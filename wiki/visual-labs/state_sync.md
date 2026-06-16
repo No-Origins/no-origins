@@ -65,9 +65,21 @@ Parameters that change at **60 frames per second** (such as mouse cursor trackin
 Instead, they are managed via a shared **React Ref**:
 
 ```typescript
-const corePositionRef = useRef({ x: 0, y: 0, size: 120 });
+export interface CorePosition {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+}
+
+const corePositionRef = useRef<CorePosition>({ x: 0, y: 0, vx: 0, vy: 0, size: 120 });
 ```
 
-- **Writing**: The WebGL `LiquidMetalSphere` component writes its current core coordinates directly to `corePositionRef.current`.
-- **Reading**: The background `DotField` canvas reads from the same ref during its animation loops to calculate gravitational and swirl attraction forces on particles.
+- **Writing**: 
+  - The `InnerCore` component runs the spring physics and cursor tracking loop, writing coordinates and velocity (`x`, `y`, `vx`, `vy`) to the ref.
+  - The WebGL `LiquidMetalSphere` component writes its canvas-computed visual radius bounds (`size`) to `corePositionRef.current.size`.
+- **Reading**: 
+  - The background `DotField` canvas reads `x`, `y`, and `size` during its animation loops to calculate particle attraction and repulsion forces.
+  - The WebGL `LiquidMetalSphere` reads `vx` and `vy` to adjust shader trail fading and motion blur dynamically.
 - **Benefit**: Zero React re-renders are triggered during active drag movements, sustaining solid 60+ FPS performance.

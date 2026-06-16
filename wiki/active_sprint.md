@@ -22,4 +22,4 @@ Once the current goals are fully achieved, compile the final updates, move this 
 ---
 
 ## 💬 Session Notes & Context
-- Typography scaling task successfully completed, verified, and logged in [wiki/log.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/log.md).
+- Component separation task (glowing core and LiquidMetalSphere) successfully completed, verified, and logged in [wiki/log.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/log.md).

@@ -56,3 +56,15 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 - **Code Changes**:
   - Added utility class mapping overrides inside [index.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/index.css) to map arbitrary font classes (e.g. `text-[7px]` through `text-[18px]`) to readable font sizes (+3px scale for micro labels, +2px for inputs/headings).
 
+## [2026-06-16] refactor | Separate glowing core and LiquidMetalSphere into distinct components
+- **Session Focus**: Decoupled core physics/rendering from WebGL LiquidMetalSphere, introducing modular component architecture.
+- **Created Pages**: None
+- **Modified Pages**:
+  - [wiki/visual-labs/rendering.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/rendering.md): Updated rendering pipeline with the `InnerCore` overlay.
+  - [wiki/visual-labs/state_sync.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/state_sync.md): Documented shared velocity variables passed through `corePositionRef`.
+- **Code Changes**:
+  - Defined velocity structure in `CorePosition` interface and updated context variables inside [VisualizerContext.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/context/VisualizerContext.tsx).
+  - Created [InnerCore.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InnerCore.tsx) to handle glowing core rendering, spring/friction physics, wandering target calculations, and mouse move/click interactions.
+  - Refactored [LiquidMetalSphere.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/LiquidMetalSphere.tsx) to act as a pure WebGL canvas shader renderer, reading velocity values directly from the shared ref for motion trails.
+  - Mounted and aligned both components inside [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx).
+
