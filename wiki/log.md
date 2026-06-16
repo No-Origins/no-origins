@@ -67,4 +67,5 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Created [InnerCore.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InnerCore.tsx) to handle glowing core rendering, spring/friction physics, wandering target calculations, and mouse move/click interactions.
   - Refactored [LiquidMetalSphere.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/LiquidMetalSphere.tsx) to act as a pure WebGL canvas shader renderer, reading velocity values directly from the shared ref for motion trails.
   - Mounted and aligned both components inside [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx).
+  - Split the combined "Sphere + Core" tab in the Admin Panel [admin/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/admin/page.tsx) into separate "Sphere" and "Core" tabs with their respective control sliders and component preset managers.
 
