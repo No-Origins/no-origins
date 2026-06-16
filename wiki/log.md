@@ -80,4 +80,5 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Updated `InteractiveHUD.tsx` prop typings and creators to map to the new dynamic `presets` dictionary.
   - Re-anchored the "States" sidebar navigation tab in `admin/page.tsx` as a top-level sidebar section using the `Database` icon.
   - Redesigned the States creator block in `admin/page.tsx` to include checkboxes next to component inputs, enabling selective composition and dynamic subset transitions.
+  - Tweak component selectors list layout in `admin/page.tsx` to render in a single column rather than a 2-column grid.
 
