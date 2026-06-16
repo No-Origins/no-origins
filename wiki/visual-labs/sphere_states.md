@@ -14,7 +14,7 @@ Once created, these states can be used as target points for smooth transitions, 
 
 ## ⚙️ Component Presets & States Configuration Schema
 
-Rather than keeping flat lists of visualizer parameters, each component (`liquid`, `core`, `field`, `audio`) manages its own presets. A composed **State** is a combination of these individual component preset references:
+Rather than keeping flat lists of visualizer parameters, each component (`liquid`, `core`, `field`, `audio`) manages its own presets. A composed **State** is a combination of these individual component preset references mapped via a dynamic dictionary:
 
 ```typescript
 export interface ComponentPreset {
@@ -27,10 +27,7 @@ export interface ComponentPreset {
 export interface SphereStateConfig {
   id: string;
   name: string;
-  liquidPresetId: string; // references a "liquid" type ComponentPreset
-  corePresetId: string;   // references a "core" type ComponentPreset
-  fieldPresetId: string;  // references a "field" type ComponentPreset
-  audioPresetId: string;  // references an "audio" type ComponentPreset
+  presets: Record<string, string>; // Maps component type -> presetId
 }
 ```
 
@@ -61,18 +58,21 @@ graph TD
    - In each render frame, the active variables slide towards the target values:
      $$\text{current} = \text{current} + (\text{target} - \text{current}) \times \text{interpolationRate}$$
    - This prevents React from having to re-render the HUD sliders 60 times a second during transition while keeping the visual change butter-smooth on screen.
+3. **Fallback & Component Exclusions**:
+   - If a component key is missing from `presets` (e.g. `presets.field` is undefined because the admin unchecked "Field Preset" during state composition), the target value resolves to the current active value in the context.
+   - During animation, the interpolater runs on that component's properties with identical start and end values, leaving that component completely unaffected. This allows subset state transitions (e.g. morphing only the audio while keeping the liquid sphere identical).
 
 ---
 
 ## 🎨 Proposed Controls in the Interactive HUD ("States" Tab)
 
-We propose adding a dedicated **"States"** tab to [InteractiveHUD.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InteractiveHUD.tsx) containing:
+We have a dedicated **"States"** tab in [InteractiveHUD.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InteractiveHUD.tsx) containing:
 
 ### 1. State Creator & Manager
-* **Save Current State**: A text field and button to capture the current active HUD settings and save them under a custom name.
-* **State List**: A list of saved states with actions to:
+* **Save Current State**: A text field and selectors to capture the current active HUD settings.
+* **Component Selectors**: Dropdowns and checkboxes in the Admin Panel to select and include/exclude specific component presets.
+* **State List**: A list of saved states showing included components and action triggers:
   - **Morph to State**: Trigger a smooth, animated transition to that configuration.
-  - **Overwrite**: Overwrite the state configuration with current HUD values.
   - **Rename / Delete**: Standard management tools.
 
 ### 2. Transition Tweaker
@@ -82,4 +82,3 @@ We propose adding a dedicated **"States"** tab to [InteractiveHUD.tsx](file:///U
 ### 3. A-B State Mixer (Morpher)
 * **Selectors**: Dropdowns to select two saved configurations: **State A** and **State B**.
 * **Blend Slider**: A horizontal crossfader slider (`0%` to `100%`). Dragging the slider dynamically calculates a weighted interpolation of every parameter between State A and State B in real-time, instantly shifting the sphere.
-* **XY Pad Mixer (Optional)**: A 2D pad where the user can assign four states to the corners and drag a cursor to blend between all four simultaneously.

@@ -22,4 +22,4 @@ Once the current goals are fully achieved, compile the final updates, move this 
 ---
 
 ## 💬 Session Notes & Context
-- Component separation task (glowing core and LiquidMetalSphere) successfully completed, verified, and logged in [wiki/log.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/log.md).
+- Sync presets and states to Supabase with dynamic JSONB and checkboxes successfully completed, verified, and logged in [wiki/log.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/log.md).

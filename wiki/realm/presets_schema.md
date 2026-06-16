@@ -1,42 +1,66 @@
-# Realm presets Table Schema
+# Realm Presets and States Database Schema
 
-This document defines the schema and syncing logic managed by the **realm** backend module, which provides data synchronization for the user's HUD presets.
+This document defines the schema and syncing logic managed by the **realm** backend module, which provides data synchronization for the custom component-level presets and composed States.
 
 ---
 
-## 📊 Presets Table Definition
+## 📊 Database Tables Definition
 
-The frontend interacts with the database via a public Supabase table named `presets`.
+The frontend interacts with the database via public Supabase tables: `component_presets` and `states`.
 
-### Schema (SQL Definition stub)
+### 1. Component-Specific Presets (`component_presets`)
+Stores specific configurations for individual components (`liquid`, `core`, `field`, `audio`).
 
+#### Schema (SQL Definition)
 ```sql
-create table public.presets (
-  id uuid default gen_random_uuid() primary key,
+create table public.component_presets (
+  id text primary key,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   name text not null,
+  type text not null, -- 'liquid' | 'core' | 'field' | 'audio'
   settings jsonb not null
 );
 ```
 
-### Settings JSONB Payload Fields
-The `settings` JSONB payload matches the `AppStatePreset` TypeScript interface inside `VisualizerContext.tsx`:
-
-| Parameter | Type | Default Value | Description |
-| :--- | :--- | :--- | :--- |
-| `theme` | number | `3` | WebGL orb shader color theme index (0-4) |
-| `roughness` | number | `0.26` | Gloss/matte displacement surface roughness |
-| `amplitude` | number | `0.35` | Noise displacement amplitude |
-| `speed` | number | `1.0` | Displacement animation speed |
-| `size` | number | `0.5` | Mathematical core radius of WebGL orb |
-| `thickness` | number | `3.0` | Fluid noise density / thickness |
-| `fieldDotSize`| number | `1.4` | Canvas grid particle radii |
-| `fieldGap` | number | `30` | Distance between layout particles |
-| `fieldState` | string | `"WAVES"` | Background canvas render mode (`WAVES`, `ASTEROID_RAIN`, `CHAOS`) |
+#### Settings JSONB Payload Fields
+The `settings` JSONB payload matches the specific parameters of each component type:
+- **`liquid`**: `{ theme, roughness, amplitude, speed, size, transparency, thickness, bulge, pop }`
+- **`core`**: `{ coreSize, coreIntensity, coreSpring, coreFriction, coreBlur, coreColor, coreFreeWill, coreFreeWillSpeed }`
+- **`field`**: `{ fieldDotSize, fieldGap, fieldRepulsionRadius, fieldRepulsionStrength, fieldSpringTension, fieldState, rainDirection, rainSpeed, rainLineLength, orbGravityStrength, orbSwirlStrength }`
+- **`audio`**: `{ droneVolume, rippleVolume, baseFreq }`
 
 ---
 
-## ⚡ Real-Time Syncing Protocol
+### 2. Composed States (`states`)
+Stores composed states mapping component keys to target preset IDs.
 
-- **Supabase JS Client**: The frontend maps database queries using `supabase.from("presets").select("*")` inside `VisualizerContext.tsx`.
-- **Loading a Preset**: Selecting a preset overwrites the React hooks in the Context, causing the WebGL loops and `audioEngine` parameters to instantly update in real-time.
+#### Schema (SQL Definition)
+```sql
+create table public.states (
+  id text primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  name text not null,
+  presets jsonb not null -- Record<string, string> mapping component type to presetId
+);
+```
+
+#### Example Payload
+```json
+{
+  "id": "state-1718534000",
+  "name": "Golden Storm",
+  "presets": {
+    "liquid": "preset-liquid-992",
+    "core": "preset-core-110",
+    "field": "preset-field-452"
+  }
+}
+```
+*(Notice that "audio" preset is omitted from the state, which is supported by design. Missing component keys remain at their current parameters during transitions).*
+
+---
+
+## ⚡ Real-Time Syncing & Offline Fallback Protocol
+
+- **Supabase JS Client**: The frontend maps database queries using `supabase.from("component_presets")` and `supabase.from("states")` inside `VisualizerContext.tsx`.
+- **Offline Caching**: If network connection fails or database tables are uninitialized, the provider gracefully catches the error and reads/writes using local storage caches (`no_origins_component_presets` and `no_origins_custom_states`).

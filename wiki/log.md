@@ -69,3 +69,15 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Mounted and aligned both components inside [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx).
   - Split the combined "Sphere + Core" tab in the Admin Panel [admin/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/admin/page.tsx) into separate "Sphere" and "Core" tabs with their respective control sliders and component preset managers.
 
+## [2026-06-16] write | Sync presets and states to Supabase with dynamic JSONB and checkboxes
+- **Session Focus**: Sync component-level presets and composed States to Supabase, redesign States as a top-level section in the Admin Panel sidebar, and support checkbox-based component inclusion/exclusion.
+- **Created Pages**: None
+- **Modified Pages**:
+  - [wiki/realm/presets_schema.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/presets_schema.md): Documented new tables `component_presets` and `states` with JSONB payloads.
+  - [wiki/visual-labs/sphere_states.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/sphere_states.md): Updated state schema documentation to reflect the new dynamic `presets` dictionary.
+- **Code Changes**:
+  - Refactored `VisualizerContext.tsx` context states, fetching logic, and mutators (`saveState`, `deleteState`, `updateState`, `morphToState`, A-B mixer) to use the new dynamic `presets: Record<string, string>` map and sync asynchronously to Supabase.
+  - Updated `InteractiveHUD.tsx` prop typings and creators to map to the new dynamic `presets` dictionary.
+  - Re-anchored the "States" sidebar navigation tab in `admin/page.tsx` as a top-level sidebar section using the `Database` icon.
+  - Redesigned the States creator block in `admin/page.tsx` to include checkboxes next to component inputs, enabling selective composition and dynamic subset transitions.
+
