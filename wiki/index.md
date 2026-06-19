@@ -17,6 +17,7 @@ Welcome to the **No Origins** Agent Wiki. This is a persistent, compounding know
 - **[Sphere States & Transitions](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/sphere_states.md)**: Proposal and specifications for liquid metal sphere states, target properties, and animated transitions.
 - **[WebGL & Canvas Rendering](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/rendering.md)**: Technical specifications of `DotField` particle dynamics and `LiquidMetalSphere` shader calculations.
 - **[Procedural Audio Synthesis](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/audio.md)**: Documentation on Web Audio API oscillators, sound envelopes, and real-time volume calculations in `audio.ts`.
+- **[Sentient Sphere AI Chatbot](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/ai_chat.md)**: Details on the client-server AI communication pipeline and dynamic settings morphing.
 
 ### 🗄️ Backend: `realm` Submodule
 - **[Presets Database Schema](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/presets_schema.md)**: Presets syncing rules, table layouts, and settings configurations inside Supabase.

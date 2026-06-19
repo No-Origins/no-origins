@@ -32,10 +32,10 @@ export interface SphereStateConfig {
 ```
 
 ### 🎛️ Parameters Groupings
-* **`liquid`**: `theme`, `roughness`, `amplitude`, `speed`, `size`, `transparency`, `thickness`, `bulge`, `pop`
+* **`liquid`**: `theme`, `roughness`, `amplitude`, `speed`, `size` (Boundary Scale slider, minimum lowered from `0.50x` to `0.10x`), `sphereOffsetX`, `sphereOffsetY` (X/Y screen offset translations), `transparency`, `thickness`, `bulge`, `pop`
 * **`core`**: `coreSize`, `coreIntensity`, `coreSpring`, `coreFriction`, `coreBlur`, `coreColor`, `coreFreeWill`, `coreFreeWillSpeed`
 * **`field`**: `fieldDotSize`, `fieldGap`, `fieldRepulsionRadius`, `fieldRepulsionStrength`, `fieldSpringTension`, `fieldState`, `rainDirection`, `rainSpeed`, `rainLineLength`, `orbGravityStrength`, `orbSwirlStrength`
-* **`audio`**: `droneVolume`, `rippleVolume`, `baseFreq`
+* **`audio`**: `audioEnabled` (master ambient sound state), `audioVolume` (master volume level), `droneVolume` (synth pad volume), `rippleVolume` (bubble pop/impact effects volume), `baseFreq` (fundamental drone pitch), `visualReactivityEnabled`, `visualReactivityStrength` (intensity of audio-driven visual displacement)
 
 ---
 
@@ -82,3 +82,4 @@ We have a dedicated **"States"** tab in [InteractiveHUD.tsx](file:///Users/hidde
 ### 3. A-B State Mixer (Morpher)
 * **Selectors**: Dropdowns to select two saved configurations: **State A** and **State B**.
 * **Blend Slider**: A horizontal crossfader slider (`0%` to `100%`). Dragging the slider dynamically calculates a weighted interpolation of every parameter between State A and State B in real-time, instantly shifting the sphere.
+* **Auto-Play/Pause Morpher**: A play/pause button added next to the blend slider. Clicking it triggers an animation loop that automatically sweeps the blend value back and forth or to the opposite end (duration is `2500ms`). Manual slider interaction cancels the autoplay immediately.

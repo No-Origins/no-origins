@@ -76,3 +76,21 @@ Instead of importing heavy impulse audio files, the engine generates an impulse 
 
 - A stereo buffer filled with decaying white noise over a duration of 3 seconds.
 - The decay is governed by the equation $factor = e^{-t \cdot \lambda} \times \text{noise}$, creating a smooth, metallic hall reverb.
+
+---
+
+## 💾 Audio Presets & Persistence
+
+The audio settings are synced as part of the visualizer presets and composed states:
+
+* **Synced Parameters**: The `audio` component preset saves the following properties:
+  - `audioEnabled`: Master toggle for the entire AudioContext synthesizer.
+  - `audioVolume`: Master GainNode volume slider percentage.
+  - `droneVolume`: Ambient drone gain level.
+  - `rippleVolume`: Interactive pops/impact effects gain level.
+  - `baseFreq`: Fundamental drone oscillator frequency (Hz).
+  - `visualReactivityEnabled`: Toggles visual sphere displacement driven by real-time audio volumes.
+  - `visualReactivityStrength`: Scale modifier for audio-driven displacement.
+* **Master Toggle Persistence**: 
+  - To respect user preferences across refreshes or workspace navigations, the master sound toggle is saved to `localStorage` under the key `no_origins_audio_enabled`.
+  - When the app boots and resolves environment-driven States, the transition checks `preserveAudio: true`. This option overrides the database state's audio toggle with the user's cached preference, preventing ambient sounds from suddenly playing if the user previously muted it.

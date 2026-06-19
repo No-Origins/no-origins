@@ -65,3 +65,32 @@ sequenceDiagram
 
 - **State Sync**: React context acts as a unidirectional loop where parameters are adjusted in the HUD, applied directly to WebGL state references, and fed to the `audioEngine` via the context's effect loops.
 - **Sound Reactivity**: The visualizer can read back real-time audio analysis data (RMS and frequency bands from `audioEngine.getAudioVolumeData()`) to modulate parameters like sphere scaling, providing true visual-audio synchronicity.
+
+---
+
+## 🔒 Security, Authentication & Role Gating
+
+The ecosystem features a strict Role-Based Access Control (RBAC) model implemented at both the server-side middleware layer and the database layer (via Row Level Security).
+
+### 👥 Role Taxonomy
+* **Anonymous / standard user**: Has read-only access to database presets and states. Any new presets or states created by regular/anonymous users are saved to the browser's `localStorage` (local-only sandbox mode), keeping the central database clean.
+* **Admin**: Users promoted to the `admin` role in `public.profiles`. Granted full write permissions (Insert, Update, Delete) to the database tables (`component_presets`, `states`, `stages`).
+
+### 🛡️ Admin Console Gating & 2FA Flow
+Admin console routes (`/admin`) are protected by Next.js SSR middleware (`utils/supabase/middleware.ts`):
+1. **Authentication Check**: Anonymous users attempting to reach `/admin` are redirected to `/login`.
+2. **Role Gate**: If authenticated, middleware queries `public.profiles` for the user's role. Non-admins are blocked from the console and redirected to the home page (`/`).
+3. **MFA Enforcement**: Admins must enroll and complete TOTP Multi-Factor Authentication (MFA/2FA) to unlock console access:
+   - If no factors are enrolled, the user is redirected to `/login/setup-mfa` to scan a QR code and register a TOTP app.
+   - If a factor is enrolled but not verified, the user is redirected to `/login/mfa` to enter the verification code.
+   - Once elevated to Authentication Assurance Level 2 (`aal2`), the user is redirected to `/admin` using a hard navigation (`window.location.assign`) to ensure session cookies are re-read.
+
+---
+
+## 🌐 Environment Stages
+
+The application behavior and initial appearance adapt to the environment in which it is running, resolved at build time:
+
+* **Trigger**: Managed via the `NEXT_PUBLIC_APP_STAGE` environment variable (value is `DEVELOPMENT`, `STAGING`, or `RELEASE`).
+* **Environment Mapping**: Mapped via the `stages` database table which binds stage names to specific States and Themes.
+* **Boot Flow**: On load, the system detects the active stage, pulls the corresponding state/theme from the database, and instantly applies it, ensuring users see the designed environment for that specific deployment stage.

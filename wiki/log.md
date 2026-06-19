@@ -82,3 +82,29 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Redesigned the States creator block in `admin/page.tsx` to include checkboxes next to component inputs, enabling selective composition and dynamic subset transitions.
   - Tweak component selectors list layout in `admin/page.tsx` to render in a single column rather than a 2-column grid.
 
+## [2026-06-18] ingest | Synchronize wiki with latest authentication, role gating, and visual-audio parameters updates
+- **Session Focus**: Audited and fully updated the documentation wiki pages to represent the latest codebase additions in the `visual-labs` and `realm` repositories.
+- **Created Pages**: None
+- **Modified Pages**:
+  - [wiki/global/architecture.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/architecture.md): Documented role-based authentication taxonomy, SSR middleware gating on `/admin`, MFA/2FA enforcement, and build-time env stage initialization.
+  - [wiki/visual-labs/state_sync.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/state_sync.md): Documented new custom CSS variables (`--border-glow`, `--border-width`, `--border-style-type`), admin session checks, local-only sandbox writes fallback, and boot loader lifecycle.
+  - [wiki/visual-labs/sphere_states.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/sphere_states.md): Updated preset parameter groupings with offsets (`sphereOffsetX/Y`), master audio/reactivity values, and documented the A-B mixer autoplay/pause control slider button.
+  - [wiki/visual-labs/rendering.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/rendering.md): Updated the frontend canvas layer description to include the container offset translation.
+  - [wiki/visual-labs/audio.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/audio.md): Documented new master volume/reactivity parameters inside the audio preset structure, and master audio toggle persistence (`no_origins_audio_enabled`) in localStorage to prevent unwanted startup noise.
+  - [wiki/realm/presets_schema.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/presets_schema.md): Registered new `profiles` table schema, `stages` environment mapping schema, and detailed Row Level Security (RLS) policies guarding mutations with the `is_admin()` postgres function.
+- **Code Changes**: None (Documentation session)
+
+## [2026-06-19] write | Create global `run` skill for universal project launching
+- **Session Focus**: Created a global instruction-only Antigravity skill that discovers and launches dev servers for any project in any workspace.
+- **Created Files**:
+  - [~/.gemini/config/skills/run/SKILL.md](file:///Users/hiddenstack/.gemini/config/skills/run/SKILL.md): Global `run` skill with runtime detection table (Node, Python, Rust, Go, Ruby, Docker, Make), concurrent background-task launching, and pre-flight dependency checks.
+- **Code Changes**: None (Skill authoring session — instruction-only skill, no scripts)
+
+## [2026-06-19] ingest | Document Sentient Sphere AI chatbot integration and audit wiki links
+- **Session Focus**: Documented the AI chatbot client-server communication pipeline, `/api/chat-sphere` route structure, and the `SphereChatInput` component layout behaviors. Checked all repository wiki links for format alignment.
+- **Created Pages**:
+  - [wiki/visual-labs/ai_chat.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/ai_chat.md): Specifications for the Sentient Sphere chatbot system prompt constraints, JSON return format, and frontend layout configurations.
+- **Modified Pages**:
+  - [wiki/index.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/index.md): Registered the AI Chatbot page in the wiki directory.
+- **Code Changes**: None (Documentation update session)
+

@@ -9,8 +9,9 @@ This document details the visual rendering systems in **No Origins**, specifical
 The visual background is composed of overlapping canvas and DOM elements layered dynamically:
 
 1. **Backdrop Canvas (`DotField`)**: An HTML5 2D Canvas containing a responsive particle grid with local gravity and elastic spring physics.
-2. **Foreground Canvas (`LiquidMetalSphere`)**: A high-performance WebGL canvas rendering a procedurally displaced 3D-like liquid sphere using custom fragment shaders (Raymarching).
-3. **Glowing Core (`InnerCore`)**: An HTML/CSS overlay element layered on top of the WebGL canvas, calculating spring physics, cursor-tracking, and visual reactivity.
+2. **Foreground Canvas Container**: A parent wrapper `div` positioned relative to the screen. It applies a translation offset style (`transform: translate(sphereOffsetX%, sphereOffsetY%)`) mapping parameters to offset coordinates.
+3. **Foreground Canvas (`LiquidMetalSphere`)**: A high-performance WebGL canvas rendering a procedurally displaced 3D-like liquid sphere using custom fragment shaders (Raymarching) inside the container.
+4. **Glowing Core (`InnerCore`)**: An HTML/CSS overlay element layered on top of the WebGL canvas within the container, calculating spring physics, cursor-tracking, and visual reactivity.
 
 ```
 [Layer 1: DotField] ➔ [Layer 2: Radial Center Vignette] ➔ [Layer 3: Target Circles] ➔ [Layer 4: LiquidMetalSphere WebGL] ➔ [Layer 5: InnerCore Glowing Div]

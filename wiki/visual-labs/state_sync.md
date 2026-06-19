@@ -28,8 +28,11 @@ graph TD
 - **`--bg-glass`**: Semi-transparent, blur-backed HUD panel styling.
 - **`--glow-color`**: Drop-shadow glow values.
 - **`--font-family-name`**: Switch between strict monospaced (`mono`) and rounded sans-serif (`sans`) typography.
+- **`--border-glow`**: Glow values for theme borders (e.g. `0 0 15px var(--glow-color)` or `none`).
+- **`--border-width`**: Thickness of panels and buttons (e.g. `1px` or double style `3px`).
+- **`--border-style-type`**: border style type (e.g. `solid` or `double`).
 
-This pattern allows Tailwind styles to instantly adapt to global designer updates without requiring manual Tailwind class toggling.
+This pattern allows styles to instantly adapt to global designer updates without requiring manual class toggling.
 
 ---
 
@@ -83,3 +86,34 @@ const corePositionRef = useRef<CorePosition>({ x: 0, y: 0, vx: 0, vy: 0, size: 1
   - The background `DotField` canvas reads `x`, `y`, and `size` during its animation loops to calculate particle attraction and repulsion forces.
   - The WebGL `LiquidMetalSphere` reads `vx` and `vy` to adjust shader trail fading and motion blur dynamically.
 - **Benefit**: Zero React re-renders are triggered during active drag movements, sustaining solid 60+ FPS performance.
+
+---
+
+## 🔒 Authentication & Database Write Gating
+
+To maintain security and prevent database clutter, the context manages state variables related to authentication:
+
+* **`isAuthenticated` (Boolean)**: Reactive state reflecting if the current user has an active Supabase auth session.
+* **`isAdminRef` (Ref of Boolean)**: Evaluates if the logged-in user possesses the `admin` role and an `active` status in the `profiles` table.
+* **Write Gating Loop**:
+  - Functions that modify database state (such as saving component presets, editing design themes, or mapping environment stages) check the value of `isAdminRef.current` synchronously.
+  - If the user is an authorized admin, updates are pushed via Supabase queries to the postgres database.
+  - If the user is an anonymous visitor or standard user, database calls are bypassed, and updates are committed exclusively to the browser's `localStorage` (local-only fallback mode).
+
+---
+
+## ⏳ Boot Loader Lifecycle
+
+To hide visual layout snap and the default-to-active parameter "flash" on startup, a global boot sequence is coordinated inside `VisualizerProvider`:
+
+1. **`isBooting` State**: Initialized to `true`. While `true`, the `BootLoader` component renders a full-screen loader animation blocking visitor clicks.
+2. **Asynchronous Ingestion**: The provider concurrently fetches data on mount:
+   - Customized design themes (`localStorage`).
+   - Component presets (Supabase query falling back to `localStorage`).
+   - Composed states (Supabase query falling back to `localStorage`).
+   - Stage-to-state environment assignments (Supabase query).
+3. **Environment State Resolution**: 
+   - The deployment's stage is resolved via `process.env.NEXT_PUBLIC_APP_STAGE` (mapped to `previewStage`).
+   - Once all tables have loaded, the provider looks up the state ID assigned to the active stage and applies it instantly (`instant: true`, `preserveAudio: true`).
+4. **Volume Preservation**: The instant-apply uses the `preserveAudio` option which checks the client's master sound toggle preference (`no_origins_audio_enabled`) in `localStorage` rather than blindly activating the stage's preset volume, ensuring sound preference is respected across page refreshes.
+5. **Dismissal**: After the initial environment state is applied (or if data fetches timeout after a fallback limit of 8 seconds), `isBooting` is set to `false`, causing the boot loader overlay to fade out cleanly.
