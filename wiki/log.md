@@ -7,6 +7,12 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-20] write | Fix page card invisibility with custom CSS entry animation and BorderGlow sweeps
+- **Session Focus**: Resolved an issue where page cards (BorderGlow) were invisible on load due to missing/broken third-party Tailwind animation dependencies, and enabled card glow sweep animations on mount.
+- **Code Changes**:
+  - Appended `@keyframes page-enter` and `.animate-page-enter` utility class inside [index.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/index.css).
+  - Modified subpages (`labs`, `hyperbase`, `stories`, `society`, `spotify`, `credits`) to utilize `.animate-page-enter` and set `animated={true}` on their respective `<BorderGlow>` cards to sweep on page transition.
+
 ## [2026-06-20] write | Configure Vercel environment variables and redeploy production
 - **Session Focus**: Fixed the production chatbot failure on Vercel by adding the missing `GEMINI_API_KEY` to Vercel environment variables and triggering a production redeployment.
 - **Code Changes**:
