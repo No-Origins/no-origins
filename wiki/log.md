@@ -7,6 +7,15 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-20] write | Gate AI Agent chatbot behind Vercel feature flag
+- **Session Focus**: Hide the AI chatbot entry points and configurations, and protect its API route when `NEXT_PUBLIC_ENABLE_AI_AGENT` is not set to `"true"`.
+- **Code/Doc Changes**:
+  - Modified [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/layout.tsx) to conditionally render `<SphereChatInput />`.
+  - Modified [route.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/api/chat-sphere/route.ts) to return a 404 response if the feature flag is disabled.
+  - Modified [admin/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/admin/page.tsx) and [InteractiveHUD.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InteractiveHUD.tsx) to hide the chatbot/input configuration tab buttons and panel overlays.
+  - Appended documentation and default setting to [.env.example](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/.env.example).
+  - Updated the Sentient Sphere chatbot wiki documentation in [ai_chat.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/ai_chat.md).
+
 ## [2026-06-20] write | Implement direct selection navigation and bidirectional route-menu synchronization
 - **Session Focus**: Removed the requirement to click the action button to open pages in the InfiniteMenu, making items navigate directly upon selection/snapping. Added bidirectional route synchronization between Next.js pathnames and the WebGL InfiniteMenu rotation.
 - **Code Changes**:
