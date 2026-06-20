@@ -108,3 +108,87 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - [wiki/index.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/index.md): Registered the AI Chatbot page in the wiki directory.
 - **Code Changes**: None (Documentation update session)
 
+## [2026-06-19] write | Initialize realm backend with Mezmo Aura framework
+- **Session Focus**: Populated the empty `realm` submodule directory with the Mezmo Aura agentic framework codebase, added the Sentient Sphere configuration, verified the build and test suite, and documented the setup.
+- **Created Pages**:
+  - [wiki/realm/aura_setup.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/aura_setup.md): Setup documentation for Mezmo Aura in the `realm` backend.
+- **Modified Pages**:
+  - [wiki/index.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/index.md): Registered the new Aura Setup page in the central directory.
+- **Code Changes**:
+  - Copied Mezmo Aura codebase into the `realm` submodule folder.
+  - Created [sentient_sphere.toml](file:///Users/hiddenstack/Creatives/no-origins/realm/configs/sentient_sphere.toml) config file defining the Sentient Sphere agent parameters and system instructions.
+  - Updated [config_test.rs](file:///Users/hiddenstack/Creatives/no-origins/realm/crates/aura-config/src/config_test.rs) to include `GEMINI_API_KEY` in the mocked variables to ensure workspace tests pass.
+
+## [2026-06-19] write | Integrate Next.js API route with Realm Aura backend and fallback
+- **Session Focus**: Connect the Next.js `chat-sphere` API route to the newly running local Realm Aura backend server, ensuring dynamic sphere parameter updates are preserved.
+- **Modified Pages**:
+  - [wiki/visual-labs/ai_chat.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/ai_chat.md): Updated architectural diagram and pipeline description to document Realm integration and the fallback mechanism.
+- **Code Changes**:
+  - Modified [route.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/api/chat-sphere/route.ts) to send chat completions to the local Realm server (`http://127.0.0.1:8080/v1/chat/completions`) with a 5-second timeout, formatting the payload with OpenAI-compatible messages and embedding `currentSettings` instructions directly into the user message.
+  - Retained direct Gemini SDK/REST API invocations as a fallback path in case the Realm server is down or times out.
+  - Created [realm/.env](file:///Users/hiddenstack/Creatives/no-origins/realm/.env) file to configure the backend server's `GEMINI_API_KEY` using the key from visual-labs.
+  - Improved `parseCleanJson` robustness in [route.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/api/chat-sphere/route.ts) to extract JSON from anywhere in the text payload, protecting against LLM formatting fluctuations or conversational wraps.
+  - Wrapped the Realm JSON response parsing in a local try-catch block inside [route.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/api/chat-sphere/route.ts) to ensure that if the Aura server returns an unparseable response (such as an upstream API provider error string), the system will successfully trigger the direct Gemini fallback instead of returning a 500 error.
+
+## [2026-06-19] write | Shift chatbot pipeline to state-based transitions
+- **Session Focus**: Transitioned the Sentient Sphere chatbot from modifying individual parameters to selecting from available visualizer states.
+- **Modified Pages**:
+  - [wiki/visual-labs/ai_chat.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/ai_chat.md): Documented the new state transition flow architecture and JSON schemas.
+- **Code Changes**:
+  - Updated [route.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/api/chat-sphere/route.ts) to accept `availableStates` in the payload and format instructions for the agent to select a state ID.
+  - Refactored [SphereChatInput.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/SphereChatInput.tsx) to send available states from the context and trigger `context.morphToState(stateId)` on response.
+  - Overwrote [sentient_sphere.toml](file:///Users/hiddenstack/Creatives/no-origins/realm/configs/sentient_sphere.toml) to adjust system instructions and enforce return schemas for `stateId` selection.
+  - Restarted the Aura web server on port 8080 and the Next.js dev server on port 3000 to apply and test the changes.
+
+## [2026-06-19] refactor | Transition Sentient Sphere to local Gemma model via Ollama
+- **Session Focus**: Configured and transitioned the backend agentic chatbot to run local `gemma4:e2b` via Ollama, mitigating Gemini API quota exhaustion errors.
+- **Modified Pages**:
+  - [wiki/realm/aura_setup.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/aura_setup.md): Documented the local Ollama/Gemma configuration and dependencies.
+  - [wiki/visual-labs/ai_chat.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/ai_chat.md): Updated request timeout to 30 seconds in diagrams and text descriptions.
+- **Code Changes**:
+  - Configured `realm/configs/sentient_sphere.toml` to utilize `provider = "ollama"` and `model = "gemma4:e2b"`.
+  - Increased request timeout in Next.js `chat-sphere` API handler [route.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/api/chat-sphere/route.ts) to 30 seconds to support local model warm-up/cold-start loading.
+  - Terminated old server and restarted the Aura web server process to load the Ollama agent configuration.
+  - Verified end-to-end communication and correct structured state selection.
+
+## [2026-06-19] lint | Fix missing field presets in state morph transitions
+- **Session Focus**: Debugged and resolved an issue where field parameters did not morph correctly during state transitions.
+- **Modified Pages**: None
+- **Code Changes**:
+  - Fixed [VisualizerContext.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/context/VisualizerContext.tsx) where `fieldDotSize`, `fieldGap`, `fieldRepulsionRadius`, `fieldRepulsionStrength`, `fieldSpringTension`, `rainDirection`, `rainSpeed`, and `rainLineLength` were defined in the target state object but omitted from `startValues` and `applyEase` interpolation updates during `morphToState`.
+
+## [2026-06-20] ingest | Create Realm Agent Society Information Base
+- **Session Focus**: Researched, brainstormed, and established a persistent knowledge base for the Realm Agent Society inside the backend module.
+- **Created Pages**:
+  - [wiki/realm/society/index.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/index.md): Central overview directory mapping out the three-tier societal hierarchy.
+  - [wiki/realm/society/constitution.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/constitution.md): Core directives, safety thresholds, model selection, and security boundaries.
+  - [wiki/realm/society/taxonomy.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/taxonomy.md): Level definitions, roles (database, telemetry, optimization), and worker configs.
+  - [wiki/realm/society/protocols.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/protocols.md): A2A specifications, sanitization limits, and Human-in-the-Loop checkpoints.
+  - [wiki/realm/society/decisions.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/decisions.md): Registry of architectural decision records (Aura, local Gemma, society setup).
+  - [wiki/realm/society/future.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/future.md): Speculative sandbox covering society HUD map, voting settings consensus, self-optimizing prompts, and dialogue generation.
+- **Modified Pages**:
+  - [wiki/index.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/index.md): Registered the Agent Society Base index in the central wiki map.
+- **Code Changes**: None (Documentation and architectural design session)
+
+## [2026-06-20] ingest | Document administrative and guardian roles in Realm Agent Society
+- **Session Focus**: Brainstormed and documented societal roles of safety, security, health, judiciary, and bureaucracy to manage and regulate the multi-level agent framework.
+- **Modified Pages**:
+  - [wiki/realm/society/taxonomy.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/taxonomy.md): Expanded taxonomy documentation to define the responsibilities, technical implementations, and tools for Safety, Security, Health, Judiciary, and Bureaucracy roles.
+- **Code Changes**: None (Documentation session)
+
+## [2026-06-20] write | Establish Workspace Agent Rules and Collaborative Guidelines
+- **Session Focus**: Formulated, approved, and integrated collaborative guidelines and pipelines for human-agent co-creation, and configured local agent workspace rules.
+- **Created Pages**:
+  - [wiki/global/collaborative_guidelines.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/collaborative_guidelines.md): Comprehensive collaborative co-creation guidelines.
+- **Modified Pages**:
+  - [wiki/index.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/index.md): Registered new guidelines page.
+- **Code/Config Changes**:
+  - Created [.agents/AGENTS.md](file:///Users/hiddenstack/Creatives/no-origins/.agents/AGENTS.md) to serve as the platform-ingested project-scoped rules for all future sessions.
+
+## [2026-06-20] write | Initialize shadcn UI and integrate InfiniteMenu component
+- **Session Focus**: Integrate shadcn component infrastructure into Next.js app with Tailwind v4, and add React Bits InfiniteMenu component.
+- **Code Changes**:
+  - Initialized shadcn using `npx shadcn@latest init` (using default settings with Radix primitives).
+  - Configured `@import "shadcn/tailwind.css"` and components config mapping to the v4 structure.
+  - Installed `gl-matrix` npm package.
+  - Created [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) and [InfiniteMenu.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.css) based on the React Bits implementation.
