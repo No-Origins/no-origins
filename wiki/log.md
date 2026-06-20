@@ -214,7 +214,8 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Refactored [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) render structure to isolate the WebGL canvas inside a circular mask wrapper (`rounded-full overflow-hidden bg-transparent`), while leaving the absolute-positioned siblings (`face-title`, `face-description`, `action-button`) outside of the overflow boundaries.
   - Expanded the maximum size of the outer container in [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) to `max-w-[760px] max-h-[760px]` and removed the outer `rounded-full overflow-hidden` wrapper classes, ensuring elements can render fully across views.
 
-## [2026-06-20] write | Reduce InfiniteMenu layout camera scale
-- **Session Focus**: Reduce camera scale to improve menu presentation and prevent boundary overflows.
+## [2026-06-20] write | Bind InfiniteMenu scale dynamically to sphere size
+- **Session Focus**: Bind the camera scale of the InfiniteMenu dynamically to match the configured size of the Liquid Metal Sphere.
 - **Code Changes**:
-  - Reduced `scale` prop value from `1.2` to `0.85` on `<InfiniteMenu>` inside [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx), providing extra buffer margin for 3D layout calculations.
+  - Bound the `scale` prop of `<InfiniteMenu>` in [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) dynamically using `scale={size * 1.7}`. This ensures that as the user (or the AI core) scales the sphere size, the menu scales in perfect proportion.
+
