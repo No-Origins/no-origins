@@ -6,15 +6,17 @@ This document details the architecture and implementation of the **Sentient Sphe
 
 ## 🔮 Core Concept: Sentient Interaction
 
-The floating WebGL liquid metal sphere acts as a techno-sentient entity. Visitors can engage in a text-based dialogue with the sphere. The conversation is not only textual; the sphere possesses physical agency and will dynamically morph its rendering properties (colors, speed, sizes, repulsion forces) in response to the emotional tone, context, or direct commands of the user.
+The floating WebGL liquid metal sphere acts as a techno-sentient entity. Visitors can engage in a text-based dialogue with the sphere. The conversation is not only textual; the sphere possesses physical agency and will dynamically morph its rendering properties (colors, speed, sizes, repulsion forces) in response to the user's emotion or commands by selecting one of the composed visual-audio database **States** (such as "Golden Storm" or "Deep Zen").
 
 ```mermaid
-graph LR
-    User[User Message] -->|Post Message & Current Settings| API[Next.js API Route /api/chat-sphere]
-    API -->|Prompt + System Rules| Gemini[Gemini 2.5 Flash]
+graph TD
+    User[User Message] -->|Post Message & Available States| API[Next.js API Route /api/chat-sphere]
+    API -->|1. Try API Call (30s Timeout)| Realm[Realm Web Server :8080]
+    Realm -->|Chat Completions| API
+    API -->|2. Direct Fallback if Realm Down| Gemini[Gemini 2.5 Flash]
     Gemini -->|JSON Response| API
-    API -->|Text + Settings Diff| Client[SphereChatInput Component]
-    Client -->|Apply Setters| Context[VisualizerContext]
+    API -->|Text + Selected State ID| Client[SphereChatInput Component]
+    Client -->|morphToState| Context[VisualizerContext]
     Context -->|Render Updates| WebGL[LiquidMetalSphere Shader & DotField Physics]
 ```
 
@@ -22,46 +24,33 @@ graph LR
 
 ## ⚙️ Backend Pipeline: `/api/chat-sphere`
 
-The backend interface is implemented in [route.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/api/chat-sphere/route.ts). It serves as a secure gateway to the Gemini API, encapsulating prompt formatting and response schema enforcement.
+The backend interface is implemented in [route.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/api/chat-sphere/route.ts). It serves as a bridge to the agent runner, encapsulating prompt formatting and response schema enforcement.
 
-### 1. Dual-Client Invocation Pattern
-To guarantee system stability, the API route implements a fallback model:
-1. **Primary SDK Client**: Attempts to communicate using the `@google/genai` library client instance.
-2. **REST API Fallback**: If the SDK client fails or encounters configuration issues, it falls back to a direct `fetch` POST request to the Google Generative Language REST endpoint (`gemini-2.5-flash:generateContent`).
+### 1. Realm Backend Integration
+If the `realm` backend service (Mezmo Aura framework) is running (typically on `http://127.0.0.1:8080`), Next.js routes all chat queries to its `/v1/chat/completions` endpoint.
+Because Aura's system preamble configurations are authoritative (it ignores system role messages in chat history), the Next.js API route dynamically appends the list of `AVAILABLE STATES` and state selection instructions directly to the last user message before sending. An abort controller with a 30-second timeout prevents long cold-start delays on local Ollama models from aborting requests prematurely.
 
-### 2. System Instructions & Personality Gating
+### 2. Direct Gemini Fallback Pattern
+To guarantee system stability when the local backend is offline or compilation is running:
+1. **Primary SDK Client**: Attempts to communicate directly using the `@google/genai` library client instance.
+2. **REST API Fallback**: If the SDK client fails, it falls back to a direct `fetch` POST request to the Google Generative Language REST endpoint (`gemini-2.5-flash:generateContent`).
+
+### 3. System Preamble & Personality Gating
 The model is instructed to act as a hyper-dimensional sentient core. The system prompt restricts model output to:
 * **Max length**: 2 sentences.
 * **Tone**: Mysterious, poetic, and techno-sentient.
-* **Return Format**: A strict JSON payload containing a `message` string and a `settings` object.
+* **Return Format**: A strict JSON payload containing a `message` string and a `stateId` string.
 
-### 3. Settings Mutation Schema
-The `settings` JSON object returned by the model maps directly to physical parameters in the visualizer:
+### 4. State Selection Schema
+Instead of returning individual parameters, the model matches the user's vibe/commands against the list of `availableStates` and selects the corresponding state ID:
 
 ```json
 {
-  "message": "My structures shift to reflect your curiosity.",
-  "settings": {
-    "theme": 1,
-    "size": 1.4,
-    "speed": 0.8,
-    "transparency": 0.9,
-    "coreSize": 1.2,
-    "coreIntensity": 0.7,
-    "coreBlur": 20,
-    "coreColor": "#ffd700",
-    "coreFreeWill": true,
-    "coreFreeWillSpeed": 2.5,
-    "fieldDotSize": 2.0,
-    "fieldGap": 40,
-    "fieldRepulsionRadius": 150,
-    "fieldRepulsionStrength": 50
-  }
+  "message": "The golden tempest shall unfurl. Witness the energetic rupture.",
+  "stateId": "state-gold"
 }
 ```
-
-### 4. Dynamic Parameter Diffing
-To minimize state updates, the backend feeds the visualizer's current status (`currentSettings`) into the model's system prompt context. The model is instructed to only return parameters that are actively changing from their current values, returning an empty `settings` object if no parameters are adjusted.
+*(If no state transition is appropriate or requested, the model sets `"stateId": null`)*.
 
 ---
 
@@ -76,7 +65,7 @@ The chat input container supports multiple layout styles cached inside the user'
 * **`fixed`**: Statically anchored at the bottom-center of the screen above the HUD.
 
 ### 2. State Mapping & Mutation
-When a valid response is received from the API route, the component reads the `settings` payload and conditionally invokes corresponding setters on `VisualizerContext` (`context.setTheme`, `context.setSize`, etc.). This causes the shader uniform variables and particle physics constants to immediately transition to their new AI-defined values.
+When a valid response is received from the Next.js API route, the component reads the `stateId` from the payload and calls `context.morphToState(stateId)`. This initiates a smooth transition morphing all visual, audio, and physics parameters to the chosen state presets.
 
 ### 3. Operational Safeguards
 * **Input Lock**: While a request is in flight (`isLoading === true`), the sphere's positional tracking is locked (`isLocked = true`) to prevent visual jumpiness.

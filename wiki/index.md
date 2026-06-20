@@ -10,6 +10,7 @@ Welcome to the **No Origins** Agent Wiki. This is a persistent, compounding know
 - **[Ecosystem Architecture](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/architecture.md)**: High-level overview of the parent repo, submodule integrations, and global layout.
 - **[Git Submodule Workflows](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/git_submodules.md)**: Procedures for submodule pointer management to prevent broken/detached reference states.
 - **[Wiki Maintenance Playbook](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/wiki_rules.md)**: Standards and triggers for creating, modifying, logging, and linting the wiki.
+- **[Collaborative Guidelines & Pipelines](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/collaborative_guidelines.md)**: Roles, git submodule workflows, wiki compliance, and safety checkpoints.
 
 
 ### 🎨 Frontend: `visual-labs` Submodule
@@ -21,6 +22,8 @@ Welcome to the **No Origins** Agent Wiki. This is a persistent, compounding know
 
 ### 🗄️ Backend: `realm` Submodule
 - **[Presets Database Schema](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/presets_schema.md)**: Presets syncing rules, table layouts, and settings configurations inside Supabase.
+- **[Mezmo Aura Setup](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/aura_setup.md)**: Backend agentic harness configuration, build procedures, and API specifications.
+- **[Aura Agent Society Base](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/index.md)**: Index and architectural hub of the multi-level organizational societal agentic system.
 
 ---
 
