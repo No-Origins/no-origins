@@ -11,6 +11,7 @@ Welcome to the **No Origins** Agent Wiki. This is a persistent, compounding know
 - **[Git Submodule Workflows](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/git_submodules.md)**: Procedures for submodule pointer management to prevent broken/detached reference states.
 - **[Wiki Maintenance Playbook](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/wiki_rules.md)**: Standards and triggers for creating, modifying, logging, and linting the wiki.
 - **[Collaborative Guidelines & Pipelines](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/collaborative_guidelines.md)**: Roles, git submodule workflows, wiki compliance, and safety checkpoints.
+- **[Vercel REST API Guide](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/vercel_api.md)**: Reference specifications for querying Vercel deployment status, build failures, and function runtime logs.
 
 
 ### 🎨 Frontend: `visual-labs` Submodule

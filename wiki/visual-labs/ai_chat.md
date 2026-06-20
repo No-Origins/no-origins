@@ -11,9 +11,9 @@ The floating WebGL liquid metal sphere acts as a techno-sentient entity. Visitor
 ```mermaid
 graph TD
     User[User Message] -->|Post Message & Available States| API[Next.js API Route /api/chat-sphere]
-    API -->|1. Try API Call (30s Timeout)| Realm[Realm Web Server :8080]
+    API -->|1. Realm Check (Bypassed if Prod & no REALM_API_URL)| Realm[Realm Web Server :8080]
     Realm -->|Chat Completions| API
-    API -->|2. Direct Fallback if Realm Down| Gemini[Gemini 2.5 Flash]
+    API -->|2. Direct Fallback / Production Path| Gemini[Gemini 2.5 Flash]
     Gemini -->|JSON Response| API
     API -->|Text + Selected State ID| Client[SphereChatInput Component]
     Client -->|morphToState| Context[VisualizerContext]
@@ -28,12 +28,15 @@ The backend interface is implemented in [route.ts](file:///Users/hiddenstack/Cre
 
 ### 1. Realm Backend Integration
 If the `realm` backend service (Mezmo Aura framework) is running (typically on `http://127.0.0.1:8080`), Next.js routes all chat queries to its `/v1/chat/completions` endpoint.
+To avoid serverless function execution timeout limits in production environments (such as Vercel), the route detects if the node environment is `"production"`. If `NODE_ENV === "production"` and `REALM_API_URL` is not explicitly set, it bypasses the Realm call entirely and goes directly to the Gemini API.
+
 Because Aura's system preamble configurations are authoritative (it ignores system role messages in chat history), the Next.js API route dynamically appends the list of `AVAILABLE STATES` and state selection instructions directly to the last user message before sending. An abort controller with a 30-second timeout prevents long cold-start delays on local Ollama models from aborting requests prematurely.
 
-### 2. Direct Gemini Fallback Pattern
-To guarantee system stability when the local backend is offline or compilation is running:
-1. **Primary SDK Client**: Attempts to communicate directly using the `@google/genai` library client instance.
-2. **REST API Fallback**: If the SDK client fails, it falls back to a direct `fetch` POST request to the Google Generative Language REST endpoint (`gemini-2.5-flash:generateContent`).
+### 2. Direct Gemini Fallback / Production Pattern
+To guarantee system stability when the local backend is offline or when running in production:
+1. **Chat History Sanitization**: The Gemini API strictly requires that a chat history start with a message from the `user` role and alternate roles. The API route filters the incoming client history, locating the first message from a `"user"` and slicing the array from that point forward (omitting any leading greeting/system messages from the model).
+2. **Primary SDK Client**: Attempts to communicate directly using the `@google/genai` library client instance.
+3. **REST API Fallback**: If the SDK client fails, it falls back to a direct `fetch` POST request to the Google Generative Language REST endpoint (`gemini-2.5-flash:generateContent`).
 
 ### 3. System Preamble & Personality Gating
 The model is instructed to act as a hyper-dimensional sentient core. The system prompt restricts model output to:

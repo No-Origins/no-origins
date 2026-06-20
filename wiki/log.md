@@ -7,6 +7,21 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-20] ingest | Add Vercel REST API Guide to workspace wiki
+- **Session Focus**: Document programmatically checking Vercel deployments, build-time events, and runtime function logs.
+- **Created Pages**:
+  - [wiki/global/vercel_api.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/vercel_api.md): Reference guide for Vercel REST API endpoints and diagnostics script.
+- **Modified Pages**:
+  - [wiki/index.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/index.md): Registered new Vercel API Guide in the central directory.
+
+## [2026-06-20] write | Bypass local Realm in production and sanitize Gemini API chat history
+- **Session Focus**: Address serverless timeouts/failures on Vercel where the local Realm backend is unhosted, and prevent chat history validation errors with Gemini.
+- **Modified Pages**:
+  - [wiki/visual-labs/ai_chat.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/ai_chat.md): Documented Vercel production routing and history sanitization details.
+- **Code Changes**:
+  - Modified [route.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/api/chat-sphere/route.ts) to detect production environment and skip Realm API calls entirely unless `REALM_API_URL` is set.
+  - Added history slicing logic in [route.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/api/chat-sphere/route.ts) starting from the first `user` role message to meet Gemini's strict conversational structure.
+
 ## [2026-06-20] write | Enable AI-controlled navigation via Sentient Core chatbot
 - **Session Focus**: Configure the Core chatbot (local Gemma and fallback Gemini) to handle client-side page navigation dynamically.
 - **Modified Pages**:
