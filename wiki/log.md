@@ -7,6 +7,14 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-20] write | Persistent DOM context and client-side navigation for InfiniteMenu
+- **Session Focus**: Enable persistent DOM context for WebGL canvases and audio engines, converting all internal navigation to client-side routing.
+- **Modified Pages**:
+  - [wiki/visual-labs/state_sync.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/state_sync.md): Documented persistent DOM and client-side routing.
+- **Code Changes**:
+  - Modified [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) to import and use `useRouter` for handling internal clicks on InfiniteMenu item cards, preventing page reloads.
+  - Replaced raw anchor `<a>` tags with Next.js `<Link>` components in [page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/\(base\)/page.tsx), [base/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/\(base\)/base/page.tsx), and [login/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/\(base\)/login/page.tsx).
+
 ## [2026-06-16] ingest | Initialize Agent Wiki Collaboration Framework
 - **Session Focus**: Established the wiki framework inspired by Andrej Karpathy's LLM Wiki concept.
 - **Created Pages**:
@@ -218,4 +226,11 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 - **Session Focus**: Bind the camera scale of the InfiniteMenu dynamically to match the configured size of the Liquid Metal Sphere.
 - **Code Changes**:
   - Bound the `scale` prop of `<InfiniteMenu>` in [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) dynamically using `scale={size * 1.7}`. This ensures that as the user (or the AI core) scales the sphere size, the menu scales in perfect proportion.
+
+## [2026-06-20] write | Remove Console Output section and clean up unused icons
+- **Session Focus**: Cleaned up bottom HUD layout overlays in the visualizer.
+- **Code Changes**:
+  - Removed "Console Output" section from [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx).
+  - Cleaned up unused `MousePointerClick` and `RefreshCw` imports from `lucide-react` in [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx).
+
 

@@ -117,3 +117,14 @@ To hide visual layout snap and the default-to-active parameter "flash" on startu
    - Once all tables have loaded, the provider looks up the state ID assigned to the active stage and applies it instantly (`instant: true`, `preserveAudio: true`).
 4. **Volume Preservation**: The instant-apply uses the `preserveAudio` option which checks the client's master sound toggle preference (`no_origins_audio_enabled`) in `localStorage` rather than blindly activating the stage's preset volume, ensuring sound preference is respected across page refreshes.
 5. **Dismissal**: After the initial environment state is applied (or if data fetches timeout after a fallback limit of 8 seconds), `isBooting` is set to `false`, causing the boot loader overlay to fade out cleanly.
+
+---
+
+## 🧭 Persistent DOM & Client-Side Routing
+
+To prevent resetting the WebGL contexts (`LiquidMetalSphere`, `DotField`) and interrupting the Web Audio API context during internal site navigation:
+
+1. **Persistent Mounting**: The main canvas rendering overlays (`BackgroundVisualizer` and `SphereChatInput`) are mounted directly inside the shared Next.js `BaseLayout` (`(base)/layout.tsx`).
+2. **Client-Side Navigation**: Internal links (such as navigating to the interactive sandbox `/base`, the admin dashboard `/admin`, or back home `/`) use Next.js `<Link>` components or `useRouter()` navigation.
+3. **Behavior**: Client-side navigation swaps only the `{children}` elements inside the persistent base layout wrapper. Because the canvas is sibling to the children and does not unmount, the liquid metal sphere, particle fields, and procedural audio drone run continuously and seamlessly without resetting or triggering the boot loader again.
+
