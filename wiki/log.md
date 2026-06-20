@@ -192,3 +192,13 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Configured `@import "shadcn/tailwind.css"` and components config mapping to the v4 structure.
   - Installed `gl-matrix` npm package.
   - Created [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) and [InfiniteMenu.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.css) based on the React Bits implementation.
+
+## [2026-06-20] write | Animate InfiniteMenu overlay based on LiquidMetalSphere rotation
+- **Session Focus**: Connect the WebGL rotation velocity/state to trigger the display of the InfiniteMenu overlay with custom easing blurs.
+- **Code Changes**:
+  - Added `onRotationChange` prop to [LiquidMetalSphere.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/LiquidMetalSphere.tsx), tracking drag & inertia thresholds to fire state callbacks.
+  - Added `onItemClick` and `onMovementChange` callbacks to [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) and resolved TypeScript typing constraints with default parameter properties.
+  - Mounted [InfiniteMenu](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) absolute centered in [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) floating directly over the WebGL canvas.
+  - Wired rotation state hooks to animate menu opacity, blur filters, scaling, and rotation states, triggering a 2-second timeout fadeout on rotation rest.
+  - Programmed programmatic keyboard events to open the sentient AI chat container on "SENTIENT CORE" menu selection.
+

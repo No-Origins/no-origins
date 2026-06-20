@@ -7,16 +7,12 @@ Once the current goals are fully achieved, compile the final updates, move this 
 ---
 
 ## 🎯 Current Goal
-- **Focus**: Integrate Shadcn UI into the visual-labs Next.js application.
+- **Focus**: Idle / Waiting for next task instructions.
 
 ---
 
 ## 📝 Active Checklist
-- `[x]` Run `npx shadcn@latest init` in the `visual-labs` directory
-- `[x]` Verify components.json, CSS integration, and build correctness
-- `[x]` Integrate the `<InfiniteMenu />` component from React Bits
-- `[ ]` Update root pointer and commit changes inside submodule first
-- `[ ]` Clear active sprint and log progress in log.md
+- `[ ]` Define new sprint goals and checklists
 
 ---
 
