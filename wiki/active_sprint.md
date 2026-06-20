@@ -22,10 +22,11 @@ None
 ---
 
 ## 💬 Session Notes & Context
-- Integrated the React Bits `BorderGlow` component under `visual-labs/src/components/` supporting responsive cursor edge proximity glow tracking.
-- Set up 6 internal navigation pages (`/labs`, `/hyperbase`, `/stories`, `/society`, `/spotify`, `/credits`) wrapping their placeholder content inside themed `BorderGlow` cards.
-- Wired a custom `trigger-ripple` window listener inside `LiquidMetalSphere.tsx` to let page components dispatch visual waves and audio pops when they are selected (mounted).
-- Updated `InfiniteMenu.tsx` to dynamically render black circular discs with colored glowing borders and white system icons on a 2D canvas, improving load speed and offline support.
+- Enabled the Sentient Core chatbot to execute client-side page navigation dynamically.
+- Configured the API route (`route.ts`) and local agent prompt (`sentient_sphere.toml`) to instruct the LLM on the `"route"` JSON schema and map target paths.
+- Updated `SphereChatInput.tsx` to push route navigation returned by the Core, transitioning the page viewport while preserving the persistent WebGL canvas and audio.
+
+
 
 
 

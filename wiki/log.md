@@ -7,6 +7,15 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-20] write | Enable AI-controlled navigation via Sentient Core chatbot
+- **Session Focus**: Configure the Core chatbot (local Gemma and fallback Gemini) to handle client-side page navigation dynamically.
+- **Modified Pages**:
+  - [wiki/visual-labs/ai_chat.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/ai_chat.md): Documented the new AI-controlled navigation schema.
+- **Code/Config Changes**:
+  - Modified [route.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/api/chat-sphere/route.ts) to define navigation capabilities, list available routes, and add `route` to the JSON schema.
+  - Modified [sentient_sphere.toml](file:///Users/hiddenstack/Creatives/no-origins/realm/configs/sentient_sphere.toml) system prompt configuration to support route selection.
+  - Updated [SphereChatInput.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/SphereChatInput.tsx) to import `useRouter` and push data.route navigation updates client-side.
+
 ## [2026-06-20] write | Integrate BorderGlow component, setup 6 internal pages, and draw menu icons dynamically
 - **Session Focus**: Integrate React Bits BorderGlow, create 6 internal pages, wire custom ripple events, and update InfiniteMenu to render vector icons dynamically.
 - **Code Changes**:

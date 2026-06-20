@@ -39,18 +39,19 @@ To guarantee system stability when the local backend is offline or compilation i
 The model is instructed to act as a hyper-dimensional sentient core. The system prompt restricts model output to:
 * **Max length**: 2 sentences.
 * **Tone**: Mysterious, poetic, and techno-sentient.
-* **Return Format**: A strict JSON payload containing a `message` string and a `stateId` string.
+* **Return Format**: A strict JSON payload containing `message` (string), `stateId` (string/null), and `route` (string/null).
 
-### 4. State Selection Schema
-Instead of returning individual parameters, the model matches the user's vibe/commands against the list of `availableStates` and selects the corresponding state ID:
+### 4. State Selection & Navigation Schema
+Instead of returning individual parameters, the model matches the user's vibe/commands against the list of `availableStates` and selects the corresponding state ID, and matches requests to travel or navigate to pages against the list of available paths:
 
 ```json
 {
   "message": "The golden tempest shall unfurl. Witness the energetic rupture.",
-  "stateId": "state-gold"
+  "stateId": "state-gold",
+  "route": "/labs"
 }
 ```
-*(If no state transition is appropriate or requested, the model sets `"stateId": null`)*.
+*(If no state transition is appropriate, `"stateId"` is set to `null`. If no page navigation is requested, `"route"` is set to `null`)*.
 
 ---
 
