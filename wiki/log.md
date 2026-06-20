@@ -7,6 +7,15 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-20] write | Implement direct selection navigation and bidirectional route-menu synchronization
+- **Session Focus**: Removed the requirement to click the action button to open pages in the InfiniteMenu, making items navigate directly upon selection/snapping. Added bidirectional route synchronization between Next.js pathnames and the WebGL InfiniteMenu rotation.
+- **Code Changes**:
+  - Implemented `snapToItem` inside the `InfiniteGridMenu` WebGL class in [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to programmatically rotate the menu to a specific item.
+  - Updated the `InfiniteMenu` component to listen to `usePathname()` and trigger `snapToItem()` on change.
+  - Added selection-based navigation via `useEffect` in [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) when dragging stops (`isMoving` becomes false) and the item link differs from the active pathname.
+  - Removed the `.action-button` DOM element from [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) rendering block.
+  - Passed `visible` prop to the menu inside [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx).
+
 ## [2026-06-20] write | Fix page card invisibility with custom CSS entry animation and BorderGlow sweeps
 - **Session Focus**: Resolved an issue where page cards (BorderGlow) were invisible on load due to missing/broken third-party Tailwind animation dependencies, and enabled card glow sweep animations on mount.
 - **Code Changes**:
