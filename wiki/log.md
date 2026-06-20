@@ -202,3 +202,10 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Wired rotation state hooks to animate menu opacity, blur filters, scaling, and rotation states, triggering a 2-second timeout fadeout on rotation rest.
   - Programmed programmatic keyboard events to open the sentient AI chat container on "SENTIENT CORE" menu selection.
 
+## [2026-06-20] write | Fix InfiniteMenu WebGL transparency and clipping box
+- **Session Focus**: Enable transparency in InfiniteMenu WebGL context and size the container to prevent element clipping.
+- **Code Changes**:
+  - Modified [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) WebGL context initialization to set `alpha: true` enabling transparent background clear color.
+  - Updated [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) wrapping div with responsive viewport-relative dimensions `w-[88vw] h-[88vw] max-w-[680px] max-h-[680px]` and circular mask classes `rounded-full overflow-hidden bg-transparent` to prevent item clipping.
+
+
