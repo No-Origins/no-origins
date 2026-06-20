@@ -7,6 +7,13 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-20] write | Configure Vercel environment variables and redeploy production
+- **Session Focus**: Fixed the production chatbot failure on Vercel by adding the missing `GEMINI_API_KEY` to Vercel environment variables and triggering a production redeployment.
+- **Code Changes**:
+  - Linked workspace locally to the Vercel project (`visual-labs`).
+  - Added `.vercel` to the submodule's `.gitignore`.
+  - Triggered production build and deployment (`vercel --prod`) to apply environment changes. Tested the endpoint on the live domain `no-origins.com` (returning 200 OK).
+
 ## [2026-06-20] ingest | Add Vercel REST API Guide to workspace wiki
 - **Session Focus**: Document programmatically checking Vercel deployments, build-time events, and runtime function logs.
 - **Created Pages**:
