@@ -7,6 +7,15 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-20] write | Integrate BorderGlow component, setup 6 internal pages, and draw menu icons dynamically
+- **Session Focus**: Integrate React Bits BorderGlow, create 6 internal pages, wire custom ripple events, and update InfiniteMenu to render vector icons dynamically.
+- **Code Changes**:
+  - Created [BorderGlow.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BorderGlow.tsx) and [BorderGlow.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BorderGlow.css).
+  - Modified [LiquidMetalSphere.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/LiquidMetalSphere.tsx) to listen for the `trigger-ripple` window event to programmatically start visual waves and play audio ripples.
+  - Updated [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to draw item discs directly on a 2D canvas with black backgrounds, glowing outline rings, and centered white system icons (offline-first).
+  - Updated [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) to configure the 6 internal routes (Labs, Hyperbase, Stories, Society, Spotify, Credits) with custom symbols and colors.
+  - Created internal page templates: `/labs`, `/hyperbase`, `/stories`, `/society`, `/spotify`, and `/credits`, each utilizing the `BorderGlow` card, and dispatching `trigger-ripple` on load.
+
 ## [2026-06-20] write | Persistent DOM context and client-side navigation for InfiniteMenu
 - **Session Focus**: Enable persistent DOM context for WebGL canvases and audio engines, converting all internal navigation to client-side routing.
 - **Modified Pages**:

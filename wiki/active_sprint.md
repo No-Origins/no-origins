@@ -22,8 +22,11 @@ None
 ---
 
 ## 💬 Session Notes & Context
-- Converted all internal page navigation routes (`/`, `/base`, `/admin`, `/login`) to client-side Next.js routing via `useRouter` and `<Link>` components.
-- Verified that WebGL canvas context and procedural audio engine states persist seamlessly without resetting or re-triggering the boot loader during internal page routing.
-- Retained the custom 2-second rotation timeout fade behavior for the Infinite Menu overlay.
+- Integrated the React Bits `BorderGlow` component under `visual-labs/src/components/` supporting responsive cursor edge proximity glow tracking.
+- Set up 6 internal navigation pages (`/labs`, `/hyperbase`, `/stories`, `/society`, `/spotify`, `/credits`) wrapping their placeholder content inside themed `BorderGlow` cards.
+- Wired a custom `trigger-ripple` window listener inside `LiquidMetalSphere.tsx` to let page components dispatch visual waves and audio pops when they are selected (mounted).
+- Updated `InfiniteMenu.tsx` to dynamically render black circular discs with colored glowing borders and white system icons on a 2D canvas, improving load speed and offline support.
+
+
 
 
