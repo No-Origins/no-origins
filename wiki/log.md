@@ -208,4 +208,8 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Modified [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) WebGL context initialization to set `alpha: true` enabling transparent background clear color.
   - Updated [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) wrapping div with responsive viewport-relative dimensions `w-[88vw] h-[88vw] max-w-[680px] max-h-[680px]` and circular mask classes `rounded-full overflow-hidden bg-transparent` to prevent item clipping.
 
-
+## [2026-06-20] write | Separate circular WebGL mask from absolute text overlays
+- **Session Focus**: Prevent absolute text descriptions and button overlays from being clipped by `overflow-hidden` container limits.
+- **Code Changes**:
+  - Refactored [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) render structure to isolate the WebGL canvas inside a circular mask wrapper (`rounded-full overflow-hidden bg-transparent`), while leaving the absolute-positioned siblings (`face-title`, `face-description`, `action-button`) outside of the overflow boundaries.
+  - Expanded the maximum size of the outer container in [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) to `max-w-[760px] max-h-[760px]` and removed the outer `rounded-full overflow-hidden` wrapper classes, ensuring elements can render fully across views.
