@@ -7,6 +7,14 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-21] ingest | Review and synchronize wikis with latest codebase features
+- **Session Focus**: Audit and synchronize wiki documentation with all recent codebase changes in No Origins repositories.
+- **Created Pages**:
+  - [wiki/visual-labs/navigation_ui.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/navigation_ui.md): Created documentation for the InfiniteMenu WebGL component, route synchronization, BorderGlow cursor physics tracking, page entry animations, and internal subpages.
+- **Modified Pages**:
+  - [wiki/index.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/index.md): Registered the new Navigation & Subpage UI page.
+  - [wiki/realm/aura_setup.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/aura_setup.md): Updated the Sentient Sphere system prompt configuration mapping to include the route navigation schema.
+
 ## [2026-06-20] write | Gate AI Agent chatbot behind Vercel feature flag
 - **Session Focus**: Hide the AI chatbot entry points and configurations, and protect its API route when `NEXT_PUBLIC_ENABLE_AI_AGENT` is not set to `"true"`.
 - **Code/Doc Changes**:
