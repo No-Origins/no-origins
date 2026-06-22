@@ -7,6 +7,14 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-23] write | Fix InfiniteMenu concurrent WebGL loops and event listener leaks
+- **Session Focus**: Address coordinate mapping discrepancies where duplicate menu icons opened incorrect routes, caused by multiple animation loops and pointer listeners running in parallel.
+- **Code Changes**:
+  - Implemented `destroy()` method on `ArcballControl` class in [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to remove pointer event listeners from the canvas.
+  - Implemented `destroy()` method on `InfiniteGridMenu` class in [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to cancel the running `requestAnimationFrame` loop (`this.rafId`) and delete WebGL texture, program, VAO, and instance/vertex buffers.
+  - Updated React component cleanup inside [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to call `sketch.destroy()` on recreation/unmount.
+  - Extracted the `scale` prop from the main mount `useEffect` dependency array, introducing a lightweight, dedicated `useEffect` to directly mutate `scaleFactor` and `camera.position[2]` in place without destroying and recreating the WebGL context.
+
 ## [2026-06-22] write | Correct Infinite Menu texture row mapping and Y-axis flip
 - **Session Focus**: Correct duplicate menu item icons matching and routing alignment.
 - **Code Changes**:
