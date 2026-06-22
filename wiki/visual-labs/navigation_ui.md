@@ -24,8 +24,8 @@ graph LR
 ```
 
 - **Pathname-to-Rotation**: The menu listens to `usePathname()`. On change, it locates the matching item link and invokes `snapToItem(index)` on the underlying WebGL controller to programmatically rotate the wheel to the correct index.
-- **Rotation-to-Pathname**: When dragging/scrolling on the menu decays to rest (`isMoving` becomes false) and the snaps settle on a new item, a react effect triggers `router.push(activeItem.link)` to perform client-side navigation.
-- **Direct Navigation**: Clicking on the active menu card instantly navigates to the page without requiring separate action buttons.
+- **Confirmation-Based Navigation**: When dragging/scrolling on the menu decays to rest (`isMoving` becomes false), a glassmorphic confirmation panel fades in at the bottom center of the menu. It displays the active item's title, description, and an **ENTER** button styled with a border glow matching the active item's custom `glowColor`.
+- **Direct Navigation Execution**: Clicking the **ENTER** button triggers the route update (`router.push(activeItem.link)`), providing clear intent and preventing accidental navigation.
 
 ### 3. Dynamic Camera Scaling
 To maintain a unified visual weight, the menu's camera scale binds dynamically to the configured size of the Liquid Metal Sphere:

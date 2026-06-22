@@ -77,13 +77,13 @@ When a valid response is received from the Next.js API route, the component read
 
 ---
 
-## 🔒 Feature Gating: \`NEXT_PUBLIC_ENABLE_AI_AGENT\`
+## 🔒 Feature Gating: `NEXT_PUBLIC_ENABLE_AI_AGENT`
 
 To satisfy deployment and staging constraints, the AI Agent feature can be hidden and disabled. This is controlled by the environment variable:
 
-\`NEXT_PUBLIC_ENABLE_AI_AGENT\`
+`NEXT_PUBLIC_ENABLE_AI_AGENT`
 
-### Behaviors when Disabled (Set to anything other than \`"true"\`, or unset):
-1. **Client-side Layout**: The \`<SphereChatInput />\` component is not rendered inside the main \`BaseLayout\` (\`layout.tsx\`), preventing trigger keyboard shortcuts and layout updates from initializing.
-2. **HUD Controls**: The "Input Controls" tab/panel is filtered out and hidden from both the Visitor HUD (\`InteractiveHUD.tsx\`) and the Admin Control Console (\`admin/page.tsx\`).
-3. **Backend Safeguard**: The \`/api/chat-sphere\` API handler checks this variable on invocation and immediately returns a \`404\` error payload, rejecting any automated or direct queries.
+### Behaviors when Disabled (Set to anything other than `"true"`, or unset):
+1. **Client-side Layout**: The `<SphereChatInput />` component is not rendered inside the main `BaseLayout` (`layout.tsx`), preventing trigger keyboard shortcuts and layout updates from initializing.
+2. **HUD Controls**: The "Input Controls" tab/panel is filtered out and hidden from both the Visitor HUD (`InteractiveHUD.tsx`) and the Admin Control Console (`admin/page.tsx`).
+3. **Backend Safeguard**: The `/api/chat-sphere` API handler checks this variable on invocation and immediately returns a `404` error payload, rejecting any automated or direct queries.

@@ -7,6 +7,23 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-22] write | Resolve sphere, field, and infinite menu interaction conflicts
+- **Session Focus**: Resolve click conflicts between background dot field, liquid metal sphere, and inner core. Implement confirmation-based navigation with a glassmorphic ENTER button.
+- **Modified Pages**:
+  - [wiki/visual-labs/navigation_ui.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/navigation_ui.md): Documented the new confirmation panel and button navigation flow.
+- **Code Changes**:
+  - Restricted dragging sphere/pushing core to clicking the sphere's canvas element in [LiquidMetalSphere.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/LiquidMetalSphere.tsx) and [InnerCore.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InnerCore.tsx).
+  - Updated sphere container wrapper pointer events in [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) to allow click-throughs to background dot field canvas.
+  - Added click guards and duplicate audio prevention in [DotField.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/DotField.tsx).
+  - Disabled automatic routing on snap rest and introduced a sleek, responsive glassmorphic confirmation panel overlay with a glowing ENTER button in [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) and [InfiniteMenu.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.css).
+
+## [2026-06-22] lint | Audit and align repository wikis
+- **Session Focus**: Audit, clean, and synchronize all wiki documentation across `visual-labs`, `realm`, and global scopes.
+- **Modified Pages**:
+  - [wiki/log.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/log.md): Resolved escaped parentheses backslash references to Next.js route group directories.
+  - [wiki/visual-labs/ai_chat.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/ai_chat.md): Restored standard backtick code blocks by removing escaped backslash formatting in environment variable gating sections.
+- **Diagnostics**: Executed `audit_wiki.py` link-checking script to ensure 100% path resolution and format compliance.
+
 ## [2026-06-21] ingest | Review and synchronize wikis with latest codebase features
 - **Session Focus**: Audit and synchronize wiki documentation with all recent codebase changes in No Origins repositories.
 - **Created Pages**:
@@ -85,7 +102,7 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - [wiki/visual-labs/state_sync.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/state_sync.md): Documented persistent DOM and client-side routing.
 - **Code Changes**:
   - Modified [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) to import and use `useRouter` for handling internal clicks on InfiniteMenu item cards, preventing page reloads.
-  - Replaced raw anchor `<a>` tags with Next.js `<Link>` components in [page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/\(base\)/page.tsx), [base/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/\(base\)/base/page.tsx), and [login/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/\(base\)/login/page.tsx).
+  - Replaced raw anchor `<a>` tags with Next.js `<Link>` components in [page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/page.tsx), [base/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/base/page.tsx), and [login/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/login/page.tsx).
 
 ## [2026-06-16] ingest | Initialize Agent Wiki Collaboration Framework
 - **Session Focus**: Established the wiki framework inspired by Andrej Karpathy's LLM Wiki concept.
