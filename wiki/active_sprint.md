@@ -5,19 +5,24 @@ This document tracks active development goals, session checklists, and staged do
 ---
 
 ## 🎯 Current Goal
-- **Focus**: None (Ready for next sprint)
+- **Focus**: Resolve the WebGL concurrent loop leak and coordinate mapping mismatch inside the `InfiniteMenu` component.
 
 ---
 
 ## 📝 Active Checklist
-- [ ] No active tasks
+- [ ] Add `destroy()` method to `ArcballControl` in `InfiniteMenu.tsx` to clean up event listeners
+- [ ] Add `destroy()` method to `InfiniteGridMenu` in `InfiniteMenu.tsx` to stop RAF loop and delete WebGL resources
+- [ ] Refactor React component `useEffect` hooks in `InfiniteMenu.tsx` to call `destroy()` on cleanup
+- [ ] Update `scale` prop changes directly on the active sketch instance without recreation
+- [ ] Verify functionality and run build tests
 
 ---
 
 ## 🛠️ Modified Files & Staging area
-- None
+- [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx)
 
 ---
 
 ## 💬 Session Notes & Context
-- None
+- Discovered that modifying the `scale` prop (which links to the `size` slider) destroys and recreates `InfiniteGridMenu` on every slider shift.
+- Since the old `requestAnimationFrame` loops and canvas pointer event listeners are never cleaned up, multiple loops run concurrently and cause conflicting updates to the React `activeItem` state.
