@@ -7,12 +7,18 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-22] write | Correct Infinite Menu texture row mapping and Y-axis flip
+- **Session Focus**: Correct duplicate menu item icons matching and routing alignment.
+- **Code Changes**:
+  - Restored default vertical texture loading `gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)` in [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to align WebGL texture coordinates row-offsets with the canvas coordinate row-offsets, ensuring duplicate icons display correctly and map to their expected routes.
+
 ## [2026-06-22] write | Fix Infinite Menu log flooding, oscillation, and index mapping mismatches
 - **Session Focus**: Address terminal log flooding, infinite loop oscillations, and incorrect subpage item selection on menu release.
 - **Code Changes**:
   - Normalized target vector `targetPos` in `snapToItem` in [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to ensure `quat.rotationTo` computes mathematically accurate rotations.
   - Reset `snapDirection` in `ArcballControl` and `snapToItem` targets to `[0, 0, -1]` to align with the negative-coordinate back-to-front negation rendering pipeline.
   - Added `lastActiveItemIndex` check in `#onControlUpdate` in [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to throttle `onActiveItemChange` calls to execute only when the item index actually changes, eliminating infinite rendering log loops.
+  - Set `gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)` in `initTexture` inside [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to correct Y-axis texture row uploads, aligning duplicate item icons with their expected page selectors.
   - Updated `displayItem` text panel logic in [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) to show `activeItem` when moving or dragging on subpages, dynamically updating descriptions as the user drags.
 
 ## [2026-06-22] write | Fix Infinite Menu navigation unresponsiveness and pointer events
