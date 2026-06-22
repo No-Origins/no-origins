@@ -7,6 +7,21 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-22] write | Fix Infinite Menu log flooding, oscillation, and index mapping mismatches
+- **Session Focus**: Address terminal log flooding, infinite loop oscillations, and incorrect subpage item selection on menu release.
+- **Code Changes**:
+  - Normalized target vector `targetPos` in `snapToItem` in [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to ensure `quat.rotationTo` computes mathematically accurate rotations.
+  - Reset `snapDirection` in `ArcballControl` and `snapToItem` targets to `[0, 0, -1]` to align with the negative-coordinate back-to-front negation rendering pipeline.
+  - Added `lastActiveItemIndex` check in `#onControlUpdate` in [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to throttle `onActiveItemChange` calls to execute only when the item index actually changes, eliminating infinite rendering log loops.
+  - Updated `displayItem` text panel logic in [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) to show `activeItem` when moving or dragging on subpages, dynamically updating descriptions as the user drags.
+
+## [2026-06-22] write | Fix Infinite Menu navigation unresponsiveness and pointer events
+- **Session Focus**: Fix Infinite Menu navigation click blocker. Allow button clicks to fire immediately, even during snap settling, and configure pointer events.
+- **Code Changes**:
+  - Removed `isMoving` block from `handleActionClick` in [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to allow instant page entering.
+  - Set `pointer-events: auto` on `.menu-info-panel` in [InfiniteMenu.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.css) to ensure buttons receive clicks on all browsers.
+  - Configured `pointer-events: none` on title and description elements in `InfiniteMenu.css` to allow drags on text fields to pass through to the canvas underneath.
+
 ## [2026-06-22] refactor | Shift dragging/rotation interaction focus from Sphere to Infinite Menu
 - **Session Focus**: Shift primary dragging/rotation interaction from the Liquid Metal Sphere to the Infinite Menu, making the sphere a non-interactive ambient object.
 - **Modified Pages**:
