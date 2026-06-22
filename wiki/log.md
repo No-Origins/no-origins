@@ -10,7 +10,8 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 ## [2026-06-22] write | Correct Infinite Menu texture row mapping and Y-axis flip
 - **Session Focus**: Correct duplicate menu item icons matching and routing alignment.
 - **Code Changes**:
-  - Restored `gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)` in [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to ensure icons inside the cells are drawn right-side up (when paired with shader's `1.0 - vUvs.y` inversion).
+  - Restored `gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)` in [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx) to flip the texture vertically on upload.
+  - Removed the redundant cell flip inside the fragment shader by changing `st.y = 1.0 - vUvs.y` to `st.y = vUvs.y` to render icons right-side up.
   - Modified the fragment shader row offset calculation to `int cellY = uAtlasSize - 1 - (itemIndex / cellsPerRow)` to correctly map the flipped vertical rows in the texture atlas (avoiding black/empty discs for Labs, Hyperbase, and Stories).
 
 ## [2026-06-22] write | Fix Infinite Menu log flooding, oscillation, and index mapping mismatches
