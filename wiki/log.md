@@ -7,6 +7,17 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-22] refactor | Shift dragging/rotation interaction focus from Sphere to Infinite Menu
+- **Session Focus**: Shift primary dragging/rotation interaction from the Liquid Metal Sphere to the Infinite Menu, making the sphere a non-interactive ambient object.
+- **Modified Pages**:
+  - [wiki/visual-labs/navigation_ui.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/navigation_ui.md): Updated documentation to cover menu dragging and click-forwarding.
+- **Code Changes**:
+  - Removed all mouse/touch drag listeners, grab cursor styling, and dragRef states from [LiquidMetalSphere.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/LiquidMetalSphere.tsx), setting its canvas to `pointer-events-none`.
+  - Added a slow, continuous ambient rotation on the sphere via `u_time` uniform in `LiquidMetalSphere.tsx`.
+  - Removed direct pointer/touch listeners from [InnerCore.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InnerCore.tsx), relying exclusively on `trigger-ripple` window events to trigger core push forces.
+  - Bound Infinite Menu visibility directly to the Next.js `pathname` route (always visible on `/`, hidden on subpages) in [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx).
+  - Implemented click-to-ripple forwarding inside [InfiniteMenu.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/InfiniteMenu.tsx), forwarding quick clicks on the menu canvas as `trigger-ripple` window events.
+
 ## [2026-06-22] write | Resolve sphere, field, and infinite menu interaction conflicts
 - **Session Focus**: Resolve click conflicts between background dot field, liquid metal sphere, and inner core. Implement confirmation-based navigation with a glassmorphic ENTER button.
 - **Modified Pages**:

@@ -32,6 +32,11 @@ To maintain a unified visual weight, the menu's camera scale binds dynamically t
 $$\text{menuScale} = \text{sphereSize} \times 1.2$$
 As the sphere grows or shrinks (due to audio reactivity or manual preset morphing), the menu scales in perfect proportion.
 
+### 4. Interactive Dragging & Click-Forwarding
+- **Primary Drag Target**: The Infinite Menu canvas serves as the sole interactive grab target on the home page. Dragging anywhere on the menu canvas spins and rotates the WebGL menu items.
+- **Ambient Sphere Interaction**: The underlying `LiquidMetalSphere` is non-interactive and features a slow, continuous ambient rotation to display reflections. Its canvas has `pointer-events-none`.
+- **Click Forwarding**: Quick clicks/touches on the Infinite Menu canvas (movement < 6px, duration < 200ms) are intercepted and dispatched as a `trigger-ripple` event to the `window`. Both the `LiquidMetalSphere` and the `InnerCore` listen to this event to render ripple shaders and push the core in sync, preserving micro-interaction responsiveness.
+
 ---
 
 ## 🎨 Interactive Hover Glows: `BorderGlow`
