@@ -62,13 +62,13 @@ Step 4: Commit and Push the Root Repository pointer update:
 ---
 
 ### 📝 The Agent-Wiki Collaboration Pipeline (MANDATORY)
-To prevent agents from losing context between sessions, we maintain a persistent Wiki. Every development session follows this pipeline:
+To prevent agents from losing context between sessions, we maintain a persistent Wiki inside Obsidian. For any project, Obsidian serves as the central Wiki workspace, located inside the `Wikis/` folder (e.g., `Wikis/no-origins/`). Every development session follows this pipeline:
 
 ```mermaid
 sequenceDiagram
     participant H as Human / System
     participant A as Agent
-    participant W as Wiki / Logs
+    participant W as Obsidian Wiki / Logs
     
     H->>A: Issue request / objective
     Note over A: Phase 1: Ingest Wiki

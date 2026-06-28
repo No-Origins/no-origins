@@ -18,6 +18,10 @@ graph TD
     Context -->|CSS Variables| UI[Tailwind CSS v4 Layouts]
 ```
 
+### ❄️ Sphere Stillness Toggle
+- **`sphereStill` (Boolean)**: Global flag governing whether the Liquid Metal Sphere is frozen in place.
+- **Dynamic Interaction**: When set to `true`, the context triggers a soft deceleration sequence, interpolating visual displacement values to zero to return the sphere to its perfectly round base geometry, rather than pausing the WebGL render loop abruptly. It also snapshots the current active core parameters and loads the designated "MEDITATING CORE" preset. Toggling it back to `false` restores the pre-freeze parameters from the snapshot.
+
 ---
 
 ## 🎨 Theme Synchronization (CSS Variables)

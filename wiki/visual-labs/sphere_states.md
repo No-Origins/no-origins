@@ -58,9 +58,27 @@ graph TD
    - In each render frame, the active variables slide towards the target values:
      $$\text{current} = \text{current} + (\text{target} - \text{current}) \times \text{interpolationRate}$$
    - This prevents React from having to re-render the HUD sliders 60 times a second during transition while keeping the visual change butter-smooth on screen.
-3. **Fallback & Component Exclusions**:
+4. **Fallback & Component Exclusions**:
    - If a component key is missing from `presets` (e.g. `presets.field` is undefined because the admin unchecked "Field Preset" during state composition), the target value resolves to the current active value in the context.
    - During animation, the interpolater runs on that component's properties with identical start and end values, leaving that component completely unaffected. This allows subset state transitions (e.g. morphing only the audio while keeping the liquid sphere identical).
+
+---
+
+## ❄️ Sphere Stillness & Meditating Core Swap
+
+To support a soft-resting visual transition, the stillness features operate through coordinated mathematical interpolation and preset swapping:
+
+### 1. Stillness Deceleration Easing
+When stillness is enabled (`sphereStill` becomes true), the `BackgroundVisualizer` runs a dedicated `requestAnimationFrame` loop to animate a `stillBlend` variable from `0` to `1` over a `2400ms` window:
+- **Easing Curve**: Uses an **ease-out cubic** function ($f(t) = 1 - (1 - t)^3$) to ensure a gentle, decelerating wind-down with no mid-animation speed spikes.
+- **Shader Modulation**: The uniforms passed to `LiquidMetalSphere` are multiplied by `(1 - stillBlend)`. This pulls `amplitude`, `speed`, and `bulge` values smoothly to zero, settling the sphere into a perfectly smooth round shape.
+
+### 2. Meditating Core Preset Swap
+When stillness is activated:
+- **Context Snapshot**: The system snapshots all active `core` parameter states (size, intensity, spring, friction, blur, color, freewill, and freewill speed) into `coreSnapshotRef`.
+- **Preset Match**: Searches all local and Supabase component presets for a `type === "core"` preset with a trimmed, case-insensitive name containing the word `"MEDITATING"`.
+- **Application & Fallback**: If found, the meditating preset is loaded. If no match is found, the system logs a warning containing all available core presets to the console for debugging and leaves the parameters at their baseline.
+- **Restoration**: When stillness is deactivated, the baseline parameter values captured in `coreSnapshotRef` are restored back to the visualizer context.
 
 ---
 

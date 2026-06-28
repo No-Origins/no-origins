@@ -12,7 +12,7 @@ Welcome to the **No Origins** Agent Wiki. This is a persistent, compounding know
 - **[Wiki Maintenance Playbook](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/wiki_rules.md)**: Standards and triggers for creating, modifying, logging, and linting the wiki.
 - **[Collaborative Guidelines & Pipelines](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/collaborative_guidelines.md)**: Roles, git submodule workflows, wiki compliance, and safety checkpoints.
 - **[Vercel REST API Guide](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/vercel_api.md)**: Reference specifications for querying Vercel deployment status, build failures, and function runtime logs.
-
+- **[Projects Feature RFC](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/projects_feature_rfc.md)**: Request for Comments and design specifications for the whiteboarding/TipTap projects canvas.
 
 ### 🎨 Frontend: `visual-labs` Submodule
 - **[State Synchronization](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/state_sync.md)**: Deep dive into the reactive single source of truth (`VisualizerContext`) governing HUD, WebGL, and sound values.
@@ -32,4 +32,3 @@ Welcome to the **No Origins** Agent Wiki. This is a persistent, compounding know
 ## 📜 Session logs & Active Sprints
 - **[Active Session Tracker](file:///Users/hiddenstack/Creatives/no-origins/wiki/active_sprint.md)**: Current sprint objectives, checklists, staging logs, and session contexts.
 - **[Chronological Wiki Activity Log](file:///Users/hiddenstack/Creatives/no-origins/wiki/log.md)**: Chronological history of agent sessions, changes, features added, and audits.
-

@@ -5,7 +5,7 @@ This document tracks active development goals, session checklists, and staged do
 ---
 
 ## 🎯 Current Goal
-- **Focus**: None (Ready for next sprint)
+- **Focus**: None
 
 ---
 

@@ -28,7 +28,8 @@ graph TD
 
 ### Frontend (`visual-labs`)
 - **Core Framework**: **Next.js 16.2** (App Router structure using Turbopack in development, React 19.2, TypeScript).
-- **Styling**: **Tailwind CSS v4** coupled with dynamically-injected CSS Custom Properties (CSS variables) to support reactive designer themes.
+- **Styling**: **Tailwind CSS v4** coupled with dynamically-injected CSS Custom Properties (CSS variables) to support reactive designer themes. Uses a global `--radius-button` token (set to `9999px`) in the base layer to enforce unified pill-shaped buttons across HUD, admin panels, and nav toggles, replacing ad-hoc rounded utility classes.
+- **Component UI**: **shadcn/ui** (Radix UI primitives) integrated directly with Tailwind v4 structure mapping.
 - **Visual Rendering**: WebGL-based custom rendering utilizing `<canvas>` elements for the floating metal orb and background particle fields.
 - **Audio Engine**: Custom built class inside `audio.ts` utilizing the browser's native **Web Audio API** (Oscillators, Gain nodes, BiquadFilters, Analysers, ConvolverNode reverb, and white noise synthesizers).
 - **Transitions & Micro-Interactions**: Framer Motion 12 (`motion` package) for HUD panel animations.

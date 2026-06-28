@@ -1,6 +1,25 @@
 # Navigation Interface & Interactive Subpages
 
-This document details the navigation framework of **No Origins**, specifically the high-performance WebGL-based infinite circular menu, route synchronization, the mouse-tracking reactive border glow component, and internal page templates.
+This document details the navigation framework of **No Origins**, specifically the split viewport layout, the high-performance WebGL-based infinite circular menu, route synchronization, the mouse-tracking reactive border glow component, and internal page templates.
+
+---
+
+## 🏛️ Layout Architecture (Split View & Shared Cards)
+
+To support a multi-layered interactive experience, the application utilizes a split-viewport structure and shared card layouts:
+
+### 1. Viewport Split Layout
+Defined in [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/layout.tsx), the layout divides the screen:
+- **Sphere Section**: Left on desktop (`md:flex-row`), bottom on mobile (`flex-col`). It contains the interactive WebGL canvas overlays ([BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) and [SphereChatInput.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/SphereChatInput.tsx)).
+- **Sub-page Section**: Right on desktop, top on mobile. It scrolls independently and houses the child route pages. On mobile, it is top-aligned and center-justified (`items-start min-h-full`) to prevent overlapping visualizer controls.
+
+### 2. Viewport Backdrop Field
+The entire viewport is backed by [BackdropField.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackdropField.tsx) mounted at the root level of `BaseLayout`. This ensures that the reactive particle [DotField.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/DotField.tsx) remains visible behind both the canvas sphere and all textual card pages, overlaid with a radial vignette gradient.
+
+### 3. Shared Cards Layout Group
+The six internal pages are nested inside the `(cards)` route group [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/layout.tsx). Rather than duplicate styling and mount logic:
+- The shared layout enforces a `max-w-[450px]` container with custom padding and pointer event routing.
+- It is keyed on `pathname` (`key={pathname}`), ensuring that the entry animations replay and the ripple triggers dispatch on every route transition.
 
 ---
 
@@ -37,6 +56,22 @@ As the sphere grows or shrinks (due to audio reactivity or manual preset morphin
 - **Ambient Sphere Interaction**: The underlying `LiquidMetalSphere` is non-interactive and features a slow, continuous ambient rotation to display reflections. Its canvas has `pointer-events-none`.
 - **Click Forwarding**: Quick clicks/touches on the Infinite Menu canvas (movement < 6px, duration < 200ms) are intercepted and dispatched as a `trigger-ripple` event to the `window`. Both the `LiquidMetalSphere` and the `InnerCore` listen to this event to render ripple shaders and push the core in sync, preserving micro-interaction responsiveness.
 
+### 5. WebGL Lifecycle & Leak Prevention
+To eliminate memory leaks and event listener accumulation during navigation and hot reloading:
+- **`ArcballControl.destroy()`**: Removes mouse, touch, and wheel pointer event listeners from the target canvas on unmount.
+- **`InfiniteGridMenu.destroy()`**: Cancels active `requestAnimationFrame` loops (`this.rafId`) and explicitly deletes WebGL programs, vertex array objects (VAOs), buffers, and textures from GPU memory.
+- **In-place Parameter Mutation**: The scale prop is decoupled from the main context reconstruction hook. A dedicated, lightweight `useEffect` directly modifies `scaleFactor` and `camera.position[2]` in-place, preventing costly unmount-rebuild WebGL loops during scale transitions.
+
+---
+
+## 🎛️ Ambient Controls: `SphereNavBar`
+
+Underneath the page-details info panel sits [SphereNavBar.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/SphereNavBar.tsx). It provides direct, non-dragging control options represented by simple, glassmorphic buttons (Square, Triangle, Circle):
+
+1.  **Square (Random Shuffle)**: Triggers a random navigation path. When clicked, it selects a random internal route, calls the imperative `spinAndSnap(targetIndex, 2000)` ref method to spin the WebGL Infinite Menu wheel for 2 seconds, and pushes the new route.
+2.  **Triangle (Home Navigation)**: Instantly returns the router to `/`. The icon uses responsive optical translation offsets (`max-md:portrait:-translate-y-px`, `max-md:landscape:translate-x-px`, `md:translate-x-px md:-translate-y-px`) to keep the triangular glyph centered within its boundaries.
+3.  **Circle (Stillness Toggle)**: Toggles the `sphereStill` context variable to freeze/unfreeze sphere motion.
+
 ---
 
 ## 🎨 Interactive Hover Glows: `BorderGlow`
@@ -64,16 +99,16 @@ On mount, if `animated={true}` is set, the component initiates a `requestAnimati
 
 ## 📄 Subpages & Ripple Event Triggering
 
-The application exposes 6 internal page layouts built inside the Next.js App Router:
-- **Labs**: `/labs` (WebGL controls environment).
-- **Hyperbase**: `/hyperbase` (presets database explorer).
-- **Stories**: `/stories` (procedural text logs).
-- **Society**: `/society` (backend agent configurations dashboard).
-- **Spotify**: `/spotify` (ambient soundtrack integrations).
-- **Credits**: `/credits` (attribution and repository history).
+The application exposes 6 internal page layouts located in the `(cards)` route group:
+- **Labs**: `/labs` (WebGL controls environment). See [labs/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/labs/page.tsx).
+- **Hyperbase**: `/hyperbase` (presets database explorer). See [hyperbase/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/hyperbase/page.tsx).
+- **Stories**: `/stories` (procedural text logs). See [stories/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/stories/page.tsx).
+- **Society**: `/society` (backend agent configurations dashboard). See [society/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/society/page.tsx).
+- **Spotify**: `/spotify` (ambient soundtrack integrations). See [spotify/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/spotify/page.tsx).
+- **Credits**: `/credits` (attribution and repository history). See [credits/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/credits/page.tsx).
 
 ### 1. CSS Page Entry Animation
-To prevent layout snapping during route updates, the pages are wrapped in the `.animate-page-enter` utility class defined in [index.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/index.css). It applies a smooth fade, scale, and blur-removal sequence:
+To prevent layout snapping during route updates, pages are loaded inside the `.animate-page-enter` utility class defined in [index.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/index.css). It applies a smooth fade, scale, and blur-removal sequence:
 
 ```css
 @keyframes page-enter {
@@ -91,12 +126,19 @@ To prevent layout snapping during route updates, the pages are wrapped in the `.
 ```
 
 ### 2. Window Ripple Dispatcher
-To integrate the static pages into the reactive environment, each page schedules a window event dispatch on mount:
+To integrate static card pages into the reactive environment, the shared cards layout schedules a window event dispatch on mount and pathname updates:
 
 ```typescript
 useEffect(() => {
-  window.dispatchEvent(new CustomEvent('trigger-ripple'));
-}, []);
+  const event = new CustomEvent("trigger-ripple", {
+    detail: {
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+      intensity: 0.8,
+    },
+  });
+  window.dispatchEvent(event);
+}, [pathname]);
 ```
 
 - **LiquidMetalSphere**: Listens for the `trigger-ripple` event to programmatically inject ripples into the WebGL fragment shader, generating wave trails.
