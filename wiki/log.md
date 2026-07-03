@@ -7,6 +7,37 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-06-29] write | Integrate media shapes, floating canvas HUD elements, community bento grid, and database-level MFA gates
+- **Session Focus**: Expand the Projects feature whiteboard with custom URL/YouTube media shapes and a Restyled BackToContent locator, build out `/community` and `/profile` subpages using GSAP/UserAvatar, and implement database-level security checks for MFA and user suspension.
+- **Code Changes**:
+  - **Whiteboard Shapes & Tools**:
+    - Created custom Tldraw shape utils: [UrlCardUtil.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/UrlCardUtil.tsx) and [YouTubeCardUtil.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/YouTubeCardUtil.tsx) for link previews (scraping open graph data via `/api/link-preview` API route) and YouTube frames.
+    - Added the floating glassmorphic locator [BackToContentButton.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/BackToContentButton.tsx) which displays when shapes are off-screen and zooms/frames the viewport on click.
+    - Updated command palette shortcuts to support URL/YouTube embeds.
+  - **Subpages & Dynamic Components**:
+    - Built out the `/community` page featuring a dynamic 8-characteristic `<MagicBento />` grid styled in [MagicBento.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/MagicBento.css), utilizing GSAP for 3D card tilt and magnetic icon effects.
+    - Developed the authenticated `/profile` page with [UserAvatar.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/UserAvatar.tsx) (fetching MD5-hashed Gravatar avatars with initials fallbacks).
+  - **Security Gating**:
+    - Added backend migration [0003_enforce_mfa_and_suspension.sql](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/supabase/migrations/0003_enforce_mfa_and_suspension.sql) to check JWT multi-factor levels (`aal2`) inside `is_admin()` and block writes from suspended accounts via the `is_active()` helper.
+    - Integrated status suspension checks into [middleware.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/utils/supabase/middleware.ts), redirecting suspended users to `/login`.
+- **Modified Documentation**:
+  - Updated [Ecosystem Architecture](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/architecture.md) to document DB-level MFA claims and user status gating.
+  - Updated [Navigation & Subpage UI](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/navigation_ui.md) with details on `/community` (MagicBento), `/profile` (UserAvatar), and the new GSAP dependency.
+  - Updated [Projects Feature RFC](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/projects_feature_rfc.md) with URL previews, YouTube embeds, and BackToContent button specifications.
+  - Documented projects canvas persistence in [Canvas Autosave](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/canvas_autosave.md).
+- **Diagnostics**: All pages successfully compiled and typechecked.
+
+## [2026-06-29] refactor | Establish unified Visual Labs design system (token-driven, multi-accent)
+- **Session Focus**: Author the authoritative [Design.md](file:///Users/hiddenstack/Creatives/no-origins/Design.md) design-system spec and roll it out across all of `visual-labs`, replacing two fragmented parallel token systems and pervasive hardcoded `emerald/sky/...` hex with one runtime accent slot.
+- **Architecture**: Four token tiers (primitives → `--section-accent` slot → shadcn semantic → utilities). The accent is swapped per-route via `data-section` on `(cards)/layout.tsx` and exposed as a Tailwind color `section` (`text-section`, `bg-section/10`, `border-section/30`). Three independent theming axes are now documented: section accent (route), workspace preset (`VisualizerContext`), sphere material.
+- **Code Changes**:
+  - Rewrote [index.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/index.css): tier-0 primitives, `[data-section]` swap table for all 7 sections, shadcn vars wired dark + accent, `.glass`/`.glow-accent`/`.surface-list-item` utilities, named type scale, `--color-section` exposure. Default font set to mono.
+  - [BorderGlow.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BorderGlow.tsx) inherits the accent slot (colors via `var()`, glow via computed `--section-accent-hsl`); pages drop all color props.
+  - Tokenized all 7 card pages, the Projects dashboard (sky→slot), HUD toggles, SphereChatInput, BackgroundVisualizer chrome, resizable, login/MFA/base, and the TipTap + Tldraw CSS.
+  - Fixed Stories heading (pink→fuchsia via slot).
+- **Verification**: Routes 200, `data-section` resolves in SSR, compiled CSS contains all section blocks + `section` utilities + `color-mix`; `tsc` clean (pre-existing `.next/types/validator.ts` error excepted).
+- **Intentional exceptions**: sphere-material colors, InfiniteMenu hue data, editor "unsaved" amber status, admin JS preset config. Deferred: migrating `text-[Npx]` literals to `.type-*`.
+
 ## [2026-06-28] refactor | Implement responsive resizable split-screen layout for Tldraw and TipTap
 - **Session Focus**: Add responsive resizable layout for Tldraw canvas and TipTap editor on desktop screens, and full-screen drawer overlay on mobile screens.
 - **Code Changes**:

@@ -144,28 +144,39 @@ Rendered under a full-width glassmorphic layout:
 
 A major refactoring of the spatial whiteboard interface was conducted to clean up overlays and integrate advanced control capabilities:
 
-1. **TipTap Card Toolbar Integration**:
+1. **Custom Shape Utilities**:
+   - In addition to standard drawings and TipTap documents, the whiteboard canvas registers two new custom media shapes:
+     - **Link Preview Card (`UrlCardShapeUtil`)**: Represents a URL bookmark card. When dropped onto the canvas, it makes a lazy API request to the scraper route `/api/link-preview` to fetch Open Graph metadata (title, description, and preview image), rendering a beautiful glassmorphic bookmark card inline.
+     - **YouTube Video Card (`YouTubeCardShapeUtil`)**: Embeds an interactive, responsive YouTube video iframe directly onto the drawing board, allowing users to watch media in place.
+   - Both shapes are draggable, resizable, and use custom HTML rendering overlays in Tldraw.
+
+2. **TipTap Card Toolbar & Media Integration**:
    - The standalone "Add TipTap Card" button was removed from the floating header HUD.
    - It is now fully integrated as a native tool button at the end of the default Tldraw toolbar, using a standard document/text [FileText](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TldrawCanvas.tsx) icon.
    - Clicking this tool button immediately spawns a new TipTap shape at the center of the viewport.
 
-2. **Shadcn Command Palette**:
+3. **Shadcn Command Palette**:
    - Hides the default Tldraw top-left controls (`MainMenu` hamburger, `PageMenu` page selector, `QuickActions` buttons like delete/duplicate, and `ActionsMenu` three-dots dropdown) to clear the canvas frame completely.
-   - The palette is triggered by clicking a floating circular button in the bottom-left corner of the viewport (styled with a `Terminal` icon and emerald accent glow), or by pressing the system-wide shortcut `Cmd+K` / `Ctrl+K`.
+   - The palette is triggered by clicking a floating circular button in the bottom-left corner of the viewport (styled with a `Terminal` icon and active section accent glow), or by pressing the system-wide shortcut `Cmd+K` / `Ctrl+K`.
    - All whiteboard and document controls are migrated into this unified Command palette:
-     - **Whiteboard Tools**: Select, Draw, Text, Eraser, Hand, Laser, Add TipTap Card.
+     - **Whiteboard Tools**: Select, Draw, Text, Eraser, Hand, Laser, Add TipTap Card, Add URL Preview, Add YouTube Video.
      - **Canvas Actions**: Undo, Redo, Toggle Grid Mode, Zoom to Fit.
      - **Page Management** (rebuilds dynamically using `useValue` signals): Create New Page, Delete Current Page, Rename Current Page, and switch between existing pages.
      - **Selection Actions** (displayed dynamically when one or more shapes are selected): Duplicate Selected (with selection count), Delete Selected, and Group Selected Shapes.
      - **Navigation**: Back to Dashboard, Go to Home Page.
 
-3. **Theme & Glassmorphism Styling**:
-   - All custom overlay dialogs, input panels, and command item list components use absolute monospace typography (`font-mono`) and dark glassmorphic styling (`bg-neutral-950/70` with `backdrop-filter: blur(24px)` and thin `border-white/8` outline).
-   - Command list items feature custom active states styled with a glowing emerald background (`rgba(16, 185, 129, 0.12)`) and text outline (`text-emerald-400`).
+4. **Floating HUD Controls & "Back to Content" Locator**:
+   - **Floating Canvas HUD**: Consists of a simple, clean header bar. The left side houses a circular button to return to the Projects dashboard. The right side shows active cloud syncing status (`SAVING SNAPSHOT...`, `CLOUD SYNCED`, `SYNC ERROR`).
+   - **Back to Content Button ([BackToContentButton.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/BackToContentButton.tsx))**: A custom self-contained floating glass pill button. It mirrors tldraw's default helper button but is styled in premium dark glassmorphism. It uses a custom `useValue` reactive check matching `editor.getNotVisibleShapes()` to only render when the canvas has shapes and *every one of them* is currently scrolled off-screen. Clicking it triggers a smooth bounding transition (`zoomToBounds`) framing the page contents without zooming past 100%.
 
-4. **Desktop Resizable Split Layout**:
+5. **Theme & Glassmorphism Styling**:
+   - All custom overlay dialogs, input panels, and command item list components use absolute monospace typography (`font-mono`) and dark glassmorphic styling (`bg-neutral-950/60` with `backdrop-filter: blur(24px)` and thin `border-white/8` outline).
+   - Command list items feature custom active states styled with a glowing section background (`bg-section/10`) and text outline (`text-section`).
+
+6. **Desktop Resizable Split Layout**:
    - On desktop/large screens (>=1024px), the whiteboard canvas and the TipTap editor render side-by-side inside a resizable layout using a custom Shadcn `ResizablePanelGroup` component.
    - The Tldraw component is kept continuously mounted in the canvas panel, preventing zoom/selection resets or canvas reloads when opening/closing the editor.
    - On mobile/tablet screens, the layout automatically adapts to a full-screen overlay drawer (`w-full` width) when writing or editing.
+
 
 

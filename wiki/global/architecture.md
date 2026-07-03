@@ -32,7 +32,8 @@ graph TD
 - **Component UI**: **shadcn/ui** (Radix UI primitives) integrated directly with Tailwind v4 structure mapping.
 - **Visual Rendering**: WebGL-based custom rendering utilizing `<canvas>` elements for the floating metal orb and background particle fields.
 - **Audio Engine**: Custom built class inside `audio.ts` utilizing the browser's native **Web Audio API** (Oscillators, Gain nodes, BiquadFilters, Analysers, ConvolverNode reverb, and white noise synthesizers).
-- **Transitions & Micro-Interactions**: Framer Motion 12 (`motion` package) for HUD panel animations.
+- **Transitions & Micro-Interactions**: Framer Motion 12 (`motion` package) for HUD panel animations, and **GSAP** (`gsap` package) for complex interactive animations like 3D tile tilts and magnetic physics.
+- **Collaborative Canvas**: **tldraw** (`tldraw` package) for spatial boarding, with customized shape utilities and **TipTap** (`@tiptap/react` package) for nested rich-text document integration.
 - **State Management**: **React Context** (`VisualizerContext`) serving as the unified single source of truth (SSOT) managing all visual, audio, UI, preset, and theme state.
 - **Backend Integrations**: Supabase JavaScript client (`@supabase/supabase-js`, `@supabase/ssr`) for storing client presets and syncing global settings.
 - **AI Integrations**: Google GenAI SDK (`@google/genai`) enabling communication with the Sentient Sphere chatbot.
@@ -76,15 +77,17 @@ The ecosystem features a strict Role-Based Access Control (RBAC) model implement
 ### 👥 Role Taxonomy
 * **Anonymous / standard user**: Has read-only access to database presets and states. Any new presets or states created by regular/anonymous users are saved to the browser's `localStorage` (local-only sandbox mode), keeping the central database clean.
 * **Admin**: Users promoted to the `admin` role in `public.profiles`. Granted full write permissions (Insert, Update, Delete) to the database tables (`component_presets`, `states`, `stages`).
+* **Suspended Account**: Users with a status of `suspended` inside `public.profiles`. They are banned from all authenticated pages (`/projects`, `/admin`) via a matching middleware check, and blocked from database mutations via RLS.
 
-### 🛡️ Admin Console Gating & 2FA Flow
-Admin console routes (`/admin`) are protected by Next.js SSR middleware (`utils/supabase/middleware.ts`):
-1. **Authentication Check**: Anonymous users attempting to reach `/admin` are redirected to `/login`.
-2. **Role Gate**: If authenticated, middleware queries `public.profiles` for the user's role. Non-admins are blocked from the console and redirected to the home page (`/`).
-3. **MFA Enforcement**: Admins must enroll and complete TOTP Multi-Factor Authentication (MFA/2FA) to unlock console access:
-   - If no factors are enrolled, the user is redirected to `/login/setup-mfa` to scan a QR code and register a TOTP app.
-   - If a factor is enrolled but not verified, the user is redirected to `/login/mfa` to enter the verification code.
-   - Once elevated to Authentication Assurance Level 2 (`aal2`), the user is redirected to `/admin` using a hard navigation (`window.location.assign`) to ensure session cookies are re-read.
+### 🛡️ Access Control & 2FA Enforcement
+Authentication paths and console access routes are protected by Next.js SSR middleware ([middleware.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/utils/supabase/middleware.ts)) and backed by database constraints:
+
+1. **Authentication Check**: Anonymous users attempting to reach protected paths (such as `/admin` or `/projects`) are redirected to `/login`.
+2. **Account Suspension (Ban)**: If authenticated, the middleware looks up the profile's `status`. If the user is suspended, they are instantly redirected to `/login` with an account suspension error. This is enforced at the data layer using the SQL helper `public.is_active()`, which gates all insert, update, and delete actions across the `projects` and `project_versions` tables.
+3. **Role Gate**: To reach `/admin`, the middleware verifies that the user is an active admin. Non-admins are redirected back to the home page (`/`).
+4. **MFA (2FA) Enforcement**:
+   - **Client-Side Gate**: Active admins must complete Multi-Factor Authentication (MFA) to reach `/admin`. If they have no factor enrolled, they are routed to `/login/setup-mfa`. If enrolled but not verified, they are routed to `/login/mfa`. Elevated access level (`aal2`) triggers a hard navigation reload.
+   - **Database-Side Gate**: To prevent bypasses of the client-side router, the SQL function `public.is_admin()` verifies that the caller's session carries a verified second factor (`coalesce(auth.jwt() ->> 'aal', '') = 'aal2'`). Bypassing TOTP gates via direct API requests results in database-level write rejections.
 
 ---
 

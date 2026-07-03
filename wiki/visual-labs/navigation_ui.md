@@ -99,13 +99,31 @@ On mount, if `animated={true}` is set, the component initiates a `requestAnimati
 
 ## 📄 Subpages & Ripple Event Triggering
 
-The application exposes 6 internal page layouts located in the `(cards)` route group:
+The application exposes 8 internal page layouts located in the `(cards)` route group:
 - **Labs**: `/labs` (WebGL controls environment). See [labs/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/labs/page.tsx).
 - **Hyperbase**: `/hyperbase` (presets database explorer). See [hyperbase/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/hyperbase/page.tsx).
 - **Stories**: `/stories` (procedural text logs). See [stories/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/stories/page.tsx).
 - **Society**: `/society` (backend agent configurations dashboard). See [society/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/society/page.tsx).
 - **Spotify**: `/spotify` (ambient soundtrack integrations). See [spotify/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/spotify/page.tsx).
 - **Credits**: `/credits` (attribution and repository history). See [credits/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/credits/page.tsx).
+- **Community**: `/community` (the interactive ecosystem characteristics wall). Renders a complex [MagicBento.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/MagicBento.tsx) grid highlighting the 8 core values/traits of No Origins, styled with custom GSAP-driven 3D mouse tilt and magnetism.
+- **Profile**: `/profile` (the authenticated user dashboard). Displays the current user's role, status, and metadata, using [UserAvatar.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/UserAvatar.tsx) for dynamic avatar rendering and an Indigo section accent theme.
+
+---
+
+## 💎 Custom Subpage Components
+
+### 1. Magic Bento Grid (`MagicBento`)
+Used exclusively on the `/community` route, `<MagicBento />` is an advanced interactive component that presents the 8 characteristics of the No Origins network.
+- **GSAP 3D Hover Tilt**: Mouse move handlers calculate normalized $(x, y)$ coordinate offsets relative to the individual cell boundaries. GSAP (`gsap.to`) is utilized to animate the 3D rotation (`rotateX`, `rotateY`) and shadow offset in real-time, yielding a premium physical depth feeling.
+- **Magnetic Icon Effect**: Inner action buttons and icons track the cursor using custom magnetic physics handlers, pulling slightly toward the cursor on hover.
+- **Bento Stylesheet**: CSS styling tokens are maintained in [MagicBento.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/MagicBento.css), setting up standard grid structures, glass backdrops, and active neon reflections.
+
+### 2. User Avatar (`UserAvatar`)
+Renders the authenticated user's profile icon across cards and HUD components.
+- **Gravatar Integration**: Automatically computes the MD5 hash of the user's email to fetch the official Gravatar photo if it exists.
+- **FallbackInitials**: If no avatar is registered, the component parses the metadata user initials (or email prefix) and displays them over a custom background reflecting the active `--section-accent` slot theme, maintaining style cohesion.
+
 
 ### 1. CSS Page Entry Animation
 To prevent layout snapping during route updates, pages are loaded inside the `.animate-page-enter` utility class defined in [index.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/index.css). It applies a smooth fade, scale, and blur-removal sequence:

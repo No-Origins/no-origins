@@ -15,12 +15,14 @@ Welcome to the **No Origins** Agent Wiki. This is a persistent, compounding know
 - **[Projects Feature RFC](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/projects_feature_rfc.md)**: Request for Comments and design specifications for the whiteboarding/TipTap projects canvas.
 
 ### 🎨 Frontend: `visual-labs` Submodule
+- **[Design System (Design.md)](file:///Users/hiddenstack/Creatives/no-origins/Design.md)**: Authoritative spec — token architecture (4 tiers + per-route `--section-accent` slot), the `section` Tailwind color, glass/glow utilities, type scale, component contracts, and the three theming axes (section / workspace preset / sphere material). All `visual-labs` styling must resolve from these tokens.
 - **[State Synchronization](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/state_sync.md)**: Deep dive into the reactive single source of truth (`VisualizerContext`) governing HUD, WebGL, and sound values.
 - **[Sphere States & Transitions](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/sphere_states.md)**: Proposal and specifications for liquid metal sphere states, target properties, and animated transitions.
 - **[WebGL & Canvas Rendering](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/rendering.md)**: Technical specifications of `DotField` particle dynamics and `LiquidMetalSphere` shader calculations.
 - **[Procedural Audio Synthesis](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/audio.md)**: Documentation on Web Audio API oscillators, sound envelopes, and real-time volume calculations in `audio.ts`.
 - **[Sentient Sphere AI Chatbot](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/ai_chat.md)**: Details on the client-server AI communication pipeline and dynamic settings morphing.
 - **[Navigation & Subpage UI](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/navigation_ui.md)**: Specifications for the WebGL InfiniteMenu rotation, route synchronization, BorderGlow, and page entry transitions.
+- **[Canvas Autosave (Projects)](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/canvas_autosave.md)**: How the tldraw project canvas persists to Supabase — scoped listener, document-only snapshot, debounce + max-wait, and dirty check.
 
 ### 🗄️ Backend: `realm` Submodule
 - **[Presets Database Schema](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/presets_schema.md)**: Presets syncing rules, table layouts, and settings configurations inside Supabase.
