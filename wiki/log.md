@@ -7,6 +7,14 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-07-06] write | Fix responsiveness of custom connection handles on shape move and resize
+- **Session Focus**: Address coordinate lag where midpoint connection circles stayed static during shape dragging and resizing by subscribing to shape store changes dynamically.
+- **Code Changes**:
+  - Modified [ConnectionHandles.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/ConnectionHandles.tsx) to fetch the shape inside a reactive `useValue` hook, allowing properties like bounds and page-level transform matrices to update in real-time.
+- **Modified Documentation**:
+  - Appended entry to Obsidian project session log.
+- **Diagnostics**: Checked static builds (`npm run build`) and lint compiles successfully with zero errors.
+
 ## [2026-07-05] refactor | Create Pull Request #5 and update submodule reference pointer
 - **Session Focus**: Commit the connection handles and selection outline styling implementation in `visual-labs`, push the local `feat/cards-layout-and-meditating-core` branch to GitHub, create Pull Request #5, and update the parent repository submodule pointer and documentation.
 - **Code Changes**:
