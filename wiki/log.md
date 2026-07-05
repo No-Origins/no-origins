@@ -7,6 +7,33 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-07-05] write | Implement connection handles and unify selection styling in Tldraw canvas
+- **Session Focus**: Add interactive connection circles at the midpoint of each side of a selected shape to enable click-and-drag native arrow connections in Tldraw. Unify selection box aesthetics by styling handles, programmatically overriding Tldraw's canvas theme, and masking selection lines beneath handle circles.
+- **Code Changes**:
+  - Created [ConnectionHandles.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/ConnectionHandles.tsx) containing `ConnectionHandlesOverlay` and `ConnectionHandle` using Tldraw page transform matrix scaling/rotations and pointer listeners. Added `CustomSelectionForegroundOverlayUtil` extending `SelectionForegroundOverlayUtil` to perform a `destination-out` composite operation on the canvas, erases/clears selection borders under connection handle circles.
+  - Modified [TldrawCanvas.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TldrawCanvas.tsx) to import and register the handles under `OnTheCanvas` components override, register `CustomSelectionForegroundOverlayUtil` in `overlayUtils`, and add a safe `onMount` theme override (`editor.updateTheme`) that clones the active default theme first (retaining the `fonts` properties) and merges the emerald green (`#10b981`) selection overrides to prevent runtime `TypeError` crashes.
+  - Appended glassmorphic styles for `.connection-handle-circle` in [TldrawCustom.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TldrawCustom.css).
+- **Modified Documentation**:
+  - Documented connection handles, theme integrations, selection masking overlay, and runtime bugfixes in Obsidian project index and session log.
+- **Diagnostics**: Tested static production builds and TypeScript type-checking using `npm run lint`. Passed successfully with zero compiler/TypeScript errors.
+
+## [2026-07-05] write | Redesign TipTap card shape as expandable glassmorphic pill
+- **Session Focus**: Redesign the TipTap card shape rendered on the whiteboard canvas from a static box to a horizontal glassmorphic pill. Add support for a document description field, and implement smooth hover-expansion to display it alongside other document metadata.
+- **Code Changes**:
+  - **TipTap Card Shape**:
+    - Added `description` property to `TipTapCardShape` and updated type declarations and default properties in [TipTapCardUtil.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TipTapCardUtil.tsx).
+    - Set shape default bounds to `w: 280, h: 48` (pill shape).
+    - Redesigned the card HTML rendering inside [TipTapCardUtil.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TipTapCardUtil.tsx) to render a single-line horizontal pill (Notes icon, truncated title header, and circular write pencil button).
+  - **Hover Expansion Styles**:
+    - Added transition, transform, and hover keyframes inside [TldrawCustom.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TldrawCustom.css) to morph pill shape to card shape on hover (`border-radius: 18px` and height expansion via `max-height: 320px`) and fade-in the description summary, tags, and metadata elements when `description` is present.
+  - **Split-Panel Editor**:
+    - Added description state, input textarea field, initial data synchronization, and onSave payload integration inside [TipTapSplitEditor.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TipTapSplitEditor.tsx).
+  - **Canvas Routing & Event Plumbing**:
+    - Integrated description property updates in `activeEditorShape` hook state, `open-tiptap-editor` event listener, `handleAddTipTapCard` creation helper, and `handleSaveDocument` autosave updater in [TldrawCanvas.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TldrawCanvas.tsx).
+- **Modified Documentation**:
+  - Updated [Projects Feature RFC](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/projects_feature_rfc.md) with design specs for the new expandable pill card and editor panels.
+- **Diagnostics**: Checked TypeScript compiles cleanly using `tsc --noEmit`. Committed changes inside `visual-labs` submodule and updated the parent repository reference pointer.
+
 ## [2026-07-03] refactor | Create Pull Request and update submodule reference pointer
 - **Session Focus**: Review all visual design system changes, database RLS/MFA updates, and spatial canvas features in `visual-labs`, commit/push changes, create a Pull Request on GitHub, and update the parent repository pointer.
 - **Code Changes**:

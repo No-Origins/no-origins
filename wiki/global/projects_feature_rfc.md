@@ -89,21 +89,22 @@ alter table public.project_versions enable row level security;
 ### 1. TipTap Shape Component in Tldraw
 We register a custom shape type in `tldraw` (e.g., `TipTapCardShape`).
 * **Canvas Presentation**: 
-  * Displays as a glowing glassmorphic card on the canvas.
-  * Renders the **Title**, **Tags** (rendered as small pills), a **Last Modified Timestamp**, and a **"Write" Edit Button**.
-  * Shows word count and a short content preview snippet if available.
+  * Displays as a sleek, fully-rounded glassmorphic **pill** in its default resting state (`48px` height).
+  * The default pill contains a **Notes icon** on the left, the **Title** header in the middle (truncated with ellipsis), and a circular **Pencil write icon button** on the right.
+  * When a **Description** is added to the document, hovering over the pill smoothly animates it (transitions `height` to `auto` / `max-height: 320px`, morphs border-radius to `18px` card curves, and fades in the content) to reveal the description text, tags list, word count, and timestamp metadata. If no description is added, it stays in its compact pill shape on hover.
 * **Interaction**:
-  * Draggable and resizable using standard tldraw handlers.
-  * Clicking the card or the Edit button opens the **Split-Pane Editor** on the right side of the screen.
+  * Draggable and resizable (width-adjustable) using standard tldraw handlers.
+  * Clicking the Pencil edit button opens the **Split-Pane Editor** on the right side of the screen.
 
 ### 2. Split-Pane Rich Text Editor
 * **Layout**: Responsive split screen. On desktop screens (>=1024px), the canvas and editor render side-by-side inside a resizable panel layout. On mobile screens, the editor overlays the canvas as a full-screen drawer.
 * **TipTap Setup**: Mounts the TipTap editor instance equipped with a default toolbar.
 * **Fields**:
   * **Title Input** (updates the card title on the canvas).
+  * **Description Input** (short textarea summary to display on hover).
   * **Tags Input** (pills list to classify the document).
   * **Rich Text Editor Area** (TipTap).
-* **Save/Sync Trigger**: Clicking "Save" close the pane, commits the data to the tldraw shape's `props`, and initiates a Supabase sync.
+* **Save/Sync Trigger**: Clicking "Save" closes the pane, commits the title, description, tags, HTML content, and wordCount to the tldraw shape's `props`, and initiates a Supabase sync.
 
 ### 3. Autosave Engine
 * Standard drawings and canvas changes are debounced (e.g., 2000ms) and sent to a Next.js Server Action or API Route to update `projects.canvas_data`.
