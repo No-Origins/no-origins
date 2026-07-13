@@ -7,6 +7,7 @@ Welcome to the **No Origins** Agent Wiki. This is a persistent, compounding know
 ## 🗺️ Wiki Directory
 
 ### 🌐 Global / Ecosystem Configurations
+- **[Product Map (Ideation)](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/product_map.md)**: Living map of the whole No Origins product — north star, pillars, surface status, maturity, open questions, and Figma workspace OS. Visual twin: [Master Ideation FigJam](https://www.figma.com/board/f6K9ZBe4zh1Jz1bzqOsKMN).
 - **[Ecosystem Architecture](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/architecture.md)**: High-level overview of the parent repo, submodule integrations, and global layout.
 - **[Git Submodule Workflows](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/git_submodules.md)**: Procedures for submodule pointer management to prevent broken/detached reference states.
 - **[Wiki Maintenance Playbook](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/wiki_rules.md)**: Standards and triggers for creating, modifying, logging, and linting the wiki.
@@ -23,6 +24,7 @@ Welcome to the **No Origins** Agent Wiki. This is a persistent, compounding know
 - **[Sentient Sphere AI Chatbot](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/ai_chat.md)**: Details on the client-server AI communication pipeline and dynamic settings morphing.
 - **[Navigation & Subpage UI](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/navigation_ui.md)**: Specifications for the WebGL InfiniteMenu rotation, route synchronization, BorderGlow, and page entry transitions.
 - **[Canvas Autosave (Projects)](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/canvas_autosave.md)**: How the tldraw project canvas persists to Supabase — scoped listener, document-only snapshot, debounce + max-wait, and dirty check.
+- **[Nested Sub-Projects](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/sub_projects.md)**: Hierarchy trees, collapsible sidebar, recursive soft-deletes trigger, and Tldraw custom SubProjectCard shape.
 
 ### 🗄️ Backend: `realm` Submodule
 - **[Presets Database Schema](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/presets_schema.md)**: Presets syncing rules, table layouts, and settings configurations inside Supabase.

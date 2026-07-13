@@ -7,6 +7,38 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-07-13] write | Implement nested sub-projects and collapsible hierarchy tree sidebar
+- **Session Focus**: Add support for nested projects (hierarchical sub-projects) within the whiteboard canvas, including a collapsible tree navigation sidebar, recursive soft-deletes trigger, trash section, and custom Tldraw SubProjectCard shape.
+- **Code Changes**:
+  - **Database Migration**: Created `0004_add_parent_project_id.sql` adding `parent_project_id` and `deleted_at` columns and setting up a cascading soft-delete trigger in PostgreSQL.
+  - **Dashboard Updates**: Modified `projects/dashboard/page.tsx` to handle soft-deletes, restore projects, display parent relation badges, and added a Trash tab showing deleted projects.
+  - **Hierarchy Sidebar**: Created `ProjectHierarchySidebar.tsx` to construct and render a nested folder structure and toggleable sidebar tree of sub-projects with click-to-navigate links and inline creation.
+  - **SubProjectCard Shape**: Created `SubProjectCardUtil.tsx` implementing `"sub-project-card"` custom Tldraw shape with inline editing, Supabase insertions, and custom link button styles.
+  - **Canvas HUD & Page routes**: Modified `TldrawCanvas.tsx` and `ClientTldrawCanvas.tsx` to register shape utils, add toolbar tools, register command palette shortcuts, and include parent navigation buttons in the HUD header. Modified project load route `projects/[id]/page.tsx` to fetch parent properties.
+  - **CSS Styling**: Added styling for `.sub-project-card-container` inputs and hierarchy sidebar tree lists in `TldrawCustom.css`.
+- **Modified Documentation**: Created `wiki/visual-labs/sub_projects.md` and registered in `wiki/index.md`.
+- **Diagnostics**: TypeScript (`npm run lint`) and Next.js production builds (`npm run build`) compiled successfully with zero errors.
+
+## [2026-07-13] refactor | Organize existing No Origins Figma draft file
+- **Session Focus**: Structure the long-running Untitled design draft in the No Origins Figma project (Starter plan · 3-page limit).
+- **File**: [No Origins — Draft](https://www.figma.com/design/ii0qtui7UOuEnX7mLVVcDc) (`ii0qtui7UOuEnX7mLVVcDc`)
+- **Changes**:
+  - Renamed pages to `01 · Brand & Symbol`, `02 · Product Screens`, `03 · Social & Art`.
+  - Reparented ~120 top-level layers into the three pages by type (no deletes).
+  - Grid layouts + section labels (`__ORG__*`); renamed symbols, screens, IG posts, gen-art refs.
+- **Wiki**: Updated product map Workspace OS table with draft link + page structure.
+
+## [2026-07-13] ingest | Organize complete No Origins product map (ideation)
+- **Session Focus**: Focus Figma work on the No Origins team; synthesize repo knowledge into one product/ideation organization layer.
+- **Figma**:
+  - Created FigJam [No Origins — Master Ideation](https://www.figma.com/board/f6K9ZBe4zh1Jz1bzqOsKMN) under plan `team::1280174415155818092`.
+  - Board sections: North Star, Product Pillars, Surface Map, System Map, Maturity, Open Questions, Agent Society, Figma Workspace OS.
+- **Wiki**:
+  - Added [product_map.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/product_map.md) as the text twin of the board.
+  - Registered the product map in [index.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/index.md).
+  - Reset [active_sprint.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/active_sprint.md) to this organization goal (prior table-doc catch-up deferred).
+- **Outcomes**: Single map of shipped vs stub surfaces; eight open product questions; planned Figma file sequence (Design System → Product Screens → Projects UX → Brand).
+
 ## [2026-07-06] write | Fix responsiveness of custom connection handles on shape move and resize
 - **Session Focus**: Address coordinate lag where midpoint connection circles stayed static during shape dragging and resizing by subscribing to shape store changes dynamically.
 - **Code Changes**:
