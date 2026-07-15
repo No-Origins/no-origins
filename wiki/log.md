@@ -12,6 +12,7 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 - **Code Changes**:
   - **ProjectHierarchySidebar**: Removed the viewport-edge trigger button entirely, replacing it with an inline Close chevron inside the sidebar header.
   - **TldrawCanvas**: Added `isSidebarOpen` state, registered a "Toggle Hierarchy Tree" button (FolderTree icon) in the custom toolbar, and wired it to toggle the sidebar.
+  - **Toolbar Aesthetics**: Added CSS overrides to hide less frequently used default Tldraw tools (note, frame, laser, and shapes), shortening the visible toolbar to prevent items from overflowing into the "More" popover menu.
   - **Detail Navigation**: Replaced the next/link `<Link>` in the `/projects` recents card list with a standard anchor `<a>` tag to bypass React layout group transition caching.
 - **Git Actions**: Committed and pushed submodule updates inside `visual-labs` and updated the root reference pointer.
 
