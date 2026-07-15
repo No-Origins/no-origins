@@ -7,6 +7,13 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-07-15] write | Add shape tools back to toolbar, insert Cmd Palette button, add dividers, and inline the Hierarchy Tree in dropdown
+- **Session Focus**: Restore drawing shapes (Arrow, Line, Rectangle, Ellipse, Triangle, Sticky Note) to the toolbar with localStorage tracking, add a Cmd Palette button beside the Dashboard link, place visual dividers between toolbar groups, and inline the Project Hierarchy Tree inside a dropdown menu.
+- **Code Changes**:
+  - **ProjectHierarchySidebar.tsx**: Refactored the file to export `ProjectHierarchyTree` – a component for rendering the tree inside a compact, scrollable dropdown content viewport.
+  - **TldrawCanvas.tsx**: Imported `GeoShapeGeoStyle` and shape icons. Introduced `currentGeoStyle` and `currentToolName` hooks to reactively track geometric shape subtypes and update tool usage counts. Created the `handleSelectTool` callback. Restructured the custom `Toolbar` to include vertical dividers, the Command Palette button beside the Dashboard link, a \"More Shapes & Tools\" dropdown for remaining tools, and integrated the inline `ProjectHierarchyTree` dropdown, removing the drawer.
+- **Diagnostics**: TypeScript validation, ESLint linting, and production Next.js builds compiled successfully. Staged, committed, and pushed the `visual-labs` submodule changes, and updated the root reference pointer.
+
 ## [2026-07-15] write | Restructure and scale whiteboard toolbar into reactive icon-only Navigation Menu
 - **Session Focus**: Restructure the projects whiteboard toolbar to render as circular icon-only buttons (Dashboard, 5 Frequent Tools, Insert Dropdown, Actions Dropdown, Sidebar Tree Toggle), track drawing tool usage frequency dynamically via localStorage, fix the downward menu flyout overlap bug, and scale up toolbar elements to Comfortable Medium size.
 - **Code Changes**:
