@@ -7,6 +7,19 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-07-15] write | Implement read-only mode for viewing community projects
+- **Session Focus**: Ensure community published projects open in a read-only viewer mode that locks document mutation, hides editing UI, queries correct ownership trees, and disables overlay edits.
+- **Code Changes**:
+  - **projects/dashboard/page.tsx**: Added "Open" button in the Discovery tab next to "Fork Workspace".
+  - **projects/[id]/page.tsx**: Checked project owner and forwarded `isReadOnly` and `ownerId` to client canvas.
+  - **ClientTldrawCanvas.tsx**: Passed read-only configuration through to the canvas component.
+  - **TldrawCanvas.tsx**: Set editor instance read-only state via `updateInstanceState({ isReadonly: true })` on mount, guarded autosave/save callbacks, and filtered custom toolbar/command menu.
+  - **ProjectHierarchySidebar.tsx**: Queried project tree by target owner's ID and hid sub-project creation buttons.
+  - **TipTapSplitEditor.tsx**: Set editor editable dynamically, toggled inputs/textarea fields to `readOnly`, hid save button, and displayed a "Read Only" status badge.
+  - **TableEditorDialog.tsx**: Made cells/headers read-only and hid addition/save buttons.
+  - **TableCardUtil.tsx / TipTapCardUtil.tsx / SubProjectCardUtil.tsx**: Custom card shape renderers updated to render read-only `Eye` icons and block double-click interactions.
+- **Diagnostics**: TypeScript compilation validation completed successfully with 0 errors. Staged, committed, and pushed changes inside `visual-labs` submodule and updated pointer reference in the root.
+
 ## [2026-07-15] write | Add shape tools back to toolbar, insert Cmd Palette button, add dividers, and inline the Hierarchy Tree in dropdown
 - **Session Focus**: Restore drawing shapes (Arrow, Line, Rectangle, Ellipse, Triangle, Sticky Note) to the toolbar with localStorage tracking, add a Cmd Palette button beside the Dashboard link, place visual dividers between toolbar groups, and inline the Project Hierarchy Tree inside a dropdown menu.
 - **Code Changes**:
