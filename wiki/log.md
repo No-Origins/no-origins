@@ -7,6 +7,13 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-07-15] refactor | Resolve sidebar layout clipping and navigation redirects
+- **Session Focus**: Address layout visibility bug where collapsible tree sidebar was clipped inside its parent container, and fix next/link route-group transition blocks.
+- **Code Changes**:
+  - **ProjectHierarchySidebar**: Moved the expand/collapse tab button outside the inner `overflow-hidden` container so it is visible and clickable on the left margin when collapsed.
+  - **Detail Navigation**: Replaced the next/link `<Link>` in the `/projects` recents card list with a standard anchor `<a>` tag to bypass React layout group transition caching.
+- **Git Actions**: Committed and pushed submodule updates inside `visual-labs` and updated the root reference pointer.
+
 ## [2026-07-15] lint | Review and synchronize wikis in Obsidian with all latest code changes in No Origins repositories
 - **Session Focus**: Review codebase and repository wikis, synchronize the Obsidian vault wiki directories, normalize wiki-to-wiki reference links to use standard Obsidian vault-relative format (`Wikis/no-origins/...`), and preserve absolute `file:///` paths for local code references.
 - **Modified Documentation**:
