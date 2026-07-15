@@ -7,6 +7,14 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-07-15] write | Implement Navigation Menu layout for Projects whiteboard toolbar
+- **Session Focus**: Replace Tldraw's default flat toolbar with a structured, glassmorphic Shadcn `NavigationMenu` containing dropdown selections for drawing tools, shape creations, canvas actions, and navigation links.
+- **Code Changes**:
+  - **navigation-menu.tsx**: Added Shadcn's NavigationMenu React component using Radix UI primitives.
+  - **TldrawCanvas.tsx**: Imported `NavigationMenu` elements, overrode the Tldraw custom `Toolbar` render to output our custom glassmorphic container and NavigationMenu component, and added `currentToolId` and `editor` to the components memo dependency array to enable reactive highlights.
+  - **TldrawCustom.css**: Added upward flyout layout adjustments (`bottom-full mb-1.5`) and custom slide/fade animations for the dropdown panels using the visual system's accent tokens.
+- **Documentation**: Updated the `projects_feature_rfc.md` wiki spec with the new toolbar structure.
+
 ## [2026-07-15] refactor | Resolve sidebar layout clipping and navigation redirects
 - **Session Focus**: Address layout visibility bug where collapsible tree sidebar was clipped inside its parent container, fix next/link route-group transition blocks, and move the sidebar toggle trigger to a custom toolbar button.
 - **Code Changes**:

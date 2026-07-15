@@ -179,5 +179,14 @@ A major refactoring of the spatial whiteboard interface was conducted to clean u
    - The Tldraw component is kept continuously mounted in the canvas panel, preventing zoom/selection resets or canvas reloads when opening/closing the editor.
    - On mobile/tablet screens, the layout automatically adapts to a full-screen overlay drawer (`w-full` width) when writing or editing.
 
+7. **Whiteboard Navigation Menu Toolbar**:
+   - Replaced Tldraw's default flat toolbar at the bottom center of the viewport with a structured, glassmorphic `NavigationMenu` component from Shadcn/Radix UI.
+   - Organized toolbar tools and actions into structured flyout dropdowns:
+     - **Tools**: Select, Hand, Draw, Eraser, Text, and Laser tools. Highlighting matches the currently active tool (`currentToolId`) dynamically.
+     - **Insert**: Spawn new Document cards, Web Preview bookmarks, YouTube video players, Grid Tables, and nested Sub-Projects.
+     - **Actions**: Trigger the Command Palette, Undo, Redo, and Toggle Grid mode.
+     - **Navigate**: Direct page links returning to the Home landing page or the Projects Dashboard.
+   - Configured with `viewport={false}` and custom upward-opening animations (`bottom-full mb-1.5`) in `TldrawCustom.css` to prevent clipping at the bottom viewport edge.
+
 
 
