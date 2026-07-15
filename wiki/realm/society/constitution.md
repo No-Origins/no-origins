@@ -56,5 +56,5 @@ The following actions represent high-risk operations and **MUST** trigger a deve
 ## ⚖️ Section 4: Constitutional Amendment Process
 
 This constitution is not static. Amendments can be proposed by:
-1.  **AI Agents**: Creating a pull request containing changes to this document, accompanied by a structured rationale in the [Decisions Registry](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/decisions.md).
+1.  **AI Agents**: Creating a pull request containing changes to this document, accompanied by a structured rationale in the [Decisions Registry](Wikis/no-origins/realm/society/decisions.md).
 2.  **Human Developers**: Modifying this file directly to adjust alignment boundaries, introducing new safety parameters, or tweaking persona constraints.

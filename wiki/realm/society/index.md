@@ -21,15 +21,15 @@ The ultimate goal is an autonomous, resilient backend society that manages the p
 
 To navigate the guidelines, rules, and structures of our agentic society, refer to the following documents:
 
-1.  **[Constitution & Alignment](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/constitution.md)**
+1.  **[Constitution & Alignment](Wikis/no-origins/realm/society/constitution.md)**
     *   The core directives, ethical boundaries, character guidelines, and technical safety limits (turn depth, CPU, API usage) governing all agents.
-2.  **[Taxonomy & Roles](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/taxonomy.md)**
+2.  **[Taxonomy & Roles](Wikis/no-origins/realm/society/taxonomy.md)**
     *   The organizational hierarchy (Level 0: Interface, Level 1: Orchestration/Governance, Level 2: Specialists), agent configurations, and LLM provider pairings.
-3.  **[Protocols & Tool Governance](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/protocols.md)**
+3.  **[Protocols & Tool Governance](Wikis/no-origins/realm/society/protocols.md)**
     *   A2A communication specifications, tool usage parameters, state transition routing, and Human-in-the-Loop (HITL) checkpoints.
-4.  **[Decisions Registry](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/decisions.md)**
+4.  **[Decisions Registry](Wikis/no-origins/realm/society/decisions.md)**
     *   A chronological archive of architectural decisions, consensus logs, and policy revisions enacted by the society and its human operators.
-5.  **[Emergent Future Sandbox](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/future.md)**
+5.  **[Emergent Future Sandbox](Wikis/no-origins/realm/society/future.md)**
     *   Brainstorming, exploratory ideas, and research paths for multi-agent evolution, decentralized databases, and real-time visualization of agent communication.
 
 ---
@@ -66,7 +66,7 @@ graph TD
 
 ## 📜 Principles of Maintenance
 
-This information base is a live document. AI agents acting in this workspace are expected to adhere to the [Wiki Maintenance Playbook](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/wiki_rules.md) and update these files whenever:
+This information base is a live document. AI agents acting in this workspace are expected to adhere to the [Wiki Maintenance Playbook](Wikis/no-origins/global/wiki_rules.md) and update these files whenever:
 1. A new agent role is introduced or modified in `realm`.
 2. A new communication protocol or custom tool is implemented.
 3. An architectural decision is finalized (recorded in `decisions.md`).

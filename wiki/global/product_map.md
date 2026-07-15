@@ -29,12 +29,12 @@ Still open: whether the primary product shape is *experience sandbox*, *creator 
 
 | # | Pillar | Meaning | Primary code / docs |
 | :--- | :--- | :--- | :--- |
-| 1 | **Core** | Sphere + particle field + procedural audio; reactive SSOT | `visual-labs` visualizer, [state_sync](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/state_sync.md) |
-| 2 | **Nav** | WebGL InfiniteMenu + route-synced section accents | [navigation_ui](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/navigation_ui.md), [Design.md](file:///Users/hiddenstack/Creatives/no-origins/Design.md) |
-| 3 | **Projects** | Spatial tldraw canvas + TipTap docs + publish/fork | [projects_feature_rfc](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/projects_feature_rfc.md) |
-| 4 | **Society** | Multi-level agent ecology (Sphere → Council → Specialists) | [society index](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/index.md), `realm` |
+| 1 | **Core** | Sphere + particle field + procedural audio; reactive SSOT | `visual-labs` visualizer, [state_sync](Wikis/no-origins/visual-labs/state_sync.md) |
+| 2 | **Nav** | WebGL InfiniteMenu + route-synced section accents | [navigation_ui](Wikis/no-origins/visual-labs/navigation_ui.md), [Design.md](file:///Users/hiddenstack/Creatives/no-origins/Design.md) |
+| 3 | **Projects** | Spatial tldraw canvas + TipTap docs + publish/fork | [projects_feature_rfc](Wikis/no-origins/global/projects_feature_rfc.md) |
+| 4 | **Society** | Multi-level agent ecology (Sphere → Council → Specialists) | [society index](Wikis/no-origins/realm/society/index.md), `realm` |
 | 5 | **Identity** | Auth, roles, MFA, profile / community | Supabase migrations, middleware, `/profile` `/admin` |
-| 6 | **Hyperbase** | Presets, stages, themes, config substrate | [presets_schema](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/presets_schema.md) |
+| 6 | **Hyperbase** | Presets, stages, themes, config substrate | [presets_schema](Wikis/no-origins/realm/presets_schema.md) |
 
 ---
 
@@ -79,7 +79,7 @@ no-origins (root)
 | **Agents** | L0 Sphere interface → L1 governance/orchestrator → L2 specialists |
 | **Wiki** | `index` · `active_sprint` · `log` · per-module pages |
 
-High-level architecture detail: [architecture.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/architecture.md).
+High-level architecture detail: [architecture.md](Wikis/no-origins/global/architecture.md).
 
 ---
 
@@ -128,7 +128,7 @@ Track answers on the FigJam board; update this list when decisions land.
 7. **Multiplayer** — Realtime collab on projects canvas for v1?
 8. **Brand** — Is “No Origins” the product, the studio, or the world?
 
-Decisions that harden architecture should also land in [society/decisions.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/decisions.md) or an ADR under `wiki/global/` when appropriate.
+Decisions that harden architecture should also land in [society/decisions.md](Wikis/no-origins/realm/society/decisions.md) or an ADR under `wiki/global/` when appropriate.
 
 ---
 
@@ -140,7 +140,7 @@ Decisions that harden architecture should also land in [society/decisions.md](fi
 | L1 Governance | Orchestrator / council | Decompose, delegate, HITL |
 | L2 Specialists | DB, telemetry, optimization | Tool-scoped agents |
 
-Full charter: [society/index.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/realm/society/index.md).
+Full charter: [society/index.md](Wikis/no-origins/realm/society/index.md).
 
 ---
 
@@ -169,7 +169,7 @@ Full charter: [society/index.md](file:///Users/hiddenstack/Creatives/no-origins/
 
 ## 9. How to use this map
 
-1. **Starting a session** — Read this page + [active_sprint.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/active_sprint.md) + FigJam board.
+1. **Starting a session** — Read this page + [active_sprint.md](Wikis/no-origins/active_sprint.md) + FigJam board.
 2. **Changing product direction** — Update FigJam first, then this page, then code/wiki module pages.
-3. **Shipping a surface** — Move its status in §3, log in [log.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/log.md).
+3. **Shipping a surface** — Move its status in §3, log in [log.md](Wikis/no-origins/log.md).
 4. **Design work** — Prefer new files under the No Origins Figma team using the Workspace OS table above.

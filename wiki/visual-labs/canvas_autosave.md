@@ -63,5 +63,5 @@ const snapshot = editor.store.getStoreSnapshot("document");
 
 ## 🔗 Related
 
-- [State Management & Synchronization](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/state_sync.md)
+- [State Management & Synchronization](Wikis/no-origins/visual-labs/state_sync.md)
 - Schema: `supabase/migrations/0002_projects_feature.sql` — `projects.canvas_data`, `project_versions.canvas_data`

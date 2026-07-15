@@ -7,6 +7,14 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-07-14] lint | Review and synchronize wikis with latest Table custom shape implementation
+- **Session Focus**: Review code modifications across both submodules, identify undocumented components, author comprehensive documentation for the custom Table whiteboard shape, and update indices and activity logs.
+- **Modified Documentation**:
+  - Created [table_cards.md](Wikis/no-origins/visual-labs/table_cards.md) outlining the custom Table whiteboard shape specs, component structures, decoupled event flows, and CSS styling.
+  - Registered the new page in [index.md](Wikis/no-origins/index.md).
+  - Synced [log.md](Wikis/no-origins/log.md) to integrate the original `[2026-07-06]` Table shape code changes details.
+- **Diagnostics**: Next.js production builds and TypeScript typecheck compiled successfully.
+
 ## [2026-07-13] write | Implement nested sub-projects and collapsible hierarchy tree sidebar
 - **Session Focus**: Add support for nested projects (hierarchical sub-projects) within the whiteboard canvas, including a collapsible tree navigation sidebar, recursive soft-deletes trigger, trash section, and custom Tldraw SubProjectCard shape.
 - **Code Changes**:
@@ -34,18 +42,24 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Created FigJam [No Origins — Master Ideation](https://www.figma.com/board/f6K9ZBe4zh1Jz1bzqOsKMN) under plan `team::1280174415155818092`.
   - Board sections: North Star, Product Pillars, Surface Map, System Map, Maturity, Open Questions, Agent Society, Figma Workspace OS.
 - **Wiki**:
-  - Added [product_map.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/product_map.md) as the text twin of the board.
-  - Registered the product map in [index.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/index.md).
-  - Reset [active_sprint.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/active_sprint.md) to this organization goal (prior table-doc catch-up deferred).
+  - Added [product_map.md](Wikis/no-origins/global/product_map.md) as the text twin of the board.
+  - Registered the product map in [index.md](Wikis/no-origins/index.md).
+  - Reset [active_sprint.md](Wikis/no-origins/active_sprint.md) to this organization goal (prior table-doc catch-up deferred).
 - **Outcomes**: Single map of shipped vs stub surfaces; eight open product questions; planned Figma file sequence (Design System → Product Screens → Projects UX → Brand).
 
-## [2026-07-06] write | Fix responsiveness of custom connection handles on shape move and resize
-- **Session Focus**: Address coordinate lag where midpoint connection circles stayed static during shape dragging and resizing by subscribing to shape store changes dynamically.
+## [2026-07-06] write | Implement interactive custom Table whiteboard shape and fix connection handle responsiveness
+- **Session Focus**: Program and deploy the custom Table whiteboard shape (`table-card`) enabling grid layout visualizations on the canvas and stable portal-based dialog editing, resolve hydration errors, and fix coordinate lag where midpoint connection circles stayed static during shape dragging and resizing.
 - **Code Changes**:
-  - Modified [ConnectionHandles.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/ConnectionHandles.tsx) to fetch the shape inside a reactive `useValue` hook, allowing properties like bounds and page-level transform matrices to update in real-time.
+  - **Custom Table Shape**:
+    - Created [TableCardUtil.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TableCardUtil.tsx) defining `"table-card"` shape, drawing a read-only table on the canvas inside `HTMLContainer`, and stopping event propagation to Tldraw to allow cell scrolling and click capturing.
+    - Created [TableEditorDialog.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TableEditorDialog.tsx) implementing the editing interface inside a React portal at the document level (editing headers, row/column count, and cell values).
+    - Modified [TldrawCanvas.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TldrawCanvas.tsx) to register the shape utility, handle the `"open-table-editor"` custom events, configure toolbar tool button shortcuts, and add Table creation to the Command Palette list.
+    - Added styling rules (scrollbars, input focuses, monospace fonts) in [TldrawCustom.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TldrawCustom.css).
+  - **Connection Handles**:
+    - Modified [ConnectionHandles.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/ConnectionHandles.tsx) to fetch the shape inside a reactive `useValue` hook, allowing properties like bounds and page-level transform matrices to update in real-time.
 - **Modified Documentation**:
-  - Appended entry to Obsidian project session log.
-- **Diagnostics**: Checked static builds (`npm run build`) and lint compiles successfully with zero errors.
+  - Created [table_cards.md](Wikis/no-origins/visual-labs/table_cards.md) and registered it in the index.
+- **Diagnostics**: TypeScript (`npm run lint`) and production builds compiled successfully with zero errors.
 
 ## [2026-07-05] refactor | Create Pull Request #5 and update submodule reference pointer
 - **Session Focus**: Commit the connection handles and selection outline styling implementation in `visual-labs`, push the local `feat/cards-layout-and-meditating-core` branch to GitHub, create Pull Request #5, and update the parent repository submodule pointer and documentation.
@@ -55,7 +69,7 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Created Pull Request #5 on GitHub.
   - Updated `visual-labs` submodule reference pointer in the parent repository.
 - **Modified Documentation**:
-  - Updated [Projects Feature RFC](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/projects_feature_rfc.md) with details on expandable pill layout and custom connection handles.
+  - Updated [Projects Feature RFC](Wikis/no-origins/global/projects_feature_rfc.md) with details on expandable pill layout and custom connection handles.
   - Staged and committed changes in the parent repository.
 - **Diagnostics**: Checked TypeScript compiles cleanly and static production builds compile successfully.
 
@@ -83,7 +97,7 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - **Canvas Routing & Event Plumbing**:
     - Integrated description property updates in `activeEditorShape` hook state, `open-tiptap-editor` event listener, `handleAddTipTapCard` creation helper, and `handleSaveDocument` autosave updater in [TldrawCanvas.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TldrawCanvas.tsx).
 - **Modified Documentation**:
-  - Updated [Projects Feature RFC](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/projects_feature_rfc.md) with design specs for the new expandable pill card and editor panels.
+  - Updated [Projects Feature RFC](Wikis/no-origins/global/projects_feature_rfc.md) with design specs for the new expandable pill card and editor panels.
 - **Diagnostics**: Checked TypeScript compiles cleanly using `tsc --noEmit`. Committed changes inside `visual-labs` submodule and updated the parent repository reference pointer.
 
 ## [2026-07-03] refactor | Create Pull Request and update submodule reference pointer
@@ -111,10 +125,10 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
     - Added backend migration [0003_enforce_mfa_and_suspension.sql](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/supabase/migrations/0003_enforce_mfa_and_suspension.sql) to check JWT multi-factor levels (`aal2`) inside `is_admin()` and block writes from suspended accounts via the `is_active()` helper.
     - Integrated status suspension checks into [middleware.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/utils/supabase/middleware.ts), redirecting suspended users to `/login`.
 - **Modified Documentation**:
-  - Updated [Ecosystem Architecture](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/architecture.md) to document DB-level MFA claims and user status gating.
-  - Updated [Navigation & Subpage UI](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/navigation_ui.md) with details on `/community` (MagicBento), `/profile` (UserAvatar), and the new GSAP dependency.
-  - Updated [Projects Feature RFC](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/projects_feature_rfc.md) with URL previews, YouTube embeds, and BackToContent button specifications.
-  - Documented projects canvas persistence in [Canvas Autosave](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/canvas_autosave.md).
+  - Updated [Ecosystem Architecture](Wikis/no-origins/global/architecture.md) to document DB-level MFA claims and user status gating.
+  - Updated [Navigation & Subpage UI](Wikis/no-origins/visual-labs/navigation_ui.md) with details on `/community` (MagicBento), `/profile` (UserAvatar), and the new GSAP dependency.
+  - Updated [Projects Feature RFC](Wikis/no-origins/global/projects_feature_rfc.md) with URL previews, YouTube embeds, and BackToContent button specifications.
+  - Documented projects canvas persistence in [Canvas Autosave](Wikis/no-origins/visual-labs/canvas_autosave.md).
 - **Diagnostics**: All pages successfully compiled and typechecked.
 
 ## [2026-06-29] refactor | Establish unified Visual Labs design system (token-driven, multi-accent)
@@ -136,7 +150,7 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Modified [TipTapSplitEditor.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TipTapSplitEditor.tsx) to support `isInline` prop, rendering as flexible relative block when inline and w-full full-width drawer when in mobile screen layout.
   - Modified [TldrawCanvas.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TldrawCanvas.tsx) to detect screen width (`isLargeScreen` state at `>= 1024px`). On desktop screens, it mounts a horizontal `<ResizablePanelGroup>` placing `Tldraw` and `TipTapSplitEditor` in separate resizable panels. This keeps `Tldraw` canvas mounted during editor toggling, avoiding canvas reloads, scroll resets, or flickering.
 - **Modified Documentation**:
-  - Updated [Projects Feature RFC](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/projects_feature_rfc.md) to log these responsive resizable workspace layout specs.
+  - Updated [Projects Feature RFC](Wikis/no-origins/global/projects_feature_rfc.md) to log these responsive resizable workspace layout specs.
 - **Diagnostics**: Tested static production builds and TypeScript type-checking using `npm run lint` and `npm run build`. Compiles successfully.
 
 ## [2026-06-28] refactor | Enhance Tldraw UI, Toolbar and integrate Command Palette
@@ -150,7 +164,7 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Styled Command menu components and dialogs inside [TldrawCustom.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TldrawCustom.css) with glassmorphism backdrops, monospace console typography, and emerald hover/active glowing outlines.
   - Updated [TldrawCustom.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TldrawCustom.css) to correct hyphenated selectors to use standard `.tlui-*` selectors and target `.tlui-main-toolbar__tools`. Configured the toolbar container to be fully rounded (`border-radius: 9999px`) and set a consistent circular shape (`border-radius: 50%`) and dimensions (`36px x 36px`) for all buttons and active state background pseudo-elements (`::after` and `::before`) in the toolbar (including the Command trigger). Positioned `.tlui-style-panel__wrapper` to the bottom right (`bottom: 24px`, `right: 16px`) to resolve overlapping with the top-right Cloud Sync indicator and align its bottom level exactly with the bottom toolbar (`margin-bottom: 24px`) baseline. Configured all style panel buttons and their active/hover state pseudo-element backgrounds to render as perfect circles (`border-radius: 50%`). Added a CSS specificity override for elements with `[data-toolbar-visible='false']` to ensure they hide correctly when collapsed by the layout manager.
 - **Modified Pages**:
-  - Updated [Projects Feature RFC](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/projects_feature_rfc.md) to log these spatial canvas UI enhancements.
+  - Updated [Projects Feature RFC](Wikis/no-origins/global/projects_feature_rfc.md) to log these spatial canvas UI enhancements.
 - **Diagnostics**: Run `npm run lint` and `npm run build` checking static page generation and server builds. Passed successfully with zero compilation or TypeScript errors.
 
 ## [2026-06-25] write | Implement Projects feature (tldraw canvas, TipTap custom shapes, and database sync)
@@ -169,9 +183,9 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 ## [2026-06-25] ingest | Draft RFC for tldraw & TipTap Projects feature
 - **Session Focus**: Grill developer to define the scope, user experience, database schema, and layouts for the Projects feature, compiling the results into an RFC.
 - **Created Pages**:
-  - [Projects Feature RFC](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/projects_feature_rfc.md): Detailed RFC specifying the tldraw custom TipTap shape, database schema, RLS policies, and dashboard flow.
+  - [Projects Feature RFC](Wikis/no-origins/global/projects_feature_rfc.md): Detailed RFC specifying the tldraw custom TipTap shape, database schema, RLS policies, and dashboard flow.
 - **Modified Pages**:
-  - [index.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/index.md): Registered Projects RFC in the Global directory and cleaned up duplications.
+  - [index.md](Wikis/no-origins/index.md): Registered Projects RFC in the Global directory and cleaned up duplications.
 
 ## [2026-06-24] write | Register Obsidian Local REST API MCP server in global configs
 - **Session Focus**: Enable Obsidian as a wiki and documentation space by integrating the Local REST API plugin's native MCP server.
@@ -181,10 +195,10 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 ## [2026-06-23] ingest | Update wiki documentation for split layouts, stillness, and WebGL lifecycle
 - **Session Focus**: Align workspace documentation with recent feature changes and refactors in the visual-labs frontend.
 - **Wiki Modifications**:
-  - Updated [navigation_ui.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/navigation_ui.md) with details on the split viewport layout, BackdropField, shared cards layout group, floating SphereNavBar controls, and WebGL lifecycle cleanup.
-  - Updated [state_sync.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/state_sync.md) to document the global `sphereStill` state variable and deceleration behavior.
-  - Updated [sphere_states.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/visual-labs/sphere_states.md) to document the `stillBlend` animation logic (ease-out cubic, 2400ms duration) and trimmed case-insensitive "MEDITATING CORE" preset match/swap.
-  - Updated [architecture.md](file:///Users/hiddenstack/Creatives/no-origins/wiki/global/architecture.md) to log Tailwind CSS v4 styling structure and the global `--radius-button` pill token.
+  - Updated [navigation_ui.md](Wikis/no-origins/visual-labs/navigation_ui.md) with details on the split viewport layout, BackdropField, shared cards layout group, floating SphereNavBar controls, and WebGL lifecycle cleanup.
+  - Updated [state_sync.md](Wikis/no-origins/visual-labs/state_sync.md) to document the global `sphereStill` state variable and deceleration behavior.
+  - Updated [sphere_states.md](Wikis/no-origins/visual-labs/sphere_states.md) to document the `stillBlend` animation logic (ease-out cubic, 2400ms duration) and trimmed case-insensitive "MEDITATING CORE" preset match/swap.
+  - Updated [architecture.md](Wikis/no-origins/global/architecture.md) to log Tailwind CSS v4 styling structure and the global `--radius-button` pill token.
 
 ## [2026-06-23] write | Fix InfiniteMenu concurrent WebGL loops and event listener leaks
 - **Session Focus**: Address coordinate mapping discrepancies where duplicate menu icons opened incorrect routes, caused by multiple animation loops and pointer listeners running in parallel.
