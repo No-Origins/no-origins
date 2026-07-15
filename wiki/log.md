@@ -11,7 +11,7 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 - **Session Focus**: Address layout visibility bug where collapsible tree sidebar was clipped inside its parent container, fix next/link route-group transition blocks, and move the sidebar toggle trigger to a custom toolbar button.
 - **Code Changes**:
   - **ProjectHierarchySidebar**: Removed the viewport-edge trigger button entirely, replacing it with an inline Close chevron inside the sidebar header.
-  - **TldrawCanvas**: Replaced Tldraw's default `<DefaultToolbar>` with a manual layout-controlled flexbox `div` container and native HTML `<button className="tlui-button" ...>` elements. This bypasses Tldraw's responsive Javascript/JSX-children collapsing and prevents Radix UI `RovingFocusGroupItem` runtime errors, while retaining full layout integration and state-dependent styling via reactive `useValue("currentToolId")` tracking.
+  - **TldrawCanvas**: Restored Tldraw's default `<DefaultToolbar>` (and its `<DefaultToolbarContent />` child) so that standard drawing/shape tools and the `^` "More" button remain fully accessible. Positioned the **Hierarchy Tree** toggle button outside `<DefaultToolbar>` as an independent, always-visible glass pill to the right of the main toolbar, styled to match the `BackToContentButton` pill baseline.
   - **Detail Navigation**: Replaced the next/link `<Link>` in the `/projects` recents card list with a standard anchor `<a>` tag to bypass React layout group transition caching.
 - **Git Actions**: Committed and pushed submodule updates inside `visual-labs` and updated the root reference pointer.
 
