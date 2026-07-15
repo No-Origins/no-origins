@@ -8,9 +8,10 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 ---
 
 ## [2026-07-15] refactor | Resolve sidebar layout clipping and navigation redirects
-- **Session Focus**: Address layout visibility bug where collapsible tree sidebar was clipped inside its parent container, and fix next/link route-group transition blocks.
+- **Session Focus**: Address layout visibility bug where collapsible tree sidebar was clipped inside its parent container, fix next/link route-group transition blocks, and move the sidebar toggle trigger to a custom toolbar button.
 - **Code Changes**:
-  - **ProjectHierarchySidebar**: Moved the expand/collapse tab button outside the inner `overflow-hidden` container so it is visible and clickable on the left margin when collapsed.
+  - **ProjectHierarchySidebar**: Removed the viewport-edge trigger button entirely, replacing it with an inline Close chevron inside the sidebar header.
+  - **TldrawCanvas**: Added `isSidebarOpen` state, registered a "Toggle Hierarchy Tree" button (FolderTree icon) in the custom toolbar, and wired it to toggle the sidebar.
   - **Detail Navigation**: Replaced the next/link `<Link>` in the `/projects` recents card list with a standard anchor `<a>` tag to bypass React layout group transition caching.
 - **Git Actions**: Committed and pushed submodule updates inside `visual-labs` and updated the root reference pointer.
 
