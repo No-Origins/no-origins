@@ -7,11 +7,12 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
-## [2026-07-15] write | Restructure whiteboard toolbar into reactive icon-only Navigation Menu
-- **Session Focus**: Restructure the projects whiteboard toolbar to render as circular icon-only buttons (Dashboard, 5 Frequent Tools, Insert Dropdown, Actions Dropdown, Sidebar Tree Toggle), track drawing tool usage frequency dynamically via localStorage, and fix the downward menu flyout overlap bug.
+## [2026-07-15] write | Restructure and scale whiteboard toolbar into reactive icon-only Navigation Menu
+- **Session Focus**: Restructure the projects whiteboard toolbar to render as circular icon-only buttons (Dashboard, 5 Frequent Tools, Insert Dropdown, Actions Dropdown, Sidebar Tree Toggle), track drawing tool usage frequency dynamically via localStorage, fix the downward menu flyout overlap bug, and scale up toolbar elements to Comfortable Medium size.
 - **Code Changes**:
   - **navigation-menu.tsx**: Installed the Radix-based Shadcn NavigationMenu component.
-  - **TldrawCanvas.tsx**: Integrated local storage tracking to increment and re-sort the top 5 tools reactively on tool change. Overrode the `Toolbar` render to return a unified horizontal pill structure of 32px circular icon buttons, hiding default chevrons on dropdown triggers.
+  - **TldrawCanvas.tsx**: Integrated local storage tracking to increment and re-sort the top 5 tools reactively on tool change. Overrode the `Toolbar` render to return a unified horizontal pill structure of 40px circular icon buttons, scaled icons to 20px, and expanded the menubar height to 48px, hiding default chevrons on dropdown triggers.
+  - **BackToContentButton.tsx**: Scaled button to 40px and icon to 20px to match the upgraded toolbar proportions.
   - **TldrawCustom.css**: Scoped the dropdown content alignment under `.whiteboard-toolbar` to open upwards (`bottom-full mb-2`) and added premium custom fade/slide keyframe transitions.
 - **Documentation**: Synced the projects canvas specifications inside `projects_feature_rfc.md`.
 
