@@ -12,6 +12,7 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 - **Code Changes**:
   - **ProjectHierarchySidebar.tsx**: Refactored the file to export `ProjectHierarchyTree` – a component for rendering the tree inside a compact, scrollable dropdown content viewport.
   - **TldrawCanvas.tsx**: Imported `GeoShapeGeoStyle` and shape icons. Introduced `currentGeoStyle` and `currentToolName` hooks to reactively track geometric shape subtypes and update tool usage counts. Created the `handleSelectTool` callback. Restructured the custom `Toolbar` to include vertical dividers, the Command Palette button beside the Dashboard link, a \"More Shapes & Tools\" dropdown for remaining tools, and integrated the inline `ProjectHierarchyTree` dropdown, removing the drawer.
+  - **TldrawCustom.css**: Implemented centered keyframe animations (`slideUpAndFadeInCentered`, `slideDownAndFadeOutCentered`) and absolute/relative centering rules (`left: 50%`, `transform: translateX(-50%)`) to horizontally center-align dropdown flyouts directly above their trigger buttons.
 - **Diagnostics**: TypeScript validation, ESLint linting, and production Next.js builds compiled successfully. Staged, committed, and pushed the `visual-labs` submodule changes, and updated the root reference pointer.
 
 ## [2026-07-15] write | Restructure and scale whiteboard toolbar into reactive icon-only Navigation Menu
