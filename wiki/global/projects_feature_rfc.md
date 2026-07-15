@@ -181,12 +181,14 @@ A major refactoring of the spatial whiteboard interface was conducted to clean u
 
 7. **Whiteboard Navigation Menu Toolbar**:
    - Replaced Tldraw's default flat toolbar at the bottom center of the viewport with a structured, glassmorphic `NavigationMenu` component from Shadcn/Radix UI.
-   - Organized toolbar tools and actions into structured flyout dropdowns:
-     - **Tools**: Select, Hand, Draw, Eraser, Text, and Laser tools. Highlighting matches the currently active tool (`currentToolId`) dynamically.
-     - **Insert**: Spawn new Document cards, Web Preview bookmarks, YouTube video players, Grid Tables, and nested Sub-Projects.
-     - **Actions**: Trigger the Command Palette, Undo, Redo, and Toggle Grid mode.
-     - **Navigate**: Direct page links returning to the Home landing page or the Projects Dashboard.
-   - Configured with `viewport={false}` and custom upward-opening animations (`bottom-full mb-1.5`) in `TldrawCustom.css` to prevent clipping at the bottom viewport edge.
+   - Restructured all controls to render as circular icon-only buttons in the exact left-to-right order:
+     - **Dashboard**: Circular dashboard icon button linking back to the `/projects` dashboard.
+     - **Top 5 Frequent Tools**: circular drawing tool icon buttons. We use an automatic reactive local storage listener to increment and sort tool usage (Select, Hand, Draw, Eraser, Text, Laser) based on click or shortcut key selections, falling back to standard defaults on empty usage.
+     - **Insert**: Circular plus icon dropdown containing triggers to spawn Document cards, Web Preview bookmarks, YouTube video players, Grid Tables, and nested Sub-Projects.
+     - **Actions**: Circular settings icon dropdown containing options to launch the Command Palette, Undo, Redo, and Toggle Grid mode.
+     - **Hierarchy Tree**: Integrated circular folder-tree icon button to toggle the collapsible sub-project sidebar.
+   - Hides standard text labels and chevron down icons on the Insert/Actions triggers to keep button layouts completely circular and clean.
+   - Configured with `viewport={false}` and scoped upward-opening styles (`bottom-full mb-2`) in `TldrawCustom.css` to fix the overlapping layout bug.
 
 
 

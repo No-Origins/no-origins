@@ -7,13 +7,13 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
-## [2026-07-15] write | Implement Navigation Menu layout for Projects whiteboard toolbar
-- **Session Focus**: Replace Tldraw's default flat toolbar with a structured, glassmorphic Shadcn `NavigationMenu` containing dropdown selections for drawing tools, shape creations, canvas actions, and navigation links.
+## [2026-07-15] write | Restructure whiteboard toolbar into reactive icon-only Navigation Menu
+- **Session Focus**: Restructure the projects whiteboard toolbar to render as circular icon-only buttons (Dashboard, 5 Frequent Tools, Insert Dropdown, Actions Dropdown, Sidebar Tree Toggle), track drawing tool usage frequency dynamically via localStorage, and fix the downward menu flyout overlap bug.
 - **Code Changes**:
-  - **navigation-menu.tsx**: Added Shadcn's NavigationMenu React component using Radix UI primitives.
-  - **TldrawCanvas.tsx**: Imported `NavigationMenu` elements, overrode the Tldraw custom `Toolbar` render to output our custom glassmorphic container and NavigationMenu component, and added `currentToolId` and `editor` to the components memo dependency array to enable reactive highlights.
-  - **TldrawCustom.css**: Added upward flyout layout adjustments (`bottom-full mb-1.5`) and custom slide/fade animations for the dropdown panels using the visual system's accent tokens.
-- **Documentation**: Updated the `projects_feature_rfc.md` wiki spec with the new toolbar structure.
+  - **navigation-menu.tsx**: Installed the Radix-based Shadcn NavigationMenu component.
+  - **TldrawCanvas.tsx**: Integrated local storage tracking to increment and re-sort the top 5 tools reactively on tool change. Overrode the `Toolbar` render to return a unified horizontal pill structure of 32px circular icon buttons, hiding default chevrons on dropdown triggers.
+  - **TldrawCustom.css**: Scoped the dropdown content alignment under `.whiteboard-toolbar` to open upwards (`bottom-full mb-2`) and added premium custom fade/slide keyframe transitions.
+- **Documentation**: Synced the projects canvas specifications inside `projects_feature_rfc.md`.
 
 ## [2026-07-15] refactor | Resolve sidebar layout clipping and navigation redirects
 - **Session Focus**: Address layout visibility bug where collapsible tree sidebar was clipped inside its parent container, fix next/link route-group transition blocks, and move the sidebar toggle trigger to a custom toolbar button.
