@@ -183,12 +183,31 @@ A major refactoring of the spatial whiteboard interface was conducted to clean u
    - Replaced Tldraw's default flat toolbar at the bottom center of the viewport with a structured, glassmorphic `NavigationMenu` component from Shadcn/Radix UI.
    - Restructured all controls to render as circular icon-only buttons in the exact left-to-right order:
      - **Dashboard**: Circular dashboard icon button linking back to the `/projects` dashboard.
-     - **Top 5 Frequent Tools**: circular drawing tool icon buttons. We use an automatic reactive local storage listener to increment and sort tool usage (Select, Hand, Draw, Eraser, Text, Laser) based on click or shortcut key selections, falling back to standard defaults on empty usage.
+     - **Command Palette Trigger**: Circular button to launch the Command Palette inline for menubar consistency.
+     - **Vertical Dividers**: Sleek separators partitioning functional button groups.
+     - **Top 5 Frequent Tools**: Circular drawing tool icon buttons. We use an automatic reactive local storage listener to increment and sort tool usage (Select, Hand, Draw, Eraser, Text, Laser) based on click or shortcut key selections, falling back to standard defaults on empty usage.
+     - **More Shapes & Tools Dropdown**: Houses drawing shapes (Arrow, Line, Rectangle, Ellipse, Triangle, Sticky Note) with localStorage frequency tracking.
      - **Insert**: Circular plus icon dropdown containing triggers to spawn Document cards, Web Preview bookmarks, YouTube video players, Grid Tables, and nested Sub-Projects.
-     - **Actions**: Circular settings icon dropdown containing options to launch the Command Palette, Undo, Redo, and Toggle Grid mode.
-     - **Hierarchy Tree**: Integrated circular folder-tree icon button to toggle the collapsible sub-project sidebar.
-   - Hides standard text labels and chevron down icons on the Insert/Actions triggers to keep button layouts completely circular and clean.
-   - Configured with `viewport={false}` and scoped upward-opening styles (`bottom-full mb-2`) in `TldrawCustom.css` to fix the overlapping layout bug.
+     - **Actions**: Circular settings icon dropdown containing options to Undo, Redo, and Toggle Grid mode.
+     - **Hierarchy Tree**: Compact, scrollable dropdown content viewport containing the collapsible Project Hierarchy Tree inline, replacing the sliding drawer.
+   - Elements are scaled up to **Comfortable Medium** proportions (40px circular buttons, 20px icons, and 48px menubar height) with added padding to prevent button label text wrapping on dashboard cards.
+   - Hides standard text labels and chevron down icons on the triggers to keep layouts completely circular and clean.
+   - Configured with `viewport={false}` and scoped upward-opening styles (`bottom-full mb-2`) in `TldrawCustom.css`.
+   - **Horizontal Dropdown Centering**: Center-aligns dropdown flyouts horizontally above trigger buttons (`left: 50%`, `transform: translateX(-50%)`) with a consistent `16px` of vertical spacing and premium custom keyframe transitions (`slideUpAndFadeInCentered`, `slideDownAndFadeOutCentered`).
+
+8. **Read-Only Mode for Community Projects**:
+   - Ensures that published community workspaces open in a lock-down read-only mode for non-owners, guarding the database and canvas from unauthorized mutation.
+   - **Canvas Lock**: Calls `editor.updateInstanceState({ isReadonly: true })` on mount.
+   - **Snapshot Loading & Framing**: Bypasses the autosave store listener completely but loads the canvas snapshot data normally. Automatically calls `editor.zoomToFit()` on load inside a `requestAnimationFrame` context to frame the workspace contents instantly.
+   - **UI Restricting**:
+     - Hides the Insert and Actions dropdown menus on the custom Navigation Menu toolbar.
+     - Disables and hides the inline sub-project creation buttons in the Project Hierarchy Sidebar / Tree.
+     - Intercepts and blocks all local save actions/handlers (e.g. `handleSaveDocument`, `handleSaveTable`).
+   - **Interactive Component Adapting**:
+     - **TipTapSplitEditor**: Sets the editor's editable state to false dynamically, toggles text inputs/textareas to `readOnly`, hides save/sync buttons, and renders a prominent "Read Only" status badge.
+     - **TableEditorDialog**: Makes cells and headers read-only, and hides the row/column addition and save buttons.
+     - **Custom Canvas Shape Utilities**: Custom card shape renderers (`TableCardUtil`, `TipTapCardUtil`, `SubProjectCardUtil`) render a read-only `Eye` icon indicator, block double-click interactions, and restrict editing dialogs.
+
 
 
 

@@ -7,6 +7,13 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
 
 ---
 
+## [2026-07-16] lint | Review and update wikis in Obsidian with all latest code changes
+- **Session Focus**: Review codebase modifications across No Origins repositories, document Read-Only Mode and custom Navigation Menu toolbar updates, sync all markdown documentation to the Obsidian vault, and verify that the wiki indices, logs, and sprint boards are up to date.
+- **Modified Pages**:
+  - Updated [Projects Feature RFC](Wikis/no-origins/global/projects_feature_rfc.md) detailing the custom Radix/Shadcn `NavigationMenu` toolbar layout, dynamic localStorage tool frequency tracking, and the lock-down Read-Only Mode behavior for community projects.
+  - Updated [Nested Sub-Projects Architecture](Wikis/no-origins/visual-labs/sub_projects.md) detailing cascading project tree publishing, Discovery filtering of root workspaces, parent-scoped publishing badges, and refactored Open Board anchor links.
+- **Sync Actions**: Synced all updated repository wiki documents to the local Obsidian vault directory.
+
 ## [2026-07-15] write | Implement read-only mode for viewing community projects
 - **Session Focus**: Ensure community published projects open in a read-only viewer mode that locks document mutation, hides editing UI, queries correct ownership trees, and disables overlay edits.
 - **Code Changes**:
