@@ -27,8 +27,13 @@ Welcome to the **No Origins** Agent Wiki. This is a persistent, compounding know
 - **[Nested Sub-Projects](Wikis/no-origins/visual-labs/sub_projects.md)**: Hierarchy trees, collapsible sidebar, recursive soft-deletes trigger, and Tldraw custom SubProjectCard shape.
 - **[Custom Table Cards](Wikis/no-origins/visual-labs/table_cards.md)**: Tabular data layout components, portal-based decoupled editor, and CSS section accent styling rules.
 
+### 📱 Mobile Companion: `visual-labs-mobile` (Expo / React Native)
+- **[Mobile App Plan](Wikis/no-origins/visual-labs-mobile/app_plan.md)**: Product goals, React Native / Expo tech stack, Native capability maps (Push notifications, Biometrics, Offline cache, Camera upload), and the 8-phase implementation roadmap.
+- **[Mobile Design System](Wikis/no-origins/visual-labs-mobile/design_system.md)**: Token specifications, SectionProvider accent mechanism for RN, typography, Safe areas, and Skia components (Sphere SkSL, Atlas particles, InfiniteMenu).
+
 ### 🗄️ Backend: `realm` Submodule
 - **[Presets Database Schema](Wikis/no-origins/realm/presets_schema.md)**: Presets syncing rules, table layouts, and settings configurations inside Supabase.
+- **[Social & Moderation Schema](Wikis/no-origins/realm/social_schema.md)**: Data models, RLS policies, media storage, push tokens, and account deletion RPC for social feed and moderation.
 - **[Mezmo Aura Setup](Wikis/no-origins/realm/aura_setup.md)**: Backend agentic harness configuration, build procedures, and API specifications.
 - **[Aura Agent Society Base](Wikis/no-origins/realm/society/index.md)**: Index and architectural hub of the multi-level organizational societal agentic system.
 

@@ -11,36 +11,47 @@ The workspace is structured as a multi-component mono-repository leveraging Git 
 ```mermaid
 graph TD
     Root["no-origins (Root Git Repo)"]
-    Frontend["visual-labs/ (Next.js 16 UI Frontend Submodule)"]
-    Backend["realm/ (Backend Server Submodule)"]
+    Frontend["visual-labs/ (Next.js 16 Web Submodule)"]
+    Mobile["visual-labs-mobile/ (Expo SDK 57 Companion Submodule)"]
+    Backend["realm/ (Backend Submodule)"]
     
     Root --> Frontend
+    Root --> Mobile
     Root --> Backend
 ```
 
-- **[no-origins (Root)](file:///Users/hiddenstack/Creatives/no-origins)**: Contains the umbrella configuration, [GEMINI.md](file:///Users/hiddenstack/Creatives/no-origins/GEMINI.md) developer/agent rules, and global workflows.
-- **[visual-labs/](file:///Users/hiddenstack/Creatives/no-origins/visual-labs)**: Next.js 16 (React 19, Tailwind CSS v4) client-side application hosting the interactive sandbox, procedural audio engine, and WebGL particle visualization.
-- **[realm/](file:///Users/hiddenstack/Creatives/no-origins/realm)**: Backend services (Supabase schema, configurations, syncing presets and user state variables).
+- **[no-origins (Root)](file:///Users/hiddenstack/Creatives/no-origins)**: Contains umbrella configuration, [GEMINI.md](file:///Users/hiddenstack/Creatives/no-origins/GEMINI.md) developer/agent rules, and global workflows.
+- **[visual-labs/](file:///Users/hiddenstack/Creatives/no-origins/visual-labs)**: Next.js 16 (React 19, Tailwind CSS v4) client-side web application hosting the interactive sandbox, procedural audio engine, tldraw whiteboarding canvas, and WebGL particle visualization.
+- **[visual-labs-mobile/](file:///Users/hiddenstack/Creatives/no-origins/visual-labs-mobile)**: Expo SDK 57 / React Native mobile companion application featuring Skia visual graphics, biometrics, mobile social feed, push token registration, and EAS build pipelines.
+- **[realm/](file:///Users/hiddenstack/Creatives/no-origins/realm)**: Backend services (Supabase migrations `0001`–`0010`, preset schemas, social feed, moderation queues, account deletion RPCs, and Mezmo Aura agent society).
 
 ---
 
 ## 💻 Tech Stack & Dependencies
 
-### Frontend (`visual-labs`)
-- **Core Framework**: **Next.js 16.2** (App Router structure using Turbopack in development, React 19.2, TypeScript).
+### Frontend Web (`visual-labs`)
+- **Core Framework**: **Next.js 16** (App Router structure using Turbopack in development, React 19, TypeScript).
 - **Styling**: **Tailwind CSS v4** coupled with dynamically-injected CSS Custom Properties (CSS variables) to support reactive designer themes. Uses a global `--radius-button` token (set to `9999px`) in the base layer to enforce unified pill-shaped buttons across HUD, admin panels, and nav toggles, replacing ad-hoc rounded utility classes.
 - **Component UI**: **shadcn/ui** (Radix UI primitives) integrated directly with Tailwind v4 structure mapping.
-- **Visual Rendering**: WebGL-based custom rendering utilizing `<canvas>` elements for the floating metal orb and background particle fields.
-- **Audio Engine**: Custom built class inside `audio.ts` utilizing the browser's native **Web Audio API** (Oscillators, Gain nodes, BiquadFilters, Analysers, ConvolverNode reverb, and white noise synthesizers).
+- **Visual Rendering**: WebGL-based custom rendering utilizing `<canvas>` elements for the floating metal orb (`LiquidMetalSphere`) and background particle fields (`DotField`).
+- **Audio Engine**: Custom built class inside `audio.ts` utilizing the browser's native **Web Audio API** (Oscillators, Gain nodes, BiquadFilters, Analysers, ConvolverNode reverb, detent scroll/click haptic voices, and white noise synthesizers).
 - **Transitions & Micro-Interactions**: Framer Motion 12 (`motion` package) for HUD panel animations, and **GSAP** (`gsap` package) for complex interactive animations like 3D tile tilts and magnetic physics.
-- **Collaborative Canvas**: **tldraw** (`tldraw` package) for spatial boarding, with customized shape utilities and **TipTap** (`@tiptap/react` package) for nested rich-text document integration.
+- **Collaborative Canvas**: **tldraw** (`tldraw` package) for spatial boarding, with customized shape utilities, public published project read-only access (`/projects/[id]`), and **TipTap** (`@tiptap/react` package) for nested rich-text document integration.
 - **State Management**: **React Context** (`VisualizerContext`) serving as the unified single source of truth (SSOT) managing all visual, audio, UI, preset, and theme state.
-- **Backend Integrations**: Supabase JavaScript client (`@supabase/supabase-js`, `@supabase/ssr`) for storing client presets and syncing global settings.
+- **Backend Integrations**: Supabase JavaScript client (`@supabase/supabase-js`, `@supabase/ssr`) for storing client presets, social feed data, user profiles, and syncing global settings.
 - **AI Integrations**: Google GenAI SDK (`@google/genai`) enabling communication with the Sentient Sphere chatbot.
 
+### Mobile Companion (`visual-labs-mobile`)
+- **Framework**: **Expo SDK 57** (React Native 0.76+, Expo Router v4, TypeScript).
+- **Styling & Theming**: NativeWind v4 (Tailwind CSS for React Native) paired with `SectionProvider` accent context mirroring web route themes.
+- **Graphics & Shaders**: `@shopify/react-native-skia` for hardware-accelerated Skia canvas rendering of background dot fields (`FieldBackground.tsx`) and liquid metal sphere SkSL shaders (`sphereShader.ts`).
+- **Authentication & Security**: Supabase JS client (`src/supabase.ts`) with `expo-local-authentication` (`BiometricGate.tsx`, `biometrics.ts`) for Face ID / Touch ID gatekeeping.
+- **Features & Parity**: Mobile social feed (`app/(tabs)/feed.tsx`), post creation (`app/compose.tsx`), profile username/avatar editing (`app/(tabs)/profile.tsx`), projects list with open-on-web WebView (`app/project/[id].tsx`), moderation/report queue (`app/admin/reports.tsx`), and Expo Push Notifications (`src/push.ts`).
+- **Build Pipeline**: EAS Build (`eas.json` profiles: `development`, `development-simulator`, `preview`, `production`), bundle identifier `com.noorigins.visuallabs`, Expo Updates (`expo-updates`), and simulator helper script (`scripts/run-ios-sim.sh`).
+
 ### Backend (`realm`)
-- Serves as the database management layer storing preset schemas, design themes, and user configurations.
-- Interfaced via Supabase SSR client integrations inside the Next.js frontend.
+- Serves as the database management layer storing preset schemas, design themes, user profiles, social feed (`posts`, `likes`, `comments`, `follows`), push tokens (`push_tokens`), moderation queue (`reports`, `blocks`), and account deletion RPC (`delete_own_account()`).
+- Interfaced via Supabase SSR client integrations inside the Next.js web application and Supabase JS client inside the Expo mobile application.
 
 ---
 

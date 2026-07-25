@@ -6,7 +6,16 @@ This document details the procedural audio synthesis architecture in the **No Or
 
 ## 🔊 Engine Architecture & Graph
 
-The audio system is implemented in the [audio.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/audio.ts) class `AudioEngine`. It operates a custom routing graph to combine ambient sounds, interactive sound effects, and analysis node layers:
+The audio system is implemented in the [audio.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/audio.ts) class `AudioEngine`. It operates a custom routing graph to combine ambient sounds, interactive sound effects, and analysis node layers.
+
+### Independent buses (user toggles)
+
+| Toggle | UI control | Engine flag | What it gates |
+| :--- | :--- | :--- | :--- |
+| **Ambient music** | Music icon (footer) / Ambient Music in HUD | `ambientEnabled` via `toggleAmbient` | Drone only |
+| **Haptic feedback** | Vibrate icon (footer) / Haptic Feedback in HUD | `hapticsEnabled` via `toggleHaptics` | Scroll ticks, ripples, impacts |
+
+Both preferences persist in `localStorage` (`no_origins_audio_enabled`, `no_origins_haptics_enabled`). Either bus may init/resume the shared `AudioContext`.
 
 ```mermaid
 graph TD
@@ -48,6 +57,22 @@ this.droneGain.gain.setTargetAtTime(targetGain, this.ctx.currentTime, 0.5);
 - **Synthesis Pattern**: Dual-source synthesis to mimic a heavy crunch and explosion:
   1. **Low Thump (triangle wave)**: Rapid downward sweep (160Hz down to 50Hz) passed through a lowpass filter (320Hz) to create a muffled weight.
   2. **Explosion Crunch (noise burst)**: 300ms of mathematically generated white noise buffer passed through a resonant bandpass filter (220Hz, Q=2.5) with a medium decay envelope.
+
+### 4–5. Menu Detent Voice (`playDetentVoice` → scroll + click)
+Shared dry synthesis for both:
+
+1. **Bass body (triangle)** ~110Hz thump, lowpass ~280→140Hz  
+2. **Mid blip (sine)** ~620Hz  
+3. **Noise edge** ~12ms highpass spike  
+4. **Metal hint** quiet inharmonic pair (~2.1kHz)
+
+| API | Trigger | Difference from base voice |
+| :--- | :--- | :--- |
+| `playScrollTick` | Slot boundary while scrolling | Direction pan, velocity level, ≥22ms rate limit |
+| `playClick` | Disc tap / enter commit | Same voice, centered, ~12% firmer, no rate limit |
+
+- **Routing**: Master only — **no reverb**.  
+- **Gating**: `hapticsEnabled` + `rippleVolume`.
 
 ---
 
@@ -91,6 +116,7 @@ The audio settings are synced as part of the visualizer presets and composed sta
   - `baseFreq`: Fundamental drone oscillator frequency (Hz).
   - `visualReactivityEnabled`: Toggles visual sphere displacement driven by real-time audio volumes.
   - `visualReactivityStrength`: Scale modifier for audio-driven displacement.
-* **Master Toggle Persistence**: 
-  - To respect user preferences across refreshes or workspace navigations, the master sound toggle is saved to `localStorage` under the key `no_origins_audio_enabled`.
-  - When the app boots and resolves environment-driven States, the transition checks `preserveAudio: true`. This option overrides the database state's audio toggle with the user's cached preference, preventing ambient sounds from suddenly playing if the user previously muted it.
+* **Toggle Persistence**: 
+  - Ambient music → `localStorage` key `no_origins_audio_enabled`.
+  - Haptic FX → `localStorage` key `no_origins_haptics_enabled` (migrates from ambient pref if unset).
+  - When the app boots and resolves environment-driven States, the transition checks `preserveAudio: true`. This option overrides the database state's ambient toggle with the user's cached preference, preventing the drone from suddenly playing if the user previously muted it. Haptics stay a pure user preference and are never overwritten by sphere states.

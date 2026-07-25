@@ -6,7 +6,7 @@ This document establishes the workflows and repository guidelines for managing t
 
 ## ⚠️ The Submodule Golden Rule
 
-Because `visual-labs` and `realm` are standalone Git submodules, committing changes directly inside the submodules without updating the parent root references leads to **broken pointer references (detached HEAD states)**.
+Because `visual-labs`, `visual-labs-mobile`, and `realm` are standalone Git submodules, committing changes directly inside the submodules without updating the parent root references leads to **broken pointer references (detached HEAD states)**.
 
 Always follow the three-step flow when pushing changes:
 
@@ -24,8 +24,12 @@ graph TD
 ### Step 1: Make modifications in the target component
 All coding tasks must take place inside the sub-directories:
 ```bash
-# E.g., for front-end visual elements
+# E.g., for front-end web, mobile companion, or backend
 cd visual-labs
+# OR
+cd visual-labs-mobile
+# OR
+cd realm
 ```
 
 ### Step 2: Commit and push changes inside the Submodule

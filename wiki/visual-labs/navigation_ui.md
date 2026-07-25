@@ -9,7 +9,7 @@ This document details the navigation framework of **No Origins**, specifically t
 To support a multi-layered interactive experience, the application utilizes a split-viewport structure and shared card layouts:
 
 ### 1. Viewport Split Layout
-Defined in [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/layout.tsx), the layout divides the screen:
+Defined in [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/%28base%29/layout.tsx), the layout divides the screen:
 - **Sphere Section**: Left on desktop (`md:flex-row`), bottom on mobile (`flex-col`). It contains the interactive WebGL canvas overlays ([BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) and [SphereChatInput.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/SphereChatInput.tsx)).
 - **Sub-page Section**: Right on desktop, top on mobile. It scrolls independently and houses the child route pages. On mobile, it is top-aligned and center-justified (`items-start min-h-full`) to prevent overlapping visualizer controls.
 
@@ -17,7 +17,7 @@ Defined in [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-la
 The entire viewport is backed by [BackdropField.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackdropField.tsx) mounted at the root level of `BaseLayout`. This ensures that the reactive particle [DotField.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/DotField.tsx) remains visible behind both the canvas sphere and all textual card pages, overlaid with a radial vignette gradient.
 
 ### 3. Shared Cards Layout Group
-The six internal pages are nested inside the `(cards)` route group [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/layout.tsx). Rather than duplicate styling and mount logic:
+The six internal pages are nested inside the `(cards)` route group [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/%28base%29/%28cards%29/layout.tsx). Rather than duplicate styling and mount logic:
 - The shared layout enforces a `max-w-[450px]` container with custom padding and pointer event routing.
 - It is keyed on `pathname` (`key={pathname}`), ensuring that the entry animations replay and the ripple triggers dispatch on every route transition.
 
@@ -66,11 +66,11 @@ To eliminate memory leaks and event listener accumulation during navigation and 
 
 ## 🎛️ Ambient Controls: `SphereNavBar`
 
-Underneath the page-details info panel sits [SphereNavBar.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/SphereNavBar.tsx). It provides direct, non-dragging control options represented by simple, glassmorphic buttons (Square, Triangle, Circle):
+Underneath the page-details info panel sits [SphereNavBar.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/SphereNavBar.tsx). It provides direct, non-dragging control options represented by simple, glassmorphic buttons (Square, Triangle, Circle) — **same mapping on web and mobile**:
 
 1.  **Square (Random Shuffle)**: Triggers a random navigation path. When clicked, it selects a random internal route, calls the imperative `spinAndSnap(targetIndex, 2000)` ref method to spin the WebGL Infinite Menu wheel for 2 seconds, and pushes the new route.
 2.  **Triangle (Home Navigation)**: Instantly returns the router to `/`. The icon uses responsive optical translation offsets (`max-md:portrait:-translate-y-px`, `max-md:landscape:translate-x-px`, `md:translate-x-px md:-translate-y-px`) to keep the triangular glyph centered within its boundaries.
-3.  **Circle (Stillness Toggle)**: Toggles the `sphereStill` context variable to freeze/unfreeze sphere motion.
+3.  **Circle (Profile)**: Opens `/profile` (web) or `/(tabs)/profile` (mobile). Active while on the profile route.
 
 ---
 
@@ -99,15 +99,23 @@ On mount, if `animated={true}` is set, the component initiates a `requestAnimati
 
 ## 📄 Subpages & Ripple Event Triggering
 
-The application exposes 8 internal page layouts located in the `(cards)` route group:
-- **Labs**: `/labs` (WebGL controls environment). See [labs/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/labs/page.tsx).
-- **Hyperbase**: `/hyperbase` (presets database explorer). See [hyperbase/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/hyperbase/page.tsx).
-- **Stories**: `/stories` (procedural text logs). See [stories/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/stories/page.tsx).
-- **Society**: `/society` (backend agent configurations dashboard). See [society/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/society/page.tsx).
-- **Spotify**: `/spotify` (ambient soundtrack integrations). See [spotify/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/spotify/page.tsx).
-- **Credits**: `/credits` (attribution and repository history). See [credits/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/credits/page.tsx).
-- **Community**: `/community` (the interactive ecosystem characteristics wall). Renders a complex [MagicBento.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/MagicBento.tsx) grid highlighting the 8 core values/traits of No Origins, styled with custom GSAP-driven 3D mouse tilt and magnetism.
-- **Profile**: `/profile` (the authenticated user dashboard). Displays the current user's role, status, and metadata, using [UserAvatar.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/UserAvatar.tsx) for dynamic avatar rendering and an Indigo section accent theme.
+The Infinite Menu (web + mobile) shares one canonical set of destinations. **Profile is not a menu disc** — open it with ○ on `SphereNavBar`. Interactive Sandbox (`/base`) is retired; use Admin for field/sphere config.
+
+Menu destinations:
+- **Labs**: `/labs` (WebGL controls environment).
+- **Hyperbase**: `/hyperbase` (presets database explorer).
+- **Stories**: `/stories` (procedural text logs).
+- **Agent Society**: `/society` (backend agent configurations dashboard).
+- **Spotify**: `/spotify` (ambient soundtrack integrations).
+- **Credits**: `/credits` (attribution and repository history).
+- **Projects**: `/projects` (spatial media hub; mobile has a native browse tab).
+- **Community**: `/community` (MagicBento traits wall).
+- **Feed**: `/feed` (shared social posts — same Supabase tables as mobile).
+- **Capture**: `/capture` (compose post; mobile route is `/compose`).
+
+Also available outside the menu:
+- **Profile**: `/profile` (○ nav button). Account dashboard with [UserAvatar.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/UserAvatar.tsx); indigo section accent.
+- **Admin**: `/admin` (presets / states / stages — replaces the old visitor sandbox).
 
 ---
 

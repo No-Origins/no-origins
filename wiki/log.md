@@ -5,7 +5,133 @@ This is an append-only log detailing all major updates, feature implementations,
 Format for entries: `## [YYYY-MM-DD] <operation> | <description>`
 Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `refactor` (code restructuring).
 
----
+## [2026-07-25] ingest | Review and update wikis with latest code changes across all No Origins repositories
+- **Session Focus**: Conduct comprehensive review of all recent code changes across `visual-labs`, `visual-labs-mobile`, `realm`, and parent `no-origins` repositories, and synchronize Obsidian wiki documentation accordingly.
+- **Updated Pages**:
+  - [Ecosystem Architecture](Wikis/no-origins/global/architecture.md): Updated architecture diagram and tech stack to include `visual-labs-mobile` (Expo SDK 57, React Native, Skia canvas/shaders, NativeWind, biometrics, EAS pipeline), public published project workspace access (`/projects/[id]`), and backend social/moderation database schema.
+  - [Git Submodule Workflows](Wikis/no-origins/global/git_submodules.md): Updated submodule golden rules and command flow to include `visual-labs-mobile` alongside `visual-labs` and `realm`.
+  - [Procedural Audio Synthesis](Wikis/no-origins/visual-labs/audio.md): Documented split ambient music vs. haptic sound toggles (`no_origins_audio_enabled`, `no_origins_haptics_enabled`), detent scroll tick (`playScrollTick`), and click feedback (`playClick`).
+  - [Navigation & Subpage UI](Wikis/no-origins/visual-labs/navigation_ui.md): Updated menu canonical destinations (Labs, Hyperbase, Stories, Society, Spotify, Credits, Projects, Community, Feed, Capture) and profile ○ nav button behavior.
+  - [Active Sprint Tracker](Wikis/no-origins/active_sprint.md): Updated active goal, sprint status, completed checklists, and key file paths.
+  - [Wiki Index](Wikis/no-origins/index.md): Verified directory listings and bidirectional links across all submodules.
+
+## [2026-07-24] lint | Session handoff — EAS live; Apple paid program deferred
+- Reset [active_sprint.md](active_sprint.md) with full EAS resume checklist, build IDs, PR links, and first prompts.
+- **Shipped this arc**:
+  - Code review + PRs: web [PR #10](https://github.com/bhargavAtgithub/visual-labs/pull/10) (`feat/social-feed-profile-and-mobile-parity`); mobile [PR #1](https://github.com/No-Origins/visual-labs-mobile/pull/1) (`feat/initial-mobile-companion`).
+  - Mobile GitHub → **No-Origins/visual-labs-mobile**; Expo org **@no-origins/visual-labs-mobile**.
+  - EAS: `eas.json` (dev / sim / preview / production), env vars on all three environments, `expo-dev-client`, `expo-updates`, workflow stub, bundle id `com.noorigins.visuallabs`.
+  - Builds **finished**: iOS `development-simulator` `9a84623f-…` (installed on iPhone 17 Pro sim once); Android `development` `bf98509c-…` APK ready.
+  - Helper `scripts/run-ios-sim.sh`.
+- **Blocked**: physical iPhone EAS build / push / TestFlight until paid Apple Developer Program (user deferred to later).
+- **Next**: interactive `eas build -p ios --profile development` after membership; or product (haptics port, PR merges, Android smoke).
+
+## [2026-07-24] write | EAS Build + Update pipeline for visual-labs-mobile
+- Configured EAS for project `1621f8c3-ceaa-497e-b9e0-0285e18cf2a5` under owner `no-origins`.
+- Profiles: `development` (device, internal), `development-simulator`, `preview`, `production` + channels.
+- Env: `EXPO_PUBLIC_SUPABASE_*` + `EXPO_PUBLIC_WEB_URL` set for development/preview/production.
+- Device iOS non-interactive build failed (no Apple credentials); simulator + Android succeeded.
+- Local: sim app `VisualLabs.app` / bundle `com.noorigins.visuallabs`; deep link scheme `exp+visual-labs-mobile`.
+
+## [2026-07-24] lint | Session handoff — profile arc closed; haptics port next
+- Reset [active_sprint.md](Wikis/no-origins/active_sprint.md) for a clean next session.
+- **Shipped this arc**: profile parity web↔mobile; pill-only buttons; `avatar_path` + migration applied; web bento profile; **inline Identity edit** (no Account tile / no second edit panel); `formatSupabaseError` for storage/RPC failures.
+- **Next**: port InfiniteMenu haptic scroll/click to mobile; unify Feed/Compose; device smoke on profile photo + username.
+
+## [2026-07-24] write | Profile picture (avatar_path) web + mobile
+- Migration `0010_profile_avatar.sql`: `profiles.avatar_path`, `set_own_avatar(desired)`, guard normalize, account deletion clears path.
+- Storage: `{uid}/avatar/{timestamp}.ext` in public `media` bucket (reuse post media policies).
+- Web/mobile Edit profile: upload/replace/remove photo; display priority custom → OAuth → initials.
+- Feed author chips load `avatar_path` on web + mobile PostCard.
+- Apply migration in Supabase before clients can save avatars.
+
+## [2026-07-24] write | Web profile bento grid (mobile-ordered sections)
+- Reorganized web `/profile` to match mobile section order: Identity → Account/Edit → Security → Admin → Blocked → Account actions.
+- Layout: responsive bento (`1` / `2` / `6` cols) with featured Identity tile; each section is a `BorderGlow` cell.
+- Panel width: `profile` → `max-w-[780px]` in cards layout (alongside community/feed wide panels).
+
+## [2026-07-24] write | Profile parity + pill buttons (web & mobile)
+- **Edit profile**: both platforms — view mode shows identity rows; **Edit profile** opens username editor with Save/Cancel (`set_own_username` RPC, same rules as migration 0009).
+- **Web profile** gained: MFA status + setup/verify links, blocked users unblock, delete account (`delete_own_account`), admin dashboard link, refresh, last sign-in / user id chips — aligned with mobile shell.
+- **Mobile profile**: same Edit profile flow; OAuth avatar when present; action Pressables use `rounded-full`.
+- **Buttons**: web base CSS enforces pill radius on all `button` / `[data-slot=button]`; mobile CTAs across feed, auth, compose, projects, admin, biometrics use `rounded-full`.
+- **Still mobile-only (by design)**: biometrics unlock, Expo push registration, deep link “open account on web”.
+- **Still web-only (by design)**: full admin console (mobile has reports queue only), OAuth avatar upload lives in IdP metadata not profiles table.
+
+## [2026-07-24] ingest | Synchronize Obsidian wiki with latest codebase, mobile app, and database changes
+- **Session Focus**: Review, audit, and synchronize wiki documentation in Obsidian with all recent code, mobile companion app, and backend database changes across the No Origins repositories.
+- **Created Pages**:
+  - [Social & Moderation Schema](Wikis/no-origins/realm/social_schema.md): Documented social feed tables (`posts`, `post_likes`, `comments`, `follows`), push notification tokens (`push_tokens`), UGC safety & moderation (`reports`, `blocks`), public `media` storage bucket, and self-service account deletion RPC (`delete_own_account()`).
+- **Updated Pages**:
+  - [Wiki Index](Wikis/no-origins/index.md): Registered new social & moderation schema documentation under Backend `realm` submodule.
+  - [Active Sprint Tracker](Wikis/no-origins/active_sprint.md): Updated current sprint focus, completed checklist items, and key file paths.
+  - [Mobile App Plan](Wikis/no-origins/visual-labs-mobile/app_plan.md) & [Mobile Design System](Wikis/no-origins/visual-labs-mobile/design_system.md): Verified mobile companion documentation alignment (Expo SDK 57, auth/biometrics, Skia shell, social feed, moderation queue, account deletion, iOS 27 `SceneDelegate` fix).
+  - [Procedural Audio Synthesis](Wikis/no-origins/visual-labs/audio.md): Verified dry detent haptic audio engine documentation (`playDetentVoice`, `playScrollTick`, `playClick`).
+
+## [2026-07-24] lint | Session handoff — web haptic scroll/click ready; mobile port next
+- Reset [active_sprint.md](Wikis/no-origins/active_sprint.md) for next session.
+- Shipped this arc (web): scroll detent + click (shared `playDetentVoice`), Music vs Vibrate toggles, dry haptics, audio wiki updates.
+- Click fade/metal experiment reverted — click matches scroll voice again.
+- Next: port haptics to mobile InfiniteMenu; optional further web polish; UI unify web↔mobile.
+
+## [2026-07-24] write | Split ambient music vs haptic sound toggles (web)
+- **UI**: Footer Music icon = ambient drone only; new Vibrate icon = haptic FX (scroll ticks, ripples, impacts).
+- **Engine**: `toggleAmbient` / `toggleHaptics` on `AudioEngine`; prefs `no_origins_audio_enabled` + `no_origins_haptics_enabled`.
+- **HUD / Admin**: Separate Ambient / Haptic toggles; FX volume slider gated by haptics.
+
+## [2026-07-24] write | Infinite menu scroll detent sound (web first)
+- **Session Focus**: Unifying UI feedback — design tactile sound for item scroll in InfiniteMenu on web before porting to mobile.
+- **Audio**: `audioEngine.playScrollTick` — dual-layer metallic detent (sine body chirp + bandpass noise click), direction pan/pitch, velocity level, 22ms rate limit.
+- **UI**: Web `InfiniteMenu` fires ticks on virtual slot boundary crossings (drag, spring snap, wheel/keyboard via spring, `spinAndSnap`).
+- **Docs**: [Procedural Audio](Wikis/no-origins/visual-labs/audio.md) §4 Scroll Detent.
+
+## [2026-07-24] lint | Session handoff — visual-labs-mobile ready for new session
+- Reset [active_sprint.md](Wikis/no-origins/active_sprint.md) and app_plan **RESUME HERE** for clean pickup.
+- Shipped this arc: store-harden (admin reports, account deletion, WAVES-only), EAS link, push blocked on free Apple team.
+- Next: device smoke / product polish; push only after paid Apple Developer Program.
+
+## [2026-07-24] write | EAS link + push entitlement investigation (personal team blocked)
+- **EAS:** `eas login` + project linked — `projectId` `1621f8c3-ceaa-497e-b9e0-0285e18cf2a5` in `app.json`.
+- Device rebuild installed; Profile push hit `no valid aps-environment entitlement`.
+- Adding entitlement failed: personal free Apple team cannot use Push Notifications.
+- Reverted entitlement so app builds; `push.ts` + Profile copy explain paid-program requirement.
+
+## [2026-07-24] write | Mobile store-harden: WAVES-only, admin reports, account deletion
+- **Session Focus**: Continue visual-labs-mobile after thermal reset — ship store-required moderation admin path + account deletion, and lock Home to cheap WAVES.
+- **Mobile:**
+  - `FieldBackground.tsx` — `FORCE_WAVES_ONLY` ignores admin ASTEROID_RAIN.
+  - `app/admin/reports.tsx` — admin queue (hide / dismiss / open post).
+  - Profile — blocked list + unblock, Delete account (double confirm), admin entry.
+  - `moderation.ts` — `fetchReports`, `resolveReport`, `deleteOwnAccount`, `fetchBlockedUsers`.
+- **Backend:** Applied `account_deletion` migration (`delete_own_account` SECURITY DEFINER RPC); local file `0008_account_deletion.sql`.
+- **Docs:** Updated active sprint + mobile app plan RESUME HERE.
+
+## [2026-07-24] write | Biometrics, offline Query cache, push_tokens
+- **Mobile:** BiometricGate (Face ID/Touch ID unlock), Profile toggle; TanStack Query + AsyncStorage offline cache for projects/feed; OfflineBanner; expo-notifications registerPushToken.
+- **Backend:** Applied `push_tokens` migration via Supabase MCP; local file `0006_push_tokens.sql`.
+- **Note:** Real Expo push tokens require EAS projectId; Edge fan-out deferred.
+
+## [2026-07-24] write | Social feed schema + mobile Feed/Compose UI
+- **Session Focus**: Implement v1 social layer for Visual Labs mobile after auth verification.
+- **Backend:** Added `visual-labs/supabase/migrations/0005_social_feed.sql` (`posts`, `post_likes`, `comments`, `follows`, media bucket + RLS). Must be applied in Supabase SQL Editor.
+- **Mobile:** Feed list (Everyone/Following, categories), post detail + comments, compose (text/photo/camera/project), optimistic likes, delete own content.
+- **Docs:** Updated [Mobile App Plan](Wikis/no-origins/visual-labs-mobile/app_plan.md).
+
+## [2026-07-24] write | Mobile auth, Profile, and projects polish
+- **Session Focus**: Ship Supabase session auth on `visual-labs-mobile`, a real Profile tab, and projects empty/error/open-on-web polish using production web URL **https://no-origins.com**.
+- **Code Changes** (`visual-labs-mobile`):
+  - Session: AsyncStorage-backed supabase client (`persistSession` + `autoRefreshToken`), `AuthProvider` (profile + MFA AAL).
+  - Auth screens: `(auth)/sign-in`, `(auth)/mfa`; Profile identity/MFA/sign-out; Projects pull-to-refresh + empty/error states.
+  - `EXPO_PUBLIC_WEB_URL=https://no-origins.com`; open-on-web → `/projects/{id}`.
+- **Docs**: Updated [Mobile App Plan](Wikis/no-origins/visual-labs-mobile/app_plan.md) resume status.
+
+## [2026-07-17] ingest | Index and document React Native/Expo mobile companion app
+- **Session Focus**: Integrate the sibling mobile companion app (`visual-labs-mobile`) planning and design system specifications into the central Obsidian wiki repository. Review codebase changes and propose submodule pointer updates.
+- **Modified Pages**:
+  - Created [Mobile App Plan](Wikis/no-origins/visual-labs-mobile/app_plan.md) mapping product scope, native capabilities (Push, Biometrics, Offline, Camera), and implementation roadmap from `Mobile.md`.
+  - Created [Mobile Design System](Wikis/no-origins/visual-labs-mobile/design_system.md) mapping token mappings, RN `<SectionProvider>` accent swap mechanism, safe areas, Skia rendering contracts (Sphere, particle Atlas, InfiniteMenu), and platform considerations from `Mobile-Design.md`.
+  - Updated [No Origins Workspace Wiki Index](Wikis/no-origins/index.md) to register the new mobile companion documentation suite.
+- **Sync Actions**: Synced all updated repository wiki documents to the local Obsidian vault directory.
 
 ## [2026-07-16] lint | Review and update wikis in Obsidian with all latest code changes
 - **Session Focus**: Review codebase modifications across No Origins repositories, document Read-Only Mode and custom Navigation Menu toolbar updates, sync all markdown documentation to the Obsidian vault, and verify that the wiki indices, logs, and sprint boards are up to date.
@@ -227,8 +353,8 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Implemented the `tiptap-card` shape utility [TipTapCardUtil.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TipTapCardUtil.tsx) drawing glassmorphic cards on the canvas.
   - Built the sliding panel editor [TipTapSplitEditor.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TipTapSplitEditor.tsx) hosting the rich-text workspace and real-time word counter.
   - Built [TldrawCanvas.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TldrawCanvas.tsx) and [ClientTldrawCanvas.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/ClientTldrawCanvas.tsx) with debounced autosaving and dynamic import.
-  - Built the dashboard page [projects/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/projects/page.tsx) with Workspace management, SemVer publish modal, and Discovery forking operations.
-  - Built the canvas route [projects/[id]/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/projects/[id]/page.tsx) with server validations.
+  - Built the dashboard page [projects/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/%28base%29/projects/page.tsx) with Workspace management, SemVer publish modal, and Discovery forking operations.
+  - Built the canvas route [projects/[id]/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/%28base%29/projects/[id]/page.tsx) with server validations.
   - Added PROJECTS menu item in [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) and protected the routes in [middleware.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/utils/supabase/middleware.ts).
 - **Diagnostics**: Run `npm run lint` and `npm run build` checking static page generation and server builds. Passed successfully.
 
