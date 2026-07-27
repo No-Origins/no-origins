@@ -6,8 +6,9 @@ This document tracks active development goals, session checklists, and staged do
 
 ## Current Goal
 - **Focus**: Finish EAS device pipeline after **paid Apple Developer Program** enrollment, then resume product work (haptics port, Feed/Compose unify, device smoke).
-- **Blocked until tonight (user)**: Paid Apple Developer membership for physical iPhone builds, TestFlight, and production push entitlements.
-- **Prior session completed (2026-07-24)**: EAS fully configured; iOS **simulator** + Android **development** builds finished; PRs open for web + mobile; GitHub under No-Origins org.
+- **Prior session completed (2026-07-27)**: Comprehensive wiki review and update in Obsidian completed across all repositories (`visual-labs`, `visual-labs-mobile`, `realm`, and parent `no-origins`).
+
+
 
 ---
 

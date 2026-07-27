@@ -5,6 +5,25 @@ This is an append-only log detailing all major updates, feature implementations,
 Format for entries: `## [YYYY-MM-DD] <operation> | <description>`
 Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `refactor` (code restructuring).
 
+## [2026-07-27] ingest | Review and update wikis with latest code changes across all No Origins repositories
+- **Session Focus**: Audit codebase across `visual-labs`, `visual-labs-mobile`, `realm`, and parent `no-origins` repositories, verifying all recent features (social feed, profile parity, mobile responsiveness, EAS builds, read-only viewing) are fully documented across the Obsidian wiki.
+- **Updated Pages**:
+  - [Navigation & Subpage UI](Wikis/no-origins/visual-labs/navigation_ui.md): Documented short mobile viewport height clamping (`100dvh`), responsive padding scaling, and text collision prevention on height-constrained mobile screens.
+  - [Ecosystem Architecture](Wikis/no-origins/global/architecture.md): Verified tech stack specifications, global pill button vs underline tab controls, mobile companion Expo SDK 57 / Skia setup, and backend social schema.
+  - [Canvas Autosave (Projects)](Wikis/no-origins/visual-labs/canvas_autosave.md): Verified public read-only viewer mode (`isReadOnly`), snapshot load unblocking, autosave guards, and initial `zoomToFit` framing.
+  - [Active Session Tracker](Wikis/no-origins/active_sprint.md): Verified active goals, handoff state, and next session prompts.
+  - [Wiki Index](Wikis/no-origins/index.md): Verified directory listings and bidirectional link integrity across all submodule pages.
+
+## [2026-07-26] ingest | Review and update wikis with latest code changes across all No Origins repositories
+- **Session Focus**: Conduct comprehensive audit and update of Obsidian wiki documentation covering all recent code features, bug fixes, and architectural refinements across `visual-labs`, `visual-labs-mobile`, `realm`, and parent `no-origins` repositories.
+- **Updated Pages**:
+  - [Ecosystem Architecture](Wikis/no-origins/global/architecture.md): Documented segmented underline tab controls (`button[data-variant="tab"]` with `border-radius: 0 !important;`) vs global pill buttons (`--radius-button: 9999px`), public read-only workspace viewing (`/projects/[id]`), `zoomToFit` on load, and inline command palette dropdown.
+  - [Navigation & Subpage UI](Wikis/no-origins/visual-labs/navigation_ui.md): Added documentation for Projects Dashboard underline tab styling vs global pill buttons, avatar resolution hierarchy (custom `avatar_path` -> OAuth -> Gravatar -> initials), and layout updates.
+  - [Canvas Autosave (Projects)](Wikis/no-origins/visual-labs/canvas_autosave.md): Documented public read-only viewer mode (`isReadOnly`), snapshot loading unblocking, autosave listener guards, and automatic `zoomToFit` framing on initial load.
+  - [Nested Sub-Projects](Wikis/no-origins/visual-labs/sub_projects.md): Documented custom shape tools, inline command palette dropdown integration in top menubar, native HTML `<a>` link anchors on sub-project card "Open Board" buttons, and root workspace cascading publishing (`is_published`).
+  - [Active Session Tracker](Wikis/no-origins/active_sprint.md): Reset sprint tracker for next session handoff.
+  - [Wiki Index](Wikis/no-origins/index.md): Verified link integrity and directory structure across all submodules.
+
 ## [2026-07-25] ingest | Review and update wikis with latest code changes across all No Origins repositories
 - **Session Focus**: Conduct comprehensive review of all recent code changes across `visual-labs`, `visual-labs-mobile`, `realm`, and parent `no-origins` repositories, and synchronize Obsidian wiki documentation accordingly.
 - **Updated Pages**:

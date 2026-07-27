@@ -52,12 +52,15 @@ Registers the custom Tldraw shape `SubProjectCardShape` (`"sub-project-card"`):
 * **Refactored Link Anchor**: The "Open Board" button is implemented as a native HTML `<a>` anchor, enabling normal click routing, as well as browser middle-click or Cmd/Ctrl+click to open the nested board in a new tab.
 * **Parent-Scoped Publishing Badge**: Instead of showing an independent "Publish" button, sub-project cards show a "Via parent" status badge since publishing is managed at the root workspace level.
 
-### 3. Canvas Navigation & HUD overrides (`TldrawCanvas.tsx`)
-* Custom toolbar button (FolderGit icon) and Command palette (`Cmd+K`) item.
-* Floating parent navigation shortcut: Displays a "Back to Parent: [parentProjectName]" button in the left of the header HUD next to the main Dashboard back button when nested.
+### 3. Canvas Navigation, Toolbar & Inline Menus (`TldrawCanvas.tsx`)
+* **Custom Shape Tools**: Integrated shape tools (SubProjectCard, TableCard, TipTapCard), shape tool shortcuts, and custom toolbar button (FolderGit icon).
+* **Inline Command Palette Dropdown**: Command palette (`Cmd+K`) item and action list are rendered directly inside inline dropdown content in the canvas top menubar for unified UI consistency.
+* **Floating Parent Navigation Shortcut**: Displays a "Back to Parent: [parentProjectName]" button in the top-left header HUD next to the main Dashboard back button when navigating inside a nested child project.
+* **Read-Only Mode & Framing**: Non-owner/visitor views disable editing toolbars, display a read-only badge, unblock store snapshot loading, and execute initial `zoomToFit` to center the workspace content automatically.
 
 ### 4. Dashboard, Publishing, & Trash
-* Personal projects list filters out soft-deleted projects and renders sub-project badges pointing to parents.
-* **Cascading Publishing**: Publishing a workspace cascades `is_published = true` to its entire recursive sub-project tree, ensuring nested child board links successfully resolve for public viewers.
-* **Discovery Filtering**: The Discovery Hub lists root workspaces only; published sub-projects are not surfaced as separate individual discovery entries, preserving layout clarity.
-* **Trash tab**: Displays soft-deleted projects. Offers **Restore** (sets `deleted_at = null`) and **Delete Permanently** (hard delete from database).
+* **Personal Projects List**: Filters out soft-deleted projects and renders sub-project badges pointing to parents.
+* **Cascading Publishing**: Publishing a root workspace cascades `is_published = true` to its entire recursive sub-project tree, ensuring nested child board links successfully resolve for public viewers.
+* **Discovery Hub Filtering**: The Discovery Hub lists root workspaces only; published sub-projects are not surfaced as separate individual discovery entries, preserving layout clarity.
+* **Trash Tab**: Displays soft-deleted projects. Offers **Restore** (sets `deleted_at = null`) and **Delete Permanently** (hard delete from database).
+

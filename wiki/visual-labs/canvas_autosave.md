@@ -54,6 +54,17 @@ const snapshot = editor.store.getStoreSnapshot("document");
 
 ---
 
+## 👁️ Public Read-Only Viewing (`isReadOnly` Mode)
+
+Unauthenticated visitors and non-owner users viewing published projects (`is_published = true`) at `/projects/[id]` open the workspace in read-only mode:
+
+1. **Snapshot Load Unblocked**: The canvas data snapshot is always loaded into the store via `loadSnapshot()` regardless of `isReadOnly`. (An earlier bug returned early before loading when `isReadOnly` was true, causing published canvases to display blank for viewers).
+2. **Autosave Listener Guarded**: The store change listener and write loop are strictly gated on `!isReadOnly`. Read-only viewers make no Supabase persistence calls.
+3. **Auto-Framing (`zoomToFit`)**: On initial snapshot load, if `isReadOnly` is active, the canvas automatically executes `editor.zoomToFit({ animation: { duration: 300 } })`. This ensures public viewers open framed cleanly on the existing content rather than looking at a blank corner of the infinity canvas.
+
+
+---
+
 ## 🔭 Deferred (not yet implemented)
 
 - **Incremental diff persistence.** Each `store.listen` callback receives a `HistoryEntry` with the exact `RecordsDiff`. Persisting diffs instead of the full document would cut write payload as boards grow. This is an architectural change to the persistence model (append-only diffs + periodic compaction) and is intentionally out of scope for the over-triggering fix.

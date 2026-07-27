@@ -11,7 +11,7 @@ To support a multi-layered interactive experience, the application utilizes a sp
 ### 1. Viewport Split Layout
 Defined in [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/%28base%29/layout.tsx), the layout divides the screen:
 - **Sphere Section**: Left on desktop (`md:flex-row`), bottom on mobile (`flex-col`). It contains the interactive WebGL canvas overlays ([BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) and [SphereChatInput.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/SphereChatInput.tsx)).
-- **Sub-page Section**: Right on desktop, top on mobile. It scrolls independently and houses the child route pages. On mobile, it is top-aligned and center-justified (`items-start min-h-full`) to prevent overlapping visualizer controls.
+- **Sub-page Section**: Right on desktop, top on mobile. It scrolls independently and houses the child route pages. On mobile, it is top-aligned and center-justified (`items-start min-h-full`) to prevent overlapping visualizer controls. Short mobile viewports enforce responsive padding scaling, `100dvh` viewport height bounds, and flex contraction to eliminate text collisions on height-constrained mobile screens.
 
 ### 2. Viewport Backdrop Field
 The entire viewport is backed by [BackdropField.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackdropField.tsx) mounted at the root level of `BaseLayout`. This ensures that the reactive particle [DotField.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/DotField.tsx) remains visible behind both the canvas sphere and all textual card pages, overlaid with a radial vignette gradient.
@@ -129,8 +129,19 @@ Used exclusively on the `/community` route, `<MagicBento />` is an advanced inte
 
 ### 2. User Avatar (`UserAvatar`)
 Renders the authenticated user's profile icon across cards and HUD components.
-- **Gravatar Integration**: Automatically computes the MD5 hash of the user's email to fetch the official Gravatar photo if it exists.
-- **FallbackInitials**: If no avatar is registered, the component parses the metadata user initials (or email prefix) and displays them over a custom background reflecting the active `--section-accent` slot theme, maintaining style cohesion.
+- **Avatar Resolution Priority**: Checks custom uploaded avatar (`avatar_path` stored in Supabase `media` bucket) first, falls back to OAuth `avatar_url`/`picture`, then Gravatar MD5 hash, and finally initial letter badges.
+- **FallbackInitials**: If no photo exists, parses the metadata user initials (or email prefix) and displays them over a custom background reflecting the active `--section-accent` slot theme, maintaining style cohesion.
+
+### 3. Projects Dashboard Underline Tabs vs Global Pill Buttons
+- **Global Pill Buttons**: Standard buttons and `[data-slot="button"]` elements inherit `--radius-button: 9999px` via base CSS in [index.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/index.css) to guarantee pill-shaped CTAs across HUDs, social feed, and admin panels.
+- **Segmented Underline Tabs**: Dashboard tab selectors (`My Projects`, `Discovery Hub`, `Trash`) on `/projects` require rectangular, unrounded tabs with border-bottom active indicators. To achieve this, tab buttons specify `data-variant="tab"` and receive an explicit override in [index.css](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/index.css):
+  ```css
+  button[data-variant="tab"] {
+    border-radius: 0 !important;
+  }
+  ```
+- Active tabs render `-mb-px border-b-2 border-section text-section` to align seamlessly with the bottom border line of the tab bar.
+
 
 
 ### 1. CSS Page Entry Animation
