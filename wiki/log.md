@@ -5,6 +5,15 @@ This is an append-only log detailing all major updates, feature implementations,
 Format for entries: `## [YYYY-MM-DD] <operation> | <description>`
 Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `refactor` (code restructuring).
 
+## [2026-07-28] ingest | Review and update wikis with latest code changes across all No Origins repositories
+- **Session Focus**: Conduct comprehensive audit and update of Obsidian wiki documentation covering all recent code features, bug fixes, and architectural refinements across `visual-labs`, `visual-labs-mobile`, `realm`, and parent `no-origins` repositories.
+- **Updated Pages**:
+  - [Navigation & Subpage UI](Wikis/no-origins/visual-labs/navigation_ui.md): Fixed percent-encoded file links to use clean Markdown paths for `(base)` and `(cards)` route groups; verified short mobile viewport height clamping (`100dvh`), responsive padding scaling, and text collision prevention.
+  - [Ecosystem Architecture](Wikis/no-origins/global/architecture.md): Verified repository layout, tech stack details, pill-shaped global button rules vs underline tab overrides (`button[data-variant="tab"]`), Expo SDK 57 mobile setup, and backend social schema.
+  - [Canvas Autosave (Projects)](Wikis/no-origins/visual-labs/canvas_autosave.md): Verified public read-only viewer mode (`isReadOnly`), snapshot loading unblocking, autosave listener guards, and automatic `zoomToFit` framing on initial load.
+  - [Active Session Tracker](Wikis/no-origins/active_sprint.md): Synchronized prior session completion status for 2026-07-28 and preserved upcoming EAS/product roadmap handoff checklist.
+  - [Wiki Index](Wikis/no-origins/index.md): Verified link integrity and directory structure across all submodules.
+
 ## [2026-07-27] ingest | Review and update wikis with latest code changes across all No Origins repositories
 - **Session Focus**: Audit codebase across `visual-labs`, `visual-labs-mobile`, `realm`, and parent `no-origins` repositories, verifying all recent features (social feed, profile parity, mobile responsiveness, EAS builds, read-only viewing) are fully documented across the Obsidian wiki.
 - **Updated Pages**:
@@ -372,8 +381,8 @@ Operations: `ingest` (adding docs), `write` (code features), `lint` (audits), `r
   - Implemented the `tiptap-card` shape utility [TipTapCardUtil.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TipTapCardUtil.tsx) drawing glassmorphic cards on the canvas.
   - Built the sliding panel editor [TipTapSplitEditor.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TipTapSplitEditor.tsx) hosting the rich-text workspace and real-time word counter.
   - Built [TldrawCanvas.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/TldrawCanvas.tsx) and [ClientTldrawCanvas.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/projects/ClientTldrawCanvas.tsx) with debounced autosaving and dynamic import.
-  - Built the dashboard page [projects/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/%28base%29/projects/page.tsx) with Workspace management, SemVer publish modal, and Discovery forking operations.
-  - Built the canvas route [projects/[id]/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/%28base%29/projects/[id]/page.tsx) with server validations.
+  - Built the dashboard page [projects/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/projects/page.tsx) with Workspace management, SemVer publish modal, and Discovery forking operations.
+  - Built the canvas route [projects/[id]/page.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/projects/[id]/page.tsx) with server validations.
   - Added PROJECTS menu item in [BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) and protected the routes in [middleware.ts](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/utils/supabase/middleware.ts).
 - **Diagnostics**: Run `npm run lint` and `npm run build` checking static page generation and server builds. Passed successfully.
 

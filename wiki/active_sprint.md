@@ -6,7 +6,7 @@ This document tracks active development goals, session checklists, and staged do
 
 ## Current Goal
 - **Focus**: Finish EAS device pipeline after **paid Apple Developer Program** enrollment, then resume product work (haptics port, Feed/Compose unify, device smoke).
-- **Prior session completed (2026-07-27)**: Comprehensive wiki review and update in Obsidian completed across all repositories (`visual-labs`, `visual-labs-mobile`, `realm`, and parent `no-origins`).
+- **Prior session completed (2026-07-28)**: Comprehensive wiki review and update in Obsidian completed across all repositories (`visual-labs`, `visual-labs-mobile`, `realm`, and parent `no-origins`). All recent features and fixes (mobile shell responsiveness, short mobile viewport geometry, projects dashboard underline tabs, public read-only workspace access, EAS build pipeline, and shared Supabase social schema) are verified and documented across the Obsidian wiki.
 
 
 

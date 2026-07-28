@@ -9,7 +9,7 @@ This document details the navigation framework of **No Origins**, specifically t
 To support a multi-layered interactive experience, the application utilizes a split-viewport structure and shared card layouts:
 
 ### 1. Viewport Split Layout
-Defined in [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/%28base%29/layout.tsx), the layout divides the screen:
+Defined in [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/layout.tsx), the layout divides the screen:
 - **Sphere Section**: Left on desktop (`md:flex-row`), bottom on mobile (`flex-col`). It contains the interactive WebGL canvas overlays ([BackgroundVisualizer.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackgroundVisualizer.tsx) and [SphereChatInput.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/SphereChatInput.tsx)).
 - **Sub-page Section**: Right on desktop, top on mobile. It scrolls independently and houses the child route pages. On mobile, it is top-aligned and center-justified (`items-start min-h-full`) to prevent overlapping visualizer controls. Short mobile viewports enforce responsive padding scaling, `100dvh` viewport height bounds, and flex contraction to eliminate text collisions on height-constrained mobile screens.
 
@@ -17,7 +17,7 @@ Defined in [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-la
 The entire viewport is backed by [BackdropField.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/BackdropField.tsx) mounted at the root level of `BaseLayout`. This ensures that the reactive particle [DotField.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/components/DotField.tsx) remains visible behind both the canvas sphere and all textual card pages, overlaid with a radial vignette gradient.
 
 ### 3. Shared Cards Layout Group
-The six internal pages are nested inside the `(cards)` route group [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/%28base%29/%28cards%29/layout.tsx). Rather than duplicate styling and mount logic:
+The six internal pages are nested inside the `(cards)` route group [layout.tsx](file:///Users/hiddenstack/Creatives/no-origins/visual-labs/src/app/(base)/(cards)/layout.tsx). Rather than duplicate styling and mount logic:
 - The shared layout enforces a `max-w-[450px]` container with custom padding and pointer event routing.
 - It is keyed on `pathname` (`key={pathname}`), ensuring that the entry animations replay and the ripple triggers dispatch on every route transition.
 
