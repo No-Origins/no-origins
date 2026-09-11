@@ -452,16 +452,30 @@
 
 .noo-profile__card {
   position: relative; overflow: hidden; isolation: isolate;
-  aspect-ratio: 1; border-radius: var(--r-2xl);
+  aspect-ratio: 1;
+  /* A PROPORTIONAL radius, which is the one place on the platform a radius is not a token. The card is the same
+     component at 280px in a row and at 420px at the front of a deck, and `--r-2xl` (48) reads as a soft rectangle
+     at the large size and as a pill-ish blob at the small one. A percentage keeps the corner the same *shape* at
+     every size — which is what the reference has, and what a square photograph wants. */
+  border-radius: 14%;
   /* the hue's wash under the grain, exactly as a bento cell (§9) — it is what shows through a cutout, and what
      the card is when there is no picture at all */
   background-color: var(--surface);
   background-image: linear-gradient(135deg, color-mix(in oklch, var(--pf-hue) 62%, var(--surface)), var(--surface) 74%);
-  /* the hairline and the top edge catching light, drawn INSIDE so they sit over the picture (§3 cues 1 and 2) */
+  /* the hairline and the top edge catching light, drawn INSIDE so they sit over the picture (§3 cues 1 and 2),
+     plus the bottom rim a thick glass object gets where it turns away from the light */
   box-shadow:
     inset 0 0 0 1px var(--glass-border),
-    inset 0 1px 0 color-mix(in oklch, white var(--glass-hl-2), transparent),
-    var(--e3);
+    inset 0 1.5px 0 color-mix(in oklch, white var(--glass-hl-3), transparent),
+    inset 0 -1px 0 color-mix(in oklch, var(--shade) 10%, transparent),
+    var(--e3),
+    0 18px 40px color-mix(in oklch, var(--shade) 12%, transparent);
+}
+/* The corner is a squircle wherever the browser has one — continuous curvature, so the curve runs about half as
+   far again along the edge as a circular arc of the same radius, which is why the radius goes up with it. It is
+   one declaration and a silent no-op elsewhere, so the fallback above is the design, not a degraded version. */
+@supports (corner-shape: squircle) {
+  .noo-profile__card { corner-shape: squircle; border-radius: 20%; }
 }
 .noo-profile__media { position: absolute; inset: 0; z-index: 0; }
 .noo-profile__media > * { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
@@ -469,11 +483,56 @@
 .noo-profile--cutout .noo-profile__media { inset: 6% 0 0 0; }
 .noo-profile--cutout .noo-profile__media > * { object-fit: contain; object-position: center bottom; }
 
-/* the sweep and the grain: the card's material, above the picture and below the words */
+/* THE GLOSS (Bhargav, 2026-09-11: "still don't have the glossy design").
+   The reference's shine is not a highlight painted on top — it is the bottom of the picture going to frosted
+   glass: blurred, a little brighter, a little more saturated, and with NO edge anywhere. That last part is the
+   whole trick, and it is why this is not the `glass-2` plate that was rejected an hour earlier. A plate has a
+   boundary, so it reads as a panel sitting on the photograph; this fades out upward, so the picture simply
+   becomes glass as it goes down and the words are already standing on it.
+
+   **It blurs a second copy of the picture rather than the backdrop.** `backdrop-filter` is the obvious tool and
+   it is the wrong one: Chromium clips the filtered backdrop to the element's border box and ignores the mask, so
+   the fade that is the entire point comes out as a hard horizontal line across the card. Confirmed by looking,
+   not assumed. A duplicated `<img>` under `filter: blur()` is the element's own content, so the mask applies to
+   it normally, and it renders the same everywhere instead of only where backdrop-filter is feathered. The copy
+   is scaled up because a blur samples past its own edges and would otherwise leave a transparent fringe. */
+.noo-profile__frost {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden;
+  -webkit-mask-image: linear-gradient(to top, #000 0 26%, color-mix(in oklch, #000 50%, transparent) 46%, transparent 64%);
+  mask-image: linear-gradient(to top, #000 0 26%, color-mix(in oklch, #000 50%, transparent) 46%, transparent 64%);
+}
+.noo-profile__frost > * {
+  display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 0;
+  filter: blur(18px) saturate(1.5) brightness(1.2);
+  transform: scale(1.22);
+}
+/* the white film a frosted surface has. It shares the parent's mask, so it fades out with the blur and never
+   becomes an edge — which is the only reason this is allowed to exist at all. */
+.noo-profile__frost:not(:empty)::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to top, color-mix(in oklch, white 15%, transparent), transparent 72%);
+}
+/* A cutout figure and a bare card have no photograph to frost, and white words on the hue's own wash are not
+   legible on their own. Those get the one thing this component otherwise refuses — a scrim — in the GROUND's
+   shade rather than black, because black over a warm wash is a bruise. */
+.noo-profile__frost:empty {
+  /* its own ramp, not the mask's: the mask is shaped for a blur that reads from about two thirds down, and a
+     scrim spread over that same distance is too thin to hold white type where the type actually sits. */
+  background: linear-gradient(to top,
+    color-mix(in oklch, var(--shade) 74%, transparent) 0%,
+    color-mix(in oklch, var(--shade) 46%, transparent) 16%,
+    transparent 44%);
+}
+
+/* the sweep and the grain: the card's material, above the frost and below the words */
 .noo-profile__sheen {
-  position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: inherit;
+  position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit;
   background:
-    linear-gradient(118deg, color-mix(in oklch, white var(--glass-sweep), transparent) 0%, transparent 42%);
+    /* the specular streak a curved glass face throws — short, bright, and off the top-left corner */
+    linear-gradient(118deg,
+      color-mix(in oklch, white calc(var(--glass-sweep) + 14%), transparent) 0%,
+      color-mix(in oklch, white var(--glass-sweep), transparent) 12%,
+      transparent 46%);
 }
 .noo-profile__sheen::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
@@ -487,7 +546,7 @@
    reference's: about 8.5% of the card for the name, 5.7% for the role, so it scales with the card rather than
    with the page — hence container units. */
 .noo-profile__words {
-  position: absolute; inset: auto 0 0 0; z-index: 2;
+  position: absolute; inset: auto 0 0 0; z-index: 3;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   padding: 0 6% 7%; text-align: center; color: #fff;
   text-shadow:
@@ -502,9 +561,11 @@
   margin: 0; font-family: var(--ff-sans); font-weight: 400;
   font-size: clamp(13px, 5.7cqw, 25px); line-height: 1.25; opacity: 0.92;
 }
+/* The light the picture spills onto the surface under it — the other half of the gloss. It sits low and tight
+   rather than haloing the whole card, because that is where a lit object throws light: down and a little out. */
 .noo-profile__bloom {
-  position: absolute; inset: 8% -6% -10% -6%; z-index: -1; pointer-events: none;
-  filter: blur(38px) saturate(1.5); opacity: 0.55; transform: scaleY(0.92);
+  position: absolute; inset: 26% -7% -13% -7%; z-index: -1; pointer-events: none;
+  filter: blur(40px) saturate(1.9) brightness(1.1); opacity: 0.62; transform: scaleY(0.9);
 }
 .noo-profile__bloom > * { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
 
@@ -537,8 +598,8 @@
 .noo-deck__slide {
   flex: 0 0 var(--deck-card); scroll-snap-align: center; container-type: inline-size;
   margin-inline: calc(var(--deck-card) * var(--deck-overlap, 0.28) / -2);
-  transform: scale(calc(1 - 0.22 * var(--ad, 0))) translateY(calc(var(--ad, 0) * 4%));
-  opacity: calc(1 - 0.22 * var(--ad, 0));
+  transform: scale(calc(1 - 0.3 * var(--ad, 0))) translateY(calc(var(--ad, 0) * 3%));
+  opacity: calc(1 - 0.18 * var(--ad, 0));
   transform-origin: center 62%;
   transition: transform var(--d-base) var(--ease), opacity var(--d-base) var(--ease);
   will-change: transform;
@@ -563,7 +624,7 @@
 @media (forced-colors: active) {
   .noo-profile__card { border: 1px solid CanvasText; }
   .noo-profile__words { background: Canvas; color: CanvasText; }
-  .noo-profile__bloom { display: none; }
+  .noo-profile__frost, .noo-profile__sheen, .noo-profile__bloom { display: none; }
 }
 
 /* ===== forced colours (Windows high contrast) — glass and tints vanish; keep every edge and state legible ===== */

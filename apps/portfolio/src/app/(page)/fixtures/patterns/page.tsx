@@ -187,14 +187,16 @@ export default function PatternsFixture() {
       </Case>
 
       <Case
-        title="ProfileCard — a glass object holding a picture"
+        title="ProfileCard — the picture turns to glass at the bottom"
         note={
           <>
-            The first version was the reference&apos;s language: a full-bleed photo with a gradient scrim, wearing
-            none of §3&apos;s material. It carries all four cues now — the hairline, the 118° sweep, the grain, and
-            a real <span className="noo-code">glass-2</span> plate under the words that <i>blurs</i> the picture
-            behind it instead of darkening it. Glass only goes over something worth seeing through; a face
-            qualifies.
+            The gloss is not a panel and not a highlight: the lower half of the photograph is blurred, brightened
+            and a little more saturated, masked so it has <b>no edge anywhere</b>. A plate has a boundary, so it
+            reads as a thing placed on the picture; this reads as the picture&apos;s own surface, and the words are
+            already standing on it by the time they appear. It blurs a second copy of the media rather than using{" "}
+            <span className="noo-code">backdrop-filter</span>, which Chromium clips to the border box and renders
+            as a hard line straight across the card. Over it the card keeps all four §3 cues — hairline, lit top
+            edge, 118° sweep, grain.
           </>
         }
       >
