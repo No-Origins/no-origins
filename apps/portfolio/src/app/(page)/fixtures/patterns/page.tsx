@@ -186,12 +186,37 @@ export default function PatternsFixture() {
         </Stack>
       </Case>
 
-      <Case title="ProfileCard on its own" note="The bloom under it is the media rendered a second time, blurred and scaled — the picture already knows what colour it is, so nothing has to extract one. Without media the hue fills the card and the bloom is off.">
+      <Case
+        title="ProfileCard — a glass object holding a picture"
+        note={
+          <>
+            The first version was the reference&apos;s language: a full-bleed photo with a gradient scrim, wearing
+            none of §3&apos;s material. It carries all four cues now — the hairline, the 118° sweep, the grain, and
+            a real <span className="noo-code">glass-2</span> plate under the words that <i>blurs</i> the picture
+            behind it instead of darkening it. Glass only goes over something worth seeing through; a face
+            qualifies.
+          </>
+        }
+      >
         <Row gap={40} align="start">
-          <div className="w-[300px]">
-            <ProfileCard name="Natalie Ramirez" role="Software Engineer" hue="blue" media={<Image src={FACES[0]!.src} alt="" ratio={1} />} />
+          <div className="w-[280px]">
+            <Label className="text-muted mb-3">fill — a photograph, cropped square</Label>
+            <ProfileCard name="Natalie Ramirez" role="Software Engineer" hue="blue" media={<Image src={FACES[1]!.src} alt="" ratio={1} />} />
           </div>
-          <div className="w-[300px]">
+          <div className="w-[280px]">
+            <Label className="text-muted mb-3">cutout — a figure standing on the hue&apos;s wash</Label>
+            {/* A background-free PNG goes here. Until one is in `public/faces/`, the blob stands in — it is the
+                same job: a figure with no background of its own, bottom-aligned on the card's wash. */}
+            <ProfileCard
+              crop="cutout"
+              name="The host"
+              role="Standing on the wash"
+              hue="peach"
+              media={<Blob size="hero" variant="glass" />}
+            />
+          </div>
+          <div className="w-[280px]">
+            <Label className="text-muted mb-3">no media — the wash is the card</Label>
             <ProfileCard name="No picture yet" role="The hue fills it instead" hue="green" />
           </div>
         </Row>

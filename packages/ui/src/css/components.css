@@ -453,22 +453,55 @@
 .noo-profile__card {
   position: relative; overflow: hidden; isolation: isolate;
   aspect-ratio: 1; border-radius: var(--r-2xl);
-  background: color-mix(in oklch, var(--pf-hue) 55%, var(--surface));
-  box-shadow: var(--e3);
+  /* the hue's wash under the grain, exactly as a bento cell (§9) — it is what shows through a cutout, and what
+     the card is when there is no picture at all */
+  background-color: var(--surface);
+  background-image: linear-gradient(135deg, color-mix(in oklch, var(--pf-hue) 62%, var(--surface)), var(--surface) 74%);
+  /* the hairline and the top edge catching light, drawn INSIDE so they sit over the picture (§3 cues 1 and 2) */
+  box-shadow:
+    inset 0 0 0 1px var(--glass-border),
+    inset 0 1px 0 color-mix(in oklch, white var(--glass-hl-2), transparent),
+    var(--e3);
 }
-.noo-profile__media { position: absolute; inset: 0; }
+.noo-profile__media { position: absolute; inset: 0; z-index: 0; }
 .noo-profile__media > * { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
-.noo-profile__words {
-  position: absolute; inset: auto 0 0 0; z-index: 1;
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 24px 20px 28px; text-align: center; color: #fff;
-  /* the scrim: the ground's own darkness, so a warm picture stays warm under it */
-  background: linear-gradient(to top, color-mix(in oklch, var(--ink) 62%, transparent), transparent 78%);
+/* a background-free figure stands on the wash rather than filling the square */
+.noo-profile--cutout .noo-profile__media { inset: 6% 0 0 0; }
+.noo-profile--cutout .noo-profile__media > * { object-fit: contain; object-position: center bottom; }
+
+/* the sweep and the grain: the card's material, above the picture and below the words */
+.noo-profile__sheen {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: inherit;
+  background:
+    linear-gradient(118deg, color-mix(in oklch, white var(--glass-sweep), transparent) 0%, transparent 42%);
 }
-.noo-profile__name { margin: 0; font: 600 clamp(20px, 3.4cqw, 30px)/1.15 var(--ff-sans); letter-spacing: -0.01em;
-  text-shadow: 0 1px 12px color-mix(in oklch, black 45%, transparent); }
-.noo-profile__role { margin: 0; font: 400 clamp(14px, 2.4cqw, 20px)/1.3 var(--ff-sans); opacity: 0.88;
-  text-shadow: 0 1px 10px color-mix(in oklch, black 40%, transparent); }
+.noo-profile__sheen::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--ink); opacity: calc(var(--grain-strength) * 0.7);
+  -webkit-mask-image: var(--grain); mask-image: var(--grain);
+  -webkit-mask-size: 120px 120px; mask-size: 120px 120px;
+}
+
+/* The words sit ON the picture — no plate, no scrim panel (Bhargav, 2026-09-11: "there is background behind the
+   text"). Legibility comes from a shadow, which costs nothing and hides nothing of the face. The size is the
+   reference's: about 8.5% of the card for the name, 5.7% for the role, so it scales with the card rather than
+   with the page — hence container units. */
+.noo-profile__words {
+  position: absolute; inset: auto 0 0 0; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 0 6% 7%; text-align: center; color: #fff;
+  text-shadow:
+    0 1px 2px color-mix(in oklch, black 34%, transparent),
+    0 2px 18px color-mix(in oklch, black 40%, transparent);
+}
+.noo-profile__name {
+  margin: 0; font-family: var(--ff-sans); font-weight: 500;
+  font-size: clamp(19px, 8.5cqw, 38px); line-height: 1.12; letter-spacing: -0.015em;
+}
+.noo-profile__role {
+  margin: 0; font-family: var(--ff-sans); font-weight: 400;
+  font-size: clamp(13px, 5.7cqw, 25px); line-height: 1.25; opacity: 0.92;
+}
 .noo-profile__bloom {
   position: absolute; inset: 8% -6% -10% -6%; z-index: -1; pointer-events: none;
   filter: blur(38px) saturate(1.5); opacity: 0.55; transform: scaleY(0.92);
