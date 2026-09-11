@@ -476,6 +476,17 @@
 .noo-bento[data-hue="yellow"]   { --bento-hue: var(--yellow);   --bento-hue-deep: var(--yellow-deep); --bento-hue-ink: var(--yellow-ink); }
 .noo-bento[data-hue="blue"]     { --bento-hue: var(--blue);     --bento-hue-deep: var(--blue-deep); --bento-hue-ink: var(--blue-ink); }
 
+/* Page mode (§8.4) — the same grid as a section's full view: 10 fluid columns, rows that GROW.
+   `minmax(--bento-cell, auto)` is the whole difference: a cell is at least one box tall and never clips, which is
+   what retired nineteen hand-measured panel heights. Horizontally true, vertically approximate. */
+.noo-bento--page {
+  width: 100%;
+  max-width: 1600px;
+  grid-template-columns: repeat(var(--bento-cols, 10), minmax(0, 1fr));
+  grid-auto-rows: minmax(var(--bento-cell), auto);
+}
+.noo-bento--page .noo-bento__cell { justify-content: flex-start; gap: 10px; overflow: visible; }
+
 .noo-bento__cell {
   position: relative;
   display: flex; flex-direction: column; justify-content: space-between; gap: 8px;
@@ -502,9 +513,10 @@
   background-image: linear-gradient(135deg, color-mix(in oklch, var(--ink) 84%, var(--bento-hue)), var(--ink) 70%);
   color: var(--ground);
 }
+.noo-bento__cell--bare { background: none; box-shadow: none; padding-inline: 4px; }               /* type on the grid: a page's intro */
 .noo-bento__cell--glass { border-radius: var(--r-lg); }                                        /* glass has its own material: no gradient, no grain */
-.noo-textured, .noo-bento__cell:not(.noo-bento__cell--glass) { position: relative; }
-.noo-textured::after, .noo-bento__cell:not(.noo-bento__cell--glass)::after {
+.noo-textured, .noo-bento__cell:not(.noo-bento__cell--glass):not(.noo-bento__cell--bare) { position: relative; }
+.noo-textured::after, .noo-bento__cell:not(.noo-bento__cell--glass):not(.noo-bento__cell--bare)::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
   background: currentColor;                                                                    /* the card's own ink: right polarity on every ground */
   -webkit-mask-image: var(--grain); mask-image: var(--grain);

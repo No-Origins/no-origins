@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Button, CellHead, Chip, Divider, Dot, Heading, Intro, Label, RegionLabel, Row, Stack, Text, hues } from "@no-origins/ui";
+import { Bento, BentoCell, Button, CellHead, Chip, Divider, Dot, Heading, Intro, Label, RegionLabel, Row, Stack, Text, hues } from "@no-origins/ui";
 
 export const metadata: Metadata = { title: "Compose fixture", robots: { index: false } };
 
@@ -167,6 +167,54 @@ export default function ComposeFixture() {
             <RegionLabel>Work</RegionLabel>
           </div>
         </Box>
+      </Case>
+
+      <Case
+        title="Bento, page mode — the same grid as a section's full view"
+        note={
+          <>
+            Ten fluid columns to a 1600 max, rows <span className="noo-code">minmax(144px, auto)</span> — a cell is
+            at least one box tall and grows with what is in it. That is the whole difference from the 4 × 3 widget,
+            and it is what retired nineteen hand-measured panel heights: nothing clips, so nothing is measured.
+            Scroll the frame.
+          </>
+        }
+      >
+        <div className="max-h-[460px] overflow-y-auto rounded-lg border border-rule">
+          <Bento page hue="peach" label="Work experience" className="!max-w-none">
+            <BentoCell span={[10, 1]} tone="bare">
+              <Intro title="Four roles, told as blocks" lead="Editors, design systems, agent systems, and shipping full-stack." />
+            </BentoCell>
+            <BentoCell span={[5, 2]}>
+              <Label>Radise · now</Label>
+              <Heading level={4}>The whole stack of SmartInfra Hub</Heading>
+              <Text>Auth, servers, storage, licensing and performance, end to end.</Text>
+              <Row gap={8}><Chip hue="green">full-stack</Chip><Chip hue="grey">next.js</Chip><Chip hue="grey">nest</Chip></Row>
+            </BentoCell>
+            <BentoCell span={[5, 2]}>
+              <Label>Hashnode · one year</Label>
+              <Heading level={4}>Neptune, Hashnode&apos;s editor</Heading>
+              <Text>The WYSIWYG editor on tiptap was mine for a year, plus a seat on the design-system core team.</Text>
+              <Row gap={8}><Chip hue="lavender">editors</Chip><Chip hue="peach">design systems</Chip></Row>
+            </BentoCell>
+            <BentoCell span={[4, 1]} tone="fill">
+              <Label>the through-line</Label>
+              <Row gap={8}>
+                <Chip hue="lavender">editors</Chip>
+                <Chip hue="peach">design systems</Chip>
+                <Chip hue="blue">agent systems</Chip>
+                <Chip hue="green">full-stack</Chip>
+              </Row>
+            </BentoCell>
+            <BentoCell span={[6, 1]}>
+              <Label>the résumé</Label>
+              <Row gap={16}>
+                <Button variant="secondary">Download the résumé</Button>
+                <Text size="small" tone="muted" as="span">Chosen pieces of this work are on Case Studies.</Text>
+              </Row>
+            </BentoCell>
+          </Bento>
+        </div>
       </Case>
 
       <Case

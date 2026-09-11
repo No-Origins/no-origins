@@ -208,12 +208,16 @@ Where a height does still get written — a canvas panel outside a widget — th
 
 **Publish is blocked on a failing probe.** Four of them:
 
-| Probe | Fails when |
-|---|---|
-| `probe10` | An illustration crosses a glyph, or a field comes within 8px of one |
-| `probe11` | Two lines in one drawing touch |
-| `probe12` | A bento has anything but exactly one `fill` cell — the rule `SectionWidget` used to hold as a prop, now held as a check (Design-System.md §9) |
-| fit | Content overflows a fixed 4 × 3 widget |
+| Probe | Fails when | Where it lives |
+|---|---|---|
+| `probe10` | An illustration crosses a glyph, or a field comes within 8px of one | `e2e/.mcp/` — **not in version control** |
+| `probe11` | Two lines in one drawing touch | `e2e/.mcp/` — **not in version control** |
+| `probe12` | A widget has anything but exactly one `fill` cell — the rule `SectionWidget` used to hold as a prop | `e2e/review.spec.ts`, run by `pnpm review` on every route |
+| fit | Content overflows a fixed 4 × 3 widget | not built |
+
+**Found while building `probe12` (2026-09-11): `e2e/.mcp/` is gitignored, so `probe10` and `probe11` are not in the repository.** Design-System.md and Illustrations.md both cite them as the thing that enforces an illustration rule, and they exist only on the machine that wrote them — a fresh clone has the rules and none of the checks. `probe12` was therefore written into the review spec instead, where `pnpm review` runs it on all sixteen routes automatically and CLAUDE.md's loop already requires it after any UI change. **The other two should move there too**; until they do, two of the four rules above are enforced by memory.
+
+It was also verified by making it fail: a widget with two `fill` cells was added to a fixture, the sweep failed with `widget "two loud cells" has 2 loud cells, expected exactly 1`, and the control was removed. A check that has never failed is decoration.
 
 `probe12` is the one to understand, because it is the shape every retired guard rail should take. Dropping `SectionWidget` bought total freedom over composition; it did not buy the right to a ring where one widget looks unlike the other five. A rule worth keeping is worth *checking* — and a check can be overridden deliberately, which a missing prop cannot.
 
