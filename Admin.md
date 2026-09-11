@@ -268,14 +268,15 @@ documents           (id, project_id → projects, slug, kind, title,
                      draft jsonb, rev int, draft_updated_at, draft_updated_by,
                      current_version_id → document_versions,
                      unique (project_id, slug))
-document_versions   (id, document_id → documents, version text, version_ord int,
+document_versions   (id, document_id → documents, version int, label text not null,
                      doc jsonb, schema_version int, ui_version text, registry_hash text,
-                     theme_snapshot jsonb, label, notes, published_by, published_at,
-                     unique (document_id, version))
+                     theme_snapshot jsonb, notes, published_by, published_at,
+                     unique (document_id, version),
+                     unique (document_id, lower(btrim(label))))
 
 -- layer 2 · systems
 systems             (id, slug unique, name, kind, description, config jsonb)
-themes              (id, project_id → projects null, name, tokens jsonb, is_default bool)
+-- themes           REMOVED BY R3 — see below
 
 -- layer 3 · products
 products            (id, slug unique, name, system_slug → systems.slug, version, manifest jsonb)
@@ -289,6 +290,14 @@ audit_log           (id bigserial, actor, action, entity, entity_id, diff jsonb,
 ```
 
 `documents` holds exactly one mutable draft and a pointer; `document_versions` is append-only. That split is the whole persistence design — everything else is reference data.
+
+**Built 2026-09-11** as `supabase/migrations/`, run against a local stack and exercised rather than read: the allowlist gate rejects an unlisted address and gives a listed one a profile carrying its invited role; `anon` sees zero rows in all ten tables; a viewer reads projects but cannot read the allowlist, cannot insert a version, and updates zero rows of a draft; an empty label fails a check and a duplicate one a unique index; `update` and `delete` on `document_versions` raise **even as superuser**, because RLS stops `authenticated` and a trigger stops the service role. Three departures from the shape above, each recorded in the migration that makes it:
+
+1. **`themes` is not built. R3 forbids it.** R3 makes the package the only source of truth for tokens, so a table holding `tokens jsonb` would be a second source of truth for precisely the thing R3 exists to prevent — the same reasoning that struck ~~Token configuration~~ from §13. `theme_snapshot` on a version is *not* the same thing: it records what a version was published against, which is history, not configuration.
+2. **`version int` plus a required `label`**, not `version text` + `version_ord int`. The table above was drafted before R1 settled the format; R1's integer already sorts, so an ordinal would be a second copy of the same fact. R1's "rejects an empty or duplicate label" is a check constraint and a unique index, not editor manners.
+3. **No `citext`.** A lowercase-only `text` column with a check is the same guarantee without depending on where the extension was installed or what is on a role's `search_path`.
+
+**`documents.rev` is maintained by the database**, bumped by a trigger only when the draft actually changes, for the same reason `updated_at` is: the one write that forgets to increment it is the one that silently clobbers a newer draft. The editor's conflict check is `update … where rev = <the rev I loaded>`.
 
 ### 8.2 Storage buckets
 
@@ -420,11 +429,11 @@ So there is no first migration. The first document is a **new, empty canvas**, c
 
 ## 13. Build order
 
-**Nothing below is built yet — this is the order to build it in.** The five rules of §12 are settled, so step 1 can start. R5 shapes the order: there is no migration, so nothing here touches what a visitor sees — the live portfolio renders from `scene.tsx` until step 10, which has no date.
+**Steps 1–3 are built; 4 onward is the order for the rest.** The five rules of §12 are settled, so step 1 can start. R5 shapes the order: there is no migration, so nothing here touches what a visitor sees — the live portfolio renders from `scene.tsx` until step 10, which has no date.
 
 1. **Scene-Schema.md adopted** — the JSON format and the registry contract (Scene-Schema.md §1–§3), with R4's directive set declared.
 2. **The component library, then `catalogue.ts` + registry** — R5 makes this the long pole, not a footnote: free composition needs a *complete* palette, not whatever the current portfolio happened to use. Ten components are missing (Scene-Schema.md §2.3), and every one of them is a place the app reached for a utility class instead of a component. Then each declares its props schema and an example: one declaration, three consumers (§5.1).
-3. **Supabase project** — the schema of §8.1, RLS, allowlist auth, both buckets. Seeded with one project row: `portfolio`.
+3. ~~**Supabase project**~~ — **done 2026-09-11.** The schema of §8.1, deny-by-default RLS, the allowlist gate, both buckets, seeded with the four systems and one project row: `portfolio`. Lives in `supabase/`; `supabase/README.md` says how to run it and what was verified. **One thing is deliberately not in the repo: the allowlist row with a real email address.** Until it exists nobody can sign in, which is §8.4 working rather than a snag.
 4. **`apps/admin` shell** — page-mode rail, the three layer sections, auth, empty screens. Deployed to `admin.no-origins.com` before there is anything in it, because a deploy path found later is a deploy path found the hard way.
 5. **Systems → Design System, the catalogue** (§5.1–5.2) — every component live in both themes, every token with its contrast report. Under R3 this is the whole of the Design System section, and it is also §14 step 14's public showcase, which stops being a separate build.
 6. **Document renderer** — a `SceneDocument` in the package turning doc JSON into `SceneNode[]` (Scene-Schema.md §4), plus the markdown-and-directives renderer R4 needs. **Read path first**, on a fixture. The two hand-authored documents in Scene-Schema.md §8 and §9 are the test material: they were written against real sections, so if they render they prove the renderer, and nothing has to be migrated for that to be true.
