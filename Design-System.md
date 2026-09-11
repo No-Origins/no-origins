@@ -320,6 +320,7 @@ Rules: measure 60–70ch for running text; `text-wrap: balance` on headings, `pr
 | `--r-md` | 14 | Small cards, fields |
 | `--r-lg` | 20 | Cards, panels |
 | `--r-xl` | 28 | Glass sheets, hero panels |
+| `--r-2xl` | 48 | **Large-format media** — a `ProfileCard` and anything else where the picture is the whole surface. Added 2026-09-11: at 420px wide, 28 reads as a rounded rectangle and 48 reads as an object |
 | `--r-pill` | 999 | Blobs, buttons, chips, bubbles, the chat input |
 
 **Elevation** — warm shadows, never grey. All use `--shade` at low alpha: `--ink` in the light theme, black in the dark one (a light ink would glow, not shade). The blob's drop shadow and the glass bottom edge use it too.

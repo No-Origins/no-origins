@@ -38,6 +38,7 @@
   --radius-md: var(--r-md);
   --radius-lg: var(--r-lg);
   --radius-xl: var(--r-xl);
+  --radius-2xl: var(--r-2xl);
   --radius-pill: var(--r-pill);
 
   --shadow-e1: var(--e1);

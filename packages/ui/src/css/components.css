@@ -414,7 +414,7 @@
 
 /* ===== Carousel (§9) — CSS scroll-snap; the script only tracks which slide is current ===== */
 .noo-carousel { display: flex; flex-direction: column; gap: 20px; }
-.noo-carousel__track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+.noo-carousel__track { position: relative; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
   padding-block: 4px; scrollbar-width: none; }
 .noo-carousel__track::-webkit-scrollbar { display: none; }
 .noo-carousel__track--g8 { gap: 8px } .noo-carousel__track--g16 { gap: 16px }
@@ -438,6 +438,99 @@
 @media (forced-colors: active) {
   .noo-step__marker, .noo-quote, .noo-media-card { border: 1px solid CanvasText; }
   .noo-carousel__dot { background: CanvasText; }
+}
+
+/* ===== ProfileCard + Deck (§9) — large-format media, and a stack of it =====
+   The scrim over the words is the GROUND colour, not black: black over a warm photograph is a bruise. The bloom
+   is the media rendered a second time, blurred and scaled beneath the card — the picture already knows what
+   colour it is, so nothing has to extract one. */
+.noo-profile { --pf-hue: var(--accent); position: relative; display: block; width: 100%; }
+.noo-profile[data-hue="pink"]{--pf-hue:var(--pink)} .noo-profile[data-hue="green"]{--pf-hue:var(--green)}
+.noo-profile[data-hue="grey"]{--pf-hue:var(--grey)} .noo-profile[data-hue="lavender"]{--pf-hue:var(--lavender)}
+.noo-profile[data-hue="peach"]{--pf-hue:var(--peach)} .noo-profile[data-hue="yellow"]{--pf-hue:var(--yellow)}
+.noo-profile[data-hue="blue"]{--pf-hue:var(--blue)}
+
+.noo-profile__card {
+  position: relative; overflow: hidden; isolation: isolate;
+  aspect-ratio: 1; border-radius: var(--r-2xl);
+  background: color-mix(in oklch, var(--pf-hue) 55%, var(--surface));
+  box-shadow: var(--e3);
+}
+.noo-profile__media { position: absolute; inset: 0; }
+.noo-profile__media > * { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
+.noo-profile__words {
+  position: absolute; inset: auto 0 0 0; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 24px 20px 28px; text-align: center; color: #fff;
+  /* the scrim: the ground's own darkness, so a warm picture stays warm under it */
+  background: linear-gradient(to top, color-mix(in oklch, var(--ink) 62%, transparent), transparent 78%);
+}
+.noo-profile__name { margin: 0; font: 600 clamp(20px, 3.4cqw, 30px)/1.15 var(--ff-sans); letter-spacing: -0.01em;
+  text-shadow: 0 1px 12px color-mix(in oklch, black 45%, transparent); }
+.noo-profile__role { margin: 0; font: 400 clamp(14px, 2.4cqw, 20px)/1.3 var(--ff-sans); opacity: 0.88;
+  text-shadow: 0 1px 10px color-mix(in oklch, black 40%, transparent); }
+.noo-profile__bloom {
+  position: absolute; inset: 8% -6% -10% -6%; z-index: -1; pointer-events: none;
+  filter: blur(38px) saturate(1.5); opacity: 0.55; transform: scaleY(0.92);
+}
+.noo-profile__bloom > * { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
+
+/* the deck — a scroll container that publishes each card's distance from centre as --d, and lets CSS do depth */
+/* The card width is derived from `visible` and `overlap`, in CONTAINER units — and the container unit is the
+   whole point. It was a percentage first, which is circular and silently wrong: the track's padding-inline is
+   computed FROM the card width, so a flex-basis percentage then resolves against a content box that the padding
+   had already shrunk. 46% asked for 420 and got 193. `cqw` is measured on `.noo-deck`, which nothing resizes.
+
+   shown = card + 2 · visible · card · (1 − overlap)  →  card = 100cqw / (1 + 2 · visible · (1 − overlap)) */
+.noo-deck {
+  display: flex; flex-direction: column; gap: 24px;
+  container-type: inline-size;
+  --deck-visible: 1; --deck-overlap: 0.28;
+  --deck-card: min(
+    calc(100cqw / (1 + 2 * var(--deck-visible) * (1 - var(--deck-overlap)))),
+    420px
+  );
+}
+.noo-deck__track {
+  /* positioned so it is the offsetParent of its slides: `offsetLeft` is measured against the nearest POSITIONED
+     ancestor, and an unpositioned track sends the centring maths to whatever is positioned further up the page. */
+  position: relative;
+  display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+  padding-block: 6% 4%; scrollbar-width: none;
+  /* the front card sits centred whatever `visible` is: half the track, minus half a card */
+  padding-inline: calc(50% - var(--deck-card) / 2);
+}
+.noo-deck__track::-webkit-scrollbar { display: none; }
+.noo-deck__slide {
+  flex: 0 0 var(--deck-card); scroll-snap-align: center; container-type: inline-size;
+  margin-inline: calc(var(--deck-card) * var(--deck-overlap, 0.28) / -2);
+  transform: scale(calc(1 - 0.22 * var(--ad, 0))) translateY(calc(var(--ad, 0) * 4%));
+  opacity: calc(1 - 0.22 * var(--ad, 0));
+  transform-origin: center 62%;
+  transition: transform var(--d-base) var(--ease), opacity var(--d-base) var(--ease);
+  will-change: transform;
+}
+/* `visible` is how many show either side; past that they are out of the track's own overflow anyway */
+.noo-deck[style*="--deck-visible: 0"] .noo-deck__slide { margin-inline: 0; }
+/* the outer edges take no negative margin, or the whole track shifts left by half an overlap and the padding
+   that was meant to centre the front card centres it half a card too far */
+.noo-deck__slide:first-child { margin-inline-start: 0; }
+.noo-deck__slide:last-child { margin-inline-end: 0; }
+.noo-deck__dots { display: flex; justify-content: center; gap: 8px; }
+
+@media (max-width: 639.98px) { .noo-deck { --deck-card: min(78cqw, 320px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  /* depth is motion here: the scale only reads while the track moves. Dropped, this is a plain snapping row —
+     less to look at, identical to operate. */
+  .noo-deck__track { scroll-behavior: auto; }
+  .noo-deck__slide { transform: none; opacity: 1; transition: none; margin-inline: 6px; }
+  .noo-profile__bloom { display: none; }
+}
+@media (forced-colors: active) {
+  .noo-profile__card { border: 1px solid CanvasText; }
+  .noo-profile__words { background: Canvas; color: CanvasText; }
+  .noo-profile__bloom { display: none; }
 }
 
 /* ===== forced colours (Windows high contrast) — glass and tints vanish; keep every edge and state legible ===== */

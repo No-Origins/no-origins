@@ -9,6 +9,8 @@ import { MediaCard } from "../blocks/MediaCard";
 import { Quote } from "../blocks/Quote";
 import { Step, Steps } from "../blocks/Steps";
 import { Carousel } from "../primitives/Carousel";
+import { Deck } from "../primitives/Deck";
+import { ProfileCard } from "../blocks/ProfileCard";
 import { Image } from "../primitives/Image";
 import { Bento, BentoCell, BentoFigure } from "../primitives/Bento";
 import { Button } from "../primitives/Button";
@@ -544,12 +546,65 @@ const carousel: RegistryEntry = {
   since: "0.1.0", status: "draft",
 };
 
+
+const FACE =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">` +
+      `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">` +
+      `<stop offset="0" stop-color="#5b8fd6"/><stop offset="1" stop-color="#8fd6a8"/></linearGradient></defs>` +
+      `<rect width="400" height="400" fill="url(#g)"/>` +
+      `<ellipse cx="200" cy="220" rx="86" ry="100" fill="#fff" fill-opacity="0.22"/>` +
+      `<circle cx="200" cy="125" r="52" fill="#fff" fill-opacity="0.28"/></svg>`,
+  );
+
+const profileCard: RegistryEntry = {
+  name: "ProfileCard", kind: ["slot", "panel"], group: "composites", component: ProfileCard as never,
+  line: "A face, a name, and what they do — the picture is the whole card.",
+  props: {
+    name: { type: "text", max: 40, required: true },
+    role: { type: "text", max: 40 },
+    hue: { type: "hue", help: "Fills the card when there is no media, and tints the bloom under it." },
+    bloom: { type: "boolean", default: true, help: "The media rendered again, blurred beneath the card — the light it casts on the surface. Off where the surface has its own." },
+  },
+  slots: { media: { admits: ["Image", "Illustration", "Blob"], max: 1, label: "The face" } },
+  defaults: { name: "Someone", role: "What they do", hue: "blue" },
+  example: () => (
+    <div style={{ width: 260 }}>
+      <ProfileCard name="Natalie Ramirez" role="Software Engineer" hue="blue" media={<Image src={FACE} alt="" ratio={1} />} />
+    </div>
+  ),
+  since: "0.1.0", status: "draft",
+};
+
+const deck: RegistryEntry = {
+  name: "Deck", kind: ["panel", "slot"], group: "layout", component: Deck as never,
+  line: "A stack of cards, one of them forward. Still a scroll container.",
+  props: {
+    label: { type: "text", max: 40, required: true },
+    visible: { type: "enum", of: ["0", "1", "2"], default: "1", help: "Cards showing either side of the front one. 1 is three across; 2 is five. The card width is derived from it, in container units." },
+    overlap: { type: "number", unit: "fraction of a card", min: 0, max: 0.5, default: 0.28 },
+    start: { type: "text", max: 8, default: "0", help: "Which card is forward on load. “middle” opens with a neighbour on each side, which is what a deck is for." },
+    dots: { type: "boolean", default: true },
+  },
+  slots: { children: { admits: ["ProfileCard", "MediaCard", "Card"], label: "Cards", min: 2 } },
+  defaults: { label: "Cards", visible: 1, start: "middle" },
+  example: () => (
+    <Deck label="The team" visible={1} start="middle">
+      <ProfileCard name="Sophia Brooks" role="Teacher" hue="peach" media={<Image src={FACE} alt="" ratio={1} />} />
+      <ProfileCard name="Natalie Ramirez" role="Software Engineer" hue="blue" media={<Image src={FACE} alt="" ratio={1} />} />
+      <ProfileCard name="James Whitman" role="Researcher" hue="lavender" media={<Image src={FACE} alt="" ratio={1} />} />
+    </Deck>
+  ),
+  since: "0.1.0", status: "draft",
+};
+
 export const entries: readonly RegistryEntry[] = [
   heading, text, label,
   chip, dot,
   button,
-  stack, row, divider, bento, bentoCell, carousel,
+  stack, row, divider, bento, bentoCell, carousel, deck,
   card, glass, placeholder,
   figure, blob, illustration, image,
-  intro, cellHead, blockCard, roadmapItem, regionLabel, steps, step, quote, mediaCard,
+  intro, cellHead, blockCard, roadmapItem, regionLabel, steps, step, quote, mediaCard, profileCard,
 ];

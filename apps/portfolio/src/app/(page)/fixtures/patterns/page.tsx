@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import {
-  Blob, Button, Carousel, Chip, Heading, Label, MediaCard, Quote,
+  Blob, Button, Carousel, Chip, Deck, Heading, Image, Label, MediaCard, ProfileCard, Quote,
   Row, Stack, Step, Steps, Text,
 } from "@no-origins/ui";
+import { FACES } from "./faces";
 
 export const metadata: Metadata = { title: "Patterns fixture", robots: { index: false } };
 
@@ -127,6 +128,73 @@ export default function PatternsFixture() {
           <MediaCard hue="blue" meta="Case study" title="GenIQ" line="Full-stack retrieval apps and agents that do work." footer={<Chip hue="blue">Agents</Chip>} />
           <MediaCard hue="green" meta="Case study" title="Project Vault" line="A storage layer with a unified file explorer." footer={<Chip hue="green">Full-stack</Chip>} />
         </Carousel>
+      </Case>
+
+
+      <Case
+        title="Deck — a stack of cards, one of them forward"
+        note={
+          <>
+            Still a scroll container, for the same reason the Carousel is: scroll-snap gives the trackpad, the
+            swipe, the arrow keys and a screen reader&apos;s own scrolling for free. What this adds is depth —
+            each card&apos;s distance from the centre is published to CSS as <span className="noo-code">--d</span>,
+            and the stylesheet scales it down and tucks it behind its neighbour. The scrolling stays real; the
+            depth is a description of where it got to. Under reduced motion the transforms drop and it becomes a
+            plain snapping row.
+          </>
+        }
+      >
+        <Stack gap={40}>
+          <div>
+            <Label className="text-muted mb-4">visible 1 — three across, the reference</Label>
+            <Deck label="The team" visible={1} start="middle">
+              {FACES.map((f) => (
+                <ProfileCard
+                  key={f.name}
+                  name={f.name}
+                  role={f.role}
+                  hue={f.hue}
+                  media={<Image src={f.src} alt="" ratio={1} />}
+                />
+              ))}
+            </Deck>
+          </div>
+
+          <div>
+            <Label className="text-muted mb-4">visible 2 — five across, same cards</Label>
+            <Deck label="The team, wider" visible={2} overlap={0.36} start="middle">
+              {FACES.map((f) => (
+                <ProfileCard
+                  key={f.name}
+                  name={f.name}
+                  role={f.role}
+                  hue={f.hue}
+                  media={<Image src={f.src} alt="" ratio={1} />}
+                />
+              ))}
+            </Deck>
+          </div>
+
+          <div>
+            <Label className="text-muted mb-4">visible 0 — one at a time, no overlap</Label>
+            <Deck label="One at a time" visible={0}>
+              {FACES.slice(0, 3).map((f) => (
+                <ProfileCard key={f.name} name={f.name} role={f.role} hue={f.hue} media={<Image src={f.src} alt="" ratio={1} />} />
+              ))}
+            </Deck>
+          </div>
+        </Stack>
+      </Case>
+
+      <Case title="ProfileCard on its own" note="The bloom under it is the media rendered a second time, blurred and scaled — the picture already knows what colour it is, so nothing has to extract one. Without media the hue fills the card and the bloom is off.">
+        <Row gap={40} align="start">
+          <div className="w-[300px]">
+            <ProfileCard name="Natalie Ramirez" role="Software Engineer" hue="blue" media={<Image src={FACES[0]!.src} alt="" ratio={1} />} />
+          </div>
+          <div className="w-[300px]">
+            <ProfileCard name="No picture yet" role="The hue fills it instead" hue="green" />
+          </div>
+        </Row>
       </Case>
 
       <Case title="Steps, Quote and a Row together" note="The point of the four: they compose with everything already in the system, because none of them invented a scale, a hue or a spacing of its own.">
