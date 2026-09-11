@@ -456,8 +456,14 @@
   /* A PROPORTIONAL radius, which is the one place on the platform a radius is not a token. The card is the same
      component at 280px in a row and at 420px at the front of a deck, and `--r-2xl` (48) reads as a soft rectangle
      at the large size and as a pill-ish blob at the small one. A percentage keeps the corner the same *shape* at
-     every size — which is what the reference has, and what a square photograph wants. */
-  border-radius: 14%;
+     every size — which is what the reference has, and what a square photograph wants.
+
+     It is a plain circular corner and NOT `corner-shape: squircle`, which was tried and taken out. Chromium clips
+     a composited descendant — and `__frost` is one, because a mask composites — with a circular arc whatever the
+     ancestor's `corner-shape` says, so the squircle showed as a lighter wedge in each bottom corner where the
+     overlay stopped short of the card's edge (Bhargav, 2026-09-11: "the overlay border radius don't match the
+     card border radius"). Every layer agreeing on one shape is worth more than a more continuous curve. */
+  border-radius: 15%;
   /* the hue's wash under the grain, exactly as a bento cell (§9) — it is what shows through a cutout, and what
      the card is when there is no picture at all */
   background-color: var(--surface);
@@ -471,12 +477,7 @@
     var(--e3),
     0 18px 40px color-mix(in oklch, var(--shade) 12%, transparent);
 }
-/* The corner is a squircle wherever the browser has one — continuous curvature, so the curve runs about half as
-   far again along the edge as a circular arc of the same radius, which is why the radius goes up with it. It is
-   one declaration and a silent no-op elsewhere, so the fallback above is the design, not a degraded version. */
-@supports (corner-shape: squircle) {
-  .noo-profile__card { corner-shape: squircle; border-radius: 20%; }
-}
+
 .noo-profile__media { position: absolute; inset: 0; z-index: 0; }
 .noo-profile__media > * { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
 /* a background-free figure stands on the wash rather than filling the square */
@@ -497,7 +498,14 @@
    it normally, and it renders the same everywhere instead of only where backdrop-filter is feathered. The copy
    is scaled up because a blur samples past its own edges and would otherwise leave a transparent fringe. */
 .noo-profile__frost {
-  position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden;
+  /* NO `overflow: hidden` here, deliberately. The card already clips to its own corner, and a second clip on this
+     element gets drawn with a CIRCULAR arc rather than the card's squircle — visible as a lighter wedge in each
+     bottom corner where the frost stops short of the edge (Bhargav, 2026-09-11: "the overlay border radius don't
+     match"). The scaled-up copy inside only needs *a* clip, and the card's is the right one. The mask applies to
+     the whole subtree, overflow included, so nothing else changes. */
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  /* the card's own corner, restated: this layer is clipped separately and has to agree with it exactly */
+  border-radius: inherit; overflow: hidden;
   -webkit-mask-image: linear-gradient(to top, #000 0 26%, color-mix(in oklch, #000 50%, transparent) 46%, transparent 64%);
   mask-image: linear-gradient(to top, #000 0 26%, color-mix(in oklch, #000 50%, transparent) 46%, transparent 64%);
 }

@@ -18,8 +18,9 @@ import type { Hue } from "../tokens";
  * the photograph's own surface. That is `__frost`, and it is the whole difference between the two rejections.
  *
  * On top of it the card keeps every §3 cue — the hairline, the lit top edge, the 118° sweep, the grain — and the
- * corner is a squircle wherever the browser has one, because the reference's corner runs too far along the edge to
- * be a circular arc.
+ * corner is a proportional 15%, so it is the same *shape* at 280px in a row and at 420px at the front of a deck.
+ * Not a squircle: Chromium clips a composited descendant with a circular arc whatever `corner-shape` says, and an
+ * overlay whose corner disagrees with the card's is worse than a slightly less continuous curve.
  *
  * `crop="cutout"` is for a photograph with no background: the figure stands on the hue's own wash, bottom-aligned,
  * with the grain over it — which is closer to this system than a rectangular photo ever gets.
