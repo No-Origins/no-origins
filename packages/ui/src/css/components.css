@@ -1,0 +1,719 @@
+/* @no-origins/ui — component classes.
+   Components are styled here, by the package's own classes — never by Tailwind utilities — so a host without
+   Tailwind gets the full look (§11.2 rule 3). Step 1: the ground. Steps 2–4 add the blob, wordmark and the rest. */
+
+/* The ground — every page, both layout modes; what glass refracts and what the blobs live on (§8).
+   LINES, not dots, since 2026-09-11. The canvas is a grid of 160 boxes and every bento cell sits in one, so a
+   second ground at 32 was a second grid saying something the first one already said. The blob sits on the
+   ORIGIN CROSSHAIR, which is the whole reason this was worth doing: both axes pass through the one glass blob. */
+.noo-ground {
+  background-color: var(--ground);
+  background-image:
+    linear-gradient(to right, var(--grid-line) var(--grid-line-w), transparent var(--grid-line-w)),
+    linear-gradient(to bottom, var(--grid-line) var(--grid-line-w), transparent var(--grid-line-w));
+  background-size: var(--grid-box) var(--grid-box);
+}
+
+/* ===== the blob (§3 material · §4 geometry) — a 96 × 64 pill; scale, never redraw =====
+   Markup (React or copied by hand):
+   <span class="noo-blob noo-blob--character noo-blob--md noo-blob--breathe" data-hue="peach">
+     <span class="noo-blob__glass"><svg class="noo-blob__svg" viewBox="0 0 96 64"> …defs… body · ref · rim · eyes </svg></span>
+   </span> */
+.noo-blob {
+  --blob-w: 72px;                                   /* md — the sketch size; height is always 2/3 */
+  --blob-fill: var(--accent-tint);                  /* the block's tint unless data-hue says otherwise */
+  --blob-fill-opacity: var(--glass-blob-opacity);   /* 24% light · 36% dark */
+  --blob-rim: 0.8;                                  /* rim stroke, user units */
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  vertical-align: middle;
+  width: var(--blob-w);
+  height: calc(var(--blob-w) * 2 / 3);
+  transform-origin: 50% 50%;
+  transition: transform var(--d-fast) var(--ease);
+}
+.noo-blob--favicon { --blob-w: 30px; }
+.noo-blob--inline  { --blob-w: 1.5em; }
+.noo-blob--nav     { --blob-w: 36px; }
+.noo-blob--sm      { --blob-w: 48px; }
+.noo-blob--md      { --blob-w: 72px; }
+.noo-blob--lg      { --blob-w: 96px; }
+.noo-blob--hero    { --blob-w: 168px; }
+
+.noo-blob[data-hue="pink"]     { --blob-fill: var(--pink-tint); }
+.noo-blob[data-hue="green"]    { --blob-fill: var(--green-tint); }
+.noo-blob[data-hue="lavender"] { --blob-fill: var(--lavender-tint); }
+.noo-blob[data-hue="peach"]    { --blob-fill: var(--peach-tint); }
+.noo-blob[data-hue="yellow"]   { --blob-fill: var(--yellow-tint); }
+.noo-blob[data-hue="blue"]     { --blob-fill: var(--blue-tint); }
+.noo-blob--host { --blob-fill: #fff; --blob-fill-opacity: var(--glass-host-opacity); --blob-rim: 0.95; }   /* the host: glass with nothing in it */
+
+.noo-blob--interactive { cursor: pointer; }
+.noo-blob--interactive:hover { transform: scale(1.04); }
+
+/* the material: frost that mutes what's behind, a drop shadow beneath; this layer breathes */
+.noo-blob__glass {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--r-pill);
+  -webkit-backdrop-filter: blur(2px) saturate(0.6);
+          backdrop-filter: blur(2px) saturate(0.6);
+  filter: drop-shadow(0 5px 14px color-mix(in oklch, var(--shade) 10%, transparent));
+  transform-origin: 50% 50%;
+}
+.noo-blob--breathe .noo-blob__glass { animation: noo-breathe var(--d-ambient) ease-in-out infinite; animation-delay: var(--blob-phase, 0s); }
+.noo-blob--sleep .noo-blob__glass { animation-duration: 9000ms; }
+
+.noo-blob__svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.noo-blob__body { fill: var(--blob-fill); fill-opacity: var(--blob-fill-opacity); }
+.noo-blob__ref  { opacity: 0.32; }                                                             /* the grid, bent: band .32 → .92 of the radius */
+.noo-blob__gline { fill: var(--grid-line); }   /* the refracted grid line, in the same colour as the ground's */
+.noo-blob__rim  { stroke-width: var(--blob-rim); }
+.noo-blob__eyes { transition: transform var(--d-base) var(--ease); }                          /* look */
+.noo-blob__eye  { fill: var(--eye); transform-box: fill-box; transform-origin: 50% 50%; }
+.noo-blob__eyes.is-blinking .noo-blob__eye { animation: noo-blink var(--d-fast) var(--ease) both; }
+
+/* logotype: the outline, in whatever colour the text is */
+.noo-blob--logotype .noo-blob__outline { stroke: currentColor; stroke-width: 5.5; }
+.noo-blob--logotype .noo-blob__eye { fill: currentColor; }
+
+@supports not (backdrop-filter: blur(1px)) {
+  .noo-blob__body { fill-opacity: calc(var(--blob-fill-opacity) + 0.2); }                     /* no frost → a little more body */
+}
+@media (prefers-reduced-transparency: reduce) {
+  .noo-blob__glass { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .noo-blob__body { fill-opacity: 0.55; }
+  .noo-blob__ref { display: none; }
+}
+
+/* ===== the wordmark (§4.4) — N [blob] RIGINS ===== */
+.noo-wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.06em;
+  font-family: var(--ff-display);
+  font-weight: 400;                                 /* Bowlby One has one weight; never ask for another */
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+  color: inherit;
+}
+.noo-wordmark .noo-wordmark__blob { --blob-w: 1.23em; }                                       /* height 0.82em — fits the caps; the caps never fit it */
+.noo-wordmark--text {
+  display: inline;
+  gap: 0;
+  font-family: var(--ff-sans);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: inherit;
+}
+
+/* ===== radius helpers (Glass `radius`) ===== */
+.noo-r-xs { border-radius: var(--r-xs); } .noo-r-sm { border-radius: var(--r-sm); } .noo-r-md { border-radius: var(--r-md); }
+.noo-r-lg { border-radius: var(--r-lg); } .noo-r-xl { border-radius: var(--r-xl); } .noo-r-pill { border-radius: var(--r-pill); }
+
+/* ===== focus (§12) — one ring everywhere something takes focus: 2px accent-deep, 2px out ===== */
+:where(a, button, summary, [tabindex]):focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+:where(.noo-btn, .noo-chip--interactive, .noo-toggle, .noo-card--interactive, .noo-blob--interactive, .noo-nav__link, .noo-nav__home, .noo-footer__link, .noo-theme__btn, .noo-skip):focus-visible {
+  outline: 2px solid var(--accent-deep);
+  outline-offset: 2px;
+}
+/* text selection in the block's colour */
+::selection { background: color-mix(in oklch, var(--accent) 45%, var(--surface)); color: var(--ink); }
+/* visually hidden, still read — for the heading a canvas page needs */
+.noo-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+/* ===== hit targets (§12) — small controls reach 44px through a pseudo-element, without changing their look ===== */
+.noo-btn--sm, .noo-chip--interactive, .noo-theme__btn, .noo-footer__link { position: relative; }
+.noo-btn--sm::before { content: ""; position: absolute; inset: -4px 0; }
+.noo-chip--interactive::before { content: ""; position: absolute; inset: -8px 0; }
+.noo-theme__btn::before { content: ""; position: absolute; inset: -8px -2px; }
+.noo-footer__link::before { content: ""; position: absolute; inset: -6px 0; }
+.noo-nav__link::before { content: ""; position: absolute; inset: -2px 0; }
+
+/* ===== Button (§9) — a pill, 44px; `sm` 36px ===== */
+.noo-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 0 20px;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+  font: 600 15px/1.2 var(--ff-sans);
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition: transform var(--d-fast) var(--ease), box-shadow var(--d-fast) var(--ease), background-color var(--d-fast) var(--ease), text-decoration-color var(--d-fast) var(--ease);
+}
+.noo-btn--sm { min-height: 36px; padding: 0 14px; font-size: 13.5px; }
+.noo-btn__icon { display: inline-flex; flex: none; }
+.noo-btn__icon > svg { width: 1.1em; height: 1.1em; }
+.noo-btn--primary { background: var(--ink); color: var(--ground); box-shadow: var(--e1); }
+.noo-btn--primary:hover { transform: translateY(-1px); box-shadow: var(--e2); }
+.noo-btn--secondary { color: var(--ink); }                                                   /* + .glass .glass-1: the hairline is the glass border */
+.noo-btn--secondary:hover { transform: translateY(-1px); --gs: var(--e2); }
+.noo-btn--ghost { background: transparent; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 4px; text-decoration-thickness: 1.5px; padding-inline: 8px; }
+.noo-btn--ghost:hover { text-decoration-color: currentColor; }
+.noo-btn:active { transform: translateY(0); }
+.noo-btn:disabled, .noo-btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: var(--e1); }
+
+/* ===== Chip (§9) — 28px pill; the hue's pastel at 45% over the surface, ink text, deep dot ===== */
+.noo-chip {
+  --chip: var(--accent); --chip-deep: var(--accent-deep);
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 11px;
+  border-radius: var(--r-pill);
+  border: 0;
+  font: 600 13px/1 var(--ff-sans);
+  color: var(--ink);
+  background: color-mix(in oklch, var(--chip) 45%, var(--surface));
+  text-decoration: none;
+  white-space: nowrap;
+}
+.noo-chip[data-hue="pink"]     { --chip: var(--pink);     --chip-deep: var(--pink-deep); }
+.noo-chip[data-hue="green"]    { --chip: var(--green);    --chip-deep: var(--green-deep); }
+.noo-chip[data-hue="grey"]     { --chip: var(--grey);     --chip-deep: var(--grey-deep); }
+.noo-chip[data-hue="lavender"] { --chip: var(--lavender); --chip-deep: var(--lavender-deep); }
+.noo-chip[data-hue="peach"]    { --chip: var(--peach);    --chip-deep: var(--peach-deep); }
+.noo-chip[data-hue="yellow"]   { --chip: var(--yellow);   --chip-deep: var(--yellow-deep); }
+.noo-chip[data-hue="blue"]     { --chip: var(--blue);     --chip-deep: var(--blue-deep); }
+.noo-chip__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--chip-deep); flex: none; }
+.noo-chip__icon { display: inline-flex; color: var(--chip-deep); flex: none; }
+.noo-chip__icon > svg { width: 14px; height: 14px; }
+.noo-chip--interactive { cursor: pointer; transition: background-color var(--d-fast) var(--ease), color var(--d-fast) var(--ease); }
+.noo-chip--interactive:hover { background: color-mix(in oklch, var(--chip) 62%, var(--surface)); }
+.noo-chip--interactive[aria-pressed="true"] { background: var(--chip-deep); color: var(--ground); }
+.noo-chip--interactive[aria-pressed="true"] .noo-chip__dot, .noo-chip--interactive[aria-pressed="true"] .noo-chip__icon { background: var(--ground); color: var(--ground); }
+
+/* ===== Card (§9) — surface or glass-1 · radius 20 · padding 24 (sm 20) · e1 → e2 on hover ===== */
+.noo-card { display: block; border-radius: var(--r-lg); padding: 24px; color: inherit; text-decoration: none; }
+.noo-card:not(.glass) { background: var(--surface); box-shadow: var(--e1); }
+.noo-card--pad-sm { padding: 20px; }
+.noo-card--interactive { cursor: pointer; transition: transform var(--d-fast) var(--ease), box-shadow var(--d-fast) var(--ease); }
+.noo-card--interactive:hover { transform: translateY(-1px); }
+.noo-card--interactive:not(.glass):hover { box-shadow: var(--e2); }
+.noo-card--interactive.glass:hover { --gs: var(--e2); }
+
+/* ===== Bubble (§9) — glass-1 pill of real text · 15/1.4 Hanken 500 · padding 10 × 16 ===== */
+.noo-bubble {
+  display: inline-block;
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: var(--r-pill);
+  font: 500 15px/1.4 var(--ff-sans);
+  color: var(--ink);
+  max-width: 38ch;
+  text-wrap: pretty;
+}
+.noo-bubble--tint { --bubble: var(--accent); background: color-mix(in oklch, var(--bubble) 45%, var(--surface)); }
+.noo-bubble[data-hue="pink"]     { --bubble: var(--pink); }
+.noo-bubble[data-hue="green"]    { --bubble: var(--green); }
+.noo-bubble[data-hue="grey"]     { --bubble: var(--grey); }
+.noo-bubble[data-hue="lavender"] { --bubble: var(--lavender); }
+.noo-bubble[data-hue="peach"]    { --bubble: var(--peach); }
+.noo-bubble[data-hue="yellow"]   { --bubble: var(--yellow); }
+.noo-bubble[data-hue="blue"]     { --bubble: var(--blue); }
+
+/* ===== Field (§9) — caption label · glass-1 box, radius 14, 48px · accent focus ring ===== */
+.noo-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.noo-field__label { font: 500 13px/1.45 var(--ff-sans); color: var(--ink-2); }
+.noo-field__box {
+  display: flex; align-items: center; gap: 10px;
+  min-height: 48px; padding: 0 14px;
+  border-radius: var(--r-md);
+  transition: box-shadow var(--d-fast) var(--ease);
+}
+.noo-field__box:focus-within {
+  box-shadow:
+    inset 0 0 0 1.5px var(--accent-deep),
+    0 0 0 3px color-mix(in oklch, var(--accent) 25%, transparent),
+    var(--gs, var(--e1));
+}
+.noo-field--invalid .noo-field__box { box-shadow: inset 0 0 0 1.5px var(--bad), var(--gs, var(--e1)); }
+.noo-field--invalid .noo-field__box:focus-within { box-shadow: inset 0 0 0 1.5px var(--bad), 0 0 0 3px color-mix(in oklch, var(--bad) 22%, transparent), var(--gs, var(--e1)); }
+.noo-field__input {
+  flex: 1; min-width: 0; width: 100%;
+  padding: 12px 0;
+  border: 0; outline: 0; background: transparent;
+  font: 400 15px/1.4 var(--ff-sans);
+  color: var(--ink);
+}
+.noo-field__input::placeholder { color: var(--muted); }
+.noo-field__input:disabled { color: var(--muted); cursor: not-allowed; }
+.noo-field--multiline .noo-field__box { align-items: flex-start; }
+.noo-field--multiline .noo-field__input { min-height: 96px; resize: vertical; }
+.noo-field__adorn { display: inline-flex; align-items: center; flex: none; color: var(--muted); font: 500 14px/1 var(--ff-sans); }
+.noo-field__adorn > svg { width: 18px; height: 18px; }
+.noo-field__hint, .noo-field__error { margin: 0; font: 500 13px/1.45 var(--ff-sans); }
+.noo-field__hint { color: var(--muted); }
+.noo-field__error { color: var(--bad); }
+
+/* ===== Toggle (§9) — 44 × 26 · on: ink track, ground knob · off: ink 18%, surface knob ===== */
+.noo-toggle {
+  position: relative; flex: none;
+  width: 44px; height: 26px;
+  border-radius: var(--r-pill);
+  border: 0; padding: 0;
+  background: color-mix(in oklch, var(--ink) 18%, var(--ground));
+  cursor: pointer;
+  transition: background-color var(--d-fast) var(--ease);
+}
+.noo-toggle::before { content: ""; position: absolute; inset: -9px 0; }                     /* a 44px hit target (§12) */
+.noo-toggle__knob {
+  position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--e1);
+  transition: transform var(--d-fast) var(--ease), background-color var(--d-fast) var(--ease);
+}
+.noo-toggle[aria-checked="true"] { background: var(--ink); }
+.noo-toggle[aria-checked="true"] .noo-toggle__knob { transform: translateX(18px); background: var(--ground); }
+.noo-toggle:disabled { opacity: 0.5; cursor: not-allowed; }
+.noo-toggle-row { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; font: 500 15px/1.3 var(--ff-sans); color: var(--ink); }
+.noo-toggle-row.is-disabled { cursor: not-allowed; color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .noo-btn, .noo-chip--interactive, .noo-card--interactive, .noo-field__box, .noo-toggle, .noo-toggle__knob, .noo-nav__link, .noo-footer__link, .noo-theme__btn, .noo-chat__bar, .noo-chat__send { transition: none; }
+  .noo-btn:hover, .noo-card--interactive:hover, .noo-chat__send:hover { transform: none; }
+}
+
+/* ===== forced colours (Windows high contrast) — glass and tints vanish; keep every edge and state legible ===== */
+@media (forced-colors: active) {
+  .glass, .noo-card, .noo-chip, .noo-bubble, .noo-field__box, .noo-chat__bar { border: 1px solid CanvasText; }
+  .noo-toggle { border: 1px solid ButtonText; }
+  .noo-toggle__knob { background: ButtonText; }
+  .noo-toggle[aria-checked="true"] { background: Highlight; }
+  .noo-toggle[aria-checked="true"] .noo-toggle__knob { background: Canvas; }
+  .noo-blob__eye, .noo-chip__dot { fill: CanvasText; background: CanvasText; }
+  .noo-blob__body { fill: Canvas; fill-opacity: 1; stroke: CanvasText; stroke-width: 2; }
+  .noo-nav__link[aria-current="page"]::after { background: Highlight; }
+  .noo-chat__send { border: 1px solid ButtonText; }
+}
+
+/* ===== Page mode layout (§8) — the reading column ===== */
+.noo-page { min-height: 100dvh; display: flex; flex-direction: column; }
+.noo-page > * { flex-shrink: 0; }                                                          /* nav and footer never give up height; main grows */
+.noo-page__main { flex: 1 0 auto; outline: none; }
+.noo-container { width: 100%; max-width: 1120px; margin-inline: auto; padding-inline: 24px; box-sizing: border-box; }
+.noo-section { padding-block: 32px; }                                                      /* 64 between sections on mobile … */
+@media (min-width: 900px) {
+  .noo-container { padding-inline: 48px; }
+  .noo-section { padding-block: 48px; }                                                    /* … 96 on desktop */
+}
+.noo-prose { max-width: 68ch; }
+
+/* skip link — the first thing in the tab order, visible only when focused */
+.noo-skip {
+  position: absolute; left: 16px; top: -100px; z-index: 100;
+  padding: 10px 16px; border-radius: var(--r-pill);
+  background: var(--ink); color: var(--ground);
+  font: 600 14px/1 var(--ff-sans); text-decoration: none;
+}
+.noo-skip:focus { top: 12px; }
+
+/* ===== SectionHeader (§9) — eyebrow · title · lead; 64 above when it follows something, 32 below ===== */
+.noo-section-header { display: flex; flex-direction: column; gap: 12px; margin: 0 0 32px; }
+.noo-section-header:not(:first-child) { margin-top: 64px; }
+.noo-section-header__label { margin: 0; color: var(--muted); }
+.noo-section-header__title { margin: 0; color: var(--ink); }
+.noo-section-header__lead { margin: 0; max-width: 60ch; color: var(--ink-2); }
+
+/* ===== NavBar (§9) — glass-2 · 60px · sticky · wordmark left, links right · current = accent-deep + 2px ===== */
+.noo-nav {
+  position: sticky; top: 0; z-index: 30;
+  height: 60px;
+  border-radius: 0;
+  border-width: 0 0 1px 0;                                                                 /* the glass hairline, bottom only */
+}
+.noo-nav__inner { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.noo-nav__home { display: inline-flex; align-items: center; height: 44px; color: var(--ink); text-decoration: none; font-size: 22px; border-radius: var(--r-pill); }
+.noo-nav__links { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.noo-nav__link {
+  position: relative;
+  display: inline-flex; align-items: center;
+  height: 40px; padding: 0 12px;
+  border-radius: var(--r-pill);
+  font: 500 15px/1 var(--ff-sans);
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: color var(--d-fast) var(--ease);
+}
+.noo-nav__link:hover { color: var(--ink); }
+.noo-nav__link[aria-current="page"] { color: var(--accent-deep); }
+.noo-nav__link[aria-current="page"]::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 6px; height: 2px; border-radius: 1px; background: var(--accent-deep); }
+.noo-nav__trailing { display: flex; align-items: center; gap: 12px; }
+.noo-nav__sheet { display: none; }
+@media (max-width: 899.98px) {                                                             /* below md: links become a bottom glass sheet */
+  .noo-nav__links { display: none; }
+  .noo-nav__sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    display: flex; align-items: center; justify-content: space-around; gap: 4px;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+    border-radius: 0;
+    border-width: 1px 0 0 0;
+  }
+  .noo-nav__sheet .noo-nav__link { flex: 1; justify-content: center; height: 44px; }
+  .noo-nav__sheet .noo-nav__link[aria-current="page"]::after { bottom: 4px; }
+  .noo-page:has(.noo-nav__sheet) { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ===== Footer (§9) — on the ground, a hairline above; the name in running text, meta, links, a trailing slot ===== */
+.noo-footer { margin-top: 64px; border-top: 1px solid var(--rule); padding-block: 40px; color: var(--ink-2); font: 400 14.5px/1.5 var(--ff-sans); }
+.noo-footer__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 32px; }
+.noo-footer__brand { display: flex; flex-direction: column; gap: 4px; }
+.noo-footer__name { color: var(--ink); font-size: 16px; }
+.noo-footer__meta { margin: 0; font: 400 13px/1.4 var(--ff-mono); color: var(--muted); }
+.noo-footer__links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.noo-footer__link { color: var(--ink-2); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 4px; padding: 6px 0; border-radius: var(--r-xs); transition: color var(--d-fast) var(--ease), text-decoration-color var(--d-fast) var(--ease); }
+.noo-footer__link:hover { color: var(--ink); text-decoration-color: currentColor; }
+.noo-footer__trailing { display: flex; align-items: center; gap: 12px; }
+@media (max-width: 639.98px) { .noo-footer__inner { flex-direction: column; align-items: flex-start; } }
+
+/* ===== ThemeSwitch — light · system · dark in a glass-1 pill ===== */
+.noo-theme { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border-radius: var(--r-pill); }
+.noo-theme__btn {
+  height: 28px; padding: 0 10px;
+  border: 0; border-radius: var(--r-pill); background: transparent;
+  font: 500 13px/1 var(--ff-sans); color: var(--ink-2);
+  cursor: pointer;
+  transition: background-color var(--d-fast) var(--ease), color var(--d-fast) var(--ease);
+}
+.noo-theme__btn:hover { color: var(--ink); }
+.noo-theme__btn[aria-pressed="true"] { background: var(--ink); color: var(--ground); }
+
+/* ===== BlockCard · RoadmapItem (§9) — the Work item and the not-yet item ===== */
+.noo-block-card, .noo-roadmap-item { display: flex; gap: 20px; align-items: flex-start; }
+.noo-block-card__blob, .noo-roadmap-item__blob { margin-top: 2px; }
+.noo-block-card__hue { flex: none; width: 10px; height: 10px; margin-top: 7px; border-radius: 999px; background: var(--card-hue, var(--accent-deep)); }
+.noo-block-card--dot { gap: 14px; }                                                        /* the blob's 48px column shrinks to a dot */
+.noo-block-card[data-hue="pink"]     { --card-hue: var(--pink-deep); }
+.noo-block-card[data-hue="green"]    { --card-hue: var(--green-deep); }
+.noo-block-card[data-hue="grey"]     { --card-hue: var(--grey-deep); }
+.noo-block-card[data-hue="lavender"] { --card-hue: var(--lavender-deep); }
+.noo-block-card[data-hue="peach"]    { --card-hue: var(--peach-deep); }
+.noo-block-card[data-hue="yellow"]   { --card-hue: var(--yellow-deep); }
+.noo-block-card[data-hue="blue"]     { --card-hue: var(--blue-deep); }
+.noo-roadmap-item[data-hue="lavender"] { --card-hue: var(--lavender-deep); }
+.noo-roadmap-item[data-hue="blue"]     { --card-hue: var(--blue-deep); }
+
+/* React Flow's Background renders a <path>; `stroke` is a presentation attribute and cannot take a var(), so
+   the colour is set here instead of passed in — which also keeps it right in both themes for free. */
+.noo-canvas .react-flow__background path { stroke: var(--grid-line); }
+
+/* the ground (§8): large grid lines. Cells snap into the boxes; a cell spanning n boxes is n·box − 2·pad wide */
+.noo-graph {
+  background-color: var(--ground);
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: var(--grid-box) var(--grid-box);
+}
+
+/* ===== Bento (§8.3–8.4, §9) — the widget. A 4 × 3 widget is 640 × 480: four boxes by three; one loud cell per widget ===== */
+.noo-bento {
+  --bento-cell: calc(var(--grid-box) - 2 * var(--grid-pad));                                 /* 144: a cell is a grid box minus its padding */
+  --bento-gap: calc(2 * var(--grid-pad));                                                    /* 16: two paddings meet between cells */
+  padding: var(--grid-pad);                                                                  /* so the widget's outer edge is the box edge too */
+  --bento-hue: var(--accent);
+  --bento-hue-deep: var(--accent-deep);
+  --bento-hue-ink: var(--peach-ink);
+  display: grid;
+  grid-template-columns: repeat(var(--bento-cols, 4), var(--bento-cell));
+  grid-auto-rows: var(--bento-cell);
+  gap: var(--bento-gap);
+  width: max-content;
+}
+.noo-bento[data-hue="pink"]     { --bento-hue: var(--pink);     --bento-hue-deep: var(--pink-deep); --bento-hue-ink: var(--pink-ink); }
+.noo-bento[data-hue="green"]    { --bento-hue: var(--green);    --bento-hue-deep: var(--green-deep); --bento-hue-ink: var(--green-ink); }
+.noo-bento[data-hue="grey"]     { --bento-hue: var(--grey);     --bento-hue-deep: var(--grey-deep); --bento-hue-ink: var(--grey-ink); }
+.noo-bento[data-hue="lavender"] { --bento-hue: var(--lavender); --bento-hue-deep: var(--lavender-deep); --bento-hue-ink: var(--lavender-ink); }
+.noo-bento[data-hue="peach"]    { --bento-hue: var(--peach);    --bento-hue-deep: var(--peach-deep); --bento-hue-ink: var(--peach-ink); }
+.noo-bento[data-hue="yellow"]   { --bento-hue: var(--yellow);   --bento-hue-deep: var(--yellow-deep); --bento-hue-ink: var(--yellow-ink); }
+.noo-bento[data-hue="blue"]     { --bento-hue: var(--blue);     --bento-hue-deep: var(--blue-deep); --bento-hue-ink: var(--blue-ink); }
+
+.noo-bento__cell {
+  position: relative;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 8px;
+  min-width: 0; min-height: 0;
+  padding: 20px;
+  border-radius: var(--r-lg);
+  overflow: hidden;                                                                          /* a glyph bleeds off the edge */
+  color: var(--ink);
+}
+/* Textured gradient cards (Illustrations.md §4b): the card carries the light and the material now that the
+   drawing on it is a line. The gradient runs −45°, the blob's light; the grain sits on top of it. */
+.noo-bento__cell--quiet {
+  background-color: var(--surface);
+  background-image: linear-gradient(135deg, color-mix(in oklch, var(--bento-hue) 34%, var(--surface)), var(--surface) 66%);
+  box-shadow: var(--e1);
+}
+.noo-bento__cell--fill {                                                                       /* the loud one; ink stays dark in both themes */
+  background-color: var(--bento-hue);
+  background-image: linear-gradient(135deg, color-mix(in oklch, var(--bento-hue) 58%, white), var(--bento-hue) 72%);
+  color: var(--bento-hue-ink);
+}
+.noo-bento__cell--ink {
+  background-color: var(--ink);
+  background-image: linear-gradient(135deg, color-mix(in oklch, var(--ink) 84%, var(--bento-hue)), var(--ink) 70%);
+  color: var(--ground);
+}
+.noo-bento__cell--glass { border-radius: var(--r-lg); }                                        /* glass has its own material: no gradient, no grain */
+.noo-textured, .noo-bento__cell:not(.noo-bento__cell--glass) { position: relative; }
+.noo-textured::after, .noo-bento__cell:not(.noo-bento__cell--glass)::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: currentColor;                                                                    /* the card's own ink: right polarity on every ground */
+  -webkit-mask-image: var(--grain); mask-image: var(--grain);
+  -webkit-mask-size: 120px 120px; mask-size: 120px 120px;
+  opacity: var(--grain-strength);
+}
+.noo-bento__cell > * { position: relative; z-index: 1; }                                       /* above the illustration and the grain */
+.noo-bento__cell .noo-label { color: inherit; opacity: 0.7; }
+.noo-bento__cell--fill .noo-label { opacity: 0.85; }
+
+/* twice the document scale: read from twice as far away, nothing under 20 */
+.noo-bento__title { margin: 0; font: 600 22px/1.15 var(--ff-sans); letter-spacing: -0.005em; text-wrap: balance; }
+.noo-bento__text  { margin: 0; font: 400 20px/1.35 var(--ff-sans); color: var(--ink-2); text-wrap: pretty; }
+.noo-bento__cell--fill .noo-bento__text { color: inherit; opacity: 0.85; }
+.noo-bento__word  { margin: 0; font: 400 48px/0.95 var(--ff-display); letter-spacing: -0.01em; }        /* two lines in a 2 × 2 cell; 56 wrapped to three and met the illustration */
+.noo-bento__list  { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font: 500 22px/1.25 var(--ff-sans); }
+.noo-bento__list li { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.noo-bento__list li > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.noo-bento__chips { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
+.noo-bento__cell .noo-chip { height: 34px; padding-inline: 14px; font-size: 16px; }             /* chips scale with the widget */
+
+.noo-bento__figure { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.noo-bento__value { font: 400 96px/0.9 var(--ff-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.noo-bento__figure--md .noo-bento__value { font-size: 56px; }
+.noo-bento__figure-label { font-size: 20px; letter-spacing: 0.08em; }
+.noo-bento__cell .noo-placeholder__tag { align-self: flex-start; font-size: 14px; padding: 6px 10px; }
+
+/* Illustration (Illustrations.md §4–5): one hue, one fine line, placed where the text is not */
+.noo-ill { --ill-hue: var(--accent-tint); display: block; }
+.noo-ill[data-hue="pink"]     { --ill-hue: var(--pink-tint); }
+.noo-ill[data-hue="green"]    { --ill-hue: var(--green-tint); }
+.noo-ill[data-hue="grey"]     { --ill-hue: var(--grey-tint); }
+.noo-ill[data-hue="lavender"] { --ill-hue: var(--lavender-tint); }
+.noo-ill[data-hue="peach"]    { --ill-hue: var(--peach-tint); }
+.noo-ill[data-hue="yellow"]   { --ill-hue: var(--yellow-tint); }
+.noo-ill[data-hue="blue"]     { --ill-hue: var(--blue-tint); }
+.noo-ill {
+  /* the line takes its contrast from the text beside it: dark on a light tile, light on a dark one, in either
+     theme, on any surface we invent later. One declaration instead of a theme block per ground. */
+  /* Both of these are dialled DOWN from where they started (Bhargav, 2026-09-11: "instead of dark and thick lines
+     that take up more attention, let's try to reduce the attention these lines grab"). The illustration is the
+     ground the cell's words sit on, not a thing competing with them. 64% and 2.6 were the old pair. */
+  --ill-line: color-mix(in oklch, var(--ill-hue) 46%, currentColor);                            /* 74% left yellow and green too pale on a light card; 64% read as ink */
+  --ill-w: 1.7;                                                                                 /* ≈1.3px where a loud cell renders it */
+}
+/* the diagonal: label top-left, figure or word bottom-left, illustration top-right — the reference's ring cell */
+.noo-bento__ill { position: absolute; z-index: 0; right: -7%; top: -8%; width: 62%; height: auto; pointer-events: none; }
+.noo-bento__ill--field { inset: 0; width: 100%; height: 100%; }                                                              /* a field: the lines cross the cell and run off its edges */
+.noo-bento__ill--bottom { top: auto; bottom: -8%; }                                                                          /* only when the cell's text sits at the top */
+.noo-bento__ill--alone { position: static; width: 80%; margin: auto; }                                                       /* a cell with no text */
+
+/* Placeholder (§9) — scaffolding while a section waits for copy, and the honest empty state once it ships */
+.noo-placeholder { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 20px; border: 1.5px dashed var(--rule); border-radius: var(--r-lg); }
+.noo-placeholder--draft { border-color: color-mix(in oklch, var(--accent-deep) 45%, transparent); }
+.noo-placeholder__tag { align-self: flex-start; font: 500 11px/1 var(--ff-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-deep); background: var(--accent-tint); padding: 5px 8px; border-radius: var(--r-pill); }
+.noo-placeholder__title { margin: 0; color: var(--ink-2); }
+.noo-placeholder__body { color: var(--muted); }
+.noo-block-card__body, .noo-roadmap-item__body { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.noo-block-card__meta { margin: 0; color: var(--muted); }
+.noo-block-card__title, .noo-roadmap-item__title { margin: 0; color: var(--ink); }
+.noo-block-card__line, .noo-roadmap-item__description { margin: 0; color: var(--ink-2); }
+.noo-block-card__details { margin: 4px 0 0; padding-left: 18px; list-style: disc; color: var(--ink-2); display: flex; flex-direction: column; gap: 4px; }
+.noo-block-card__details li::marker { color: var(--muted); }
+.noo-block-card__chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.noo-roadmap-item__progress { margin: 6px 0 0; color: var(--muted); }
+@media (max-width: 639.98px) { .noo-block-card, .noo-roadmap-item { flex-direction: column; gap: 14px; } }
+
+/* ===== ChatInput (§9) — glass-2 pill, 56px; send = 36px accent circle with the blob's eyes ===== */
+.noo-chat { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: min(640px, 92vw); }
+.noo-chat__suggestions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.noo-chat__bar { display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 10px 0 20px; border-radius: var(--r-pill); transition: box-shadow var(--d-fast) var(--ease); }
+.noo-chat__bar:focus-within { box-shadow: inset 0 0 0 1.5px var(--accent-deep), 0 0 0 3px color-mix(in oklch, var(--accent) 25%, transparent), var(--gs, var(--e2)); }
+.noo-chat__input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: 400 16px/1.3 var(--ff-sans); color: var(--ink); }
+.noo-chat__input::placeholder { color: var(--muted); }
+.noo-chat__send {
+  flex: none; display: grid; place-items: center;
+  width: 36px; height: 36px; border-radius: 50%; border: 0;
+  background: var(--accent); color: var(--eye);
+  cursor: pointer;
+  transition: transform var(--d-fast) var(--ease), opacity var(--d-fast) var(--ease);
+}
+.noo-chat__send > svg { width: 20px; height: 12px; }
+.noo-chat__send:hover { transform: scale(1.06); }
+.noo-chat__send:disabled { opacity: 0.45; cursor: default; transform: none; }
+.noo-chat__send:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+
+/* ===== Canvas (§8) — the base layout of No Origins; the host also imports @xyflow/react/dist/base.css ===== */
+.noo-canvas {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  background: var(--ground);
+  --xy-background-color: var(--ground);
+  --xy-background-pattern-color: color-mix(in oklch, var(--ink) var(--grid-ink), var(--ground));
+}
+.noo-canvas .react-flow__node-blob { border-radius: var(--r-pill); }
+.noo-canvas .react-flow__node:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 4px; }
+.noo-canvas .react-flow__node-toolbar { pointer-events: none; }                            /* bubbles are read, not pressed */
+.noo-canvas__bubble { white-space: nowrap; margin-top: -30px; }                             /* top-right of the blob, 8px gap */
+.noo-canvas__bubble--below { margin-top: 0; }
+.noo-canvas .react-flow__panel { margin: 20px; }
+.noo-canvas .react-flow__panel.bottom.center { transform: translateX(-20px) translateX(-50%); }
+.noo-canvas .react-flow__attribution { background: transparent; padding: 0; font: 400 10px/1 var(--ff-mono); }
+.noo-canvas .react-flow__attribution a { color: var(--muted); }
+.noo-canvas__wordmark { color: var(--ink); font-size: 22px; }
+.noo-canvas__menu { display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: var(--r-pill); }
+.noo-canvas__menu--column { flex-direction: column; align-items: stretch; gap: 1px; padding: 6px; border-radius: var(--r-lg); min-width: 148px; }
+.noo-canvas__menu--column .noo-nav__link { text-align: left; padding: 7px 12px; border-radius: var(--r-md); }
+.noo-canvas__menu button.noo-nav__link { background: none; border: 0; font: inherit; cursor: pointer; }
+.noo-canvas__menu .noo-nav__link[aria-current="true"] { color: var(--accent-deep); font-weight: 600; }
+.noo-canvas__panel--tools { display: flex; align-items: center; gap: 10px; }
+
+/* --- panels (§8.2): reading matter in canvas space --- */
+.noo-panel {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  overflow: hidden;
+  cursor: auto;
+  -webkit-user-select: text;
+          user-select: text;                                                               /* base.css sets `none` on every node: without this, not one word can be copied */
+}
+.noo-panel--glass { border-radius: var(--r-lg); }
+.noo-panel--solid { background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--e1); }
+.noo-panel--bare { padding: 0; background: none; }                                          /* type straight on the grid, for region intros */
+.noo-panel__content { min-width: 0; width: 100%; }
+.noo-panel--bare > .noo-panel__content { height: 100%; }
+.noo-panel--scroll > .noo-panel__content { height: 100%; overflow-y: auto; }
+.noo-panel__title { margin: 0 0 10px; color: var(--ink); }
+.noo-panel__lead { margin: 0; color: var(--ink-2); max-width: 46ch; }
+.noo-panel__prose { display: flex; flex-direction: column; gap: 14px; color: var(--ink-2); }
+.noo-panel__prose p { margin: 0; }
+
+/* RETIRED 2026-09-11, step 12 (Design-System.md §8.4): the three opacity tiers — map · titles · full — that
+   faded a document's words to nothing as you zoomed out. It was a trick, and it was standing in for a design.
+   A section now has two real layouts instead: a WIDGET built to be read at map size, and a full view that is
+   simply not visible until it is open (`.noo-full` below). Nothing fades by zoom any more, which is also why
+   the Me column stopped going blank on the map. `useZoomTier` survives for anything that wants to know. */
+
+/* --- regions (§8.2): the map label. Decorative — the section's real h2 is in its intro panel --- */
+.noo-region { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 10px; width: 100%; height: 100%; pointer-events: none; }
+.noo-region__label { font: 400 96px/0.9 var(--ff-display); color: color-mix(in oklch, var(--ink) 20%, var(--ground)); letter-spacing: -0.02em; }
+.noo-region__rule { width: 100%; border-top: 1.5px dotted var(--rule); }
+
+/* --- the minimap (§8.1): content off-screen is content that does not exist --- */
+.noo-canvas__map.react-flow__minimap {
+  width: 196px; height: 124px;
+  background: color-mix(in oklch, var(--surface) 66%, transparent);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--e1);
+  margin: 46px 20px 20px;                                                                   /* below the attribution, clear of the switcher entirely */
+}
+.noo-canvas__map .react-flow__minimap-mask { fill: color-mix(in oklch, var(--ink) 6%, transparent); stroke: var(--accent-deep); stroke-width: 2; }
+
+/* --- the through-line, drawn (§8.1) --- */
+.noo-canvas__threads { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; z-index: -1; }
+.noo-canvas__threads path { fill: none; stroke: var(--rule); stroke-width: 1.5; stroke-dasharray: 4 7; stroke-linecap: round; }
+
+/* --- document mode (§8.6): below md the canvas keeps its nodes and stops being infinite.
+       A media query rather than a class, so the server gets it right too. The `!important`s are the only way
+       past React Flow's inline transforms. The same declarations run in the app's <noscript> at every width. --- */
+@media (max-width: 899.98px) {
+  .noo-canvas { height: auto; }
+  .noo-canvas .react-flow,
+  .noo-canvas .react-flow__renderer,
+  .noo-canvas .react-flow__pane,
+  .noo-canvas .react-flow__viewport,
+  .noo-canvas .react-flow__nodes { position: static; width: auto; height: auto !important; transform: none !important; }
+  .noo-canvas .react-flow { overflow: visible !important; }                                 /* React Flow sets height and overflow inline: only !important gets past them */
+  .noo-canvas .react-flow__background,
+  .noo-canvas .react-flow__edges,
+  .noo-canvas .react-flow__node-toolbar,
+  .noo-canvas__threads,
+  .noo-canvas__map { display: none; }              /* the ground draws the grid; bubbles render inline, not as toolbars */
+  .noo-canvas .react-flow__nodes { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; padding: 64px 16px 140px; }   /* clear of the fixed theme switch */
+  .noo-canvas .react-flow__node { position: static !important; transform: none !important; width: auto !important; height: auto !important; }
+  .noo-canvas .react-flow__node-blob { flex: 0 0 calc(50% - 10px); display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .noo-canvas .react-flow__node-panel, .noo-canvas .react-flow__node-region { flex: 0 0 100%; }
+  .noo-canvas .react-flow__node-region { margin-top: 24px; }
+  .noo-canvas__bubble { white-space: normal; margin-top: 0; }
+  .noo-region__label { font-size: 34px; }
+  .noo-placeholder { padding: 16px; }
+  .noo-region__rule { border-top-width: 1px; }
+  .noo-panel { padding: 18px; }
+  .noo-panel--bare { padding: 0; }
+  .noo-canvas .react-flow__panel { margin: 12px; }
+  .noo-canvas .react-flow__panel.bottom.center { position: fixed; transform: translateX(-12px) translateX(-50%); }
+  .noo-canvas__panel--menu { display: none; }                                               /* the chat's suggestions are the menu */
+  .noo-canvas__panel--brand { display: none; }                                              /* the theme switch has top-right; the wordmark would collide */
+  .noo-canvas__panel--tools { position: fixed; }
+  .noo-canvas__wordmark { font-size: 18px; }
+}
+
+/* ── Widget and full — two layouts, one snap (Design-System.md §8.4) ──────────────────────────────────────────
+   Nothing is ever unmounted or `hidden`: both layouts stay in the DOM at every zoom, so every word is in the
+   accessibility tree and the server renders all of it (§12). Focus mode is opacity and pointer-events, nothing
+   more — which is also why it costs nothing to leave. */
+.noo-widget { width: 100%; height: 100%; cursor: pointer; }
+.react-flow__node:has(> .noo-widget) { border-radius: var(--r-lg); }
+.react-flow__node:focus-visible:has(> .noo-widget) { outline: 2px solid var(--accent-deep); outline-offset: 4px; }
+
+/* `!important` is load-bearing, not laziness: React Flow writes `pointer-events` as an INLINE style on every
+   node wrapper, and an inline style beats a class. Without it a full view — invisible, but stacked above the
+   ring it hangs from — still swallows every click meant for the widget underneath. That cost an hour. */
+.react-flow__node.noo-full { opacity: 0; pointer-events: none !important; }   /* hidden until its section is open */
+.react-flow__node.noo-full.is-open { opacity: 1; pointer-events: all !important; }
+.react-flow__node.is-faded { opacity: 0.05; pointer-events: none !important; }  /* what the open section does not own */
+.react-flow__node.is-source { opacity: 0; pointer-events: none !important; }    /* the widget it came out of */
+.react-flow__node.noo-full,
+.react-flow__node.is-faded,
+.react-flow__node.is-source { transition: opacity var(--d-slow) var(--ease); }
+
+@media (prefers-reduced-motion: reduce) {
+  .react-flow__node.noo-full,
+  .react-flow__node.is-faded,
+  .react-flow__node.is-source { transition: none; }                     /* the state change is instant (§8.4) */
+}
+
+/* In focus mode the map is not the surface you are on, and it sits exactly where a full view's heading goes. */
+.noo-canvas--open .noo-canvas__map { display: none; }
+
+/* Document mode (§8.6) and no-JS (§8.7): there is no zoom, so there is no snap and no focus mode. Widgets are
+   not rendered at all — a widget is a preview of something you can open, and on a phone you simply read the
+   thing — and the full views stop being hidden and become the content, stacked in reading order.
+   `!important` because these have to beat the base `.noo-full` rule above, which React Flow's inline
+   pointer-events forced into using it too. */
+@media (max-width: 899.98px) {
+  .noo-canvas .react-flow__node-widget { display: none; }
+  .noo-canvas .react-flow__node.noo-full { opacity: 1 !important; pointer-events: all !important; }
+  .noo-canvas .react-flow__node.is-faded,
+  .noo-canvas .react-flow__node.is-source { opacity: 1 !important; pointer-events: all !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noo-panel :is(
+  .noo-block-card__meta, .noo-block-card__title, .noo-block-card__line, .noo-block-card__details, .noo-block-card__chips,
+  .noo-roadmap-item__title, .noo-roadmap-item__description, .noo-roadmap-item__progress,
+  .noo-panel__title, .noo-panel__lead, .noo-panel__prose, .noo-panel__extra, .noo-panel .noo-bubble,
+  .noo-placeholder__tag, .noo-placeholder__title, .noo-placeholder__body
+  ) { transition: none; }
+}
+
+@media (forced-colors: active) {
+  .noo-panel--glass, .noo-panel--solid, .noo-bento__cell { border: 1px solid CanvasText; }
+  .noo-bento__cell--fill { background: Canvas; color: CanvasText; }
+  .noo-region__label { color: CanvasText; }
+  .noo-canvas__threads path { stroke: CanvasText; }
+  .noo-ill { --ill-line: CanvasText; }
+  .noo-textured::after, .noo-bento__cell::after { display: none; }                             /* no grain where the system picks the colours */
+}

@@ -1,0 +1,331 @@
+<title>No Origins Blob Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Hanken+Grotesk:wght@300..800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --ground: oklch(0.95 0.004 90); --ground-2: oklch(0.92 0.005 90); --surface: oklch(0.985 0.003 90);
+    --ink: oklch(0.30 0.012 60); --ink-2: oklch(0.42 0.012 60); --muted: oklch(0.55 0.01 60); --rule: oklch(0.86 0.006 90);
+    --accent: oklch(0.87 0.07 50); --accent-deep: oklch(0.45 0.12 50); --good: oklch(0.45 0.12 140); --warn: oklch(0.50 0.105 75); --bad: oklch(0.50 0.18 25);
+    --font-display: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif; --font-sans: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif; --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+    --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-pill: 999px;
+    --e1: 0 1px 2px color-mix(in oklch, var(--ink) 6%, transparent), 0 2px 6px color-mix(in oklch, var(--ink) 5%, transparent);
+    --e2: 0 4px 12px color-mix(in oklch, var(--ink) 8%, transparent), 0 1px 2px color-mix(in oklch, var(--ink) 5%, transparent);
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ground: oklch(0.20 0.006 60); --ground-2: oklch(0.17 0.006 60); --surface: oklch(0.25 0.007 60); --ink: oklch(0.93 0.005 90); --ink-2: oklch(0.80 0.006 90); --muted: oklch(0.66 0.008 60); --rule: oklch(0.32 0.006 60); --accent: oklch(0.76 0.09 50); --accent-deep: oklch(0.82 0.10 50); --good: oklch(0.82 0.12 140); --warn: oklch(0.78 0.13 75); --bad: oklch(0.72 0.16 25); } }
+  :root[data-theme="dark"] { --ground: oklch(0.20 0.006 60); --ground-2: oklch(0.17 0.006 60); --surface: oklch(0.25 0.007 60); --ink: oklch(0.93 0.005 90); --ink-2: oklch(0.80 0.006 90); --muted: oklch(0.66 0.008 60); --rule: oklch(0.32 0.006 60); --accent: oklch(0.76 0.09 50); --accent-deep: oklch(0.82 0.10 50); --good: oklch(0.82 0.12 140); --warn: oklch(0.78 0.13 75); --bad: oklch(0.72 0.16 25); }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--font-sans); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 2px; border-radius: 6px; }
+  h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+  p { margin: 0; text-wrap: pretty; }
+  code { font-family: var(--font-mono); font-size: 0.86em; background: var(--ground-2); padding: 1px 6px; border-radius: 5px; }
+  .label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+
+  .bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 54px; padding: 0 28px; background: var(--ground); border-bottom: 1px solid var(--rule); font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.06em; color: var(--muted); }
+  .bar .name { color: var(--ink); font-family: var(--font-display); font-weight: 700; font-size: 16px; letter-spacing: -0.01em; display: inline-flex; align-items: center; gap: 8px; }
+  .bar .name svg { height: 13px; width: auto; }
+  .bar .status { display: flex; align-items: center; gap: 9px; white-space: nowrap; }
+  .bar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--rule); }
+  .bar .status[data-state="saving"] .dot, .bar .status[data-state="unsaved"] .dot { background: var(--warn); }
+  .bar .status[data-state="saved"] .dot { background: var(--good); }
+  .bar .status[data-state="error"] .dot, .bar .status[data-state="nodb"] .dot { background: var(--bad); }
+
+  .page { max-width: 1280px; margin: 0 auto; padding: 28px 28px 120px; }
+  .lede { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 22px; }
+  .lede h1 { font-size: 30px; font-weight: 700; }
+  .lede p { color: var(--muted); max-width: 62ch; margin-top: 6px; }
+  .lay { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 22px; align-items: start; }
+  .left { position: sticky; top: 74px; display: flex; flex-direction: column; gap: 14px; }
+  .stage { position: relative; height: 420px; border-radius: var(--r-lg); overflow: hidden; background-color: var(--ground); box-shadow: inset 0 0 0 1px var(--rule); display: flex; align-items: center; justify-content: center; }
+  .stage .hero { position: absolute; left: 50%; top: 44%; transform: translate(-50%, -50%); }
+  .stage .row { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; gap: 14px; align-items: center; }
+  .stage .tools { position: absolute; right: 14px; top: 14px; display: flex; gap: 6px; }
+  .stage .card-check { position: absolute; left: 14px; top: 14px; padding: 10px 12px; border-radius: var(--r-md); background: var(--surface); box-shadow: var(--e1); display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--muted); }
+  .sm { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: var(--r-pill); border: 1px solid var(--rule); background: var(--surface); font-size: 12.5px; font-weight: 500; color: var(--ink); }
+  .sm[aria-pressed="true"] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+
+  .blob { display: block; flex-shrink: 0; overflow: visible; }
+  .blob-wrap { display: inline-flex; flex-shrink: 0; border-radius: var(--r-pill); }
+  .blob .gdot { fill: var(--gdot); }
+  .ref { display: none; } .gridded .ref { display: block; }
+
+  .panel { display: flex; flex-direction: column; gap: 14px; }
+  .sec { background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--e1); padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .sec h3 { font-size: 15px; font-weight: 600; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .sec h3 span { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; text-transform: none; }
+  .ctl { display: grid; grid-template-columns: 128px 1fr 64px; gap: 12px; align-items: center; }
+  .ctl label { font-size: 13.5px; }
+  .ctl output { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+  input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 22px; background: transparent; margin: 0; cursor: pointer; }
+  input[type="range"]::-webkit-slider-runnable-track { height: 2px; background: var(--rule); border-radius: 1px; }
+  input[type="range"]::-moz-range-track { height: 2px; background: var(--rule); border-radius: 1px; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; margin-top: -7px; background: var(--ink); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--rule); }
+  input[type="range"]::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--ink); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--rule); }
+  input[type="range"]:focus-visible { outline: none; } input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 40%, transparent), 0 0 0 1px var(--accent-deep); }
+  input[type="color"] { width: 36px; height: 28px; border: 1px solid var(--rule); border-radius: 8px; padding: 2px; background: var(--surface); }
+  .hues { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .hues button { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; padding: 0; position: relative; }
+  .hues button[aria-pressed="true"] { border-color: var(--ink); }
+  .hues button.host { background: var(--surface); box-shadow: inset 0 0 0 1px var(--rule); }
+  .hues button.custom { background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red); }
+  .figma { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; font-size: 13px; }
+  .figma span:nth-child(odd) { color: var(--muted); }
+  .figma span:nth-child(even) { font-family: var(--font-mono); font-size: 12px; }
+  pre { margin: 0; font-family: var(--font-mono); font-size: 11.5px; line-height: 1.55; color: var(--ink-2); background: var(--ground-2); padding: 14px 16px; border-radius: var(--r-md); overflow-x: auto; white-space: pre; max-height: 260px; }
+  textarea { width: 100%; font-family: var(--font-sans); font-size: 14.5px; line-height: 1.5; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-sm); padding: 11px 13px; resize: none; overflow: hidden; min-height: 70px; }
+  textarea:focus { outline: none; border-color: var(--ink); }
+  .actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; border-radius: var(--r-pill); padding: 11px 18px; font-size: 14px; font-weight: 500; border: 1.5px solid var(--ink); background: var(--ink); color: var(--ground); }
+  .btn.quiet { background: transparent; color: var(--ink); border-color: var(--rule); }
+  .done-note { font-family: var(--font-mono); font-size: 11.5px; color: var(--good); letter-spacing: 0.04em; }
+  .notice { padding: 12px 14px; border: 1px solid var(--rule); border-radius: var(--r-sm); background: var(--surface); font-size: 14px; }
+  [hidden] { display: none !important; }
+  @media (max-width: 960px) { .lay { grid-template-columns: 1fr; } .left { position: static; } .stage { height: 380px; } }
+  @media (max-width: 600px) { .bar { padding: 0 16px; } .page { padding: 20px 16px 100px; } .ctl { grid-template-columns: 1fr 1fr; } .ctl input[type="range"] { grid-column: 1 / -1; } }
+</style>
+
+<div class="bar">
+  <span class="name">N<svg viewBox="0 0 96 64" aria-hidden="true"><rect x="2.75" y="2.75" width="90.5" height="58.5" rx="29.25" fill="none" stroke="currentColor" stroke-width="5.5"></rect><circle cx="33.5" cy="32" r="9.5" fill="currentColor"></circle><circle cx="62.5" cy="32" r="9.5" fill="currentColor"></circle></svg>RIGINS · Blob Lab</span>
+  <span class="status" id="status" data-state="idle"><span class="dot"></span><span id="statusText">Loading</span></span>
+</div>
+
+<main class="page">
+  <div class="lede">
+    <div><div class="label">Design system · §4 · the blob</div><h1 style="margin-top:8px">Tune the pill until it&#39;s yours</h1><p>Every visual parameter of the blob, live over the real grid. Move anything; it saves as you go. When it looks right, mark it done — I&#39;ll read these exact values and rewrite the spec from them.</p></div>
+    <div class="actions"><button class="sm" id="themeBtn">Theme: light</button><button class="sm" id="resetBtn">Reset to spec (your 09-09 values)</button></div>
+  </div>
+  <div class="notice" id="nodbNotice" hidden>Values aren&#39;t reaching the shared store in this view — kept in this browser only.</div>
+
+  <div class="lay">
+    <div class="left">
+      <div class="stage" id="stage">
+        <div class="tools"><button class="sm" id="onCard" aria-pressed="false">Over a card</button></div>
+        <div class="hero" id="hero"></div>
+        <div class="row" id="row"></div>
+      </div>
+      <div class="sec" style="padding:14px 18px"><h3>Generated markup <span>what you&#39;re looking at</span></h3><pre id="code"></pre></div>
+    </div>
+
+    <div class="panel" id="panel">
+      <div class="sec">
+        <h3>Colour <span>tint at low opacity = the pastel</span></h3>
+        <div class="hues" id="hues"></div>
+        <div class="ctl" id="customRow" hidden><label>Custom tint</label><input type="color" id="customTint" value="#8268FF"><output id="customOut"></output></div>
+      </div>
+      <div id="controls"></div>
+      <div class="sec">
+        <h3>Your Figma, for reference <span>the target</span></h3>
+        <div class="figma"><span>Frame</span><span>96 × 64 hug · radius 100</span><span>Fill</span><span>8268FF @ 23% (host: none)</span><span>Glass light</span><span>−45° · 80%</span><span>Refraction</span><span>80</span><span>Depth</span><span>20</span><span>Dispersion</span><span>50</span><span>Frost</span><span>2</span><span>Eyes</span><span>#474747 · gap 10 · pad 24 · black in dark (your note)</span></div>
+      </div>
+      <div class="sec">
+        <h3>Notes <span>what still feels off, in words</span></h3>
+        <textarea id="notes" placeholder="e.g. the rim is too sharp; the tint should be warmer; Figma&#39;s refraction bends the dots more…"></textarea>
+        <div class="actions"><button class="btn" id="doneBtn">Mark as done</button><span class="done-note" id="doneNote" hidden></span></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var DOC_PATH = 'decisions/blob', LS_KEY = 'no-origins.blob-lab.v1';
+  var $ = function (s) { return document.querySelector(s); };
+  var TINT = { pink: 'oklch(0.62 0.22 20)', green: 'oklch(0.72 0.22 135)', lavender: 'oklch(0.60 0.21 285)', peach: 'oklch(0.70 0.19 45)', yellow: 'oklch(0.85 0.19 95)', blue: 'oklch(0.62 0.19 260)' };
+  var PASTEL = { pink: 'oklch(0.82 0.10 20)', green: 'oklch(0.91 0.10 130)', lavender: 'oklch(0.85 0.08 300)', peach: 'oklch(0.87 0.07 50)', yellow: 'oklch(0.92 0.11 100)', blue: 'oklch(0.80 0.09 260)' };
+  var HUES = ['pink', 'green', 'lavender', 'peach', 'yellow', 'blue', 'host', 'custom'];
+
+  var DEFAULTS = {
+    hue: "host", customTint: "#8268FF",
+    fillOpacity: 24, hostOpacity: 5, frost: 2, saturate: 60,
+    lightAngle: -45, rimIntensity: 90, rimWidth: 0.8, rimFade: 40, rimEnd: 40,
+    shadowIntensity: 0, shadowWidth: 0, shadowBlur: 0,
+    refractZoom: 6, refractBand: 32, refractOpacity: 32,
+    dropY: 5, dropBlur: 14, dropOpacity: 10,
+    eyeR: 10, eyeGap: 36, eyeColor: "#474747",
+    gridGap: 32, gridDot: 2, gridStrength: 16,
+    onCard: false
+  };
+  var CONTROLS = [
+    { sec: 'Body', hint: 'Figma: fill 23% · frost 2', items: [
+      ['fillOpacity', 'Tint opacity', 0, 100, 1, '%'], ['hostOpacity', 'Host presence', 0, 60, 1, '%'], ['frost', 'Frost (blur)', 0, 12, 0.5, 'px'], ['saturate', 'Backdrop saturate', 60, 180, 5, '%'] ] },
+    { sec: 'Light', hint: 'Figma: −45° · 80%', items: [
+      ['lightAngle', 'Light angle', -180, 180, 5, '°'], ['rimIntensity', 'Rim brightness', 0, 100, 1, '%'], ['rimWidth', 'Rim width', 0, 5, 0.1, 'u'], ['rimFade', 'Rim fade at', 10, 100, 1, '%'], ['rimEnd', 'Rim far side', 0, 60, 1, '%'] ] },
+    { sec: 'Depth', hint: 'Figma: depth 20 — the inner shadow', items: [
+      ['shadowIntensity', 'Shadow strength', 0, 70, 1, '%'], ['shadowWidth', 'Shadow width', 0, 24, 0.5, 'u'], ['shadowBlur', 'Shadow softness', 0, 8, 0.1, 'u'] ] },
+    { sec: 'Refraction', hint: 'Figma: refraction 80 — the grid bending at the rim', items: [
+      ['refractZoom', 'Magnify', 0, 30, 0.5, '%'], ['refractBand', 'Band starts at', 0, 95, 1, '%'], ['refractOpacity', 'Band opacity', 0, 100, 1, '%'] ] },
+    { sec: 'Drop shadow', hint: 'beneath the pill', items: [
+      ['dropY', 'Offset Y', 0, 20, 0.5, 'px'], ['dropBlur', 'Blur', 0, 40, 1, 'px'], ['dropOpacity', 'Opacity', 0, 40, 1, '%'] ] },
+    { sec: 'Eyes', hint: 'Figma: 19px · gap 10 · #474747', items: [
+      ['eyeR', 'Radius', 5, 14, 0.25, 'u'], ['eyeGap', 'Centre distance', 16, 44, 0.5, 'u'] ] },
+    { sec: 'Grid', hint: 'what the glass has to refract', items: [
+      ['gridGap', 'Gap', 16, 56, 1, 'px'], ['gridDot', 'Dot size', 0.6, 3, 0.1, 'px'], ['gridStrength', 'Dot strength', 4, 40, 1, '%'] ] }
+  ];
+
+  var state = { params: Object.assign({}, DEFAULTS), notes: '', complete: false, completedAt: null, updatedAt: null };
+  var db = null, saveTimer = null, pending = false, GN = 0;
+  var statusEl = $('#status'), statusText = $('#statusText');
+
+  // ---------- colour helpers ----------
+  function hexToOklch(hex) {
+    var n = parseInt(hex.slice(1), 16), r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+    var lin = function (c) { return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }; r = lin(r); g = lin(g); b = lin(b);
+    var l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b), m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b), s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    var L = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s, a = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s, bb = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s;
+    var C = Math.hypot(a, bb), H = (Math.atan2(bb, a) * 180 / Math.PI + 360) % 360;
+    return 'oklch(' + L.toFixed(3) + ' ' + C.toFixed(3) + ' ' + H.toFixed(0) + ')';
+  }
+  function tintOf(p) { return p.hue === 'custom' ? p.customTint : TINT[p.hue]; }
+  function isDark() { var t = document.documentElement.getAttribute("data-theme"); return t === "dark" || (!t && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches); }
+
+  // ---------- blob renderer (parameterised copy of the design-system construction) ----------
+  function lightPts(deg) { var t = deg * Math.PI / 180; var dx = Math.sin(t) * 0.5, dy = -Math.cos(t) * 0.5; return { x1: (0.5 + dx).toFixed(3), y1: (0.5 + dy).toFixed(3), x2: (0.5 - dx).toFixed(3), y2: (0.5 - dy).toFixed(3) }; }
+  function blob(p, w, hue, breathe) {
+    var h = Math.round(w * 2 / 3), id = 'b' + (++GN), host = hue === 'host';
+    var L = lightPts(p.lightAngle);
+    var fill = host ? 'white' : (hue === 'custom' ? p.customTint : TINT[hue]);
+    var fo = host ? p.hostOpacity / 100 : p.fillOpacity / 100;
+    var exl = 48 - p.eyeGap / 2, exr = 48 + p.eyeGap / 2;
+    var defs = '<defs>' +
+      '<linearGradient id="' + id + 'rim" x1="' + L.x1 + '" y1="' + L.y1 + '" x2="' + L.x2 + '" y2="' + L.y2 + '"><stop offset="0" stop-color="#fff" stop-opacity="' + (p.rimIntensity / 100) + '"></stop><stop offset="' + (p.rimFade / 100) + '" stop-color="#fff" stop-opacity="' + (p.rimIntensity / 100 * 0.19).toFixed(3) + '"></stop><stop offset="1" stop-color="#fff" stop-opacity="' + (p.rimEnd / 100) + '"></stop></linearGradient>' +
+      '<linearGradient id="' + id + 'sh" x1="' + L.x1 + '" y1="' + L.y1 + '" x2="' + L.x2 + '" y2="' + L.y2 + '"><stop offset="0" stop-color="#000" stop-opacity="0"></stop><stop offset="0.5" stop-color="#000" stop-opacity="' + (p.shadowIntensity / 100 * 0.07).toFixed(3) + '"></stop><stop offset="1" stop-color="#000" stop-opacity="' + (p.shadowIntensity / 100) + '"></stop></linearGradient>' +
+      '<radialGradient id="' + id + 'mk" cx="0.5" cy="0.5" r="0.5"><stop offset="' + (p.refractBand / 100) + '" stop-color="#fff" stop-opacity="0"></stop><stop offset="0.92" stop-color="#fff" stop-opacity="1"></stop></radialGradient>' +
+      '<mask id="' + id + 'mask" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#' + id + 'mk)"></rect></mask>' +
+      '<clipPath id="' + id + 'clip"><rect width="96" height="64" rx="32"></rect></clipPath>' +
+      '<filter id="' + id + 'blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="' + p.shadowBlur + '"></feGaussianBlur></filter>' +
+      '<pattern id="' + id + 'grid" patternUnits="userSpaceOnUse" width="32" height="32"><circle class="gdot" cx="16" cy="16" r="1.4"></circle></pattern></defs>';
+    var body = '<rect class="body" width="96" height="64" rx="32" fill="' + fill + '" fill-opacity="' + fo + '"></rect>';
+    var ref = '<g class="ref" clip-path="url(#' + id + 'clip)" mask="url(#' + id + 'mask)" opacity="' + (p.refractOpacity / 100) + '"><rect width="96" height="64" fill="url(#' + id + 'grid)"></rect></g>';
+    var half = p.shadowWidth / 2;
+    var sh = p.shadowWidth > 0 ? '<g clip-path="url(#' + id + 'clip)"><rect x="' + (-half + 2) + '" y="' + (-half + 2) + '" width="' + (96 + p.shadowWidth - 4) + '" height="' + (64 + p.shadowWidth - 4) + '" rx="' + (32 + half - 2) + '" fill="none" stroke="url(#' + id + 'sh)" stroke-width="' + p.shadowWidth + '" filter="url(#' + id + 'blur)"></rect></g>' : '';
+    var rw = host ? p.rimWidth * 1.18 : p.rimWidth;
+    var rim = rw > 0 ? '<rect x="' + (rw / 2 + 0.05).toFixed(2) + '" y="' + (rw / 2 + 0.05).toFixed(2) + '" width="' + (96 - rw - 0.1).toFixed(2) + '" height="' + (64 - rw - 0.1).toFixed(2) + '" rx="' + (32 - rw / 2).toFixed(2) + '" fill="none" stroke="url(#' + id + 'rim)" stroke-width="' + rw.toFixed(2) + '"></rect>' : '';
+    var eyeC = isDark() ? "#000000" : p.eyeColor;
+    var eyes = "<circle cx=\"" + exl + "\" cy=\"32\" r=\"" + p.eyeR + "\" fill=\"" + eyeC + "\"></circle><circle cx=\"" + exr + "\" cy=\"32\" r=\"" + p.eyeR + "\" fill=\"" + eyeC + "\"></circle>";
+    var wrapStyle = 'width:' + w + 'px;height:' + h + 'px;-webkit-backdrop-filter:blur(' + p.frost + 'px) saturate(' + p.saturate / 100 + ');backdrop-filter:blur(' + p.frost + 'px) saturate(' + p.saturate / 100 + ');filter:drop-shadow(0 ' + p.dropY + 'px ' + p.dropBlur + 'px color-mix(in oklch, var(--ink) ' + p.dropOpacity + '%, transparent));';
+    return '<span class="blob-wrap' + (host ? ' host' : '') + '" style="' + wrapStyle + '"><svg class="blob" viewBox="0 0 96 64" width="' + w + '" height="' + h + '" aria-hidden="true">' + defs + body + ref + sh + rim + eyes + '</svg></span>';
+  }
+
+  function mod(a, n) { return ((a % n) + n) % n; }
+  function alignGrid() {
+    var st = $('#stage'), p = state.params, r = st.getBoundingClientRect();
+    st.querySelectorAll('svg.blob').forEach(function (svg) {
+      var pat = svg.querySelector('pattern'); var b = svg.getBoundingClientRect(); if (!pat || !b.width) return;
+      var s = b.width / 96, G = p.gridGap / s, rd = p.gridDot / s;
+      var T = mod((r.left + p.gridGap / 2 - b.left) / s, G), U = mod((r.top + p.gridGap / 2 - b.top) / s, G);
+      pat.setAttribute('width', G); pat.setAttribute('height', G);
+      var c = pat.querySelector('circle'); c.setAttribute('cx', G / 2); c.setAttribute('cy', G / 2); c.setAttribute('r', rd);
+      var z = 1 + p.refractZoom / 100;
+      pat.setAttribute('patternTransform', 'translate(48 32) scale(' + z + ') translate(-48 -32) translate(' + (T - G / 2).toFixed(2) + ' ' + (U - G / 2).toFixed(2) + ')');
+      svg.classList.add('gridded');
+    });
+  }
+
+  function render() {
+    var p = state.params, st = $('#stage');
+    st.style.setProperty('--gdot', 'color-mix(in oklch, var(--ink) ' + p.gridStrength + '%, var(--ground))');
+    st.style.backgroundImage = p.onCard ? 'none' : 'radial-gradient(color-mix(in oklch, var(--ink) ' + p.gridStrength + '%, var(--ground)) ' + p.gridDot + 'px, transparent ' + (p.gridDot + 0.2) + 'px)';
+    st.style.backgroundSize = p.gridGap + 'px ' + p.gridGap + 'px';
+    st.style.backgroundColor = p.onCard ? 'var(--surface)' : 'var(--ground)';
+    $('#hero').innerHTML = blob(p, 240, p.hue);
+    $('#row').innerHTML = HUES.filter(function (h) { return h !== 'custom'; }).map(function (h) { return blob(p, 66, h); }).join('');
+    $('#code').textContent = prettyCode(p);
+    $('#customRow').hidden = p.hue !== 'custom';
+    $('#customOut').textContent = hexToOklch(p.customTint);
+    document.querySelectorAll('#hues button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-h') === p.hue)); });
+    $('#onCard').setAttribute('aria-pressed', String(!!p.onCard));
+    if (!p.onCard) requestAnimationFrame(alignGrid); else st.querySelectorAll('svg.blob').forEach(function (s) { s.classList.remove('gridded'); });
+  }
+  function prettyCode(p) {
+    var L = lightPts(p.lightAngle), tint = p.hue === 'host' ? 'white' : tintOf(p), fo = p.hue === 'host' ? p.hostOpacity : p.fillOpacity;
+    return [
+      '/* blob — ' + p.hue + (p.hue === 'custom' ? ' ' + hexToOklch(p.customTint) : '') + ' */',
+      '.blob-wrap { backdrop-filter: blur(' + p.frost + 'px) saturate(' + (p.saturate / 100) + ');',
+      '             filter: drop-shadow(0 ' + p.dropY + 'px ' + p.dropBlur + 'px ink/' + p.dropOpacity + '%); }',
+      '<rect .body rx=32 fill="' + tint + '" fill-opacity=".' + String(fo).padStart(2, '0') + '"/>',
+      'refraction: grid ×' + (1 + p.refractZoom / 100).toFixed(2) + ' about centre · band ' + p.refractBand + '%→92% · opacity ' + p.refractOpacity + '%',
+      'depth:      stroke ' + p.shadowWidth + ' outside, blur ' + p.shadowBlur + ', clipped inside · black 0→' + p.shadowIntensity + '% along light',
+      'light ' + p.lightAngle + '°: rim ' + p.rimWidth + ' · white ' + p.rimIntensity + '% → ' + Math.round(p.rimIntensity * 0.19) + '% @' + p.rimFade + '% → ' + p.rimEnd + '%',
+      '            gradient (' + L.x1 + ',' + L.y1 + ') → (' + L.x2 + ',' + L.y2 + ')',
+      'eyes:       r ' + p.eyeR + ' at x ' + (48 - p.eyeGap / 2) + ' / ' + (48 + p.eyeGap / 2) + ' · ' + p.eyeColor,
+      'grid:       gap ' + p.gridGap + ' · dot ' + p.gridDot + ' · ink ' + p.gridStrength + '%'
+    ].join('\n');
+  }
+
+  // ---------- controls ----------
+  function buildControls() {
+    $('#hues').innerHTML = HUES.map(function (h) {
+      var cls = h === 'host' ? 'host' : h === 'custom' ? 'custom' : '';
+      var bg = (h === 'host' || h === 'custom') ? '' : 'style="background:' + PASTEL[h] + '"';
+      return '<button type="button" class="' + cls + '" data-h="' + h + '" title="' + h + '" aria-label="' + h + '" ' + bg + '></button>';
+    }).join('') + '<span class="label" style="margin-left:6px" id="hueName"></span>';
+    document.querySelectorAll('#hues button').forEach(function (b) { b.addEventListener('click', function () { state.params.hue = b.getAttribute('data-h'); $('#hueName').textContent = state.params.hue; render(); scheduleSave(); }); });
+    $('#customTint').addEventListener('input', function () { state.params.customTint = $('#customTint').value; render(); scheduleSave(); });
+    var html = '';
+    CONTROLS.forEach(function (sec) {
+      html += '<div class="sec"><h3>' + sec.sec + ' <span>' + sec.hint + '</span></h3>';
+      sec.items.forEach(function (it) { html += '<div class="ctl"><label for="c_' + it[0] + '">' + it[1] + '</label><input type="range" id="c_' + it[0] + '" data-k="' + it[0] + '" min="' + it[2] + '" max="' + it[3] + '" step="' + it[4] + '"><output id="o_' + it[0] + '"></output></div>'; });
+      html += '</div>';
+    });
+    $('#controls').innerHTML = html;
+    document.querySelectorAll('#controls input[type="range"]').forEach(function (r) {
+      r.addEventListener('input', function () { state.params[r.getAttribute('data-k')] = parseFloat(r.value); syncOutputs(); render(); scheduleSave(); });
+    });
+  }
+  function unitOf(k) { for (var i = 0; i < CONTROLS.length; i++) for (var j = 0; j < CONTROLS[i].items.length; j++) if (CONTROLS[i].items[j][0] === k) return CONTROLS[i].items[j][5]; return ''; }
+  function syncOutputs() {
+    document.querySelectorAll('#controls input[type="range"]').forEach(function (r) { var k = r.getAttribute('data-k'); r.value = state.params[k]; $('#o_' + k).textContent = state.params[k] + (unitOf(k) === 'u' ? '' : unitOf(k)); });
+    $('#customTint').value = state.params.customTint; $('#hueName').textContent = state.params.hue;
+  }
+  $('#onCard').addEventListener('click', function () { state.params.onCard = !state.params.onCard; render(); scheduleSave(); });
+  $('#resetBtn').addEventListener('click', function () { state.params = Object.assign({}, DEFAULTS); syncOutputs(); render(); scheduleSave(); });
+  window.addEventListener('resize', function () { requestAnimationFrame(alignGrid); });
+
+  // ---------- theme ----------
+  var root = document.documentElement;
+  function setTheme(t) { if (t === "system") root.removeAttribute("data-theme"); else root.setAttribute("data-theme", t); $("#themeBtn").textContent = "Theme: " + t; try { localStorage.setItem("noo.lab.theme", t); } catch (e) {} render(); }
+  var th = 'light'; try { th = localStorage.getItem('noo.lab.theme') || 'light'; } catch (e) {}
+  $('#themeBtn').addEventListener('click', function () { th = th === 'light' ? 'dark' : th === 'dark' ? 'system' : 'light'; setTheme(th); });
+
+  // ---------- notes / done / save ----------
+  var notesEl = $('#notes');
+  notesEl.addEventListener('input', function () { state.notes = notesEl.value; notesEl.style.height = 'auto'; notesEl.style.height = Math.max(notesEl.scrollHeight, 70) + 'px'; scheduleSave(); });
+  function renderDone() { var b = $('#doneBtn'), n = $('#doneNote'); if (state.complete) { b.textContent = 'Reopen'; b.classList.add('quiet'); n.hidden = false; n.textContent = 'Marked done ' + timeLabel(state.completedAt) + ' — tell Claude in the chat.'; } else { b.textContent = 'Mark as done'; b.classList.remove('quiet'); n.hidden = true; } }
+  $('#doneBtn').addEventListener('click', function () { state.complete = !state.complete; state.completedAt = state.complete ? new Date().toISOString() : null; renderDone(); save(); });
+
+  function apply(s) { state.params = Object.assign({}, DEFAULTS, s.params || {}); state.notes = s.notes || ''; state.complete = !!s.complete; state.completedAt = s.completedAt || null; state.updatedAt = s.updatedAt || null; notesEl.value = state.notes; syncOutputs(); render(); renderDone(); }
+  function collect() { var c = JSON.parse(JSON.stringify(state)); c.updatedAt = new Date().toISOString(); state.updatedAt = c.updatedAt; c.resolved = { tint: state.params.hue === 'host' ? null : (state.params.hue === 'custom' ? hexToOklch(state.params.customTint) : TINT[state.params.hue]), eyeX: [48 - state.params.eyeGap / 2, 48 + state.params.eyeGap / 2], light: lightPts(state.params.lightAngle) }; return c; }
+  function setStatus(k, t) { statusEl.setAttribute('data-state', k); statusText.textContent = t; }
+  function timeLabel(iso) { try { return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
+  function scheduleSave() { setStatus('unsaved', 'Unsaved'); clearTimeout(saveTimer); saveTimer = setTimeout(save, 800); }
+  function save() {
+    clearTimeout(saveTimer); var data = collect();
+    try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch (e) {}
+    if (!db) { setStatus('nodb', 'Saved in this browser only'); return; }
+    if (pending) { saveTimer = setTimeout(save, 400); return; }
+    pending = true; setStatus('saving', 'Saving');
+    db.doc(DOC_PATH).set(data).then(function () { pending = false; setStatus('saved', 'Saved ' + timeLabel(data.updatedAt)); })
+      .catch(function (e) { pending = false; if ((e && e.code) === 'unavailable') { setTimeout(function () { db.doc(DOC_PATH).set(data).then(function () { setStatus('saved', 'Saved ' + timeLabel(data.updatedAt)); }).catch(function () { setStatus('error', 'Could not save — kept in this browser'); }); }, 700); } else { setStatus('error', 'Could not save — kept in this browser'); } });
+  }
+
+  // ---------- boot ----------
+  buildControls();
+  var local = null; try { local = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) {}
+  apply(local || state); setTheme(th); setStatus('idle', 'Connecting');
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { requestAnimationFrame(alignGrid); });
+  var canUse = window.claude && typeof window.claude.use === 'function';
+  if (!canUse) { setStatus('nodb', 'Saved in this browser only'); $('#nodbNotice').hidden = false; }
+  else {
+    window.claude.use('db').then(function (ns) {
+      db = ns; if (!db) { setStatus('nodb', 'Saved in this browser only'); $('#nodbNotice').hidden = false; return; }
+      return db.doc(DOC_PATH).get().then(function (snap) {
+        if (snap.exists) { var remote = snap.data(); if (!local || (remote.updatedAt || '') >= (local.updatedAt || '')) { apply(remote); setStatus('saved', 'Saved ' + timeLabel(remote.updatedAt)); } else { save(); } }
+        else if (local && local.updatedAt) { save(); } else { setStatus('saved', 'Ready'); }
+      }).catch(function () { setStatus('error', 'Could not load saved values'); });
+    });
+  }
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden' && statusEl.getAttribute('data-state') === 'unsaved') save(); });
+})();
+</script>

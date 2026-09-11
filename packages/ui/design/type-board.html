@@ -1,0 +1,226 @@
+<title>No Origins Display Type</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titan+One&family=Chango&family=Rammetto+One&family=Bowlby+One&family=Fredoka:wght@300..700&family=Baloo+2:wght@400..800&family=Gabarito:wght@400..900&family=Bungee&family=Bungee+Inline&family=Righteous&family=Passion+One:wght@400;700;900&family=Unbounded:wght@200..900&family=Hanken+Grotesk:wght@300..800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  @font-face { font-family: 'Phosphate Solid Local'; src: local('Phosphate-Solid'), local('Phosphate Solid'), local('PhosphateSolid'); }
+  @font-face { font-family: 'Phosphate Inline Local'; src: local('Phosphate-Inline'), local('Phosphate Inline'), local('PhosphateInline'); }
+  :root {
+    --ground: oklch(0.95 0.004 90); --ground-2: oklch(0.92 0.005 90); --surface: oklch(0.985 0.003 90);
+    --ink: oklch(0.30 0.012 60); --ink-2: oklch(0.42 0.012 60); --muted: oklch(0.55 0.01 60); --rule: oklch(0.86 0.006 90);
+    --accent: oklch(0.87 0.07 50); --accent-deep: oklch(0.45 0.12 50); --accent-tint: oklch(0.70 0.19 45); --good: oklch(0.45 0.12 140); --warn: oklch(0.50 0.105 75); --bad: oklch(0.50 0.18 25);
+    --sans: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif; --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+    --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-pill: 999px;
+    --e1: 0 1px 2px color-mix(in oklch, var(--ink) 6%, transparent), 0 2px 6px color-mix(in oklch, var(--ink) 5%, transparent);
+    --e2: 0 4px 12px color-mix(in oklch, var(--ink) 8%, transparent), 0 1px 2px color-mix(in oklch, var(--ink) 5%, transparent);
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ground: oklch(0.20 0.006 60); --ground-2: oklch(0.17 0.006 60); --surface: oklch(0.25 0.007 60); --ink: oklch(0.93 0.005 90); --ink-2: oklch(0.80 0.006 90); --muted: oklch(0.66 0.008 60); --rule: oklch(0.32 0.006 60); --accent: oklch(0.76 0.09 50); --accent-deep: oklch(0.82 0.10 50); --good: oklch(0.82 0.12 140); --warn: oklch(0.78 0.13 75); --bad: oklch(0.72 0.16 25); } }
+  :root[data-theme="dark"] { --ground: oklch(0.20 0.006 60); --ground-2: oklch(0.17 0.006 60); --surface: oklch(0.25 0.007 60); --ink: oklch(0.93 0.005 90); --ink-2: oklch(0.80 0.006 90); --muted: oklch(0.66 0.008 60); --rule: oklch(0.32 0.006 60); --accent: oklch(0.76 0.09 50); --accent-deep: oklch(0.82 0.10 50); --good: oklch(0.82 0.12 140); --warn: oklch(0.78 0.13 75); --bad: oklch(0.72 0.16 25); }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+    background-color: var(--ground); background-image: radial-gradient(color-mix(in oklch, var(--ink) 16%, var(--ground)) 2px, transparent 2.2px); background-size: 32px 32px; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 3px; border-radius: 6px; }
+  p { margin: 0; text-wrap: pretty; }
+  .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  .bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 54px; padding: 0 28px; background: var(--ground); border-bottom: 1px solid var(--rule); font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.06em; color: var(--muted); }
+  .bar .status { display: flex; align-items: center; gap: 9px; white-space: nowrap; }
+  .bar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--rule); }
+  .bar .status[data-state="saving"] .dot, .bar .status[data-state="unsaved"] .dot { background: var(--warn); }
+  .bar .status[data-state="saved"] .dot { background: var(--good); }
+  .bar .status[data-state="error"] .dot, .bar .status[data-state="nodb"] .dot { background: var(--bad); }
+  .bar .sel { color: var(--ink); }
+  .page { max-width: 1200px; margin: 0 auto; padding: 40px 28px 140px; }
+  .lede { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 36px; align-items: end; }
+  .lede h1 { font-family: var(--sans); font-weight: 700; font-size: 34px; line-height: 1.1; letter-spacing: -0.02em; margin: 10px 0 0; }
+  .lede p { color: var(--muted); max-width: 60ch; margin-top: 12px; }
+  .lede .how { font-size: 14.5px; }
+  .notice { margin-top: 20px; padding: 14px 16px; border-radius: var(--r-md); background: var(--surface); box-shadow: var(--e1); font-size: 14.5px; display: flex; gap: 12px; align-items: flex-start; }
+  .notice b { font-weight: 600; }
+  .group { margin-top: 48px; }
+  .group h2 { font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.02em; color: var(--muted); margin: 0 0 14px; display: flex; align-items: baseline; gap: 12px; }
+  .group h2 span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep); }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .opt { position: relative; display: flex; flex-direction: column; gap: 0; background: var(--surface); border: 1.5px solid var(--rule); border-radius: var(--r-lg); cursor: pointer; transition: border-color 140ms, transform 180ms, box-shadow 180ms; }
+  .opt:hover { border-color: color-mix(in oklch, var(--ink) 30%, var(--rule)); transform: translateY(-2px); box-shadow: var(--e2); }
+  .opt input { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
+  .opt:has(input:checked) { border-color: var(--ink); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ink) 12%, transparent); }
+  .opt:has(input:focus-visible) { outline: 2px solid var(--accent-deep); outline-offset: 3px; }
+  .opt .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px 0; }
+  .opt .head .name { font-weight: 600; font-size: 16px; }
+  .opt .head .meta { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; color: var(--muted); }
+  .opt .tick { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--rule); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .opt .tick svg { opacity: 0; } .opt:has(input:checked) .tick { background: var(--ink); border-color: var(--ink); } .opt:has(input:checked) .tick svg { opacity: 1; }
+  .opt .body { padding: 14px 20px 20px; display: flex; flex-direction: column; gap: 16px; }
+  .spec { border-radius: var(--r-md); background: var(--ground); background-image: radial-gradient(color-mix(in oklch, var(--ink) 16%, var(--ground)) 2px, transparent 2.2px); background-size: 32px 32px; box-shadow: inset 0 0 0 1px var(--rule); padding: 22px 22px 20px; display: flex; flex-direction: column; gap: 14px; overflow: hidden; }
+  .wm { display: inline-flex; align-items: center; gap: 0.06em; text-transform: uppercase; color: var(--ink); line-height: 1; font-size: 30px; letter-spacing: 0; }
+  .wm svg { height: 0.82em; width: auto; display: block; }
+  .hd { font-size: 40px; line-height: 1.02; letter-spacing: -0.01em; color: var(--ink); text-wrap: balance; }
+  .lc { font-size: 22px; line-height: 1.2; color: var(--ink-2); }
+  .pair { font-family: var(--sans); font-size: 14.5px; line-height: 1.55; color: var(--ink-2); max-width: 46ch; }
+  .pair b { font-family: inherit; }
+  .why { font-size: 14px; color: var(--muted); line-height: 1.5; }
+  .why b { color: var(--ink); font-weight: 600; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .badge.ok { background: color-mix(in oklch, var(--good) 18%, var(--surface)); color: var(--good); }
+  .badge.no { background: color-mix(in oklch, var(--bad) 14%, var(--surface)); color: var(--bad); }
+  .badge.lic { background: color-mix(in oklch, var(--warn) 18%, var(--surface)); color: var(--warn); }
+  textarea { width: 100%; font-family: var(--sans); font-size: 15px; line-height: 1.5; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-sm); padding: 12px 14px; resize: none; overflow: hidden; min-height: 76px; }
+  textarea:focus { outline: none; border-color: var(--ink); }
+  .finish { margin-top: 64px; padding: 26px 28px; border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--e1); display: flex; flex-direction: column; gap: 16px; }
+  .finish p { color: var(--muted); font-size: 15px; max-width: 60ch; }
+  .actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; border-radius: var(--r-pill); padding: 12px 20px; font-size: 15px; font-weight: 500; border: 1.5px solid var(--ink); background: var(--ink); color: var(--ground); }
+  .btn.quiet { background: transparent; color: var(--ink); border-color: var(--rule); }
+  .sm { display: inline-flex; align-items: center; height: 34px; padding: 0 13px; border-radius: var(--r-pill); border: 1px solid var(--rule); background: var(--surface); font-size: 13px; font-weight: 500; }
+  .done-note { font-family: var(--mono); font-size: 11.5px; color: var(--good); letter-spacing: 0.04em; }
+  [hidden] { display: none !important; }
+  @media (max-width: 900px) { .grid, .lede { grid-template-columns: 1fr; } .hd { font-size: 34px; } }
+  @media (max-width: 600px) { .bar { padding: 0 16px; } .bar .sel { display: none; } .page { padding: 28px 16px 120px; } .wm { font-size: 24px; } .hd { font-size: 30px; } }
+</style>
+
+<div class="bar">
+  <span style="color:var(--ink);font-weight:600;letter-spacing:0;font-family:var(--sans);font-size:14px">no origins · display type</span>
+  <span class="sel" id="selLabel">Nothing picked yet</span>
+  <span class="status" id="status" data-state="idle"><span class="dot"></span><span id="statusText">Loading</span></span>
+</div>
+
+<main class="page">
+  <header class="lede">
+    <div>
+      <div class="label">Design system · §5 · display face</div>
+      <h1>Phosphate Solid, and eleven faces in its spirit</h1>
+      <p>Body stays <b style="color:var(--ink)">Hanken Grotesk</b> — that&#39;s decided and every paragraph here is set in it. This is only the display face: the wordmark, headings, the big type. Each card shows the caps wordmark with the blob, a headline, the lowercase, and how it sits next to Hanken.</p>
+    </div>
+    <p class="how" style="color:var(--muted)">Grouped by distance from Phosphate: its closest free cousins first, then rounded faces with real weight ranges, then two contrarian options. Single-weight faces can only make hierarchy with size — that&#39;s flagged where it applies.</p>
+  </header>
+  <div class="notice" id="phNotice"><span class="badge lic">Licence</span><span><b>Phosphate</b> ships with macOS (Solid and Inline) but not with the web. Using it on the site means a webfont licence from its foundry (Red Rooster / International TypeFounders) — a one-off fee, entirely doable — or picking the closest free sibling below. It renders on this page only because you&#39;re on a Mac; <span id="phState">checking whether it&#39;s installed…</span></span></div>
+  <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap"><button class="sm" id="themeBtn">Theme: light</button><button class="sm" id="capsBtn" aria-pressed="false">Headlines in caps</button></div>
+
+  <div id="groups"></div>
+
+  <div class="finish">
+    <div><label class="label" for="notes">Notes — "Titan One but lighter", "Phosphate for the wordmark only", anything</label><textarea id="notes" style="margin-top:8px" placeholder="What&#39;s close, what&#39;s off…"></textarea></div>
+    <p>Pick one, mark it done, tell me in the chat. The wordmark, the type scale and the living page get rebuilt in it.</p>
+    <div class="actions"><button class="btn" id="doneBtn">Decision made</button><span class="done-note" id="doneNote" hidden></span></div>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var DOC_PATH = 'decisions/type', LS_KEY = 'no-origins.type.v1';
+  var $ = function (s) { return document.querySelector(s); };
+  var LOGO = '<svg viewBox="0 0 96 64" aria-hidden="true"><rect x="2.75" y="2.75" width="90.5" height="58.5" rx="29.25" fill="none" stroke="currentColor" stroke-width="5.5"></rect><circle cx="30" cy="32" r="10" fill="currentColor"></circle><circle cx="66" cy="32" r="10" fill="currentColor"></circle></svg>';
+
+  var GROUPS = [
+    { id: 'phosphate', title: 'Your pick', hint: 'macOS system face', faces: [
+      { id: 'phosphate', name: 'Phosphate Solid', stack: "'Phosphate Solid Local', 'Titan One', sans-serif", weight: 400, src: 'macOS · licence for web', weights: 'single weight (+ Inline sibling)', tracking: '0.01em',
+        why: '<b>Chunky rounded caps with 1930s poster warmth</b> — the blob&#39;s own shape, as letters. Comes with an Inline sibling for a second voice. Risk: one weight, so hierarchy is size only; the lowercase is small and quirky; and it needs a licence to ship.' } ] },
+    { id: 'cousins', title: 'Closest free cousins', hint: 'heavy · rounded · single weight', faces: [
+      { id: 'titan', name: 'Titan One', stack: "'Titan One', sans-serif", weight: 400, src: 'Google Fonts', weights: 'single weight', tracking: '0.01em',
+        why: '<b>The nearest free relative.</b> Heavy, rounded, sturdy — reads as solid without going cartoon. Hierarchy by size only.' },
+      { id: 'chango', name: 'Chango', stack: "'Chango', sans-serif", weight: 400, src: 'Google Fonts', weights: 'single weight', tracking: '0.005em',
+        why: '<b>Rounder and softer than Titan</b> — very blob. Risk: at small sizes it reads as a children&#39;s brand.' },
+      { id: 'rammetto', name: 'Rammetto One', stack: "'Rammetto One', sans-serif", weight: 400, src: 'Google Fonts', weights: 'single weight', tracking: '0',
+        why: '<b>Geometric-heavy with tighter rounds</b> — more engineered, less bubbly. Sits well with a systems brand. Hierarchy by size only.' },
+      { id: 'bowlby', name: 'Bowlby One', stack: "'Bowlby One', sans-serif", weight: 400, src: 'Google Fonts', weights: 'single weight', tracking: '0',
+        why: '<b>Poster-heavy and a touch narrower</b> — retro without the softness. The most &ldquo;bold&rdquo; of the set. Risk: loud at every size.' } ] },
+    { id: 'inline', title: 'Solid + inline siblings, like Phosphate', hint: 'signage energy', faces: [
+      { id: 'bungee', name: 'Bungee', stack: "'Bungee', sans-serif", weight: 400, src: 'Google Fonts', weights: 'single weight + Bungee Inline', tracking: '0.02em', inline: "'Bungee Inline', sans-serif",
+        why: '<b>Solid and Inline versions, exactly the Phosphate pairing</b> — free. Built for signage: caps-first, lowercase is small caps. Risk: very loud; the wordmark loves it, body headings may not.' } ] },
+    { id: 'ranges', title: 'Rounded, with real weight ranges', hint: 'can carry h1 → h4 by weight', faces: [
+      { id: 'fredoka', name: 'Fredoka', stack: "'Fredoka', sans-serif", weight: 700, src: 'Google Fonts', weights: '300 – 700 variable', tracking: '-0.01em',
+        why: '<b>Rounded and friendly with a full weight range</b> — the one Phosphate-spirited face that can do a whole heading hierarchy by weight. Risk: at 700 it leans toy-like; at 600 it&#39;s right.' },
+      { id: 'baloo', name: 'Baloo 2', stack: "'Baloo 2', sans-serif", weight: 800, src: 'Google Fonts', weights: '400 – 800 variable', tracking: '-0.01em',
+        why: '<b>Chunky rounded with a proper lowercase</b> and five weights. Playful without cartoon; excellent at 800 for the wordmark, 600 for h3s.' },
+      { id: 'gabarito', name: 'Gabarito', stack: "'Gabarito', sans-serif", weight: 800, src: 'Google Fonts', weights: '400 – 900 variable', tracking: '-0.02em',
+        why: '<b>Rounded geometric, calmer</b> — the closest to a &ldquo;system&rdquo; face while still soft. Least Phosphate, most versatile. Risk: less character at the wordmark.' } ] },
+    { id: 'retro', title: 'Retro geometric', hint: 'period charm', faces: [
+      { id: 'righteous', name: 'Righteous', stack: "'Righteous', sans-serif", weight: 400, src: 'Google Fonts', weights: 'single weight', tracking: '0',
+        why: '<b>Art-deco geometry with sharper corners</b> — period charm, less bubble. Risk: the deco flavour can date quickly.' },
+      { id: 'passion', name: 'Passion One', stack: "'Passion One', sans-serif", weight: 900, src: 'Google Fonts', weights: '400 · 700 · 900', tracking: '0',
+        why: '<b>Bold retro rounded with three weights</b> — warm, a little sporty. Named for one of your three words, for whatever that&#39;s worth.' } ] },
+    { id: 'contrarian', title: 'The contrarian', hint: 'bold, not cute', faces: [
+      { id: 'unbounded', name: 'Unbounded', stack: "'Unbounded', sans-serif", weight: 800, src: 'Google Fonts', weights: '200 – 900 variable', tracking: '-0.02em',
+        why: '<b>Wide, geometric, modern</b> — boldness without roundness. If the blobs carry all the play, the type can afford to be this. Risk: cool where the brand is warm.' } ] }
+  ];
+
+  var state = { display: '', notes: '', complete: false, completedAt: null, updatedAt: null, caps: false };
+  var db = null, saveTimer = null, pending = false;
+  var statusEl = $('#status'), statusText = $('#statusText');
+
+  function card(f) {
+    var fs = 'font-family:' + f.stack + ';font-weight:' + f.weight + ';letter-spacing:' + f.tracking + ';';
+    var inl = f.inline ? '<div class="wm" style="font-family:' + f.inline + ';font-weight:400;">N' + LOGO + 'RIGINS <span class="label" style="margin-left:10px">inline</span></div>' : '';
+    var ph = f.id === 'phosphate' ? '<div class="wm" style="font-family:\'Phosphate Inline Local\', \'Bungee Inline\', sans-serif;font-weight:400;">N' + LOGO + 'RIGINS <span class="label" style="margin-left:10px">inline</span></div>' : '';
+    return '<label class="opt"><input type="radio" name="display" value="' + f.id + '">' +
+      '<div class="head"><div><span class="name">' + f.name + '</span> <span class="meta"> · ' + f.src + ' · ' + f.weights + '</span></div><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--ground)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>' +
+      '<div class="body"><div class="spec">' +
+        '<div class="wm" style="' + fs + '">N' + LOGO + 'RIGINS</div>' + inl + ph +
+        '<div class="hd caps-target" style="' + fs + '">Hi, I&#39;m Bhargav.<br>Editors, systems, agents.</div>' +
+        '<div class="lc" style="' + fs + '">no origins — a playground, a lab, blocks over time</div>' +
+        '<p class="pair">Paired with Hanken Grotesk: I build editors, design systems and agent tools, and I keep them here. The harness isn&#39;t finished yet — here&#39;s what it&#39;ll do, and you can watch it get there.</p>' +
+      '</div><p class="why">' + f.why + '</p></div></label>';
+  }
+  function render() {
+    $('#groups').innerHTML = GROUPS.map(function (g) { return '<section class="group"><h2>' + g.title + ' <span>' + g.hint + '</span></h2><div class="grid">' + g.faces.map(card).join('') + '</div></section>'; }).join('');
+    document.querySelectorAll('input[name="display"]').forEach(function (r) {
+      r.checked = r.value === state.display;
+      r.addEventListener('change', function () { if (r.checked) { state.display = r.value; $('#selLabel').textContent = 'Picked: ' + nameOf(r.value); scheduleSave(); } });
+    });
+    applyCaps();
+  }
+  function nameOf(id) { for (var i = 0; i < GROUPS.length; i++) for (var j = 0; j < GROUPS[i].faces.length; j++) if (GROUPS[i].faces[j].id === id) return GROUPS[i].faces[j].name; return id; }
+  function applyCaps() { document.querySelectorAll('.caps-target').forEach(function (el) { el.style.textTransform = state.caps ? 'uppercase' : 'none'; }); $('#capsBtn').setAttribute('aria-pressed', String(state.caps)); }
+  $('#capsBtn').addEventListener('click', function () { state.caps = !state.caps; applyCaps(); scheduleSave(); });
+
+  // Phosphate availability
+  if (document.fonts && document.fonts.load) {
+    document.fonts.load("16px 'Phosphate Solid Local'").then(function (faces) {
+      var ok = faces && faces.length > 0 && faces.every(function (f) { return f.status === 'loaded'; });
+      $('#phState').innerHTML = ok ? '<span class="badge ok">installed here</span> so what you see is the real face.' : '<span class="badge no">not found on this device</span> — the card below is showing Titan One in its place.';
+    }).catch(function () { $('#phState').textContent = 'could not check whether it is installed.'; });
+  }
+
+  // theme
+  var root = document.documentElement, th = 'light';
+  try { th = localStorage.getItem('noo.type.theme') || 'light'; } catch (e) {}
+  function setTheme(t) { if (t === 'system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', t); $('#themeBtn').textContent = 'Theme: ' + t; try { localStorage.setItem('noo.type.theme', t); } catch (e) {} }
+  $('#themeBtn').addEventListener('click', function () { th = th === 'light' ? 'dark' : th === 'dark' ? 'system' : 'light'; setTheme(th); });
+
+  // notes / done / save
+  var notesEl = $('#notes');
+  notesEl.addEventListener('input', function () { state.notes = notesEl.value; notesEl.style.height = 'auto'; notesEl.style.height = Math.max(notesEl.scrollHeight, 76) + 'px'; scheduleSave(); });
+  function renderDone() { var b = $('#doneBtn'), n = $('#doneNote'); if (state.complete) { b.textContent = 'Reopen'; b.classList.add('quiet'); n.hidden = false; n.textContent = 'Marked done ' + timeLabel(state.completedAt) + ' — tell Claude in the chat.'; } else { b.textContent = 'Decision made'; b.classList.remove('quiet'); n.hidden = true; } }
+  $('#doneBtn').addEventListener('click', function () { state.complete = !state.complete; state.completedAt = state.complete ? new Date().toISOString() : null; renderDone(); save(); });
+  function apply(s) { state.display = s.display || ''; state.notes = s.notes || ''; state.caps = !!s.caps; state.complete = !!s.complete; state.completedAt = s.completedAt || null; state.updatedAt = s.updatedAt || null; notesEl.value = state.notes; $('#selLabel').textContent = state.display ? 'Picked: ' + nameOf(state.display) : 'Nothing picked yet'; render(); renderDone(); }
+  function collect() { var c = JSON.parse(JSON.stringify(state)); c.updatedAt = new Date().toISOString(); state.updatedAt = c.updatedAt; c.displayName = nameOf(state.display); return c; }
+  function setStatus(k, t) { statusEl.setAttribute('data-state', k); statusText.textContent = t; }
+  function timeLabel(iso) { try { return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
+  function scheduleSave() { setStatus('unsaved', 'Unsaved'); clearTimeout(saveTimer); saveTimer = setTimeout(save, 700); }
+  function save() {
+    clearTimeout(saveTimer); var data = collect();
+    try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch (e) {}
+    if (!db) { setStatus('nodb', 'Saved in this browser only'); return; }
+    if (pending) { saveTimer = setTimeout(save, 400); return; }
+    pending = true; setStatus('saving', 'Saving');
+    db.doc(DOC_PATH).set(data).then(function () { pending = false; setStatus('saved', 'Saved ' + timeLabel(data.updatedAt)); })
+      .catch(function (e) { pending = false; if ((e && e.code) === 'unavailable') { setTimeout(function () { db.doc(DOC_PATH).set(data).then(function () { setStatus('saved', 'Saved ' + timeLabel(data.updatedAt)); }).catch(function () { setStatus('error', 'Could not save — kept in this browser'); }); }, 700); } else { setStatus('error', 'Could not save — kept in this browser'); } });
+  }
+
+  var local = null; try { local = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) {}
+  apply(local || state); setTheme(th); setStatus('idle', 'Connecting');
+  var canUse = window.claude && typeof window.claude.use === 'function';
+  if (!canUse) { setStatus('nodb', 'Saved in this browser only'); }
+  else {
+    window.claude.use('db').then(function (ns) {
+      db = ns; if (!db) { setStatus('nodb', 'Saved in this browser only'); return; }
+      return db.doc(DOC_PATH).get().then(function (snap) {
+        if (snap.exists) { var remote = snap.data(); if (!local || (remote.updatedAt || '') >= (local.updatedAt || '')) { apply(remote); setStatus('saved', 'Saved ' + timeLabel(remote.updatedAt)); } else { save(); } }
+        else if (local && local.updatedAt) { save(); } else { setStatus('saved', 'Ready'); }
+      }).catch(function () { setStatus('error', 'Could not load saved choice'); });
+    });
+  }
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden' && statusEl.getAttribute('data-state') === 'unsaved') save(); });
+})();
+</script>

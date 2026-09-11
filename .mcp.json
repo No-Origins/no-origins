@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "pnpm",
+      "args": [
+        "exec",
+        "playwright-mcp",
+        "--browser",
+        "chromium",
+        "--headless",
+        "--output-dir",
+        "e2e/.mcp"
+      ]
+    }
+  }
+}
