@@ -16,7 +16,7 @@ Why: the platform has one design system across every block (Brand principle 5), 
 
 **Is:** a **fine line drawing** in one hue — arcs, capsules, waves, circles and one long spiral — lit from the top-left, filling most of the cell it sits in and cropped by its edge. It suggests a quantity or a quality (four things, many things, one thing opening) without axes, legends or captions. It is drawn on a card that carries the colour and the texture; the drawing itself is only line.
 
-**Isn't:** a photograph or a render of a real thing (no devices, no people, no stock — the brand decided against real images 2026-09-10); an emoji; a generated image; anything with two hues in it; anything with a sharp corner; **anything filled**.
+**Isn't:** a photograph or a render of a real thing (no devices, no people, no stock); an emoji; a generated image; anything with two hues in it; anything with a sharp corner; **anything filled**. *Photographs became allowed on the platform 2026-09-11, and none of this changed — a photograph is simply not an illustration. The `Image` component is where one goes; this grammar is where a drawing comes from.*
 
 > **2026-09-10, the correction that set the style.** The first draft was soft filled masses — a four-tone ramp per object, no outlines, depth by stacking. Bhargav's four conditions replaced it the same day: *fine lines, no fill, textured gradient cards, no colliding lines in the pattern.* The consequence is bigger than a restyle and worth stating plainly: **the material moved from the object to the ground.** The card is now what carries colour, gradient and grain; the illustration is what is drawn on it. Principles 2, 3 and 6 below are those conditions, and each has a measurement behind it.
 

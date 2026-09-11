@@ -345,6 +345,101 @@
 .noo-contrast__floor { font-family: var(--ff-mono); font-size: 11.5px; color: var(--muted); }
 .noo-contrast__row[data-fail] .noo-contrast__num { color: var(--bad); }
 
+/* ===== Steps (§9) — a numbered sequence on a rule ===== */
+.noo-steps { --steps-hue: var(--accent-deep); list-style: none; margin: 0; padding: 0; counter-reset: noo-step; }
+.noo-steps[data-hue="pink"]{--steps-hue:var(--pink-deep)} .noo-steps[data-hue="green"]{--steps-hue:var(--green-deep)}
+.noo-steps[data-hue="grey"]{--steps-hue:var(--grey-deep)} .noo-steps[data-hue="lavender"]{--steps-hue:var(--lavender-deep)}
+.noo-steps[data-hue="peach"]{--steps-hue:var(--peach-deep)} .noo-steps[data-hue="yellow"]{--steps-hue:var(--yellow-deep)}
+.noo-steps[data-hue="blue"]{--steps-hue:var(--blue-deep)}
+.noo-step { position: relative; display: grid; grid-template-columns: 40px 1fr; gap: 4px 20px; padding-bottom: 32px; counter-increment: noo-step; }
+.noo-step:last-child { padding-bottom: 0; }
+.noo-step__marker { grid-row: 1 / span 2; display: grid; place-items: center; width: 40px; height: 40px;
+  border-radius: 50%; background: var(--surface); border: 1px solid var(--rule); box-shadow: var(--e1);
+  font: 500 12px/1 var(--ff-mono); color: var(--steps-hue); }
+.noo-step__marker::before { content: counter(noo-step, decimal-leading-zero); }
+/* the rule is the STEP's, not the container's: :not(:last-child) stops it without counting anything */
+.noo-step:not(:last-child)::before { content: ""; position: absolute; left: 19.5px; top: 40px; bottom: -4px;
+  width: 1px; background: color-mix(in oklch, var(--steps-hue) 45%, transparent); }
+.noo-step__body { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.noo-step__title { margin: 0; }
+.noo-step__text { margin: 0; color: var(--ink-2); max-width: 54ch; }
+@media (min-width: 640px) {
+  .noo-steps--across { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 24px; }
+  .noo-steps--across .noo-step { grid-template-columns: 1fr; padding-bottom: 0; }
+  .noo-steps--across .noo-step__marker { grid-row: auto; margin-bottom: 8px; }
+  .noo-steps--across .noo-step:not(:last-child)::before { left: 48px; right: -24px; top: 19.5px; bottom: auto; width: auto; height: 1px; }
+}
+
+/* ===== Quote (§9) — a figure, a blockquote and a figcaption, because that is what it is ===== */
+.noo-quote { margin: 0; display: grid; gap: 32px; grid-template-columns: 1fr; align-items: center;
+  background: var(--surface); border-radius: var(--r-xl); padding: 40px; box-shadow: var(--e2); }
+@media (min-width: 760px) { .noo-quote--media { grid-template-columns: 1fr minmax(0, 0.85fr); } }
+.noo-quote__words { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.noo-quote__figure { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.noo-quote__value { font: 400 clamp(34px, 5vw, 56px)/1 var(--ff-display); color: var(--ink); }
+.noo-quote__figure-label { color: var(--muted); }
+.noo-quote__text { margin: 0; color: var(--ink); max-width: 26ch; }
+.noo-quote__by { display: flex; flex-direction: column; gap: 2px; padding-left: 14px; border-left: 2px solid var(--accent-deep); }
+.noo-quote__name { font: 600 15px/1.3 var(--ff-sans); color: var(--ink); }
+.noo-quote__role { color: var(--muted); }
+.noo-quote__media { position: relative; min-width: 0; border-radius: var(--r-lg); overflow: hidden; min-height: 220px;
+  display: grid; place-items: center; background: color-mix(in oklch, var(--ink) 3%, var(--surface)); }
+.noo-quote__media > img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ===== MediaCard (§9) — a picture beside the words. Photographs allowed since 2026-09-11 ===== */
+.noo-media-card { --mc-hue: var(--accent); display: grid; gap: 0; background: var(--surface);
+  border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--e1); color: inherit; text-decoration: none; }
+.noo-media-card[data-hue="pink"]{--mc-hue:var(--pink)} .noo-media-card[data-hue="green"]{--mc-hue:var(--green)}
+.noo-media-card[data-hue="grey"]{--mc-hue:var(--grey)} .noo-media-card[data-hue="lavender"]{--mc-hue:var(--lavender)}
+.noo-media-card[data-hue="peach"]{--mc-hue:var(--peach)} .noo-media-card[data-hue="yellow"]{--mc-hue:var(--yellow)}
+.noo-media-card[data-hue="blue"]{--mc-hue:var(--blue)}
+.noo-media-card__media { position: relative; min-height: 200px; overflow: hidden;
+  background-image: linear-gradient(135deg, color-mix(in oklch, var(--mc-hue) 70%, var(--surface)), var(--surface) 78%); }
+.noo-media-card__media > * { display: block; width: 100%; height: 100%; object-fit: cover; }
+.noo-media-card__body { display: flex; flex-direction: column; gap: 10px; padding: 28px; min-width: 0; }
+.noo-media-card__meta { margin: 0; color: var(--muted); }
+.noo-media-card__title, .noo-media-card__line { margin: 0; }
+.noo-media-card__line { color: var(--ink-2); }
+.noo-media-card__footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 14px; }
+@media (min-width: 640px) { .noo-media-card--beside { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); } }
+.noo-media-card--link { transition: transform var(--d-fast) var(--ease), box-shadow var(--d-fast) var(--ease); }
+.noo-media-card--link:hover { transform: translateY(-2px); box-shadow: var(--e3); }
+
+/* ===== Image (§9) — a plain <img>; optimisation is the host's job (§11.2 rule 1) ===== */
+.noo-img { display: block; max-width: 100%; height: auto; }
+.noo-img--r-none { border-radius: 0; } .noo-img--r-sm { border-radius: var(--r-sm); }
+.noo-img--r-md { border-radius: var(--r-md); } .noo-img--r-lg { border-radius: var(--r-lg); }
+.noo-img--r-xl { border-radius: var(--r-xl); }
+.noo-img--tint { filter: saturate(0.9) contrast(1.02); }
+
+/* ===== Carousel (§9) — CSS scroll-snap; the script only tracks which slide is current ===== */
+.noo-carousel { display: flex; flex-direction: column; gap: 20px; }
+.noo-carousel__track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+  padding-block: 4px; scrollbar-width: none; }
+.noo-carousel__track::-webkit-scrollbar { display: none; }
+.noo-carousel__track--g8 { gap: 8px } .noo-carousel__track--g16 { gap: 16px }
+.noo-carousel__track--g24 { gap: 24px } .noo-carousel__track--g40 { gap: 40px }
+.noo-carousel__slide { flex: 0 0 var(--slide, 100%); scroll-snap-align: center; min-width: 0; }
+.noo-carousel__track--peek-none { --slide: 100%; }
+.noo-carousel__track--peek-sm { --slide: min(88%, 720px); padding-inline: max(6%, 16px); }
+.noo-carousel__track--peek-md { --slide: min(74%, 640px); padding-inline: max(13%, 16px); }
+.noo-carousel__dots { display: flex; justify-content: center; gap: 8px; }
+.noo-carousel__dot { width: 8px; height: 8px; padding: 0; border: 0; border-radius: var(--r-pill); cursor: pointer;
+  background: color-mix(in oklch, var(--ink) 22%, transparent); position: relative;
+  transition: width var(--d-base) var(--ease), background var(--d-base) var(--ease); }
+.noo-carousel__dot::before { content: ""; position: absolute; inset: -14px -6px; }   /* 44px hit target (§12) */
+.noo-carousel__dot[aria-selected="true"] { width: 26px; background: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .noo-carousel__track { scroll-behavior: auto; }
+  .noo-carousel__dot, .noo-media-card--link { transition: none; }
+  .noo-media-card--link:hover { transform: none; }
+}
+@media (forced-colors: active) {
+  .noo-step__marker, .noo-quote, .noo-media-card { border: 1px solid CanvasText; }
+  .noo-carousel__dot { background: CanvasText; }
+}
+
 /* ===== forced colours (Windows high contrast) — glass and tints vanish; keep every edge and state legible ===== */
 @media (forced-colors: active) {
   .glass, .noo-card, .noo-chip, .noo-bubble, .noo-field__box, .noo-chat__bar { border: 1px solid CanvasText; }

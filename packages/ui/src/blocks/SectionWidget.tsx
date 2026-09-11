@@ -59,7 +59,7 @@ export function SectionWidget({
         <p className="noo-label">{eyebrow}</p>
         {figure ? <BentoFigure value={figure.value} label={figure.label} size={figure.size} /> : null}
         {!figure && word ? <p className="noo-bento__word">{word}</p> : null}
-        {illustration ? <Illustration family={illustration} id={illustrationId} hue={hue} /> : null}
+        {illustration ? <Illustration family={illustration} id={illustrationId} hue={hue} placement="field" /> : null}
       </BentoCell>
       {children}
     </Bento>

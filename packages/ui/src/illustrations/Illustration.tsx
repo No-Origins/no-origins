@@ -48,6 +48,16 @@ export interface IllustrationProps extends Omit<ComponentPropsWithoutRef<"svg">,
   title?: string;
   /** Names the drawing for `probe10` and `probe11`. Omit outside a fixture. */
   id?: string;
+  /**
+   * `field` positions it absolutely across its cell (`inset: 0`) — what a bento's loud cell wants, and what it
+   * has to be for a drawing to leave through the edges.
+   *
+   * **`inline` is the default, and that is a correction.** It shipped as `field` unconditionally on 2026-09-11
+   * and escaped the first container that was not a bento cell: `position: absolute` with no positioned ancestor
+   * anchors to the page, so a quote's portrait slot drew a 1400px illustration across the header. A component
+   * cannot assume the box it will be put in.
+   */
+  placement?: "inline" | "field";
 }
 
 /** The one line. There is no second one: same weight, same colour, everywhere in every picture. */
@@ -95,7 +105,7 @@ export function IllustrationCanvas({ hue, title, className, children, ...rest }:
  * package (`fields.ts`). Give it a `name` for one of the six, or a `family` for a candidate the studio is still
  * arguing over.
  */
-export function Illustration({ name, family, hue, title, id, className, ...rest }: IllustrationProps) {
+export function Illustration({ name, family, hue, title, id, placement = "inline", className, ...rest }: IllustrationProps) {
   const params = family ?? (name ? fields[name] : undefined);
   if (!params) return null;
   return (
@@ -104,10 +114,13 @@ export function Illustration({ name, family, hue, title, id, className, ...rest 
       title={title}
       data-ill={id}
       // A field crosses the whole cell and leaves through its edges (principle 7), so it SLICES rather than fits:
-      // fitting would letterbox it inside the cell and every line would end in mid-air. The two classes place it
-      // at `inset: 0` in a bento cell; outside one they do nothing.
+      // fitting would letterbox it inside the cell and every line would end in mid-air.
       preserveAspectRatio="xMidYMid slice"
-      className={cx("noo-bento__ill noo-bento__ill--field", name && `noo-ill--${name}`, className)}
+      className={cx(
+        placement === "field" && "noo-bento__ill noo-bento__ill--field",
+        name && `noo-ill--${name}`,
+        className,
+      )}
       {...rest}
     >
       {(line) =>

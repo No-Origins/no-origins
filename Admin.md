@@ -297,7 +297,7 @@ audit_log           (id bigserial, actor, action, entity, entity_id, diff jsonb,
 | `assets` | private, signed reads | Uploads: the résumé PDF, source photos for Character.md, anything a panel links |
 | `publish` | public read | The published doc JSON per version, at a stable path, plus derived static output (OG images) |
 
-**No image assets on the platform surfaces.** Design-System.md §13 decided 2026-09-10: no real images anywhere, pictures are code. The `assets` bucket is for documents and source material, not for decoration. The admin should say so where you upload.
+**The `assets` bucket holds photographs now.** Design-System.md §13's "no real images" was reversed 2026-09-11: photographs are allowed, illustrations are still code. So this bucket carries documents, source material *and* the photographs a document places through `Image` — which makes `alt` text a field on the asset record, not an afterthought at the point of use, and makes width and height worth storing so a document can reserve the box.
 
 ### 8.3 RLS
 

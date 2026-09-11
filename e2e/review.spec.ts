@@ -16,6 +16,7 @@ export const ROUTES = [
   "/fixtures/primitives",
   "/fixtures/compose",
   "/fixtures/catalogue",
+  "/fixtures/patterns",
   "/fixtures/blob",
 ];
 
@@ -58,6 +59,13 @@ for (const route of ROUTES) {
     //
     // Widgets only. A page (§8.4) is read alone and at reading size, never compared against five others across an
     // overview, so it carries no such constraint.
+    //
+    // KNOWN EDGE, 2026-09-11: this treats every non-page bento as a widget, and it caught a registry example that
+    // used `Bento` as a plain grid with no loud cell at all. That was a lazy example and was fixed — but the rule
+    // it tripped is genuinely about the SIX ON THE RING, which must read as a family, not about every grid anyone
+    // ever builds. The day `Bento` is legitimately used as a bare layout, this needs a marker to tell the two
+    // apart rather than a looser count. Left strict on purpose: a check that has to guess is worse than one that
+    // occasionally makes you say what you meant.
     const bentos = await page.$$eval(".noo-bento:not(.noo-bento--page)", (nodes) =>
       nodes
         .filter((n) => n.getBoundingClientRect().width > 0)

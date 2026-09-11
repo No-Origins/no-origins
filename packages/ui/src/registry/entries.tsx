@@ -5,6 +5,11 @@ import { Intro } from "../blocks/Intro";
 import { RegionLabel } from "../blocks/RegionLabel";
 import { RoadmapItem } from "../blocks/RoadmapItem";
 import { Illustration } from "../illustrations/Illustration";
+import { MediaCard } from "../blocks/MediaCard";
+import { Quote } from "../blocks/Quote";
+import { Step, Steps } from "../blocks/Steps";
+import { Carousel } from "../primitives/Carousel";
+import { Image } from "../primitives/Image";
 import { Bento, BentoCell, BentoFigure } from "../primitives/Bento";
 import { Button } from "../primitives/Button";
 import { Card } from "../primitives/Card";
@@ -300,15 +305,16 @@ const illustration: RegistryEntry = {
     name: { type: "illustration", required: true, help: "One of the six measured families in `fields.ts`. The fourteen parameters are NOT authorable: two of them are measurements (Scene-Schema.md §3.6), and an inspector of fourteen sliders invites exactly the estimation Illustrations.md forbids." },
     hue: { type: "hue" },
     title: { type: "text", max: 60, help: "Without one it is decorative and hidden from assistive tech." },
+    placement: { type: "enum", of: ["inline", "field"], default: "inline", help: "`field` fills its cell absolutely — a bento's loud cell. Anywhere without a positioned ancestor it would escape to the page." },
   },
-  defaults: { name: "work" },
+  defaults: { name: "work", placement: "inline" },
   // Drawn at the size it is composed for: a 2 × 2 loud cell is 304 square. A field is tuned to cross THAT cell and
   // leave through its edges, so showing it at any other aspect misrepresents it.
   example: () => (
     <Bento hue="peach" cols={2} rows={2}>
       <BentoCell span={[2, 2]} tone="fill" >
         <Label>work</Label>
-        <Illustration name="work" hue="peach" title="Four roles, opening out" />
+        <Illustration name="work" hue="peach" title="Four roles, opening out" placement="field" />
         <BentoFigure value="4" label="roles" />
       </BentoCell>
     </Bento>
@@ -406,12 +412,144 @@ const regionLabel: RegistryEntry = {
   since: "0.1.0", status: "draft",
 };
 
+
+/* ── added 2026-09-11, from Bhargav's references ────────────────────────────────────────────────────────── */
+
+/**
+ * A 3:2 image the component genuinely loads, as a data URI.
+ *
+ * There is no photograph on the platform yet, and inventing one for a catalogue would be the same dishonesty as
+ * lorem text (§3.2a rule 1). A drawn stand-in that the browser really fetches, decodes and lays out demonstrates
+ * everything this component does — `alt`, the reserved box, `fit`, the radius — without pretending to be
+ * someone's portrait. Replace it with a real photograph the day there is one.
+ */
+const STAND_IN =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='240'%3E" +
+  "%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E" +
+  "%3Cstop offset='0' stop-color='%23c9b8e8'/%3E%3Cstop offset='1' stop-color='%23f2d9c4'/%3E" +
+  "%3C/linearGradient%3E%3C/defs%3E%3Crect width='360' height='240' fill='url(%23g)'/%3E%3C/svg%3E";
+
+const image: RegistryEntry = {
+  name: "Image", kind: ["slot"], group: "figures", component: Image as never,
+  line: "A photograph. Optimisation is the host's job, never the package's.",
+  props: {
+    src: { type: "href", required: true },
+    alt: { type: "text", max: 120, required: true, help: "Required, including as an empty string. A decorative image is a decision, and a required empty string makes someone decide rather than forget (§12)." },
+    ratio: { type: "number", unit: "w / h", help: "Reserves the box before the bytes arrive. Without it the layout shifts on load." },
+    fit: { type: "enum", of: ["cover", "contain"], default: "cover" },
+    radius: { type: "enum", of: ["none", "sm", "md", "lg", "xl"], default: "lg" },
+  },
+  defaults: { alt: "", radius: "lg", fit: "cover" },
+  example: () => <Image src={STAND_IN} alt="" ratio={3 / 2} width={360} height={240} />,
+  since: "0.1.0", status: "draft",
+};
+
+const steps: RegistryEntry = {
+  name: "Steps", kind: ["panel", "slot"], group: "composites", component: Steps as never,
+  line: "A numbered sequence on a rule. Numbering is a counter, never a prop.",
+  props: {
+    hue: { type: "hue" },
+    orientation: { type: "enum", of: ["vertical", "horizontal"], default: "vertical" },
+  },
+  slots: { children: { admits: ["Step"], label: "Steps", min: 2 } },
+  defaults: { orientation: "vertical" },
+  example: () => (
+    <Steps hue="peach">
+      <Step title="Discover">A short call to understand what is actually needed, not what was asked for.</Step>
+      <Step title="Design">A focused first draft, shaped around the one thing that matters most.</Step>
+      <Step title="Build">The draft becomes the real thing, tested before it ever reaches you.</Step>
+    </Steps>
+  ),
+  since: "0.1.0", status: "draft",
+};
+
+const step: RegistryEntry = {
+  name: "Step", kind: ["slot"], group: "composites", component: Step as never,
+  line: "One step. Its number comes from its position, so reordering renumbers.",
+  props: { title: { type: "text", max: 60, required: true } },
+  slots: { children: { admits: "blocks", label: "What happens" } },
+  defaults: { title: "Discover" },
+  example: () => (
+    <Steps hue="blue">
+      <Step title="Deliver">Handed off with everything you need to keep going — no loose ends.</Step>
+    </Steps>
+  ),
+  since: "0.1.0", status: "draft",
+};
+
+const quote: RegistryEntry = {
+  name: "Quote", kind: ["panel", "slot"], group: "composites", component: Quote as never,
+  line: "Someone else's words, attributed — with a measured number above them.",
+  props: {
+    by: { type: "text", max: 60 },
+    role: { type: "text", max: 80 },
+    figure: { type: "object", fields: { value: { type: "text", max: 8 }, label: { type: "text", max: 30 } }, help: "A measurement or nothing. Honest counts only." },
+    markdown: { type: "markdown", required: true, label: "The quote" },
+  },
+  slots: { media: { admits: ["Image", "Illustration", "Blob"], max: 1, label: "Beside the words" } },
+  defaults: { markdown: "It just works now.", by: "Someone", role: "Their job" },
+  example: () => (
+    <Quote figure={{ value: "4", label: "roles, so far" }} by="Bhargav" role="No Origins">
+      Editors, design systems, agent systems, and shipping.
+    </Quote>
+  ),
+  since: "0.1.0", status: "draft",
+};
+
+const mediaCard: RegistryEntry = {
+  name: "MediaCard", kind: ["panel", "slot"], group: "composites", component: MediaCard as never,
+  line: "A card with a picture beside its words.",
+  props: {
+    title: { type: "text", max: 90, required: true },
+    meta: { type: "text", max: 40 },
+    line: { type: "text", max: 160 },
+    hue: { type: "hue", help: "Fills the media region when nothing is placed in it: the hue's wash under the grain." },
+    layout: { type: "enum", of: ["beside", "above"], default: "beside" },
+    href: { type: "href" },
+  },
+  slots: {
+    media: { admits: ["Image", "Illustration", "Blob"], max: 1, label: "The picture" },
+    footer: { admits: "blocks", label: "Chips, a button" },
+  },
+  defaults: { title: "A thing worth reading", layout: "beside", hue: "lavender" },
+  example: () => (
+    <MediaCard
+      hue="lavender"
+      meta="Published recently"
+      title="The rise of ambient computing"
+      line="Technology is becoming quieter, smarter, and more seamlessly part of everyday places."
+      footer={<><Chip hue="lavender">Future tech</Chip><Button size="sm" variant="primary">Read more</Button></>}
+    />
+  ),
+  since: "0.1.0", status: "draft",
+};
+
+const carousel: RegistryEntry = {
+  name: "Carousel", kind: ["panel", "slot"], group: "layout", component: Carousel as never,
+  line: "A track of slides that snaps, with the neighbours showing.",
+  props: {
+    label: { type: "text", max: 40, required: true, help: "Names the group for assistive tech — “Testimonials”, not “carousel”." },
+    peek: { type: "enum", of: ["none", "sm", "md"], default: "md", help: "A slide that fills the track gives no sign there is another one." },
+    gap: { ...GAP, default: "24" },
+    dots: { type: "boolean", default: true },
+  },
+  slots: { children: { admits: "blocks", label: "Slides", min: 2 } },
+  defaults: { label: "Slides", peek: "md", dots: true },
+  example: () => (
+    <Carousel label="What people said" peek="md" gap={16}>
+      <Quote by="Elena Duarte" role="Operations Manager">Planning used to be guesswork.</Quote>
+      <Quote by="Ravi Menon" role="Head of Platform">It reads like one thing, not five.</Quote>
+    </Carousel>
+  ),
+  since: "0.1.0", status: "draft",
+};
+
 export const entries: readonly RegistryEntry[] = [
   heading, text, label,
   chip, dot,
   button,
-  stack, row, divider, bento, bentoCell,
+  stack, row, divider, bento, bentoCell, carousel,
   card, glass, placeholder,
-  figure, blob, illustration,
-  intro, cellHead, blockCard, roadmapItem, regionLabel,
+  figure, blob, illustration, image,
+  intro, cellHead, blockCard, roadmapItem, regionLabel, steps, step, quote, mediaCard,
 ];

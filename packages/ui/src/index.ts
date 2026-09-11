@@ -49,6 +49,10 @@ export { Dot } from "./primitives/Dot";
 export type { DotProps } from "./primitives/Dot";
 export { Divider } from "./primitives/Divider";
 export type { DividerProps } from "./primitives/Divider";
+export { Image } from "./primitives/Image";
+export type { ImageProps } from "./primitives/Image";
+export { Carousel } from "./primitives/Carousel";
+export type { CarouselProps } from "./primitives/Carousel";
 export { cx } from "./cx";
 
 export { Page, Container, Section } from "./layout/Layout";
@@ -86,6 +90,12 @@ export { CellHead } from "./blocks/CellHead";
 export type { CellHeadProps } from "./blocks/CellHead";
 export { RegionLabel } from "./blocks/RegionLabel";
 export type { RegionLabelProps } from "./blocks/RegionLabel";
+export { Steps, Step } from "./blocks/Steps";
+export type { StepsProps, StepProps } from "./blocks/Steps";
+export { Quote } from "./blocks/Quote";
+export type { QuoteProps } from "./blocks/Quote";
+export { MediaCard } from "./blocks/MediaCard";
+export type { MediaCardProps } from "./blocks/MediaCard";
 export { RoadmapItem } from "./blocks/RoadmapItem";
 export type { RoadmapItemProps } from "./blocks/RoadmapItem";
 
