@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Button, Chip, Row, Stack, Text } from "@no-origins/ui";
+import { Button, CellHead, Chip, Divider, Dot, Heading, Intro, Label, RegionLabel, Row, Stack, Text, hues } from "@no-origins/ui";
 
 export const metadata: Metadata = { title: "Compose fixture", robots: { index: false } };
 
 /**
- * Admin.md build order step 2, first three: `Text`, `Stack` and `Row`.
+ * Admin.md build order step 2: the ten components the editor needs and the package did not have.
  *
  * These are the components hand-authoring found missing (Scene-Schema.md §8.1 ⑨, §9.3 ⑨) — the package could
  * style a thing but could not place two things beside each other, so the app reached for a Tailwind utility
@@ -42,11 +42,12 @@ export default function ComposeFixture() {
   return (
     <div className="noo-container py-14">
       <p className="noo-label text-muted">no origins · admin step 2 · fixture</p>
-      <h1 className="noo-h2 mt-2">Text · Stack · Row</h1>
+      <h1 className="noo-h2 mt-2">Ten new components</h1>
       <Text size="lead" className="mt-3 max-w-[62ch] text-ink-2">
-        The three that let a page be composed without a utility class. Spacing belongs to the container, never to
-        the child — <span className="noo-code">.noo-text</span> has no margin, and the gap is the Stack&apos;s or
-        the Row&apos;s.
+        Everything hand-authoring two real sections found missing. Each one was a class on a bare tag in an app
+        file, and a class on a bare tag cannot be placed in an editor. Spacing belongs to the container, never to
+        the child — <span className="noo-code">.noo-text</span> and <span className="noo-code">.noo-heading</span> have
+        no margin, and the gap is the Stack&apos;s or the Row&apos;s.
       </Text>
 
       <Case
@@ -102,6 +103,70 @@ export default function ComposeFixture() {
             </div>
           </Box>
         </Stack>
+      </Case>
+
+
+      <Case title="Heading — three levels, and the Bowlby rule carried in code" note="The display face appears at level 2 and nowhere smaller; 3 and 4 are Hanken 600. Level 1 is not offered — a surface has exactly one h1 (§12), and it belongs to the page or the canvas, never to a composed block.">
+        <Stack gap={16}>
+          <Heading level={2}>Four roles, told as blocks</Heading>
+          <Heading level={3}>Neptune, Hashnode&apos;s editor</Heading>
+          <Heading level={4}>The through-line</Heading>
+        </Stack>
+      </Case>
+
+      <Case title="Label and Dot" note="The mono voice for metadata, and a hue as a mark. The dot exists because a hue survives the map zoom tier and text does not — a zoomed-out column stays colour-coded when no word in it is legible.">
+        <Stack gap={24}>
+          <Box label="label">
+            <Row gap={24}>
+              <Label>now</Label>
+              <Label>two years</Label>
+              <Label>the through-line</Label>
+            </Row>
+          </Box>
+          <Box label="dot — all seven hues">
+            <Row gap={16}>
+              {hues.map((h) => (
+                <Row key={h} gap={8}>
+                  <Dot hue={h} />
+                  <Text size="small" tone="muted" as="span">{h}</Text>
+                </Row>
+              ))}
+            </Row>
+          </Box>
+        </Stack>
+      </Case>
+
+      <Case title="Divider" note="An <hr>, because that is what it means: a thematic break, announced as a separator. Dotted is the canvas voice — the line under a region label.">
+        <Stack gap={16}>
+          <Text size="small" tone="muted">solid</Text>
+          <Divider />
+          <Text size="small" tone="muted">dotted</Text>
+          <Divider dotted />
+        </Stack>
+      </Case>
+
+      <Case title="Intro — because markdown cannot express a type scale" note="A document writing this as markdown would get a heading and a body paragraph; the lead — 19/1.5, a real step on the scale — has no syntax at all. Rather than invent one, the pair is a component.">
+        <Box label="intro">
+          <Intro title="Four roles, told as blocks" lead="Editors, design systems, agent systems, and shipping full-stack." />
+        </Box>
+      </Case>
+
+      <Case title="CellHead — the same shape four times in one widget" note="Two <p> tags typed by hand in the app's content file, once per role. Composable from Label, Dot and a title — and registered anyway, because authoring a widget cell should be one node, not four.">
+        <Row gap={16} align="start">
+          {([["now", "Radise", "peach"], ["before", "Dataflix", "green"], ["one year", "Hashnode", "blue"], ["two years", "Terrible Tiny Tales", "pink"]] as const).map(([l, t, h]) => (
+            <div key={t} className="noo-bento__cell noo-bento__cell--quiet w-[144px] h-[144px]">
+              <CellHead label={l} title={t} dot={h} />
+            </div>
+          ))}
+        </Row>
+      </Case>
+
+      <Case title="RegionLabel — the one heading that has to read at 0.27 zoom" note="96px in canvas units, stepping down to 34 in document mode where there is no zoom to fight. Always aria-hidden: the section's meaningful h2 is in its intro, and “Four roles, told as blocks” beats “work” for anyone navigating by heading. RegionNode renders this now, so the markup has one home.">
+        <Box label="region label">
+          <div className="h-[150px]">
+            <RegionLabel>Work</RegionLabel>
+          </div>
+        </Box>
       </Case>
 
       <Case

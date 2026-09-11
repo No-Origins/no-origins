@@ -41,6 +41,14 @@ export { Stack } from "./primitives/Stack";
 export type { StackProps } from "./primitives/Stack";
 export { Row } from "./primitives/Row";
 export type { RowProps } from "./primitives/Row";
+export { Heading } from "./primitives/Heading";
+export type { HeadingProps } from "./primitives/Heading";
+export { Label } from "./primitives/Label";
+export type { LabelProps } from "./primitives/Label";
+export { Dot } from "./primitives/Dot";
+export type { DotProps } from "./primitives/Dot";
+export { Divider } from "./primitives/Divider";
+export type { DividerProps } from "./primitives/Divider";
 export { cx } from "./cx";
 
 export { Page, Container, Section } from "./layout/Layout";
@@ -70,6 +78,12 @@ export { BlockCard } from "./blocks/BlockCard";
 export type { BlockCardProps, BlockChip } from "./blocks/BlockCard";
 export { SectionWidget } from "./blocks/SectionWidget";
 export type { SectionWidgetProps } from "./blocks/SectionWidget";
+export { Intro } from "./blocks/Intro";
+export type { IntroProps } from "./blocks/Intro";
+export { CellHead } from "./blocks/CellHead";
+export type { CellHeadProps } from "./blocks/CellHead";
+export { RegionLabel } from "./blocks/RegionLabel";
+export type { RegionLabelProps } from "./blocks/RegionLabel";
 export { RoadmapItem } from "./blocks/RoadmapItem";
 export type { RoadmapItemProps } from "./blocks/RoadmapItem";
 
