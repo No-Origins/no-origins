@@ -8,6 +8,7 @@ export const metadata: Metadata = { title: "Fixtures", robots: { index: false } 
 const fixtures = [
   { href: "/fixtures/blob", step: 2, title: "The blob and the wordmark", line: "Every variant, size and state over the grid." },
   { href: "/fixtures/primitives", step: 3, title: "Glass and the six primitives", line: "Type scale, glass levels, Button, Chip, Card, Bubble, Field, Toggle." },
+  { href: "/fixtures/compose", step: "admin 2", title: "Text, Stack and Row", line: "The three that let a page be composed without a utility class \u2014 and the two real rows they replace." },
   { href: "/fixtures/layout", step: 4, title: "Page mode", line: "NavBar, SectionHeader, Footer, the reading column and its rhythm." },
   { href: "/fixtures/canvas", step: 9, title: "Canvas nodes", line: "The panel and region node types, and the three level-of-detail tiers side by side." },
   { href: "/fixtures/bento", step: 11, title: "Bento widgets", line: "The six section widgets at full size and at the 0.27 overview, with the six illustrations." },

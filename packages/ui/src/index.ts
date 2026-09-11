@@ -35,6 +35,12 @@ export { Field } from "./primitives/Field";
 export type { FieldProps } from "./primitives/Field";
 export { Toggle } from "./primitives/Toggle";
 export type { ToggleProps } from "./primitives/Toggle";
+export { Text } from "./primitives/Text";
+export type { TextProps } from "./primitives/Text";
+export { Stack } from "./primitives/Stack";
+export type { StackProps } from "./primitives/Stack";
+export { Row } from "./primitives/Row";
+export type { RowProps } from "./primitives/Row";
 export { cx } from "./cx";
 
 export { Page, Container, Section } from "./layout/Layout";

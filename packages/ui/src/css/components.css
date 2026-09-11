@@ -197,6 +197,23 @@
 .noo-card--interactive:not(.glass):hover { box-shadow: var(--e2); }
 .noo-card--interactive.glass:hover { --gs: var(--e2); }
 
+/* ===== Text · Stack · Row (§9) — the three that let a page be composed without a utility class =====
+   The package had no way to put two things beside each other, so the app reached for Tailwind every time and
+   those spots became unauthorable (Scene-Schema.md §8.1 ⑨). Spacing belongs to the container, never to the
+   child: `.noo-text` has no margin, and the gap is the Stack's or the Row's. */
+.noo-text { margin: 0; }
+.noo-text--muted { color: var(--muted); }
+
+.noo-stack { display: flex; flex-direction: column; min-width: 0; }                            /* min-width 0: a long word must not widen the cell */
+.noo-stack--g8 { gap: 8px; } .noo-stack--g16 { gap: 16px; } .noo-stack--g24 { gap: 24px; } .noo-stack--g40 { gap: 40px; }
+.noo-stack--start { align-items: flex-start; } .noo-stack--center { align-items: center; } .noo-stack--end { align-items: flex-end; }
+
+.noo-row { display: flex; flex-wrap: wrap; min-width: 0; }
+.noo-row--g8 { gap: 8px; } .noo-row--g16 { gap: 16px; } .noo-row--g24 { gap: 24px; } .noo-row--g40 { gap: 40px; }
+.noo-row--center { align-items: center; } .noo-row--start { align-items: flex-start; }
+.noo-row--baseline { align-items: baseline; } .noo-row--end { align-items: flex-end; }
+.noo-row--nowrap { flex-wrap: nowrap; }
+
 /* ===== Bubble (§9) — glass-1 pill of real text · 15/1.4 Hanken 500 · padding 10 × 16 ===== */
 .noo-bubble {
   display: inline-block;
