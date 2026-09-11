@@ -667,5 +667,11 @@ Resolved 2026-09-09: the host blob is clear glass (§4.1b); the canvas home ship
 
     **Not done:** `RegionNode` is unused by the portfolio now but still exported and exercised by `/fixtures/canvas`.
 13. Deploy to Vercel → `bhargav.no-origins.com`.
-14. `design.no-origins.com` — the design-system showcase: a second app, its own Vercel project and DNS, on the same `CanvasShell`. This is where the blob family, every component variant and both themes live, so the portfolio does not have to demonstrate them.
+14. ✅ **Done 2026-09-11. `design.no-origins.com` — the showcase.** `apps/design`, a second Next app, three routes: an overview, **Components** (the whole registry, rendered by `Catalogue` from the package so the showcase and the admin cannot drift), and **Tokens** (the family, the type scale, space, radius, elevation, motion, and the contrast report).
+
+    It is **page mode, not a canvas** — the first thing on the platform to wear `Page`, `NavBar`, `Footer` and `SectionHeader` since the portfolio retired them in step 9. §9 kept them specified on the grounds that documents would need them, and a catalogue is a document. Block accent lavender, so it never reads as part of the portfolio.
+
+    **The contrast report earned its place immediately**, by finding three pairs below §12's floors on the day it was built: `--muted` on `--ground` at 4.20:1, `pink-ink` on `pink` at 4.47:1 and `blue-ink` on `blue` at 4.05:1, against a floor of 4.5. Under R3 the showcase cannot refuse a token — tokens are code — so making a broken floor impossible to miss is the whole of its job, and it did that before anyone asked it to.
+
+    It measures rather than computes, and the reason is worth keeping: `getComputedStyle` resolves a `var()` but keeps the colour in the space it was authored in, so every `oklch()` token came back as `oklch(...)`. Reading three numbers out of that as R, G and B made every ratio about 1:1 — the wrong answer in the most convincing possible form. The resolved colour is painted into a 1×1 canvas and the pixel read back instead. Caught by looking at the page, not by a passing test.
 15. The browser-side model — a fine-tuned small model that helps a visitor navigate the map and ask about Bhargav, wearing the centre blob (§8.3). Needs the portfolio's copy to exist first: it is the training material.

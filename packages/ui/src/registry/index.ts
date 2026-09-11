@@ -3,6 +3,8 @@ import type { Registry, RegistryEntry, RegistryGroup } from "./types";
 
 export type { NodeKind, PropType, PropSpec, PropSchema, SlotSpec, RegistryGroup, RegistryEntry, Registry } from "./types";
 export { entries } from "./entries";
+export { Catalogue } from "./Catalogue";
+export type { CatalogueProps } from "./Catalogue";
 
 /** Every authorable component, by name. A `component` value a document names must be a key here or it does not render. */
 export const registry: Registry = Object.fromEntries(entries.map((e) => [e.name, e]));

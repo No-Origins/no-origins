@@ -19,6 +19,10 @@ export const ROUTES = [
   "/fixtures/blob",
 ];
 
+/** The showcase is a second app on its own port (Design-System.md §11.4) — its own project, its own domain. */
+export const DESIGN = "http://localhost:3001";
+export const DESIGN_ROUTES = ["/", "/components", "/tokens"];
+
 const slug = (route: string) =>
   route === "/" ? "home" : route.slice(1).replace(/\//g, "__");
 
@@ -75,6 +79,25 @@ for (const route of ROUTES) {
         `[${testInfo.project.name}] ${route} console errors:\n  ${consoleErrors.join("\n  ")}`,
       );
     }
+    expect(pageErrors, `uncaught errors on ${route}`).toEqual([]);
+  });
+}
+
+// ── the design showcase, on :3001 ────────────────────────────────────────────────────────────────────────────
+for (const route of DESIGN_ROUTES) {
+  test(`review design ${route}`, async ({ page }, testInfo) => {
+    const pageErrors: string[] = [];
+    page.on("pageerror", (err) => pageErrors.push(err.message));
+
+    const response = await page.goto(`${DESIGN}${route}`, { waitUntil: "networkidle" });
+    expect(response, `no response for ${route}`).not.toBeNull();
+    expect(response!.status(), `${route} returned ${response!.status()}`).toBeLessThan(400);
+    await page.waitForTimeout(400);
+
+    const file = `e2e/screenshots/${testInfo.project.name}/design__${slug(route)}.png`;
+    await page.screenshot({ path: file, fullPage: true, animations: "disabled" });
+    await testInfo.attach(`${testInfo.project.name} design ${route}`, { path: file, contentType: "image/png" });
+
     expect(pageErrors, `uncaught errors on ${route}`).toEqual([]);
   });
 }
