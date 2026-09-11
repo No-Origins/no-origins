@@ -715,6 +715,94 @@
   .noo-page:has(.noo-nav__sheet) { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
 }
 
+/* ===== Rail (Admin.md §10) — page mode's NavBar as a column =====
+   The bar's grammar, rotated: wordmark goes home, current is `--accent-deep`, skip link first. The one detail
+   that had to be translated is the current marker — an underline in a stack reads as a divider between two items
+   rather than as a mark on one, so it becomes the same 2px `--accent-deep` on the leading edge, which is the edge
+   a column actually has. */
+.noo-rail {
+  grid-area: rail;
+  position: sticky; top: 0; align-self: start;
+  width: 248px; height: 100dvh;
+  display: flex; flex-direction: column; gap: 24px;
+  padding: 20px 12px 16px;
+  border-radius: 0; border-width: 0 1px 0 0;
+  overflow-y: auto; overscroll-behavior: contain;
+}
+.noo-rail__brand { padding: 0 12px; }
+.noo-rail__home {
+  display: inline-flex; align-items: center; height: 40px;
+  color: var(--ink); text-decoration: none; font-size: 20px; border-radius: var(--r-pill);
+}
+.noo-rail__groups { display: flex; flex-direction: column; gap: 20px; }
+.noo-rail__group { --rail-hue: var(--accent-deep); }
+.noo-rail__group[data-hue="pink"]{--rail-hue:var(--pink-deep)} .noo-rail__group[data-hue="green"]{--rail-hue:var(--green-deep)}
+.noo-rail__group[data-hue="grey"]{--rail-hue:var(--grey-deep)} .noo-rail__group[data-hue="lavender"]{--rail-hue:var(--lavender-deep)}
+.noo-rail__group[data-hue="peach"]{--rail-hue:var(--peach-deep)} .noo-rail__group[data-hue="yellow"]{--rail-hue:var(--yellow-deep)}
+.noo-rail__group[data-hue="blue"]{--rail-hue:var(--blue-deep)}
+
+.noo-rail__group-label {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 6px; padding: 0 12px; color: var(--muted);
+}
+.noo-rail__group-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--rail-hue); flex: 0 0 auto; }
+
+.noo-rail__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+.noo-rail__list--sub { margin: 2px 0 6px; padding-left: 12px; gap: 0; }
+.noo-rail__link {
+  position: relative; display: flex; align-items: center; min-height: 34px;
+  padding: 6px 12px; border-radius: var(--r-md);
+  font: 500 14px/1.3 var(--ff-sans); color: var(--ink-2); text-decoration: none;
+  transition: color var(--d-fast) var(--ease), background var(--d-fast) var(--ease);
+}
+.noo-rail__link:hover { color: var(--ink); background: color-mix(in oklch, var(--ink) 4%, transparent); }
+.noo-rail__link--sub { min-height: 30px; font-size: 13px; font-weight: 400; color: var(--muted); }
+.noo-rail__link--sub:hover { color: var(--ink-2); }
+.noo-rail__link[aria-current="page"] { color: var(--rail-hue); background: color-mix(in oklch, var(--rail-hue) 9%, transparent); }
+.noo-rail__link[aria-current="page"]::after {
+  content: ""; position: absolute; inset-inline-start: 0; top: 7px; bottom: 7px;
+  width: 2px; border-radius: 1px; background: var(--rail-hue);
+}
+.noo-rail__trailing {
+  margin-top: auto; padding: 12px 12px 0; display: flex; flex-direction: column; gap: 10px;
+  border-top: 1px solid var(--glass-border);
+}
+
+/* Below the breakpoint the column has no room, so it stops being one: a strip across the top that scrolls
+   sideways. The groups stay — they are the three layers, and dropping them to save space would drop the one
+   thing the rail is for. */
+@media (max-width: 899.98px) {
+  .noo-rail {
+    position: static; width: auto; height: auto;
+    flex-direction: row; align-items: center; gap: 16px;
+    padding: 10px 16px; border-width: 0 0 1px 0;
+    overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+  }
+  .noo-rail::-webkit-scrollbar { display: none; }
+  .noo-rail__brand { padding: 0; flex: 0 0 auto; }
+  .noo-rail__groups { flex-direction: row; align-items: center; gap: 16px; }
+  .noo-rail__group { display: flex; align-items: center; gap: 8px; }
+  .noo-rail__group-label { margin: 0; padding: 0; }
+  .noo-rail__list, .noo-rail__list--sub { flex-direction: row; gap: 2px; padding: 0; margin: 0; }
+  /* an item and the children it opened sit BESIDE each other here, not under. Left stacked, one open branch
+     doubles the strip's height and shoves the page down. */
+  .noo-rail__item { display: flex; align-items: center; gap: 2px; }
+  .noo-rail__link { white-space: nowrap; }
+  .noo-rail__link[aria-current="page"]::after { inset: auto 10px 3px; top: auto; width: auto; height: 2px; }
+  .noo-rail__trailing {
+    margin: 0 0 0 auto; padding: 0 0 0 16px; flex-direction: row; align-items: center;
+    border-top: 0; border-inline-start: 1px solid var(--glass-border);
+  }
+}
+
+/* the railed page: two columns, and the rail is the one that does not scroll with the document */
+.noo-page--railed { display: grid; grid-template-areas: "rail column"; grid-template-columns: auto minmax(0, 1fr); }
+.noo-page__column { grid-area: column; min-width: 0; display: flex; flex-direction: column; min-height: 100dvh; }
+@media (max-width: 899.98px) {
+  .noo-page--railed { grid-template-areas: "rail" "column"; grid-template-columns: minmax(0, 1fr); }
+  .noo-page__column { min-height: 0; }
+}
+
 /* ===== Footer (§9) — on the ground, a hairline above; the name in running text, meta, links, a trailing slot ===== */
 .noo-footer { margin-top: 64px; border-top: 1px solid var(--rule); padding-block: 40px; color: var(--ink-2); font: 400 14.5px/1.5 var(--ff-sans); }
 .noo-footer__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 32px; }

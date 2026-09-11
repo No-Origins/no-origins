@@ -9,19 +9,46 @@ import { cx } from "../cx";
 export interface PageProps extends ComponentPropsWithoutRef<"div"> {
   nav?: ReactNode;
   footer?: ReactNode;
+  /**
+   * A `Rail` (Admin.md §10). Given one, the page becomes two columns instead of a stack — the rail beside the
+   * main column rather than above it. `nav` and `rail` are alternatives, not a pair: two primary navigations on
+   * one screen is two answers to "where am I".
+   */
+  rail?: ReactNode;
   /** id of the main landmark; the NavBar's skip link points here. */
   mainId?: string;
   mainClassName?: string;
 }
 
-export function Page({ nav, footer, mainId = "main", mainClassName, className, children, ...rest }: PageProps) {
-  return (
-    <div className={cx("noo-page", className)} {...rest}>
-      {nav}
+export function Page({ nav, rail, footer, mainId = "main", mainClassName, className, children, ...rest }: PageProps) {
+  const body = (
+    <>
       <main id={mainId} tabIndex={-1} className={cx("noo-page__main", mainClassName)}>
         {children}
       </main>
       {footer}
+    </>
+  );
+
+  // Two shapes, not one shape with a modifier class doing the work. Without a rail the DOM is exactly what it
+  // always was — a flex column of nav, main, footer — because the portfolio and the showcase are laid out by
+  // that shape and a wrapper introduced for the admin's benefit would quietly change both.
+  if (!rail) {
+    return (
+      <div className={cx("noo-page", className)} {...rest}>
+        {nav}
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <div className={cx("noo-page noo-page--railed", className)} {...rest}>
+      {rail}
+      <div className="noo-page__column">
+        {nav}
+        {body}
+      </div>
     </div>
   );
 }

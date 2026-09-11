@@ -61,6 +61,8 @@ export { Page, Container, Section } from "./layout/Layout";
 export type { PageProps, ContainerProps, SectionProps } from "./layout/Layout";
 export { NavBar } from "./layout/NavBar";
 export type { NavBarProps, NavLink } from "./layout/NavBar";
+export { Rail } from "./layout/Rail";
+export type { RailProps, RailGroup, RailItem } from "./layout/Rail";
 export { SectionHeader } from "./layout/SectionHeader";
 export type { SectionHeaderProps } from "./layout/SectionHeader";
 export { Footer } from "./layout/Footer";

@@ -156,11 +156,15 @@ enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
 # The admin runs on 3002 locally — portfolio is 3000 and the design showcase is 3001.
-site_url = "http://127.0.0.1:3002"
+site_url = "http://localhost:3002"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["http://localhost:3002", "https://admin.no-origins.com"]
+# Wildcards, and they are load-bearing. This list is matched against the FULL redirect URL, so a bare origin
+# does not admit `/auth/callback?next=…` — Supabase silently falls back to `site_url`, the `next` is lost, and the
+# link lands on the overview instead of where you were going. Found by following a real magic link, not by
+# reading this file.
+additional_redirect_urls = ["http://localhost:3002/**", "http://127.0.0.1:3002/**", "https://admin.no-origins.com/**"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.

@@ -356,7 +356,7 @@ The admin needs every one of them. That is not a problem — it is the point. **
 | `Table` | Versions, assets, audit log | The first component with real data density; the type scale has never been tested there |
 | `Tree` | The outline (§6.1) | Reorderable, keyboard-operable — DOM order is tab order |
 | `Inspector` | Schema-driven props form | The genuinely new one. Everything else exists in some form elsewhere |
-| `Rail` | The left nav | Page mode's `NavBar` as a column |
+| ~~`Rail`~~ | The left nav | **Built 2026-09-11.** Page mode's `NavBar` as a column, and `Page` takes a `rail` so a railed page is two columns instead of a stack. The bar's grammar survives the rotation except for one detail: an underline in a stack reads as a divider between two items rather than a mark on one, so the current marker becomes the same 2px `--accent-deep` on the leading edge. Groups carry a hue, which puts §1's three layers in the navigation rather than only in each screen's eyebrow |
 
 **Headless layer, per the shadcn note (§9).** Take Radix or Base UI directly as an **optional peer**, the way `@xyflow/react` already is, and style it with our own classes in the `components` layer. Not shadcn: its utilities-in-components model breaks §11.2 rule 3.
 
@@ -429,12 +429,14 @@ So there is no first migration. The first document is a **new, empty canvas**, c
 
 ## 13. Build order
 
-**Steps 1–3 are built; 4 onward is the order for the rest.** The five rules of §12 are settled, so step 1 can start. R5 shapes the order: there is no migration, so nothing here touches what a visitor sees — the live portfolio renders from `scene.tsx` until step 10, which has no date.
+**Steps 1–4 are built; 5 onward is the order for the rest.** The five rules of §12 are settled, so step 1 can start. R5 shapes the order: there is no migration, so nothing here touches what a visitor sees — the live portfolio renders from `scene.tsx` until step 10, which has no date.
 
 1. **Scene-Schema.md adopted** — the JSON format and the registry contract (Scene-Schema.md §1–§3), with R4's directive set declared.
 2. **The component library, then `catalogue.ts` + registry** — R5 makes this the long pole, not a footnote: free composition needs a *complete* palette, not whatever the current portfolio happened to use. Ten components are missing (Scene-Schema.md §2.3), and every one of them is a place the app reached for a utility class instead of a component. Then each declares its props schema and an example: one declaration, three consumers (§5.1).
 3. ~~**Supabase project**~~ — **done 2026-09-11.** The schema of §8.1, deny-by-default RLS, the allowlist gate, both buckets, seeded with the four systems and one project row: `portfolio`. Lives in `supabase/`; `supabase/README.md` says how to run it and what was verified. **One thing is deliberately not in the repo: the allowlist row with a real email address.** Until it exists nobody can sign in, which is §8.4 working rather than a snag.
-4. **`apps/admin` shell** — page-mode rail, the three layer sections, auth, empty screens. Deployed to `admin.no-origins.com` before there is anything in it, because a deploy path found later is a deploy path found the hard way.
+4. **`apps/admin` shell** — **built 2026-09-11, not yet deployed.** The rail, the three layer sections, magic-link auth and nine honest empty screens are running on :3002 against the local stack; signing in was exercised end to end through a real emailed link rather than assumed. **Deploying it is the part still open**, and §13 wants that done while it is still empty — a deploy path found later is a deploy path found the hard way. It needs a hosted Supabase project and a Vercel project, both of which are Bhargav's to create.
+
+   One thing was found only by following a real link: `additional_redirect_urls` is matched against the **whole** URL, so a bare origin does not admit `/auth/callback?next=…`. Supabase falls back to `site_url` silently, the `next` is dropped, and the link lands on the overview instead of where you were going. The config now lists `/**` patterns.
 5. **Systems → Design System, the catalogue** (§5.1–5.2) — every component live in both themes, every token with its contrast report. Under R3 this is the whole of the Design System section, and it is also §14 step 14's public showcase, which stops being a separate build.
 6. **Document renderer** — a `SceneDocument` in the package turning doc JSON into `SceneNode[]` (Scene-Schema.md §4), plus the markdown-and-directives renderer R4 needs. **Read path first**, on a fixture. The two hand-authored documents in Scene-Schema.md §8 and §9 are the test material: they were written against real sections, so if they render they prove the renderer, and nothing has to be migrated for that to be true.
 7. **The editor, read-write** (§6) — palette, canvas, inspector, outline; draft autosave; the ⌘K directive control; probes on save. Preview renders the draft behind auth.

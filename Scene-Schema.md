@@ -229,7 +229,7 @@ Stated so the omissions read as decisions rather than oversights.
 | `Glass`, `Bubble` | Surface primitives. Every authorable component is already built on them; exposing them lets a document build an un-designed surface |
 | `Field`, `Toggle` | Form controls. A published canvas collects no input — that is the admin's job, and the admin is code |
 | `ChatInput`, `CanvasMap`, `ThemeSwitch`, `Wordmark` | Viewport furniture, not content. They belong to `CanvasShell`'s panel slots and are not in the scene at all (§8.1) |
-| `NavBar`, `SectionHeader`, `Footer`, `Page`, `Container`, `Section` | Page mode. Reserved for `kind: "page"`, which is out of scope until the editor block exists (§7) |
+| `NavBar`, `Rail`, `SectionHeader`, `Footer`, `Page`, `Container`, `Section` | Page mode. Reserved for `kind: "page"`, which is out of scope until the editor block exists (§7) |
 | `IllustrationCanvas` | Takes a render function (`children: (line) => ReactNode`). A function is the one thing a document can never carry |
 
 ---
