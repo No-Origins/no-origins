@@ -8,6 +8,7 @@ export const metadata: Metadata = { title: "Fixtures", robots: { index: false } 
 const fixtures = [
   { href: "/fixtures/blob", step: 2, title: "The blob and the wordmark", line: "Every variant, size and state over the grid." },
   { href: "/fixtures/primitives", step: 3, title: "Glass and the six primitives", line: "Type scale, glass levels, Button, Chip, Card, Bubble, Field, Toggle." },
+  { href: "/fixtures/catalogue", step: "admin 2", title: "The catalogue", line: "Every authorable component, rendered from the registry itself \u2014 one declaration, three consumers." },
   { href: "/fixtures/compose", step: "admin 2", title: "The ten new components", line: "Heading, Text, Label, Dot, Stack, Row, Divider, Intro, CellHead, RegionLabel \u2014 and the two real rows they replace." },
   { href: "/fixtures/layout", step: 4, title: "Page mode", line: "NavBar, SectionHeader, Footer, the reading column and its rhythm." },
   { href: "/fixtures/canvas", step: 9, title: "Canvas nodes", line: "The panel and region node types, and the three level-of-detail tiers side by side." },

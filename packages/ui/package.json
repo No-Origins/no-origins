@@ -1,7 +1,7 @@
 {
   "name": "@no-origins/ui",
   "version": "0.0.1",
-  "description": "No Origins design system — tokens, glass, motion, the blob, and the components every block shares.",
+  "description": "No Origins design system \u2014 tokens, glass, motion, the blob, and the components every block shares.",
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -20,7 +20,8 @@
     "./tailwind.css": "./src/css/tailwind.css",
     "./glass.css": "./src/css/glass.css",
     "./motion.css": "./src/css/motion.css",
-    "./components.css": "./src/css/components.css"
+    "./components.css": "./src/css/components.css",
+    "./registry": "./src/registry/index.ts"
   },
   "publishConfig": {
     "exports": {
@@ -39,7 +40,11 @@
       "./tailwind.css": "./src/css/tailwind.css",
       "./glass.css": "./src/css/glass.css",
       "./motion.css": "./src/css/motion.css",
-      "./components.css": "./src/css/components.css"
+      "./components.css": "./src/css/components.css",
+      "./registry": {
+        "types": "./dist/registry/index.d.ts",
+        "import": "./dist/registry/index.js"
+      }
     }
   },
   "scripts": {

@@ -15,6 +15,7 @@ export const ROUTES = [
   "/fixtures/layout",
   "/fixtures/primitives",
   "/fixtures/compose",
+  "/fixtures/catalogue",
   "/fixtures/blob",
 ];
 
