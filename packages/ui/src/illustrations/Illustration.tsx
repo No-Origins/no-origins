@@ -2,6 +2,8 @@ import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from "react";
 import type { Hue } from "../tokens";
 import { cx } from "../cx";
 import { SIZE, bands, pebbles, polar, ring, rosette, spiral, stack } from "./primitives";
+import { illo, type Family } from "./generator";
+import { fields, type FieldName } from "./fields";
 
 /**
  * Illustration (Illustrations.md) — a named picture, drawn by code from the grammar in primitives.ts.
@@ -14,15 +16,38 @@ import { SIZE, bands, pebbles, polar, ring, rosette, spiral, stack } from "./pri
  *
  * Colours are set through `style`, because SVG presentation attributes do not accept `var()`.
  */
-export type IllustrationName = "status" | "work" | "cases" | "projects" | "interests" | "philosophy";
-export const illustrationNames: IllustrationName[] = ["status", "work", "cases", "projects", "interests", "philosophy"];
+/**
+ * @deprecated The original grammar of six primitives — corner OBJECTS, not fields.
+ *
+ * Retired 2026-09-10 when Bhargav set the four conditions (fine lines, no fill, textured cards, no colliding
+ * lines) and the library was redrawn as fields drawn by the generator. No live widget has used these since.
+ * They are kept, and shown beside the real ones at `/fixtures/bento`, until the grammar is deleted.
+ *
+ * Renamed from `Illustration` on 2026-09-11: the current name belongs to the current system. Registering the
+ * retired glyphs as the authorable illustration was a real error, caught by Bhargav on the catalogue page —
+ * `work` here is literally `stack(4)`, four capsules, which is what it drew.
+ */
+export type GlyphName = "status" | "work" | "cases" | "projects" | "interests" | "philosophy";
+export const glyphNames: GlyphName[] = ["status", "work", "cases", "projects", "interests", "philosophy"];
 
-export interface IllustrationProps extends Omit<ComponentPropsWithoutRef<"svg">, "name"> {
-  name: IllustrationName;
+export interface GlyphProps extends Omit<ComponentPropsWithoutRef<"svg">, "name"> {
+  name: GlyphName;
   /** The one hue. Defaults to the block accent. */
   hue?: Hue;
-  /** Describes the picture; without it the illustration is decorative and hidden from assistive tech. */
+  /** Describes the picture; without it the glyph is decorative and hidden from assistive tech. */
   title?: string;
+}
+
+/** A field, by name or by parameters (Illustrations.md §6.0a). What every live widget is drawn from. */
+export interface IllustrationProps extends Omit<ComponentPropsWithoutRef<"svg">, "name"> {
+  /** One of the six measured families. */
+  name?: FieldName;
+  /** Raw parameters, for a candidate that is not in the library yet — the studio draws this way. */
+  family?: Family;
+  hue?: Hue;
+  title?: string;
+  /** Names the drawing for `probe10` and `probe11`. Omit outside a fixture. */
+  id?: string;
 }
 
 /** The one line. There is no second one: same weight, same colour, everywhere in every picture. */
@@ -63,7 +88,39 @@ export function IllustrationCanvas({ hue, title, className, children, ...rest }:
   );
 }
 
-export function Illustration({ name, hue, title, className, ...rest }: IllustrationProps) {
+/**
+ * Illustration — a FIELD: fine lines in one hue crossing the whole cell and leaving through its edges.
+ *
+ * Draws `illo()` from the generator, which is what `SectionWidget` did inline until the parameters moved into the
+ * package (`fields.ts`). Give it a `name` for one of the six, or a `family` for a candidate the studio is still
+ * arguing over.
+ */
+export function Illustration({ name, family, hue, title, id, className, ...rest }: IllustrationProps) {
+  const params = family ?? (name ? fields[name] : undefined);
+  if (!params) return null;
+  return (
+    <IllustrationCanvas
+      hue={hue}
+      title={title}
+      data-ill={id}
+      // A field crosses the whole cell and leaves through its edges (principle 7), so it SLICES rather than fits:
+      // fitting would letterbox it inside the cell and every line would end in mid-air. The two classes place it
+      // at `inset: 0` in a bento cell; outside one they do nothing.
+      preserveAspectRatio="xMidYMid slice"
+      className={cx("noo-bento__ill noo-bento__ill--field", name && `noo-ill--${name}`, className)}
+      {...rest}
+    >
+      {(line) =>
+        illo(params).flatMap((runs, i) =>
+          runs.map((d, j) => <path key={`${i}-${j}`} d={d} style={line()} />),
+        )
+      }
+    </IllustrationCanvas>
+  );
+}
+
+/** @deprecated See {@link GlyphProps}. */
+export function Glyph({ name, hue, title, className, ...rest }: GlyphProps) {
   return (
     <IllustrationCanvas hue={hue} title={title} className={cx(`noo-ill--${name}`, className)} {...rest}>
       {(line) => draw(name, line)}
@@ -71,7 +128,7 @@ export function Illustration({ name, hue, title, className, ...rest }: Illustrat
   );
 }
 
-function draw(name: IllustrationName, line: Line) {
+function draw(name: GlyphName, line: Line) {
   switch (name) {
     // looking, open: a ring left open at the top-right, a shorter arc inside it, and one mark already outside
     case "status": {

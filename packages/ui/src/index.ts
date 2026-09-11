@@ -66,8 +66,10 @@ export type { ThemeChoice } from "./theme";
 
 export { Bento, BentoCell, BentoFigure } from "./primitives/Bento";
 export type { BentoProps, BentoCellProps, BentoFigureProps, BentoTone } from "./primitives/Bento";
-export { Illustration, IllustrationCanvas, illustrationNames } from "./illustrations/Illustration";
-export type { IllustrationProps, IllustrationCanvasProps, IllustrationName, Line } from "./illustrations/Illustration";
+export { Illustration, IllustrationCanvas, Glyph, glyphNames } from "./illustrations/Illustration";
+export type { IllustrationProps, IllustrationCanvasProps, GlyphProps, GlyphName, Line } from "./illustrations/Illustration";
+export { fields, fieldNames } from "./illustrations/fields";
+export type { FieldName } from "./illustrations/fields";
 export * as ill from "./illustrations/primitives";
 // The generator (Illustrations.md §6.0a) — v1 of the one function that draws every illustration.
 export { illo, illoLines, poly } from "./illustrations/generator";

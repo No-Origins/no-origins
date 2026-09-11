@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Bento, BentoCell, BentoFigure } from "../primitives/Bento";
-import { IllustrationCanvas } from "../illustrations/Illustration";
-import { illo, type Family } from "../illustrations/generator";
+import { Illustration } from "../illustrations/Illustration";
+import type { Family } from "../illustrations/generator";
 import type { Hue } from "../tokens";
 import { cx } from "../cx";
 
@@ -59,20 +59,7 @@ export function SectionWidget({
         <p className="noo-label">{eyebrow}</p>
         {figure ? <BentoFigure value={figure.value} label={figure.label} size={figure.size} /> : null}
         {!figure && word ? <p className="noo-bento__word">{word}</p> : null}
-        {illustration ? (
-          <IllustrationCanvas
-            hue={hue}
-            data-ill={illustrationId}
-            preserveAspectRatio="xMidYMid slice"
-            className="noo-bento__ill noo-bento__ill--field"
-          >
-            {(line) =>
-              illo(illustration).flatMap((runs, i) =>
-                runs.map((d, j) => <path key={`${i}-${j}`} d={d} style={line()} />),
-              )
-            }
-          </IllustrationCanvas>
-        ) : null}
+        {illustration ? <Illustration family={illustration} id={illustrationId} hue={hue} /> : null}
       </BentoCell>
       {children}
     </Bento>

@@ -380,11 +380,19 @@ Validation: `view` must resolve (§6 rule 4), so a pan-link to a deleted section
 
 ### 3.6 Measured parameters are not authorable
 
-`BentoCell.illustration` takes a `Family` — fourteen parameters. Two of them are **measurements, not choices**: `flow` decides how much of the cell the words cost and is read off `e2e/.mcp/flow.mjs`; `words` is the text boxes the drawing must keep clear and is read off `words.mjs`. Illustrations.md is emphatic that neither is ever estimated by eye, and each has already cost a round.
+`Illustration` takes a `Family` — fourteen parameters. Two of them are **measurements, not choices**: `flow` decides how much of the cell the words cost and is read off `e2e/.mcp/flow.mjs`; `words` is the text boxes the drawing must keep clear and is read off `words.mjs`. Illustrations.md is emphatic that neither is ever estimated by eye, and each has already cost a round.
 
 An inspector with fourteen sliders would invite exactly that. So **`illustration` is authorable only as one of the six named families** — `status · work · cases · projects · interests · philosophy` — and the parameter sets stay in `content/sections.tsx`, in code, where the measurements live beside the numbers they produced.
 
 This is the same shape as R3: the values that come from measurement or from a design round are a code change; the admin names one and does not tune it. A seventh family is a studio round (Illustrations.md §8), not a slider drag.
+
+**Two corrections, both found on the catalogue page 2026-09-11 (Bhargav).**
+
+The package held **two** illustration systems and the registry named the wrong one. `Illustration` was the *retired* grammar of six primitives — corner objects, where `work` is literally `stack(4)` and draws four capsules — kept only so `/fixtures/bento` could show them beside the real ones until the grammar is deleted. The live system is `illo()`, the generator, which every widget has used since 2026-09-10. The current name now belongs to the current system: the retired glyphs are `Glyph`, marked deprecated.
+
+And the six parameter sets lived in `apps/portfolio/src/content/sections.tsx` — **in the app**. A document can only name what the package exports, so an illustration could be placed in hand-written TSX and never authored. They are `packages/ui/src/illustrations/fields.ts` now, and `sections.tsx` imports them, so there is one source. `SectionWidget` also drew the field inline; it renders `Illustration` now, which is what made the catalogue's example wrong in the first place — it was missing the `slice` aspect ratio and the field positioning that only existed inside `SectionWidget`.
+
+**`words` is the open part.** It is measured against a *particular composition* — the boxes in `fields.ts` are true for the six widgets as composed today, a mono eyebrow top-left and a figure bottom-left. Recompose a cell and they are wrong. So under free composition `words` becomes something **the editor measures and writes back**, exactly as it does a panel height (Admin.md §6.3), with `probe10` checking the result. It is the second measurement to move from the author to the machine, and for the same reason.
 
 ## 4. The adapter
 

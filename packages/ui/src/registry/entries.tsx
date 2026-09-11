@@ -295,18 +295,18 @@ const blob: RegistryEntry = {
 
 const illustration: RegistryEntry = {
   name: "Illustration", kind: ["slot"], group: "figures", component: Illustration as never,
-  line: "A named line family, drawn by the generator. Six exist.",
+  line: "A field: fine lines in one hue crossing the whole cell and leaving through its edges.",
   props: {
-    name: { type: "illustration", required: true },
+    name: { type: "illustration", required: true, help: "One of the six measured families in `fields.ts`. The fourteen parameters are NOT authorable: two of them are measurements (Scene-Schema.md §3.6), and an inspector of fourteen sliders invites exactly the estimation Illustrations.md forbids." },
     hue: { type: "hue" },
     title: { type: "text", max: 60, help: "Without one it is decorative and hidden from assistive tech." },
   },
   defaults: { name: "work" },
-  // Sized like the cell it is drawn for: a 2 × 2 loud cell is 304 square. Unconstrained it stretches to whatever
-  // box it is given, and a field drawn at 3:1 is not what the generator was tuned for.
+  // Drawn at the size it is composed for: a 2 × 2 loud cell is 304 square. A field is tuned to cross THAT cell and
+  // leave through its edges, so showing it at any other aspect misrepresents it.
   example: () => (
     <Bento hue="peach" cols={2} rows={2}>
-      <BentoCell span={[2, 2]} tone="fill">
+      <BentoCell span={[2, 2]} tone="fill" >
         <Label>work</Label>
         <Illustration name="work" hue="peach" title="Four roles, opening out" />
         <BentoFigure value="4" label="roles" />

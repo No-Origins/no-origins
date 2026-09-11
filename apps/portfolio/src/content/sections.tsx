@@ -1,4 +1,4 @@
-import { BentoCell, Chip, type Family, type Hue } from "@no-origins/ui";
+import { BentoCell, Chip, fields, type Family, type Hue } from "@no-origins/ui";
 import { throughLine } from "./work";
 import { sampled, site } from "./site";
 
@@ -66,10 +66,7 @@ export const sections: SectionDef[] = [
     eyebrow: "status",
     figure: { value: "4", label: "ways in" },
     signature: "curl alone — one wide sweep, the most open of the six",
-    illustration: {
-      seed: 4, flow: 105, scale: 1.5, swing: 42, breath: 24, drift: 0.4, spread: 0.5, curl: 0.85,
-      words: [[16, 15, 56, 28], [16, 105, 91, 224]],
-    },
+    illustration: fields.status,
     cells: (
       <>
         <BentoCell><p className="noo-label">hiring</p><p className="noo-bento__title">Recognise the work</p></BentoCell>
@@ -89,10 +86,7 @@ export const sections: SectionDef[] = [
     eyebrow: "work",
     figure: { value: "4", label: "roles" },
     signature: "taper — the family opens out along its travel, four roles going somewhere",
-    illustration: {
-      seed: 7, flow: 90, scale: 1.5, swing: 44, breath: 28, drift: 0.4, spread: 0.45, taper: 0.8,
-      words: [[16, 15, 42, 28], [16, 105, 69, 224]],
-    },
+    illustration: fields.work,
     cells: (
       <>
         <BentoCell><p className="noo-label">now</p><p className="noo-bento__title"><Dot hue="peach" /> Radise</p></BentoCell>
@@ -115,10 +109,7 @@ export const sections: SectionDef[] = [
     eyebrow: "case studies",
     figure: { value: "3", label: "worth telling" },
     signature: "pinch — a waist mid-travel, and the nearest, densest field of the six",
-    illustration: {
-      seed: 2, flow: 58, scale: 1.0, swing: 44, breath: 22, drift: 0.5, spread: 0.5, pinch: -0.8,
-      words: [[16, 15, 95, 28], [16, 105, 155, 224]],
-    },
+    illustration: fields.cases,
     cells: (
       <>
         <BentoCell span={W([2, 1]) as [number, number]}><p className="noo-label">hashnode</p><p className="noo-bento__title">Neptune</p></BentoCell>
@@ -137,10 +128,7 @@ export const sections: SectionDef[] = [
     eyebrow: "projects",
     figure: { value: "0", label: "shipped yet" },
     signature: "no device at all, and the widest breath — absence said with room, which is the only vocabulary v1 has for it",
-    illustration: {
-      seed: 17, flow: 90, scale: 2.4, swing: 38, breath: 46, drift: 0.3, spread: 0.35,
-      words: [[16, 15, 69, 28], [16, 105, 134, 224]],
-    },
+    illustration: fields.projects,
     cells: (
       <>
         <BentoCell span={W([2, 1]) as [number, number]}><p className="noo-label">why</p><p className="noo-bento__text">Deleted for a clean slate.</p></BentoCell>
@@ -156,10 +144,7 @@ export const sections: SectionDef[] = [
     eyebrow: "interests",
     word: <>outside<br />the work</>,
     signature: "curl and tempo, both at half — the family turns and quickens across itself",
-    illustration: {
-      seed: 11, flow: 0, scale: 1.2, swing: 44, breath: 24, drift: 0.5, spread: 0.55, curl: 0.5, tempo: 0.5,
-      words: [[16, 15, 75, 28], [16, 140, 217, 236]],
-    },
+    illustration: fields.interests,
     cells: (
       <>
         <BentoCell span={W([2, 2]) as [number, number]}>
@@ -182,10 +167,7 @@ export const sections: SectionDef[] = [
     eyebrow: "philosophy",
     word: <>how I<br />build</>,
     signature: "temperament — no device, but the lines differ from one another more than anywhere else",
-    illustration: {
-      seed: 13, flow: 68, scale: 1.7, swing: 42, breath: 26, drift: 0.9, spread: 0.75,
-      words: [[16, 15, 82, 28], [16, 140, 135, 236]],
-    },
+    illustration: fields.philosophy,
     cells: (
       <>
         <BentoCell span={W([2, 2]) as [number, number]}>
