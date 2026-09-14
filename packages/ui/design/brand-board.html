@@ -1,0 +1,512 @@
+<title>No Origins Brand Board</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Hanken+Grotesk:wght@300..800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: oklch(0.965 0.012 85);
+    --surface: oklch(0.992 0.006 85);
+    --ink: oklch(0.24 0.035 320);
+    --muted: oklch(0.50 0.025 320);
+    --rule: oklch(0.885 0.015 85);
+    --rule-strong: oklch(0.76 0.02 85);
+    --shadow: 0 1px 2px oklch(0.24 0.035 320 / 0.05), 0 10px 28px oklch(0.24 0.035 320 / 0.06);
+    --accent: oklch(0.58 0.13 40);
+    --accent-soft: oklch(0.92 0.06 40);
+    --good: oklch(0.55 0.12 150);
+    --warn: oklch(0.62 0.13 70);
+    --display: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif;
+    --sans: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    --r: 14px; --r-sm: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: oklch(0.17 0.02 320); --surface: oklch(0.215 0.02 320); --ink: oklch(0.94 0.01 85); --muted: oklch(0.68 0.015 320);
+      --rule: oklch(0.30 0.02 320); --rule-strong: oklch(0.42 0.02 320);
+      --shadow: 0 1px 2px oklch(0 0 0 / 0.3), 0 10px 28px oklch(0 0 0 / 0.35);
+      --accent: oklch(0.78 0.12 40); --accent-soft: oklch(0.30 0.05 40); --good: oklch(0.75 0.12 150); --warn: oklch(0.78 0.12 70);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: oklch(0.17 0.02 320); --surface: oklch(0.215 0.02 320); --ink: oklch(0.94 0.01 85); --muted: oklch(0.68 0.015 320);
+    --rule: oklch(0.30 0.02 320); --rule-strong: oklch(0.42 0.02 320);
+    --shadow: 0 1px 2px oklch(0 0 0 / 0.3), 0 10px 28px oklch(0 0 0 / 0.35);
+    --accent: oklch(0.78 0.12 40); --accent-soft: oklch(0.30 0.05 40); --good: oklch(0.75 0.12 150); --warn: oklch(0.78 0.12 70);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); } a:hover { color: var(--ink); }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+  h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+  p { margin: 0; text-wrap: pretty; }
+
+  .bar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 20px; height: 54px; padding: 0 32px; background: var(--bg); border-bottom: 1px solid var(--rule); font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.06em; color: var(--muted); }
+  .bar .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); font-family: var(--display); font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .bar .status { display: flex; align-items: center; gap: 9px; white-space: nowrap; }
+  .bar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--rule-strong); transition: background 200ms; }
+  .bar .status[data-state="saving"] .dot, .bar .status[data-state="unsaved"] .dot { background: var(--warn); }
+  .bar .status[data-state="saved"] .dot { background: var(--good); }
+  .bar .status[data-state="error"] .dot, .bar .status[data-state="nodb"] .dot { background: var(--accent); }
+
+  .page { max-width: 1160px; margin: 0 auto; padding: 56px 32px 140px; }
+  .lede { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px; align-items: end; }
+  .lede h1 { font-size: 56px; line-height: 1.02; font-weight: 700; font-variation-settings: 'opsz' 96, 'wdth' 100; margin-top: 18px; }
+  .lede h1 .oo { color: var(--accent); }
+  .lede .pos { margin-top: 22px; font-size: 20px; line-height: 1.45; max-width: 34ch; }
+  .lede .how { font-size: 15px; color: var(--muted); max-width: 40ch; }
+  .eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); font-weight: 500; letter-spacing: 0.08em; }
+
+  .settled { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .settled .s { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--rule); font-size: 14px; }
+  .settled .s .ok { width: 18px; height: 18px; border-radius: 50%; background: var(--good); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .settled .s b { font-family: var(--display); font-weight: 600; letter-spacing: -0.01em; }
+  .settled .s span.k { color: var(--muted); }
+
+  .section { margin-top: 88px; }
+  .section > h2 { font-size: 34px; line-height: 1.1; margin-top: 12px; }
+  .section > .sub { margin-top: 12px; color: var(--muted); font-size: 16.5px; max-width: 66ch; }
+  .section > .sub b { color: var(--ink); }
+
+  .opts { display: grid; gap: 16px; margin-top: 28px; }
+  .opts.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .opts.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .opt { position: relative; display: flex; flex-direction: column; background: var(--surface); border: 1.5px solid var(--rule); border-radius: var(--r); cursor: pointer; transition: border-color 140ms, transform 200ms, box-shadow 200ms; }
+  .opt:hover { border-color: var(--rule-strong); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .opt input { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
+  .opt:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .opt:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .opt .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px 0; }
+  .opt .head .name { font-family: var(--display); font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
+  .opt .tick { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--rule-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 140ms, border-color 140ms; }
+  .opt .tick svg { opacity: 0; transition: opacity 140ms; }
+  .opt:has(input:checked) .tick { background: var(--accent); border-color: var(--accent); }
+  .opt:has(input:checked) .tick svg { opacity: 1; }
+  .opt .body { padding: 14px 20px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .opt .why { font-size: 14px; color: var(--muted); line-height: 1.5; }
+  .opt .why b { color: var(--ink); font-weight: 600; }
+
+  /* palette specimens — fixed paint chips, deliberately not theme-aware */
+  .chip { border-radius: var(--r-sm); background: var(--pg); color: var(--pi); padding: 20px; display: flex; flex-direction: column; gap: 16px; border: 1px solid color-mix(in oklch, var(--pi) 12%, var(--pg)); }
+  .chip .mnav { display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; color: var(--pm); }
+  .chip .mnav b { font-family: var(--display); font-size: 14px; font-weight: 700; letter-spacing: -0.02em; color: var(--pi); }
+  .chip .mnav b i { font-style: normal; color: var(--a1); }
+  .chip h4 { font-size: 24px; line-height: 1.1; font-weight: 700; color: var(--pi); letter-spacing: -0.025em; }
+  .chip .mp { font-size: 13.5px; line-height: 1.5; color: var(--pm); max-width: 40ch; }
+  .chip .mrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .chip .mbtn { padding: 8px 14px; border-radius: 999px; background: var(--pi); color: var(--pg); font-size: 13px; font-weight: 500; }
+  .chip .mbtn.ac { background: var(--a1); color: var(--pg); }
+  .chip .mtag { padding: 5px 10px; border-radius: 999px; background: color-mix(in oklch, var(--a1) 22%, var(--pg)); color: var(--pi); font-size: 11.5px; font-weight: 500; }
+  .chip .mlink { font-size: 13px; color: var(--a2); text-decoration: underline; text-decoration-color: color-mix(in oklch, var(--a2) 45%, var(--pg)); text-underline-offset: 3px; }
+  .chip .tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  .chip .tile { height: 54px; border-radius: 8px; display: flex; align-items: flex-end; padding: 8px; font-family: var(--mono); font-size: 9.5px; color: var(--pi); position: relative; }
+  .chip .tile::before { content: ''; position: absolute; top: 8px; left: 8px; width: 9px; height: 9px; border-radius: 50%; }
+  .chip .tile:nth-child(1) { background: color-mix(in oklch, var(--a1) 22%, var(--pg)); } .chip .tile:nth-child(1)::before { background: var(--a1); }
+  .chip .tile:nth-child(2) { background: color-mix(in oklch, var(--a2) 22%, var(--pg)); } .chip .tile:nth-child(2)::before { background: var(--a2); }
+  .chip .tile:nth-child(3) { background: color-mix(in oklch, var(--a3) 22%, var(--pg)); } .chip .tile:nth-child(3)::before { background: var(--a3); }
+  .chip .tile:nth-child(4) { background: color-mix(in oklch, var(--a4) 22%, var(--pg)); } .chip .tile:nth-child(4)::before { background: var(--a4); }
+  .chip .tile:nth-child(5) { background: color-mix(in oklch, var(--a5) 22%, var(--pg)); } .chip .tile:nth-child(5)::before { background: var(--a5); }
+  .chip.single .tile:nth-child(n+2) { background: color-mix(in oklch, var(--pi) 6%, var(--pg)); }
+  .chip.single .tile:nth-child(n+2)::before { background: color-mix(in oklch, var(--pi) 35%, var(--pg)); }
+  .chip.duo .tile:nth-child(2), .chip.duo .tile:nth-child(4) { background: color-mix(in oklch, var(--a2) 14%, var(--pg)); }
+  .chip.duo .tile:nth-child(3) { background: color-mix(in oklch, var(--a1) 40%, var(--pg)); }
+  .chip.duo .tile:nth-child(5) { background: color-mix(in oklch, var(--a2) 30%, var(--pg)); }
+  .chip .sw { display: flex; gap: 6px; align-items: center; }
+  .chip .sw i { display: block; height: 22px; flex: 1; border-radius: 5px; }
+  .chip .sw i:nth-child(1) { background: var(--a1); } .chip .sw i:nth-child(2) { background: var(--a2); } .chip .sw i:nth-child(3) { background: var(--a3); } .chip .sw i:nth-child(4) { background: var(--a4); } .chip .sw i:nth-child(5) { background: var(--a5); }
+  .chip .sw i.g { background: var(--pg); border: 1px solid color-mix(in oklch, var(--pi) 20%, var(--pg)); flex: 0.7; }
+  .chip .sw i.k { background: var(--pi); flex: 0.7; }
+  .chip.single .sw i:nth-child(n+4), .chip.duo .sw i:nth-child(n+5) { display: none; }
+  .vals { font-family: var(--mono); font-size: 10.5px; color: var(--muted); letter-spacing: 0.02em; line-height: 1.6; }
+
+  /* marks */
+  .stage { border-radius: var(--r-sm); background: var(--bg); border: 1px solid var(--rule); padding: 20px; display: flex; flex-direction: column; gap: 16px; min-height: 150px; justify-content: center; }
+  .wm { font-family: var(--display); font-weight: 700; letter-spacing: -0.03em; line-height: 1; font-variation-settings: 'opsz' 96, 'wdth' 100; display: flex; align-items: center; gap: 0.3em; color: var(--ink); }
+  .wm.lg { font-size: 30px; } .wm.sm { font-size: 16px; letter-spacing: -0.02em; }
+  .wm .oo { color: var(--accent); }
+  .wm .dotj { color: var(--accent); font-weight: 800; margin: 0 -0.08em; }
+  .wm svg { display: block; flex-shrink: 0; }
+  .fav { width: 28px; height: 28px; border-radius: 7px; background: var(--surface); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .stage .row { display: flex; align-items: center; gap: 14px; justify-content: space-between; }
+  .mg { display: inline-flex; align-items: center; justify-content: center; font-family: var(--display); font-weight: 800; letter-spacing: -0.07em; color: var(--ink); background: var(--accent-soft); border-radius: 30%; line-height: 1; }
+  .mg.lg { width: 38px; height: 38px; font-size: 19px; } .mg.sm { width: 20px; height: 20px; font-size: 10px; border-radius: 6px; } .mg.xs { width: 16px; height: 16px; font-size: 8px; border-radius: 5px; }
+  .ooxs { font-family: var(--display); font-weight: 800; font-size: 12px; color: var(--accent); letter-spacing: -0.08em; }
+
+  /* names */
+  .names { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 28px; }
+  .names .opt { flex-direction: row; align-items: center; gap: 18px; padding: 18px 22px; }
+  .names .opt .tick { order: 3; }
+  .names .opt .big { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .names .opt .big b { font-family: var(--display); font-size: 21px; font-weight: 600; letter-spacing: -0.02em; }
+  .names .opt .big span { font-size: 14px; color: var(--muted); }
+
+  textarea { width: 100%; font-family: var(--sans); font-size: 15px; line-height: 1.5; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-sm); padding: 12px 14px; resize: none; overflow: hidden; min-height: 72px; }
+  textarea:hover { border-color: var(--rule-strong); }
+  textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  textarea::placeholder { color: var(--muted); opacity: 0.75; }
+  .notes { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .notes label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+  .finish { margin-top: 96px; padding: 32px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--rule); display: flex; flex-direction: column; gap: 18px; }
+  .finish p { color: var(--muted); font-size: 15px; max-width: 60ch; }
+  .actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 13px 22px; cursor: pointer; font-family: var(--sans); font-size: 15px; font-weight: 500; border: 1.5px solid var(--ink); background: var(--ink); color: var(--bg); transition: transform 160ms; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.quiet { background: transparent; color: var(--ink); border-color: var(--rule-strong); }
+  .done-note { font-family: var(--mono); font-size: 12px; color: var(--good); letter-spacing: 0.04em; }
+  .notice { margin-top: 28px; padding: 14px 16px; border: 1px solid var(--rule-strong); border-radius: var(--r-sm); background: var(--surface); font-size: 14.5px; }
+  .notice[hidden], .done-note[hidden] { display: none; }
+
+  @media (max-width: 980px) { .opts.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lede { grid-template-columns: 1fr; } .lede h1 { font-size: 44px; } }
+  @media (max-width: 640px) { .bar { padding: 0 18px; } .bar .progress { display: none; } .page { padding: 40px 18px 120px; } .opts.two, .opts.four { grid-template-columns: 1fr; } .chip h4 { font-size: 20px; } .names .opt { flex-direction: column; align-items: flex-start; } .names .opt .tick { order: 0; align-self: flex-end; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } .opt:hover, .btn:hover { transform: none; } }
+</style>
+
+<svg width="0" height="0" style="position: absolute;" aria-hidden="true">
+  <defs>
+    <symbol id="m-axis" viewBox="0 0 32 32"><path d="M16 2v8M16 22v8M2 16h8M22 16h8" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" fill="none"></path><circle cx="16" cy="16" r="4.5" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="2.4 2.4" fill="none"></circle></symbol>
+    <symbol id="m-open" viewBox="0 0 32 32"><path d="M24 3.5H11a7.5 7.5 0 0 0-7.5 7.5v10A7.5 7.5 0 0 0 11 28.5h13" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" fill="none"></path><circle cx="18" cy="16" r="4" fill="var(--accent)"></circle></symbol>
+    <symbol id="m-seed" viewBox="0 0 32 32"><circle cx="13" cy="24" r="5.5" fill="var(--accent)"></circle><path d="M13 18.5c0-6 3-9.5 10-13" stroke="var(--ink)" stroke-width="2.6" stroke-linecap="round" fill="none"></path><path d="M23 5.5c0 4-2.5 6.5-6.5 6.5c0-4 2.5-6.5 6.5-6.5z" fill="var(--ink)"></path></symbol>
+    <symbol id="m-const" viewBox="0 0 32 32"><path d="M7 23L13 8.5L24.5 13.5L19 26.5" stroke="var(--ink)" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" fill="none"></path><circle cx="7" cy="23" r="3" fill="var(--ink)"></circle><circle cx="13" cy="8.5" r="3.6" fill="var(--accent)"></circle><circle cx="24.5" cy="13.5" r="3" fill="var(--ink)"></circle><circle cx="19" cy="26.5" r="2.4" fill="var(--ink)"></circle></symbol>
+    <symbol id="m-spark" viewBox="0 0 32 32"><path d="M16 12V3" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"></path><path d="M18.6 14.5L24.7 11M18.6 17.5L26.4 22M16 20V25.5M13.4 17.5L6.5 21.5M13.4 14.5L5.6 10" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" fill="none"></path></symbol>
+    <symbol id="m-squig" viewBox="0 0 32 32"><path d="M5 25C12 25 10 7 17 7S22 25 28 9" stroke="var(--ink)" stroke-width="2.7" stroke-linecap="round" fill="none"></path><circle cx="5" cy="25" r="2.2" fill="var(--ink)" opacity="0.35"></circle><circle cx="28" cy="9" r="3.4" fill="var(--accent)"></circle></symbol>
+  </defs>
+</svg>
+
+<div class="bar">
+  <span class="brand"><span>no origins</span></span>
+  <span class="progress" id="progress">0 of 3 decided</span>
+  <span class="status" id="status" data-state="idle"><span class="dot"></span><span id="statusText">Loading</span></span>
+</div>
+
+<main class="page">
+  <header class="lede">
+    <div>
+      <div class="eyebrow"><span class="pill">Round 2</span><span>Wider spreads for the three that didn't land</span></div>
+      <h1>no origins</h1>
+      <p class="pos">Colour, mark and name — six, eight and five options this time. Pick the one closest, then say what you'd change in the notes.</p>
+    </div>
+    <p class="how">This page now runs in Hanken Grotesk, as decided. Its own palette is still the round-1 "Orchard" set — that's under review below, so judge the palette cards, not the page around them.</p>
+  </header>
+
+  <div class="settled">
+    <span class="s"><span class="ok"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><span class="k">Type</span><b>Hanken Grotesk + Bricolage Grotesque</b></span>
+    <span class="s"><span class="ok"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><span class="k">Domain</span><b>Portfolio first</b></span>
+    <span class="s"><span class="ok"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><span class="k">v1</span><b>About · Work · Roadmap · Contact</b></span>
+  </div>
+
+  <div class="notice" id="nodbNotice" hidden>Choices aren't reaching the shared store in this view — they're kept in this browser only.</div>
+
+  <!-- COLOUR -->
+  <section class="section">
+    <div class="eyebrow"><span class="pill">Decision A</span><span>Colour · "I need more options to choose from"</span></div>
+    <h2>Six palette directions</h2>
+    <p class="sub">Each card is the same small piece of UI — a nav, a heading, a line, a button, a tag, five block tiles — painted in a different system. Ground and ink change too, not just accents. <b>Two of them abandon the family idea</b> (one duotone, one single accent) so that's a real choice, not a foregone one.</p>
+    <div class="opts two">
+
+      <label class="opt" style="--pg: oklch(0.965 0.012 85); --pi: oklch(0.24 0.035 320); --pm: oklch(0.50 0.025 320); --a1: oklch(0.58 0.13 40); --a2: oklch(0.58 0.13 315); --a3: oklch(0.58 0.13 240); --a4: oklch(0.58 0.13 125); --a5: oklch(0.58 0.13 180);">
+        <input type="radio" name="palette" value="orchard" data-k="palette">
+        <div class="head"><span class="name">1 · Orchard</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="chip">
+            <div class="mnav"><b>no origins</b><span>about · work · contact</span></div>
+            <h4>Editors, systems, agents.</h4>
+            <p class="mp">I build things for writing and for agents, and I keep them here.</p>
+            <div class="mrow"><span class="mbtn">Try it</span><span class="mtag">Block · Portfolio</span><span class="mlink">Roadmap</span></div>
+            <div class="tiles"><div class="tile">portfolio</div><div class="tile">editor</div><div class="tile">agents</div><div class="tile">tools</div><div class="tile">next</div></div>
+            <div class="sw"><i class="g"></i><i class="k"></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <p class="why"><b>The round-1 hypothesis.</b> Warm cream, plum ink, five siblings at one lightness and chroma. Balanced and safe — which may be its problem.</p>
+          <div class="vals">ground .965 .012 85 · ink .24 .035 320 · accents .58 .13 @ 40 315 240 125 180</div>
+        </div>
+      </label>
+
+      <label class="opt" style="--pg: oklch(0.978 0.012 95); --pi: oklch(0.23 0.03 300); --pm: oklch(0.52 0.02 300); --a1: oklch(0.72 0.16 45); --a2: oklch(0.70 0.13 300); --a3: oklch(0.74 0.12 200); --a4: oklch(0.82 0.17 105); --a5: oklch(0.74 0.17 350);">
+        <input type="radio" name="palette" value="sherbet" data-k="palette">
+        <div class="head"><span class="name">2 · Sherbet</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="chip">
+            <div class="mnav"><b>no origins</b><span>about · work · contact</span></div>
+            <h4>Editors, systems, agents.</h4>
+            <p class="mp">I build things for writing and for agents, and I keep them here.</p>
+            <div class="mrow"><span class="mbtn">Try it</span><span class="mtag">Block · Portfolio</span><span class="mlink">Roadmap</span></div>
+            <div class="tiles"><div class="tile">portfolio</div><div class="tile">editor</div><div class="tile">agents</div><div class="tile">tools</div><div class="tile">next</div></div>
+            <div class="sw"><i class="g"></i><i class="k"></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <p class="why"><b>Closest to Keya's site.</b> Lighter ground, brighter and more saturated accents — peach, lilac, aqua, lemon, pink. The most playful of the six. Risk: candy. Needs a very dark ink to hold it together.</p>
+          <div class="vals">ground .978 .012 95 · ink .23 .03 300 · accents ~.72–.82 / .12–.17</div>
+        </div>
+      </label>
+
+      <label class="opt" style="--pg: oklch(0.972 0.008 95); --pi: oklch(0.21 0.045 290); --pm: oklch(0.48 0.03 290); --a1: oklch(0.86 0.19 120); --a2: oklch(0.48 0.13 315); --a3: oklch(0.86 0.19 120); --a4: oklch(0.48 0.13 315); --a5: oklch(0.48 0.13 315);">
+        <input type="radio" name="palette" value="inklime" data-k="palette">
+        <div class="head"><span class="name">3 · Ink &amp; Lime</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="chip duo">
+            <div class="mnav"><b>no origins</b><span>about · work · contact</span></div>
+            <h4>Editors, systems, agents.</h4>
+            <p class="mp">I build things for writing and for agents, and I keep them here.</p>
+            <div class="mrow"><span class="mbtn ac" style="color: var(--pi);">Try it</span><span class="mtag">Block · Portfolio</span><span class="mlink">Roadmap</span></div>
+            <div class="tiles"><div class="tile">portfolio</div><div class="tile">editor</div><div class="tile">agents</div><div class="tile">tools</div><div class="tile">next</div></div>
+            <div class="sw"><i class="g"></i><i class="k"></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <p class="why"><b>Duotone. Two colours, used hard.</b> Deep indigo ink and an electric lime that does all the pointing; plum as the quiet second. Blocks tell apart by tint depth, not hue. Quietest layout, loudest single note. Risk: the lime gets tiring if it's everywhere.</p>
+          <div class="vals">ground .972 .008 95 · ink .21 .045 290 · lime .86 .19 120 · plum .48 .13 315</div>
+        </div>
+      </label>
+
+      <label class="opt" style="--pg: oklch(0.955 0.016 75); --pi: oklch(0.26 0.03 45); --pm: oklch(0.50 0.025 45); --a1: oklch(0.56 0.12 35); --a2: oklch(0.66 0.12 80); --a3: oklch(0.55 0.09 120); --a4: oklch(0.52 0.08 250); --a5: oklch(0.42 0.09 330);">
+        <input type="radio" name="palette" value="clay" data-k="palette">
+        <div class="head"><span class="name">4 · Clay</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="chip">
+            <div class="mnav"><b>no origins</b><span>about · work · contact</span></div>
+            <h4>Editors, systems, agents.</h4>
+            <p class="mp">I build things for writing and for agents, and I keep them here.</p>
+            <div class="mrow"><span class="mbtn">Try it</span><span class="mtag">Block · Portfolio</span><span class="mlink">Roadmap</span></div>
+            <div class="tiles"><div class="tile">portfolio</div><div class="tile">editor</div><div class="tile">agents</div><div class="tile">tools</div><div class="tile">next</div></div>
+            <div class="sw"><i class="g"></i><i class="k"></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <p class="why"><b>Earth pigments.</b> Warm sand ground, brown-black ink, clay, ochre, olive, slate, aubergine. The most timeless of the six and the warmest. Risk: it's the palette every "thoughtful" site reached for lately, and playful 72 has less room in it.</p>
+          <div class="vals">ground .955 .016 75 · ink .26 .03 45 · accents .42–.66 / .08–.12</div>
+        </div>
+      </label>
+
+      <label class="opt" style="--pg: oklch(0.978 0.006 240); --pi: oklch(0.22 0.03 250); --pm: oklch(0.50 0.02 250); --a1: oklch(0.64 0.15 30); --a2: oklch(0.55 0.15 260); --a3: oklch(0.62 0.11 190); --a4: oklch(0.74 0.14 85); --a5: oklch(0.58 0.13 300);">
+        <input type="radio" name="palette" value="papersky" data-k="palette">
+        <div class="head"><span class="name">5 · Paper &amp; Sky</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="chip">
+            <div class="mnav"><b>no origins</b><span>about · work · contact</span></div>
+            <h4>Editors, systems, agents.</h4>
+            <p class="mp">I build things for writing and for agents, and I keep them here.</p>
+            <div class="mrow"><span class="mbtn">Try it</span><span class="mtag">Block · Portfolio</span><span class="mlink">Roadmap</span></div>
+            <div class="tiles"><div class="tile">portfolio</div><div class="tile">editor</div><div class="tile">agents</div><div class="tile">tools</div><div class="tile">next</div></div>
+            <div class="sw"><i class="g"></i><i class="k"></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <p class="why"><b>Cool page, warm accents.</b> A near-white ground with a faint cool cast, navy ink; coral, cobalt, teal, marigold, violet carry all the warmth. Calmer and more "product." Tests whether warm 35 means a warm <em>ground</em> or warm <em>accents</em> on a neutral page.</p>
+          <div class="vals">ground .978 .006 240 · ink .22 .03 250 · accents .55–.74 / .11–.15</div>
+        </div>
+      </label>
+
+      <label class="opt" style="--pg: oklch(0.965 0.012 85); --pi: oklch(0.24 0.035 320); --pm: oklch(0.50 0.025 320); --a1: oklch(0.62 0.16 30); --a2: oklch(0.62 0.16 30); --a3: oklch(0.62 0.16 30); --a4: oklch(0.62 0.16 30); --a5: oklch(0.62 0.16 30);">
+        <input type="radio" name="palette" value="coral" data-k="palette">
+        <div class="head"><span class="name">6 · Coral, alone</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="chip single">
+            <div class="mnav"><b>no origins</b><span>about · work · contact</span></div>
+            <h4>Editors, systems, agents.</h4>
+            <p class="mp">I build things for writing and for agents, and I keep them here.</p>
+            <div class="mrow"><span class="mbtn ac">Try it</span><span class="mtag">Block · Portfolio</span><span class="mlink" style="color: var(--a1);">Roadmap</span></div>
+            <div class="tiles"><div class="tile">portfolio</div><div class="tile">editor</div><div class="tile">agents</div><div class="tile">tools</div><div class="tile">next</div></div>
+            <div class="sw"><i class="g"></i><i class="k"></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <p class="why"><b>One accent for the whole platform.</b> Blocks are told apart by their mark and their name, never by colour. The simplest system to keep consistent — Principle 5 for free. Cost: less expressive, and the family idea is gone.</p>
+          <div class="vals">ground .965 .012 85 · ink .24 .035 320 · coral .62 .16 30 · neutrals only otherwise</div>
+        </div>
+      </label>
+    </div>
+    <div class="notes"><label for="paletteNotes">Colour notes — "X's ground with Y's accents" is a valid answer</label><textarea id="paletteNotes" data-t="paletteNotes" placeholder="Warmer, cooler, fewer, brighter…"></textarea></div>
+  </section>
+
+    <!-- MARK -->
+  <section class="section">
+    <div class="eyebrow"><span class="pill">Decision B</span><span>Mark · round-1 set rejected — eight new ones</span></div>
+    <h2>Eight marks, none from before</h2>
+    <p class="sub">You said none of the first five looked interesting or good enough, so none are here. Three of these are energetic (spark, constellation, squiggle), two geometric, one conceptual, one organic, one typographic. Each at wordmark size, at nav size, and in a favicon tile. <b>Every one recolours to whatever palette wins</b> — the peach is round-1's, for now.</p>
+    <div class="opts four">
+
+      <label class="opt"><input type="radio" name="mark" value="spark" data-k="mark">
+        <div class="head"><span class="name">Spark</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="stage">
+            <div class="wm lg"><svg width="34" height="34"><use href="#m-spark"></use></svg><span>no origins</span></div>
+            <div class="row"><div class="wm sm"><svg width="17" height="17"><use href="#m-spark"></use></svg><span>no origins</span></div><span class="fav"><svg width="17" height="17"><use href="#m-spark"></use></svg></span></div>
+          </div>
+          <p class="why"><b>Energetic.</b> An asterisk with uneven arms and a hollow centre — a new idea going off. One arm carries the block's colour. Hand-drawn energy without being a doodle. Risk: asterisks mean "footnote" to some eyes.</p>
+        </div>
+      </label>
+
+      <label class="opt"><input type="radio" name="mark" value="constellation" data-k="mark">
+        <div class="head"><span class="name">Constellation</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="stage">
+            <div class="wm lg"><svg width="34" height="34"><use href="#m-const"></use></svg><span>no origins</span></div>
+            <div class="row"><div class="wm sm"><svg width="17" height="17"><use href="#m-const"></use></svg><span>no origins</span></div><span class="fav"><svg width="17" height="17"><use href="#m-const"></use></svg></span></div>
+          </div>
+          <p class="why"><b>Network.</b> Four ideas, loosely joined, one lit — blocks connecting on a canvas. The closest to what you liked about brober. Can grow a node each time a block ships. Risk: "connected dots" is a whole genre of tech logos.</p>
+        </div>
+      </label>
+
+      <label class="opt"><input type="radio" name="mark" value="squiggle" data-k="mark">
+        <div class="head"><span class="name">Squiggle</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="stage">
+            <div class="wm lg"><svg width="34" height="34"><use href="#m-squig"></use></svg><span>no origins</span></div>
+            <div class="row"><div class="wm sm"><svg width="17" height="17"><use href="#m-squig"></use></svg><span>no origins</span></div><span class="fav"><svg width="17" height="17"><use href="#m-squig"></use></svg></span></div>
+          </div>
+          <p class="why"><b>Expressive line.</b> The path an idea takes: a faint start, a wander, a bright arrival. Built to animate — it draws itself on page load. The most "playful 72 / expressive 72" of the set. Risk: a squiggle is only as good as its curve; this one needs a few more passes.</p>
+        </div>
+      </label>
+
+      <label class="opt"><input type="radio" name="mark" value="axis" data-k="mark">
+        <div class="head"><span class="name">Axis</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="stage">
+            <div class="wm lg"><svg width="34" height="34"><use href="#m-axis"></use></svg><span>no origins</span></div>
+            <div class="row"><div class="wm sm"><svg width="17" height="17"><use href="#m-axis"></use></svg><span>no origins</span></div><span class="fav"><svg width="17" height="17"><use href="#m-axis"></use></svg></span></div>
+          </div>
+          <p class="why"><b>Conceptual.</b> In geometry the origin is (0,0). Here the axes exist and the origin doesn't — a dotted ring where the point would be. The name, literally. Risk: reads as a crosshair or a "+" if the gap is too small.</p>
+        </div>
+      </label>
+
+      <label class="opt"><input type="radio" name="mark" value="open" data-k="mark">
+        <div class="head"><span class="name">Open block</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="stage">
+            <div class="wm lg"><svg width="34" height="34"><use href="#m-open"></use></svg><span>no origins</span></div>
+            <div class="row"><div class="wm sm"><svg width="17" height="17"><use href="#m-open"></use></svg><span>no origins</span></div><span class="fav"><svg width="17" height="17"><use href="#m-open"></use></svg></span></div>
+          </div>
+          <p class="why"><b>Geometric.</b> A block with one side missing and something already inside — anything can enter, something already has. Closed-mindedness is on your anti-list; this is its opposite, drawn.</p>
+        </div>
+      </label>
+
+      <label class="opt"><input type="radio" name="mark" value="seed" data-k="mark">
+        <div class="head"><span class="name">Seed</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="stage">
+            <div class="wm lg"><svg width="34" height="34"><use href="#m-seed"></use></svg><span>no origins</span></div>
+            <div class="row"><div class="wm sm"><svg width="17" height="17"><use href="#m-seed"></use></svg><span>no origins</span></div><span class="fav"><svg width="17" height="17"><use href="#m-seed"></use></svg></span></div>
+          </div>
+          <p class="why"><b>Organic.</b> A seed sending up a single leaf — curiosity, growth, things starting. Warmest of the eight. Risk: cute. Wellness-app adjacent if the leaf gets any bigger.</p>
+        </div>
+      </label>
+
+      <label class="opt"><input type="radio" name="mark" value="monogram" data-k="mark">
+        <div class="head"><span class="name">Monogram</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="stage">
+            <div class="wm lg"><span class="mg lg">no</span><span>no origins</span></div>
+            <div class="row"><div class="wm sm"><span class="mg sm">no</span><span>no origins</span></div><span class="fav"><span class="mg xs">no</span></span></div>
+          </div>
+          <p class="why"><b>Typographic.</b> "no" set tight in a soft tile — app-icon ready. The word itself is the mark. Risk: reads as a negative before it reads as a name.</p>
+        </div>
+      </label>
+
+      <label class="opt"><input type="radio" name="mark" value="joint" data-k="mark">
+        <div class="head"><span class="name">Joint</span><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+        <div class="body">
+          <div class="stage">
+            <div class="wm lg" style="gap: 0;">no<span class="dotj">·</span>origins</div>
+            <div class="row"><div class="wm sm" style="gap: 0;">no<span class="dotj">·</span>origins</div><span class="fav"><span class="ooxs" style="font-size: 18px;">·</span></span></div>
+          </div>
+          <p class="why"><b>Typographic.</b> One word, one coloured joint. The dot is the origin that isn't there — a tiny idea, told quietly. Favicon is just a dot, which is either brave or nothing.</p>
+        </div>
+      </label>
+    </div>
+    <div class="notes"><label for="markNotes">Mark notes — "Spark but calmer" or "none, more like…" both help</label><textarea id="markNotes" data-t="markNotes" placeholder="What works, what doesn't, what to try…"></textarea></div>
+  </section>
+
+  <!-- NAME -->
+  <section class="section">
+    <div class="eyebrow"><span class="pill">Decision C</span><span>Name reading · "close but not quite" — four new readings, plus "not yet"</span></div>
+    <h2>What "No Origins" means</h2>
+    <p class="sub">"Nothing here needs a pedigree" was close but not quite, so it's gone. Four other readings of what the words <em>mean</em> — the one-line idea that shapes copy and mark. Leaving it open is a legitimate pick.</p>
+    <div class="names">
+      <label class="opt"><input type="radio" name="name" value="nofixed" data-k="name"><div class="big"><b>No fixed starting point.</b><span>Everything can begin from anywhere; the platform grows by addition, not by plan.</span></div><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></label>
+      <label class="opt"><input type="radio" name="name" value="scratch" data-k="name"><div class="big"><b>Made from scratch.</b><span>Nothing borrowed, nothing templated — the origins are the maker's own.</span></div><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></label>
+      <label class="opt"><input type="radio" name="name" value="before" data-k="name"><div class="big"><b>Before categories.</b><span>A place for ideas before they're labelled product, tool, essay or experiment.</span></div><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></label>
+      <label class="opt"><input type="radio" name="name" value="many" data-k="name"><div class="big"><b>Many beginnings, no origin story.</b><span>No founding myth, no single start — just a lot of things beginning, over time.</span></div><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></label>
+
+
+      <label class="opt"><input type="radio" name="name" value="open" data-k="name"><div class="big"><b>Leave it open for now.</b><span>The work will define the name. Don't pin it before there's a second block.</span></div><span class="tick"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></label>
+    </div>
+    <div class="notes"><label for="nameText">Or in your own words</label><textarea id="nameText" data-t="nameText" placeholder="No Origins means…"></textarea></div>
+  </section>
+
+  <div class="finish">
+    <div class="notes" style="margin-top: 0;"><label for="notes">Anything else</label><textarea id="notes" data-t="notes" placeholder="Reactions, combinations, things I'm still missing…"></textarea></div>
+    <p>When colour, mark and name are picked, mark it done and say so in the chat. Next document is Design-System.md.</p>
+    <div class="actions">
+      <button type="button" class="btn" id="doneBtn">Decisions made</button>
+      <span class="done-note" id="doneNote" hidden></span>
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var DOC_PATH = 'decisions/round2';
+  var LS_KEY = 'no-origins.brand-decisions.round2.v1';
+  var state = { palette: '', paletteNotes: '', mark: '', markNotes: '', name: '', nameText: '', notes: '', complete: false, completedAt: null, updatedAt: null };
+  var db = null, saveTimer = null, pending = false;
+  var $ = function (id) { return document.getElementById(id); };
+  var statusEl = $('status'), statusText = $('statusText'), progressEl = $('progress');
+
+  function autogrow(ta) { ta.style.height = 'auto'; ta.style.height = Math.max(ta.scrollHeight, 72) + 'px'; }
+
+  function wire() {
+    document.querySelectorAll('input[type="radio"][data-k]').forEach(function (r) {
+      r.addEventListener('change', function () { if (!r.checked) return; state[r.getAttribute('data-k')] = r.value; updateProgress(); scheduleSave(); });
+    });
+    document.querySelectorAll('textarea[data-t]').forEach(function (t) {
+      t.addEventListener('input', function () { state[t.getAttribute('data-t')] = t.value; autogrow(t); scheduleSave(); });
+    });
+  }
+  function apply(s) {
+    ['palette', 'paletteNotes', 'mark', 'markNotes', 'name', 'nameText', 'notes'].forEach(function (k) { state[k] = s[k] || ''; });
+    state.complete = !!s.complete; state.completedAt = s.completedAt || null; state.updatedAt = s.updatedAt || null;
+    document.querySelectorAll('input[type="radio"][data-k]').forEach(function (r) { r.checked = (state[r.getAttribute('data-k')] === r.value); });
+    document.querySelectorAll('textarea[data-t]').forEach(function (t) { t.value = state[t.getAttribute('data-t')] || ''; autogrow(t); });
+    renderDone(); updateProgress();
+  }
+  function collect() { var c = JSON.parse(JSON.stringify(state)); c.updatedAt = new Date().toISOString(); state.updatedAt = c.updatedAt; return c; }
+  function updateProgress() { var n = 0; if (state.palette) n++; if (state.mark) n++; if (state.name) n++; progressEl.textContent = n + ' of 3 decided'; }
+
+  function setStatus(k, t) { statusEl.setAttribute('data-state', k); statusText.textContent = t; }
+  function timeLabel(iso) { try { return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
+  function scheduleSave() { setStatus('unsaved', 'Unsaved'); clearTimeout(saveTimer); saveTimer = setTimeout(save, 700); }
+  function save() {
+    clearTimeout(saveTimer);
+    var data = collect();
+    try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch (e) {}
+    if (!db) { setStatus('nodb', 'Saved in this browser only'); return; }
+    if (pending) { saveTimer = setTimeout(save, 400); return; }
+    pending = true; setStatus('saving', 'Saving');
+    db.doc(DOC_PATH).set(data).then(function () { pending = false; setStatus('saved', 'Saved ' + timeLabel(data.updatedAt)); })
+      .catch(function (e) {
+        pending = false;
+        if ((e && e.code) === 'unavailable') {
+          setStatus('saving', 'Retrying');
+          setTimeout(function () { db.doc(DOC_PATH).set(data).then(function () { setStatus('saved', 'Saved ' + timeLabel(data.updatedAt)); }).catch(function () { setStatus('error', 'Could not save — kept in this browser'); }); }, 600 + Math.random() * 800);
+        } else { setStatus('error', 'Could not save — kept in this browser'); }
+      });
+  }
+  function renderDone() {
+    var btn = $('doneBtn'), note = $('doneNote');
+    if (state.complete) { btn.textContent = 'Reopen'; btn.classList.add('quiet'); note.hidden = false; note.textContent = 'Marked done ' + (state.completedAt ? timeLabel(state.completedAt) : '') + ' — tell Claude in the chat.'; }
+    else { btn.textContent = 'Decisions made'; btn.classList.remove('quiet'); note.hidden = true; }
+  }
+  $('doneBtn').addEventListener('click', function () { state.complete = !state.complete; state.completedAt = state.complete ? new Date().toISOString() : null; renderDone(); save(); });
+
+  wire();
+  var local = null; try { local = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) {}
+  apply(local || state);
+  setStatus('idle', 'Connecting');
+  var canUse = window.claude && typeof window.claude.use === 'function';
+  if (!canUse) { setStatus('nodb', 'Saved in this browser only'); $('nodbNotice').hidden = false; }
+  else {
+    window.claude.use('db').then(function (ns) {
+      db = ns;
+      if (!db) { setStatus('nodb', 'Saved in this browser only'); $('nodbNotice').hidden = false; return; }
+      return db.doc(DOC_PATH).get().then(function (snap) {
+        if (snap.exists) { var remote = snap.data(); if (!local || (remote.updatedAt || '') >= (local.updatedAt || '')) { apply(remote); setStatus('saved', 'Saved ' + timeLabel(remote.updatedAt)); } else { save(); } }
+        else if (local && local.updatedAt) { save(); } else { setStatus('saved', 'Ready'); }
+      }).catch(function () { setStatus('error', 'Could not load saved choices'); });
+    });
+  }
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden' && statusEl.getAttribute('data-state') === 'unsaved') save(); });
+})();
+</script>

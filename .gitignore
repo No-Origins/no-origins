@@ -1,17 +1,19 @@
-# Root Git Ignore
-
-.DS_Store
-node_modules/
-build/
-dist/
-coverage/
-.next/
-*.log
+node_modules
+.pnpm-store
+dist
+.next
+out
+.turbo
+.vercel
+*.tsbuildinfo
+next-env.d.ts
 .env*
 !.env.example
+.DS_Store
+*.log
 
-# Local Agent Workspace Data
-.agents/
-.gemini/
-skills-lock.json
-tsconfig.tsbuildinfo
+# playwright review loop
+e2e/.results
+e2e/.mcp
+e2e/screenshots
+playwright-report

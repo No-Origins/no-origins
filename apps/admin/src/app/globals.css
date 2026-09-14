@@ -1,0 +1,13 @@
+@import "@no-origins/ui/index.css";
+
+/* No Tailwind here (Atomic.md rule 5): the admin composes the package and styles nothing. */
+html { height: 100%; }
+body { min-height: 100%; margin: 0; }   /* never a fixed height: a flex column of fixed height shrinks its children */
+body {
+  font-family: var(--ff-sans);
+  color: var(--ink);
+  background: var(--ground);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
