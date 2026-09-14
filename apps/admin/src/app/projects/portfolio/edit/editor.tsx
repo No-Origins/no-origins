@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Button, Chip, Dialog, Field, Label, SectionHeader, Segmented, Text, ThemeSwitch, ToolScreen, Tree, type TreeNode } from "@no-origins/ui";
 import { CanvasShell, useCanvasZoom, type SceneNode } from "@no-origins/ui/canvas";
+import { useReactFlow } from "@xyflow/react";
 import { documentToScene, type Issue, type SceneDocument } from "@no-origins/ui/document";
 import { CanvasOverlay, DocumentForm, PALETTE_MIME, Palette, PropsForm, SaveState, freshProps, type Ghost, type OverlayBox, type SaveStatus, type Selected } from "@no-origins/ui/editor";
 import { registry } from "@no-origins/ui/registry";
@@ -34,9 +35,41 @@ const SIZE_IN_BOXES: Record<string, [number, number]> = { widget: [4, 3], panel:
 
 const HOSTS: ReadonlyArray<"widget" | "panel" | "blob" | "region"> = ["widget", "panel", "blob", "region"];
 
-function ZoomProbe({ onZoom }: { onZoom: (z: number) => void }) {
+/** What the bar's zoom controls drive. Lifted out of the canvas, because the bar is outside it. */
+interface Tools {
+  in: () => void;
+  out: () => void;
+  fit: () => void;
+  /** Bring one node under the viewport — what picking a row in the outline has to do to mean anything. */
+  focus: (id: string) => void;
+}
+
+/** The editor opens close enough to read a widget, never at the map's minimum where every tag is hidden. */
+const EDITOR_FIT = { padding: 0.2, minZoom: 0.5, maxZoom: 0.9 };
+
+/**
+ * Rendered inside the flow, so it can see the viewport: it reports the zoom up for the bar's readout, hands the
+ * bar its three controls, and lands the editor at a working zoom. The shell fits every node on mount, which for
+ * a ring this wide inside a column between a sidebar and an inspector is 0.15 — the map tier, where the canvas
+ * is a picture of a canvas. So this re-fits once, after the shell's own landing.
+ */
+function CanvasTools({ onZoom, onReady }: { onZoom: (z: number) => void; onReady: (tools: Tools) => void }) {
   const zoom = useCanvasZoom();
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
   useEffect(() => onZoom(zoom), [zoom, onZoom]);
+  useEffect(() => {
+    onReady({
+      in: () => void zoomIn(),
+      out: () => void zoomOut(),
+      // Fit means fit: no floor, even though below 0.4 the tags hide — that is the map tier doing its job (§8.4).
+      fit: () => void fitView({ padding: 0.2, maxZoom: 0.9 }),
+      focus: (id) => void fitView({ nodes: [{ id }], padding: 0.55, minZoom: 0.4, maxZoom: 0.9, duration: 320 }),
+    });
+  }, [onReady, zoomIn, zoomOut, fitView]);
+  useEffect(() => {
+    const id = setTimeout(() => void fitView({ ...EDITOR_FIT, duration: 0 }), 400);
+    return () => clearTimeout(id);
+  }, [fitView]);
   return null;
 }
 
@@ -58,6 +91,8 @@ export function Editor({ documentId, projectName, title, rev: loadedRev, savedAt
   const [status, setStatus] = useState<SaveStatus>("saved");
   const [savedAt, setSavedAt] = useState<string | null>(loadedAt);
   const [zoom, setZoom] = useState(1);
+  const [rev, setRev] = useState(loadedRev);
+  const tools = useRef<Tools | null>(null);
   const [viewport, setViewport] = useState<"desktop" | "phone">("desktop");
   const [grid, setGrid] = useState<"on" | "off">("on");
   const [publishing, setPublishing] = useState(false);
@@ -84,6 +119,7 @@ export function Editor({ documentId, projectName, title, rev: loadedRev, savedAt
         if (!res.ok) return setStatus("failed");
         const body = (await res.json()) as { rev: number; savedAt: string | null };
         revRef.current = body.rev;
+        setRev(body.rev);
         setSavedAt(body.savedAt);
         setStatus("saved");
       } catch {
@@ -184,6 +220,7 @@ export function Editor({ documentId, projectName, title, rev: loadedRev, savedAt
         const node: Node = {
           id,
           kind,
+          component: entry.name,
           at: [snap(at[0]), snap(at[1])],
           props: { ...entry.defaults, ...freshProps(entry.props) },
           ...(kind === "blob" ? {} : { size: [w * box, h * box] as [number, number] }),
@@ -353,7 +390,11 @@ export function Editor({ documentId, projectName, title, rev: loadedRev, savedAt
             nodes={outline}
             selected={selected[0]}
             defaultExpanded={(doc.order ?? []).map((s) => `section:${s}`)}
-            onSelect={(id) => setSelected(id.startsWith("section:") ? [] : [id])}
+            onSelect={(id) => {
+              if (id.startsWith("section:")) return setSelected([]);
+              setSelected([id]);
+              tools.current?.focus(id);
+            }}
             onReorder={onReorder}
           />
         </>
@@ -380,8 +421,11 @@ export function Editor({ documentId, projectName, title, rev: loadedRev, savedAt
         <>
           <Segmented label="Viewport" options={[{ value: "desktop", label: "Desktop" }, { value: "phone", label: "Phone" }]} value={viewport} onChange={setViewport} />
           <Segmented label="Grid" options={[{ value: "on", label: "Grid" }, { value: "off", label: "Off" }]} value={grid} onChange={setGrid} />
+          <Button variant="ghost" size="sm" onClick={() => tools.current?.out()} aria-label="Zoom out">−</Button>
           <Text size="small" tone="muted" as="span">zoom {zoom.toFixed(2)}</Text>
-          <Text size="small" tone="muted" as="span">{doc.nodes.length} nodes · rev {revRef.current}</Text>
+          <Button variant="ghost" size="sm" onClick={() => tools.current?.in()} aria-label="Zoom in">+</Button>
+          <Button variant="ghost" size="sm" onClick={() => tools.current?.fit()}>Fit</Button>
+          <Text size="small" tone="muted" as="span">{doc.nodes.length} nodes · rev {rev}</Text>
           <ThemeSwitch />
         </>
       }
@@ -414,7 +458,7 @@ export function Editor({ documentId, projectName, title, rev: loadedRev, savedAt
         }}
         overlay={<CanvasOverlay boxes={boxes} selected={selected} hovered={hovered} ghost={ghost} />}
       >
-        <ZoomProbe onZoom={setZoom} />
+        <CanvasTools onZoom={setZoom} onReady={(t) => { tools.current = t; }} />
       </CanvasShell>
 
       <Dialog
