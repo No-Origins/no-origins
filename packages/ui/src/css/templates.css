@@ -69,6 +69,35 @@
   .noo-tool__inspector { margin: 0 var(--s-4) var(--s-4); }
 }
 
+/* --- the editor's shell (Admin.md §6.5 row 1, 2026-09-14): a sidebar for the palette and the outline, and a flush
+       main for the canvas. The sidebar is the inspector's mirror — glass-1, sticky under the header, its own scroll —
+       at the Menu column's width, so the two side regions read as one family with the navigation beside them.
+       Flush pins the screen to the viewport and strips main's gutters and gap: its one child fills it, and the
+       sidebar, the inspector and the bar float over the canvas's ground rather than beside a padded well. --- */
+.noo-tool__screen--sidebar { grid-template-areas: "header header header" "sidebar main inspector" "bar bar bar"; grid-template-columns: auto minmax(0, 1fr) auto; }
+.noo-tool__sidebar {
+  grid-area: sidebar;
+  position: sticky; top: calc(var(--bar) + var(--s-3)); align-self: start;
+  width: 280px; max-height: calc(100dvh - var(--bar) - 2 * var(--s-3));
+  margin: var(--s-3) 0 var(--s-3) var(--s-3); padding: var(--s-5);
+  border-radius: var(--r-xl); overflow-y: auto;
+  display: flex; flex-direction: column; gap: var(--s-5);
+}
+.noo-tool__screen--flush { flex: none; height: 100dvh; }                                  /* `flex: 1` would size the grid to its content and push the bar below the fold */
+.noo-tool__screen--flush .noo-tool__sidebar, .noo-tool__screen--flush .noo-tool__inspector { max-height: calc(100% - 2 * var(--s-3)); }   /* the row, not the viewport: the bar has its own row */
+.noo-tool__main--flush { padding: 0; gap: 0; overflow: hidden; }
+.noo-tool__main--flush > * { flex: 1; min-width: 0; min-height: 0; }
+@media (max-width: 1199.98px) {
+  .noo-tool__screen--sidebar { grid-template-areas: "header" "sidebar" "main" "inspector" "bar"; grid-template-rows: auto auto minmax(0, 1fr) auto auto; }
+  .noo-tool__sidebar { position: static; width: auto; max-height: none; margin: var(--s-8) var(--s-8) 0; }
+  .noo-tool__screen--flush { flex: 1; height: auto; }                                       /* the regions stack; a pinned height would clip them */
+  .noo-tool__screen--flush .noo-tool__sidebar, .noo-tool__screen--flush .noo-tool__inspector { max-height: none; }
+}
+@media (max-width: 899.98px) {
+  .noo-tool__sidebar { margin: var(--s-4) var(--s-4) 0; }
+  .noo-tool__main--flush { padding: 0; }
+}
+
 
 /* ===== Document — the 68ch reading column, markdown into the ramp. `.noo-prose` is the old name ===== */
 .noo-document, .noo-prose { max-width: 68ch; color: var(--ink-2); font: 400 var(--t-body)/1.55 var(--ff-sans); }

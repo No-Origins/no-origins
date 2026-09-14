@@ -10,6 +10,9 @@ import { Menu, Text, ThemeSwitch, type MenuGroup } from "@no-origins/ui";
  * Overview sits outside them rather than becoming a fourth. Each group's hue carries its layer, so §1's claim is
  * visible in the navigation and not only in the eyebrow each screen prints.
  *
+ * On the editor route (`…/edit`, Admin.md §6.5 row 1) it takes its rail form whatever the width, so the screen's
+ * sidebar and inspector have the room; the theme switch that the rail hides sits in the editor's own bar.
+ *
  * A client island purely because it needs the pathname.
  */
 export const GROUPS: MenuGroup[] = [
@@ -40,9 +43,11 @@ export const GROUPS: MenuGroup[] = [
 
 export function AdminRail({ email }: { email?: string | null }) {
   const pathname = usePathname();
+  const editing = /\/edit(\/|$)/.test(pathname);
   return (
     <Menu
       groups={GROUPS}
+      form={editing ? "rail" : "auto"}
       currentHref={pathname}
       linkComponent={Link}
       trailing={

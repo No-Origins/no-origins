@@ -12,10 +12,15 @@ import { Label } from "../atoms/Label";
  *   the rail never remounts between screens.
  * - `ToolScreen` is one screen inside that column: a 56px header on the ground with a hairline below — the layer
  *   eyebrow, the title, the screen's `meta` and `actions` — then `main#main`, fluid with 32px gutters, and only
- *   where a screen has them, an `inspector` on the right and a `bar` along the bottom.
+ *   where a screen has them, a `sidebar` on the left, an `inspector` on the right and a `bar` along the bottom.
  *
  * Density comes from what a screen puts in `main` — a `Table`, `Tabs`, `Steps` — never from cards of prose
  * (Brand.md §10). Main is a column with `--s-10` between its children; give it components, not spacing.
+ *
+ * **The editor's shell** (Admin.md §6.5 row 1, built 2026-09-14): `sidebar` is the palette and the outline, the
+ * inspector's mirror at the Menu column's width; `flush` pins the screen to the viewport and strips main's gutters
+ * so its one child — the canvas — fills it edge to edge, with the sidebar, the inspector and the bar floating
+ * beside it on the ground. The admin's Menu drops to its rail form on that route to make room (`AdminRail`).
  */
 export interface ToolProps extends ComponentPropsWithoutRef<"div"> {
   /** The navigation: a `Menu` in its column form (`auto` resolves to it on a desktop). */
@@ -39,18 +44,32 @@ export interface ToolScreenProps extends Omit<ComponentPropsWithoutRef<"div">, "
   meta?: ReactNode;
   /** Right-aligned: the screen's one or two buttons. */
   actions?: ReactNode;
+  /** The palette and the outline, on the left. Only under an editor. */
+  sidebar?: ReactNode;
   /** The selected thing's props. Only where a screen has a selection. */
   inspector?: ReactNode;
   /** The bottom bar: zoom, theme, viewport — only under an editor. */
   bar?: ReactNode;
+  /** No gutters: the screen is pinned to the viewport and main's one child fills it. For the canvas. */
+  flush?: boolean;
   /** id of the main landmark; the Menu's skip link points here. */
   mainId?: string;
   titleId?: string;
 }
 
-export function ToolScreen({ eyebrow, title, meta, actions, inspector, bar, mainId = "main", titleId = "screen-title", className, children, ...rest }: ToolScreenProps) {
+export function ToolScreen({ eyebrow, title, meta, actions, sidebar, inspector, bar, flush, mainId = "main", titleId = "screen-title", className, children, ...rest }: ToolScreenProps) {
   return (
-    <div className={cx("noo-tool__screen", Boolean(inspector) && "noo-tool__screen--inspector", Boolean(bar) && "noo-tool__screen--bar", className)} {...rest}>
+    <div
+      className={cx(
+        "noo-tool__screen",
+        Boolean(sidebar) && "noo-tool__screen--sidebar",
+        Boolean(inspector) && "noo-tool__screen--inspector",
+        Boolean(bar) && "noo-tool__screen--bar",
+        flush && "noo-tool__screen--flush",
+        className,
+      )}
+      {...rest}
+    >
       <header className="noo-tool__header">
         <div className="noo-tool__heading">
           {eyebrow ? <Label className="noo-tool__eyebrow">{eyebrow}</Label> : null}
@@ -59,7 +78,8 @@ export function ToolScreen({ eyebrow, title, meta, actions, inspector, bar, main
         </div>
         {actions ? <div className="noo-tool__actions">{actions}</div> : null}
       </header>
-      <main id={mainId} tabIndex={-1} className="noo-tool__main" aria-labelledby={titleId}>
+      {sidebar ? <aside className="noo-glass noo-glass--1 noo-tool__sidebar" aria-label="Sidebar">{sidebar}</aside> : null}
+      <main id={mainId} tabIndex={-1} className={cx("noo-tool__main", flush && "noo-tool__main--flush")} aria-labelledby={titleId}>
         {children}
       </main>
       {inspector ? <aside className="noo-glass noo-glass--1 noo-tool__inspector" aria-label="Inspector">{inspector}</aside> : null}

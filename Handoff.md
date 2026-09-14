@@ -6,7 +6,8 @@
 
 - **`@no-origins/ui` 0.1.0 is released and merged** (PR #1, 2026-09-14). Atomic.md is the record; the canvas *No Origins Design System* (artifact 13bff065) and its phone edition (artifact 13529f87) show it.
 - **The inspector controls are decided and built** (commit `5219696` on `main`, pushed). A changeset for a **minor** bump sits in `.changeset/inspector-controls.md`; `pnpm changeset version` has *not* been run — do it with the next release, which makes the package 0.2.0.
-- **Working tree is clean.** `main` is the only branch. Remote is `origin` = `No-Origins/no-origins` (private).
+- **Step 1 of §6.5's order of work — the ToolScreen sidebar — is built** (2026-09-14, branch `feat/tool-sidebar`, not pushed): `sidebar` and `flush` on `ToolScreen`, `AdminRail` in rail form on any `…/edit` path, the editor's shell as the third block of `/fixtures/tool`, changeset `.changeset/tool-sidebar.md` (minor). Recorded in Admin.md §6.5 row 1 and Atomic.md step 5. Reviewed with `pnpm review -g "fixtures/tool"` at 1440 / 1100 / 412 in both themes. One thing found: a flush screen must be `flex: none` — with `flex: 1` the grid sizes to its content and the bar drops below the fold.
+- Remote is `origin` = `No-Origins/no-origins` (private).
 
 ## What the last session did
 
@@ -45,7 +46,7 @@ Canvas mechanics that bit before: re-read the artifact and `--extract` before an
 
 ## What next — Admin.md §6.5's order of work
 
-1. **ToolScreen sidebar** (decided, §6.5 row 1): a left `sidebar` region for palette + outline; the admin Menu drops to its rail form on the editor route; `main` gets a flush mode so the canvas fills it edge to edge. Package-only, no new decisions.
+1. ~~**ToolScreen sidebar**~~ — **done 2026-09-14** (see above). The rail rule cannot be seen in the admin until the `/edit` route exists at step 3; `/fixtures/tool` shows it.
 2. **The document layer** (Scene-Schema.md; mostly decided): registry prop schemas → Zod validators; the adapter document → `SceneNode[]` for `CanvasShell` (§4); the `patterns` map; prove the portfolio's hand-written `scene.tsx` can be expressed as a document and render identically. No UI, but the editor is impossible without it and this is where bugs hide.
 3. **The editor screen** at `/projects/portfolio/edit`. Open design questions that want **option boards (five each) before code**: what a selected node looks like on the canvas; how a palette item lands on the grid; how autosave states show; what the inspector does with none or several selected. His rule: he picks by letter, notes outrank recommendations, each pick becomes a rule in Admin.md first.
 
