@@ -334,6 +334,10 @@
 .noo-placeholder { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 20px; border: 1.5px dashed var(--rule); border-radius: var(--r-lg); }
 .noo-placeholder--draft { border-color: color-mix(in oklch, var(--accent-deep) 45%, transparent); }
 .noo-placeholder__tag { align-self: flex-start; font: 500 var(--t-label)/1 var(--ff-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-deep); background: var(--accent-tint); padding: 5px 8px; border-radius: var(--r-pill); }
+/* the adapter's sample-copy tag (Admin.md §6.5c F4) is a component's first child, which inside a <p> is the first
+   line; `display: table` gives it a line of its own without asking the component to be a div. */
+.noo-sample-tag { display: table; }
+p > .noo-sample-tag { margin-bottom: var(--s-3); }                                          /* a block container spaces it with its own gap */
 .noo-placeholder__title { margin: 0; color: var(--ink-2); }
 .noo-placeholder__body { color: var(--muted); }
 

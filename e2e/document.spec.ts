@@ -29,8 +29,8 @@ const WIDGETS: Array<{ label: string; ratio: number }> = [
   { label: "Work experience", ratio: 0.01 },
   { label: "Case studies", ratio: 0.01 },
   { label: "Projects", ratio: 0.01 },
-  { label: "Interests", ratio: 0.04 },
-  { label: "Philosophy", ratio: 0.05 },
+  { label: "Interests", ratio: 0.05 },
+  { label: "Philosophy", ratio: 0.07 },
 ];
 const HOME_RATIO = 0.01;
 

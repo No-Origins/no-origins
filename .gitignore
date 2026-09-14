@@ -18,3 +18,4 @@ e2e/.mcp
 e2e/screenshots
 playwright-report
 e2e/*-snapshots/
+.claude/worktrees/

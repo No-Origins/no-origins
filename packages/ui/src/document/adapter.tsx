@@ -172,7 +172,7 @@ function prepare(child: SlotChild, entry: RegistryEntry, path: string, ctx: Ctx,
   }
 
   // The tag goes FIRST, above the words it is about — the cell's own top-left, as the hand-written widgets have it.
-  if (sampled.length) children.unshift(<span key="sampled" className="noo-placeholder__tag">sample copy</span>);
+  if (sampled.length) children.unshift(<span key="sampled" className="noo-placeholder__tag noo-sample-tag">sample copy</span>);
 
   return { authored, props: entry.adapt ? entry.adapt(props, parent) : props, children };
 }
