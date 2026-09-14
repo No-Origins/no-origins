@@ -398,8 +398,9 @@ const philosophy = section("philosophy", "", "Philosophy", "How I think about bu
 
 /** Reading order — declared, because a ring has no natural one (§8.3). Tab order, screen readers, phones, ← / →. */
 export const portfolioScene = (says: string): SceneNode[] => [
-  // the view switcher, placed (Atomic.md D9): bottom-left, one item per view, in reading order
-  { kind: "menu", id: "menu", position: { x: 0, y: 0 }, anchor: "bottom-left", label: "Sections", items: portfolioViews.map((v) => ({ label: v.label, view: v.id, href: v.href })) },
+  // the view switcher, placed in canvas space (Atomic.md D9, amended 2026-09-14): beside the Me column, one item
+  // per view in reading order. It pans with the map; the chat's suggestions and ← / → never do.
+  { kind: "menu", id: "menu", position: { x: -520, y: 100 }, width: 188, height: 284, label: "Sections", items: portfolioViews.map((v) => ({ label: v.label, view: v.id, href: v.href })) },
   ...me.map((n) => (n.id === "me-blob" ? blob(says) : n)),
   ...status,
   ...work,
@@ -411,7 +412,7 @@ export const portfolioScene = (says: string): SceneNode[] => [
 
 export const portfolioViews: CanvasView[] = [
   // "/" is the map (§8.4), so the first view fits the whole ring — Me sits at the middle of it by construction.
-  { id: "me", label: "Me", href: "/", frame: "fit", nodeIds: ["me-blob", "me-intro", "me-story", ...(Object.keys(AT).map((k) => `${k}-widget`))] },
+  { id: "me", label: "Me", href: "/", frame: "fit", nodeIds: ["me-blob", "menu", "me-intro", "me-story", ...(Object.keys(AT).map((k) => `${k}-widget`))] },
   { id: "status", label: "Status", href: "/status", nodeIds: ["status-widget"] },
   { id: "work", label: "Work", href: "/work", nodeIds: ["work-widget"] },
   { id: "cases", label: "Cases", href: "/case-studies", nodeIds: ["cases-widget"] },

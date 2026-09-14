@@ -3,6 +3,7 @@ import type { BlobFlowNode, BlobNodeData } from "./BlobNode";
 import type { PanelNodeData } from "./PanelNode";
 import type { RegionNodeData } from "./RegionNode";
 import type { WidgetNodeData } from "./WidgetNode";
+import type { MenuNodeData } from "./MenuNode";
 
 /**
  * The scene (Design-System.md §8.2–8.3) — every node of a block's canvas, hand-placed. Heights included, so the
@@ -43,20 +44,20 @@ export interface WidgetSceneNode extends SceneNodeBase, WidgetNodeData {
   height: number;
 }
 /**
- * A menu (Atomic.md D9): the view switcher as a placed node. It anchors to a corner of the VIEWPORT, not to a
- * point in canvas space — a menu that pans away is not navigation — and `position` is its inset from that corner
- * in px, so the editor places it like anything else. Items name a `view` (a pan) or an `href` (a page).
+ * A menu (Atomic.md D9, amended 2026-09-14): the view switcher as a node IN CANVAS SPACE — placed, dragged and
+ * dropped like a blob or a panel, in canvas units, and part of the reading order. It pans with the map: where it
+ * sits is a composition decision, and the chat's suggestions and ← / → remain the ways to move that never pan away.
+ * Items name a `view` (a pan) or an `href` (a page). Rendered by `MenuNode` as a `Menu` in its floating form.
  */
 export interface MenuSceneItem {
   label: string;
   view?: string;
   href?: string;
-  /** An icon name from `@no-origins/ui/icons`; the shell's `renderIcon` turns it into a glyph. */
-  icon?: string;
 }
 export interface MenuSceneNode extends SceneNodeBase {
   kind: "menu";
-  anchor?: "bottom-left" | "bottom-right" | "top-left" | "top-right";
+  width: number;
+  height: number;
   /** Names the menu for assistive tech — "Sections". */
   label?: string;
   items: MenuSceneItem[];
@@ -66,7 +67,8 @@ export type SceneNode = BlobSceneNode | PanelSceneNode | RegionSceneNode | Widge
 export type PanelFlowNode = Node<PanelNodeData, "panel">;
 export type RegionFlowNode = Node<RegionNodeData, "region">;
 export type WidgetFlowNode = Node<WidgetNodeData, "widget">;
-export type SceneFlowNode = BlobFlowNode | PanelFlowNode | RegionFlowNode | WidgetFlowNode;
+export type MenuFlowNode = Node<MenuNodeData, "menu">;
+export type SceneFlowNode = BlobFlowNode | PanelFlowNode | RegionFlowNode | WidgetFlowNode | MenuFlowNode;
 
 /**
  * A named destination. `frame: "top"` (the default) puts the anchor node's top-left near the top of the screen at
@@ -93,7 +95,25 @@ export const BLOB_H = 48;
 export const NARROW_QUERY = "(max-width: 899.98px)";
 
 export function sceneToNodes(scene: SceneNode[]): SceneFlowNode[] {
-  return scene.filter((s): s is Exclude<SceneNode, MenuSceneNode> => s.kind !== "menu").map((s) => {
+  return scene.map((s) => {
+    if (s.kind === "menu") {
+      const { kind, id, position, width, height, section, ...data } = s;
+      void kind;
+      return {
+        id,
+        type: "menu",
+        position,
+        width,
+        height,
+        data,
+        draggable: true,                                       // dropped where the composition wants it (2026-09-14)
+        selectable: false,
+        focusable: false,                                      // the menu's own links are the tab stops
+        zIndex: 2,
+        ariaRole: "presentation",
+        className: section ? `noo-of-${section}` : undefined,
+      } satisfies MenuFlowNode;
+    }
     if (s.kind === "widget") {
       const { kind, id, position, width, height, section, ...data } = s;
       void kind;
@@ -169,7 +189,6 @@ export interface Box {
 export function sceneBoxes(scene: SceneNode[]): Record<string, Box> {
   const out: Record<string, Box> = {};
   for (const s of scene) {
-    if (s.kind === "menu") continue;                                            // viewport-anchored: it has no box in flow space
     const w = s.kind === "blob" ? BLOB_W : s.width;
     const h = s.kind === "blob" ? BLOB_H : s.height;
     out[s.id] = { x: s.position.x, y: s.position.y, w, h };

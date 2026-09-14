@@ -131,7 +131,8 @@
 .noo-canvas .react-flow__attribution { background: transparent; padding: 0; font: 400 10px/1 var(--ff-mono); } /* stylelint-disable-line declaration-property-value-disallowed-list -- React Flow's own attribution */
 .noo-canvas .react-flow__attribution a { color: var(--muted); }
 .noo-canvas__wordmark { color: var(--ink); font-size: var(--t-h4); }
-.noo-canvas__panel--menu .noo-menu { --menu-hue: var(--accent-deep); }                     /* the view switcher is a Menu node (D9) */
+.noo-canvas .react-flow__node-menu { border-radius: var(--r-xl); }                          /* the view switcher is a node in canvas space (D9, 2026-09-14) */
+.noo-canvas__menu { --menu-hue: var(--accent-deep); }
 .noo-canvas__panel--tools { display: flex; align-items: center; gap: 10px; }
 
 /* --- panels (§8.2): reading matter in canvas space --- */
@@ -202,7 +203,8 @@
   .noo-canvas .react-flow__nodes { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; padding: 64px 16px 140px; }   /* clear of the fixed theme switch */
   .noo-canvas .react-flow__node { position: static !important; transform: none !important; width: auto !important; height: auto !important; }
   .noo-canvas .react-flow__node-blob { flex: 0 0 calc(50% - 10px); display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-  .noo-canvas .react-flow__node-panel, .noo-canvas .react-flow__node-region { flex: 0 0 100%; }
+  .noo-canvas .react-flow__node-panel, .noo-canvas .react-flow__node-region, .noo-canvas .react-flow__node-menu { flex: 0 0 100%; }
+  .noo-canvas__menu { width: 100%; }
   .noo-canvas .react-flow__node-region { margin-top: 24px; }
   .noo-canvas__bubble { white-space: normal; margin-top: 0; }
   .noo-region__label { font-size: var(--t-h2); }
@@ -212,7 +214,6 @@
   .noo-panel--bare { padding: 0; }
   .noo-canvas .react-flow__panel { margin: 12px; }
   .noo-canvas .react-flow__panel.bottom.center { position: fixed; transform: translateX(-12px) translateX(-50%); }
-  .noo-canvas__panel--menu { display: none; }                                               /* the chat's suggestions are the menu */
   .noo-canvas__panel--brand { display: none; }                                              /* the theme switch has top-right; the wordmark would collide */
   .noo-canvas__panel--tools { position: fixed; }
   .noo-canvas__wordmark { font-size: var(--t-lead); }

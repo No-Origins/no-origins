@@ -18,25 +18,26 @@ import { GroundProvider, type Ground } from "../../atoms/blob/grid";
 import { prefersReducedMotion } from "../../atoms/blob/behaviour";
 import { Button } from "../../atoms/Button";
 import { Wordmark } from "../../atoms/Wordmark";
-import { Menu, type MenuItem } from "../../organisms/Menu";
 import { cx } from "../../cx";
 import { BlobNode } from "./BlobNode";
 import { PanelNode } from "./PanelNode";
 import { RegionNode } from "./RegionNode";
 import { WidgetNode } from "./WidgetNode";
+import { MenuNode } from "./MenuNode";
 import { CanvasMap } from "./CanvasMap";
 import { Threads } from "./Threads";
 import { CanvasModeProvider } from "./lod";
 import { CanvasNavProvider } from "./nav";
-import { NARROW_QUERY, sceneBoxes, sceneToNodes, viewCentres, type Box, type CanvasView, type MenuSceneNode, type SceneFlowNode, type SceneNode, type SceneThread } from "./scene";
+import { NARROW_QUERY, sceneBoxes, sceneToNodes, viewCentres, type Box, type CanvasView, type SceneFlowNode, type SceneNode, type SceneThread } from "./scene";
 
 /**
  * CanvasShell — the base layout of No Origins (Design-System.md §8), on React Flow. The dot grid is the flow's
  * Background; every blob, panel and region is a node; the chat input, minimap and wordmark are panels fixed to
  * the viewport. Navigation is a viewport move, not a page load (§8.5).
  *
- * The view switcher is a `menu` node in the scene (Atomic.md D9), rendered as a `Menu` in its floating form at the
- * corner it names. A scene with `views` and no menu node gets one built from the views, so nothing is lost.
+ * The view switcher is a `menu` node in the scene (Atomic.md D9, amended 2026-09-14): a node in canvas space,
+ * rendered by `MenuNode`, placed and dragged like any other. The shell fixes nothing to the viewport but the chat,
+ * the minimap, the tools and the wordmark.
  *
  * The host imports `@xyflow/react/dist/base.css` into `layer(base)` so the package can style over it.
  */
@@ -55,8 +56,6 @@ export interface CanvasShellProps {
   onOpen?: (href: string, node: SceneNode) => void;
   /** Bottom-centre panel: the ChatInput. */
   chat?: ReactNode;
-  /** Turns a menu item's icon name into a glyph — `(name) => <Icon name={name} />` from `@no-origins/ui/icons`. */
-  renderIcon?: (name: string) => ReactNode;
   /** Bottom-right panel. Default: the wordmark. */
   brand?: ReactNode;
   /** Top-right panel, beside "Reset view": the theme switch, usually. */
@@ -72,7 +71,7 @@ export interface CanvasShellProps {
   heading?: ReactNode;
 }
 
-const nodeTypes: NodeTypes = { blob: BlobNode, panel: PanelNode, region: RegionNode, widget: WidgetNode };
+const nodeTypes: NodeTypes = { blob: BlobNode, panel: PanelNode, region: RegionNode, widget: WidgetNode, menu: MenuNode };
 
 /** Fit, but never zoom past 1.2: seven blobs in a 1440 viewport otherwise fit at ×1.7 and the grid coarsens too. */
 const HOME_FIT: FitViewOptions<SceneFlowNode> = { padding: 0.3, maxZoom: 1.2 };
@@ -95,8 +94,8 @@ const SNAP_OPEN = 0.85;
 const SNAP_RELEASE = 0.55;
 /** Where releasing lands: the browse tier, clear of the release threshold so it cannot re-open itself. */
 const MAP_AFTER_RELEASE = 0.45;
-/** Room the view switcher needs down the left: a full view is centred, but never underneath it. */
-const MENU_INSET = 200;
+/** A full view is centred, but never flush with the left edge. */
+const MIN_LEFT = 24;
 
 /**
  * React Flow's server-side fit cannot be scoped: `initialFitViewOptions.nodes` is ignored in 12.11.6, so the
@@ -177,7 +176,6 @@ function CanvasShellInner({
   threads,
   onOpen,
   chat,
-  renderIcon,
   brand,
   trailing,
   resetLabel = "Reset view",
@@ -312,9 +310,7 @@ function CanvasShellInner({
       const z = READING_ZOOM;
       const duration = prefersReducedMotion() ? 0 : 400;
       beginSelfMove(duration);
-      // centred, but never behind the view switcher in the bottom-left corner: at 1440 a full view centres with
-      // 144px margins and the menu is ~165 wide, so the left column would sit under it
-      const left = Math.max((width - w * z) / 2, MENU_INSET);
+      const left = Math.max((width - w * z) / 2, MIN_LEFT);
       void setViewport({ x: left - x * z, y: TOP_MARGIN - y * z, zoom: z }, { duration });
       setMoved(true);
       onViewChange?.(id);
@@ -429,12 +425,6 @@ function CanvasShellInner({
 
   const ground = useCanvasGrid(container, grid.box, grid.line, flow);
   const nav = useMemo(() => ({ goTo: (id: string) => goTo(id), current, open: openSection }), [goTo, current, openSection]);
-  // the placed menus; a scene with views and none of its own gets the default, bottom-left
-  const menus = useMemo<MenuSceneNode[]>(() => {
-    const placed = scene.filter((n): n is MenuSceneNode => n.kind === "menu");
-    if (placed.length || !views?.length) return placed;
-    return [{ kind: "menu", id: "menu", position: { x: 0, y: 0 }, anchor: "bottom-left", label: "Sections", items: views.map((v) => ({ label: v.label, view: v.id, href: v.href })) }];
-  }, [scene, views]);
 
   return (
     <div ref={container} className={cx("noo-canvas", open && "noo-canvas--open", className)} onKeyDown={onKeyDown}>
@@ -495,29 +485,6 @@ function CanvasShellInner({
                 {chat}
               </Panel>
             ) : null}
-            {menus.map((m) => (
-              <Panel
-                key={m.id}
-                position={m.anchor ?? "bottom-left"}
-                className="noo-canvas__panel noo-canvas__panel--menu"
-                style={m.position.x || m.position.y ? { margin: `calc(20px + ${m.position.y}px) calc(20px + ${m.position.x}px)` } : undefined}
-              >
-                <Menu
-                  form="floating"
-                  aria-label={m.label ?? "Sections"}
-                  skipTo={false}
-                  brand={false}
-                  items={m.items.map((it): MenuItem => ({
-                    id: it.view ?? it.href ?? it.label,
-                    label: it.label,
-                    href: it.href,
-                    icon: it.icon && renderIcon ? renderIcon(it.icon) : undefined,
-                    current: it.view ? current === it.view : undefined,
-                    onSelect: it.view ? () => goTo(it.view!) : undefined,
-                  }))}
-                />
-              </Panel>
-            ))}
             <Panel position="bottom-right" className="noo-canvas__panel noo-canvas__panel--brand">
               {brand ?? <Wordmark className="noo-canvas__wordmark" />}
             </Panel>

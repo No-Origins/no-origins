@@ -598,8 +598,7 @@ const menu: RegistryEntry = {
   line: "The one navigation, in five forms. The current item is an ink pill.",
   props: {
     label: { type: "text", max: 40, help: "What the menu is for — “Sections”." },
-    items: { type: "list", of: { type: "object", fields: { label: { type: "text", max: 24 }, href: { type: "href" }, view: { type: "text", max: 24 }, icon: { type: "text", max: 24 } } }, max: 9, required: true },
-    anchor: { type: "enum", of: ["bottom-left", "bottom-right", "top-left", "top-right"], default: "bottom-left", help: "On a canvas the menu anchors to a corner of the viewport, not to a point in the scene." },
+    items: { type: "list", of: { type: "object", fields: { label: { type: "text", max: 24 }, href: { type: "href" }, view: { type: "text", max: 24 } } }, max: 9, required: true, help: "On a canvas the menu is a node in canvas space — placed and dragged like any other, and part of the reading order." },
   },
   defaults: { label: "Sections", items: [{ label: "Me", href: "/" }, { label: "Work", href: "/work" }] },
   example: () => (
