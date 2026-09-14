@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * The panel (Illustrations.md §8b) — every variable in the generator, on one screen, against the real thing.
+ * The panel (Patterns.md §8b) — every variable in the generator, on one screen, against the real thing.
  *
  * > *“With all the conditions we arrived on, can we create a layout with all the controls where we can customise
  * > and control the variables in the function/formulas?”* — Bhargav, 2026-09-11
@@ -17,7 +17,7 @@
  */
 
 import { useId, useMemo, useState, type CSSProperties, type ReactNode } from "react";
-import { BentoFigure, IllustrationCanvas, Section, SectionHeader, ill, illoLines, poly, type Family, type Hue, type Pt } from "@no-origins/ui";
+import { BentoFigure, PatternCanvas, Section, SectionHeader, ill, illoLines, poly, type Family, type Hue, type Pt } from "@no-origins/ui";
 
 // The generator comes from the package, not from the studio fixture next door — that is the whole point of
 // promoting it. Nothing here reaches into another route's folder any more.
@@ -125,7 +125,7 @@ function Drawing({ geom, look, cell, id: ill }: { geom: Geom; look: Look; cell: 
   }, [lines, breath, look.band]);
 
   return (
-    <IllustrationCanvas
+    <PatternCanvas
       hue={cell.hue}
       data-ill={ill}
       preserveAspectRatio="xMidYMid slice"
@@ -153,7 +153,7 @@ function Drawing({ geom, look, cell, id: ill }: { geom: Geom; look: Look; cell: 
           </g>
         </>
       )}
-    </IllustrationCanvas>
+    </PatternCanvas>
   );
 }
 

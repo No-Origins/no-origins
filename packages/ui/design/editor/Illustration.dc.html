@@ -32,7 +32,7 @@
   /* the family — fill (the pastel it reads as) · deep (text, ≥ 4.5:1 on ground) · tint (glass fill @ 24%) */
   --pink: oklch(0.82 0.10 20);      --pink-deep: oklch(0.45 0.16 20);      --pink-tint: oklch(0.62 0.22 20);
   --green: oklch(0.91 0.10 130);    --green-deep: oklch(0.45 0.12 140);    --green-tint: oklch(0.72 0.22 135);
-  --grey: oklch(0.93 0.006 90);     --grey-deep: oklch(0.45 0.01 90);     --grey-tint: oklch(0.62 0.012 90);   /* the one hue that had no tint — illustrations need one (Illustrations.md §4) */
+  --grey: oklch(0.93 0.006 90);     --grey-deep: oklch(0.45 0.01 90);     --grey-tint: oklch(0.62 0.012 90);   /* the one hue that had no tint — illustrations need one (Patterns.md §4) */
   --lavender: oklch(0.85 0.08 300); --lavender-deep: oklch(0.45 0.14 300); --lavender-tint: oklch(0.60 0.21 285);
   --peach: oklch(0.87 0.07 50);     --peach-deep: oklch(0.45 0.12 50);     --peach-tint: oklch(0.70 0.19 45);
   --yellow: oklch(0.92 0.11 100);   --yellow-deep: oklch(0.45 0.09 90);    --yellow-tint: oklch(0.85 0.19 95);
@@ -111,7 +111,7 @@
   --grid-pad: 8px;                   /* inside each box; two of them make the 16 gutter between cells */
   --grid-line: color-mix(in oklch, var(--ink) 9%, var(--ground));
 
-  /* grain — a filter the browser runs over a card, not a picture we ship (Illustrations.md §4b).
+  /* grain — a filter the browser runs over a card, not a picture we ship (Patterns.md §4b).
      Masked with currentColor at --grain-strength, so it darkens a light card and lightens a dark one. */
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch' seed='7'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23g)'/%3E%3C/svg%3E");
   --grain-strength: 0.13;                        /* up from 0.075 — Bhargav, 2026-09-11: "add some texture and noise to the card" */
@@ -594,7 +594,7 @@
 .noo-skip:focus { top: 12px; }
 
 
-/* Illustration (Illustrations.md §4–5): one hue, one fine line, placed where the text is not */
+/* Illustration (Patterns.md §4–5): one hue, one fine line, placed where the text is not */
 .noo-ill { --ill-hue: var(--hue-tint); display: block; }
 .noo-ill {
   /* the line takes its contrast from the text beside it: dark on a light tile, light on a dark one, in either
@@ -883,6 +883,92 @@
   .noo-dots__dot { background: CanvasText; }
   .noo-tabs__tab[aria-selected="true"]::after, .noo-toast__mark { background: Highlight; }
 }
+
+/* ── Inspector controls (Admin.md §6.5a, 2026-09-14) ──────────────────────────────────────────────────────────── */
+
+/* The editor's one drop indicator: a 2px accent line with a dot at its head. Repeater and Tree both render it. */
+.noo-drop { position: relative; height: 0; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+.noo-drop::before { content: ""; position: absolute; left: 6px; right: 0; top: -1px; height: 2px; border-radius: 1px; background: var(--accent-deep); }
+.noo-drop::after { content: ""; position: absolute; left: 0; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-deep); }
+.noo-drop--v { height: auto; width: 0; align-self: stretch; }
+.noo-drop--v::before { left: -1px; right: auto; top: 6px; bottom: 0; width: 2px; height: auto; }
+.noo-drop--v::after { left: -4px; top: 0; }
+
+/* HueSwatch (E1 A): seven 20px dots, an ink ring on the chosen one, the name beside. */
+.noo-swatch { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1) var(--s-3); min-height: var(--ctl-md); }   /* the name drops under the row where a column is narrow */
+.noo-swatch.is-disabled { opacity: 0.5; }
+.noo-swatch__dots { display: flex; align-items: center; gap: var(--s-2); }
+.noo-swatch__dot { position: relative; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 50%; background: var(--hue-deep); cursor: pointer; transition: box-shadow var(--d-fast) var(--ease), transform var(--d-fast) var(--ease); }
+.noo-swatch__dot::before { content: ""; position: absolute; inset: -12px -4px; }                    /* the 44px hit target */
+.noo-swatch__dot:hover { transform: scale(1.1); }
+.noo-swatch__dot[aria-checked="true"] { box-shadow: 0 0 0 2px var(--ground), 0 0 0 4px var(--ink); }
+.noo-swatch__dot:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 5px; }
+.noo-swatch__dot--accent { background: color-mix(in oklch, var(--accent) 55%, transparent); box-shadow: inset 0 0 0 1px var(--ink); }   /* the block's own colour: a glass dot with an ink hairline */
+.noo-swatch__dot--accent[aria-checked="true"] { box-shadow: inset 0 0 0 1px var(--ink), 0 0 0 2px var(--ground), 0 0 0 4px var(--ink); }
+.noo-swatch__dot:disabled { cursor: not-allowed; }
+.noo-swatch__name { font: 500 var(--t-label)/1 var(--ff-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+
+/* PatternPicker (E2 A): the library drawn in the node's hue, named; the chosen one in the swatch's ring. */
+.noo-pp { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-3) var(--s-2); }
+.noo-pp--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }   /* only where the inspector is wider than 320: four across truncates the names */
+.noo-pp.is-disabled { opacity: 0.5; }
+.noo-pp__group { display: contents; }
+.noo-pp__item { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 0; border: 0; border-radius: var(--r-md); background: none; text-align: left; cursor: pointer; }
+.noo-pp__item:disabled { cursor: not-allowed; }
+.noo-pp__pic { position: relative; aspect-ratio: 1; border-radius: var(--r-md); background: var(--hue); color: var(--hue-ink);   /* the loud cell's pair: the line takes its contrast from this ink, in both themes */ overflow: hidden; box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--ink) 8%, transparent); transition: box-shadow var(--d-fast) var(--ease); }
+.noo-pp__pic > .noo-ill { position: absolute; inset: 0; width: 100%; height: 100%; }
+.noo-pp__item:hover > .noo-pp__pic { box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--ink) 30%, transparent); }
+.noo-pp__item[aria-checked="true"] > .noo-pp__pic { box-shadow: 0 0 0 2px var(--ground), 0 0 0 4px var(--ink); }
+.noo-pp__item:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+.noo-pp__name { font: 500 var(--t-label)/1 var(--ff-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.noo-pp__new > .noo-pp__name { white-space: normal; }
+.noo-pp__pic--new { display: grid; place-items: center; background: none; box-shadow: none; outline: 1.5px dashed var(--rule); outline-offset: -1.5px; color: var(--muted); }
+.noo-pp__new:hover > .noo-pp__pic--new { outline-color: var(--ink-2); color: var(--ink); box-shadow: none; }
+.noo-pp__pic--new > svg { width: var(--icon-md); height: var(--icon-md); }
+
+/* Range: a dial — a 2px rule, a 16px ink thumb, the value in mono beside the label. */
+.noo-range { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.noo-range.is-disabled { opacity: 0.5; }
+.noo-range__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2); }
+.noo-range__label { font: 500 var(--t-caption)/1.45 var(--ff-sans); color: var(--ink-2); }
+.noo-range__value { font: 500 var(--t-caption)/1.45 var(--ff-mono); font-variant-numeric: tabular-nums; color: var(--ink); }
+.noo-range__input { appearance: none; -webkit-appearance: none; width: 100%; height: 20px; margin: 0; padding: 0; background: none; cursor: pointer; }
+.noo-range__input:disabled { cursor: not-allowed; }
+.noo-range__input::-webkit-slider-runnable-track { height: 2px; border-radius: 1px; background: var(--rule); }
+.noo-range__input::-moz-range-track { height: 2px; border-radius: 1px; background: var(--rule); }
+.noo-range__input::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -7px; border: 0; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 3px var(--ground); }
+.noo-range__input::-moz-range-thumb { width: 16px; height: 16px; border: 0; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 3px var(--ground); }
+.noo-range__input:focus-visible { outline: none; }
+.noo-range__input:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+.noo-range__input:focus-visible::-moz-range-thumb { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+.noo-range__hint { margin: 0; font: 500 var(--t-caption)/1.45 var(--ff-sans); color: var(--muted); }
+
+/* Repeater (E3 A + C): rows on hairlines with a grip, or chips with a remove mark; the same component. */
+.noo-rep { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+.noo-rep.is-disabled { opacity: 0.5; }
+.noo-rep__label { font: 500 var(--t-caption)/1.45 var(--ff-sans); color: var(--ink-2); }
+.noo-rep__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.noo-rep__row { display: flex; align-items: center; gap: var(--s-2); padding: var(--s-3) 0; border-top: 1px solid var(--rule); }
+.noo-rep__row:last-of-type { border-bottom: 1px solid var(--rule); }
+.noo-rep__row.is-dragging, .noo-rep__chip.is-dragging { opacity: 0.45; }
+.noo-rep__fields { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-2); }
+.noo-rep__grip, .noo-rep__x { flex: none; display: grid; place-items: center; width: var(--ctl-xs); height: var(--ctl-xs); padding: 0; border: 0; border-radius: 50%; background: none; color: var(--muted); cursor: pointer; transition: color var(--d-fast) var(--ease), background-color var(--d-fast) var(--ease); }
+.noo-rep__grip { cursor: grab; }
+.noo-rep__grip > svg, .noo-rep__x > svg { width: var(--icon-sm); height: var(--icon-sm); }
+.noo-rep__grip:hover, .noo-rep__x:hover { color: var(--ink); background: color-mix(in oklch, var(--ink) 6%, transparent); }
+.noo-rep__x:hover { color: var(--bad); background: color-mix(in oklch, var(--bad) 10%, transparent); }
+.noo-rep__grip:focus-visible, .noo-rep__x:focus-visible, .noo-rep__chip:focus-visible, .noo-rep__chipx:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+.noo-rep__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); min-height: var(--ctl-sm); }
+.noo-rep__count { font: 500 var(--t-caption)/1 var(--ff-mono); letter-spacing: 0.04em; color: var(--muted); }
+.noo-rep__chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.noo-rep__chip { position: relative; display: inline-flex; align-items: center; border-radius: var(--r-pill); cursor: grab; }
+.noo-rep__chip > .noo-chip { padding-right: 26px; }
+.noo-rep__chip[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ground), 0 0 0 4px var(--ink); }
+.noo-rep__chipx { position: absolute; right: 4px; top: 50%; translate: 0 -50%; display: grid; place-items: center; width: 18px; height: 18px; padding: 0; border: 0; border-radius: 50%; background: none; color: inherit; cursor: pointer; }
+.noo-rep__chipx > svg { width: 12px; height: 12px; }
+.noo-rep__chipx:hover { background: color-mix(in oklch, var(--ink) 12%, transparent); }
+.noo-rep__addchip > .noo-chip[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+.noo-rep__edit { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-3) 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
 
 /* @no-origins/ui — organisms (Atomic.md layer 4): a distinct section of a screen. Reads tokens, atoms and molecules. */
 
@@ -1350,7 +1436,7 @@
   overflow: hidden;                                                                          /* a glyph bleeds off the edge */
   color: var(--ink);
 }
-/* Textured gradient cards (Illustrations.md §4b): the card carries the light and the material now that the
+/* Textured gradient cards (Patterns.md §4b): the card carries the light and the material now that the
    drawing on it is a line. The gradient runs −45°, the blob's light; the grain sits on top of it. */
 .noo-bento__cell--quiet {
   background-color: var(--surface);
@@ -1486,6 +1572,27 @@
 @media (forced-colors: active) {
   .noo-menu, .noo-dialog, .noo-table-wrap { border: 1px solid CanvasText; }
   .noo-menu__link[aria-current], .noo-tree__item[aria-selected="true"] > .noo-tree__row { background: Highlight; color: HighlightText; }
+}
+
+/* ── Tree reordering (Admin.md §6.5a E4) and the pattern studio (§6.5b), 2026-09-14 ─────────────────────────── */
+.noo-tree--reorderable .noo-tree__row { user-select: none; }
+.noo-tree__grip { flex: none; display: grid; place-items: center; width: var(--icon-sm); height: var(--icon-sm); color: var(--muted); cursor: grab; opacity: 0; transition: opacity var(--d-fast) var(--ease); }
+.noo-tree__grip > svg { width: 100%; height: 100%; }
+.noo-tree__row:hover > .noo-tree__grip, .noo-tree__item:focus-visible > .noo-tree__row > .noo-tree__grip { opacity: 1; }
+.noo-tree__item[aria-selected="true"] > .noo-tree__row > .noo-tree__grip { color: inherit; }
+.noo-tree__row--into { box-shadow: inset 0 0 0 2px var(--accent-deep); }
+.noo-tree__item.is-dragging > .noo-tree__row { opacity: 0.45; }
+.noo-tree > .noo-drop, .noo-tree__group > .noo-drop { margin: 0 0 0 var(--s-2); }
+
+.noo-ps { display: grid; grid-template-columns: minmax(200px, 1fr) minmax(0, 1.5fr); gap: var(--s-6); align-items: start; }
+.noo-ps__side { display: flex; flex-direction: column; gap: var(--s-4); }
+.noo-ps__preview { position: relative; aspect-ratio: 4 / 3; border-radius: var(--r-lg); background: var(--hue); color: var(--hue-ink); overflow: hidden; box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--ink) 8%, transparent); }
+.noo-ps__preview > .noo-ill { position: absolute; inset: 0; width: 100%; height: 100%; }
+.noo-ps__dials { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4) var(--s-5); }
+.noo-ps__group { display: flex; flex-direction: column; gap: var(--s-3); }
+.noo-ps__group-label { font: 500 var(--t-label)/1 var(--ff-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 640px) {
+  .noo-ps, .noo-ps__dials { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* @no-origins/ui — templates (Atomic.md layer 5): the shells a screen is poured into — Page, the railed page, the canvas. */
@@ -1859,6 +1966,12 @@ a { color: var(--accent-deep); } a:hover { color: var(--ink); }
 .ip-row__line { font: 400 var(--t-caption)/1.3 var(--ff-sans); color: var(--muted); }
 </style>
 <header class="rv-head"><p class="noo-label">the editor · inspector controls · 2 of 3 · pick one by its letter</p><h1 class="noo-h1" style="margin:0">Illustration picker</h1><p class="noo-lead" style="margin:0">The control an <code>illustration</code> prop renders: one of the six measured families from fields.ts, drawn (§3.6 — the parameters are measured, never typed). The thumbnails here are a stand-in field; the real control draws each family with the generator, in the node's own hue.</p></header>
+<style>
+.decided { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; margin: 0 0 28px; padding: 14px 18px; border-radius: var(--r-lg); font: 400 var(--t-body-sm)/1.45 var(--ff-sans); color: var(--ink-2); }
+.decided__eyebrow { font: 500 var(--t-label)/1 var(--ff-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--good); }
+.decided strong { color: var(--ink); }
+.decided__note { flex-basis: 100%; }
+</style><div class="noo-glass noo-glass--1 decided"><span class="decided__eyebrow">decided 2026-09-14 · built</span><strong>A — a grid of drawn thumbnails, named</strong><span>Shipped as <code>PatternPicker</code>: three across so every name reads whole (four truncated them), each tile drawn by the generator in the node's hue, the ring shared with the swatch, and <em>New pattern</em> at the end opening <code>PatternStudio</code>.</span><span class="decided__note">Your two notes changed more than the picker: illustrations are <strong>patterns</strong> now (Patterns.md, <code>Pattern</code>, the <code>pattern</code> prop), eighteen ship instead of six, and a new one is made in the picker and saved to the document — Admin.md §6.5b. Board 5 shows the eighteen.</span></div>
 <div class="rv-group"><h2 class="noo-h2">Five directions</h2><p class="noo-body">Inside the inspector at its real width; the node's hue is peach, the chosen family is work.</p></div>
 <section class="op op--rec">
   <div class="op__spec">

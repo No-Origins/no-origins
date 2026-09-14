@@ -3,10 +3,10 @@ import type { Hue } from "../../tokens/tokens";
 import { cx } from "../../cx";
 import { SIZE, bands, pebbles, polar, ring, rosette, spiral, stack } from "./primitives";
 import { illo, type Family } from "./generator";
-import { fields, type FieldName } from "./fields";
+import { patterns, type PatternName } from "./patterns";
 
 /**
- * Illustration (Illustrations.md) — a named picture, drawn by code from the grammar in primitives.ts.
+ * Pattern (Patterns.md) — a named picture, drawn by code from the grammar in primitives.ts.
  *
  * A fine line in one hue, never a fill (principles 1–2). No two lines in a picture cross or touch (principle 3).
  * EVERY line in a picture has the same weight and the same colour (Bhargav, 2026-09-11) — there are no depths and
@@ -17,13 +17,13 @@ import { fields, type FieldName } from "./fields";
  * Colours are set through `style`, because SVG presentation attributes do not accept `var()`.
  */
 /**
- * @deprecated The original grammar of six primitives — corner OBJECTS, not fields.
+ * @deprecated The original grammar of six primitives — corner OBJECTS, not patterns.
  *
  * Retired 2026-09-10 when Bhargav set the four conditions (fine lines, no fill, textured cards, no colliding
- * lines) and the library was redrawn as fields drawn by the generator. No live widget has used these since.
+ * lines) and the library was redrawn as patterns drawn by the generator. No live widget has used these since.
  * They are kept, and shown beside the real ones at `/fixtures/bento`, until the grammar is deleted.
  *
- * Renamed from `Illustration` on 2026-09-11: the current name belongs to the current system. Registering the
+ * Renamed from `Pattern` on 2026-09-11: the current name belongs to the current system. Registering the
  * retired glyphs as the authorable illustration was a real error, caught by Bhargav on the catalogue page —
  * `work` here is literally `stack(4)`, four capsules, which is what it drew.
  */
@@ -38,10 +38,10 @@ export interface GlyphProps extends Omit<ComponentPropsWithoutRef<"svg">, "name"
   title?: string;
 }
 
-/** A field, by name or by parameters (Illustrations.md §6.0a). What every live widget is drawn from. */
-export interface IllustrationProps extends Omit<ComponentPropsWithoutRef<"svg">, "name"> {
+/** A field, by name or by parameters (Patterns.md §6.0a). What every live widget is drawn from. */
+export interface PatternProps extends Omit<ComponentPropsWithoutRef<"svg">, "name"> {
   /** One of the six measured families. */
-  name?: FieldName;
+  name?: PatternName;
   /** Raw parameters, for a candidate that is not in the library yet — the studio draws this way. */
   family?: Family;
   hue?: Hue;
@@ -66,7 +66,7 @@ const LINE: CSSProperties = { stroke: "var(--ill-line)", fill: "none", strokeWid
 /** Every shape in a picture takes its style from this and nothing else. */
 export type Line = () => CSSProperties;
 
-export interface IllustrationCanvasProps extends Omit<ComponentPropsWithoutRef<"svg">, "children"> {
+export interface PatternCanvasProps extends Omit<ComponentPropsWithoutRef<"svg">, "children"> {
   hue?: Hue;
   title?: string;
   /** Draws the picture. Style every shape with `line()` — never with a weight or a colour of its own. */
@@ -76,10 +76,10 @@ export interface IllustrationCanvasProps extends Omit<ComponentPropsWithoutRef<"
 /**
  * The surface every illustration is drawn on: the viewBox, the light, and the one line style.
  *
- * Split out of `Illustration` so a picture that is not in the library yet can still be drawn on the real thing —
+ * Split out of `Pattern` so a picture that is not in the library yet can still be drawn on the real thing —
  * the studio at `/fixtures/studio` draws its candidates here, and one day so will the model in the blob.
  */
-export function IllustrationCanvas({ hue, title, className, children, ...rest }: IllustrationCanvasProps) {
+export function PatternCanvas({ hue, title, className, children, ...rest }: PatternCanvasProps) {
   const line: Line = () => LINE;
   return (
     <svg
@@ -99,17 +99,17 @@ export function IllustrationCanvas({ hue, title, className, children, ...rest }:
 }
 
 /**
- * Illustration — a FIELD: fine lines in one hue crossing the whole cell and leaving through its edges.
+ * Pattern — a FIELD: fine lines in one hue crossing the whole cell and leaving through its edges.
  *
  * Draws `illo()` from the generator, which is what `SectionWidget` did inline until the parameters moved into the
- * package (`fields.ts`). Give it a `name` for one of the six, or a `family` for a candidate the studio is still
+ * package (`patterns.ts`). Give it a `name` for one of the six, or a `family` for a candidate the studio is still
  * arguing over.
  */
-export function Illustration({ name, family, hue, title, id, placement = "inline", className, ...rest }: IllustrationProps) {
-  const params = family ?? (name ? fields[name] : undefined);
+export function Pattern({ name, family, hue, title, id, placement = "inline", className, ...rest }: PatternProps) {
+  const params = family ?? (name ? patterns[name] : undefined);
   if (!params) return null;
   return (
-    <IllustrationCanvas
+    <PatternCanvas
       hue={hue}
       title={title}
       data-ill={id}
@@ -128,16 +128,16 @@ export function Illustration({ name, family, hue, title, id, placement = "inline
           runs.map((d, j) => <path key={`${i}-${j}`} d={d} style={line()} />),
         )
       }
-    </IllustrationCanvas>
+    </PatternCanvas>
   );
 }
 
 /** @deprecated See {@link GlyphProps}. */
 export function Glyph({ name, hue, title, className, ...rest }: GlyphProps) {
   return (
-    <IllustrationCanvas hue={hue} title={title} className={cx(`noo-ill--${name}`, className)} {...rest}>
+    <PatternCanvas hue={hue} title={title} className={cx(`noo-ill--${name}`, className)} {...rest}>
       {(line) => draw(name, line)}
-    </IllustrationCanvas>
+    </PatternCanvas>
   );
 }
 
@@ -203,3 +203,12 @@ function draw(name: GlyphName, line: Line) {
       );
   }
 }
+
+/** @deprecated Renamed `Pattern` on 2026-09-14 (Admin.md §6.5b — "the word is pattern"); alias removed next minor. */
+export const Illustration = Pattern;
+/** @deprecated Renamed `PatternCanvas`; alias removed next minor. */
+export const IllustrationCanvas = PatternCanvas;
+/** @deprecated See {@link PatternProps}. */
+export type IllustrationProps = PatternProps;
+/** @deprecated See {@link PatternCanvasProps}. */
+export type IllustrationCanvasProps = PatternCanvasProps;

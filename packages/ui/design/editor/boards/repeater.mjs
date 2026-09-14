@@ -1,4 +1,4 @@
-import { head, group, option, insp, chip } from "../lib.mjs";
+import { head, group, option, insp, chip, decided } from "../lib.mjs";
 
 const CSS = `
 .rp { display: flex; flex-direction: column; gap: 2px; }
@@ -36,6 +36,7 @@ export const title = "Repeater";
 export const block = "design";
 export const body = `<style>${CSS}</style>
 ${head({ eyebrow: "the editor · inspector controls · 3 of 3 · pick one by its letter", title: "Repeater", lead: "The control a <code>list</code> prop renders (§3.1: “reorderable rows of <code>of</code>, capped at <code>max</code>”). Two shapes of list exist in the registry: lists of text — BlockCard’s <code>details</code>, Menu’s items — and lists of objects — BlockCard’s <code>chips</code> <code>{ label, hue }</code>, Select’s options, RadioGroup’s options. The sample is BlockCard’s chips, three of a maximum five." })}
+${decided({ pick: "A, with C as the compact form", built: "Shipped as <code>Repeater</code> with <code>density=\"rows\"</code> (hairlines, grip, ×, ghost Add, the count) and <code>density=\"chips\"</code> (a Chip per item, the chosen chip's fields below). Alt + ↑/↓ and drag; the drop is the one accent line the Tree shares." })}
 ${group("Five directions", "Inside the inspector at its real width.")}
 ${option({ id: "A", name: "Rows on hairlines, a grip, an add button", rec: true,
   desc: "One row per item; the item’s fields inline, from the same schema the inspector already renders (a text → Field, a hue → the swatch or a Select); a grip to drag, × to remove, a ghost “Add” under the last row, the count against `max` in a caption. Drop position is a 2px accent line.",

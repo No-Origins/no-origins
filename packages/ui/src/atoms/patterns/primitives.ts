@@ -1,9 +1,9 @@
 /**
- * The grammar (Illustrations.md §6): pure geometry, no React, no randomness at render. Everything here returns
+ * The grammar (Patterns.md §6): pure geometry, no React, no randomness at render. Everything here returns
  * numbers or path data on a 240 × 240 canvas; Illustration.tsx strokes it with the hue's line colour.
  *
  * Everything in here draws with a LINE, and every primitive owes the same guarantee: within one primitive no two
- * lines ever cross or touch (Illustrations.md principle 3). Each function says below how it keeps that promise;
+ * lines ever cross or touch (Patterns.md principle 3). Each function says below how it keeps that promise;
  * `e2e/.mcp/probe11.mjs` measures it on the rendered SVG.
  */
 export const SIZE = 240;

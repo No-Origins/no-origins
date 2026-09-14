@@ -1,4 +1,6 @@
-# Illustrations — a living document
+# Patterns — a living document
+
+> **Renamed 2026-09-14** from *Illustrations.md* on Bhargav's note (Admin.md §6.5b): the word is *pattern*. The text below still says "illustration" where it was written that way; the principles are unchanged. The library is eighteen now (§6.0a), and a pattern can be made in the editor (Scene-Schema.md §3.6).
 
 *How No Origins draws pictures. Started 2026-09-10. Every illustration on the platform is code; this is the document that code is checked against, and the library at the end grows every time one is added.*
 
@@ -178,6 +180,29 @@ illo({ seed, flow, scale, swing, breath, waves, drift, spread, taper, curl, temp
 **What v1 is.** An ordered family of graphs that never cross, each line its own curve at its own distance from the last, laid through whatever the words leave free, with three devices (`curl`, `tempo`, `pinch`) that change the kind of family and three dials (`drift`, `spread`, `taper`) that change its degree. One function, so consistency is a property of the code rather than of anyone's care.
 
 **What v1 is not, and none of these are oversights.** It does not break a line at a word — that was built, measured and rejected (§10). It does not fill anything — the ramp between lines exists behind a control and is not part of v1 until principle 2 is rewritten or it is dropped. It does not draw the six library pictures yet: **v1 lives in the studio, and nothing a visitor sees uses it.** That is the whole of the next step.
+
+### 6.0b The library at eighteen — 2026-09-14
+
+> *"Let's have 18 pre defined illustrations. So, while deciding give me controls to create new if I want to."* — Bhargav, on the inspector-controls canvas. And, beside it: *"Rename 'Illustrations' to 'Patterns'."*
+
+The six measured for the portfolio widgets keep their names and their `words`. Twelve more are named for what shapes them, because a library pattern belongs to no section and no composition; they carry no `words`, since the boxes a drawing keeps clear are the cell's and the editor measures them where the pattern lands (Scene-Schema.md §3.6). All eighteen live in `packages/ui/src/atoms/patterns/patterns.ts` and are drawn on the *Inspector Controls* canvas, board 5, in peach and across the seven hues.
+
+| Pattern | What shapes it | The call, beyond `seed · flow · scale · swing · breath` |
+|---|---|---|
+| `sweep` | curl at the top, nothing else — one long turn | `curl 1` |
+| `fan` | full taper with a little curl — gathers at one edge, opens at the other | `taper 1 · curl 0.3` |
+| `waist` | pinch in — squeezes through the middle and flares at both ends | `pinch −0.8` |
+| `bloom` | pinch out — flares in the middle and gathers at both ends | `pinch 0.8` |
+| `quicken` | tempo — calm at one edge, quick at the other | `tempo 0.9 · drift 0.25` |
+| `tide` | near-horizontal, a long curl, a slow change of pace | `flow 12 · curl 0.7 · tempo 0.3` |
+| `hush` | the widest breath and the least drift — a few lines, far apart | `breath 52 · drift 0.2 · spread 0.25` |
+| `lean` | forty-five degrees and a tight breath — an angle costs lines, breath buys them back | `flow 45 · breath 19 · curl 0.35` |
+| `swell` | spread at the top — the rhythm does all the work | `spread 1 · drift 0.3` |
+| `ridge` | drift at the top with three waves — every line its own crest | `waves 3 · drift 1 · spread 0.3` |
+| `gather` | taper and a pinch — the family closes toward one corner | `taper 0.6 · pinch −0.5` |
+| `arc` | curl at the top with a taper — a fan of arcs | `curl 1 · taper 0.4` |
+
+**A nineteenth is made in the picker.** The editor's `PatternPicker` ends with *New pattern*, which opens the `PatternStudio`: the twelve geometry dials on a live thumbnail, and a name. Save writes the `Family` into the document's own `patterns` map (Scene-Schema.md §1). This is the studio of §8 with the round collapsed to one person and one picture — which is fine, because every setting is a legal picture by construction (§6.0) and the two measurements never became dials. A document pattern worth keeping for everyone is promoted into `patterns.ts` by a commit, so the library stays a promise (§6.0a). §7's "how to add one" still describes that promotion.
 
 ### 6.1 The old grammar
 

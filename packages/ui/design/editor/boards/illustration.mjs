@@ -1,4 +1,4 @@
-import { head, group, option, insp, illo, chip } from "../lib.mjs";
+import { head, group, option, insp, illo, chip, decided } from "../lib.mjs";
 
 const NAMES = [["status", "a wide sweep — curl alone"], ["work", "taper: the family opens one way"], ["cases", "pinch: bows in the middle"], ["projects", "quick tempo, low drift"], ["interests", "slow swell, high spread"], ["philosophy", "steady, near-parallel"]];
 const CSS = `
@@ -34,6 +34,7 @@ export const title = "Illustration picker";
 export const block = "design";
 export const body = `<style>${CSS}</style>
 ${head({ eyebrow: "the editor · inspector controls · 2 of 3 · pick one by its letter", title: "Illustration picker", lead: "The control an <code>illustration</code> prop renders: one of the six measured families from fields.ts, drawn (§3.6 — the parameters are measured, never typed). The thumbnails here are a stand-in field; the real control draws each family with the generator, in the node's own hue." })}
+${decided({ pick: "A — a grid of drawn thumbnails, named", built: "Shipped as <code>PatternPicker</code>: three across so every name reads whole (four truncated them), each tile drawn by the generator in the node's hue, the ring shared with the swatch, and <em>New pattern</em> at the end opening <code>PatternStudio</code>.", note: "Your two notes changed more than the picker: illustrations are <strong>patterns</strong> now (Patterns.md, <code>Pattern</code>, the <code>pattern</code> prop), eighteen ship instead of six, and a new one is made in the picker and saved to the document — Admin.md §6.5b. Board 5 shows the eighteen." })}
 ${group("Five directions", "Inside the inspector at its real width; the node's hue is peach, the chosen family is work.")}
 ${option({ id: "A", name: "A grid of drawn thumbnails, named", rec: true,
   desc: "Six families in a 3 × 2 grid, each drawn in the node’s hue at 84px with its name under; the chosen one wears the ink ring. Picking one redraws the node on the canvas at once.",

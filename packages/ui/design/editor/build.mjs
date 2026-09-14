@@ -6,8 +6,9 @@ import * as hue from "./boards/hue.mjs";
 import * as illustration from "./boards/illustration.mjs";
 import * as repeater from "./boards/repeater.mjs";
 import * as tree from "./boards/tree.mjs";
+import * as patterns from "./boards/patterns.mjs";
 
-const boards = { Main: main, Hue: hue, Illustration: illustration, Repeater: repeater, Tree: tree };
+const boards = { Main: main, Hue: hue, Illustration: illustration, Repeater: repeater, Tree: tree, Patterns: patterns };
 for (const [name, b] of Object.entries(boards)) {
   fs.writeFileSync(`${name}.dc.html`, page({ title: b.title, body: `<style>${OPTION_CSS}</style>\n${b.body}`, block: b.block }));
 }

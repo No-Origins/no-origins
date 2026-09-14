@@ -2,7 +2,7 @@
 
 *The control surface for the platform: `admin.no-origins.com`. Opened 2026-09-11.*
 
-Companion documents: **Brand.md** (what No Origins is), **Design-System.md** (the system this configures), **Illustrations.md** and **Character.md** (two of its libraries), **Scene-Schema.md** (the document format the editor writes and every project reads). This document decides the admin; Scene-Schema.md decides the contract.
+Companion documents: **Brand.md** (what No Origins is), **Design-System.md** (the system this configures), **Patterns.md** and **Character.md** (two of its libraries), **Scene-Schema.md** (the document format the editor writes and every project reads). This document decides the admin; Scene-Schema.md decides the contract.
 
 ---
 
@@ -49,7 +49,7 @@ This is the rule that makes the admin possible at all. If a project could reach 
 | Layer | Exists now | Planned |
 |---|---|---|
 | **Projects** | `portfolio` → `bhargav.no-origins.com` (step 12 of Design-System.md §14; on the canvas, not yet DB-backed) | `design` → `design.no-origins.com` (§14 step 14) |
-| **Systems** | Design system (`@no-origins/ui`) · Canvas runtime (`@no-origins/ui/canvas`) · Theme (`theme.ts`, four axes, §10) · Illustration generator (Illustrations.md §6) · Review loop (Playwright, CLAUDE.md) | **Document** (Scene-Schema.md) · **Publishing** (§9) · **Identity & storage** (Supabase, §8) · Chat/agent (§14 step 15) |
+| **Systems** | Design system (`@no-origins/ui`) · Canvas runtime (`@no-origins/ui/canvas`) · Theme (`theme.ts`, four axes, §10) · Illustration generator (Patterns.md §6) · Review loop (Playwright, CLAUDE.md) | **Document** (Scene-Schema.md) · **Publishing** (§9) · **Identity & storage** (Supabase, §8) · Chat/agent (§14 step 15) |
 | **Products** | Six illustration families, registered into the illustration system by name · the avatar (Character.md), registering into the blob system | Component packs · the browser-side model · an OG-image renderer · a contact handler |
 
 The admin itself is a **System** by its own test — nobody lands on it as a visitor, every project shares it. It is the *face* of the Systems layer, which is why it is not listed as a project.
@@ -215,7 +215,7 @@ Where a height does still get written — a canvas panel outside a widget — th
 | `probe12` | A widget has anything but exactly one `fill` cell — the rule `SectionWidget` used to hold as a prop | `e2e/review.spec.ts`, run by `pnpm review` on every route |
 | fit | Content overflows a fixed 4 × 3 widget | not built |
 
-**Found while building `probe12` (2026-09-11): `e2e/.mcp/` is gitignored, so `probe10` and `probe11` are not in the repository.** Design-System.md and Illustrations.md both cite them as the thing that enforces an illustration rule, and they exist only on the machine that wrote them — a fresh clone has the rules and none of the checks. `probe12` was therefore written into the review spec instead, where `pnpm review` runs it on all sixteen routes automatically and CLAUDE.md's loop already requires it after any UI change. **The other two should move there too**; until they do, two of the four rules above are enforced by memory.
+**Found while building `probe12` (2026-09-11): `e2e/.mcp/` is gitignored, so `probe10` and `probe11` are not in the repository.** Design-System.md and Patterns.md both cite them as the thing that enforces an illustration rule, and they exist only on the machine that wrote them — a fresh clone has the rules and none of the checks. `probe12` was therefore written into the review spec instead, where `pnpm review` runs it on all sixteen routes automatically and CLAUDE.md's loop already requires it after any UI change. **The other two should move there too**; until they do, two of the four rules above are enforced by memory.
 
 It was also verified by making it fail: a widget with two `fill` cells was added to a fixture, the sweep failed with `widget "two loud cells" has 2 loud cells, expected exactly 1`, and the control was removed. A check that has never failed is decoration.
 
@@ -235,6 +235,29 @@ Read against Atomic.md after the release. §6.1–6.4 stand; six things moved, r
 | Footer bar: theme · block accent · zoom · desktop/mobile · grid | The block accents are the apps: `portfolio · design · admin` (D5); every control exists as `Segmented` or `ThemeSwitch` | Publish confirms in a `Dialog` whose one field is the required version label (R1); a speaking blob in document mode is a `Speaker` |
 
 The order of work that follows: the three inspector controls and `Tree` reordering in the package, then the `ToolScreen` sidebar, then the editor screen itself at `/projects/portfolio/edit` — palette, canvas, inspector, outline, autosave — with the probes gating Publish as §6.3 says.
+
+#### 6.5a The inspector controls — decided 2026-09-14
+
+Four option boards (five directions each, drawn in the package's CSS inside a 320px inspector) on the canvas *No Origins Inspector Controls*. Bhargav: *"I'm happy with your recommendations"*, plus two notes on the picker board that changed more than the picker (§6.5b). Each pick is a rule; the control is built to the rule and not the other way round.
+
+| Board | Pick | The rule |
+|---|---|---|
+| E1 · hue | **A** — seven dots, a ring on the chosen one | `HueSwatch`: the `Dot` atom at 20px in each hue's deep tier, in one row; the chosen one wears a 2px ink ring with a gap; the hue's name reads beside the row. Where a schema allows `accent`, an eighth glass dot with an ink hairline. A radiogroup — arrow keys move, Space picks. Every `hue` prop renders it. **Not** the seven-blob swatch §6.1 asked for: Brand.md makes the blob the mark of an agent, and seven sleeping faces in a form are seven agents that aren't there |
+| E2 · pattern | **A** — a grid of drawn thumbnails, named | `PatternPicker`: the library's patterns in a grid, each drawn by the generator in the node's own hue with its name under, the chosen one in the same ink ring as the swatch. A picture is chosen by looking; the canvas node is the live preview. Three across at the inspector's width, so every name reads whole — four across truncated them on the first fixture; eighteen (§6.5b) is six rows and the inspector scrolls |
+| E3 · list | **A** — rows on hairlines, a grip, an add button; **C** as its compact form | `Repeater`: one row per item; the item's fields inline, rendered from the same schema the inspector already renders; a grip to drag, × to remove, a ghost *Add* under the last row, the count against `max` in a caption. `density="chips"` is the same component for a list of text ≤ 24 or `{label, hue}` — each item a Chip with a remove mark. Alt + ↑/↓ reorders from the keyboard |
+| E4 · outline | **A** — keyboard moves and drag, one rule | `Tree` gains reordering: on the focused row Alt + ↑/↓ moves it among its siblings, Alt + ←/→ changes its depth; a grip appears on hover and focus; drag for the mouse. The tree reports the new order and the host writes the document — DOM order stays the source of truth |
+
+**One drop indicator.** Repeater and Tree show a drop as the same 2px accent line with a dot at its head. One gesture for "this goes here" across the editor.
+
+**Two corrections to Scene-Schema §3.1 the release made**, recorded on the read-first board: `enum` renders a `Segmented` (≤ 4) or a `Select` (> 4), never a chip row, because a chip is a mark and not a control (Atomic.md D3); `boolean` renders a `Checkbox`, because a `Toggle` in a form beside fields reads as a setting that applies at once, and an inspector value applies on save.
+
+#### 6.5b Patterns, not illustrations — Bhargav's notes, 2026-09-14
+
+Two sticky notes beside the picker board: *"Rename 'Illustrations' to 'Patterns'"* and *"Let's have 18 pre defined illustrations. So, while deciding give me controls to create new if I want to."* Three rules follow.
+
+1. **The word is pattern.** The component is `Pattern` (`Illustration` stays as a deprecated alias for one minor, like `Rail` and `Intro`); the prop type is `pattern`; the library is `patterns.ts` (`patterns`, `patternNames`, `PatternName`); the picker is `PatternPicker`; the document is `Patterns.md`. The `noo-ill` class prefix follows at the next major, when the aliases go.
+2. **Eighteen predefined patterns.** The six measured for the portfolio widgets keep their names and their `words`. Twelve more are named for what shapes them and carry no `words` — words belong to a composition, not a pattern, and the editor measures them (§3.6). All eighteen ship in the package, drawn on a review board in every hue, and any of them can be replaced by a studio round (Patterns.md §8).
+3. **A new pattern is made in the picker.** The grid ends with *New pattern*, which opens a `Dialog`: the geometry dials on a live thumbnail — `seed · flow · scale · swing · breath · waves · drift · spread · taper · curl · tempo · pinch` — and a name. Save adds it to the **document's own patterns** (Scene-Schema §1 gains `patterns: Record<name, Family>`), listed after the package's eighteen and drawn the same way. This amends Scene-Schema §3.6: the geometry is authorable, because the generator makes every setting a legal picture by construction; `flow` is chosen with its cost shown, as the panel already does; `words` stays the measurement the editor writes back. A document pattern that should be everyone's is promoted to `patterns.ts` in code — a commit, so the library is still a promise.
 
 ### 6.4 Save and publish
 

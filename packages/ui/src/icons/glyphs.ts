@@ -14,6 +14,7 @@ export {
   XIcon as close,
   PushPinIcon as pin,
   SlidersHorizontalIcon as sliders,
+  DotsSixVerticalIcon as grip,
   UserIcon as user,
   ArchiveIcon as archive,
   HeartIcon as heart,

@@ -9,7 +9,7 @@ import { cx } from "../cx";
  *
  *   Photographs are now allowed — portraits, case-study screenshots, anything genuinely photographic.
  *   **Illustrations are still code.** The generator, the six families and the one-line grammar are unchanged
- *   (Illustrations.md); nothing here makes a drawn picture shippable as a raster.
+ *   (Patterns.md); nothing here makes a drawn picture shippable as a raster.
  *
  * It is a plain `<img>`, never `next/image`: §11.2 rule 1 says the package imports React and its own CSS and
  * nothing else, so an Elixir or Vite host can use it unchanged. Optimisation is the host's job, exactly as fonts

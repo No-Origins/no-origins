@@ -12,7 +12,7 @@ import type { Hue } from "../tokens/tokens";
  * The rule between markers is drawn by the step, not by the container, so it stops at the last one without the
  * container having to know how many there are — `:not(:last-child)` does what a `steps.length` check would.
  *
- * Structure is information (Illustrations.md principle 8 in another key): use this only where the order is real
+ * Structure is information (Patterns.md principle 8 in another key): use this only where the order is real
  * and the reader needs it. A list of four features is a list, not a sequence, and numbering it is decoration.
  */
 export interface StepsProps extends ComponentPropsWithoutRef<"ol"> {

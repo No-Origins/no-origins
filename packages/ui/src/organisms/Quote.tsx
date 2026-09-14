@@ -13,7 +13,7 @@ import { cx } from "../cx";
  * change with them.
  *
  * `figure` is the number above it — a stat the quote then makes human ("98% on-time delivery", and then the
- * sentence that says what that felt like). Honest counts only (Illustrations.md principle 8): a figure here is a
+ * sentence that says what that felt like). Honest counts only (Patterns.md principle 8): a figure here is a
  * measurement or it is absent.
  */
 // `role` here is a job title, which collides with the ARIA attribute of the same name — omitted rather

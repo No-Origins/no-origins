@@ -1,4 +1,4 @@
-import { BentoCell, Chip, fields, type Family, type Hue } from "@no-origins/ui";
+import { BentoCell, Chip, patterns, type Family, type Hue } from "@no-origins/ui";
 import { throughLine } from "./work";
 import { sampled, site } from "./site";
 
@@ -30,7 +30,7 @@ import { sampled, site } from "./site";
  * Status is the one deliberately off its cheapest angle: 90° would cost it 37% and 105° costs 49%, and the twelve
  * points buy a lean that no other widget on the ring has. That trade is only affordable because of a COPY change —
  * its caption was “ways to reach me”, which cost 65% at every angle; “ways in” costs 37% at the best one. Two
- * words bought more picture than any parameter in this file can. Caption length is composition (Illustrations.md §10).
+ * words bought more picture than any parameter in this file can. Caption length is composition (Patterns.md §10).
  *
  * `flow` is a MEASUREMENT, not a preference (`node e2e/.mcp/flow.mjs`) — it decides how much of the cell the words
  * cost, and for a long caption that is most of it. `words` is measured too (`node e2e/.mcp/words.mjs /fixtures/bento`)
@@ -66,7 +66,7 @@ export const sections: SectionDef[] = [
     eyebrow: "status",
     figure: { value: "4", label: "ways in" },
     signature: "curl alone — one wide sweep, the most open of the six",
-    illustration: fields.status,
+    illustration: patterns.status,
     cells: (
       <>
         <BentoCell><p className="noo-label">hiring</p><p className="noo-bento__title">Recognise the work</p></BentoCell>
@@ -86,7 +86,7 @@ export const sections: SectionDef[] = [
     eyebrow: "work",
     figure: { value: "4", label: "roles" },
     signature: "taper — the family opens out along its travel, four roles going somewhere",
-    illustration: fields.work,
+    illustration: patterns.work,
     cells: (
       <>
         <BentoCell><p className="noo-label">now</p><p className="noo-bento__title"><Dot hue="peach" /> Radise</p></BentoCell>
@@ -109,7 +109,7 @@ export const sections: SectionDef[] = [
     eyebrow: "case studies",
     figure: { value: "3", label: "worth telling" },
     signature: "pinch — a waist mid-travel, and the nearest, densest field of the six",
-    illustration: fields.cases,
+    illustration: patterns.cases,
     cells: (
       <>
         <BentoCell span={W([2, 1]) as [number, number]}><p className="noo-label">hashnode</p><p className="noo-bento__title">Neptune</p></BentoCell>
@@ -128,7 +128,7 @@ export const sections: SectionDef[] = [
     eyebrow: "projects",
     figure: { value: "0", label: "shipped yet" },
     signature: "no device at all, and the widest breath — absence said with room, which is the only vocabulary v1 has for it",
-    illustration: fields.projects,
+    illustration: patterns.projects,
     cells: (
       <>
         <BentoCell span={W([2, 1]) as [number, number]}><p className="noo-label">why</p><p className="noo-bento__text">Deleted for a clean slate.</p></BentoCell>
@@ -144,7 +144,7 @@ export const sections: SectionDef[] = [
     eyebrow: "interests",
     word: <>outside<br />the work</>,
     signature: "curl and tempo, both at half — the family turns and quickens across itself",
-    illustration: fields.interests,
+    illustration: patterns.interests,
     cells: (
       <>
         <BentoCell span={W([2, 2]) as [number, number]}>
@@ -167,7 +167,7 @@ export const sections: SectionDef[] = [
     eyebrow: "philosophy",
     word: <>how I<br />build</>,
     signature: "temperament — no device, but the lines differ from one another more than anywhere else",
-    illustration: fields.philosophy,
+    illustration: patterns.philosophy,
     cells: (
       <>
         <BentoCell span={W([2, 2]) as [number, number]}>

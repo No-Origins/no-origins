@@ -1,7 +1,7 @@
 import { SIZE, mulberry32 } from "./primitives";
 
 /**
- * THE GENERATOR — v1, frozen 2026-09-11 (Illustrations.md §6.0 and §6.0a).
+ * THE GENERATOR — v1, frozen 2026-09-11 (Patterns.md §6.0 and §6.0a).
  *
  * One function draws every illustration on the platform. That is the whole argument for it: six primitives freely
  * composed give six ways to be inconsistent, and one function with parameters cannot be inconsistent because there
@@ -22,7 +22,7 @@ import { SIZE, mulberry32 } from "./primitives";
  * is closer than MIN_GAP it eases `drift`, `spread` and `tempo` together and measures again. Nothing is random —
  * the same parameters always settle the same way, on the server and on the client.
  *
- * Eleven studio rounds are behind every number here; the log is Illustrations.md §9, and the retired mechanisms
+ * Eleven studio rounds are behind every number here; the log is Patterns.md §9, and the retired mechanisms
  * (`warpField`, `waveField`, `offsetField`) stayed in the studio so that record still draws what it showed.
  */
 

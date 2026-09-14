@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
-import { BentoFigure, IllustrationCanvas, Section, SectionHeader, type Hue, type Line } from "@no-origins/ui";
+import { BentoFigure, PatternCanvas, Section, SectionHeader, type Hue, type Line } from "@no-origins/ui";
 import { rounds, type Round, type Option } from "./rounds";
 
 export const metadata: Metadata = { title: "Illustration studio", robots: { index: false } };
@@ -10,8 +10,8 @@ const settled: Array<{ rule: string; from: string }> = [
   { rule: "Fine lines, never fill", from: "Bhargav, 2026-09-10" },
   { rule: "No two lines touch, in any picture", from: "Bhargav, 2026-09-10 — measured by probe11" },
   { rule: "The card carries the colour, the gradient and the grain", from: "follows from “no fill”" },
-  { rule: "One hue, lit from the top-left like the blob", from: "Illustrations.md principles 1 and 5" },
-  { rule: "Honest counts, or say absence", from: "Illustrations.md principle 8" },
+  { rule: "One hue, lit from the top-left like the blob", from: "Patterns.md principles 1 and 5" },
+  { rule: "Honest counts, or say absence", from: "Patterns.md principle 8" },
   ...rounds.flatMap((r) => (r.rules ?? []).map((rule) => ({ rule, from: `round ${r.n} · chose ${r.chosen}` }))),
 ];
 
@@ -40,9 +40,9 @@ function Tile({
   return (
     <div className={`noo-bento__cell noo-bento__cell--${tone} ${cell ? "" : "flex items-center justify-center"}`} style={tileStyle(hue, px)}>
       {/* data-ill names the candidate for probe11, which holds it to principle 3 like anything in the library */}
-      <IllustrationCanvas hue={hue} data-ill={id} preserveAspectRatio={place === "field" ? "xMidYMid slice" : undefined} className={placeClass[place]}>
+      <PatternCanvas hue={hue} data-ill={id} preserveAspectRatio={place === "field" ? "xMidYMid slice" : undefined} className={placeClass[place]}>
         {draw}
-      </IllustrationCanvas>
+      </PatternCanvas>
       {cell ? (
         <>
           <p className="noo-label">{cell.label}</p>
@@ -141,7 +141,7 @@ export default function Studio() {
           label="studio · illustrations"
           title="The studio"
           titleId="studio-title"
-          lead="Five candidates a round, drawn by the real component on the real tokens. Pick one by its number, say what you liked or didn't, and the next batch starts from what that pick implies. Every round and every rule it produced is written down in Illustrations.md §9, so the library keeps its reasons."
+          lead="Five candidates a round, drawn by the real component on the real tokens. Pick one by its number, say what you liked or didn't, and the next batch starts from what that pick implies. Every round and every rule it produced is written down in Patterns.md §9, so the library keeps its reasons."
         />
         <div className="grid gap-5 md:grid-cols-2">
           <div className="noo-card">

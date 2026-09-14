@@ -95,8 +95,19 @@ export { Table } from "./organisms/Table";
 export type { TableProps, TableColumn } from "./organisms/Table";
 export { Dialog, Sheet } from "./organisms/Dialog";
 export type { DialogProps } from "./organisms/Dialog";
-export { Tree } from "./organisms/Tree";
-export type { TreeProps, TreeNode } from "./organisms/Tree";
+export { Tree, moveTreeNode } from "./organisms/Tree";
+export type { TreeProps, TreeNode, TreeMove } from "./organisms/Tree";
+// The inspector controls (Admin.md §6.5a, 2026-09-14).
+export { HueSwatch } from "./molecules/HueSwatch";
+export type { HueSwatchProps, HueValue } from "./molecules/HueSwatch";
+export { PatternPicker, libraryPatterns } from "./molecules/PatternPicker";
+export type { PatternPickerProps, PatternOption } from "./molecules/PatternPicker";
+export { Range } from "./molecules/Range";
+export type { RangeProps } from "./molecules/Range";
+export { Repeater } from "./molecules/Repeater";
+export type { RepeaterProps } from "./molecules/Repeater";
+export { PatternStudio, tidyFamily } from "./organisms/PatternStudio";
+export type { PatternStudioProps } from "./organisms/PatternStudio";
 export { SectionHeader } from "./molecules/SectionHeader";
 export type { SectionHeaderProps } from "./molecules/SectionHeader";
 export { Footer } from "./organisms/Footer";
@@ -108,14 +119,16 @@ export type { ThemeChoice } from "./tokens/theme";
 
 export { Bento, BentoCell, BentoFigure } from "./organisms/Bento";
 export type { BentoProps, BentoCellProps, BentoFigureProps, BentoTone } from "./organisms/Bento";
-export { Illustration, IllustrationCanvas, Glyph, glyphNames } from "./atoms/illustrations/Illustration";
-export type { IllustrationProps, IllustrationCanvasProps, GlyphProps, GlyphName, Line } from "./atoms/illustrations/Illustration";
-export { fields, fieldNames } from "./atoms/illustrations/fields";
-export type { FieldName } from "./atoms/illustrations/fields";
-export * as ill from "./atoms/illustrations/primitives";
-// The generator (Illustrations.md §6.0a) — v1 of the one function that draws every illustration.
-export { illo, illoLines, poly } from "./atoms/illustrations/generator";
-export type { Family, Drawn, Pt } from "./atoms/illustrations/generator";
+// Patterns (Patterns.md; Admin.md §6.5b renamed them from illustrations on 2026-09-14 — the old names are aliases
+// for one minor).
+export { Pattern, PatternCanvas, Glyph, glyphNames, Illustration, IllustrationCanvas } from "./atoms/patterns/Pattern";
+export type { PatternProps, PatternCanvasProps, IllustrationProps, IllustrationCanvasProps, GlyphProps, GlyphName, Line } from "./atoms/patterns/Pattern";
+export { patterns, patternNames, patternNotes, fields, fieldNames } from "./atoms/patterns/patterns";
+export type { PatternName, FieldName } from "./atoms/patterns/patterns";
+export * as ill from "./atoms/patterns/primitives";
+// The generator (Patterns.md §6.0a) — v1 of the one function that draws every pattern.
+export { illo, illoLines, poly } from "./atoms/patterns/generator";
+export type { Family, Drawn, Pt } from "./atoms/patterns/generator";
 export { Placeholder } from "./atoms/Placeholder";
 export type { PlaceholderProps } from "./atoms/Placeholder";
 export { BlockCard } from "./organisms/BlockCard";

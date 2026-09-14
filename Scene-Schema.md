@@ -40,6 +40,9 @@ Nothing in `@no-origins/ui/canvas` changes. The adapter's output is exactly what
   "kind": "canvas",                  // "canvas" | "page"
   "grid": { "box": 160, "pad": 8 },  // Design-System.md §8; echoed so a doc is self-describing
   "meta": { "title": "…", "description": "…" },
+  "patterns": {                      // the document's own patterns, made in the studio (Admin.md §6.5b); the
+    "tide-2": { "seed": 19, "flow": 12, "scale": 1.3, "swing": 44, "breath": 30, "curl": 0.7, "tempo": 0.3 }
+  },                                 // package's eighteen need no entry — a `pattern` prop names either
 
   "nodes": [
     {
@@ -55,7 +58,7 @@ Nothing in `@no-origins/ui/canvas` changes. The adapter's output is exactly what
         "hue": "peach",
         "eyebrow": "WORK EXPERIENCE",
         "figure": { "value": "4", "label": "roles" },
-        "illustration": "taper"
+        "pattern": "fan"           // one of the eighteen, or a key of `patterns` above
       },
       "slots": {
         "children": [ /* child nodes, same shape */ ]
@@ -242,15 +245,15 @@ One schema per component, doing three jobs: it **validates** a document, it **ge
 
 | Type | Control | Notes |
 |---|---|---|
-| `hue` | The seven-blob swatch row | Values from `tokens.ts` `hues` — `pink · green · grey · lavender · peach · yellow · blue`, plus `accent` where the component allows it. Never a free colour: R3 put colour in code |
+| `hue` | `HueSwatch` — seven 20px dots in a row, an ink ring on the chosen one, the name beside (Admin.md §6.5a E1; was "the seven-blob swatch") | Values from `tokens.ts` `hues` — `pink · green · grey · lavender · peach · yellow · blue`, plus `accent` as an eighth glass dot where the component allows it. Never a free colour: R3 put colour in code |
 | `text` | `Field`, with the live character count against `max` | Plain string. No markup — a `ReactNode` prop arrives here |
 | `markdown` | Text area, with the ⌘K directive control | §3.5 |
-| `enum` | Chip row, `pressed` on the selection | |
+| `enum` | `Segmented` up to four options, `Select` above four (Admin.md §6.5a; was "chip row" — a chip is a mark, not a control) | |
 | `number` | `Field`, mono, units stated — boxes, canvas units or ms | |
-| `boolean` | `Toggle` | |
-| `list` | Reorderable rows of `of`, capped at `max` | `details`, `chips` |
+| `boolean` | `Checkbox` (Admin.md §6.5a; was `Toggle` — a toggle applies at once, an inspector value applies on save) | |
+| `list` | `Repeater` — rows on hairlines with a grip, the item's fields inline, a ghost *Add*, the count against `max`; `density="chips"` for short text and `{label, hue}` (Admin.md §6.5a E3) | `details`, `chips` |
 | `object` | A labelled group of the above | `figure: {value, label, size}` |
-| `illustration` | The six named families, drawn | §3.6 |
+| `pattern` | `PatternPicker` — the library's patterns drawn in the node's hue, named, plus *New pattern* (Admin.md §6.5a E2, §6.5b; was `illustration`) | §3.6 |
 | `blobSize` | The seven names from `blobSizes`, or a number | `favicon · inline · nav · sm · md · lg · hero` |
 | `href` | `Field` plus an internal/external toggle | Internal resolves to a view, so it pans rather than routing |
 | `ref` | Picker of the project's content keys | §3.4 |
@@ -279,7 +282,7 @@ The authorable surface of all twenty-two. `*` marks required; a number in bracke
 | **Placeholder** | `title`* (80) · `draft` | `body`: blocks |
 | **Figure** | `value`* (4) · `label` (20) · `size` lg \| md | — |
 | **Blob** | `variant` character \| logotype \| glass · `size` · `state` idle \| sleep · `hue` · `label` (40) · `blink` · `look` · `breathe` · `refraction` | — |
-| **Illustration** | `name`* (one of six) · `hue` · `title` (60) | — |
+| **Pattern** (was Illustration) | `name`* (one of the eighteen, or a document pattern) · `hue` · `title` (60) | — |
 | **Intro** ★ | `title`* (60) · `lead` (160, accepts a `ref`) | — |
 | **CellHead** ★ | `label` (24) · `title` (40) · `dot` (hue) | — |
 | **BlockCard** | `hue`* · `title`* (80) · `line`* (160) · `meta` (40) · `details` (list of text ≤ 6) · `chips` (list of {label, hue} ≤ 5) · `href` · `state` idle \| sleep | — |
@@ -380,11 +383,11 @@ Validation: `view` must resolve (§6 rule 4), so a pan-link to a deleted section
 
 ### 3.6 Measured parameters are not authorable
 
-`Illustration` takes a `Family` — fourteen parameters. Two of them are **measurements, not choices**: `flow` decides how much of the cell the words cost and is read off `e2e/.mcp/flow.mjs`; `words` is the text boxes the drawing must keep clear and is read off `words.mjs`. Illustrations.md is emphatic that neither is ever estimated by eye, and each has already cost a round.
+`Illustration` takes a `Family` — fourteen parameters. Two of them are **measurements, not choices**: `flow` decides how much of the cell the words cost and is read off `e2e/.mcp/flow.mjs`; `words` is the text boxes the drawing must keep clear and is read off `words.mjs`. Patterns.md is emphatic that neither is ever estimated by eye, and each has already cost a round.
 
 An inspector with fourteen sliders would invite exactly that. So **`illustration` is authorable only as one of the six named families** — `status · work · cases · projects · interests · philosophy` — and the parameter sets stay in `content/sections.tsx`, in code, where the measurements live beside the numbers they produced.
 
-This is the same shape as R3: the values that come from measurement or from a design round are a code change; the admin names one and does not tune it. A seventh family is a studio round (Illustrations.md §8), not a slider drag.
+This is the same shape as R3: the values that come from measurement or from a design round are a code change; the admin names one and does not tune it. A seventh family is a studio round (Patterns.md §8), not a slider drag.
 
 **Two corrections, both found on the catalogue page 2026-09-11 (Bhargav).**
 
@@ -393,6 +396,8 @@ The package held **two** illustration systems and the registry named the wrong o
 And the six parameter sets lived in `apps/portfolio/src/content/sections.tsx` — **in the app**. A document can only name what the package exports, so an illustration could be placed in hand-written TSX and never authored. They are `packages/ui/src/illustrations/fields.ts` now, and `sections.tsx` imports them, so there is one source. `SectionWidget` also drew the field inline; it renders `Illustration` now, which is what made the catalogue's example wrong in the first place — it was missing the `slice` aspect ratio and the field positioning that only existed inside `SectionWidget`.
 
 **`words` is the open part.** It is measured against a *particular composition* — the boxes in `fields.ts` are true for the six widgets as composed today, a mono eyebrow top-left and a figure bottom-left. Recompose a cell and they are wrong. So under free composition `words` becomes something **the editor measures and writes back**, exactly as it does a panel height (Admin.md §6.3), with `probe10` checking the result. It is the second measurement to move from the author to the machine, and for the same reason.
+
+**Amended 2026-09-14 (Bhargav's notes on the picker board; Admin.md §6.5b).** The word is *pattern*, the library is eighteen, and **the geometry is authorable after all**: the picker's *New pattern* opens the twelve dials on a live thumbnail, and Save writes a named `Family` into the document's own `patterns` map (§1). What made the fourteen-slider inspector wrong was not the dials but the two measurements among them, and those stay where this section put them — `words` is measured by the editor and written back, never typed; `flow` is a dial, shown with its cost the way `/fixtures/controls` shows it. Every other setting is a legal picture by construction (Patterns.md §6.0), which is the property that makes handing the dials to an author safe. A pattern worth keeping for everyone is promoted to `patterns.ts` in code.
 
 ## 4. The adapter
 

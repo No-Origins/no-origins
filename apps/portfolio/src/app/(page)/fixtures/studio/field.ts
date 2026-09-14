@@ -1,7 +1,7 @@
 /**
  * Round 2's geometry — a family of lines that crosses the whole cell, varies, and never meets.
  *
- * Local to the studio on purpose (Illustrations.md §8): candidates may improvise, and only a winner is promoted
+ * Local to the studio on purpose (Patterns.md §8): candidates may improvise, and only a winner is promoted
  * into `primitives.ts` with a name and a stated guarantee. Everything here is deterministic.
  *
  * Two ways to be non-parallel and still never cross, and every family below uses one of them:
@@ -185,7 +185,7 @@ export function noise2(seed: number, cells: number, size = SIZE) {
 }
 
 /**
- * THE GENERATOR (Illustrations.md §8). One function, five parameters, every illustration on the platform.
+ * THE GENERATOR (Patterns.md §8). One function, five parameters, every illustration on the platform.
  *
  * The picture is the contour lines of a plane tilted along `flow`, drawn in a space that has been WARPED by
  * smooth noise. Warping the domain rather than adding to the height is what gives the lines their turning: they
@@ -213,7 +213,7 @@ export interface Illo {
 const MIN_SPACING = 4.4;
 
 /**
- * THE GENERATOR, round 6 (Illustrations.md §6.0). Kept beside `warpField`, which round 5 used and which is what
+ * THE GENERATOR, round 6 (Patterns.md §6.0). Kept beside `warpField`, which round 5 used and which is what
  * the studio's record of round 5 still draws.
  *
  * Round 5 warped the space to make the lines turn, and turning is what it gave: "too many lines, too close to
@@ -581,7 +581,7 @@ export function offsetField({ seed, flow, scale, swing, breath, waves = 2, even 
 /* ------------------------------------------------------------------------------------------------------------ */
 
 /*
- * Everything above this line is RETIRED, and kept on purpose (Illustrations.md §8).
+ * Everything above this line is RETIRED, and kept on purpose (Patterns.md §8).
  *
  * `warpField` is what round 5 drew, `waveField` rounds 6 and 7, `offsetField` round 8, and `contours`, `sheaf`,
  * `fan`, `rings` and `parting` are round 2's and 3's geometry. None of it ships. It stays because the log's job

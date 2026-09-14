@@ -1,7 +1,7 @@
 import { ill, type Hue, type Line } from "@no-origins/ui";
 
 /**
- * The studio's batches (Illustrations.md §8; the log of decided rounds is §9). One round asks ONE question about ONE subject and answers it five
+ * The studio's batches (Patterns.md §8; the log of decided rounds is §9). One round asks ONE question about ONE subject and answers it five
  * ways, so that picking one teaches something that carries to every other illustration.
  *
  * A candidate may improvise its geometry — only a winner earns a place in the grammar (`primitives.ts`).

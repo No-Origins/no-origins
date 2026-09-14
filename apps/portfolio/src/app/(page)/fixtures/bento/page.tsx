@@ -78,7 +78,7 @@ export default function BentoFixture() {
           label="illustrations · first six"
           title="The six they replace"
           titleId="ill-title"
-          lead="The original six, drawn from the old grammar of six primitives. They are corner objects, not fields, and the widgets above no longer use them — they are shown until the grammar is deleted so the two can be compared. Illustrations.md §6.1 and §10.2."
+          lead="The original six, drawn from the old grammar of six primitives. They are corner objects, not fields, and the widgets above no longer use them — they are shown until the grammar is deleted so the two can be compared. Patterns.md §6.1 and §10.2."
         />
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
           {glyphNames.map((name) => (

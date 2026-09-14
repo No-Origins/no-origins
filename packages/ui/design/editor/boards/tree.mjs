@@ -1,4 +1,4 @@
-import { head, group, option, insp } from "../lib.mjs";
+import { head, group, option, insp, decided } from "../lib.mjs";
 
 const CSS = `
 .tr { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; font: 500 var(--t-ui-sm)/1.3 var(--ff-sans); }
@@ -35,6 +35,7 @@ export const title = "Outline reordering";
 export const block = "design";
 export const body = `<style>${CSS}</style>
 ${head({ eyebrow: "the editor · the outline · Admin.md §6.5 decided this; confirm or change it", title: "Reordering the outline", lead: "The Outline is the scene in DOM order — which is reading order and tab order (§12) — and §6.1 says it is reorderable and not optional, because it is the only place tab order can be seen and fixed. <code>Tree</code> renders and selects; the WAI-ARIA tree pattern has no gesture for moving an item, so one has to be chosen. §6.5 recorded keyboard moves plus drag; here are the five that were weighed." })}
+${decided({ pick: "A — keyboard moves and drag", built: "Shipped into <code>Tree</code> as <code>onReorder</code>: Alt + ↑/↓ among siblings, Alt + ←/→ for depth, a grip on hover and focus, drag with the shared drop line, the row ringed when the drop goes into it. <code>moveTreeNode</code> is exported so a host applies the same move to its document." })}
 ${group("Five directions", "The outline of the portfolio’s first two sections, with Work’s widget selected.")}
 ${option({ id: "A", name: "Keyboard moves and drag, one rule", rec: true,
   desc: "On the focused row: <span class='tr-kbd'>Alt</span> + <span class='tr-kbd'>↑</span> / <span class='tr-kbd'>↓</span> moves it among its siblings, <span class='tr-kbd'>Alt</span> + <span class='tr-kbd'>←</span> / <span class='tr-kbd'>→</span> changes depth. A grip appears on hover and focus; dragging shows the drop as a 2px accent line with a dot at its head, the same line the Repeater uses.",

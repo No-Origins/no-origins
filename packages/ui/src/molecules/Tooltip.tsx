@@ -21,12 +21,15 @@ export interface TooltipProps extends Omit<ComponentPropsWithoutRef<"span">, "ch
 export function Tooltip({ label, side = "top", children, className, ...rest }: TooltipProps) {
   const id = `noo-tip${useId().replace(/\W/g, "")}`;
   const [open, setOpen] = useState(false);
-  if (!isValidElement(children)) return children;
-  const trigger = cloneElement(children, {
-    "aria-describedby": [children.props["aria-describedby"], id].filter(Boolean).join(" "),
-    onFocus: (e: unknown) => { setOpen(true); (children.props.onFocus as ((e: unknown) => void) | undefined)?.(e); },
-    onBlur: (e: unknown) => { setOpen(false); (children.props.onBlur as ((e: unknown) => void) | undefined)?.(e); },
-  });
+  // Always the same tree on the server and the client. An early `return children` here hydrated wrong on the
+  // catalogue (2026-09-14, one run in four): the wrapper span existed on one side and not the other.
+  const trigger = isValidElement(children)
+    ? cloneElement(children, {
+        "aria-describedby": [children.props["aria-describedby"], id].filter(Boolean).join(" "),
+        onFocus: (e: unknown) => { setOpen(true); (children.props.onFocus as ((e: unknown) => void) | undefined)?.(e); },
+        onBlur: (e: unknown) => { setOpen(false); (children.props.onBlur as ((e: unknown) => void) | undefined)?.(e); },
+      })
+    : children;
   return (
     <span
       className={cx("noo-tip", `noo-tip--${side}`, open && "is-open", className)}

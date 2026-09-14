@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
-import { Bento, BentoCell, BentoFigure, Illustration, cx, type Family, type Hue } from "@no-origins/ui";
+import { Bento, BentoCell, BentoFigure, Pattern, cx, type Family, type Hue } from "@no-origins/ui";
 
 /**
  * SectionWidget — one section of the portfolio as a bento widget (Design-System.md §8.3–8.4).
  *
  * **This is the portfolio's composition, not the system's** (Atomic.md §6 step 4, rule 5: apps compose, never
- * style). It is `Bento` + `BentoCell` + `BentoFigure` + `Illustration` with three rules baked in, and every class it
+ * style). It is `Bento` + `BentoCell` + `BentoFigure` + `Pattern` with three rules baked in, and every class it
  * touches belongs to those components. Retired from the package on 2026-09-11; it lived on there as a deprecated
  * export until the release moved it here.
  *
@@ -18,7 +18,7 @@ import { Bento, BentoCell, BentoFigure, Illustration, cx, type Family, type Hue 
  * 1. **One loud cell per widget**, 2 × 2, carrying the hue. Everything else recedes. A second loud cell is how a
  *    widget stops reading as one thing at map size.
  * 2. **The diagonal**: the mono label top-left, the figure or word bottom-left, the illustration across the cell.
- *    That diagonal is the one thing taken wholesale from the reference (Illustrations.md §2).
+ *    That diagonal is the one thing taken wholesale from the reference (Patterns.md §2).
  * 3. **The illustration is a FIELD** — it crosses the whole cell and leaves through its edges (principle 7), and
  *    it is drawn by the one generator, so every section is the same kind of picture with different parameters.
  *
@@ -40,7 +40,7 @@ export interface SectionWidgetProps {
   /** Used instead of `figure` when a section has nothing to count. Two short lines read best. */
   word?: ReactNode;
   /**
-   * The field illustration (Illustrations.md §6.0a). `words` must be MEASURED off the rendered cell, never
+   * The field illustration (Patterns.md §6.0a). `words` must be MEASURED off the rendered cell, never
    * estimated — `node e2e/.mcp/words.mjs` prints them — because a line that crosses a glyph fails principle 7.
    */
   illustration?: Family;
@@ -60,7 +60,7 @@ export function SectionWidget({
         <p className="noo-label">{eyebrow}</p>
         {figure ? <BentoFigure value={figure.value} label={figure.label} size={figure.size} /> : null}
         {!figure && word ? <p className="noo-bento__word">{word}</p> : null}
-        {illustration ? <Illustration family={illustration} id={illustrationId} hue={hue} placement="field" /> : null}
+        {illustration ? <Pattern family={illustration} id={illustrationId} hue={hue} placement="field" /> : null}
       </BentoCell>
       {children}
     </Bento>

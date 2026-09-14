@@ -1,15 +1,15 @@
 import { head, group, chip } from "../lib.mjs";
 
 const TYPES = [
-  ["hue", "the seven-blob swatch row", "→ this canvas, Hue swatch", "open"],
+  ["hue", "the seven-blob swatch row", "HueSwatch ✓ — seven dots, an ink ring, the name beside (E1 A)", "built"],
   ["text", "Field with the live count against max", "Field ✓ · the count is a caption to add", "built"],
   ["markdown", "text area with the ⌘K directive control", "Field multiline ✓ · the directive control comes with the renderer (step 6)", "built"],
   ["enum", "chip row, pressed on the selection", "Segmented ✓ up to four options, Select ✓ past four — replaces the chip row", "changed"],
   ["number", "Field, mono, units stated", "Field ✓ with a mono adornment for the unit", "built"],
   ["boolean", "Toggle", "Checkbox ✓ in a form; Toggle stays for a live switch (theme, grid)", "changed"],
-  ["list", "reorderable rows of of, capped at max", "→ this canvas, Repeater", "open"],
+  ["list", "reorderable rows of of, capped at max", "Repeater ✓ — rows on hairlines, or chips (E3 A + C)", "built"],
   ["object", "a labelled group of the above", "a fieldset of the above ✓", "built"],
-  ["illustration", "the six named families, drawn", "→ this canvas, Illustration picker", "open"],
+  ["pattern (was illustration)", "the six named families, drawn", "PatternPicker ✓ — eighteen drawn in the node's hue, plus New pattern → PatternStudio (E2 A + notes)", "built"],
   ["blobSize", "the seven names, or a number", "Segmented ✓ of the names; a number is not authorable", "changed"],
   ["href", "Field plus an internal/external toggle", "Field ✓ + Segmented ✓ (view · page)", "built"],
   ["ref", "picker of the project’s content keys", "Select ✓ over the keys", "built"],
@@ -27,7 +27,7 @@ export const title = "Inspector controls";
 export const block = "design";
 export const body = `
 ${head({ eyebrow: "no origins · the editor · inspector controls · 2026-09-14", title: "Three controls, and a gesture", lead: "The release left the inspector one row short of complete. Scene-Schema.md §3.1 lists twelve prop types the inspector renders; nine map onto controls the package now has, three do not — hue, illustration and list — and the outline needs a way to reorder. Each of the four boards beside this one shows five directions, with a recommendation; pick by letter, add notes, and each pick becomes a rule in Admin.md §6.5 before any code." })}
-${group("The twelve types, after the release", "What §3.1 said each type renders, and what renders it now. Blue rows are the three this canvas is for.")}
+${group("The twelve types, after the release", "What §3.1 said each type renders, and what renders it now. All twelve render now; the three this canvas decided are marked built (2026-09-14).")}
 <section class="rv-item rv-item--wide" style="border-top:0;padding-top:20px"><div class="rv-demo rv-demo--tight"><table class="rv-table"><tr><th>type</th><th>§3.1 said</th><th>now</th><th></th></tr>${TYPES.map(([t, was, now, st]) => `<tr><td><code>${t}</code></td><td>${was}</td><td>${now}</td><td>${chip(st, STATE[st])}</td></tr>`).join("")}</table>
 <p class="rv-cap" style="margin-top:12px">Two things §3.1 said that the release overruled: enum is a Segmented or a Select, not a chip row — a pressed chip goes ink-on-ground and hides its hue; boolean is a Checkbox in a form, because a Toggle promises an immediate effect and a form field does not have one until save.</p></div></section>
 ${group("Four decisions", "My recommendation on each; your pick and notes outrank it.")}

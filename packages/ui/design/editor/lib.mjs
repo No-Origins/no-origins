@@ -36,3 +36,13 @@ export function option({ id, name, desc, fits, why, demo, rec }) {
 }
 
 export const insp = (rows) => `<aside class="noo-glass noo-glass--1 insp" aria-label="Inspector">${rows.map(([label, meta, control]) => `<div class="insp__row"><p class="insp__label"><span>${label}</span>${meta ? `<span>${meta}</span>` : ""}</p>${control}</div>`).join("")}</aside>`;
+
+/** The banner an option board wears once its pick is made and built (2026-09-14). */
+export const DECIDED_CSS = `
+.decided { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; margin: 0 0 28px; padding: 14px 18px; border-radius: var(--r-lg); font: 400 var(--t-body-sm)/1.45 var(--ff-sans); color: var(--ink-2); }
+.decided__eyebrow { font: 500 var(--t-label)/1 var(--ff-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--good); }
+.decided strong { color: var(--ink); }
+.decided__note { flex-basis: 100%; }
+`;
+export const decided = ({ pick, built, note }) =>
+  `<style>${DECIDED_CSS}</style><div class="noo-glass noo-glass--1 decided"><span class="decided__eyebrow">decided 2026-09-14 · built</span><strong>${pick}</strong><span>${built}</span>${note ? `<span class="decided__note">${note}</span>` : ""}</div>`;

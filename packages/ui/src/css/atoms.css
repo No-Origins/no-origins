@@ -303,7 +303,7 @@
 .noo-skip:focus { top: 12px; }
 
 
-/* Illustration (Illustrations.md §4–5): one hue, one fine line, placed where the text is not */
+/* Illustration (Patterns.md §4–5): one hue, one fine line, placed where the text is not */
 .noo-ill { --ill-hue: var(--hue-tint); display: block; }
 .noo-ill {
   /* the line takes its contrast from the text beside it: dark on a light tile, light on a dark one, in either

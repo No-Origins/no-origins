@@ -18,7 +18,14 @@ import { Dialog } from "../organisms/Dialog";
 import { Tree } from "../organisms/Tree";
 import { RegionLabel } from "../organisms/RegionLabel";
 import { RoadmapItem } from "../organisms/RoadmapItem";
-import { Illustration } from "../atoms/illustrations/Illustration";
+import { Pattern } from "../atoms/patterns/Pattern";
+import { patterns } from "../atoms/patterns/patterns";
+import { HueSwatch } from "../molecules/HueSwatch";
+import { PatternPicker } from "../molecules/PatternPicker";
+import { Range } from "../molecules/Range";
+import { Repeater } from "../molecules/Repeater";
+import { PatternStudio } from "../organisms/PatternStudio";
+import { PatternPickerExample, RepeaterExample, TreeExample } from "./examples";
 import { MediaCard } from "../organisms/MediaCard";
 import { Quote } from "../organisms/Quote";
 import { Step, Steps } from "../molecules/Steps";
@@ -217,7 +224,7 @@ const bentoCell: RegistryEntry = {
   props: {
     span: { type: "object", fields: { cols: { type: "number", unit: "columns" }, rows: { type: "number", unit: "rows" } }, default: { cols: 1, rows: 1 } },
     tone: { type: "enum", of: ["quiet", "glass", "fill", "ink", "bare"], default: "quiet", help: "`fill` is the loud one, and probe12 allows exactly one per widget. `bare` is type on the grid with no card under it." },
-    illustration: { type: "illustration", help: "Named only. The fourteen family parameters include measurements and stay in code (Scene-Schema.md §3.6)." },
+    pattern: { type: "pattern", help: "One of the library’s eighteen, or a pattern the document made (Admin.md §6.5b). `words` is measured by the editor where the cell is composed, never typed (Scene-Schema.md §3.6)." },
   },
   slots: { content: { admits: "blocks", label: "Contents" } },
   defaults: { span: [1, 1], tone: "quiet" },
@@ -288,7 +295,7 @@ const figure: RegistryEntry = {
   name: "Figure", kind: ["slot"], group: "figures", layer: "molecule", component: BentoFigure as never,
   line: "A number or short word as an image. Honest counts only.",
   props: {
-    value: { type: "text", max: 4, required: true, help: "Capped at 4. Where nothing is countable, use a word instead — inventing a number to fill the slot is the failure mode (Illustrations.md principle 8)." },
+    value: { type: "text", max: 4, required: true, help: "Capped at 4. Where nothing is countable, use a word instead — inventing a number to fill the slot is the failure mode (Patterns.md principle 8)." },
     label: { type: "text", max: 20 },
     size: { type: "enum", of: ["lg", "md"], default: "lg" },
   },
@@ -314,11 +321,11 @@ const blob: RegistryEntry = {
   since: "0.0.1", status: "stable",
 };
 
-const illustration: RegistryEntry = {
-  name: "Illustration", kind: ["slot"], group: "figures", layer: "atom", component: Illustration as never,
-  line: "A field: fine lines in one hue crossing the whole cell and leaving through its edges.",
+const pattern: RegistryEntry = {
+  name: "Pattern", kind: ["slot"], group: "figures", layer: "atom", component: Pattern as never,
+  line: "A pattern: fine lines in one hue crossing the whole cell and leaving through its edges. Eighteen in the library; more made in the editor.",
   props: {
-    name: { type: "illustration", required: true, help: "One of the six measured families in `fields.ts`. The fourteen parameters are NOT authorable: two of them are measurements (Scene-Schema.md §3.6), and an inspector of fourteen sliders invites exactly the estimation Illustrations.md forbids." },
+    name: { type: "pattern", required: true, help: "One of the eighteen in `patterns.ts`, or a pattern made in the editor and saved to the document (Admin.md §6.5b). The geometry is authorable in the studio; `words` never is — the editor measures it where the pattern lands (Scene-Schema.md §3.6)." },
     hue: { type: "hue" },
     title: { type: "text", max: 60, help: "Without one it is decorative and hidden from assistive tech." },
     placement: { type: "enum", of: ["inline", "field"], default: "inline", help: "`field` fills its cell absolutely — a bento's loud cell. Anywhere without a positioned ancestor it would escape to the page." },
@@ -330,7 +337,7 @@ const illustration: RegistryEntry = {
     <Bento hue="peach" cols={2} rows={2}>
       <BentoCell span={[2, 2]} tone="fill" >
         <Label>work</Label>
-        <Illustration name="work" hue="peach" title="Four roles, opening out" placement="field" />
+        <Pattern name="work" hue="peach" title="Four roles, opening out" placement="field" />
         <BentoFigure value="4" label="roles" />
       </BentoCell>
     </Bento>
@@ -697,25 +704,12 @@ const dialog: RegistryEntry = {
 
 const tree: RegistryEntry = {
   name: "Tree", kind: ["panel"], group: "layout", layer: "organism", component: Tree as never,
-  line: "The outline: the Menu's list with disclosure. Arrow keys walk it; DOM order is tab order.",
+  line: "The outline: the Menu's list with disclosure. Arrow keys walk it; Alt + arrows and drag reorder it (E4 A); DOM order is tab order.",
   props: {
     label: { type: "text", max: 40, required: true },
   },
   defaults: { label: "Outline" },
-  example: () => (
-    <div style={{ width: 260 }}>
-      <Tree
-        label="Outline"
-        defaultSelected="work-widget"
-        defaultExpanded={["work", "me"]}
-        nodes={[
-          { id: "me", label: "Me", children: [{ id: "me-blob", label: "The blob" }, { id: "me-intro", label: "Intro" }, { id: "me-story", label: "Story" }] },
-          { id: "work", label: "Work", children: [{ id: "work-widget", label: "Widget" }, { id: "work-full", label: "Full view", children: [{ id: "work-roles", label: "Four roles" }, { id: "work-chips", label: "The through-line" }] }] },
-          { id: "status", label: "Status", children: [{ id: "status-widget", label: "Widget" }] },
-        ]}
-      />
-    </div>
-  ),
+  example: () => <TreeExample />,
   since: "0.1.0", status: "draft",
 };
 
@@ -903,14 +897,98 @@ const deck: RegistryEntry = {
   since: "0.1.0", status: "draft",
 };
 
+// ── Inspector controls (Admin.md §6.5a, 2026-09-14) ─────────────────────────────────────────────────────────────
+
+const hueSwatch: RegistryEntry = {
+  name: "HueSwatch", kind: ["slot"], group: "controls", layer: "molecule", component: HueSwatch as never,
+  line: "Seven 20px dots, an ink ring on the chosen one, the name beside. What a `hue` prop renders (E1 A).",
+  props: {
+    label: { type: "text", max: 40, required: true },
+    accent: { type: "boolean", default: false, help: "Offers the block accent as an eighth, glass dot with an ink hairline." },
+  },
+  defaults: { label: "Hue", accent: false },
+  example: () => (
+    <div style={{ width: 300, display: "flex", flexDirection: "column", gap: 12 }}>
+      <HueSwatch label="Hue" defaultValue="peach" />
+      <HueSwatch label="Hue or accent" defaultValue="accent" accent />
+    </div>
+  ),
+  since: "0.2.0", status: "draft",
+};
+
+const patternPicker: RegistryEntry = {
+  name: "PatternPicker", kind: ["slot"], group: "controls", layer: "molecule", component: PatternPicker as never,
+  line: "The library drawn in the node's hue, named; the chosen one in the swatch's ring; *New pattern* at the end. What a `pattern` prop renders (E2 A).",
+  props: {
+    label: { type: "text", max: 40, required: true },
+    hue: { type: "hue", accent: true, help: "The node's hue — every thumbnail is drawn in it." },
+    columns: { type: "enum", of: ["3", "4"], default: "3", help: "Three across at the inspector's width; four truncates the names." },
+  },
+  defaults: { label: "Pattern", hue: "peach", columns: 3 },
+  example: () => <PatternPickerExample />,
+  since: "0.2.0", status: "draft",
+};
+
+const range: RegistryEntry = {
+  name: "Range", kind: ["slot"], group: "controls", layer: "molecule", component: Range as never,
+  line: "A number chosen by sliding, the value in mono beside the label. The dial the pattern studio is made of.",
+  props: {
+    label: { type: "text", max: 40, required: true },
+    min: { type: "number", required: true },
+    max: { type: "number", required: true },
+    step: { type: "number", default: 1 },
+    unit: { type: "text", max: 8 },
+    hint: { type: "text", max: 120 },
+  },
+  defaults: { label: "breath", min: 12, max: 60, step: 1 },
+  example: () => (
+    <div style={{ width: 300, display: "flex", flexDirection: "column", gap: 16 }}>
+      <Range label="breath" hint="units between lines — the count is what fits" defaultValue={28} min={12} max={60} />
+      <Range label="curl" hint="the travel bends into an arc" defaultValue={0.85} min={0} max={1} step={0.05} />
+    </div>
+  ),
+  since: "0.2.0", status: "draft",
+};
+
+const repeater: RegistryEntry = {
+  name: "Repeater", kind: ["slot"], group: "controls", layer: "molecule", component: Repeater as never,
+  line: "Rows on hairlines with a grip, the item's fields inline, a ghost Add, the count against max — or chips, the same component compact. What a `list` prop renders (E3 A + C).",
+  props: {
+    label: { type: "text", max: 40, required: true },
+    itemName: { type: "text", max: 24, default: "item" },
+    max: { type: "number" },
+    density: { type: "enum", of: ["rows", "chips"], default: "rows", help: "`chips` for a list of short text or {label, hue}: each item a Chip with a remove mark, the chosen chip's fields below." },
+    addLabel: { type: "text", max: 24, default: "Add" },
+  },
+  defaults: { label: "Items", density: "rows" },
+  example: () => <RepeaterExample />,
+  since: "0.2.0", status: "draft",
+};
+
+const patternStudio: RegistryEntry = {
+  name: "PatternStudio", kind: ["panel"], group: "controls", layer: "organism", component: PatternStudio as never,
+  line: "Where a new pattern is made: the generator's twelve dials on a live thumbnail, and a name. Saves into the document's own patterns (§6.5b).",
+  props: {
+    title: { type: "text", max: 40, default: "New pattern" },
+    hue: { type: "hue", accent: true },
+  },
+  defaults: { title: "New pattern", hue: "peach" },
+  example: () => (
+    <div style={{ width: "100%", maxWidth: 720 }}>
+      <PatternStudio open inline hue="peach" initial={patterns.tide} initialName="tide-2" taken={["tide"]} />
+    </div>
+  ),
+  since: "0.2.0", status: "draft",
+};
+
 export const entries: readonly RegistryEntry[] = [
   heading, text, label,
   chip, dot,
   button,
   stack, row, divider, bento, bentoCell, carousel, deck,
   card, glass, placeholder,
-  figure, blob, illustration, image,
+  figure, blob, pattern, image,
   sectionHeader, intro, cellHead, blockCard, roadmapItem, regionLabel, steps, step, quote, mediaCard, profileCard,
-  segmented, select, checkbox, radioGroup, tabs, toast, tooltip,
-  speaker, menu, table, dialog, tree,
+  segmented, select, checkbox, radioGroup, tabs, toast, tooltip, hueSwatch, patternPicker, range, repeater,
+  speaker, menu, table, dialog, tree, patternStudio,
 ];

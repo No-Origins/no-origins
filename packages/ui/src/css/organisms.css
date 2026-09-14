@@ -464,7 +464,7 @@
   overflow: hidden;                                                                          /* a glyph bleeds off the edge */
   color: var(--ink);
 }
-/* Textured gradient cards (Illustrations.md §4b): the card carries the light and the material now that the
+/* Textured gradient cards (Patterns.md §4b): the card carries the light and the material now that the
    drawing on it is a line. The gradient runs −45°, the blob's light; the grain sits on top of it. */
 .noo-bento__cell--quiet {
   background-color: var(--surface);
@@ -600,4 +600,25 @@
 @media (forced-colors: active) {
   .noo-menu, .noo-dialog, .noo-table-wrap { border: 1px solid CanvasText; }
   .noo-menu__link[aria-current], .noo-tree__item[aria-selected="true"] > .noo-tree__row { background: Highlight; color: HighlightText; }
+}
+
+/* ── Tree reordering (Admin.md §6.5a E4) and the pattern studio (§6.5b), 2026-09-14 ─────────────────────────── */
+.noo-tree--reorderable .noo-tree__row { user-select: none; }
+.noo-tree__grip { flex: none; display: grid; place-items: center; width: var(--icon-sm); height: var(--icon-sm); color: var(--muted); cursor: grab; opacity: 0; transition: opacity var(--d-fast) var(--ease); }
+.noo-tree__grip > svg { width: 100%; height: 100%; }
+.noo-tree__row:hover > .noo-tree__grip, .noo-tree__item:focus-visible > .noo-tree__row > .noo-tree__grip { opacity: 1; }
+.noo-tree__item[aria-selected="true"] > .noo-tree__row > .noo-tree__grip { color: inherit; }
+.noo-tree__row--into { box-shadow: inset 0 0 0 2px var(--accent-deep); }
+.noo-tree__item.is-dragging > .noo-tree__row { opacity: 0.45; }
+.noo-tree > .noo-drop, .noo-tree__group > .noo-drop { margin: 0 0 0 var(--s-2); }
+
+.noo-ps { display: grid; grid-template-columns: minmax(200px, 1fr) minmax(0, 1.5fr); gap: var(--s-6); align-items: start; }
+.noo-ps__side { display: flex; flex-direction: column; gap: var(--s-4); }
+.noo-ps__preview { position: relative; aspect-ratio: 4 / 3; border-radius: var(--r-lg); background: var(--hue); color: var(--hue-ink); overflow: hidden; box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--ink) 8%, transparent); }
+.noo-ps__preview > .noo-ill { position: absolute; inset: 0; width: 100%; height: 100%; }
+.noo-ps__dials { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4) var(--s-5); }
+.noo-ps__group { display: flex; flex-direction: column; gap: var(--s-3); }
+.noo-ps__group-label { font: 500 var(--t-label)/1 var(--ff-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 640px) {
+  .noo-ps, .noo-ps__dials { grid-template-columns: minmax(0, 1fr); }
 }

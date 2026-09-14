@@ -28,7 +28,7 @@ export type PropType =
   | { type: "boolean" }
   | { type: "list"; of: PropType; max?: number }
   | { type: "object"; fields: Record<string, PropType> }
-  | { type: "illustration" }
+  | { type: "pattern" }
   | { type: "blobSize" }
   | { type: "href" }
   | { type: "ref" };

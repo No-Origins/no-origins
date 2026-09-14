@@ -1,4 +1,4 @@
-import { head, group, option, insp, chip, blob, HUES } from "../lib.mjs";
+import { head, group, option, insp, chip, blob, HUES, decided } from "../lib.mjs";
 
 const CSS = `
 .hs-dots { display: flex; align-items: center; gap: 10px; }
@@ -24,6 +24,7 @@ export const title = "Hue swatch";
 export const block = "design";
 export const body = `<style>${CSS}</style>
 ${head({ eyebrow: "the editor · inspector controls · 1 of 3 · pick one by its letter", title: "Hue swatch", lead: "The control a <code>hue</code> prop renders (Scene-Schema.md §3.1). Seven hues from tokens.ts, plus the block's accent where the component allows it — never a free colour, because R3 put colour in code. It lives in a 320px inspector column, so width is the constraint: 280px of it after padding." })}
+${decided({ pick: "A — seven dots, a ring on the chosen one", built: "Shipped as <code>HueSwatch</code> in @no-origins/ui 0.2.0: the Dot at 20px, an ink ring on the chosen one, the name beside, the accent as an eighth glass dot. On <code>/fixtures/inspector</code> and in the catalogue." })}
 ${group("Five directions", "Each is drawn inside the inspector at its real width. The selected hue is peach in every one so they compare.")}
 ${option({ id: "A", name: "Seven dots, a ring on the chosen one", rec: true,
   desc: "The Dot atom at 20px in each hue's deep tier, in one row; the chosen one wears a 2px ink ring with a gap; the name reads beside the row. The block's accent is an eighth, glass dot with an ink hairline.",
