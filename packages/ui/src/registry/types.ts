@@ -54,12 +54,16 @@ export interface SlotSpec {
   label: string;
 }
 
-export type RegistryGroup = "text" | "marks" | "actions" | "layout" | "surfaces" | "figures" | "composites";
+export type RegistryGroup = "text" | "marks" | "actions" | "controls" | "feedback" | "layout" | "surfaces" | "figures" | "composites";
+
+/** The Atomic layer the component lives in (Atomic.md §1). The catalogue reads it; the palette reads `group`. */
+export type RegistryLayer = "atom" | "molecule" | "organism";
 
 export interface RegistryEntry {
   name: string;
   kind: readonly NodeKind[];
   group: RegistryGroup;
+  layer: RegistryLayer;
   component: ComponentType<never>;
   props: PropSchema;
   slots?: Record<string, SlotSpec>;

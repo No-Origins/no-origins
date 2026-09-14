@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Rail, Text, ThemeSwitch, type RailGroup } from "@no-origins/ui";
+import { Menu, Text, ThemeSwitch, type MenuGroup } from "@no-origins/ui";
 
 /**
- * The rail (Admin.md §4).
+ * The rail (Admin.md §4) — a `Menu` (Atomic.md D9): column on a desktop, rail between `sm` and `md`, sheet below.
  *
  * The groups ARE the three layers, in the order of dependence — Projects → Systems ← Products — which is why
  * Overview sits outside them rather than becoming a fourth. Each group's hue carries its layer, so §1's claim is
@@ -12,7 +12,7 @@ import { Rail, Text, ThemeSwitch, type RailGroup } from "@no-origins/ui";
  *
  * A client island purely because it needs the pathname.
  */
-export const GROUPS: RailGroup[] = [
+export const GROUPS: MenuGroup[] = [
   { items: [{ href: "/", label: "Overview" }] },
   {
     label: "Projects",
@@ -41,7 +41,7 @@ export const GROUPS: RailGroup[] = [
 export function AdminRail({ email }: { email?: string | null }) {
   const pathname = usePathname();
   return (
-    <Rail
+    <Menu
       groups={GROUPS}
       currentHref={pathname}
       linkComponent={Link}
@@ -50,9 +50,8 @@ export function AdminRail({ email }: { email?: string | null }) {
           <ThemeSwitch />
           {email ? (
             <form action="/auth/sign-out" method="post">
-              {/* padded to the links' own inset so the column has one left edge, not two */}
-              <Text size="small" tone="muted" className="truncate px-3" title={email}>{email}</Text>
-              <button type="submit" className="noo-rail__link w-full">Sign out</button>
+              <Text size="small" tone="muted" className="noo-menu__who" title={email}>{email}</Text>
+              <button type="submit" className="noo-menu__link">Sign out</button>
             </form>
           ) : null}
         </>

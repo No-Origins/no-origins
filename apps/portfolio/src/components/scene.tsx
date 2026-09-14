@@ -1,5 +1,6 @@
 "use client";
-import { BlockCard, Button, Card, Chip, Placeholder, SectionWidget } from "@no-origins/ui";
+import { BlockCard, Button, Card, Chip, Placeholder } from "@no-origins/ui";
+import { SectionWidget } from "./section-widget";
 import type { CanvasView, PanelSceneNode, SceneNode, SceneThread } from "@no-origins/ui/canvas";
 import { roles } from "@/content/work";
 import { sampled, site } from "@/content/site";
@@ -397,6 +398,8 @@ const philosophy = section("philosophy", "", "Philosophy", "How I think about bu
 
 /** Reading order — declared, because a ring has no natural one (§8.3). Tab order, screen readers, phones, ← / →. */
 export const portfolioScene = (says: string): SceneNode[] => [
+  // the view switcher, placed (Atomic.md D9): bottom-left, one item per view, in reading order
+  { kind: "menu", id: "menu", position: { x: 0, y: 0 }, anchor: "bottom-left", label: "Sections", items: portfolioViews.map((v) => ({ label: v.label, view: v.id, href: v.href })) },
   ...me.map((n) => (n.id === "me-blob" ? blob(says) : n)),
   ...status,
   ...work,

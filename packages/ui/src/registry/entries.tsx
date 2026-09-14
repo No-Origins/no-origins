@@ -1,31 +1,45 @@
-import { Blob } from "../blob/Blob";
-import { BlockCard } from "../blocks/BlockCard";
-import { CellHead } from "../blocks/CellHead";
-import { Intro } from "../blocks/Intro";
-import { RegionLabel } from "../blocks/RegionLabel";
-import { RoadmapItem } from "../blocks/RoadmapItem";
-import { Illustration } from "../illustrations/Illustration";
-import { MediaCard } from "../blocks/MediaCard";
-import { Quote } from "../blocks/Quote";
-import { Step, Steps } from "../blocks/Steps";
-import { Carousel } from "../primitives/Carousel";
-import { Deck } from "../primitives/Deck";
-import { ProfileCard } from "../blocks/ProfileCard";
-import { Image } from "../primitives/Image";
-import { Bento, BentoCell, BentoFigure } from "../primitives/Bento";
-import { Button } from "../primitives/Button";
-import { Card } from "../primitives/Card";
-import { Chip } from "../primitives/Chip";
-import { Divider } from "../primitives/Divider";
-import { Dot } from "../primitives/Dot";
-import { Glass } from "../primitives/Glass";
-import { Heading } from "../primitives/Heading";
-import { Label } from "../primitives/Label";
-import { Placeholder } from "../primitives/Placeholder";
-import { Row } from "../primitives/Row";
-import { Stack } from "../primitives/Stack";
-import { Text } from "../primitives/Text";
-import { hues } from "../tokens";
+import { Blob } from "../atoms/blob/Blob";
+import { BlockCard } from "../organisms/BlockCard";
+import { CellHead } from "../molecules/CellHead";
+import { Intro } from "../molecules/Intro";
+import { SectionHeader } from "../molecules/SectionHeader";
+import { Segmented } from "../molecules/Segmented";
+import { Select } from "../molecules/Select";
+import { Field } from "../molecules/Field";
+import { Checkbox } from "../molecules/Checkbox";
+import { RadioGroup } from "../molecules/Radio";
+import { Tabs } from "../molecules/Tabs";
+import { Toast } from "../molecules/Toast";
+import { Tooltip } from "../molecules/Tooltip";
+import { Speaker } from "../molecules/Speaker";
+import { Menu } from "../organisms/Menu";
+import { Table } from "../organisms/Table";
+import { Dialog } from "../organisms/Dialog";
+import { Tree } from "../organisms/Tree";
+import { RegionLabel } from "../organisms/RegionLabel";
+import { RoadmapItem } from "../organisms/RoadmapItem";
+import { Illustration } from "../atoms/illustrations/Illustration";
+import { MediaCard } from "../organisms/MediaCard";
+import { Quote } from "../organisms/Quote";
+import { Step, Steps } from "../molecules/Steps";
+import { Carousel } from "../organisms/Carousel";
+import { Deck } from "../organisms/Deck";
+import { ProfileCard } from "../organisms/ProfileCard";
+import { Image } from "../atoms/Image";
+import { Bento, BentoCell, BentoFigure } from "../organisms/Bento";
+import { Button } from "../atoms/Button";
+import { Card } from "../atoms/Card";
+import { Chip } from "../atoms/Chip";
+import { Divider } from "../atoms/Divider";
+import { Dot } from "../atoms/Dot";
+import { Glass } from "../atoms/Glass";
+import { Heading } from "../atoms/Heading";
+import { Label } from "../atoms/Label";
+import { Placeholder } from "../atoms/Placeholder";
+import { Row } from "../atoms/Row";
+import { Stack } from "../atoms/Stack";
+import { Text } from "../atoms/Text";
+import { hues } from "../tokens/tokens";
 import type { RegistryEntry } from "./types";
 
 /**
@@ -44,7 +58,7 @@ const HUES = hues;
 /* ── text ───────────────────────────────────────────────────────────────────────────────────────────────── */
 
 const heading: RegistryEntry = {
-  name: "Heading", kind: ["slot", "panel"], group: "text", component: Heading as never,
+  name: "Heading", kind: ["slot", "panel"], group: "text", layer: "atom", component: Heading as never,
   line: "A heading at one of three levels.",
   props: {
     level: { type: "enum", of: ["2", "3", "4"], default: "2", help: "Display face at 2; Hanken 600 at 3 and 4. There is no level 1: a surface has exactly one h1 (§12)." },
@@ -56,7 +70,7 @@ const heading: RegistryEntry = {
 };
 
 const text: RegistryEntry = {
-  name: "Text", kind: ["slot", "panel"], group: "text", component: Text as never,
+  name: "Text", kind: ["slot", "panel"], group: "text", layer: "atom", component: Text as never,
   line: "A run of prose, at one of three steps of the scale.",
   props: {
     markdown: { type: "markdown", required: true, help: "Markdown, plus the declared inline directives (R4). The adapter parses it; the package parses nothing." },
@@ -69,7 +83,7 @@ const text: RegistryEntry = {
 };
 
 const label: RegistryEntry = {
-  name: "Label", kind: ["slot"], group: "text", component: Label as never,
+  name: "Label", kind: ["slot"], group: "text", layer: "atom", component: Label as never,
   line: "The mono eyebrow. One line, uppercase.",
   props: { text: { type: "text", max: 24, required: true, help: "Capped at 24: a widget sets its type at twice a document's, so a long eyebrow wraps and breaks the diagonal (§8.3)." } },
   defaults: { text: "now" },
@@ -80,7 +94,7 @@ const label: RegistryEntry = {
 /* ── marks ──────────────────────────────────────────────────────────────────────────────────────────────── */
 
 const chip: RegistryEntry = {
-  name: "Chip", kind: ["slot"], group: "marks", component: Chip as never,
+  name: "Chip", kind: ["slot"], group: "marks", layer: "atom", component: Chip as never,
   line: "A pill in one of the seven hues.",
   props: {
     label: { type: "text", max: 24, required: true },
@@ -95,7 +109,7 @@ const chip: RegistryEntry = {
 };
 
 const dot: RegistryEntry = {
-  name: "Dot", kind: ["slot"], group: "marks", component: Dot as never,
+  name: "Dot", kind: ["slot"], group: "marks", layer: "atom", component: Dot as never,
   line: "A hue, as a mark — it survives the map zoom where text does not.",
   props: { hue: { type: "hue", required: true } },
   defaults: { hue: "peach" },
@@ -106,7 +120,7 @@ const dot: RegistryEntry = {
 /* ── actions ────────────────────────────────────────────────────────────────────────────────────────────── */
 
 const button: RegistryEntry = {
-  name: "Button", kind: ["slot"], group: "actions", component: Button as never,
+  name: "Button", kind: ["slot"], group: "actions", layer: "atom", component: Button as never,
   line: "A pill, 44px minimum. Becomes a link with href.",
   props: {
     label: { type: "text", max: 24, required: true },
@@ -124,7 +138,7 @@ const button: RegistryEntry = {
 const GAP = { type: "enum", of: ["8", "16", "24", "40"] } as const;
 
 const stack: RegistryEntry = {
-  name: "Stack", kind: ["slot", "panel"], group: "layout", component: Stack as never,
+  name: "Stack", kind: ["slot", "panel"], group: "layout", layer: "atom", component: Stack as never,
   line: "Things down the page, evenly spaced.",
   props: {
     gap: { ...GAP, default: "16", help: "Four steps of the space scale and nothing between them — a free number lets a document invent spacing the system does not have." },
@@ -142,7 +156,7 @@ const stack: RegistryEntry = {
 };
 
 const row: RegistryEntry = {
-  name: "Row", kind: ["slot", "panel"], group: "layout", component: Row as never,
+  name: "Row", kind: ["slot", "panel"], group: "layout", layer: "atom", component: Row as never,
   line: "Things across, wrapping when they run out of room.",
   props: {
     gap: { ...GAP, default: "8" },
@@ -162,7 +176,7 @@ const row: RegistryEntry = {
 };
 
 const divider: RegistryEntry = {
-  name: "Divider", kind: ["slot"], group: "layout", component: Divider as never,
+  name: "Divider", kind: ["slot"], group: "layout", layer: "atom", component: Divider as never,
   line: "A hairline. An <hr>, because that is what it means.",
   props: { dotted: { type: "boolean", default: false, help: "The canvas voice — the line under a region label." } },
   defaults: {},
@@ -171,7 +185,7 @@ const divider: RegistryEntry = {
 };
 
 const bento: RegistryEntry = {
-  name: "Bento", kind: ["widget", "page"], group: "layout", component: Bento as never,
+  name: "Bento", kind: ["widget", "page"], group: "layout", layer: "organism", component: Bento as never,
   line: "The one grid, at two sizes: a 4 × 3 widget, or a 10-column page.",
   props: {
     hue: { type: "hue" },
@@ -198,7 +212,7 @@ const bento: RegistryEntry = {
 };
 
 const bentoCell: RegistryEntry = {
-  name: "BentoCell", kind: ["slot"], group: "layout", component: BentoCell as never,
+  name: "BentoCell", kind: ["slot"], group: "layout", layer: "organism", component: BentoCell as never,
   line: "One cell of the grid. Every cell does one job.",
   props: {
     span: { type: "object", fields: { cols: { type: "number", unit: "columns" }, rows: { type: "number", unit: "rows" } }, default: { cols: 1, rows: 1 } },
@@ -219,7 +233,7 @@ const bentoCell: RegistryEntry = {
 /* ── surfaces ───────────────────────────────────────────────────────────────────────────────────────────── */
 
 const card: RegistryEntry = {
-  name: "Card", kind: ["panel", "slot"], group: "surfaces", component: Card as never,
+  name: "Card", kind: ["panel", "slot"], group: "surfaces", layer: "atom", component: Card as never,
   line: "A container: surface or glass.",
   props: {
     surface: { type: "enum", of: ["solid", "glass"], default: "solid" },
@@ -239,7 +253,7 @@ const card: RegistryEntry = {
 };
 
 const glass: RegistryEntry = {
-  name: "Glass", kind: ["slot"], group: "surfaces", component: Glass as never,
+  name: "Glass", kind: ["slot"], group: "surfaces", layer: "atom", component: Glass as never,
   line: "The material, at three levels. Never more than two stacked.",
   props: {
     level: { type: "enum", of: ["1", "2", "3"], default: "1" },
@@ -252,7 +266,7 @@ const glass: RegistryEntry = {
 };
 
 const placeholder: RegistryEntry = {
-  name: "Placeholder", kind: ["panel", "slot"], group: "surfaces", component: Placeholder as never,
+  name: "Placeholder", kind: ["panel", "slot"], group: "surfaces", layer: "atom", component: Placeholder as never,
   line: "A section with no copy yet. Never says “coming soon”.",
   props: {
     title: { type: "text", max: 80, required: true },
@@ -271,7 +285,7 @@ const placeholder: RegistryEntry = {
 /* ── figures ────────────────────────────────────────────────────────────────────────────────────────────── */
 
 const figure: RegistryEntry = {
-  name: "Figure", kind: ["slot"], group: "figures", component: BentoFigure as never,
+  name: "Figure", kind: ["slot"], group: "figures", layer: "molecule", component: BentoFigure as never,
   line: "A number or short word as an image. Honest counts only.",
   props: {
     value: { type: "text", max: 4, required: true, help: "Capped at 4. Where nothing is countable, use a word instead — inventing a number to fill the slot is the failure mode (Illustrations.md principle 8)." },
@@ -284,7 +298,7 @@ const figure: RegistryEntry = {
 };
 
 const blob: RegistryEntry = {
-  name: "Blob", kind: ["blob"], group: "figures", component: Blob as never,
+  name: "Blob", kind: ["blob"], group: "figures", layer: "atom", component: Blob as never,
   line: "The character. One on the portfolio — the glass host at the centre.",
   props: {
     variant: { type: "enum", of: ["character", "logotype", "glass"], default: "character" },
@@ -301,7 +315,7 @@ const blob: RegistryEntry = {
 };
 
 const illustration: RegistryEntry = {
-  name: "Illustration", kind: ["slot"], group: "figures", component: Illustration as never,
+  name: "Illustration", kind: ["slot"], group: "figures", layer: "atom", component: Illustration as never,
   line: "A field: fine lines in one hue crossing the whole cell and leaving through its edges.",
   props: {
     name: { type: "illustration", required: true, help: "One of the six measured families in `fields.ts`. The fourteen parameters are NOT authorable: two of them are measurements (Scene-Schema.md §3.6), and an inspector of fourteen sliders invites exactly the estimation Illustrations.md forbids." },
@@ -327,8 +341,8 @@ const illustration: RegistryEntry = {
 /* ── composites ─────────────────────────────────────────────────────────────────────────────────────────── */
 
 const intro: RegistryEntry = {
-  name: "Intro", kind: ["panel", "slot"], group: "composites", component: Intro as never,
-  line: "A heading with a lead under it. The top of most panels.",
+  name: "Intro", kind: ["panel", "slot"], group: "composites", layer: "molecule", component: Intro as never,
+  line: "Merged into SectionHeader (rhythm off). Documents naming it still render.",
   props: {
     title: { type: "text", max: 60, required: true },
     lead: { type: "text", max: 160, help: "Accepts a ref. It is a real step on the scale (19/1.5), which is why this is a component: markdown cannot express one." },
@@ -336,11 +350,11 @@ const intro: RegistryEntry = {
   },
   defaults: { title: "A section", lead: "What it is, in one line." },
   example: () => <Intro title="Four roles, told as blocks" lead="Editors, design systems, agent systems, and shipping full-stack." />,
-  since: "0.1.0", status: "draft",
+  since: "0.1.0", status: "deprecated",
 };
 
 const cellHead: RegistryEntry = {
-  name: "CellHead", kind: ["slot"], group: "composites", component: CellHead as never,
+  name: "CellHead", kind: ["slot"], group: "composites", layer: "molecule", component: CellHead as never,
   line: "A widget cell's label, dot and title.",
   props: {
     label: { type: "text", max: 24 },
@@ -358,8 +372,8 @@ const cellHead: RegistryEntry = {
 };
 
 const blockCard: RegistryEntry = {
-  name: "BlockCard", kind: ["panel", "slot"], group: "composites", component: BlockCard as never,
-  line: "One role or one block. The Work item.",
+  name: "BlockCard", kind: ["panel", "slot"], group: "composites", layer: "organism", component: BlockCard as never,
+  line: "One role or one block. The Work item; asleep, the roadmap item.",
   props: {
     hue: { type: "hue", required: true },
     title: { type: "text", max: 80, required: true },
@@ -368,7 +382,8 @@ const blockCard: RegistryEntry = {
     details: { type: "list", of: { type: "text", max: 120 }, max: 6 },
     chips: { type: "list", of: { type: "object", fields: { label: { type: "text", max: 24 }, hue: { type: "hue" } } }, max: 5, help: "Capped at 5: a sixth wraps the card and pushes everything under it down a row." },
     href: { type: "href" },
-    state: { type: "enum", of: ["idle", "sleep"], default: "idle" },
+    state: { type: "enum", of: ["idle", "sleep"], default: "idle", help: "`sleep` is a block that is not here yet: hollow dot, sleeping blob, and it says what it will do (principle 4)." },
+    progress: { type: "text", max: 40, help: "A short state in the mono voice: “designing”, “after the portfolio”." },
   },
   defaults: { hue: "peach", title: "A role", line: "One line about it." },
   example: () => (
@@ -385,8 +400,8 @@ const blockCard: RegistryEntry = {
 };
 
 const roadmapItem: RegistryEntry = {
-  name: "RoadmapItem", kind: ["panel", "slot"], group: "composites", component: RoadmapItem as never,
-  line: "Something not here yet, said honestly.",
+  name: "RoadmapItem", kind: ["panel", "slot"], group: "composites", layer: "organism", component: RoadmapItem as never,
+  line: "Merged into BlockCard (state sleep, progress). Documents naming it still render.",
   props: {
     hue: { type: "hue", required: true },
     title: { type: "text", max: 80, required: true },
@@ -402,18 +417,308 @@ const roadmapItem: RegistryEntry = {
       progress="after the portfolio · designing"
     />
   ),
-  since: "0.0.1", status: "stable",
+  since: "0.0.1", status: "deprecated",
 };
 
 const regionLabel: RegistryEntry = {
-  name: "RegionLabel", kind: ["region"], group: "composites", component: RegionLabel as never,
-  line: "A map label: one display word that has to read at 0.27 zoom.",
+  name: "RegionLabel", kind: ["region"], group: "composites", layer: "organism", component: RegionLabel as never,
+  line: "Retired: RegionNode draws the map label itself. Documents naming it still render.",
   props: { text: { type: "text", max: 24, required: true } },
   defaults: { text: "Work" },
   example: () => <div style={{ height: 150 }}><RegionLabel>Work</RegionLabel></div>,
+  since: "0.1.0", status: "deprecated",
+};
+
+
+
+/* ── molecules added in the 2026-09-14 release (Atomic.md §6 step 3) ────────────────────────────────────── */
+
+const sectionHeader: RegistryEntry = {
+  name: "SectionHeader", kind: ["panel", "slot"], group: "text", layer: "molecule", component: SectionHeader as never,
+  line: "Eyebrow, title, lead. With rhythm it opens a section; without, a panel.",
+  props: {
+    label: { type: "text", max: 24 },
+    title: { type: "text", max: 60, required: true },
+    lead: { type: "text", max: 160, help: "A real step on the scale (19/1.5), which is why this is a component: markdown cannot express one." },
+    level: { type: "enum", of: ["2", "3", "4"], default: "2", help: "Level 1 is the page's and is not authorable from a document (§12)." },
+    rhythm: { type: "boolean", default: false, help: "64 above and 32 below, for a document. Off at the top of a panel, where the panel owns the spacing." },
+  },
+  defaults: { title: "A section", lead: "What it is, in one line.", rhythm: false },
+  example: () => <SectionHeader rhythm={false} label="the registry" title="Four roles, told as blocks" lead="Editors, design systems, agent systems, and shipping full-stack." />,
   since: "0.1.0", status: "draft",
 };
 
+const segmented: RegistryEntry = {
+  name: "Segmented", kind: ["slot"], group: "controls", layer: "molecule", component: Segmented as never,
+  line: "A few exclusive choices in a pill. More than four is a Select.",
+  props: {
+    label: { type: "text", max: 40, required: true, help: "What the group is for. Three unlabelled buttons in a pill are a riddle." },
+    options: { type: "list", of: { type: "object", fields: { value: { type: "text", max: 24 }, label: { type: "text", max: 16 } } }, max: 4, required: true },
+    size: { type: "enum", of: ["sm", "md"], default: "sm" },
+  },
+  defaults: { label: "Viewport", options: [{ value: "desktop", label: "Desktop" }, { value: "phone", label: "Phone" }] },
+  example: () => <Segmented label="Viewport" options={[{ value: "desktop", label: "Desktop" }, { value: "phone", label: "Phone" }]} />,
+  since: "0.1.0", status: "draft",
+};
+
+const select: RegistryEntry = {
+  name: "Select", kind: ["slot"], group: "controls", layer: "molecule", component: Select as never,
+  line: "A native select in the field's box. The OS picker, because every reader knows it.",
+  props: {
+    label: { type: "text", max: 40, required: true },
+    options: { type: "list", of: { type: "object", fields: { value: { type: "text", max: 40 }, label: { type: "text", max: 40 } } }, required: true },
+    placeholder: { type: "text", max: 40 },
+    hint: { type: "text", max: 120 },
+  },
+  defaults: { label: "Hue", options: HUES.map((h) => ({ value: h, label: h })), placeholder: "Choose a hue" },
+  example: () => <Select label="Block" placeholder="Choose a block" hint="Each block owns one hue." options={[{ value: "portfolio", label: "Portfolio · peach" }, { value: "design", label: "Design system · blue" }, { value: "admin", label: "Admin · lavender" }]} />,
+  since: "0.1.0", status: "draft",
+};
+
+const checkbox: RegistryEntry = {
+  name: "Checkbox", kind: ["slot"], group: "controls", layer: "molecule", component: Checkbox as never,
+  line: "A yes or no with a label. Several of them is a list; one of many is a RadioGroup.",
+  props: {
+    label: { type: "text", max: 80, required: true },
+    hint: { type: "text", max: 120 },
+    defaultChecked: { type: "boolean", default: false },
+  },
+  defaults: { label: "Show the grid" },
+  example: () => <Checkbox label="Show the grid" hint="The 144px box grid the canvas snaps to." defaultChecked />,
+  since: "0.1.0", status: "draft",
+};
+
+const radioGroup: RegistryEntry = {
+  name: "RadioGroup", kind: ["slot"], group: "controls", layer: "molecule", component: RadioGroup as never,
+  line: "One of several, each with a sentence. Two or three words each is a Segmented.",
+  props: {
+    label: { type: "text", max: 40, required: true },
+    options: { type: "list", of: { type: "object", fields: { value: { type: "text", max: 24 }, label: { type: "text", max: 40 }, hint: { type: "text", max: 120 } } }, max: 6, required: true },
+    orientation: { type: "enum", of: ["vertical", "horizontal"], default: "vertical" },
+  },
+  defaults: { label: "Publish as", options: [{ value: "draft", label: "Draft" }, { value: "live", label: "Live" }] },
+  example: () => (
+    <RadioGroup
+      label="Publish as"
+      defaultValue="draft"
+      options={[
+        { value: "draft", label: "Draft", hint: "Saved, visible only to you." },
+        { value: "live", label: "Live", hint: "Revalidates the site within a minute." },
+      ]}
+    />
+  ),
+  since: "0.1.0", status: "draft",
+};
+
+const tabs: RegistryEntry = {
+  name: "Tabs", kind: ["panel", "slot"], group: "controls", layer: "molecule", component: Tabs as never,
+  line: "A row of names on a hairline; one panel showing. The current tab wears the nav's marker.",
+  props: {
+    label: { type: "text", max: 40, required: true },
+    tabs: { type: "list", of: { type: "object", fields: { value: { type: "text", max: 24 }, label: { type: "text", max: 24 } } }, min: 2, max: 6, required: true } as never,
+  },
+  slots: { panels: { admits: "blocks", label: "One panel per tab" } },
+  defaults: { label: "Token groups", tabs: [{ value: "colour", label: "Colour" }, { value: "type", label: "Type" }] },
+  example: () => (
+    <Tabs
+      label="Token groups"
+      tabs={[
+        { value: "colour", label: "Colour", panel: <Text size="small">Seven hues, three tiers each, one accent slot per block.</Text> },
+        { value: "type", label: "Type", panel: <Text size="small">Bowlby from h2 up; Hanken 600 and 400 below.</Text> },
+        { value: "space", label: "Space", panel: <Text size="small">A 4px scale, s-1 to s-24.</Text> },
+      ]}
+    />
+  ),
+  since: "0.1.0", status: "draft",
+};
+
+const toast: RegistryEntry = {
+  name: "Toast", kind: ["slot"], group: "feedback", layer: "molecule", component: Toast as never,
+  line: "One short message that arrives and leaves. The admin's brand voice lives here.",
+  props: {
+    tone: { type: "enum", of: ["neutral", "good", "warn", "bad"], default: "neutral" },
+    title: { type: "text", max: 40 },
+    text: { type: "text", max: 120, required: true },
+  },
+  defaults: { tone: "good", title: "Published", text: "The site will catch up within a minute." },
+  example: () => (
+    <Stack gap={8}>
+      <Toast tone="good" title="Published">The site will catch up within a minute.</Toast>
+      <Toast tone="warn" title="Saved, not published">Version 12 is yours until you say otherwise.</Toast>
+    </Stack>
+  ),
+  since: "0.1.0", status: "draft",
+};
+
+const tooltip: RegistryEntry = {
+  name: "Tooltip", kind: ["slot"], group: "feedback", layer: "molecule", component: Tooltip as never,
+  line: "A line of help on hover and focus. Text only — anything more is a popover.",
+  props: {
+    label: { type: "text", max: 80, required: true },
+    side: { type: "enum", of: ["top", "bottom", "left", "right"], default: "top" },
+  },
+  slots: { children: { admits: ["Button", "Chip"], max: 1, min: 1, label: "What it describes" } },
+  defaults: { label: "What this does", side: "top" },
+  example: () => (
+    <Tooltip label="Revalidates the live site" side="right">
+      <Button variant="secondary" size="sm">Publish</Button>
+    </Tooltip>
+  ),
+  since: "0.1.0", status: "draft",
+};
+
+
+/* ── added in step 4 of the 2026-09-14 release (Atomic.md §6) ───────────────────────────────────────────── */
+
+const speaker: RegistryEntry = {
+  name: "Speaker", kind: ["slot", "panel"], group: "figures", layer: "molecule", component: Speaker as never,
+  line: "A blob with its bubble — the pairing the brand is built on, named.",
+  props: {
+    label: { type: "text", max: 40, required: true, help: "Who is speaking, for assistive tech." },
+    say: { type: "text", max: 120 },
+    hue: { type: "hue", accent: true },
+    variant: { type: "enum", of: ["character", "glass"], default: "character" },
+    state: { type: "enum", of: ["idle", "sleep"], default: "idle" },
+    size: { type: "blobSize", default: "md" },
+    tint: { type: "hue" },
+    below: { type: "boolean", default: false },
+  },
+  defaults: { label: "Bhargav", say: "What are we doing today?", variant: "glass" },
+  example: () => (
+    <Row gap={40} align="end">
+      <Speaker label="Bhargav" variant="glass" say="What are we doing today?" />
+      <Speaker label="The editor" hue="lavender" say="Not here yet." tint="lavender" state="sleep" />
+    </Row>
+  ),
+  since: "0.1.0", status: "draft",
+};
+
+const menu: RegistryEntry = {
+  name: "Menu", kind: ["panel"], group: "layout", layer: "organism", component: Menu as never,
+  line: "The one navigation, in five forms. The current item is an ink pill.",
+  props: {
+    label: { type: "text", max: 40, help: "What the menu is for — “Sections”." },
+    items: { type: "list", of: { type: "object", fields: { label: { type: "text", max: 24 }, href: { type: "href" }, view: { type: "text", max: 24 }, icon: { type: "text", max: 24 } } }, max: 9, required: true },
+    anchor: { type: "enum", of: ["bottom-left", "bottom-right", "top-left", "top-right"], default: "bottom-left", help: "On a canvas the menu anchors to a corner of the viewport, not to a point in the scene." },
+  },
+  defaults: { label: "Sections", items: [{ label: "Me", href: "/" }, { label: "Work", href: "/work" }] },
+  example: () => (
+    <Row gap={24} align="start">
+      <Menu
+        form="floating"
+        skipTo={false}
+        aria-label="Sections"
+        items={["Me", "Status", "Work", "Cases", "Projects", "Interests", "Philosophy"].map((l, i) => ({ id: l, label: l, href: `#${l.toLowerCase()}`, current: i === 2 }))}
+      />
+      <Menu
+        form="rail"
+        skipTo={false}
+        aria-label="Admin, collapsed"
+        style={{ position: "static", height: "auto", margin: 0 }}
+        groups={[
+          { items: [{ href: "#overview", label: "Overview" }] },
+          { label: "Projects", hue: "peach", items: [{ href: "#projects", label: "Projects", badge: 2 }] },
+          { label: "Systems", hue: "lavender", items: [{ href: "#systems", label: "Systems", current: true }] },
+        ]}
+      />
+      <Menu
+        form="column"
+        skipTo={false}
+        aria-label="Admin"
+        style={{ position: "static", height: "auto", margin: 0 }}
+        groups={[
+          { items: [{ href: "#overview", label: "Overview" }] },
+          { label: "Projects", hue: "peach", items: [{ href: "#projects", label: "All projects", items: [{ href: "#portfolio", label: "Portfolio" }] }] },
+          {
+            label: "Systems", hue: "lavender",
+            items: [{
+              href: "#systems", label: "All systems", current: true,
+              panel: [
+                { label: "design system", items: [{ href: "#tokens", label: "Tokens" }, { href: "#components", label: "Components", current: true }, { href: "#illustrations", label: "Illustrations" }] },
+                { label: "more", items: [{ href: "#document", label: "Document" }, { href: "#publishing", label: "Publishing" }, { href: "#storage", label: "Storage" }] },
+              ],
+            }],
+          },
+          { label: "Products", hue: "blue", items: [{ href: "#products", label: "All products", badge: 2 }] },
+        ]}
+      />
+    </Row>
+  ),
+  since: "0.1.0", status: "draft",
+};
+
+const table: RegistryEntry = {
+  name: "Table", kind: ["panel"], group: "layout", layer: "organism", component: Table as never,
+  line: "Rows on hairlines, mono headers, tabular numbers. The first real data density.",
+  props: {
+    caption: { type: "text", max: 60, help: "The table's subject. A table without one is a grid of numbers." },
+    density: { type: "enum", of: ["cozy", "compact"], default: "cozy" },
+  },
+  defaults: { caption: "Versions", density: "cozy" },
+  example: () => (
+    <Table
+      caption="Published versions"
+      rowKey={(r) => String(r.v)}
+      columns={[
+        { key: "v", header: "Version", align: "num", width: "88px" },
+        { key: "label", header: "Label" },
+        { key: "by", header: "By" },
+        { key: "when", header: "Published", align: "num" },
+        { key: "hash", header: "Registry", align: "num" },
+      ]}
+      rows={[
+        { v: 12, label: "Roadmap, honest counts", by: "bhargav", when: "2026-09-14", hash: "a3f1c2d9" },
+        { v: 11, label: "Work ring at 2200", by: "bhargav", when: "2026-09-11", hash: "a3f1c2d9" },
+        { v: 10, label: "First publish", by: "bhargav", when: "2026-09-08", hash: "7e04b1aa" },
+      ]}
+    />
+  ),
+  since: "0.1.0", status: "draft",
+};
+
+const dialog: RegistryEntry = {
+  name: "Dialog", kind: ["panel"], group: "surfaces", layer: "organism", component: Dialog as never,
+  line: "Glass-3 over everything, one primary action. A native dialog does the modal work.",
+  props: {
+    title: { type: "text", max: 60, required: true },
+    description: { type: "text", max: 160 },
+    form: { type: "enum", of: ["dialog", "sheet"], default: "dialog" },
+    size: { type: "enum", of: ["sm", "md", "lg"], default: "md" },
+  },
+  slots: { children: { admits: "blocks", label: "The body" } },
+  defaults: { title: "Publish version 13?", description: "The site revalidates within a minute." },
+  example: () => (
+    <Dialog modal={false} open title="Publish version 13?" description="The live site revalidates within a minute. The last published version stays in the list."
+      actions={<><Button variant="ghost">Not yet</Button><Button>Publish</Button></>}>
+      <Field label="Label" placeholder="What changed, in a few words" hint="Required: a version is an integer with a label (Admin.md R1)." />
+    </Dialog>
+  ),
+  since: "0.1.0", status: "draft",
+};
+
+const tree: RegistryEntry = {
+  name: "Tree", kind: ["panel"], group: "layout", layer: "organism", component: Tree as never,
+  line: "The outline: the Menu's list with disclosure. Arrow keys walk it; DOM order is tab order.",
+  props: {
+    label: { type: "text", max: 40, required: true },
+  },
+  defaults: { label: "Outline" },
+  example: () => (
+    <div style={{ width: 260 }}>
+      <Tree
+        label="Outline"
+        defaultSelected="work-widget"
+        defaultExpanded={["work", "me"]}
+        nodes={[
+          { id: "me", label: "Me", children: [{ id: "me-blob", label: "The blob" }, { id: "me-intro", label: "Intro" }, { id: "me-story", label: "Story" }] },
+          { id: "work", label: "Work", children: [{ id: "work-widget", label: "Widget" }, { id: "work-full", label: "Full view", children: [{ id: "work-roles", label: "Four roles" }, { id: "work-chips", label: "The through-line" }] }] },
+          { id: "status", label: "Status", children: [{ id: "status-widget", label: "Widget" }] },
+        ]}
+      />
+    </div>
+  ),
+  since: "0.1.0", status: "draft",
+};
 
 /* ── added 2026-09-11, from Bhargav's references ────────────────────────────────────────────────────────── */
 
@@ -432,7 +737,7 @@ const STAND_IN =
   "%3C/linearGradient%3E%3C/defs%3E%3Crect width='360' height='240' fill='url(%23g)'/%3E%3C/svg%3E";
 
 const image: RegistryEntry = {
-  name: "Image", kind: ["slot"], group: "figures", component: Image as never,
+  name: "Image", kind: ["slot"], group: "figures", layer: "atom", component: Image as never,
   line: "A photograph. Optimisation is the host's job, never the package's.",
   props: {
     src: { type: "href", required: true },
@@ -447,7 +752,7 @@ const image: RegistryEntry = {
 };
 
 const steps: RegistryEntry = {
-  name: "Steps", kind: ["panel", "slot"], group: "composites", component: Steps as never,
+  name: "Steps", kind: ["panel", "slot"], group: "composites", layer: "molecule", component: Steps as never,
   line: "A numbered sequence on a rule. Numbering is a counter, never a prop.",
   props: {
     hue: { type: "hue" },
@@ -466,7 +771,7 @@ const steps: RegistryEntry = {
 };
 
 const step: RegistryEntry = {
-  name: "Step", kind: ["slot"], group: "composites", component: Step as never,
+  name: "Step", kind: ["slot"], group: "composites", layer: "molecule", component: Step as never,
   line: "One step. Its number comes from its position, so reordering renumbers.",
   props: { title: { type: "text", max: 60, required: true } },
   slots: { children: { admits: "blocks", label: "What happens" } },
@@ -480,7 +785,7 @@ const step: RegistryEntry = {
 };
 
 const quote: RegistryEntry = {
-  name: "Quote", kind: ["panel", "slot"], group: "composites", component: Quote as never,
+  name: "Quote", kind: ["panel", "slot"], group: "composites", layer: "organism", component: Quote as never,
   line: "Someone else's words, attributed — with a measured number above them.",
   props: {
     by: { type: "text", max: 60 },
@@ -499,7 +804,7 @@ const quote: RegistryEntry = {
 };
 
 const mediaCard: RegistryEntry = {
-  name: "MediaCard", kind: ["panel", "slot"], group: "composites", component: MediaCard as never,
+  name: "MediaCard", kind: ["panel", "slot"], group: "composites", layer: "organism", component: MediaCard as never,
   line: "A card with a picture beside its words.",
   props: {
     title: { type: "text", max: 90, required: true },
@@ -527,7 +832,7 @@ const mediaCard: RegistryEntry = {
 };
 
 const carousel: RegistryEntry = {
-  name: "Carousel", kind: ["panel", "slot"], group: "layout", component: Carousel as never,
+  name: "Carousel", kind: ["panel", "slot"], group: "layout", layer: "organism", component: Carousel as never,
   line: "A track of slides that snaps, with the neighbours showing.",
   props: {
     label: { type: "text", max: 40, required: true, help: "Names the group for assistive tech — “Testimonials”, not “carousel”." },
@@ -559,7 +864,7 @@ const FACE =
   );
 
 const profileCard: RegistryEntry = {
-  name: "ProfileCard", kind: ["slot", "panel"], group: "composites", component: ProfileCard as never,
+  name: "ProfileCard", kind: ["slot", "panel"], group: "composites", layer: "organism", component: ProfileCard as never,
   line: "A face, a name, and what they do — the picture is the whole card.",
   props: {
     name: { type: "text", max: 40, required: true },
@@ -578,7 +883,7 @@ const profileCard: RegistryEntry = {
 };
 
 const deck: RegistryEntry = {
-  name: "Deck", kind: ["panel", "slot"], group: "layout", component: Deck as never,
+  name: "Deck", kind: ["panel", "slot"], group: "layout", layer: "organism", component: Deck as never,
   line: "A stack of cards, one of them forward. Still a scroll container.",
   props: {
     label: { type: "text", max: 40, required: true },
@@ -606,5 +911,7 @@ export const entries: readonly RegistryEntry[] = [
   stack, row, divider, bento, bentoCell, carousel, deck,
   card, glass, placeholder,
   figure, blob, illustration, image,
-  intro, cellHead, blockCard, roadmapItem, regionLabel, steps, step, quote, mediaCard, profileCard,
+  sectionHeader, intro, cellHead, blockCard, roadmapItem, regionLabel, steps, step, quote, mediaCard, profileCard,
+  segmented, select, checkbox, radioGroup, tabs, toast, tooltip,
+  speaker, menu, table, dialog, tree,
 ];

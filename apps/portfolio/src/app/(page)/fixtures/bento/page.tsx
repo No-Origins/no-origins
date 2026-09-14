@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Glyph, Section, SectionHeader, SectionWidget, glyphNames, type GlyphName, type Hue } from "@no-origins/ui";
+import { Glyph, Section, SectionHeader, glyphNames, type GlyphName, type Hue } from "@no-origins/ui";
+import { SectionWidget } from "@/components/section-widget";
 import { sections } from "@/content/sections";
 
 export const metadata: Metadata = { title: "Bento widgets", robots: { index: false } };
@@ -38,7 +39,7 @@ export default function BentoFixture() {
                 <p className="noo-body-sm w-full max-w-[68ch] text-ink-2">{sec.signature}</p>
               </div>
               {/* one box of padding all round, so the widget's outer edge sits on a grid line and every cell in its box */}
-              <div className="noo-graph overflow-x-auto rounded-lg" style={{ padding: "var(--grid-box)" }}>
+              <div className="noo-ground overflow-x-auto rounded-lg" style={{ padding: "var(--grid-box)" }}>
                 <SectionWidget
                   hue={sec.hue}
                   label={sec.title}
@@ -58,7 +59,7 @@ export default function BentoFixture() {
 
       <Section aria-labelledby="overview-title">
         <SectionHeader level={3} label="the overview · 0.27" title="What a visitor sees from the map" titleId="overview-title" lead="The same six at the zoom the whole ring fits a 1440 × 900 viewport. The figure and the section word should read; the detail shouldn't, and that's correct." />
-        <div className="noo-graph flex flex-wrap gap-4 rounded-lg p-6">
+        <div className="noo-ground flex flex-wrap gap-4 rounded-lg p-6">
           {sections.map((sec) => (
             <div key={sec.id} className="relative overflow-hidden" style={{ width: W * OVERVIEW, height: H * OVERVIEW }}>
               <div className="absolute left-0 top-0 origin-top-left" style={{ transform: `scale(${OVERVIEW})`, width: W, height: H }}>

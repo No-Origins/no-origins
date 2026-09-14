@@ -61,7 +61,6 @@ export function PortfolioCanvas({ initialView = "me", heading = "Bhargav — No 
       threads={portfolioThreads}
       onOpen={(href) => router.push(href)}
       heading={heading}
-      menuLayout="column"
       trailing={<ThemeSwitch />}
       chat={<CanvasChat onMiss={() => setHostSays(HOST_CANT_CHAT)} />}
     />

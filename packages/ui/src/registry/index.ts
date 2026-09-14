@@ -1,10 +1,11 @@
 import { entries } from "./entries";
-import type { Registry, RegistryEntry, RegistryGroup } from "./types";
+import type { Registry, RegistryEntry, RegistryGroup, RegistryLayer } from "./types";
 
-export type { NodeKind, PropType, PropSpec, PropSchema, SlotSpec, RegistryGroup, RegistryEntry, Registry } from "./types";
+export type { NodeKind, PropType, PropSpec, PropSchema, SlotSpec, RegistryGroup, RegistryLayer, RegistryEntry, Registry } from "./types";
 export { entries } from "./entries";
 export { Catalogue } from "./Catalogue";
 export type { CatalogueProps } from "./Catalogue";
+export { ContrastReport } from "./ContrastReport";
 
 /** Every authorable component, by name. A `component` value a document names must be a key here or it does not render. */
 export const registry: Registry = Object.fromEntries(entries.map((e) => [e.name, e]));
@@ -14,7 +15,10 @@ export const registryNames: readonly string[] = entries.map((e) => e.name);
 
 export const byGroup = (group: RegistryGroup): readonly RegistryEntry[] => entries.filter((e) => e.group === group);
 
-export const groups: readonly RegistryGroup[] = ["text", "marks", "actions", "layout", "surfaces", "figures", "composites"];
+export const groups: readonly RegistryGroup[] = ["text", "marks", "actions", "controls", "feedback", "layout", "surfaces", "figures", "composites"];
+
+export const layers: readonly RegistryLayer[] = ["atom", "molecule", "organism"];
+export const byLayer = (layer: RegistryLayer): readonly RegistryEntry[] => entries.filter((e) => e.layer === layer);
 
 /** Entries a slot admitting `"blocks"` will take: everything placeable inside another component. */
 export const blockEntries: readonly RegistryEntry[] = entries.filter((e) => e.kind.includes("slot"));
