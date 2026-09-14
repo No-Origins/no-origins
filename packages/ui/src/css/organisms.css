@@ -143,8 +143,8 @@
   position: absolute; inset: 0; z-index: 1; pointer-events: none;
   /* the card's own corner, restated: this layer is clipped separately and has to agree with it exactly */
   border-radius: inherit; overflow: hidden;
-  -webkit-mask-image: linear-gradient(to top, #000 0 26%, color-mix(in oklch, #000 50%, transparent) 46%, transparent 64%);
-  mask-image: linear-gradient(to top, #000 0 26%, color-mix(in oklch, #000 50%, transparent) 46%, transparent 64%);
+  -webkit-mask-image: linear-gradient(to top, #000 0 26%, color-mix(in oklch, #000 50%, transparent) 46%, transparent 64%); /* stylelint-disable-line color-no-hex -- a mask reads alpha only; the colour is not a colour */
+  mask-image: linear-gradient(to top, #000 0 26%, color-mix(in oklch, #000 50%, transparent) 46%, transparent 64%); /* stylelint-disable-line color-no-hex -- a mask reads alpha only; the colour is not a colour */
 }
 .noo-profile__frost > * {
   display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 0;
@@ -193,7 +193,7 @@
 .noo-profile__words {
   position: absolute; inset: auto 0 0 0; z-index: 3;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 0 6% 7%; text-align: center; color: #fff;
+  padding: 0 6% 7%; text-align: center; color: #fff; /* stylelint-disable-line color-no-hex -- white over a photograph in both themes */
   text-shadow:
     0 1px 2px color-mix(in oklch, black 34%, transparent),
     0 2px 18px color-mix(in oklch, black 40%, transparent);
@@ -280,7 +280,7 @@
   border-width: 0 0 1px 0;                                                                 /* the glass hairline, bottom only */
 }
 .noo-nav__inner { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-.noo-nav__home { display: inline-flex; align-items: center; height: var(--ctl-md); color: var(--ink); text-decoration: none; font-size: 22px; border-radius: var(--r-pill); }
+.noo-nav__home { display: inline-flex; align-items: center; height: var(--ctl-md); color: var(--ink); text-decoration: none; font-size: var(--t-h4); border-radius: var(--r-pill); }
 .noo-nav__links { display: flex; align-items: center; gap: 4px; margin-left: auto; }
 .noo-nav__link {
   position: relative;
@@ -322,7 +322,7 @@
 }
 .noo-menu--column::-webkit-scrollbar, .noo-menu--rail::-webkit-scrollbar { display: none; }
 .noo-menu__brand { display: flex; align-items: center; min-height: var(--menu-item); padding: 0 var(--s-4); }
-.noo-menu__home { display: inline-flex; align-items: center; height: var(--menu-item); color: var(--ink); text-decoration: none; font-size: 20px; border-radius: var(--r-pill); }
+.noo-menu__home { display: inline-flex; align-items: center; height: var(--menu-item); color: var(--ink); text-decoration: none; font-size: var(--t-h4); border-radius: var(--r-pill); }
 .noo-menu__groups { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
 .noo-menu__group { --menu-hue: var(--hue-deep); display: flex; flex-direction: column; gap: 2px; }
 .noo-menu__group-label { display: flex; align-items: center; gap: var(--s-2); margin: 0; padding: var(--s-2) var(--s-4) var(--s-1); color: var(--muted); }
@@ -373,7 +373,7 @@
   transition: opacity var(--d-fast) var(--ease), visibility 0s linear var(--d-fast);
 }
 .noo-menu--rail .noo-menu__link:hover .noo-menu__label, .noo-menu--rail .noo-menu__link:focus-visible .noo-menu__label { opacity: 1; visibility: visible; transition-delay: 0s, 0s; }
-.noo-menu--rail .noo-menu__badge { position: absolute; top: 2px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; font-size: 10px; }
+.noo-menu--rail .noo-menu__badge { position: absolute; top: 2px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; font-size: 10px; }             /* stylelint-disable-line declaration-property-value-disallowed-list -- a count inside a 16px badge; --t-label at 12 overflows it */
 .noo-menu--rail .noo-menu__trailing { display: none; }                                      /* a theme switch and an address do not fit 72px; the sheet hides it too */
 
 /* two columns (≥ lg): the current item's panel opens beside the column; below lg it folds into children */
@@ -424,7 +424,7 @@
 /* ===== BlockCard · RoadmapItem (§9) — the Work item and the not-yet item ===== */
 .noo-block-card { display: flex; gap: 20px; align-items: flex-start; }
 .noo-block-card__blob { margin-top: 2px; }
-.noo-block-card__hue { flex: none; width: 10px; height: 10px; margin-top: 7px; border-radius: 999px; background: var(--hue-deep); }
+.noo-block-card__hue { flex: none; width: 10px; height: 10px; margin-top: 7px; border-radius: var(--r-pill); background: var(--hue-deep); }
 .noo-block-card--sleep .noo-block-card__hue { background: transparent; box-shadow: inset 0 0 0 1.5px var(--hue-deep); }   /* not here yet: the dot is hollow (was RoadmapItem — D3) */
 .noo-block-card--dot { gap: 14px; }                                                        /* the blob's 48px column shrinks to a dot */
 
@@ -504,13 +504,13 @@
 .noo-bento__list li { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .noo-bento__list li > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .noo-bento__chips { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
-.noo-bento__cell .noo-chip { height: 34px; padding-inline: 14px; font-size: 16px; }             /* chips scale with the widget */
+.noo-bento__cell .noo-chip { height: 34px; padding-inline: 14px; font-size: var(--t-body); }             /* chips scale with the widget */
 
 .noo-bento__figure { margin: 0; display: flex; flex-direction: column; gap: 6px; }
 .noo-bento__value { font: 400 var(--t-widget-figure)/0.9 var(--ff-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .noo-bento__figure--md .noo-bento__value { font-size: var(--t-display-2); }
 .noo-bento__figure-label { font-size: var(--t-widget-text); letter-spacing: 0.08em; }
-.noo-bento__cell .noo-placeholder__tag { align-self: flex-start; font-size: 14px; padding: 6px 10px; }
+.noo-bento__cell .noo-placeholder__tag { align-self: flex-start; font-size: var(--t-body-sm); padding: 6px 10px; }
 
 
 .noo-block-card__body { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 8px; }

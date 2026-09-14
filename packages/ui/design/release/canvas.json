@@ -1,0 +1,164 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 5200,
+      "title": "Read first \u2014 the system, organised"
+    },
+    {
+      "file": "Tokens.dc.html",
+      "x": 0,
+      "y": 5000,
+      "w": 1440,
+      "h": 7240,
+      "title": "Layer 1 \u00b7 Tokens"
+    },
+    {
+      "file": "Atoms.dc.html",
+      "x": 1560,
+      "y": 5000,
+      "w": 1440,
+      "h": 7860,
+      "title": "Layer 2 \u00b7 Atoms"
+    },
+    {
+      "file": "Molecules.dc.html",
+      "x": 3120,
+      "y": 5000,
+      "w": 1440,
+      "h": 7200,
+      "title": "Layer 3 \u00b7 Molecules"
+    },
+    {
+      "file": "Organisms.dc.html",
+      "x": 4680,
+      "y": 5000,
+      "w": 1440,
+      "h": 7460,
+      "title": "Layer 4 \u00b7 Organisms"
+    },
+    {
+      "file": "Templates.dc.html",
+      "x": 6240,
+      "y": 5000,
+      "w": 1440,
+      "h": 5900,
+      "title": "Layer 5 \u00b7 Templates"
+    },
+    {
+      "file": "Artboard.dc.html",
+      "x": 7717,
+      "y": 8510,
+      "w": 485,
+      "h": 425
+    },
+    {
+      "file": "Menu.dc.html",
+      "x": 6240,
+      "y": 9500,
+      "w": 1440,
+      "h": 3960,
+      "title": "Addition \u00b7 Menu (your note)"
+    },
+    {
+      "file": "Icons.dc.html",
+      "x": 7800,
+      "y": 9500,
+      "w": 1440,
+      "h": 3240,
+      "title": "Addition \u00b7 Icons (your note)"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "how-to-read",
+      "x": 1560,
+      "y": 0,
+      "w": 520,
+      "text": "HOW TO READ THIS CANVAS\n\nThe top board is the architecture and the nine decisions. The five boards below are the layers, left to right in the order they read from each other. Two more boards, bottom right, answer the notes left on 2026-09-14: Menu and Icons.\n\nEvery sample is the real package CSS \u2014 what you see is what ships today. Each item carries a verdict:\nKeep \u00b7 Fix \u00b7 Merge \u00b7 Retire \u00b7 Missing.\n\nThe two tweaks above every board (theme, block) switch the tokens. Nothing is restyled by them; that cascade is the whole argument."
+    },
+    {
+      "id": "admin-decision",
+      "x": 7760,
+      "y": 5000,
+      "w": 360,
+      "text": "D6 \u2014 THE ADMIN LAYOUT\n\nThe railed-page sample is the admin as built, reconstructed from source at real size. Under it is the Tool template I recommend (option B) and the two alternatives with their cost.\n\nPick A, B or C; the pick becomes a rule in Atomic.md."
+    },
+    {
+      "id": "not-shown",
+      "x": 7760,
+      "y": 5420,
+      "w": 360,
+      "text": "NOT RENDERED HERE\n\nThe blob's refraction pattern and the six illustrations need the runtime (measured grid, the generator). Both are shown as stand-ins and marked so. The canvas nodes are reviewed from source."
+    },
+    {
+      "id": "note-1",
+      "x": 7719,
+      "y": 8393,
+      "w": 240,
+      "text": "Let's remove \"Menu\" from the Canvas layout. \"Menu\" should also be a component."
+    },
+    {
+      "id": "note-2",
+      "x": 7725,
+      "y": 8928,
+      "w": 240,
+      "text": "Menu Design Inspiration\n\n\nWe should have the following variants of the component.  \n\n\n1. The layout displayed in the image.\n2. A menu component that we can drag and drop in the Canvas. We should be able to add menu items.\n\n\nMake sure to have responsive variants of the component."
+    },
+    {
+      "id": "note-3",
+      "x": 1555,
+      "y": 4805,
+      "w": 240,
+      "text": "We are still missing icons. We should add icons to the project."
+    },
+    {
+      "id": "answered",
+      "x": 8260,
+      "y": 8393,
+      "w": 340,
+      "text": "ANSWERED \u2014 2026-09-14\n\nYour three notes became two boards below and two decisions on the top board:\n\nD8 \u00b7 Icons \u2014 an Icon atom, five weights drawn on the same glyphs, five sources. My pick: regular 1.5, Phosphor.\n\nD9 \u00b7 Menu \u2014 one Menu organism drawn from your reference in our tokens: column, icon rail, two columns, floating on the canvas, bottom sheet. It replaces the Rail and the canvas's built-in menu and is placeable with editable items.\n\nAtomic.md carries both."
+    },
+    {
+      "id": "note-4",
+      "x": 6907,
+      "y": 12387,
+      "w": 240,
+      "text": "The border radius is not consistently rounded with Menu layouts above."
+    },
+    {
+      "id": "note-5",
+      "x": 9252,
+      "y": 12257,
+      "w": 240,
+      "text": "Let's go with your recomendation."
+    },
+    {
+      "id": "note-6",
+      "x": 1464,
+      "y": 4144,
+      "w": 240,
+      "text": "Let's proceed with your recommendations."
+    },
+    {
+      "id": "answered-2",
+      "x": 6907,
+      "y": 12560,
+      "w": 300,
+      "text": "FIXED \u2014 the floating form now wears the column\u2019s radii: xl outside, pill items, like every Menu above."
+    },
+    {
+      "id": "picks-recorded",
+      "x": 1464,
+      "y": 4300,
+      "w": 300,
+      "text": "RECORDED \u2014 2026-09-14\n\nD1\u2013D9 as recommended. Each is now a rule in Atomic.md \u00a74 with its reason and cost, and \u00a76\u2019s build order starts: step 1, tokens."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

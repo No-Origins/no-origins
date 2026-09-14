@@ -41,7 +41,7 @@
 .noo-blob--md      { --blob-w: 72px; }
 .noo-blob--lg      { --blob-w: 96px; }
 .noo-blob--hero    { --blob-w: 168px; }
-.noo-blob--host { --blob-fill: #fff; --blob-fill-opacity: var(--glass-host-opacity); --blob-rim: 0.95; }   /* the host: glass with nothing in it */
+.noo-blob--host { --blob-fill: #fff; /* stylelint-disable-line color-no-hex -- the host blob's white is the glass itself, not a theme colour */ --blob-fill-opacity: var(--glass-host-opacity); --blob-rim: 0.95; }   /* the host: glass with nothing in it */
 
 .noo-blob--interactive { cursor: pointer; }
 .noo-blob--interactive:hover { transform: scale(1.04); }

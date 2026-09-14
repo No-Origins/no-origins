@@ -8,7 +8,7 @@
  * layers before it (rule 3). The canvas template lives at `@no-origins/ui/canvas` (needs @xyflow/react) and the Icon
  * atom at `@no-origins/ui/icons` (needs @phosphor-icons/react) — the two optional peers, each behind its own entry.
  */
-export const version = "0.0.1";
+export const version = "0.1.0";
 
 export { hues, blocks, blobSizes, breakpoints } from "./tokens/tokens";
 export type { Hue, Block, BlobSize, Breakpoint } from "./tokens/tokens";
