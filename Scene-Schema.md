@@ -756,3 +756,31 @@ Every difference is one of these. None is a bug in the adapter; each is a place 
 8. **Interpolation (§8.1 ⑦) held its line.** "Based in …", the first four interests as a list, the first philosophy paragraph are three derived keys the host composes into the content it hands the adapter. One more case and it is a feature.
 
 **What the document cannot express at all:** the hand-written full views — `full: true` panels flowed into two columns by `section()`. §9.2 made them pages and the adapter returns pages, but nothing mounts one. The five section routes still render the hand-written scene, and will until the editor's full-view work lands.
+
+### 10.4 Built to the picks — 2026-09-14
+
+§10.3's five findings were put on the canvas as option boards and decided; Admin.md §6.5c has the picks. Built here, in the package and the registry, and the thresholds re-measured against what they then achieved.
+
+| | What changed |
+|---|---|
+| **F1** | `CellHead` fills its cell and spreads — `flex: 1` + `space-between`, so the mono label sits at the top and the title at the bottom without the author typing the diagonal. A page bento's rows grow, so it collapses back there. **The dot is gone**: `dot` stays as a deprecated prop for one minor and renders nothing. In its place a **`media` slot** — one `Image`, `Blob` or `Pattern` at 24 square, inline in the title's first line. The registry entry drops `dot` and declares the slot; the adapter already maps a `max: 1` non-children slot to a prop of that name |
+| **F2** | `Text` gains **`size="widget"`** — `.noo-widget-text`, `--t-widget-text` 20/1.35, the size a bento cell is read at. The fourth step; the enum grows to four |
+| **F3** | `BentoFigure` (registered as `Figure`) gains **`kind="figure" \| "word"`**. A word is the display face at `--t-widget-word` over two lines, no tabular nums, same corner. The schema has one cap, so `value` is capped at 24 with the help text saying a figure is at most 4 characters and a word up to 24 |
+| **F4** | `DocumentContext` gains **`sampled?: (path: string) => boolean`**. `resolveDeep` now collects the refs that resolved as well as those that did not; a node whose props read a sampled path renders the *sample copy* tag as its first child and pushes a `warn` — `props read sampled copy: site.interestsMarkdown`. The portfolio maps a ref path to a slot key by taking the second segment and stripping the derived suffixes (`Markdown`, `First`, `Line`). Three warns on the portfolio document now: location, interests, philosophy |
+| **F5** | A `Text` list inside a bento cell renders **without markers** — one rule on `.noo-bento__cell .noo-text--blocks ul`. The rhythm stays; F2 gives it the size |
+
+The portfolio's document was re-poured to match: no dots on its heads, `size: "widget"` on every widget cell's text, and the two loud words as `Figure` `kind: "word"` rather than a `Heading`.
+
+**The numbers now** (`DOC_DIFF=0 pnpm review -g "like scene|like sections"`, light and dark, against §10.2's):
+
+| Compared | Was | Is |
+|---|---|---|
+| The map at home | 1 % | **< 1 %** (3258 px of 1 296 000) |
+| Current status | 3 % | **0** — identical, pixel for pixel |
+| Work experience | 3 % | **< 1 %** (2829 px) |
+| Case studies | 3 % | **< 1 %** (2203 px) |
+| Projects | 2 % | **0** — identical, pixel for pixel |
+| Interests | 9 % | **3 %** (9761 px) |
+| Philosophy | 9 % | **5 %** (15 390 px) |
+
+**What the residue is**, and why it is not an adapter bug. Work keeps a dot's worth of pixels because `content/sections.tsx` still draws them and is not re-poured until the editor's full-view work lands. Interests and Philosophy carry the rest twice over: the word wraps where the hand-written one has an explicit `<br>` (`outside the work`, `how I build`), and the *sample copy* tag sits **inline** inside a one-paragraph `Text` — it is the component's first child, and a `<p>`'s first child is on the first line — where the hand-written cell puts the tag on its own line above. The interests cell, whose markdown is a list and so renders as a `div`, puts it on its own line and matches. That is the next small decision: whether the tag is the component's child or the cell's sibling.

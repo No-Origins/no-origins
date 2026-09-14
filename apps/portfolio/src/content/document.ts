@@ -43,13 +43,15 @@ const cell = (span: [number, number], content: SlotChild[], extra: Record<string
   slots: { content },
 });
 const label = (text: string): SlotChild => ({ component: "Label", props: { text } });
-const head = (label: string, title: string, dot?: string): SlotChild => ({ component: "CellHead", props: dot ? { label, title, dot } : { label, title } });
-const text = (markdown: string | { $ref: string }, extra: Record<string, unknown> = {}): SlotChild => ({ component: "Text", props: { markdown, size: "small", ...extra } });
+const head = (label: string, title: string): SlotChild => ({ component: "CellHead", props: { label, title } });
+/** Widget scale (Admin.md §6.5c F2): a cell is read from about twice as far away as a document. */
+const text = (markdown: string | { $ref: string }, extra: Record<string, unknown> = {}): SlotChild => ({ component: "Text", props: { markdown, size: "widget", ...extra } });
 const chip = (label: string, hue: string): SlotChild => ({ component: "Chip", props: { label, hue } });
 
-/** The loud cell (Design-System.md §8.3): the mono word top-left, the figure bottom-left, the pattern across it. */
+/** The loud cell (Design-System.md §8.3): the mono word top-left, the figure bottom-left, the pattern across it.
+ *  A section with nothing countable says a word instead, in the same corner — one `Figure`, two kinds (§6.5c F3). */
 const loud = (eyebrow: string, pattern: string, figure?: { value: string; label: string }, word?: string): SlotChild =>
-  cell([2, 2], [label(eyebrow), ...(figure ? [{ component: "Figure", props: figure }] : []), ...(word ? [{ component: "Heading", props: { level: 2, text: word } }] : [])], {
+  cell([2, 2], [label(eyebrow), ...(figure ? [{ component: "Figure", props: figure }] : []), ...(word ? [{ component: "Figure", props: { value: word, kind: "word" } }] : [])], {
     tone: "fill",
     pattern,
   });
@@ -151,10 +153,10 @@ export const portfolioDocument: SceneDocument = {
     ]),
     widget("work", "peach", "Work experience", [
       loud("work", "work", { value: "4", label: "roles" }),
-      cell([1, 1], [head("now", "Radise", "peach")]),
-      cell([1, 1], [head("before", "Dataflix", "green")]),
-      cell([1, 1], [head("one year", "Hashnode", "blue")]),
-      cell([1, 1], [head("two years", "Terrible Tiny Tales", "pink")]),
+      cell([1, 1], [head("now", "Radise")]),
+      cell([1, 1], [head("before", "Dataflix")]),
+      cell([1, 1], [head("one year", "Hashnode")]),
+      cell([1, 1], [head("two years", "Terrible Tiny Tales")]),
       cell([4, 1], [
         label("the through-line"),
         { component: "Row", props: { gap: 8 }, slots: { children: [chip("editors", "lavender"), chip("design systems", "peach"), chip("agent systems", "blue"), chip("full-stack", "green")] } },

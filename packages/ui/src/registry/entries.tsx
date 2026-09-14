@@ -80,10 +80,10 @@ const heading: RegistryEntry = {
 
 const text: RegistryEntry = {
   name: "Text", kind: ["slot", "panel"], group: "text", layer: "atom", component: Text as never,
-  line: "A run of prose, at one of three steps of the scale.",
+  line: "A run of prose, at one of four steps of the scale.",
   props: {
     markdown: { type: "markdown", required: true, help: "Markdown, plus the declared inline directives (R4). The adapter parses it; the package parses nothing." },
-    size: { type: "enum", of: ["lead", "body", "small"], default: "body" },
+    size: { type: "enum", of: ["lead", "body", "small", "widget"], default: "body", help: "`widget` is the fourth step (Admin.md §6.5c F2): 20/1.35, the size a bento cell is read at." },
     tone: { type: "enum", of: ["default", "muted"], default: "default" },
   },
   childrenFrom: "markdown",
@@ -212,9 +212,9 @@ const bento: RegistryEntry = {
   example: () => (
     <Bento hue="peach" label="Work experience">
       <BentoCell span={[2, 2]} tone="fill"><Label>work</Label><BentoFigure value="4" label="roles" /></BentoCell>
-      <BentoCell><CellHead label="now" title="Radise" dot="peach" /></BentoCell>
-      <BentoCell><CellHead label="one year" title="Hashnode" dot="blue" /></BentoCell>
-      <BentoCell span={[2, 1]}><CellHead label="before" title="Dataflix" dot="green" /></BentoCell>
+      <BentoCell><CellHead label="now" title="Radise" /></BentoCell>
+      <BentoCell><CellHead label="one year" title="Hashnode" /></BentoCell>
+      <BentoCell span={[2, 1]}><CellHead label="before" title="Dataflix" /></BentoCell>
       <BentoCell span={[4, 1]}>
         <Label>the through-line</Label>
         <Row gap={8}><Chip hue="lavender">editors</Chip><Chip hue="peach">design systems</Chip></Row>
@@ -243,7 +243,7 @@ const bentoCell: RegistryEntry = {
   },
   example: () => (
     <Bento hue="blue" cols={2} rows={1}>
-      <BentoCell tone="quiet"><CellHead label="quiet" title="Recedes" dot="blue" /></BentoCell>
+      <BentoCell tone="quiet"><CellHead label="quiet" title="Recedes" /></BentoCell>
       <BentoCell tone="fill"><Label>fill</Label><Heading level={4}>The loud one</Heading></BentoCell>
     </Bento>
   ),
@@ -306,13 +306,14 @@ const placeholder: RegistryEntry = {
 
 const figure: RegistryEntry = {
   name: "Figure", kind: ["slot"], group: "figures", layer: "molecule", component: BentoFigure as never,
-  line: "A number or short word as an image. Honest counts only.",
+  line: "A number or a short word as an image. Honest counts only.",
   props: {
-    value: { type: "text", max: 4, required: true, help: "Capped at 4. Where nothing is countable, use a word instead — inventing a number to fill the slot is the failure mode (Patterns.md principle 8)." },
+    value: { type: "text", max: 24, required: true, help: "A figure is at most 4 characters; a word up to 24. Where nothing is countable, set `kind` to word — inventing a number to fill the slot is the failure mode (Patterns.md principle 8)." },
     label: { type: "text", max: 20 },
-    size: { type: "enum", of: ["lg", "md"], default: "lg" },
+    kind: { type: "enum", of: ["figure", "word"], default: "figure", help: "A word is the display face at 48 over two lines, in the same corner (Admin.md §6.5c F3)." },
+    size: { type: "enum", of: ["lg", "md"], default: "lg", help: "A figure's two sizes: 96 for a 2 × 2 cell, 56 for a single one. A word has one." },
   },
-  defaults: { value: "0", label: "of them", size: "lg" },
+  defaults: { value: "0", label: "of them", kind: "figure", size: "lg" },
   example: () => <BentoFigure value="4" label="roles" />,
   since: "0.0.1", status: "stable",
 };
@@ -376,17 +377,17 @@ const intro: RegistryEntry = {
 
 const cellHead: RegistryEntry = {
   name: "CellHead", kind: ["slot"], group: "composites", layer: "molecule", component: CellHead as never,
-  line: "A widget cell's label, dot and title.",
+  line: "A widget cell's label and title, spread top to bottom, with room for a logo.",
   props: {
     label: { type: "text", max: 24 },
     title: { type: "text", max: 40, required: true },
-    dot: { type: "hue" },
   },
+  slots: { media: { admits: ["Image", "Blob", "Pattern"], max: 1, label: "Logo" } },
   defaults: { label: "now", title: "A thing" },
   example: () => (
     <Bento hue="peach" cols={2} rows={1}>
-      <BentoCell><CellHead label="now" title="Radise" dot="peach" /></BentoCell>
-      <BentoCell tone="fill"><CellHead label="one year" title="Hashnode" dot="blue" /></BentoCell>
+      <BentoCell><CellHead label="now" title="Radise" media={<Image src={STAND_IN} alt="" radius="none" width={24} height={24} />} /></BentoCell>
+      <BentoCell tone="fill"><CellHead label="one year" title="Hashnode" /></BentoCell>
     </Bento>
   ),
   since: "0.1.0", status: "draft",

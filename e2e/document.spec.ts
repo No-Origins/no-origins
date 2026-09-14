@@ -15,18 +15,24 @@ import { expect, test, type Page } from "@playwright/test";
  *    section route such as `/work` opens the hand-written FULL VIEW, and a document has no full views (they are
  *    pages, Design-System.md §8.4), so a viewport comparison there would compare two different things.
  *
- * The thresholds are what the proof achieved on 2026-09-14 and not wishes — Scene-Schema.md §10 lists what each
- * difference is. `DOC_DIFF=0 pnpm review -g "like scene"` prints the real ratios.
+ * The thresholds are what the proof achieved and not wishes — Scene-Schema.md §10 lists what each difference is.
+ * `DOC_DIFF=0 pnpm review -g "like scene|like sections"` prints the real ratios. Re-measured 2026-09-14 after
+ * Admin.md §6.5c F1–F5 were built: status and projects now match to the pixel, and the rest is residue with a
+ * known cause. **The hand-written widgets keep their hue dots and the document's do not** — F1 removed the dot,
+ * and `content/sections.tsx` is not re-poured until the editor's work lands — so Work keeps a dot's worth of
+ * pixels. Interests and Philosophy carry the rest: the word wraps where the hand-written one has a `<br>`, and
+ * the *sample copy* tag sits inline inside a one-paragraph `Text` where the hand-written cell puts it on its own
+ * line above. Both are findings, not adapter bugs.
  */
 const WIDGETS: Array<{ label: string; ratio: number }> = [
-  { label: "Current status", ratio: 0.04 },
-  { label: "Work experience", ratio: 0.04 },
-  { label: "Case studies", ratio: 0.04 },
-  { label: "Projects", ratio: 0.03 },
-  { label: "Interests", ratio: 0.1 },
-  { label: "Philosophy", ratio: 0.1 },
+  { label: "Current status", ratio: 0.01 },
+  { label: "Work experience", ratio: 0.01 },
+  { label: "Case studies", ratio: 0.01 },
+  { label: "Projects", ratio: 0.01 },
+  { label: "Interests", ratio: 0.04 },
+  { label: "Philosophy", ratio: 0.05 },
 ];
-const HOME_RATIO = 0.02;
+const HOME_RATIO = 0.01;
 
 const max = (ratio: number) => (process.env.DOC_DIFF !== undefined ? Number(process.env.DOC_DIFF) : ratio);
 

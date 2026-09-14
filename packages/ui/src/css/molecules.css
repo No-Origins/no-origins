@@ -1,8 +1,16 @@
 /* @no-origins/ui — molecules (Atomic.md layer 3): atoms combined into one thing with one job. Reads tokens and atoms. */
 
-/* ===== CellHead (§9) — a widget cell's label over a title ===== */
-.noo-cellhead { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+/* ===== CellHead (§9) — a widget cell's label over a title, spread across the cell (Admin.md §6.5c F1) =====
+   `flex: 1` + `space-between` is the whole rule: the head takes the cell's height and pushes the mono label to the
+   top and the title to the bottom — the diagonal an author used to get by typing the two tags into the cell itself.
+   A page bento's rows grow, so there is no height to spread into: it collapses back to a block there. */
+.noo-cellhead { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; flex: 1; justify-content: space-between; }
+.noo-bento--page .noo-cellhead { flex: none; justify-content: flex-start; }
 .noo-cellhead__title { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
+/* The media slot: a logo at 24px, inline in the title's first line, where the dot was. */
+.noo-cellhead__media { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: var(--r-sm); overflow: hidden; }
+.noo-cellhead__media > * { width: 100%; height: 100%; }
+.noo-cellhead__media img { object-fit: cover; }
 
 /* ===== Field (§9) — caption label · glass-1 box, radius 14, 48px · accent focus ring ===== */
 .noo-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }

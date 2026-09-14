@@ -498,7 +498,7 @@
 /* twice the document scale: read from twice as far away, nothing under 20 */
 .noo-bento__title { margin: 0; font: 600 var(--t-widget-title)/1.15 var(--ff-sans); letter-spacing: -0.005em; text-wrap: balance; }
 .noo-bento__text  { margin: 0; font: 400 var(--t-widget-text)/1.35 var(--ff-sans); color: var(--ink-2); text-wrap: pretty; }
-.noo-bento__cell--fill .noo-bento__text { color: inherit; opacity: 0.85; }
+.noo-bento__cell--fill .noo-bento__text, .noo-bento__cell--fill .noo-widget-text { color: inherit; opacity: 0.85; }
 .noo-bento__word  { margin: 0; font: 400 var(--t-widget-word)/0.95 var(--ff-display); letter-spacing: -0.01em; }        /* two lines in a 2 × 2 cell; 56 wrapped to three and met the illustration */
 .noo-bento__list  { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font: 500 var(--t-widget-title)/1.25 var(--ff-sans); }
 .noo-bento__list li { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -510,7 +510,13 @@
 .noo-bento__value { font: 400 var(--t-widget-figure)/0.9 var(--ff-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .noo-bento__figure--md .noo-bento__value { font-size: var(--t-display-2); }
 .noo-bento__figure-label { font-size: var(--t-widget-text); letter-spacing: 0.08em; }
+/* A Figure set as a WORD (Admin.md §6.5c F3): the same corner and the same job, in the display face at the word's
+   size. No tabular nums — that alignment is for digits, and it widens letters. */
+.noo-bento__figure--word .noo-bento__value { font: 400 var(--t-widget-word)/0.95 var(--ff-display); letter-spacing: -0.01em; font-variant-numeric: normal; }
 .noo-bento__cell .noo-placeholder__tag { align-self: flex-start; font-size: var(--t-body-sm); padding: 6px 10px; }
+/* A list inside a widget cell (Admin.md §6.5c F5): lines, not bullets. A widget is a handful of lines read from
+   across the room; a marker column is document furniture and steals the width. The rhythm stays. */
+.noo-bento__cell .noo-text--blocks ul { list-style: none; padding-left: 0; }
 
 
 .noo-block-card__body { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 8px; }

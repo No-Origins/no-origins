@@ -6,7 +6,7 @@ import { CanvasShell, type SceneNode } from "@no-origins/ui/canvas";
 import { documentToScene } from "@no-origins/ui/document";
 import { registry } from "@no-origins/ui/registry";
 import { portfolioDocument } from "@/content/document";
-import { site } from "@/content/site";
+import { sampled, site } from "@/content/site";
 import { roles } from "@/content/work";
 import { CanvasChat } from "./portfolio-canvas";
 import { HOST_CANT_CHAT, HOST_SAYS } from "./scene";
@@ -21,6 +21,16 @@ import { HOST_CANT_CHAT, HOST_SAYS } from "./scene";
  * because §8.1 ⑦ deferred interpolation inside markdown and the host is where a derived line belongs until a
  * second case asks for the feature.
  */
+/**
+ * Which ref paths read sample copy (Scene-Schema.md §3.4, Admin.md §6.5c F4). `sampled()` in `content/site.ts` is
+ * keyed by SLOT — "interests", "location" — and a ref names a content path, so the second segment is the key, with
+ * the derived suffixes this file adds stripped back off: `site.interestsMarkdown` is still the interests slot.
+ */
+const sampledRef = (path: string) => {
+  const key = path.split(".")[1] ?? "";
+  return sampled(key.replace(/(Markdown|First|Line)$/, ""));
+};
+
 export function documentContent() {
   return {
     site: {
@@ -36,7 +46,7 @@ export function documentContent() {
 export function DocumentCanvas({ initialView = "me", heading = "Bhargav — No Origins, as a document" }: { initialView?: string; heading?: string }) {
   const [hostSays, setHostSays] = useState<string>(HOST_SAYS);
   const router = useRouter();
-  const result = useMemo(() => documentToScene(portfolioDocument, registry, { content: documentContent() }), []);
+  const result = useMemo(() => documentToScene(portfolioDocument, registry, { content: documentContent(), sampled: sampledRef }), []);
   // `node.say` is a default the host may override (§1.5): the guided chat changes what the blob says.
   const scene = useMemo<SceneNode[]>(() => result.scene.map((n) => (n.kind === "blob" && n.id === "me-blob" ? { ...n, say: hostSays } : n)), [result, hostSays]);
 

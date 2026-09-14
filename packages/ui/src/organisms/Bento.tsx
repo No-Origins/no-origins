@@ -80,16 +80,22 @@ export function BentoCell({ span = [1, 1], tone = "quiet", pattern, hue, classNa
 }
 
 export interface BentoFigureProps extends ComponentPropsWithoutRef<"p"> {
-  /** A number or a short word, set in the display face. */
+  /** A number, or — as a `word` — a short phrase, set in the display face. */
   value: ReactNode;
   label?: ReactNode;
-  /** `lg` 96 for a 2 × 2 cell, `md` 56 for a single cell. */
+  /** `lg` 96 for a 2 × 2 cell, `md` 56 for a single cell. Only a `figure` has two sizes. */
   size?: "lg" | "md";
+  /**
+   * What the loud cell says: a count, or a phrase where nothing is countable (Admin.md §6.5c F3). A `word` is the
+   * display face at 48 over two lines — same corner, same job, and the honest answer when there is no number.
+   */
+  kind?: "figure" | "word";
 }
 
-export function BentoFigure({ value, label, size = "lg", className, ...rest }: BentoFigureProps) {
+export function BentoFigure({ value, label, size = "lg", kind = "figure", className, ...rest }: BentoFigureProps) {
+  const word = kind === "word";
   return (
-    <p className={cx("noo-bento__figure", size === "md" && "noo-bento__figure--md", className)} {...rest}>
+    <p className={cx("noo-bento__figure", word ? "noo-bento__figure--word" : size === "md" && "noo-bento__figure--md", className)} {...rest}>
       <span className="noo-bento__value">{value}</span>
       {label ? <span className="noo-label noo-bento__figure-label">{label}</span> : null}
     </p>

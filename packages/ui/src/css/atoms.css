@@ -206,6 +206,9 @@
 .noo-text--blocks > * { margin: 0; }
 .noo-text--blocks ul { list-style: disc; padding-left: var(--s-5); }
 .noo-text--blocks li + li { margin-top: var(--s-1); }
+/* The fourth step (Admin.md §6.5c F2): the size a widget is read at, from about twice as far away. `.noo-bento__text`
+   set it on a hand-typed `<p>` and no component could; this is that declaration, as a step on the scale. */
+.noo-widget-text { font: 400 var(--t-widget-text)/1.35 var(--ff-sans); color: var(--ink-2); text-wrap: pretty; }
 
 .noo-stack { display: flex; flex-direction: column; min-width: 0; }                            /* min-width 0: a long word must not widen the cell */
 .noo-stack--g8 { gap: var(--s-2); } .noo-stack--g16 { gap: var(--s-4); } .noo-stack--g24 { gap: var(--s-6); } .noo-stack--g40 { gap: var(--s-10); }

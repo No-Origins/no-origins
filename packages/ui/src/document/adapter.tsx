@@ -5,7 +5,7 @@ import type { Registry, RegistryEntry, SlotSpec } from "../registry/types";
 import type { Hue } from "../tokens/tokens";
 import type { BlobSceneNode, CanvasView, MenuSceneNode, PanelSceneNode, RegionSceneNode, SceneNode, SceneThread, WidgetSceneNode } from "../templates/canvas/scene";
 import { markdown } from "./markdown";
-import { isRef, present, resolveDeep, resolveRef, type Unresolved } from "./refs";
+import { isRef, present, resolveDeep, resolveRef, type RefSite, type Unresolved } from "./refs";
 import { schemaFor } from "./props";
 import { documentSchema, type DocumentNodeKind, type ParsedDocument, type ParsedDocumentNode, type SlotChild } from "./schema";
 
@@ -40,6 +40,12 @@ export interface DocumentPage {
 export interface DocumentContext {
   /** The project's content, which refs resolve against (§3.4). The host owns it; the adapter reads it. */
   content?: unknown;
+  /**
+   * Does this ref path name copy the host filled from a sample? (Admin.md §6.5c F4.) A node whose props read one
+   * renders the *sample copy* tag first and says so in `issues`. Only the host knows — which is also why a
+   * document that INLINES sampled text cannot be tagged: sampled copy lives in content and is reached by ref.
+   */
+  sampled?: (path: string) => boolean;
 }
 
 export interface SceneFromDocument {
@@ -59,6 +65,7 @@ interface Ctx {
   doc: ParsedDocument;
   registry: Registry;
   content: unknown;
+  sampled?: (path: string) => boolean;
   patternNames: readonly string[];
   issues: Issue[];
   viewHref: (view: string) => string | undefined;
@@ -101,8 +108,11 @@ function prepare(child: SlotChild, entry: RegistryEntry, path: string, ctx: Ctx,
     }
   }
   const unresolved: Unresolved[] = [];
-  const resolved = resolveDeep(raw, ctx.content, `${path}.props`, unresolved) as Record<string, unknown>;
+  const read: RefSite[] = [];
+  const resolved = resolveDeep(raw, ctx.content, `${path}.props`, unresolved, read) as Record<string, unknown>;
   for (const u of unresolved) warn(ctx, u.path, `ref "${u.ref}" names nothing`);
+  const sampled = ctx.sampled ? read.filter((r) => ctx.sampled!(r.ref)) : [];
+  for (const r of sampled) warn(ctx, r.path, `props read sampled copy: ${r.ref}`);
   for (const k of Object.keys(resolved)) if (resolved[k] === undefined) delete resolved[k];
 
   const parsed = schemaFor(entry, { patternNames: ctx.patternNames }).safeParse(resolved);
@@ -160,6 +170,9 @@ function prepare(child: SlotChild, entry: RegistryEntry, path: string, ctx: Ctx,
     if (CHILD_SLOTS.has(slotName)) children.push(...elements);
     else props[slotName] = spec.max === 1 ? elements[0] : elements;
   }
+
+  // The tag goes FIRST, above the words it is about — the cell's own top-left, as the hand-written widgets have it.
+  if (sampled.length) children.unshift(<span key="sampled" className="noo-placeholder__tag">sample copy</span>);
 
   return { authored, props: entry.adapt ? entry.adapt(props, parent) : props, children };
 }
@@ -245,6 +258,7 @@ export function documentToScene(input: unknown, registry: Registry, context: Doc
     doc,
     registry,
     content: context.content,
+    sampled: context.sampled,
     patternNames: [...libraryPatternNames, ...Object.keys(doc.patterns)],
     issues: [],
     viewHref: (view) => doc.views.find((v) => v.id === view)?.href,
