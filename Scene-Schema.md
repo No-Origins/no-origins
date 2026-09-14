@@ -145,6 +145,8 @@ export interface RegistryEntry<P = Record<string, unknown>> {
   example: () => React.ReactNode;     // the catalogue's live sample
   since: string;                      // the ui version it appeared in
   status: "stable" | "draft" | "deprecated";
+  childrenFrom?: string;              // the authored prop rendered as `children` — Heading.text, Text.markdown (§10 ①)
+  adapt?: (props, parent?) => props;  // authored shape → React shape where they differ — BentoCell.span (§10 ②)
 }
 ```
 
@@ -402,11 +404,13 @@ And the six parameter sets lived in `apps/portfolio/src/content/sections.tsx` �
 ## 4. The adapter
 
 ```ts
-// @no-origins/ui/canvas
-export function documentToScene(doc: SceneDocument, registry: Registry): {
+// @no-origins/ui/document  (built 2026-09-14 — §10 ③ says why not /canvas)
+export function documentToScene(doc: unknown, registry: Registry, ctx?: { content?: unknown }): {
+  valid: boolean;          // no error-level issue: what Publish is gated on (§6)
   scene: SceneNode[];
   views: CanvasView[];
   threads: SceneThread[];
+  pages: DocumentPage[];   // `page` nodes, rendered — not in canvas space (Design-System.md §8.4), for their own route
   issues: Issue[];
 }
 ```
@@ -704,3 +708,51 @@ Source: the `work` block of `scene.tsx`, `content/work.ts`, and the `work` entry
 ### 9.5 Where the schema stands
 
 Two sections hand-authored, twelve findings, and the shape has stopped moving in the places Me tested and started moving in the places it could not reach. The five sections still unwritten (Design-System.md §13) are `Placeholder` panels today, so they exercise nothing new — **the schema is ready for step 2, and the next thing that can invalidate it is the editor, not another document.**
+
+---
+
+## 10. Built — the read path, 2026-09-14
+
+Admin.md §13 step 6, done as Admin.md §6.5's step 2: the schema as Zod, the registry's prop schemas as validators, refs, markdown with the two directives, and the adapter — in `packages/ui/src/document/`, exported at **`@no-origins/ui/document`**. The portfolio's map is written as a document in `apps/portfolio/src/content/document.ts` and rendered at **`/fixtures/document`** (in the sweep); `e2e/document.spec.ts` compares that render with the hand-written one pixel for pixel, and the numbers below are what it measured. Nothing in `@no-origins/ui/canvas` changed, as §0 promised.
+
+### 10.1 What building it amended
+
+Eight things the text above did not say, each decided by the code and recorded here so the text is true again.
+
+| | Amendment | Why |
+|---|---|---|
+| ① | `RegistryEntry` gains **`childrenFrom`** — the authored prop that renders as the component's `children` (`Heading.text`, `Label.text`, `Chip.label`, `Button.label`, `Text.markdown`, `Quote.markdown`, `Toast.text`, `RegionLabel.text`) | §2.2 re-types a `ReactNode` prop as `text`; something has to say which React prop it was. On the entry, not in a table inside the adapter — two lists drift |
+| ② | `RegistryEntry` gains **`adapt(props, parent)`** — authored shape → React shape. `BentoCell.span` is authored as `{ cols, rows }` (an `object` the inspector renders as a labelled group) and taken as `[cols, rows]`; a cell inherits its bento's `hue` for its pattern; `Pattern.name` naming a document pattern becomes `family` | The alternative was a bespoke branch per component in the adapter, which is the drift §3.1 forbids. §9's examples write `"span": [2, 2]` — read them as `{ "cols": 2, "rows": 2 }` |
+| ③ | The adapter lives at **`/document`**, not `/canvas` | It carries the whole registry and zod. The live portfolio renders a hand-written scene from `/canvas` and needs neither |
+| ④ | **`BentoCell` (the component) gains `pattern` and `hue`** | The registry declared `pattern` on the cell before the component had it — §2.2 read the other way: the authorable surface is a subset of the React one, so the component grew. What `SectionWidget` did by hand, the cell does itself |
+| ⑤ | `component` is **absent on `region` and `menu`**; `menu` carries `node: { label, items: [{ label, view \| href }] }` (Admin.md §6.5) | `RegionNode` and `MenuNode` draw themselves. `region` may still name `RegionLabel` for its text; it is deprecated |
+| ⑥ | **`page` nodes come back as `pages`**, rendered, not in `scene` | §9.2 took them off the canvas; `SceneNode` has no place for them. Nothing mounts a page yet — that is the full-view work, with the editor |
+| ⑦ | Nodes **with no section are emitted first**, in array order; then each section in `order`, in array order | §1.2 said what happens within a section and not what happens to the menu and the blob |
+| ⑧ | **Numeric enums are numbers on the way out** (`of: ["2","3","4"]` → `level: 2`); **registry `default`s are not applied on read** (they are what a dropped instance starts with); a panel with **no height and no `measured`** renders at one box with a warning; **markdown** is paragraphs, bullet lists, `**`, `*`, `` ` ``, `[text](href)` and the two directives, and block prose in a `Text` renders it as a `div.noo-text--blocks` | Each is the smallest rule that made the fixture render. An unknown directive is its text, as §3.5 promised |
+
+### 10.2 The proof, and its numbers
+
+Playwright's comparator, the hand-written render written as the baseline on every run, the blob masked. Ratios are pixels different over all pixels.
+
+| Compared | Ratio | What the pixels are |
+|---|---|---|
+| **The map at home** — `/` against `/fixtures/document`, 1440 × 900 | **1 %** | The minimap: the hand-written scene keeps nineteen full-view panels in the DOM and the minimap draws them; the document has none. Then the widget differences below, at map size |
+| **Widgets at 1:1** — `/fixtures/bento` against the document's, element for element | status **3 %** · work **3 %** · cases **3 %** · projects **2 %** · interests **9 %** · philosophy **9 %** | Listed in §10.3. The loud cells — label, figure, pattern in the section's hue — are identical in all six |
+| Section routes (`/work` …) | not compared | `/work` opens the hand-written **full view**; a document has no full views (§9.2, Design-System.md §8.4). A viewport comparison there compares two different things |
+
+The Me column matched at map size: `Intro` for the hand-written `h2` + lead, a `Stack` of `Row` + `Text` for the story panel, the two `:pan` directives resolving to the views' hrefs. Adapter issues on the document: **none** — every node named a registered component, every prop passed, every ref resolved, every widget landed on a box corner.
+
+### 10.3 What the proof found
+
+Every difference is one of these. None is a bug in the adapter; each is a place the registry cannot yet say what `content/sections.tsx` says by hand — §9.3 ⑨'s finding, continued. **They want decisions, not fixes**, and they are the next option boards.
+
+1. **`CellHead` groups the label and the title; a hand-written cell spreads them.** A bento cell is a column that pushes its children apart, so the mono label sits top-left and the title bottom-left — the diagonal (Design-System.md §8.3). `CellHead` wraps both in one block at the top, and puts the dot beside a wrapped title rather than inline in its first line ("Terrible Tiny Tales"). Every widget's 3 % is mostly this.
+2. **Nothing renders the widget text scale.** `.noo-bento__text` (`--t-widget-text`, the size a widget is read at from twice the distance) has no component; `Text size="small"` is the document scale and is visibly smaller. Status, cases, projects and the two glass cells all show it.
+3. **Nothing renders the loud cell's word.** Interests and philosophy set `outside the work` and `how I build` in `.noo-bento__word` — the display face at `--t-widget-word`, two lines. `Figure` caps `value` at 4 characters (rightly, for a number); `Heading` level 2 is the nearest thing and is smaller. Most of the 9 %.
+4. **The sample-copy tag has nowhere to live.** §3.4 says it is a field on the content record; the schema carries nothing that renders it, so the document version of interests and philosophy is silently not marked as sample copy. Until it is, a document must not carry sampled copy.
+5. **A list in a widget.** The interests cell is four lines with no markers; markdown's list renders bullets in the document scale. Whether a widget list is a `Text` with a list, a `Stack` of `Text`, or a component of its own is open.
+6. **Story panel spacing.** `scene.tsx` uses a 20px utility gap; `Stack` offers 8 · 16 · 24. 16 was used. The hand-written value was off the scale.
+7. **The document was right once.** Sample copy has `*is*` in it; the hand-written cell prints the asterisks, the document renders emphasis.
+8. **Interpolation (§8.1 ⑦) held its line.** "Based in …", the first four interests as a list, the first philosophy paragraph are three derived keys the host composes into the content it hands the adapter. One more case and it is a feature.
+
+**What the document cannot express at all:** the hand-written full views — `full: true` panels flowed into two columns by `section()`. §9.2 made them pages and the adapter returns pages, but nothing mounts one. The five section routes still render the hand-written scene, and will until the editor's full-view work lands.

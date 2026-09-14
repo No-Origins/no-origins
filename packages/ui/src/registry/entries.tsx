@@ -48,6 +48,7 @@ import { Stack } from "../atoms/Stack";
 import { Text } from "../atoms/Text";
 import { hues } from "../tokens/tokens";
 import type { RegistryEntry } from "./types";
+import type { Family } from "../atoms/patterns/generator";
 
 /**
  * The twenty-two authorable components (Scene-Schema.md §2.3, §3.2).
@@ -71,6 +72,7 @@ const heading: RegistryEntry = {
     level: { type: "enum", of: ["2", "3", "4"], default: "2", help: "Display face at 2; Hanken 600 at 3 and 4. There is no level 1: a surface has exactly one h1 (§12)." },
     text: { type: "text", max: 80, required: true },
   },
+  childrenFrom: "text",
   defaults: { level: 2, text: "A heading" },
   example: () => <Heading level={2}>Four roles, told as blocks</Heading>,
   since: "0.1.0", status: "draft",
@@ -84,6 +86,7 @@ const text: RegistryEntry = {
     size: { type: "enum", of: ["lead", "body", "small"], default: "body" },
     tone: { type: "enum", of: ["default", "muted"], default: "default" },
   },
+  childrenFrom: "markdown",
   defaults: { markdown: "Write here.", size: "body" },
   example: () => <Text size="lead">I build editors, design systems and agent tools. No Origins is where I keep them.</Text>,
   since: "0.1.0", status: "draft",
@@ -93,6 +96,7 @@ const label: RegistryEntry = {
   name: "Label", kind: ["slot"], group: "text", layer: "atom", component: Label as never,
   line: "The mono eyebrow. One line, uppercase.",
   props: { text: { type: "text", max: 24, required: true, help: "Capped at 24: a widget sets its type at twice a document's, so a long eyebrow wraps and breaks the diagonal (§8.3)." } },
+  childrenFrom: "text",
   defaults: { text: "now" },
   example: () => <Label>the through-line</Label>,
   since: "0.1.0", status: "draft",
@@ -110,6 +114,7 @@ const chip: RegistryEntry = {
     pressed: { type: "boolean", default: false },
     href: { type: "href" },
   },
+  childrenFrom: "label",
   defaults: { label: "chip", hue: "peach" },
   example: () => <Chip hue="lavender">editors</Chip>,
   since: "0.0.1", status: "stable",
@@ -135,6 +140,7 @@ const button: RegistryEntry = {
     size: { type: "enum", of: ["sm", "md"], default: "md" },
     href: { type: "href", help: "`download` and `target` are not authorable: a canvas handing a visitor a file from a database row is a different security question." },
   },
+  childrenFrom: "label",
   defaults: { label: "Do the thing", variant: "secondary" },
   example: () => <Button variant="secondary">Download the résumé</Button>,
   since: "0.0.1", status: "stable",
@@ -227,7 +233,14 @@ const bentoCell: RegistryEntry = {
     pattern: { type: "pattern", help: "One of the library’s eighteen, or a pattern the document made (Admin.md §6.5b). `words` is measured by the editor where the cell is composed, never typed (Scene-Schema.md §3.6)." },
   },
   slots: { content: { admits: "blocks", label: "Contents" } },
-  defaults: { span: [1, 1], tone: "quiet" },
+  defaults: { span: { cols: 1, rows: 1 }, tone: "quiet" },
+  // Authored as `{ cols, rows }` — an object the inspector renders as a labelled group — taken as `[cols, rows]`.
+  // The pattern is drawn in the bento's hue, which the cell has no prop for: it comes from the parent here.
+  adapt: (p, parent) => {
+    const span = p.span as { cols?: number; rows?: number } | [number, number] | undefined;
+    const tuple = Array.isArray(span) ? span : [span?.cols ?? 1, span?.rows ?? 1];
+    return { ...p, span: tuple, hue: p.pattern ? parent?.hue : undefined };
+  },
   example: () => (
     <Bento hue="blue" cols={2} rows={1}>
       <BentoCell tone="quiet"><CellHead label="quiet" title="Recedes" dot="blue" /></BentoCell>
@@ -331,6 +344,7 @@ const pattern: RegistryEntry = {
     placement: { type: "enum", of: ["inline", "field"], default: "inline", help: "`field` fills its cell absolutely — a bento's loud cell. Anywhere without a positioned ancestor it would escape to the page." },
   },
   defaults: { name: "work", placement: "inline" },
+  adapt: ({ name, ...rest }) => (typeof name === "string" ? { name, ...rest } : { family: name as Family, ...rest }),
   // Drawn at the size it is composed for: a 2 × 2 loud cell is 304 square. A field is tuned to cross THAT cell and
   // leave through its edges, so showing it at any other aspect misrepresents it.
   example: () => (
@@ -431,6 +445,7 @@ const regionLabel: RegistryEntry = {
   name: "RegionLabel", kind: ["region"], group: "composites", layer: "organism", component: RegionLabel as never,
   line: "Retired: RegionNode draws the map label itself. Documents naming it still render.",
   props: { text: { type: "text", max: 24, required: true } },
+  childrenFrom: "text",
   defaults: { text: "Work" },
   example: () => <div style={{ height: 150 }}><RegionLabel>Work</RegionLabel></div>,
   since: "0.1.0", status: "deprecated",
@@ -547,6 +562,7 @@ const toast: RegistryEntry = {
     title: { type: "text", max: 40 },
     text: { type: "text", max: 120, required: true },
   },
+  childrenFrom: "text",
   defaults: { tone: "good", title: "Published", text: "The site will catch up within a minute." },
   example: () => (
     <Stack gap={8}>
@@ -787,6 +803,7 @@ const quote: RegistryEntry = {
     markdown: { type: "markdown", required: true, label: "The quote" },
   },
   slots: { media: { admits: ["Image", "Illustration", "Blob"], max: 1, label: "Beside the words" } },
+  childrenFrom: "markdown",
   defaults: { markdown: "It just works now.", by: "Someone", role: "Their job" },
   example: () => (
     <Quote figure={{ value: "4", label: "roles, so far" }} by="Bhargav" role="No Origins">

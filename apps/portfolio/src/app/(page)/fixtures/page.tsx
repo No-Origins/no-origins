@@ -16,6 +16,7 @@ const fixtures = [
   { href: "/fixtures/tool", step: "release 5", title: "The Tool and Document templates", line: "The admin's shell with every region filled — rail, header, main, inspector, bar — the 68ch reading column with every element markdown produces, and the editor's shell: rail, sidebar, flush main." },
   { href: "/fixtures/bento", step: 11, title: "Bento widgets", line: "The six section widgets at full size and at the 0.27 overview, with the six illustrations." },
   { href: "/fixtures/studio", step: 11, title: "The illustration studio", line: "Five candidates a round, with the reasoning; picks and the rules they produced." },
+  { href: "/fixtures/document", step: "admin 6", title: "The portfolio as a document", line: "The same map, read from a Scene-Schema document through the adapter instead of from scene.tsx — with every gap the proof found listed under it." },
   { href: "/", step: 10, title: "The portfolio", line: "All of it, on the canvas: Me at the centre, six sections on a ring around it." },
 ];
 

@@ -31,7 +31,7 @@ const routes: Array<[RegExp, string]> = [
 ];
 
 /** The chat lives inside the shell, so it can move the viewport rather than load a document (§8.5). */
-function CanvasChat({ onMiss }: { onMiss: () => void }) {
+export function CanvasChat({ onMiss }: { onMiss: () => void }) {
   const nav = useCanvasNav();
   const send = (text: string) => {
     const hit = routes.find(([re]) => re.test(text));

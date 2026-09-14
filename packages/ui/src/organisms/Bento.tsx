@@ -1,6 +1,9 @@
 import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from "react";
 import type { Hue } from "../tokens/tokens";
 import { cx } from "../cx";
+import { Pattern } from "../atoms/patterns/Pattern";
+import type { PatternName } from "../atoms/patterns/patterns";
+import type { Family } from "../atoms/patterns/generator";
 
 /**
  * Bento (Design-System.md §8.3–8.4, §9) — **the one grid, at two sizes** (revised 2026-09-11).
@@ -52,15 +55,27 @@ export interface BentoCellProps extends ComponentPropsWithoutRef<"div"> {
   /** Columns and rows the cell spans. */
   span?: [cols: number, rows: number];
   tone?: BentoTone;
+  /**
+   * The field across the cell (Patterns.md principle 7): one of the library's patterns by name, or a `Family`
+   * for one the document made. Drawn last, absolutely, so it sits under the cell's words. The registry declared
+   * this prop on 2026-09-14 before the component had it — Scene-Schema.md §2.2 says the authorable surface is a
+   * subset of the React one, so the component grew rather than the schema shrinking.
+   */
+  pattern?: PatternName | Family;
+  /** The hue the pattern is drawn in. A cell has none of its own; the adapter hands down its bento's. */
+  hue?: Hue;
 }
 
-export function BentoCell({ span = [1, 1], tone = "quiet", className, style, ...rest }: BentoCellProps) {
+export function BentoCell({ span = [1, 1], tone = "quiet", pattern, hue, className, style, children, ...rest }: BentoCellProps) {
   return (
     <div
       className={cx("noo-bento__cell", tone === "glass" && "noo-glass noo-glass--1", `noo-bento__cell--${tone}`, className)}
       style={{ gridColumn: `span ${span[0]}`, gridRow: `span ${span[1]}`, ...style }}
       {...rest}
-    />
+    >
+      {children}
+      {pattern ? <Pattern {...(typeof pattern === "string" ? { name: pattern } : { family: pattern })} hue={hue} placement="field" /> : null}
+    </div>
   );
 }
 

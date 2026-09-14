@@ -342,3 +342,7 @@
 .noo-rep__chipx:hover { background: color-mix(in oklch, var(--ink) 12%, transparent); }
 .noo-rep__addchip > .noo-chip[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
 .noo-rep__edit { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-3) 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+
+/* ===== PanLink — the :pan directive (Scene-Schema.md §3.5): a link that moves the viewport, dressed as a link ===== */
+.noo-panlink { font-weight: 500; color: var(--accent-deep); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.noo-panlink:hover { text-decoration-color: currentColor; }

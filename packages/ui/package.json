@@ -1,7 +1,7 @@
 {
   "name": "@no-origins/ui",
   "version": "0.1.0",
-  "description": "No Origins design system \u2014 tokens, atoms, molecules, organisms and templates: the glass, the blob, and the building blocks every block shares.",
+  "description": "No Origins design system — tokens, atoms, molecules, organisms and templates: the glass, the blob, and the building blocks every block shares.",
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -22,6 +22,7 @@
     "./motion.css": "./src/css/motion.css",
     "./components.css": "./src/css/components.css",
     "./registry": "./src/registry/index.ts",
+    "./document": "./src/document/index.ts",
     "./icons": "./src/icons/index.ts",
     "./atoms.css": "./src/css/atoms.css",
     "./molecules.css": "./src/css/molecules.css",
@@ -49,6 +50,10 @@
       "./registry": {
         "types": "./dist/registry/index.d.ts",
         "import": "./dist/registry/index.js"
+      },
+      "./document": {
+        "types": "./dist/document/index.d.ts",
+        "import": "./dist/document/index.js"
       },
       "./icons": {
         "types": "./dist/icons/index.d.ts",
@@ -89,5 +94,8 @@
     "stylelint": "^16.26.1",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "zod": "^4.5.4"
   }
 }

@@ -200,6 +200,12 @@
    child: `.noo-text` has no margin, and the gap is the Stack's or the Row's. */
 .noo-text { margin: 0; }
 .noo-text--muted { color: var(--muted); }
+/* Text carrying more than one paragraph (the adapter parses a document's markdown into blocks): the prose rhythm
+   `.noo-panel__prose` set, on the component, so a document panel reads exactly as the hand-written one did. */
+.noo-text--blocks { display: flex; flex-direction: column; gap: 14px; }
+.noo-text--blocks > * { margin: 0; }
+.noo-text--blocks ul { list-style: disc; padding-left: var(--s-5); }
+.noo-text--blocks li + li { margin-top: var(--s-1); }
 
 .noo-stack { display: flex; flex-direction: column; min-width: 0; }                            /* min-width 0: a long word must not widen the cell */
 .noo-stack--g8 { gap: var(--s-2); } .noo-stack--g16 { gap: var(--s-4); } .noo-stack--g24 { gap: var(--s-6); } .noo-stack--g40 { gap: var(--s-10); }
