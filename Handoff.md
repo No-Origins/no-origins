@@ -32,6 +32,7 @@ Docs touched: Admin.md §6.5a–b (the rules), Scene-Schema.md §1 (`patterns` m
 
 | Canvas | URL | Source |
 |---|---|---|
+| **Editor Screen — nine option boards, awaiting his picks** (F1–F5 from the document proof, S1–S4 the screen questions; recommendation A on every board) | https://claude.ai/code/artifact/d713efe7-ed3b-4796-a0d2-93fcddf9b17b | `packages/ui/design/screen/` — `node build.mjs`, then seed with `canvas.json`; favicon 🧩 |
 | Inspector Controls (decided + built banners, board 5 = the eighteen; **his two notes are on it — preserve them**) | https://claude.ai/code/artifact/3fcae316-ffad-47ff-a179-ff06b196dc43 | `packages/ui/design/editor/` — `node build.mjs`, then seed with `canvas.json` |
 | Design System release record | https://claude.ai/code/artifact/13bff065-8753-40a2-8388-84ddd0f1d9ba | `packages/ui/design/release/` |
 | Phone-readable release | https://claude.ai/code/artifact/13529f87-251d-46c3-8847-084227ac7677 | `packages/ui/design/release/build-reader.mjs` |
@@ -49,9 +50,9 @@ Canvas mechanics that bit before: re-read the artifact and `--extract` before an
 
 1. ~~**ToolScreen sidebar**~~ — **done 2026-09-14** (see above). The rail rule cannot be seen in the admin until the `/edit` route exists at step 3; `/fixtures/tool` shows it.
 2. ~~**The document layer**~~ — **done 2026-09-14** (see above). What it found (Scene-Schema.md §10.3) wants **option boards before code**, five each: how a widget cell's head lays out (`CellHead` groups; a hand-written cell spreads — the diagonal); a component for the widget text scale; a component for the loud cell's word; where the sample-copy tag lives; a list inside a widget. Full views are pages the adapter returns and nothing mounts yet.
-3. **The editor screen** at `/projects/portfolio/edit`. Open design questions that want **option boards (five each) before code**: what a selected node looks like on the canvas; how a palette item lands on the grid; how autosave states show; what the inspector does with none or several selected. His rule: he picks by letter, notes outrank recommendations, each pick becomes a rule in Admin.md first.
+3. **The editor screen** at `/projects/portfolio/edit` — **boards published 2026-09-14** (canvas *No Origins Editor Screen*, above): S1 selected node · S2 palette landing · S3 autosave states · S4 inspector with none/several, plus F1–F5 from step 2's findings. **Waiting on his picks.** When they land: write each as a rule in Admin.md §6.5c, build F1–F5 in the package (and drop the thresholds in `e2e/document.spec.ts` to what they then measure), then the screen. His rule: he picks by letter, notes outrank recommendations, each pick becomes a rule in Admin.md first. Re-read the canvas (`--extract`) before any republish — he leaves notes on it.
 
-Recommendation given to him: build 1 and 2 now, then bring 3's questions as boards. He had not answered "Proceed" when the session ended.
+He said "Proceed" on 2026-09-14: steps 1 and 2 were built and the step-3 boards published in the same session.
 
 ## Deferred, not forgotten
 

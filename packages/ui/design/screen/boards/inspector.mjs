@@ -1,0 +1,39 @@
+import { head, group, option, insp, field, seg, chip, lbl, dot, SCREEN_CSS } from "../lib.mjs";
+
+const inspHead = (eyebrow, title, line) => `<div class="sc-insp-head"><p class="noo-label">${eyebrow}</p><h3 class="noo-h4">${title}</h3>${line ? `<p class="noo-body-sm">${line}</p>` : ""}</div>`;
+const none = (rows) => `<aside class="noo-glass noo-glass--1 insp" aria-label="Inspector">${rows}</aside>`;
+const several = (rows) => none(rows);
+const hues = (on) => `<div class="hs-dots" style="display:flex;gap:10px;align-items:center">${["pink", "green", "grey", "lavender", "peach", "yellow", "blue"].map((h) => `<span class="noo-dot" data-hue="${h}" style="width:20px;height:20px;${h === on ? "box-shadow:0 0 0 2px var(--ground),0 0 0 4px var(--ink)" : ""}"></span>`).join("")}<span style="font:500 var(--t-ui-sm)/1 var(--ff-sans);margin-left:6px">${on ?? "mixed"}</span></div>`;
+const chips = (items) => `<div style="display:flex;flex-wrap:wrap;gap:8px">${items.map(([l, h]) => chip(l, h)).join("")}</div>`;
+
+export const title = "S4 · The inspector with none or several selected";
+export const block = "design";
+export const body = `<style>${SCREEN_CSS}</style>
+${head({ eyebrow: "the editor · screen question S4 of 4 · pick one by its letter", title: "The inspector with none or several selected", lead: "The inspector renders the selected node’s props from its schema — no hand-built form, ever (Admin.md §6.1). Two cases the schema does not cover: nothing is selected, and several things are. Below: the inspector at its real width, twice per option — none on the left, three cells of the Work widget on the right." })}
+${group("Five directions", "Left: nothing selected. Right: two BentoCells and a Label selected together.")}
+${option({ id: "A", name: "None: the document. Several: what they share", rec: true,
+  desc: "With nothing selected the inspector shows the document’s own props — title, description, grid, <code>order</code> as a Repeater, the views, the document’s patterns. With several, the intersection of their schemas: props every selected node has; a value they disagree on reads <em>mixed</em> and typing sets it on all; the head counts them by component.",
+  fits: "always a subject · same controls · one rule for the head",
+  why: "The inspector always has something to inspect: the document is a node like any other, with a schema (§1), and this is where its order and views get edited — nothing else in the anatomy does that. For several, the intersection is what a form can honestly show; <em>mixed</em> is what every editor since 1990 says, and it is true.",
+  demo: `<div class="sc-two">${none(inspHead("selected", "The document", "portfolio/home · canvas · 10 nodes") + field("Title", "Bhargav — No Origins", { meta: "text · 80" }) + field("Grid", "160 · pad 8", { meta: "canvas units" }) + `<div class="insp__row"><p class="insp__label"><span>Order</span><span>7 sections</span></p>${chips([["me", "peach"], ["status", "blue"], ["work", "peach"], ["cases", "lavender"], ["projects", "green"], ["interests", "yellow"], ["philosophy", "pink"]])}</div>`)}${several(inspHead("3 selected", "2 BentoCell · 1 Label", "showing what all three have") + `<div class="insp__row"><p class="insp__label"><span>Tone</span><span>enum · mixed</span></p>${seg("Tone", ["quiet", "glass", "fill", "bare"], undefined)}</div>` + field("Span", undefined, { meta: "object · 2 of 3", mixed: true, placeholder: "mixed" }) + `<p class="sc-note">Label has no tone or span: the props below apply to the two cells only.</p>`)}</div>` })}
+${option({ id: "B", name: "None: an empty state. Several: the first one, with a count",
+  desc: "Nothing selected shows a line of text — <em>Select something on the canvas</em>. Several shows the first selected node’s form, with <em>and 2 more</em> in the head; edits apply to the first only.",
+  fits: "least to build · never wrong",
+  why: "Never wrong and rarely useful: the empty state is the one every author sees first, and a sentence teaches nothing about where the document’s order or views live. Editing the first of three while three are ringed is a small lie every time.",
+  demo: `<div class="sc-two">${none(`<p class="noo-body-sm" style="color:var(--muted);margin:0">Select something on the canvas, or in the outline.</p>`)}${several(inspHead("selected", "BentoCell", "and 2 more") + `<div class="insp__row"><p class="insp__label"><span>Tone</span></p>${seg("Tone", ["quiet", "glass", "fill", "bare"], "quiet")}</div>` + field("Span", "2 × 2", { meta: "object" }))}</div>` })}
+${option({ id: "C", name: "None: the palette moves in. Several: alignment tools",
+  desc: "With nothing selected the inspector shows the palette (the sidebar keeps the outline). With several: align left/top, distribute, match size — a drawing tool’s multi-select.",
+  fits: "uses the empty column · a familiar toolset",
+  why: "Alignment tools are what a free canvas needs and what a snapped one does not: widgets land on box corners and cells on grid tracks, so “align left” is already true or forbidden. Moving the palette by state also means the sidebar changes shape when you click on nothing, which is the one time it should not.",
+  demo: `<div class="sc-two">${none(lbl("palette · atoms") + `<div class="sc-pal">${["Heading", "Text", "Label", "Chip", "Dot", "Button"].map((n) => `<div class="sc-pal__i"><span class="sc-pal__glyph"></span>${n}</div>`).join("")}</div>`)}${several(inspHead("3 selected", "Arrange") + `<div class="insp__row"><p class="insp__label"><span>Align</span></p>${seg("Align", ["left", "centre", "right", "top"], undefined)}</div><div class="insp__row"><p class="insp__label"><span>Distribute</span></p>${seg("Distribute", ["across", "down"], undefined)}</div>`)}</div>` })}
+${option({ id: "D", name: "None: the current section. Several: a list, pick one",
+  desc: "Nothing selected shows the section the viewport is in — its view’s label, href, position in <code>order</code>. Several shows the selected nodes as a list; click one to inspect it alone.",
+  fits: "context-aware · never edits more than one",
+  why: "The section is a useful subject, and it is also a guess: the viewport is “in” whichever view centre is nearest, which at the map is Me for half the canvas. The list for several is a second outline inside the inspector, and it never lets you change three tones at once — the reason to select three.",
+  demo: `<div class="sc-two">${none(inspHead("in view", "Work", "section · 2 of 7 in order") + field("Label", "Work", { meta: "text · 24" }) + field("Route", "/work", { meta: "href" }))}${several(inspHead("3 selected", "Pick one to inspect") + `<div class="sc-pal">${[["BentoCell", "now · Radise"], ["BentoCell", "before · Dataflix"], ["Label", "the through-line"]].map(([c, l]) => `<div class="sc-pal__i" style="justify-content:space-between"><span>${c}</span><small style="color:var(--muted)">${l}</small></div>`).join("")}</div>`)}</div>` })}
+${option({ id: "E", name: "None: recent edits. Several: disabled",
+  desc: "Nothing selected shows the last few edits — what changed, when — as a small history. Several selected greys the inspector out with a count.",
+  fits: "history is useful · the simplest multi-select",
+  why: "History belongs to versions (Admin.md §7) and to undo, not to the inspector, and a disabled column with <em>3 selected</em> in it is a feature saying no. The empty column deserves the document.",
+  demo: `<div class="sc-two">${none(inspHead("recent", "Edits") + `<div class="sc-pal">${["Bento hue → peach · 2 min", "Label text → “now” · 4 min", "Widget moved · 9 min"].map((l) => `<div class="sc-pal__i" style="color:var(--ink-2)">${l}</div>`).join("")}</div>`)}<aside class="noo-glass noo-glass--1 insp" aria-label="Inspector" style="opacity:.5">${inspHead("3 selected", "Select one thing to edit it")}</aside></div>` })}
+`;
