@@ -1,29 +1,30 @@
-/* @no-origins/ui — motion (Design-System.md §7). A brand asset, rationed. */
+/* @no-origins/ui — motion (Design-System.md §7). A brand asset, rationed.
+   Prefixed 2026-09-14 (Atomic.md D4): `.noo-rise .noo-pop .noo-breathe .noo-lift`; the bare names alias for one release. */
 @keyframes noo-rise   { from { opacity: 0.35; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes noo-pop    { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: none; } }
 @keyframes noo-breathe { 50% { scale: 1.03; } }                          /* the `scale` property, so a hover transform still composes */
 @keyframes noo-blink   { 50% { transform: scaleY(0.1); } }
 
 /* rise-in: from a VISIBLE resting state — never park content at opacity 0 waiting for an observer */
-.rise-in { animation: noo-rise var(--d-slow) var(--ease-enter) both; }
-.rise-in:nth-child(2) { animation-delay: 40ms; }
-.rise-in:nth-child(3) { animation-delay: 80ms; }
-.rise-in:nth-child(4) { animation-delay: 120ms; }
-.rise-in:nth-child(5) { animation-delay: 160ms; }
+.noo-rise, .rise-in { animation: noo-rise var(--d-slow) var(--ease-enter) both; }
+.noo-rise:nth-child(2), .rise-in:nth-child(2) { animation-delay: 40ms; }
+.noo-rise:nth-child(3), .rise-in:nth-child(3) { animation-delay: 80ms; }
+.noo-rise:nth-child(4), .rise-in:nth-child(4) { animation-delay: 120ms; }
+.noo-rise:nth-child(5), .rise-in:nth-child(5) { animation-delay: 160ms; }
 
 /* bubble-pop: origin toward the blob */
-.pop-in { animation: noo-pop var(--d-base) var(--ease-spring) both; transform-origin: 10% 100%; }
+.noo-pop, .pop-in { animation: noo-pop var(--d-base) var(--ease-spring) both; transform-origin: 10% 100%; }
 
 /* blob-breathe: each blob gets a random negative animation-delay so none breathe in sync */
-.breathe { animation: noo-breathe var(--d-ambient) ease-in-out infinite; }
+.noo-breathe, .breathe { animation: noo-breathe var(--d-ambient) ease-in-out infinite; }
 
 /* glass-hover: lift one level and one pixel */
-.lift { transition: transform var(--d-fast) var(--ease), box-shadow var(--d-fast) var(--ease); }
-.lift:hover { transform: translateY(-1px); }
+.noo-lift, .lift { transition: transform var(--d-fast) var(--ease), box-shadow var(--d-fast) var(--ease); }
+.noo-lift:hover, .lift:hover { transform: translateY(-1px); }
 
 @media (prefers-reduced-motion: reduce) {
-  .rise-in, .pop-in, .breathe { animation: none; }
-  .lift, .lift:hover { transition: none; transform: none; }
+  .noo-rise, .rise-in, .noo-pop, .pop-in, .noo-breathe, .breathe { animation: none; }
+  .noo-lift, .lift, .noo-lift:hover, .lift:hover { transition: none; transform: none; }
   .noo-blob--breathe .noo-blob__glass { animation: none; }                 /* blobs stop breathing; blink stays, slowed by the component */
   .noo-blob__eyes { transition: none; }
   .noo-blob--interactive, .noo-blob--interactive:hover { transition: none; transform: none; }

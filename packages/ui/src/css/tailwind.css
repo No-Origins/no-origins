@@ -14,7 +14,7 @@
 
   --color-pink: var(--pink);         --color-pink-deep: var(--pink-deep);         --color-pink-tint: var(--pink-tint);
   --color-green: var(--green);       --color-green-deep: var(--green-deep);       --color-green-tint: var(--green-tint);
-  --color-grey: var(--grey);         --color-grey-deep: var(--grey-deep);
+  --color-grey: var(--grey);         --color-grey-deep: var(--grey-deep);         --color-grey-tint: var(--grey-tint);
   --color-lavender: var(--lavender); --color-lavender-deep: var(--lavender-deep); --color-lavender-tint: var(--lavender-tint);
   --color-peach: var(--peach);       --color-peach-deep: var(--peach-deep);       --color-peach-tint: var(--peach-tint);
   --color-yellow: var(--yellow);     --color-yellow-deep: var(--yellow-deep);     --color-yellow-tint: var(--yellow-tint);
@@ -28,6 +28,13 @@
   --color-accent: var(--accent);
   --color-accent-deep: var(--accent-deep);
   --color-accent-tint: var(--accent-tint);
+  --color-accent-ink: var(--accent-ink);
+
+  /* the hue slot (Atomic.md D1): whatever hue the nearest data-hue set */
+  --color-hue: var(--hue);
+  --color-hue-deep: var(--hue-deep);
+  --color-hue-tint: var(--hue-tint);
+  --color-hue-ink: var(--hue-ink);
 
   --font-display: var(--ff-display);
   --font-sans: var(--ff-sans);

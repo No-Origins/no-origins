@@ -1,24 +1,21 @@
 /* @no-origins/ui — the type scale (Design-System.md §5) as classes, so a host without Tailwind has the same voice.
+   Every size is a `--t-*` token (Atomic.md D2): change the step in tokens.css and every reader of it follows — these
+   classes, the controls, the widget. The phone step-down lives with the tokens too.
    The Bowlby rule: the display face appears only at h2 (34px) and above and in the wordmark, always weight 400.
    h3, h4 and everything smaller are Hanken Grotesk 600. */
-.noo-display-1 { font: 400 72px/1 var(--ff-display); letter-spacing: 0; text-wrap: balance; }
-.noo-display-2 { font: 400 56px/1 var(--ff-display); letter-spacing: 0; text-wrap: balance; }
-.noo-h1   { font: 400 44px/1.02 var(--ff-display); letter-spacing: -0.005em; text-wrap: balance; }
-.noo-h2   { font: 400 34px/1.05 var(--ff-display); letter-spacing: -0.005em; text-wrap: balance; }
-.noo-h3   { font: 600 26px/1.15 var(--ff-sans); letter-spacing: -0.01em; text-wrap: balance; }
-.noo-h4   { font: 600 21px/1.25 var(--ff-sans); letter-spacing: -0.005em; text-wrap: balance; }
-.noo-lead { font: 400 19px/1.5 var(--ff-sans); text-wrap: pretty; }
-.noo-body { font: 400 16px/1.55 var(--ff-sans); text-wrap: pretty; }
-.noo-body-sm { font: 400 14.5px/1.5 var(--ff-sans); text-wrap: pretty; }
-.noo-bubble-text { font: 500 15px/1.4 var(--ff-sans); }
-.noo-caption { font: 500 13px/1.45 var(--ff-sans); }
-.noo-label { font: 500 12px/1.3 var(--ff-mono); letter-spacing: 0.1em; text-transform: uppercase; }
-.noo-code  { font: 400 14px/1.55 var(--ff-mono); }
+.noo-display-1 { font: 400 var(--t-display-1)/1 var(--ff-display); letter-spacing: 0; text-wrap: balance; }
+.noo-display-2 { font: 400 var(--t-display-2)/1 var(--ff-display); letter-spacing: 0; text-wrap: balance; }
+.noo-h1   { font: 400 var(--t-h1)/1.02 var(--ff-display); letter-spacing: -0.005em; text-wrap: balance; }
+.noo-h2   { font: 400 var(--t-h2)/1.05 var(--ff-display); letter-spacing: -0.005em; text-wrap: balance; }
+.noo-h3   { font: 600 var(--t-h3)/1.15 var(--ff-sans); letter-spacing: -0.01em; text-wrap: balance; }
+.noo-h4   { font: 600 var(--t-h4)/1.25 var(--ff-sans); letter-spacing: -0.005em; text-wrap: balance; }
+.noo-lead { font: 400 var(--t-lead)/1.5 var(--ff-sans); text-wrap: pretty; }
+.noo-body { font: 400 var(--t-body)/1.55 var(--ff-sans); text-wrap: pretty; }
+.noo-body-sm { font: 400 var(--t-body-sm)/1.5 var(--ff-sans); text-wrap: pretty; }
+.noo-ui    { font: 600 var(--t-ui)/1.2 var(--ff-sans); }                                  /* a control's voice: buttons, links */
+.noo-ui-sm { font: 600 var(--t-ui-sm)/1 var(--ff-sans); }                                /* a small control: chips, the rail */
+.noo-bubble-text { font: 500 var(--t-ui)/1.4 var(--ff-sans); }                           /* speech: the ui step at weight 500 */
+.noo-caption { font: 500 var(--t-caption)/1.45 var(--ff-sans); }
+.noo-label { font: 500 var(--t-label)/1.3 var(--ff-mono); letter-spacing: 0.1em; text-transform: uppercase; }
+.noo-code  { font: 400 var(--t-code)/1.55 var(--ff-mono); }
 .noo-nums  { font-variant-numeric: tabular-nums; }
-
-@media (max-width: 640px) {                                      /* display sizes step down one row; h2 never below 30 */
-  .noo-display-1 { font-size: 56px; }
-  .noo-display-2 { font-size: 44px; }
-  .noo-h1 { font-size: 34px; }
-  .noo-h2 { font-size: 30px; }
-}

@@ -1,6 +1,8 @@
 /* @no-origins/ui — tokens
    Design-System.md §2 colour · §6 space, radius, elevation · §7 motion · §8 grid
-   Light is primary; dark swaps tokens and nothing else. Blocks set --accent* only. */
+   Light is primary; dark swaps tokens and nothing else. Blocks set --accent* only.
+   Atomic.md (2026-09-14): the hue slot (D1), space · type · control · icon tokens (D2, D8), blocks named after apps (D5),
+   three contrast fixes (D7). A component reads these and the slot — never a literal (rule 1). */
 
 :root {
   /* ground & ink */
@@ -9,7 +11,7 @@
   --surface: oklch(0.985 0.003 90);
   --ink: oklch(0.30 0.012 60);
   --ink-2: oklch(0.42 0.012 60);
-  --muted: oklch(0.55 0.01 60);
+  --muted: oklch(0.52 0.01 60);                 /* was 0.55: 4.20:1 on the ground, under the 4.5 floor (D7) */
   --rule: oklch(0.86 0.006 90);
   --eye: #474747;
   --shade: var(--ink);                          /* what shadows are made of: warm ink in the light, black in the dark */
@@ -36,14 +38,33 @@
 
   /* ink on a tile of this hue (§9 Bento): the light deep tier, and it never changes with theme — a pastel tile is
      light in both themes, so the text on it must stay dark. The `-deep` tiers flip in dark to work as text on the ground. */
-  --pink-ink: oklch(0.45 0.16 20);
+  --pink-ink: oklch(0.42 0.16 20);               /* was 0.45: 4.47:1 on pink (D7) */
   --green-ink: oklch(0.45 0.12 140);
   --grey-ink: oklch(0.45 0.01 90);
   --lavender-ink: oklch(0.45 0.14 300);
   --peach-ink: oklch(0.45 0.12 50);
   --yellow-ink: oklch(0.45 0.09 90);
-  --blue-ink: oklch(0.45 0.13 260);
+  --blue-ink: oklch(0.40 0.13 260);              /* was 0.45: 4.05:1 on blue (D7) */
   --accent-tint: var(--peach-tint);
+  --accent-ink: var(--peach-ink);                /* the fourth tier the accent never had; Bento hardcoded --peach-ink for it */
+
+  /* space — the 4px scale of §6, as tokens at last (D2). Stack and Row take 2 · 4 · 6 · 10; card padding is 6 (5 small, 10 large). */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px; --s-6: 24px;
+  --s-8: 32px; --s-10: 40px; --s-12: 48px; --s-16: 64px; --s-20: 80px; --s-24: 96px;
+
+  /* type sizes — every step of §5, plus two control steps and the widget scale (D2). `--t-`, because Tailwind owns `--text-*`.
+     The classes in typography.css read these; so does every control. A component sets a size by naming a step or not at all. */
+  --t-display-1: 72px; --t-display-2: 56px; --t-h1: 44px; --t-h2: 34px; --t-h3: 26px; --t-h4: 21px;
+  --t-lead: 19px; --t-body: 16px; --t-body-sm: 14.5px; --t-caption: 13px; --t-label: 12px; --t-code: 14px;
+  --t-ui: 15px;                                  /* controls: buttons, links, bubbles, inputs (600 for a control, 500 for a bubble) */
+  --t-ui-sm: 13px;                               /* small controls: chips, small buttons, the rail, the theme switch */
+  --t-widget-figure: 96px; --t-widget-word: 48px; --t-widget-title: 22px; --t-widget-text: 20px;   /* read from twice as far (§8.3) */
+
+  /* control heights (D2) — nine literals become five names. --ctl-md is also the hit target §12 asks for. */
+  --ctl-xs: 28px; --ctl-sm: 36px; --ctl-md: 44px; --ctl-lg: 56px; --bar: 60px;
+
+  /* icons (D8) — three sizes on a 24 grid, one stroke everywhere */
+  --icon-sm: 16px; --icon-md: 20px; --icon-lg: 24px; --icon-stroke: 1.5;
 
   /* glass */
   --glass-border: color-mix(in oklch, var(--ink) 8%, transparent);
@@ -110,6 +131,10 @@
     --peach: oklch(0.76 0.09 50);     --peach-deep: oklch(0.82 0.10 50);
     --yellow: oklch(0.80 0.12 100);   --yellow-deep: oklch(0.86 0.12 90);
     --blue: oklch(0.70 0.10 260);     --blue-deep: oklch(0.78 0.10 260);
+    /* the ink tier over a dark-mode fill: the fills are L 0.70–0.80 here, so the ink goes DOWN, not up (D7, dark) */
+    --pink-ink: oklch(0.28 0.09 20);     --green-ink: oklch(0.28 0.07 140);   --grey-ink: oklch(0.28 0.006 90);
+    --lavender-ink: oklch(0.28 0.08 300); --peach-ink: oklch(0.28 0.07 50);   --yellow-ink: oklch(0.28 0.06 90);
+    --blue-ink: oklch(0.26 0.08 260);
     --warn: oklch(0.78 0.13 75); --bad: oklch(0.72 0.16 25);
     --glass-border: color-mix(in oklch, white 10%, transparent);
     --glass-hl-1: 14%; --glass-hl-2: 18%; --glass-hl-3: 22%; --glass-sweep: 10%;
@@ -129,16 +154,35 @@
   --peach: oklch(0.76 0.09 50);     --peach-deep: oklch(0.82 0.10 50);
   --yellow: oklch(0.80 0.12 100);   --yellow-deep: oklch(0.86 0.12 90);
   --blue: oklch(0.70 0.10 260);     --blue-deep: oklch(0.78 0.10 260);
+  /* the ink tier over a dark-mode fill: the fills are L 0.70–0.80 here, so the ink goes DOWN, not up (D7, dark) */
+  --pink-ink: oklch(0.28 0.09 20);     --green-ink: oklch(0.28 0.07 140);   --grey-ink: oklch(0.28 0.006 90);
+  --lavender-ink: oklch(0.28 0.08 300); --peach-ink: oklch(0.28 0.07 50);   --yellow-ink: oklch(0.28 0.06 90);
+  --blue-ink: oklch(0.26 0.08 260);
   --warn: oklch(0.78 0.13 75); --bad: oklch(0.72 0.16 25);
   --glass-border: color-mix(in oklch, white 10%, transparent);
   --glass-hl-1: 14%; --glass-hl-2: 18%; --glass-hl-3: 22%; --glass-sweep: 10%;
   --glass-blob-opacity: 0.36;
 }
 
-/* block accents — one hue per block (§2.3). Set data-block on <html> or on any subtree. */
-[data-block="portfolio"] { --accent: var(--peach);    --accent-deep: var(--peach-deep);    --accent-tint: var(--peach-tint); }
-[data-block="editor"]    { --accent: var(--lavender); --accent-deep: var(--lavender-deep); --accent-tint: var(--lavender-tint); }
-[data-block="agents"]    { --accent: var(--blue);     --accent-deep: var(--blue-deep);     --accent-tint: var(--blue-tint); }
-[data-block="tools"]     { --accent: var(--yellow);   --accent-deep: var(--yellow-deep);   --accent-tint: var(--yellow-tint); }
-[data-block="writing"]   { --accent: var(--green);    --accent-deep: var(--green-deep);    --accent-tint: var(--green-tint); }
-[data-block="next"]      { --accent: var(--pink);     --accent-deep: var(--pink-deep);     --accent-tint: var(--pink-tint); }
+/* block accents — one hue per block (§2.3), and a block is an app that ships (D5). Set data-block on <html> or on any subtree.
+   A new block is added here the day its app exists; the five speculative names went on 2026-09-14. */
+[data-block="portfolio"] { --accent: var(--peach);    --accent-deep: var(--peach-deep);    --accent-tint: var(--peach-tint);    --accent-ink: var(--peach-ink); }
+[data-block="design"]    { --accent: var(--blue);     --accent-deep: var(--blue-deep);     --accent-tint: var(--blue-tint);     --accent-ink: var(--blue-ink); }
+[data-block="admin"]     { --accent: var(--lavender); --accent-deep: var(--lavender-deep); --accent-tint: var(--lavender-tint); --accent-ink: var(--lavender-ink); }
+
+/* the hue slot (D1) — how a component learns its hue. `data-hue` on any element sets the same four names for its subtree;
+   the root, a block and `data-hue="accent"` set them from the block accent. Component CSS reads --hue* and never lists a hue:
+   an eighth hue is one row here, not twelve ladders in components.css. */
+:root, [data-block], [data-hue="accent"] { --hue: var(--accent); --hue-deep: var(--accent-deep); --hue-tint: var(--accent-tint); --hue-ink: var(--accent-ink); }
+[data-hue="pink"]     { --hue: var(--pink);     --hue-deep: var(--pink-deep);     --hue-tint: var(--pink-tint);     --hue-ink: var(--pink-ink); }
+[data-hue="green"]    { --hue: var(--green);    --hue-deep: var(--green-deep);    --hue-tint: var(--green-tint);    --hue-ink: var(--green-ink); }
+[data-hue="grey"]     { --hue: var(--grey);     --hue-deep: var(--grey-deep);     --hue-tint: var(--grey-tint);     --hue-ink: var(--grey-ink); }
+[data-hue="lavender"] { --hue: var(--lavender); --hue-deep: var(--lavender-deep); --hue-tint: var(--lavender-tint); --hue-ink: var(--lavender-ink); }
+[data-hue="peach"]    { --hue: var(--peach);    --hue-deep: var(--peach-deep);    --hue-tint: var(--peach-tint);    --hue-ink: var(--peach-ink); }
+[data-hue="yellow"]   { --hue: var(--yellow);   --hue-deep: var(--yellow-deep);   --hue-tint: var(--yellow-tint);   --hue-ink: var(--yellow-ink); }
+[data-hue="blue"]     { --hue: var(--blue);     --hue-deep: var(--blue-deep);     --hue-tint: var(--blue-tint);     --hue-ink: var(--blue-ink); }
+
+/* the display sizes step down one row on a phone; h2 never below 30 (§5). In the tokens, so every reader of a step agrees. */
+@media (max-width: 640px) {
+  :root { --t-display-1: 56px; --t-display-2: 44px; --t-h1: 34px; --t-h2: 30px; }
+}

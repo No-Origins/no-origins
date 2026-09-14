@@ -29,13 +29,14 @@ export const viewport: Viewport = {
  * and `SectionHeader` specified and built after the portfolio retired them, on the grounds that documents would
  * need them. A catalogue is a document — read start to finish, no infinite canvas — so they come back here.
  *
- * The block accent is **lavender**, so the showcase never reads as part of the portfolio (peach).
+ * The block accent is **design** (blue, Atomic.md D5), so the showcase never reads as part of the portfolio (peach)
+ * or the admin (lavender).
  */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      data-block="editor"
+      data-block="design"
       className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
