@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Bento, BentoCell, Button, CellHead, Chip, Divider, Dot, Heading, Intro, Label, RegionLabel, Row, Stack, Text, hues } from "@no-origins/ui";
+import { Bento, BentoCell, Button, CellHead, Chip, Divider, Dot, Heading, Label, Row, SectionHeader, Stack, Text, hues } from "@no-origins/ui";
 
 export const metadata: Metadata = { title: "Compose fixture", robots: { index: false } };
 
@@ -145,9 +145,9 @@ export default function ComposeFixture() {
         </Stack>
       </Case>
 
-      <Case title="Intro — because markdown cannot express a type scale" note="A document writing this as markdown would get a heading and a body paragraph; the lead — 19/1.5, a real step on the scale — has no syntax at all. Rather than invent one, the pair is a component.">
-        <Box label="intro">
-          <Intro title="Four roles, told as blocks" lead="Editors, design systems, agent systems, and shipping full-stack." />
+      <Case title="SectionHeader without rhythm — because markdown cannot express a type scale" note="A document writing this as markdown would get a heading and a body paragraph; the lead — 19/1.5, a real step on the scale — has no syntax at all. Rather than invent one, the pair is a component. It was Intro until the release merged the two (Atomic.md D3).">
+        <Box label="section header · rhythm off">
+          <SectionHeader rhythm={false} title="Four roles, told as blocks" lead="Editors, design systems, agent systems, and shipping full-stack." />
         </Box>
       </Case>
 
@@ -161,13 +161,6 @@ export default function ComposeFixture() {
         </Row>
       </Case>
 
-      <Case title="RegionLabel — the one heading that has to read at 0.27 zoom" note="96px in canvas units, stepping down to 34 in document mode where there is no zoom to fight. Always aria-hidden: the section's meaningful h2 is in its intro, and “Four roles, told as blocks” beats “work” for anyone navigating by heading. RegionNode renders this now, so the markup has one home.">
-        <Box label="region label">
-          <div className="h-[150px]">
-            <RegionLabel>Work</RegionLabel>
-          </div>
-        </Box>
-      </Case>
 
       <Case
         title="Bento, page mode — the same grid as a section's full view"
@@ -183,7 +176,7 @@ export default function ComposeFixture() {
         <div className="max-h-[460px] overflow-y-auto rounded-lg border border-rule">
           <Bento page hue="peach" label="Work experience" className="!max-w-none">
             <BentoCell span={[10, 1]} tone="bare">
-              <Intro title="Four roles, told as blocks" lead="Editors, design systems, agent systems, and shipping full-stack." />
+              <SectionHeader rhythm={false} title="Four roles, told as blocks" lead="Editors, design systems, agent systems, and shipping full-stack." />
             </BentoCell>
             <BentoCell span={[5, 2]}>
               <Label>Radise · now</Label>

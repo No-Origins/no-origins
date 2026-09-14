@@ -1,9 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Row, Text } from "@no-origins/ui";
+import { Chip } from "../atoms/Chip";
+import { Text } from "../atoms/Text";
 
 /**
  * The contrast report (Admin.md §5.2, Design-System.md §12).
+ *
+ * **It lives in the package beside `Catalogue`** (D3) for the same reason the catalogue does: the showcase and the
+ * admin both render it, and a copy in either app is half a fork. The CSS was always here; now the component is.
  *
  * **R3 is why this exists in this shape.** The admin displays tokens and never writes them, so it cannot refuse a
  * value that breaks a floor the way an editor could — its job is to make a broken floor impossible to miss after
@@ -96,19 +100,16 @@ export function ContrastReport() {
     };
   }, []);
 
-  if (!rows) return <Text size="small" tone="muted">Measuring…</Text>;
+  if (!rows) return <Text size="small" tone="muted" className="noo-contrast__summary">Measuring…</Text>;
 
   const failing = rows.filter((r) => r.value < r.floor);
 
   return (
-    <div>
-      <Row gap={8} className="mb-5">
-        <span className={failing.length ? "noo-chip" : "noo-chip"} data-hue={failing.length ? "pink" : "green"}>
-          <span className="noo-chip__dot" />
-          {failing.length ? `${failing.length} below the floor` : "every pair clears its floor"}
-        </span>
+    <div className="noo-contrast-report">
+      <div className="noo-contrast__summary">
+        <Chip hue={failing.length ? "pink" : "green"}>{failing.length ? `${failing.length} below the floor` : "every pair clears its floor"}</Chip>
         <Text size="small" tone="muted" as="span">measured in the theme you are looking at</Text>
-      </Row>
+      </div>
 
       <div className="noo-contrast">
         {rows.map((r) => (

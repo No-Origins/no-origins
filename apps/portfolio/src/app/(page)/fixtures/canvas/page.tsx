@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BlockCard, Chip, RoadmapItem, Section, SectionHeader } from "@no-origins/ui";
+import { BlockCard, Chip, Section, SectionHeader } from "@no-origins/ui";
 import { roles } from "@/content/work";
 import { roadmap } from "@/content/roadmap";
 
@@ -42,7 +42,7 @@ export default function CanvasFixture() {
                   <BlockCard {...role} className="h-full" />
                 </div>
               </div>
-              <div className="glass glass-1 noo-panel noo-panel--glass h-[200px] w-full" data-tier={t.tier}>
+              <div className="noo-glass noo-glass--1 noo-panel noo-panel--glass h-[200px] w-full" data-tier={t.tier}>
                 <div className="noo-panel__content">
                   <h3 className="noo-h3 noo-panel__title">One system, every block</h3>
                   <p className="noo-body-sm noo-panel__lead">Each block owns one hue. The clear one is me: I&apos;m made of the platform.</p>
@@ -50,7 +50,7 @@ export default function CanvasFixture() {
               </div>
               <div className="noo-panel noo-panel--bare h-[300px] w-full" data-tier={t.tier}>
                 <div className="noo-panel__content">
-                  <RoadmapItem {...item} className="h-full" />
+                  <BlockCard {...item} className="h-full" />
                 </div>
               </div>
             </div>

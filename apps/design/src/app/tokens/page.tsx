@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Card, Divider, Heading, Label, Row, Section, SectionHeader, Stack, Text, hues } from "@no-origins/ui";
-import { ContrastReport } from "@/components/contrast";
+import { ContrastReport } from "@no-origins/ui/registry";
 
 export const metadata: Metadata = { title: "Tokens" };
 
