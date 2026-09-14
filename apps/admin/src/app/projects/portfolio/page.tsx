@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Chip, Placeholder, SectionHeader, Table, ToolScreen } from "@no-origins/ui";
+import { Button, Chip, SectionHeader, Table, ToolScreen } from "@no-origins/ui";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export const metadata = { title: "Portfolio" };
@@ -7,12 +8,11 @@ export const metadata = { title: "Portfolio" };
 /**
  * The project screen (Admin.md §4).
  *
- * The four sub-screens — edit, versions, content, settings — are steps 7 and 8 of §13, and they are listed here
- * as what is coming rather than linked as routes that 404. A rail entry pointing at nothing is worse than an
- * honest row saying the editor is not built.
+ * The sub-screens that do not exist are listed as what is coming rather than linked as routes that 404 — a rail
+ * entry pointing at nothing is worse than an honest row. **Edit left that table on 2026-09-14** and is a link in
+ * the actions: step 7 is built (read-write; publish is step 8).
  */
 const COMING = [
-  { screen: "Edit", step: "7", body: "The canvas editor: palette, canvas, inspector, outline, draft autosave, and the probes that run on save." },
   { screen: "Versions", step: "8", body: "History, diff and rollback. A version is an integer and a required label (R1) — the label is the moment you notice what you actually changed." },
   { screen: "Content", step: "7", body: "The copy behind the components. Markdown plus the one inline directive set (R4)." },
   { screen: "Settings", step: "4+", body: "Domain, metadata, hue. Not theme — tokens are a code edit (R3)." },
@@ -44,6 +44,11 @@ export default async function Portfolio() {
           {project.domain ? <Chip hue="peach">{project.domain}</Chip> : null}
         </>
       }
+      actions={
+        <Button as={Link} variant="secondary" size="sm" href="/projects/portfolio/edit">
+          Edit
+        </Button>
+      }
     >
       {project.description ? <SectionHeader level={3} rhythm={false} title="Documents" lead={project.description} /> : <SectionHeader level={3} rhythm={false} title="Documents" />}
       <Table
@@ -73,11 +78,6 @@ export default async function Portfolio() {
         ]}
         rows={COMING}
       />
-
-      <Placeholder title="The editor lands here">
-        Palette, canvas, inspector and outline — the anatomy in Admin.md §6.1, on this Tool template&apos;s own
-        inspector and footer bar.
-      </Placeholder>
     </ToolScreen>
   );
 }

@@ -11,3 +11,4 @@
 @import "./molecules.css" layer(components);
 @import "./organisms.css" layer(components);
 @import "./templates.css" layer(components);
+@import "./editor.css" layer(components);

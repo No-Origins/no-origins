@@ -1,11 +1,12 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type ReactNode, type RefObject } from "react";
 import {
   Background,
   BackgroundVariant,
   Panel,
   ReactFlow,
   ReactFlowProvider,
+  ViewportPortal,
   applyNodeChanges,
   useReactFlow,
   useStore,
@@ -69,6 +70,28 @@ export interface CanvasShellProps {
   chatId?: string;
   /** The page's h1, visually hidden: a canvas has no headline, a document still needs one. */
   heading?: ReactNode;
+
+  /* ── the editor (Admin.md §6.5c). Every one of these is additive: without them the canvas behaves exactly as
+     the live portfolio has always needed it to — a click opens a section, the snap fires, nothing is selectable. */
+
+  /**
+   * Given, the canvas is being EDITED: a click selects a node instead of opening its section, a click on the
+   * ground clears the selection, and the zoom snap of §8.4 is off — a viewport that opened a section under the
+   * cursor while you were placing a component would take the wheel mid-gesture.
+   */
+  onSelect?: (id: string | null) => void;
+  /** Which node the editor has selected. The shell only passes it to the overlay; node rendering never changes (§6.1). */
+  selectedId?: string | null;
+  /** Drawn over the nodes INSIDE the viewport transform, in canvas coordinates: the selection ring, the tag, the drop ghost. */
+  overlay?: ReactNode;
+  /** An HTML5 drop onto the canvas, in canvas coordinates. Given, the canvas accepts drags from the palette. */
+  onCanvasDrop?: (point: { x: number; y: number }, event: DragEvent<HTMLDivElement>) => void;
+  /** Every dragover while one is in flight, in canvas coordinates — for the ghost that follows the pointer. */
+  onCanvasDragOver?: (point: { x: number; y: number }, event: DragEvent<HTMLDivElement>) => void;
+  /** The drag left the canvas: put the ghost away. */
+  onCanvasDragLeave?: () => void;
+  /** A node dragged to rest, in canvas coordinates. The editor snaps it and writes it into the document. */
+  onNodeMove?: (id: string, position: { x: number; y: number }) => void;
 }
 
 const nodeTypes: NodeTypes = { blob: BlobNode, panel: PanelNode, region: RegionNode, widget: WidgetNode, menu: MenuNode };
@@ -184,10 +207,19 @@ function CanvasShellInner({
   className,
   chatId = "chat",
   heading,
+  onSelect,
+  selectedId,
+  overlay,
+  onCanvasDrop,
+  onCanvasDragOver,
+  onCanvasDragLeave,
+  onNodeMove,
   initialNodes,
 }: CanvasShellProps & { initialNodes: SceneFlowNode[] }) {
   const container = useRef<HTMLDivElement | null>(null);
-  const { fitView, setViewport, getViewport } = useReactFlow<SceneFlowNode>();
+  const { fitView, setViewport, getViewport, screenToFlowPosition } = useReactFlow<SceneFlowNode>();
+  /** The editor is on. Read once, so every place that has to behave differently says so in the same words. */
+  const editing = Boolean(onSelect);
   const [grid, setGrid] = useState({ box: 160, line: 1 });
   const [nodes, setNodes] = useState<SceneFlowNode[]>(initialNodes);
   const [moved, setMoved] = useState(false);
@@ -237,6 +269,16 @@ function CanvasShellInner({
   useEffect(() => {
     setNodes((ns) => ns.map((n) => (n.type === "blob" ? { ...n, data: { ...n.data, below: flow } } : n)));
   }, [flow]);
+
+  /**
+   * While the canvas is being EDITED the document is truth, so the flow's nodes are rebuilt whenever the scene
+   * changes — a prop typed in the inspector, a component dropped from the palette. Outside the editor the
+   * visitor's own dragged positions are truth and only a blob's words re-sync, which is the effect below.
+   */
+  useEffect(() => {
+    if (!editing) return;
+    setNodes(sceneToNodes(scene));
+  }, [editing, scene]);
 
   // the host may change what a blob says; positions stay where the visitor left them
   useEffect(() => {
@@ -345,7 +387,7 @@ function CanvasShellInner({
    * the "wheel idle / pointer up" the spec asks for — no timer of our own, and nothing fires mid-gesture.
    */
   const onMoveEnd = useCallback(() => {
-    if (flow || !views?.length) return;
+    if (flow || editing || !views?.length) return;
     if (Date.now() < selfMove.current) return;                 // the canvas moved itself; the visitor did not
     const { x, y, zoom } = getViewport();
     if (open) {
@@ -360,7 +402,7 @@ function CanvasShellInner({
       (n) => n.kind === "widget" && n.position.x <= cx2 && cx2 <= n.position.x + n.width && n.position.y <= cy2 && cy2 <= n.position.y + n.height,
     );
     if (hit && hit.kind === "widget" && openable.has(hit.view)) openSection(hit.view);
-  }, [flow, views, getViewport, open, release, width, height, scene, openable, openSection]);
+  }, [flow, editing, views, getViewport, open, release, width, height, scene, openable, openSection]);
 
   // Esc leaves focus mode. Zooming out works too, but it is the slow way and must never be the only way (§8.4).
   useEffect(() => {
@@ -397,14 +439,18 @@ function CanvasShellInner({
     },
     [scene, onOpen, goTo, openSection],
   );
-  const onNodeClick: NodeMouseHandler<SceneFlowNode> = useCallback((_e, node) => activate(node.id), [activate]);
+  const onNodeClick: NodeMouseHandler<SceneFlowNode> = useCallback(
+    (_e, node) => (onSelect ? onSelect(node.id) : activate(node.id)),
+    [activate, onSelect],
+  );
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     const el = (e.target as HTMLElement).closest?.(".react-flow__node") as HTMLElement | null;
     if (e.key === "Enter" || e.key === " ") {
       const id = el?.getAttribute("data-id");
       if (!id) return;
       e.preventDefault();
-      activate(id);
+      if (onSelect) onSelect(id);
+      else activate(id);
       return;
     }
     // ← / → step between regions: the canvas-native way to read a spine (§8.3)
@@ -427,7 +473,30 @@ function CanvasShellInner({
   const nav = useMemo(() => ({ goTo: (id: string) => goTo(id), current, open: openSection }), [goTo, current, openSection]);
 
   return (
-    <div ref={container} className={cx("noo-canvas", open && "noo-canvas--open", className)} onKeyDown={onKeyDown}>
+    <div
+      ref={container}
+      className={cx("noo-canvas", open && "noo-canvas--open", editing && "noo-canvas--editing", className)}
+      data-selected={selectedId ?? undefined}
+      onKeyDown={onKeyDown}
+      onDragOver={
+        onCanvasDrop || onCanvasDragOver
+          ? (e) => {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "copy";
+              onCanvasDragOver?.(screenToFlowPosition({ x: e.clientX, y: e.clientY }), e);
+            }
+          : undefined
+      }
+      onDragLeave={onCanvasDragLeave ? (e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) onCanvasDragLeave(); } : undefined}
+      onDrop={
+        onCanvasDrop
+          ? (e) => {
+              e.preventDefault();
+              onCanvasDrop(screenToFlowPosition({ x: e.clientX, y: e.clientY }), e);
+            }
+          : undefined
+      }
+    >
       <a href={`#${chatId}`} className="noo-skip">
         Skip to the chat
       </a>
@@ -440,10 +509,14 @@ function CanvasShellInner({
             onNodesChange={onNodesChange}
             nodeTypes={nodeTypes}
             onNodeClick={onNodeClick}
+            onPaneClick={onSelect ? () => onSelect(null) : undefined}
             onMoveStart={(event) => {
               if (event) setMoved(true);
             }}
-            onNodeDragStop={() => setMoved(true)}
+            onNodeDragStop={(_e, node) => {
+              setMoved(true);
+              onNodeMove?.(node.id, node.position);
+            }}
             onMoveEnd={onMoveEnd}
             minZoom={MIN_ZOOM}
             maxZoom={MAX_ZOOM}
@@ -485,6 +558,7 @@ function CanvasShellInner({
                 {chat}
               </Panel>
             ) : null}
+            {overlay ? <ViewportPortal>{overlay}</ViewportPortal> : null}
             <Panel position="bottom-right" className="noo-canvas__panel noo-canvas__panel--brand">
               {brand ?? <Wordmark className="noo-canvas__wordmark" />}
             </Panel>

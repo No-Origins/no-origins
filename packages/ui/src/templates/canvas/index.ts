@@ -18,7 +18,7 @@ export { CanvasMap } from "./CanvasMap";
 export { Threads } from "./Threads";
 export { useCanvasNav, CanvasNavProvider } from "./nav";
 export type { CanvasNav } from "./nav";
-export { useZoomTier, useCanvasMode, tierFor, TIER_TITLES, TIER_FULL } from "./lod";
+export { useZoomTier, useCanvasMode, useCanvasZoom, tierFor, TIER_TITLES, TIER_FULL } from "./lod";
 export type { ZoomTier } from "./lod";
 export { sceneToNodes, sceneBoxes, viewCentres, NARROW_QUERY, BLOB_W, BLOB_H } from "./scene";
 export type { SceneNode, BlobSceneNode, PanelSceneNode, RegionSceneNode, WidgetSceneNode, MenuSceneNode, MenuSceneItem, SceneFlowNode, MenuFlowNode, PanelFlowNode, RegionFlowNode, WidgetFlowNode, CanvasView, SceneThread, Box } from "./scene";

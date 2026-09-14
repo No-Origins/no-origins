@@ -1,0 +1,76 @@
+/* The editor's chrome (Admin.md §6, §6.5c) — the palette, the props form, the save state and the canvas overlays.
+   Tokens only, like everything else: the editor is the design system wearing a different folder name (§10), not a
+   place where a literal colour is allowed because nobody but the owner sees it. */
+
+/* ── the inspector's form (§6.5, Scene-Schema.md §3.1) ─────────────────────────────────────────────────────── */
+.noo-props { display: flex; flex-direction: column; gap: var(--s-5); min-width: 0; }
+.noo-props__row { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+.noo-props__label { color: var(--muted); }
+.noo-props__mixed { margin: 0; }
+.noo-props__group { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; margin: 0; padding: var(--s-4); border: 1px solid var(--rule); border-radius: var(--r-md); }
+.noo-props__legend { padding: 0 var(--s-2); color: var(--muted); }
+.noo-props__foot { display: flex; flex-direction: column; gap: var(--s-2); padding-top: var(--s-4); border-top: 1px solid var(--rule); }
+
+/* ── the palette (§6.1: it grows with the registry) ────────────────────────────────────────────────────────── */
+.noo-palette { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
+.noo-palette__group { display: flex; flex-direction: column; gap: var(--s-2); }
+.noo-palette__layer { margin: 0; color: var(--muted); }
+.noo-palette__list { display: flex; flex-direction: column; gap: 1px; margin: 0; padding: 0; list-style: none; }
+.noo-palette__item {
+  display: flex; align-items: center; gap: var(--s-2); width: 100%; padding: var(--s-2) var(--s-3);
+  font: inherit; font-size: var(--t-body-sm); color: var(--ink); text-align: left;
+  background: transparent; border: 0; border-radius: var(--r-sm); cursor: grab;
+  transition: background var(--d-fast) var(--ease), color var(--d-fast) var(--ease);
+}
+.noo-palette__item:hover { background: var(--accent-tint); color: var(--accent-ink); }
+.noo-palette__item:active { cursor: grabbing; }
+.noo-palette__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.noo-palette__status { flex: none; }
+
+/* ── the save state (§6.5c S3) ─────────────────────────────────────────────────────────────────────────────── */
+.noo-esave { display: inline-flex; align-items: center; gap: var(--s-2); }
+.noo-esave__words { margin: 0; }
+.noo-esave[data-state="saving"] .noo-esave__dot { background: var(--accent-deep); animation: noo-esave-pulse 1.4s var(--ease) infinite; }
+.noo-esave[data-state="failed"] .noo-esave__words, .noo-esave[data-state="stale"] .noo-esave__words { color: var(--ink); }
+
+@keyframes noo-esave-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* ── the canvas overlays (§6.5c S1, S2) ────────────────────────────────────────────────────────────────────── */
+/* Drawn inside React Flow's viewport transform, so every coordinate below is a canvas unit. */
+.noo-eoverlay { position: absolute; inset: 0; pointer-events: none; }
+.noo-eoverlay > * { position: absolute; }
+
+/* Selection wears the ring focus wears (templates.css: 2px --accent-deep at 4px offset). One rule, one meaning. */
+.noo-esel { outline: 2px solid var(--accent-deep); outline-offset: 4px; border-radius: var(--r-md); }
+.noo-ehover { outline: 1px solid var(--accent-deep); outline-offset: 4px; border-radius: var(--r-md); }
+
+/* The tag, above the top-left corner. `transform` is set inline: it counter-scales the viewport's zoom. */
+.noo-etag {
+  position: absolute; left: 0; bottom: 100%; transform-origin: left bottom;
+  display: inline-flex; align-items: center; gap: var(--s-1);
+  margin-bottom: var(--s-2); padding: var(--s-1) var(--s-2);
+  font-family: var(--ff-mono); font-size: var(--t-label); line-height: 1;
+  white-space: nowrap; color: var(--ground); background: var(--ink); border-radius: var(--r-xs);
+}
+.noo-etag__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--hue-deep); }
+.noo-etag__sep { opacity: 0.5; }
+.noo-etag--ghost { color: var(--accent-ink); background: var(--accent-tint); }
+
+/* The drop ghost: a dashed accent frame at the component's default size, the boxes it takes washed in the accent. */
+.noo-eghost {
+  border: 2px dashed var(--accent-deep); border-radius: var(--r-md);
+  background: color-mix(in oklch, var(--accent) 35%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noo-esave[data-state="saving"] .noo-esave__dot { animation: none; }
+}
+
+/* The editor's canvas, inside `ToolScreen`'s flush main. The viewport switch and the grid toggle are the bar's
+   two cheapest controls and neither needs a prop on the shell: one narrows the canvas until §8.6's media query
+   fires, the other hides the flow's Background. */
+.noo-ecanvas--phone { max-inline-size: 420px; margin-inline: auto; }
+.noo-ecanvas--nogrid .react-flow__background { display: none; }
