@@ -221,6 +221,21 @@ It was also verified by making it fail: a widget with two `fill` cells was added
 
 `probe12` is the one to understand, because it is the shape every retired guard rail should take. Dropping `SectionWidget` bought total freedom over composition; it did not buy the right to a ring where one widget looks unlike the other five. A rule worth keeping is worth *checking* — and a check can be overridden deliberately, which a missing prop cannot.
 
+### 6.5 What the 0.1.0 release changed here (2026-09-14)
+
+Read against Atomic.md after the release. §6.1–6.4 stand; six things moved, recorded before any editor code.
+
+| §6 said | Now | Decision |
+|---|---|---|
+| The shell is `Page` + rail + header (§3) | The shell is `Tool`; each screen a `ToolScreen` with header, main, `inspector` and `bar` (Atomic.md D6) | `ToolScreen` gains a left `sidebar` region for the palette and the outline, and the admin's Menu drops to its rail form on the editor route to make room. `main` gains a flush mode so the canvas fills it edge to edge |
+| Palette grouped by node kind | The registry carries a `layer` (Atomic.md rule 4); the catalogue already groups by it | The palette groups by layer; node kind stays the filter for where a thing may land |
+| Inspector: hue → seven-blob swatch, `Family` → illustration picker, string → `Field` | Enum ≤ 4 → `Segmented`, enum > 4 → `Select`, boolean → `Checkbox`, text and markdown → `Field`, blob size → `Segmented` — all in the package | Three controls the schema needs and the package lacks, built first and in the package: a hue swatch, an illustration picker, a repeater for list props |
+| Outline: the scene in DOM order, reorderable, not optional | `Tree` renders and selects; the WAI-ARIA tree pattern has no reordering gesture | Reordering is added to `Tree`: keyboard moves on the selected item (Alt + ↑/↓, Alt + ←/→ for depth) plus drag; DOM order stays the source of truth |
+| Node kinds: blob · panel · widget · region · page | A sixth, `menu` — the view switcher as a node in canvas space, placed and dragged like any other (Atomic.md D9 as amended) | Scene-Schema §1 gains `menu` with `at`, `size` and `items: { label, view \| href }` |
+| Footer bar: theme · block accent · zoom · desktop/mobile · grid | The block accents are the apps: `portfolio · design · admin` (D5); every control exists as `Segmented` or `ThemeSwitch` | Publish confirms in a `Dialog` whose one field is the required version label (R1); a speaking blob in document mode is a `Speaker` |
+
+The order of work that follows: the three inspector controls and `Tree` reordering in the package, then the `ToolScreen` sidebar, then the editor screen itself at `/projects/portfolio/edit` — palette, canvas, inspector, outline, autosave — with the probes gating Publish as §6.3 says.
+
 ### 6.4 Save and publish
 
 | Action | What happens |
