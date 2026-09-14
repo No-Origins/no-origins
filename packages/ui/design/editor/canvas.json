@@ -1,0 +1,14 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 2100, "title": "Read first — three controls and a gesture" },
+    { "file": "Hue.dc.html", "x": 0, "y": 2240, "w": 1440, "h": 2380, "title": "1 · Hue swatch — pick A–E" },
+    { "file": "Illustration.dc.html", "x": 1560, "y": 2240, "w": 1440, "h": 2820, "title": "2 · Illustration picker — pick A–E" },
+    { "file": "Repeater.dc.html", "x": 3120, "y": 2240, "w": 1440, "h": 2960, "title": "3 · Repeater — pick A–E" },
+    { "file": "Tree.dc.html", "x": 4680, "y": 2240, "w": 1440, "h": 3460, "title": "4 · Outline reordering — confirm A or change" }
+  ],
+  "annotations": [
+    { "id": "how-to-pick", "x": 1560, "y": 0, "w": 300, "text": "How to pick: each board shows five directions, A–E, with my recommendation shaded. Reply with a letter per board — E1 A, E2 A, E3 A+C, E4 A — and any notes. Your notes outrank the recommendation; each pick becomes a rule in Admin.md §6.5 before any code." },
+    { "id": "not-shown", "x": 1560, "y": 260, "w": 300, "text": "Not on these boards: the nine prop types that already have a control (the table on the Read-first board). The thumbnails on the Illustration board are a stand-in field; the real picker draws each family with the generator in the node's hue." }
+  ],
+  "launch": { "view": "canvas" }
+}
