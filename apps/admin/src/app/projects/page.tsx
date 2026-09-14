@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Card, Chip, Heading, Row, Section, SectionHeader, Stack, Text } from "@no-origins/ui";
+import { Chip, SectionHeader, Table, ToolScreen } from "@no-origins/ui";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export const metadata = { title: "Projects" };
@@ -12,28 +12,26 @@ export default async function Projects() {
     .order("name");
 
   return (
-    <Section>
+    <ToolScreen eyebrow="Projects" title="All projects" meta={<Chip hue="peach">layer 1</Chip>}>
       <SectionHeader
-        level={1}
-        label="Project"
-        title="Projects"
-        lead="A project is a thing with pages. A page is a document on the canvas, composed from the component library and published with a version number."
+        level={3}
+        rhythm={false}
+        title="A project is a thing with pages"
+        lead="A page is a document on the canvas, composed from the component library and published with a version number."
       />
-
-      <Stack gap={24}>
-        {(projects ?? []).map((project) => (
-          <Card key={project.id} as={Link} href={`/projects/${project.slug}`} interactive>
-            <Stack gap={8}>
-              <Row gap={8} align="center">
-                <Heading level={3}>{project.name}</Heading>
-                <Chip hue={project.status === "live" ? "green" : "grey"}>{project.status}</Chip>
-              </Row>
-              {project.domain ? <Text size="small" tone="muted">{project.domain}</Text> : null}
-              {project.description ? <Text tone="muted">{project.description}</Text> : null}
-            </Stack>
-          </Card>
-        ))}
-      </Stack>
-    </Section>
+      <Table
+        caption="Projects"
+        captionHidden
+        rowKey={(r) => r.id}
+        columns={[
+          { key: "name", header: "Project", render: (r) => <Link href={`/projects/${r.slug}`}>{r.name}</Link> },
+          { key: "domain", header: "Domain", render: (r) => (r.domain ? <code>{r.domain}</code> : "—") },
+          { key: "status", header: "Status", render: (r) => <Chip hue={r.status === "live" ? "green" : "grey"}>{r.status}</Chip> },
+          { key: "description", header: "What it is" },
+        ]}
+        rows={projects ?? []}
+        empty="No projects yet."
+      />
+    </ToolScreen>
   );
 }

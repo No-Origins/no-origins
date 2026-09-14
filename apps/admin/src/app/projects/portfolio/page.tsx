@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Card, Chip, Heading, Label, Placeholder, Row, Section, SectionHeader, Stack, Text } from "@no-origins/ui";
+import { Chip, Placeholder, SectionHeader, Table, ToolScreen } from "@no-origins/ui";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export const metadata = { title: "Portfolio" };
@@ -12,10 +12,10 @@ export const metadata = { title: "Portfolio" };
  * honest row saying the editor is not built.
  */
 const COMING = [
-  { title: "Edit", step: "step 7", body: "The canvas editor: palette, canvas, inspector, outline, draft autosave, and the probes that run on save." },
-  { title: "Versions", step: "step 8", body: "History, diff and rollback. A version is an integer and a required label (R1) — the label is the moment you notice what you actually changed." },
-  { title: "Content", step: "step 7", body: "The copy behind the components. Markdown plus the one inline directive set (R4)." },
-  { title: "Settings", step: "step 4+", body: "Domain, metadata, hue. Not theme — tokens are a code edit (R3)." },
+  { screen: "Edit", step: "7", body: "The canvas editor: palette, canvas, inspector, outline, draft autosave, and the probes that run on save." },
+  { screen: "Versions", step: "8", body: "History, diff and rollback. A version is an integer and a required label (R1) — the label is the moment you notice what you actually changed." },
+  { screen: "Content", step: "7", body: "The copy behind the components. Markdown plus the one inline directive set (R4)." },
+  { screen: "Settings", step: "4+", body: "Domain, metadata, hue. Not theme — tokens are a code edit (R3)." },
 ];
 
 export default async function Portfolio() {
@@ -35,52 +35,49 @@ export default async function Portfolio() {
     .order("slug");
 
   return (
-    <Section>
-      <SectionHeader level={1} label="Project" title={project.name} lead={project.description ?? undefined} />
+    <ToolScreen
+      eyebrow="Projects"
+      title={project.name}
+      meta={
+        <>
+          <Chip hue={project.status === "live" ? "green" : "grey"}>{project.status}</Chip>
+          {project.domain ? <Chip hue="peach">{project.domain}</Chip> : null}
+        </>
+      }
+    >
+      {project.description ? <SectionHeader level={3} rhythm={false} title="Documents" lead={project.description} /> : <SectionHeader level={3} rhythm={false} title="Documents" />}
+      <Table
+        caption="Documents"
+        captionHidden
+        rowKey={(r) => r.id}
+        columns={[
+          { key: "title", header: "Title" },
+          { key: "slug", header: "Route", render: (r) => <code>/{r.slug}</code> },
+          { key: "kind", header: "Kind" },
+          { key: "rev", header: "Rev", align: "num", width: "72px" },
+          { key: "state", header: "State", render: (r) => <Chip hue={r.current_version_id ? "green" : "grey"}>{r.current_version_id ? "published" : "draft only"}</Chip> },
+        ]}
+        rows={documents ?? []}
+        empty="No documents yet. Under R5 the first document is a blank canvas composed in the editor — there is no migration of the current portfolio, which keeps rendering from scene.tsx until there is something better to replace it with."
+      />
 
-      <Row gap={8} className="mb-10">
-        <Chip hue={project.status === "live" ? "green" : "grey"}>{project.status}</Chip>
-        {project.domain ? <Chip hue="peach">{project.domain}</Chip> : null}
-      </Row>
+      <SectionHeader level={3} rhythm={false} title="Not built yet" lead="Listed as what is coming rather than linked as routes that 404." />
+      <Table
+        caption="Screens to come"
+        captionHidden
+        rowKey={(r) => r.screen}
+        columns={[
+          { key: "screen", header: "Screen", width: "140px" },
+          { key: "step", header: "Step", align: "num", width: "72px" },
+          { key: "body", header: "What it does" },
+        ]}
+        rows={COMING}
+      />
 
-      <Heading level={3} className="mb-4">Documents</Heading>
-      {documents?.length ? (
-        <Stack gap={16}>
-          {documents.map((doc) => (
-            <Card key={doc.id}>
-              <Row gap={16} align="center">
-                <Stack gap={8}>
-                  <Heading level={4}>{doc.title}</Heading>
-                  <Text size="small" tone="muted">/{doc.slug} · {doc.kind} · rev {doc.rev}</Text>
-                </Stack>
-                <Chip hue={doc.current_version_id ? "green" : "grey"}>
-                  {doc.current_version_id ? "published" : "draft only"}
-                </Chip>
-              </Row>
-            </Card>
-          ))}
-        </Stack>
-      ) : (
-        <Placeholder title="No documents yet">
-          Under R5 the first document is a <strong>blank canvas</strong>, composed in the editor from the component
-          library — there is no migration of the current portfolio. It keeps rendering from <code>scene.tsx</code>,
-          untouched, until there is something better to replace it with. That makes this emptiness the plan rather
-          than a gap.
-        </Placeholder>
-      )}
-
-      <Heading level={3} className="mt-14 mb-4">Not built yet</Heading>
-      <div className="grid gap-6 md:grid-cols-2">
-        {COMING.map((item) => (
-          <Card key={item.title}>
-            <Stack gap={8}>
-              <Label className="text-muted">{item.step}</Label>
-              <Heading level={4}>{item.title}</Heading>
-              <Text size="small" tone="muted">{item.body}</Text>
-            </Stack>
-          </Card>
-        ))}
-      </div>
-    </Section>
+      <Placeholder title="The editor lands here">
+        Palette, canvas, inspector and outline — the anatomy in Admin.md §6.1, on this Tool template&apos;s own
+        inspector and footer bar.
+      </Placeholder>
+    </ToolScreen>
   );
 }

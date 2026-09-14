@@ -1,7 +1,7 @@
 "use client";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Button, Field, Heading, Label, Stack, Text } from "@no-origins/ui";
+import { Button, Container, Field, SectionHeader, Section, Stack, Text, Toast } from "@no-origins/ui";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 /**
@@ -35,49 +35,53 @@ function SignInForm() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[420px] px-6 py-24">
-      <Label className="text-muted">no origins · admin</Label>
-      <Heading level={2} className="mt-2">Sign in</Heading>
-      <Text tone="muted" className="mt-3">
-        A link, by email. There is no password to lose and no account to create — the list of people who can sign
-        in is the list of people who have been invited.
-      </Text>
+    <Section as="div">
+      <Container size="sm">
+        <Stack gap={24}>
+          <SectionHeader
+            rhythm={false}
+            label="no origins · admin"
+            title="Sign in"
+            lead="A link, by email. There is no password to lose and no account to create — the list of people who can sign in is the list of people who have been invited."
+          />
 
-      {linkFailed ? (
-        <Text size="small" className="mt-6 text-bad" role="alert">
-          That link did not work. It may have expired — they last fifteen minutes. Ask for another.
-        </Text>
-      ) : null}
+          {linkFailed ? (
+            <Toast tone="bad" title="That link did not work">It may have expired — they last fifteen minutes. Ask for another.</Toast>
+          ) : null}
 
-      {state === "sent" ? (
-        <div className="mt-8">
-          <Text>
-            If <strong>{email}</strong> is on the list, a link is on its way. It expires in fifteen minutes.
-          </Text>
-          <Button variant="ghost" className="mt-4" onClick={() => setState("idle")}>
-            Use a different address
-          </Button>
-        </div>
-      ) : (
-        <form onSubmit={send} className="mt-8">
-          <Stack gap={16}>
-            <Field
-              label="Email"
-              type="email"
-              name="email"
-              autoComplete="email"
-              required
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.currentTarget.value)}
-            />
-            <Button type="submit" disabled={state === "sending"}>
-              {state === "sending" ? "Sending…" : "Send the link"}
-            </Button>
-          </Stack>
-        </form>
-      )}
-    </div>
+          {state === "sent" ? (
+            <Stack gap={16}>
+              <Text>
+                If <strong>{email}</strong> is on the list, a link is on its way. It expires in fifteen minutes.
+              </Text>
+              <Text as="div">
+                <Button variant="ghost" onClick={() => setState("idle")}>Use a different address</Button>
+              </Text>
+            </Stack>
+          ) : (
+            <form onSubmit={send}>
+              <Stack gap={16}>
+                <Field
+                  label="Email"
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  required
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.currentTarget.value)}
+                />
+                <Text as="div">
+                  <Button type="submit" disabled={state === "sending"}>
+                    {state === "sending" ? "Sending…" : "Send the link"}
+                  </Button>
+                </Text>
+              </Stack>
+            </form>
+          )}
+        </Stack>
+      </Container>
+    </Section>
   );
 }
 

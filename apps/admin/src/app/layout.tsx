@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bowlby_One, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
-import { Page, themeBootScript } from "@no-origins/ui";
+import { Tool, themeBootScript } from "@no-origins/ui";
 import { AdminRail } from "@/components/admin-rail";
 import { currentProfile } from "@/lib/supabase/server";
 import "./globals.css";
@@ -27,11 +27,12 @@ export const viewport: Viewport = {
 /**
  * admin.no-origins.com — the control surface (Admin.md §4).
  *
- * **Page mode with a rail.** §4: "Rail, not tabs" — seven-plus destinations in a row collide the way the canvas
- * view switcher did at five, and the answer there was a column. `Page` takes a `rail` and becomes two columns.
+ * **A Tool, not a Page** (Atomic.md D6). §4: "Rail, not tabs" — seven-plus destinations in a row collide the way the
+ * canvas view switcher did at five, and the answer there was a column. `Tool` holds that column — a `Menu` — beside
+ * the screens; each screen is a `ToolScreen` with the layer eyebrow, the title and its actions in a 60px header.
  *
- * The block accent is **tools** (yellow), so the admin is never mistaken for the portfolio (peach) or the
- * showcase (lavender) in a screenshot. The three layer hues live in the rail's groups, not here.
+ * The block accent is **admin** (lavender, Admin.md §2 and Atomic.md D5), so the admin is never mistaken for the portfolio
+ * (peach) or the showcase (blue) in a screenshot. The three layer hues live in the rail's groups, not here.
  *
  * The rail is rendered here rather than per-route, so it is not remounted between screens — and the sign-in page
  * is the one route that renders without it, which is why it does its own centring.
@@ -42,19 +43,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      data-block="tools"
-      className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`}
+      data-block="admin"
+      className={`${display.variable} ${sans.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
-      <body className="noo-ground min-h-full">
-        {profile ? (
-          <Page rail={<AdminRail email={profile.email} />}>{children}</Page>
-        ) : (
-          children
-        )}
+      <body className="noo-ground">
+        {profile ? <Tool menu={<AdminRail email={profile.email} />}>{children}</Tool> : children}
       </body>
     </html>
   );

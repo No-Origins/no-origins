@@ -1,7 +1,12 @@
-import { Card, Chip, Heading, Placeholder, Row, Section, SectionHeader, Stack, Text } from "@no-origins/ui";
+import { Chip, SectionHeader, Table, ToolScreen } from "@no-origins/ui";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export const metadata = { title: "Storage" };
+
+const BUCKETS = [
+  { bucket: "assets", access: "private", holds: "Uploads: the résumé PDF, source photographs, anything a panel links. alt, width and height are columns on the record, so a document can reserve the box before the picture arrives." },
+  { bucket: "publish", access: "public read", holds: "The published doc JSON per version, at a stable path, plus derived static output. Output is fetched without credentials; the tables have no anon policy anywhere, which is the rule this does not break." },
+];
 
 /** Systems → Storage (Admin.md §8.2) — the two buckets and what is in them. */
 export default async function Storage() {
@@ -13,56 +18,39 @@ export default async function Storage() {
     .limit(20);
 
   return (
-    <Section>
+    <ToolScreen eyebrow="Systems" title="Storage" meta={<Chip hue="grey">{assets?.length ?? 0} files</Chip>}>
       <SectionHeader
-        level={1}
-        label="System"
-        title="Storage"
-        lead="Two buckets, and the difference between them is the whole point: one is private and read through signed URLs, the other is the pipeline's output and is meant to be fetched without credentials."
+        level={3}
+        rhythm={false}
+        title="Two buckets"
+        lead="The difference between them is the whole point: one is private and read through signed URLs, the other is the pipeline's output and is meant to be fetched without credentials."
       />
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <Stack gap={8}>
-            <Row gap={8}><Heading level={3}>assets</Heading><Chip hue="grey">private</Chip></Row>
-            <Text size="small" tone="muted">
-              Uploads: the résumé PDF, source photographs, anything a panel links. Photographs live here as of the
-              2026-09-11 reversal — <code>alt</code>, width and height are columns on the record, not metadata at
-              the point of use, so a document can reserve the box before the picture arrives.
-            </Text>
-          </Stack>
-        </Card>
-        <Card>
-          <Stack gap={8}>
-            <Row gap={8}><Heading level={3}>publish</Heading><Chip hue="green">public read</Chip></Row>
-            <Text size="small" tone="muted">
-              The published doc JSON per version, at a stable path, plus derived static output. Public on purpose —
-              it is output, and output is fetched without credentials. The <em>tables</em> have no anon policy
-              anywhere, which is the rule this does not break.
-            </Text>
-          </Stack>
-        </Card>
-      </div>
-
-      <Heading level={3} className="mt-12 mb-4">Files</Heading>
-      {assets?.length ? (
-        <Stack gap={8}>
-          {assets.map((a) => (
-            <Card key={a.id}>
-              <Row gap={16} align="center">
-                <Text size="small">{a.bucket}/{a.path}</Text>
-                <Text size="small" tone="muted">{a.mime} · {Math.round(a.bytes / 1024)} kB</Text>
-              </Row>
-            </Card>
-          ))}
-        </Stack>
-      ) : (
-        <Placeholder title="Nothing uploaded yet">
-          Both buckets exist and both have their policies. The first file arrives when the editor does — until
-          then the portfolio&apos;s images are files in the repo, which is where they should be for a site that
-          renders from source.
-        </Placeholder>
-      )}
-    </Section>
+      <Table
+        caption="Buckets"
+        captionHidden
+        rowKey={(r) => r.bucket}
+        columns={[
+          { key: "bucket", header: "Bucket", width: "120px", render: (r) => <code>{r.bucket}</code> },
+          { key: "access", header: "Access", width: "140px", render: (r) => <Chip hue={r.access === "private" ? "grey" : "green"}>{r.access}</Chip> },
+          { key: "holds", header: "What it holds" },
+        ]}
+        rows={BUCKETS}
+      />
+      <SectionHeader level={3} rhythm={false} title="Files" lead="The twenty most recent." />
+      <Table
+        caption="Files"
+        captionHidden
+        density="compact"
+        rowKey={(r) => r.id}
+        columns={[
+          { key: "path", header: "Path", render: (r) => <code>{r.bucket}/{r.path}</code> },
+          { key: "mime", header: "Type" },
+          { key: "bytes", header: "Size", align: "num", render: (r) => `${Math.round(r.bytes / 1024)} kB` },
+          { key: "created_at", header: "Added", align: "num", render: (r) => String(r.created_at).slice(0, 10) },
+        ]}
+        rows={assets ?? []}
+        empty="Nothing uploaded yet. Both buckets exist and both have their policies; the first file arrives when the editor does."
+      />
+    </ToolScreen>
   );
 }

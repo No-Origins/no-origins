@@ -18,6 +18,7 @@ export const ROUTES = [
   "/fixtures/catalogue",
   "/fixtures/patterns",
   "/fixtures/blob",
+  "/fixtures/tool",
 ];
 
 /** The showcase is a second app on its own port (Design-System.md §11.4) — its own project, its own domain. */

@@ -537,7 +537,7 @@ Anatomy in one line each; variants where they exist. Every component reads only 
 | **ThemeSwitch** | light · system · dark in a glass-1 pill; reads and writes `<html data-theme>` + `localStorage.theme` through `readTheme` / `applyTheme` / `subscribeTheme`; the host inlines `themeBootScript` in `<head>` (all exported, no React in `theme.ts`) |
 | **Page · Container · Section** | Page mode (§8), for documents: `Page` = `nav` slot + `<main id="main" tabIndex=-1>` + `footer` slot, fills the viewport · `Container` = 1120 measure, 24 / 48 gutters · `Section` = Container + rhythm (96 desktop / 64 mobile between sections) · `.noo-prose` = 68ch |
 
-Not in v1: Dialog/Sheet (glass-3), Toast, Tabs, Table, Editor surfaces. They inherit the same tokens when they come. A detail sheet was considered for the canvas and rejected: it would re-introduce pages through the back door, and a 560 × 520 panel holds a role with five bullets comfortably.
+~~Not in v1: Dialog/Sheet (glass-3), Toast, Tabs, Table, Editor surfaces.~~ **Built in the 2026-09-14 release** (Atomic.md §6 steps 3–5): Dialog and Sheet on a native `<dialog>`, Toast, Tabs, Table, Tree, Menu, Segmented, Select, Checkbox, Radio, Tooltip, Speaker, and the `Tool` and `Document` templates. The inventory of what exists, by layer, is Atomic.md §1–§3 and the registry itself; this section is the anatomy record of v1 and is not updated for later components. A detail sheet was considered for the canvas and rejected: it would re-introduce pages through the back door, and a 560 × 520 panel holds a role with five bullets comfortably.
 
 **Retired from the portfolio, kept in the system (2026-09-09).** `Page`, `Container`, `Section`, `NavBar`, `Footer` and `SectionHeader` are page mode, and the portfolio has no pages (§8). They stay specified, built and exercised by the fixtures, because the editor block's articles are documents. Their content moved into panels; `SiteNav` became the canvas menu and `SiteFooter`'s theme switch became a canvas panel.
 
@@ -567,12 +567,8 @@ no-origins/
 │  ├─ design/                   the boards and the lab — where the decisions were made
 │  ├─ tsup.config.ts · tsconfig.json
 │  └─ src/
-│     ├─ css/tokens.css         :root light · dark blocks · block accents · fallback --ff-* stacks (layered)
-│     ├─ css/tailwind.css       OPTIONAL @theme inline layer, for Tailwind 4 hosts
-│     ├─ css/glass.css · motion.css · components.css · index.css
-│     ├─ tokens.ts · theme.ts        hues, blocks, blob sizes · theme boot script + read/apply/subscribe (no React)
-│     ├─ blob/ wordmark/ primitives/ layout/ canvas/
-│     └─ index.ts
+│     └─ …                      by Atomic layer since the 2026-09-14 release — tokens/ atoms/ molecules/ organisms/
+│                               templates/ registry/ icons/, and css/ split the same way. The tree is Atomic.md §5.
 └─ apps/portfolio/              the first block — Next.js · imports @no-origins/ui via workspace:*
    ├─ next.config.ts            transpilePackages: ["@no-origins/ui"] — consumed from source in the workspace
    ├─ src/app/layout.tsx        next/font ×3 → --ff-display / --ff-sans / --ff-mono · <html data-block="portfolio"> · theme script

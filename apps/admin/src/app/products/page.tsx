@@ -1,4 +1,4 @@
-import { Card, Heading, Placeholder, Section, SectionHeader, Stack, Text } from "@no-origins/ui";
+import { Chip, SectionHeader, Table, ToolScreen } from "@no-origins/ui";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export const metadata = { title: "Products" };
@@ -17,31 +17,25 @@ export default async function Products() {
     .order("name");
 
   return (
-    <Section>
+    <ToolScreen eyebrow="Products" title="All products" meta={<Chip hue="blue">layer 3</Chip>}>
       <SectionHeader
-        level={1}
-        label="Product"
-        title="Products"
-        lead="A product plugs into exactly one system. Nothing in a product knows about a project — it extends the mechanism, and every project built on that mechanism gets it."
+        level={3}
+        rhythm={false}
+        title="A product plugs into exactly one system"
+        lead="Nothing in a product knows about a project — it extends the mechanism, and every project built on that mechanism gets it."
       />
-
-      {products?.length ? (
-        <Stack gap={16}>
-          {products.map((p) => (
-            <Card key={p.id}>
-              <Stack gap={8}>
-                <Heading level={3}>{p.name}</Heading>
-                <Text size="small" tone="muted">plugs into {p.system_slug} · v{p.version}</Text>
-              </Stack>
-            </Card>
-          ))}
-        </Stack>
-      ) : (
-        <Placeholder title="No products yet">
-          Layer 3 is last for a reason: a product extends a system, so there is nothing for one to plug into until
-          the systems are real. Step 11 — the manifest, the install, and the first actual product.
-        </Placeholder>
-      )}
-    </Section>
+      <Table
+        caption="Products"
+        captionHidden
+        rowKey={(r) => r.id}
+        columns={[
+          { key: "name", header: "Product" },
+          { key: "system_slug", header: "Plugs into", render: (r) => <code>{r.system_slug}</code> },
+          { key: "version", header: "Version", align: "num", width: "100px" },
+        ]}
+        rows={products ?? []}
+        empty="No products yet. Layer 3 is last for a reason: a product extends a system, so there is nothing for one to plug into until the systems are real. Step 11."
+      />
+    </ToolScreen>
   );
 }
