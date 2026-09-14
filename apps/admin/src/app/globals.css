@@ -1,4 +1,5 @@
 @import "@no-origins/ui/index.css";
+@import "@xyflow/react/dist/base.css" layer(base);   /* the editor's canvas (§6); in `base` so the package's components layer overrides it */
 
 /* No Tailwind here (Atomic.md rule 5): the admin composes the package and styles nothing. */
 html { height: 100%; }

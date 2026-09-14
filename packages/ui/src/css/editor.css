@@ -68,3 +68,9 @@
 @media (prefers-reduced-motion: reduce) {
   .noo-esave[data-state="saving"] .noo-esave__dot { animation: none; }
 }
+
+/* The editor's canvas, inside `ToolScreen`'s flush main. The viewport switch and the grid toggle are the bar's
+   two cheapest controls and neither needs a prop on the shell: one narrows the canvas until §8.6's media query
+   fires, the other hides the flow's Background. */
+.noo-ecanvas--phone { max-inline-size: 420px; margin-inline: auto; }
+.noo-ecanvas--nogrid .react-flow__background { display: none; }

@@ -1,0 +1,1102 @@
+{
+  "schema": 1,
+  "id": "portfolio/home",
+  "kind": "canvas",
+  "grid": {
+    "box": 160,
+    "pad": 8
+  },
+  "meta": {
+    "title": "Bhargav — No Origins",
+    "description": "Editors, design systems and agent tools. No Origins is where I keep them."
+  },
+  "nodes": [
+    {
+      "id": "menu",
+      "kind": "menu",
+      "at": [
+        -520,
+        100
+      ],
+      "size": [
+        188,
+        284
+      ],
+      "node": {
+        "label": "Sections",
+        "items": [
+          {
+            "label": "Me",
+            "view": "me",
+            "href": "/"
+          },
+          {
+            "label": "Status",
+            "view": "status",
+            "href": "/status"
+          },
+          {
+            "label": "Work",
+            "view": "work",
+            "href": "/work"
+          },
+          {
+            "label": "Cases",
+            "view": "cases",
+            "href": "/case-studies"
+          },
+          {
+            "label": "Projects",
+            "view": "projects",
+            "href": "/projects"
+          },
+          {
+            "label": "Interests",
+            "view": "interests",
+            "href": "/interests"
+          },
+          {
+            "label": "Philosophy",
+            "view": "philosophy",
+            "href": "/philosophy"
+          }
+        ]
+      }
+    },
+    {
+      "id": "me-blob",
+      "kind": "blob",
+      "at": [
+        -36,
+        -304
+      ],
+      "section": "me",
+      "node": {
+        "say": "What are we doing today?"
+      },
+      "component": "Blob",
+      "props": {
+        "variant": "glass",
+        "label": "Bhargav"
+      }
+    },
+    {
+      "id": "me-intro",
+      "kind": "panel",
+      "at": [
+        -280,
+        100
+      ],
+      "size": [
+        560,
+        120
+      ],
+      "section": "me",
+      "node": {
+        "surface": "none"
+      },
+      "component": "Intro",
+      "props": {
+        "title": "Hi, I'm Bhargav.",
+        "lead": {
+          "$ref": "site.tagline"
+        }
+      }
+    },
+    {
+      "id": "me-story",
+      "kind": "panel",
+      "at": [
+        -280,
+        260
+      ],
+      "size": [
+        560,
+        425
+      ],
+      "section": "me",
+      "node": {
+        "label": "About Bhargav"
+      },
+      "component": "Stack",
+      "props": {
+        "gap": 16
+      },
+      "slots": {
+        "children": [
+          {
+            "component": "Image",
+            "when": {
+              "$ref": "site.photo"
+            },
+            "props": {
+              "src": {
+                "$ref": "site.photo.src"
+              },
+              "alt": {
+                "$ref": "site.photo.alt"
+              }
+            }
+          },
+          {
+            "component": "Row",
+            "props": {
+              "gap": 8,
+              "align": "center"
+            },
+            "slots": {
+              "children": [
+                {
+                  "component": "Chip",
+                  "props": {
+                    "label": "curious",
+                    "hue": "peach"
+                  }
+                },
+                {
+                  "component": "Chip",
+                  "props": {
+                    "label": "creative",
+                    "hue": "lavender"
+                  }
+                },
+                {
+                  "component": "Chip",
+                  "props": {
+                    "label": "happy",
+                    "hue": "yellow"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "when": {
+                    "$ref": "site.location"
+                  },
+                  "props": {
+                    "size": "small",
+                    "tone": "muted",
+                    "markdown": {
+                      "$ref": "site.locationLine"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "Text",
+            "props": {
+              "markdown": "I've spent the last few years inside other people's products: two WYSIWYG editors on tiptap, the core team of a design system, full-stack RAG and agent applications, and now the whole stack at Radise. The through-line is editors, design systems, agent systems, and shipping.\n\nNo Origins is my playground on the internet. Not a fixed list of features: blocks, added over time. This portfolio is the first. Every block shares one design system, so a new one looks native the day it ships.\n\nIf you're hiring, the work is on :pan[Work]{view=work}. If you have an idea, what I'm after and how to reach me are on :pan[Current Status]{view=status}. If you're a friend, the tools are on their way. Come back; this grows."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "status-widget",
+      "kind": "widget",
+      "at": [
+        -1280,
+        -960
+      ],
+      "size": [
+        640,
+        480
+      ],
+      "section": "status",
+      "node": {
+        "view": "status"
+      },
+      "component": "Bento",
+      "props": {
+        "hue": "blue",
+        "label": "Current status"
+      },
+      "slots": {
+        "cells": [
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 2
+              },
+              "tone": "fill",
+              "pattern": "status"
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Label",
+                  "props": {
+                    "text": "status"
+                  }
+                },
+                {
+                  "component": "Figure",
+                  "props": {
+                    "value": "4",
+                    "label": "ways in"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 1,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "CellHead",
+                  "props": {
+                    "label": "hiring",
+                    "title": "Recognise the work"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 1,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "CellHead",
+                  "props": {
+                    "label": "collaborating",
+                    "title": "Bring an idea"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 1,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "CellHead",
+                  "props": {
+                    "label": "following",
+                    "title": "Watch it land"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 1,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "CellHead",
+                  "props": {
+                    "label": "saying hi",
+                    "title": "No agenda"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 4,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Text",
+                  "props": {
+                    "markdown": "Pick the path that fits; none of them needs an agenda.",
+                    "size": "small"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "work-widget",
+      "kind": "widget",
+      "at": [
+        640,
+        -960
+      ],
+      "size": [
+        640,
+        480
+      ],
+      "section": "work",
+      "node": {
+        "view": "work"
+      },
+      "component": "Bento",
+      "props": {
+        "hue": "peach",
+        "label": "Work experience"
+      },
+      "slots": {
+        "cells": [
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 2
+              },
+              "tone": "fill",
+              "pattern": "work"
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Label",
+                  "props": {
+                    "text": "work"
+                  }
+                },
+                {
+                  "component": "Figure",
+                  "props": {
+                    "value": "4",
+                    "label": "roles"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 1,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "CellHead",
+                  "props": {
+                    "label": "now",
+                    "title": "Radise",
+                    "dot": "peach"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 1,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "CellHead",
+                  "props": {
+                    "label": "before",
+                    "title": "Dataflix",
+                    "dot": "green"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 1,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "CellHead",
+                  "props": {
+                    "label": "one year",
+                    "title": "Hashnode",
+                    "dot": "blue"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 1,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "CellHead",
+                  "props": {
+                    "label": "two years",
+                    "title": "Terrible Tiny Tales",
+                    "dot": "pink"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 4,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Label",
+                  "props": {
+                    "text": "the through-line"
+                  }
+                },
+                {
+                  "component": "Row",
+                  "props": {
+                    "gap": 8
+                  },
+                  "slots": {
+                    "children": [
+                      {
+                        "component": "Chip",
+                        "props": {
+                          "label": "editors",
+                          "hue": "lavender"
+                        }
+                      },
+                      {
+                        "component": "Chip",
+                        "props": {
+                          "label": "design systems",
+                          "hue": "peach"
+                        }
+                      },
+                      {
+                        "component": "Chip",
+                        "props": {
+                          "label": "agent systems",
+                          "hue": "blue"
+                        }
+                      },
+                      {
+                        "component": "Chip",
+                        "props": {
+                          "label": "full-stack",
+                          "hue": "green"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "cases-widget",
+      "kind": "widget",
+      "at": [
+        1440,
+        -160
+      ],
+      "size": [
+        640,
+        480
+      ],
+      "section": "cases",
+      "node": {
+        "view": "cases"
+      },
+      "component": "Bento",
+      "props": {
+        "hue": "lavender",
+        "label": "Case studies"
+      },
+      "slots": {
+        "cells": [
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 2
+              },
+              "tone": "fill",
+              "pattern": "cases"
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Label",
+                  "props": {
+                    "text": "case studies"
+                  }
+                },
+                {
+                  "component": "Figure",
+                  "props": {
+                    "value": "3",
+                    "label": "worth telling"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "CellHead",
+                  "props": {
+                    "label": "hashnode",
+                    "title": "Neptune"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "CellHead",
+                  "props": {
+                    "label": "radise",
+                    "title": "Project Vault"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "CellHead",
+                  "props": {
+                    "label": "dataflix",
+                    "title": "GenIQ"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Text",
+                  "props": {
+                    "markdown": "Each one: the problem, what I did, what changed.",
+                    "size": "small"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "projects-widget",
+      "kind": "widget",
+      "at": [
+        640,
+        480
+      ],
+      "size": [
+        640,
+        480
+      ],
+      "section": "projects",
+      "node": {
+        "view": "projects"
+      },
+      "component": "Bento",
+      "props": {
+        "hue": "green",
+        "label": "Projects"
+      },
+      "slots": {
+        "cells": [
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 2
+              },
+              "tone": "fill",
+              "pattern": "projects"
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Label",
+                  "props": {
+                    "text": "projects"
+                  }
+                },
+                {
+                  "component": "Figure",
+                  "props": {
+                    "value": "0",
+                    "label": "shipped yet"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Label",
+                  "props": {
+                    "text": "why"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "props": {
+                    "markdown": "Deleted for a clean slate.",
+                    "size": "small"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "CellHead",
+                  "props": {
+                    "label": "first block",
+                    "title": "This portfolio."
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 4,
+                "rows": 1
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Text",
+                  "props": {
+                    "markdown": "Fills as things ship, starting with what No Origins is made of.",
+                    "size": "small"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "interests-widget",
+      "kind": "widget",
+      "at": [
+        -2080,
+        -160
+      ],
+      "size": [
+        640,
+        480
+      ],
+      "section": "interests",
+      "node": {
+        "view": "interests"
+      },
+      "component": "Bento",
+      "props": {
+        "hue": "yellow",
+        "label": "Interests"
+      },
+      "slots": {
+        "cells": [
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 2
+              },
+              "tone": "fill",
+              "pattern": "interests"
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Label",
+                  "props": {
+                    "text": "interests"
+                  }
+                },
+                {
+                  "component": "Heading",
+                  "props": {
+                    "level": 2,
+                    "text": "outside the work"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 2
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Text",
+                  "props": {
+                    "markdown": {
+                      "$ref": "site.interestsMarkdown"
+                    },
+                    "size": "small"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 4,
+                "rows": 1
+              },
+              "tone": "glass"
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Label",
+                  "props": {
+                    "text": "and the rest"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "props": {
+                    "markdown": "A handful more, each one a line.",
+                    "size": "small"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "philosophy-widget",
+      "kind": "widget",
+      "at": [
+        -1280,
+        480
+      ],
+      "size": [
+        640,
+        480
+      ],
+      "section": "philosophy",
+      "node": {
+        "view": "philosophy"
+      },
+      "component": "Bento",
+      "props": {
+        "hue": "pink",
+        "label": "Philosophy"
+      },
+      "slots": {
+        "cells": [
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 2
+              },
+              "tone": "fill",
+              "pattern": "philosophy"
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Label",
+                  "props": {
+                    "text": "philosophy"
+                  }
+                },
+                {
+                  "component": "Heading",
+                  "props": {
+                    "level": 2,
+                    "text": "how I build"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 2,
+                "rows": 2
+              }
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Text",
+                  "props": {
+                    "markdown": {
+                      "$ref": "site.philosophyFirst"
+                    },
+                    "size": "small"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "component": "BentoCell",
+            "props": {
+              "span": {
+                "cols": 4,
+                "rows": 1
+              },
+              "tone": "glass"
+            },
+            "slots": {
+              "content": [
+                {
+                  "component": "Label",
+                  "props": {
+                    "text": "two more like it"
+                  }
+                },
+                {
+                  "component": "Text",
+                  "props": {
+                    "markdown": "Each one a paragraph, in the full view.",
+                    "size": "small"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "views": [
+    {
+      "id": "me",
+      "label": "Me",
+      "href": "/",
+      "frame": "fit",
+      "nodeIds": [
+        "me-blob",
+        "menu",
+        "me-intro",
+        "me-story",
+        "status-widget",
+        "interests-widget",
+        "philosophy-widget",
+        "work-widget",
+        "cases-widget",
+        "projects-widget"
+      ]
+    },
+    {
+      "id": "status",
+      "label": "Status",
+      "href": "/status",
+      "nodeIds": [
+        "status-widget"
+      ]
+    },
+    {
+      "id": "work",
+      "label": "Work",
+      "href": "/work",
+      "nodeIds": [
+        "work-widget"
+      ]
+    },
+    {
+      "id": "cases",
+      "label": "Cases",
+      "href": "/case-studies",
+      "nodeIds": [
+        "cases-widget"
+      ]
+    },
+    {
+      "id": "projects",
+      "label": "Projects",
+      "href": "/projects",
+      "nodeIds": [
+        "projects-widget"
+      ]
+    },
+    {
+      "id": "interests",
+      "label": "Interests",
+      "href": "/interests",
+      "nodeIds": [
+        "interests-widget"
+      ]
+    },
+    {
+      "id": "philosophy",
+      "label": "Philosophy",
+      "href": "/philosophy",
+      "nodeIds": [
+        "philosophy-widget"
+      ]
+    }
+  ],
+  "threads": [
+    {
+      "from": "me-blob",
+      "to": "status-widget"
+    },
+    {
+      "from": "me-blob",
+      "to": "work-widget"
+    },
+    {
+      "from": "me-blob",
+      "to": "cases-widget"
+    },
+    {
+      "from": "me-blob",
+      "to": "projects-widget"
+    },
+    {
+      "from": "me-blob",
+      "to": "interests-widget"
+    },
+    {
+      "from": "me-blob",
+      "to": "philosophy-widget"
+    }
+  ],
+  "order": [
+    "me",
+    "status",
+    "work",
+    "cases",
+    "projects",
+    "interests",
+    "philosophy"
+  ]
+}

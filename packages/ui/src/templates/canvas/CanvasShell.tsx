@@ -90,6 +90,8 @@ export interface CanvasShellProps {
   onCanvasDragOver?: (point: { x: number; y: number }, event: DragEvent<HTMLDivElement>) => void;
   /** The drag left the canvas: put the ghost away. */
   onCanvasDragLeave?: () => void;
+  /** A node dragged to rest, in canvas coordinates. The editor snaps it and writes it into the document. */
+  onNodeMove?: (id: string, position: { x: number; y: number }) => void;
 }
 
 const nodeTypes: NodeTypes = { blob: BlobNode, panel: PanelNode, region: RegionNode, widget: WidgetNode, menu: MenuNode };
@@ -211,6 +213,7 @@ function CanvasShellInner({
   onCanvasDrop,
   onCanvasDragOver,
   onCanvasDragLeave,
+  onNodeMove,
   initialNodes,
 }: CanvasShellProps & { initialNodes: SceneFlowNode[] }) {
   const container = useRef<HTMLDivElement | null>(null);
@@ -266,6 +269,16 @@ function CanvasShellInner({
   useEffect(() => {
     setNodes((ns) => ns.map((n) => (n.type === "blob" ? { ...n, data: { ...n.data, below: flow } } : n)));
   }, [flow]);
+
+  /**
+   * While the canvas is being EDITED the document is truth, so the flow's nodes are rebuilt whenever the scene
+   * changes — a prop typed in the inspector, a component dropped from the palette. Outside the editor the
+   * visitor's own dragged positions are truth and only a blob's words re-sync, which is the effect below.
+   */
+  useEffect(() => {
+    if (!editing) return;
+    setNodes(sceneToNodes(scene));
+  }, [editing, scene]);
 
   // the host may change what a blob says; positions stay where the visitor left them
   useEffect(() => {
@@ -500,7 +513,10 @@ function CanvasShellInner({
             onMoveStart={(event) => {
               if (event) setMoved(true);
             }}
-            onNodeDragStop={() => setMoved(true)}
+            onNodeDragStop={(_e, node) => {
+              setMoved(true);
+              onNodeMove?.(node.id, node.position);
+            }}
             onMoveEnd={onMoveEnd}
             minZoom={MIN_ZOOM}
             maxZoom={MAX_ZOOM}
