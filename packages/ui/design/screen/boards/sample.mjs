@@ -1,4 +1,4 @@
-import { head, group, option, bento, cell, lbl, insp, tag, tree, trow, chip, SCREEN_CSS } from "../lib.mjs";
+import { head, group, option, bento, cell, lbl, insp, tag, tree, trow, chip, SCREEN_CSS, decided } from "../lib.mjs";
 
 const LINES = ["How editors decide what a document <em>is</em>", "Type on screen, and the parts of it nobody notices", "Small tools that do one thing without asking permission", "Maps, and why a good one is mostly what it leaves out"];
 const lines = (pre = "") => `<ul class="sc-lines sc-tw">${LINES.map((l, i) => `<li>${i === 0 ? pre : ""}${l}</li>`).join("")}</ul>`;
@@ -8,6 +8,7 @@ export const title = "F4 · Marking sample copy";
 export const block = "design";
 export const body = `<style>${SCREEN_CSS}</style>
 ${head({ eyebrow: "the editor · finding F4 of 5 · pick one by its letter", title: "Marking sample copy", lead: "Five sections still run on sample copy, and every panel drawn from it wears a <em>sample copy</em> tag so nobody mistakes scaffolding for writing (Design-System.md §13). <code>site.ts</code> knows exactly which slots the sample filled. The document has nowhere to carry that — Scene-Schema.md §3.4 says the tag is a field on the content record, and nothing renders one — so the document version of Interests and Philosophy is silently unmarked. Until this is decided a document must not carry sampled copy." })}
+${decided({ pick: "A — the host names the sampled keys", built: "Built: <code>DocumentContext.sampled</code>; the adapter tags any node whose props read a sampled ref and lists it as a warning. The tag takes its own line inside a paragraph." })}
 ${group("Five directions", "The Interests cell whose four lines are sample copy today, and what marks them.")}
 ${option({ id: "A", name: "The host names the sampled keys; the adapter tags what read them", rec: true,
   desc: "<code>DocumentContext</code> gains <code>sampled: (path) => boolean</code> — the <code>sampled()</code> that site.ts already exports. Any node whose props resolved a ref into a sampled key renders the tag as its first child; the inspector says which ref, and the outline marks the row.",

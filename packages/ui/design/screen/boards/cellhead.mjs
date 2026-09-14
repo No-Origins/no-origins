@@ -1,4 +1,4 @@
-import { head, group, option, bento, cell, cellhead, lbl, ttl, SCREEN_CSS } from "../lib.mjs";
+import { head, group, option, bento, cell, cellhead, lbl, ttl, SCREEN_CSS, decided } from "../lib.mjs";
 
 // Four cells beside a loud one, as the Work widget has them, drawn five ways. The hand-written version is the
 // reference: `<p class="noo-label">` and `<p class="noo-bento__title">` as two direct children of the cell, which
@@ -14,6 +14,7 @@ export const title = "F1 · A widget cell’s head";
 export const block = "design";
 export const body = `<style>${SCREEN_CSS}</style>
 ${head({ eyebrow: "the editor · finding F1 of 5 · pick one by its letter", title: "A widget cell’s head", lead: "A bento cell is a column that pushes its children apart, so a hand-written cell puts the mono label top-left and the title bottom-left — the diagonal Design-System.md §8.3 asks for. <code>CellHead</code> wraps both in one block at the top, and sets the dot beside a wrapped title instead of inline in its first line. Every widget’s 3 % in the proof is mostly this. Below: the same four Work cells, five ways, at 1:1." })}
+${decided({ pick: "A + your note — the head spreads; no dot; a logo slot", built: "Built in @no-origins/ui: <code>CellHead</code> fills its cell (label top, title bottom), <code>dot</code> is a deprecated no-op, and a <code>media</code> slot takes one Image, Blob or Pattern at 24px in the title row. The document's widgets have no dots; the hand-written ones keep theirs until they are re-poured." })}
 ${group("The reference", "content/sections.tsx today — two paragraphs as direct children of the cell. This is what the document should reproduce.")}
 <div class="rv-demo rv-demo--tight">${four(written)}</div>
 ${group("Five directions", "Each drawn with the package’s cell; only the head changes.")}

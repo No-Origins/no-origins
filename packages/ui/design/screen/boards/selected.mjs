@@ -1,4 +1,4 @@
-import { head, group, option, well, half, workWidget, cellhead, dot, insp, SCREEN_CSS } from "../lib.mjs";
+import { head, group, option, well, half, workWidget, cellhead, dot, insp, SCREEN_CSS, decided } from "../lib.mjs";
 
 // The Work widget at half zoom (0.5) on the grid, so a 640 × 480 widget is a 320 × 240 box — the map at reading
 // distance. `sel` decorates the wrapper around the scaled widget.
@@ -10,6 +10,7 @@ export const title = "S1 · A selected node on the canvas";
 export const block = "design";
 export const body = `<style>${SCREEN_CSS}</style>
 ${head({ eyebrow: "the editor · screen question S1 of 4 · pick one by its letter", title: "A selected node on the canvas", lead: "Click a node and it is selected: the inspector shows its props, the outline marks its row, Delete removes it. The canvas has to say so without changing how the node renders (Admin.md §6.1: “nothing that changes how a node renders”). The canvas already draws one ring — 2px accent, 4px offset — for keyboard focus on a widget. Below: the Work widget on the grid at half zoom, selected five ways." })}
+${decided({ pick: "A — the focus ring, plus a name tag", built: "Built in @no-origins/ui/editor: <code>CanvasOverlay</code> draws the 2px accent ring at 4px offset and a <code>kind · name</code> tag with the hue dot, hidden below zoom 0.4; hover is a hairline. Live at /projects/portfolio/edit." })}
 ${group("Five directions", "The same widget, the same grid; only the selection differs.")}
 ${option({ id: "A", name: "The focus ring, plus a name tag", rec: true,
   desc: "Selection wears exactly the ring focus wears — 2px accent at 4px offset — and a tag sits above its top-left corner: the node’s kind and name in the mono voice, with its hue dot. Hover shows a 1px hairline; a full view’s page shows the same ring on its cell.",

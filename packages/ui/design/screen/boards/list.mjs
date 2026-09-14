@@ -1,4 +1,4 @@
-import { head, group, option, bento, cell, lbl, dot, SCREEN_CSS } from "../lib.mjs";
+import { head, group, option, bento, cell, lbl, dot, SCREEN_CSS, decided } from "../lib.mjs";
 
 const LINES = ["How editors decide what a document <em>is</em>", "Type on screen, and the parts of it nobody notices", "Small tools that do one thing without asking permission", "Maps, and why a good one is mostly what it leaves out"];
 const cellOf = (inner) => bento(cell(inner, { span: [2, 2] }), { cols: 2, hue: "yellow", label: "Interests" });
@@ -9,6 +9,7 @@ export const title = "F5 · A list inside a widget";
 export const block = "design";
 export const body = `<style>${SCREEN_CSS}</style>
 ${head({ eyebrow: "the editor · finding F5 of 5 · pick one by its letter", title: "A list inside a widget", lead: "The Interests cell is four lines with no markers at the widget scale. In the document it is a <code>Text</code> whose markdown is a list, and markdown renders bullets at the document scale. Scene-Schema.md §9.3 ⑩ ruled out a loop over a ref because each item was a measured height — in a fixed cell nothing is measured, so the question is open again: what is a list, inside a widget?" })}
+${decided({ pick: "A — unmarkered, at widget scale", built: "Built: one rule on <code>.noo-bento__cell .noo-text--blocks ul</code>. The interests cell renders its four lines as the hand-written one does." })}
 ${group("Five directions", "The same four lines, at 1:1 in a 2 × 2 cell. F2’s size applies to all of them.")}
 ${option({ id: "A", name: "A Text list in a cell is unmarkered, at widget scale", rec: true,
   desc: "One <code>Text</code> node, markdown with four <code>-</code> lines. Inside a bento cell the list drops its markers and keeps its rhythm; the size is F2’s <code>widget</code> step.",

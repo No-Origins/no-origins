@@ -1,4 +1,4 @@
-import { head, group, option, btn, chip, dot, tree, trow, seg, SCREEN_CSS } from "../lib.mjs";
+import { head, group, option, btn, chip, dot, tree, trow, seg, SCREEN_CSS, decided } from "../lib.mjs";
 
 const STATES = [
   ["saved", "grey", "saved 2 min ago", "the resting state; the time is relative and updates"],
@@ -16,6 +16,7 @@ export const title = "S3 · How autosave shows";
 export const block = "design";
 export const body = `<style>${SCREEN_CSS}</style>
 ${head({ eyebrow: "the editor · screen question S3 of 4 · pick one by its letter", title: "How autosave shows", lead: "Admin.md §6.4: autosave is a debounced write to the draft with the rev bumped, and a stale write is refused, not merged. So there are five states an author can be in — saved, saving, unsaved, failed, stale — and the screen has to show which, all the time, without nagging. The ToolScreen header already carries <em>draft</em> and <em>saved 2 minutes ago</em> in its meta slot. Below: the five states, five places." })}
+${decided({ pick: "A — a dot and a few words in the header's meta", built: "Built: <code>SaveState</code> — saved · saving (pulsing, unless reduced motion) · unsaved · couldn't save with Retry · stale with Reload. Autosave PATCHes the draft with the rev rule of §6.4; a stale write is refused (409), never merged. Publish is disabled in every state but saved." })}
 ${group("Five directions", "Every option shows all five states; most show them in the editor’s header at its real width.")}
 ${option({ id: "A", name: "A dot and a few words in the header’s meta", rec: true,
   desc: "The meta slot carries a Dot and a short line: grey <em>saved 2 min ago</em>, accent <em>saving…</em> (the dot pulses), yellow <em>unsaved changes</em>, pink <em>couldn’t save — kept here</em> with a ghost Retry, pink <em>stale — saved elsewhere</em> with a ghost Reload. Publish is disabled while anything but saved.",

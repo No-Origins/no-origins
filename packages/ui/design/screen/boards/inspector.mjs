@@ -1,4 +1,4 @@
-import { head, group, option, insp, field, seg, chip, lbl, dot, SCREEN_CSS } from "../lib.mjs";
+import { head, group, option, insp, field, seg, chip, lbl, dot, SCREEN_CSS, decided } from "../lib.mjs";
 
 const inspHead = (eyebrow, title, line) => `<div class="sc-insp-head"><p class="noo-label">${eyebrow}</p><h3 class="noo-h4">${title}</h3>${line ? `<p class="noo-body-sm">${line}</p>` : ""}</div>`;
 const none = (rows) => `<aside class="noo-glass noo-glass--1 insp" aria-label="Inspector">${rows}</aside>`;
@@ -10,6 +10,7 @@ export const title = "S4 · The inspector with none or several selected";
 export const block = "design";
 export const body = `<style>${SCREEN_CSS}</style>
 ${head({ eyebrow: "the editor · screen question S4 of 4 · pick one by its letter", title: "The inspector with none or several selected", lead: "The inspector renders the selected node’s props from its schema — no hand-built form, ever (Admin.md §6.1). Two cases the schema does not cover: nothing is selected, and several things are. Below: the inspector at its real width, twice per option — none on the left, three cells of the Work widget on the right." })}
+${decided({ pick: "A — none: the document; several: what they share", built: "Built: <code>PropsForm</code> renders one control per prop type (§3.1) and, for several nodes, the intersection of their schemas with <em>mixed</em> where they disagree; <code>DocumentForm</code> holds the document's own props — title, grid, order, views, patterns — when nothing is selected." })}
 ${group("Five directions", "Left: nothing selected. Right: two BentoCells and a Label selected together.")}
 ${option({ id: "A", name: "None: the document. Several: what they share", rec: true,
   desc: "With nothing selected the inspector shows the document’s own props — title, description, grid, <code>order</code> as a Repeater, the views, the document’s patterns. With several, the intersection of their schemas: props every selected node has; a value they disagree on reads <em>mixed</em> and typing sets it on all; the head counts them by component.",

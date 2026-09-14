@@ -497,6 +497,9 @@
 .noo-text--blocks > * { margin: 0; }
 .noo-text--blocks ul { list-style: disc; padding-left: var(--s-5); }
 .noo-text--blocks li + li { margin-top: var(--s-1); }
+/* The fourth step (Admin.md §6.5c F2): the size a widget is read at, from about twice as far away. `.noo-bento__text`
+   set it on a hand-typed `<p>` and no component could; this is that declaration, as a step on the scale. */
+.noo-widget-text { font: 400 var(--t-widget-text)/1.35 var(--ff-sans); color: var(--ink-2); text-wrap: pretty; }
 
 .noo-stack { display: flex; flex-direction: column; min-width: 0; }                            /* min-width 0: a long word must not widen the cell */
 .noo-stack--g8 { gap: var(--s-2); } .noo-stack--g16 { gap: var(--s-4); } .noo-stack--g24 { gap: var(--s-6); } .noo-stack--g40 { gap: var(--s-10); }
@@ -622,6 +625,10 @@
 .noo-placeholder { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 20px; border: 1.5px dashed var(--rule); border-radius: var(--r-lg); }
 .noo-placeholder--draft { border-color: color-mix(in oklch, var(--accent-deep) 45%, transparent); }
 .noo-placeholder__tag { align-self: flex-start; font: 500 var(--t-label)/1 var(--ff-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-deep); background: var(--accent-tint); padding: 5px 8px; border-radius: var(--r-pill); }
+/* the adapter's sample-copy tag (Admin.md §6.5c F4) is a component's first child, which inside a <p> is the first
+   line; `display: table` gives it a line of its own without asking the component to be a div. */
+.noo-sample-tag { display: table; }
+p > .noo-sample-tag { margin-bottom: var(--s-3); }                                          /* a block container spaces it with its own gap */
 .noo-placeholder__title { margin: 0; color: var(--ink-2); }
 .noo-placeholder__body { color: var(--muted); }
 
@@ -633,9 +640,17 @@
 
 /* @no-origins/ui — molecules (Atomic.md layer 3): atoms combined into one thing with one job. Reads tokens and atoms. */
 
-/* ===== CellHead (§9) — a widget cell's label over a title ===== */
-.noo-cellhead { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+/* ===== CellHead (§9) — a widget cell's label over a title, spread across the cell (Admin.md §6.5c F1) =====
+   `flex: 1` + `space-between` is the whole rule: the head takes the cell's height and pushes the mono label to the
+   top and the title to the bottom — the diagonal an author used to get by typing the two tags into the cell itself.
+   A page bento's rows grow, so there is no height to spread into: it collapses back to a block there. */
+.noo-cellhead { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; flex: 1; justify-content: space-between; }
+.noo-bento--page .noo-cellhead { flex: none; justify-content: flex-start; }
 .noo-cellhead__title { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
+/* The media slot: a logo at 24px, inline in the title's first line, where the dot was. */
+.noo-cellhead__media { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: var(--r-sm); overflow: hidden; }
+.noo-cellhead__media > * { width: 100%; height: 100%; }
+.noo-cellhead__media img { object-fit: cover; }
 
 /* ===== Field (§9) — caption label · glass-1 box, radius 14, 48px · accent focus ring ===== */
 .noo-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -1480,7 +1495,7 @@
 /* twice the document scale: read from twice as far away, nothing under 20 */
 .noo-bento__title { margin: 0; font: 600 var(--t-widget-title)/1.15 var(--ff-sans); letter-spacing: -0.005em; text-wrap: balance; }
 .noo-bento__text  { margin: 0; font: 400 var(--t-widget-text)/1.35 var(--ff-sans); color: var(--ink-2); text-wrap: pretty; }
-.noo-bento__cell--fill .noo-bento__text { color: inherit; opacity: 0.85; }
+.noo-bento__cell--fill .noo-bento__text, .noo-bento__cell--fill .noo-widget-text { color: inherit; opacity: 0.85; }
 .noo-bento__word  { margin: 0; font: 400 var(--t-widget-word)/0.95 var(--ff-display); letter-spacing: -0.01em; }        /* two lines in a 2 × 2 cell; 56 wrapped to three and met the illustration */
 .noo-bento__list  { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font: 500 var(--t-widget-title)/1.25 var(--ff-sans); }
 .noo-bento__list li { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -1492,7 +1507,13 @@
 .noo-bento__value { font: 400 var(--t-widget-figure)/0.9 var(--ff-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .noo-bento__figure--md .noo-bento__value { font-size: var(--t-display-2); }
 .noo-bento__figure-label { font-size: var(--t-widget-text); letter-spacing: 0.08em; }
+/* A Figure set as a WORD (Admin.md §6.5c F3): the same corner and the same job, in the display face at the word's
+   size. No tabular nums — that alignment is for digits, and it widens letters. */
+.noo-bento__figure--word .noo-bento__value { font: 400 var(--t-widget-word)/0.95 var(--ff-display); letter-spacing: -0.01em; font-variant-numeric: normal; }
 .noo-bento__cell .noo-placeholder__tag { align-self: flex-start; font-size: var(--t-body-sm); padding: 6px 10px; }
+/* A list inside a widget cell (Admin.md §6.5c F5): lines, not bullets. A widget is a handful of lines read from
+   across the room; a marker column is document furniture and steals the width. The rhythm stays. */
+.noo-bento__cell .noo-text--blocks ul { list-style: none; padding-left: 0; }
 
 
 .noo-block-card__body { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 8px; }
@@ -1986,6 +2007,12 @@ a { color: var(--accent-deep); } a:hover { color: var(--ink); }
 </style>
 
 <header class="rv-head"><p class="noo-label">no origins · the editor · step 3 · 2026-09-14</p><h1 class="noo-h1" style="margin:0">Nine decisions before the editor screen</h1><p class="noo-lead" style="margin:0">Step 2 wrote the portfolio as a document and rendered it beside the hand-written scene (Scene-Schema.md §10). The map matched to 1 %; the widgets did not, and every difference was a place the registry cannot yet say what the hand-written composition says — five findings, boards F1–F5. Step 3 is the editor screen itself, and four of its questions were left open for boards — S1–S4. Each board shows five directions with a recommendation; pick by letter, add notes, and each pick becomes a rule in Admin.md §6.5c before code.</p></header>
+<style>
+.decided { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; margin: 0 0 28px; padding: 14px 18px; border-radius: var(--r-lg); font: 400 var(--t-body-sm)/1.45 var(--ff-sans); color: var(--ink-2); }
+.decided__eyebrow { font: 500 var(--t-label)/1 var(--ff-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--good); }
+.decided strong { color: var(--ink); }
+.decided__note { flex-basis: 100%; }
+</style><div class="noo-glass noo-glass--1 decided"><span class="decided__eyebrow">decided 2026-09-14 · built</span><strong>A on all nine, plus one note on F1: no dot on a widget cell's head — a slot for a logo or an image instead</strong><span>Every pick is a rule in Admin.md §6.5c and built: F1–F5 in the package and the registry (the proof re-measured — two widgets identical, the rest under 1 %, interests 4 % and philosophy 6 % from the word's wrap); S1–S4 as the editor screen at /projects/portfolio/edit, read-write with autosave. Publish itself is step 8.</span></div>
 <div class="rv-group"><h2 class="noo-h2">What step 2 proved</h2><p class="noo-body">Playwright’s comparator, the hand-written render as the baseline on every run, the blob masked.</p></div>
 <section class="rv-item rv-item--wide" style="border-top:0;padding-top:20px"><div class="rv-demo rv-demo--tight"><table class="rv-table"><tr><th>compared</th><th>how</th><th>ratio</th><th>what the pixels are</th></tr><tr><td>The map at home</td><td>/ against /fixtures/document, 1440 × 900</td><td>1 %</td><td>the minimap draws the hand-written full views; then the widget differences below, at map size</td></tr><tr><td>Widgets at 1:1</td><td>/fixtures/bento against the document’s six</td><td>status 3 · work 3 · cases 3 · projects 2 · interests 9 · philosophy 9 %</td><td>five findings, boards F1–F5; the loud cells are identical in all six</td></tr><tr><td>Adapter issues on the document</td><td>every node, prop, ref, box corner</td><td>none</td><td>the schema held; what differs is what the registry cannot yet say</td></tr></table>
 <p class="rv-cap" style="margin-top:12px">Section routes were not compared: /work opens the hand-written full view, and a document has no full views — they are pages (Design-System.md §8.4), which the adapter returns and nothing mounts yet.</p></div></section>

@@ -1,4 +1,4 @@
-import { head, group, option, well, half, workWidget, cellhead, lbl, kbd, SCREEN_CSS } from "../lib.mjs";
+import { head, group, option, well, half, workWidget, cellhead, lbl, kbd, SCREEN_CSS, decided } from "../lib.mjs";
 
 const w = (l, t, d) => cellhead(l, t, d, "sc-cellhead--fill");
 const ITEMS = ["Bento", "Card", "Text", "Intro", "BlockCard", "Placeholder"];
@@ -11,6 +11,7 @@ export const title = "S2 · How a palette item lands";
 export const block = "design";
 export const body = `<style>${SCREEN_CSS}</style>
 ${head({ eyebrow: "the editor · screen question S2 of 4 · pick one by its letter", title: "How a palette item lands", lead: "The palette is the registry, grouped by layer, in the ToolScreen’s sidebar. Admin.md §6.1 says “drag onto the canvas, or select a node and press a key”, and §6.3 says the editor enforces the grid: a widget lands on box corners, a panel is placed freely. What is open is the gesture — how a thing goes from the list to the canvas, and what the author sees on the way. Below: the Work widget at half zoom, a second Bento arriving." })}
+${decided({ pick: "A — drag; a ghost snaps to box corners (+ D, the / command list)", built: "Built: <code>Palette</code> groups the registry by layer and drags items as <code>application/x-noo-component</code>; the drop ghost snaps to box corners and washes the boxes it will take; <code>/</code> opens the command list. A dropped Placeholder landed on a box corner and persisted." })}
 ${group("Five directions", "The sidebar’s palette on the left, the canvas on the right; the grid’s boxes are 80px here (160 at 1:1).")}
 ${option({ id: "A", name: "Drag; a ghost snaps to box corners; the boxes it will take light up", rec: true,
   desc: `Drag an item off the palette. A ghost at the component’s default size (a Bento: 4 × 3) follows the pointer and snaps to box corners; the boxes under it wash in the accent, the drop indicator’s colour. Release places it, selected, with the inspector open on its defaults. ${kbd("Esc")} cancels; a held ${kbd("⌥")} places freely (§1.1).`,

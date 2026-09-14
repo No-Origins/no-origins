@@ -2,7 +2,7 @@
 // here is a set of bento helpers — the widgets are drawn with the package's real classes at 1:1, because the
 // findings this canvas decides came from comparing exactly those pixels (Scene-Schema.md §10).
 import fs from "node:fs";
-export { PKG_CSS, RV_CSS, FONTS, page, head, group, chip, blob, HUES, option, insp, OPTION_CSS } from "../editor/lib.mjs";
+export { PKG_CSS, RV_CSS, FONTS, page, head, group, chip, blob, HUES, option, insp, OPTION_CSS, decided } from "../editor/lib.mjs";
 
 const PATTERNS = JSON.parse(fs.readFileSync(new URL("../editor/patterns.json", import.meta.url), "utf8"));
 /** A pattern as the generator drew it, without its own hue so it takes the cell's. */

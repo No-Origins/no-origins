@@ -1,4 +1,4 @@
-import { head, group, option, bento, cell, lbl, figMd, SCREEN_CSS } from "../lib.mjs";
+import { head, group, option, bento, cell, lbl, figMd, SCREEN_CSS, decided } from "../lib.mjs";
 
 // The loud cell of Interests, five ways. The word is two lines of the display face at --t-widget-word (48).
 const loud = (inner) => bento(cell(inner, { span: [2, 2], tone: "fill", pat: "interests" }), { cols: 2, hue: "yellow", label: "Interests" });
@@ -8,6 +8,7 @@ export const title = "F3 · The loud cell’s word";
 export const block = "design";
 export const body = `<style>${SCREEN_CSS}</style>
 ${head({ eyebrow: "the editor · finding F3 of 5 · pick one by its letter", title: "The loud cell’s word", lead: "Where a section has nothing to count, the loud cell carries a word instead of a figure — Interests says <em>outside the work</em>, Philosophy says <em>how I build</em> — in the display face at <code>--t-widget-word</code> (48), two lines. <code>Figure</code> caps its value at four characters, rightly for a number; <code>Heading</code> level 2 was the nearest thing and is smaller. Most of those two widgets’ 9 % is this." })}
+${decided({ pick: "A — Figure gains kind='word'", built: "Built: <code>BentoFigure kind=\"word\"</code>, the display face at <code>--t-widget-word</code> over two lines, value capped at 24. Interests and Philosophy went from 9 % to 3 % and 5 %; what remains is the word's wrap." })}
 ${group("Five directions", "Interests’ loud cell at 1:1, the pattern behind it as the package draws it.")}
 ${option({ id: "A", name: "Figure gains kind='word'", rec: true,
   desc: "<code>Figure</code> takes <code>kind: figure | word</code>. As a word the value cap lifts to 24, the face stays display, the size drops from 96 to 48 and it wraps to two lines; the label under it is optional.",

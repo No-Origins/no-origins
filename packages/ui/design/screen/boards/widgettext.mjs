@@ -1,4 +1,4 @@
-import { head, group, option, bento, cell, cellhead, lbl, fig, text, SCREEN_CSS } from "../lib.mjs";
+import { head, group, option, bento, cell, cellhead, lbl, fig, text, SCREEN_CSS, decided } from "../lib.mjs";
 
 const LINE = "Pick the path that fits; none of them needs an agenda.";
 const status = (textCell) =>
@@ -18,6 +18,7 @@ export const title = "F2 · The widget text scale";
 export const block = "design";
 export const body = `<style>${SCREEN_CSS}</style>
 ${head({ eyebrow: "the editor · finding F2 of 5 · pick one by its letter", title: "The widget text scale", lead: "A widget is read from about twice the distance of a document, so its type is roughly double (§8.3): <code>--t-widget-text</code> is 20/1.35 and the hand-written cells use it as <code>.noo-bento__text</code>. No registered component renders that size — <code>Text size='small'</code> is the document’s 15 and visibly smaller. Status, cases, projects and both glass cells show it. Below: the Status widget’s last row, five ways." })}
+${decided({ pick: "A — Text gains size='widget'", built: "Built: <code>.noo-widget-text</code> from <code>--t-widget-text</code>; the registry's enum has four steps. Status and Projects now match the hand-written widgets pixel for pixel." })}
 ${group("Five directions", "The bottom row is the one that changes; the rest is the widget as the document already renders it (with F1 A applied to the heads).")}
 ${option({ id: "A", name: "Text gains size='widget'", rec: true,
   desc: "A fourth step on the one prose component: <code>lead · body · small · widget</code>, where widget is <code>--t-widget-text</code>. The registry’s enum grows by one; the inspector’s Segmented shows four options, which is its limit.",

@@ -1,4 +1,4 @@
-import { head, group, chip } from "../lib.mjs";
+import { head, group, chip, decided } from "../lib.mjs";
 
 const PROOF = [
   ["The map at home", "/ against /fixtures/document, 1440 × 900", "1 %", "the minimap draws the hand-written full views; then the widget differences below, at map size"],
@@ -22,6 +22,7 @@ export const title = "Editor screen — read first";
 export const block = "design";
 export const body = `
 ${head({ eyebrow: "no origins · the editor · step 3 · 2026-09-14", title: "Nine decisions before the editor screen", lead: "Step 2 wrote the portfolio as a document and rendered it beside the hand-written scene (Scene-Schema.md §10). The map matched to 1 %; the widgets did not, and every difference was a place the registry cannot yet say what the hand-written composition says — five findings, boards F1–F5. Step 3 is the editor screen itself, and four of its questions were left open for boards — S1–S4. Each board shows five directions with a recommendation; pick by letter, add notes, and each pick becomes a rule in Admin.md §6.5c before code." })}
+${decided({ pick: "A on all nine, plus one note on F1: no dot on a widget cell's head — a slot for a logo or an image instead", built: "Every pick is a rule in Admin.md §6.5c and built: F1–F5 in the package and the registry (the proof re-measured — two widgets identical, the rest under 1 %, interests 4 % and philosophy 6 % from the word's wrap); S1–S4 as the editor screen at /projects/portfolio/edit, read-write with autosave. Publish itself is step 8." })}
 ${group("What step 2 proved", "Playwright’s comparator, the hand-written render as the baseline on every run, the blob masked.")}
 <section class="rv-item rv-item--wide" style="border-top:0;padding-top:20px"><div class="rv-demo rv-demo--tight"><table class="rv-table"><tr><th>compared</th><th>how</th><th>ratio</th><th>what the pixels are</th></tr>${PROOF.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`).join("")}</table>
 <p class="rv-cap" style="margin-top:12px">Section routes were not compared: /work opens the hand-written full view, and a document has no full views — they are pages (Design-System.md §8.4), which the adapter returns and nothing mounts yet.</p></div></section>
