@@ -11,7 +11,7 @@
     {
       "file": "Tokens.dc.html",
       "x": 0,
-      "y": 5000,
+      "y": 5300,
       "w": 1440,
       "h": 7240,
       "title": "Layer 1 \u00b7 Tokens"
@@ -19,7 +19,7 @@
     {
       "file": "Atoms.dc.html",
       "x": 1560,
-      "y": 5000,
+      "y": 5300,
       "w": 1440,
       "h": 7860,
       "title": "Layer 2 \u00b7 Atoms"
@@ -27,7 +27,7 @@
     {
       "file": "Molecules.dc.html",
       "x": 3120,
-      "y": 5000,
+      "y": 5300,
       "w": 1440,
       "h": 7200,
       "title": "Layer 3 \u00b7 Molecules"
@@ -35,7 +35,7 @@
     {
       "file": "Organisms.dc.html",
       "x": 4680,
-      "y": 5000,
+      "y": 5300,
       "w": 1440,
       "h": 7460,
       "title": "Layer 4 \u00b7 Organisms"
@@ -43,7 +43,7 @@
     {
       "file": "Templates.dc.html",
       "x": 6240,
-      "y": 5000,
+      "y": 5300,
       "w": 1440,
       "h": 5900,
       "title": "Layer 5 \u00b7 Templates"
@@ -58,7 +58,7 @@
     {
       "file": "Menu.dc.html",
       "x": 6240,
-      "y": 9500,
+      "y": 11400,
       "w": 1440,
       "h": 3960,
       "title": "Addition \u00b7 Menu (your note)"
@@ -66,7 +66,7 @@
     {
       "file": "Icons.dc.html",
       "x": 7800,
-      "y": 9500,
+      "y": 11400,
       "w": 1440,
       "h": 3240,
       "title": "Addition \u00b7 Icons (your note)"
@@ -83,14 +83,14 @@
     {
       "id": "admin-decision",
       "x": 7760,
-      "y": 5000,
+      "y": 5300,
       "w": 360,
       "text": "D6 \u2014 THE ADMIN LAYOUT\n\nThe railed-page sample is the admin as built, reconstructed from source at real size. Under it is the Tool template I recommend (option B) and the two alternatives with their cost.\n\nPick A, B or C; the pick becomes a rule in Atomic.md."
     },
     {
       "id": "not-shown",
       "x": 7760,
-      "y": 5420,
+      "y": 5720,
       "w": 360,
       "text": "NOT RENDERED HERE\n\nThe blob's refraction pattern and the six illustrations need the runtime (measured grid, the generator). Both are shown as stand-ins and marked so. The canvas nodes are reviewed from source."
     },
@@ -125,14 +125,14 @@
     {
       "id": "note-4",
       "x": 6907,
-      "y": 12387,
+      "y": 14287,
       "w": 240,
       "text": "The border radius is not consistently rounded with Menu layouts above."
     },
     {
       "id": "note-5",
       "x": 9252,
-      "y": 12257,
+      "y": 14157,
       "w": 240,
       "text": "Let's go with your recomendation."
     },
@@ -146,7 +146,7 @@
     {
       "id": "answered-2",
       "x": 6907,
-      "y": 12560,
+      "y": 14460,
       "w": 300,
       "text": "FIXED \u2014 the floating form now wears the column\u2019s radii: xl outside, pill items, like every Menu above."
     },
