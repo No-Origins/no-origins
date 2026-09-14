@@ -26,6 +26,11 @@ export function useCanvasMode() {
   return useContext(CanvasModeContext);
 }
 
+/** The viewport's zoom. The editor's overlays counter-scale by it so a tag reads the same at any scale (§6.5c S1). */
+export function useCanvasZoom(): number {
+  return useStore((s) => s.transform[2]);
+}
+
 export function useZoomTier(): ZoomTier {
   const { flow } = useCanvasMode();
   const zoom = useStore((s) => s.transform[2]);

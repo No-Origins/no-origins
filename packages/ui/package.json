@@ -13,6 +13,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./canvas": "./src/templates/canvas/index.ts",
+    "./editor": "./src/editor/index.ts",
     "./css": "./src/css/index.css",
     "./index.css": "./src/css/index.css",
     "./tokens.css": "./src/css/tokens.css",
@@ -27,7 +28,8 @@
     "./atoms.css": "./src/css/atoms.css",
     "./molecules.css": "./src/css/molecules.css",
     "./organisms.css": "./src/css/organisms.css",
-    "./templates.css": "./src/css/templates.css"
+    "./templates.css": "./src/css/templates.css",
+    "./editor.css": "./src/css/editor.css"
   },
   "publishConfig": {
     "exports": {
@@ -38,6 +40,10 @@
       "./canvas": {
         "types": "./dist/templates/canvas/index.d.ts",
         "import": "./dist/templates/canvas/index.js"
+      },
+      "./editor": {
+        "types": "./dist/editor/index.d.ts",
+        "import": "./dist/editor/index.js"
       },
       "./css": "./src/css/index.css",
       "./index.css": "./src/css/index.css",
@@ -62,7 +68,8 @@
       "./atoms.css": "./src/css/atoms.css",
       "./molecules.css": "./src/css/molecules.css",
       "./organisms.css": "./src/css/organisms.css",
-      "./templates.css": "./src/css/templates.css"
+      "./templates.css": "./src/css/templates.css",
+      "./editor.css": "./src/css/editor.css"
     }
   },
   "scripts": {
