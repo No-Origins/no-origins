@@ -124,6 +124,12 @@ function prepare(child: SlotChild, entry: RegistryEntry, path: string, ctx: Ctx,
   const authored = parsed.data;
   const props: Record<string, unknown> = { ...authored };
   const children: ReactNode[] = [];
+  for (const [name, spec] of Object.entries(entry.props)) {
+    if (spec.deprecated && name in props) {
+      warn(ctx, `${path}.props.${name}`, `${entry.name}.${name} is deprecated: ${spec.deprecated}`);
+      delete props[name];
+    }
+  }
 
   for (const [name, spec] of Object.entries(entry.props)) {
     const value = props[name];

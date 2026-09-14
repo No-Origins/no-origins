@@ -381,6 +381,7 @@ const cellHead: RegistryEntry = {
   props: {
     label: { type: "text", max: 24 },
     title: { type: "text", max: 40, required: true },
+    dot: { type: "hue", deprecated: "a widget cell's head has no dot (Admin.md §6.5c F1); place a logo in the media slot instead" },
   },
   slots: { media: { admits: ["Image", "Blob", "Pattern"], max: 1, label: "Logo" } },
   defaults: { label: "now", title: "A thing" },

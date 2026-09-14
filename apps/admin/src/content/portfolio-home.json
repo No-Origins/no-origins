@@ -409,8 +409,7 @@
                   "component": "CellHead",
                   "props": {
                     "label": "now",
-                    "title": "Radise",
-                    "dot": "peach"
+                    "title": "Radise"
                   }
                 }
               ]
@@ -430,8 +429,7 @@
                   "component": "CellHead",
                   "props": {
                     "label": "before",
-                    "title": "Dataflix",
-                    "dot": "green"
+                    "title": "Dataflix"
                   }
                 }
               ]
@@ -451,8 +449,7 @@
                   "component": "CellHead",
                   "props": {
                     "label": "one year",
-                    "title": "Hashnode",
-                    "dot": "blue"
+                    "title": "Hashnode"
                   }
                 }
               ]
@@ -472,8 +469,7 @@
                   "component": "CellHead",
                   "props": {
                     "label": "two years",
-                    "title": "Terrible Tiny Tales",
-                    "dot": "pink"
+                    "title": "Terrible Tiny Tales"
                   }
                 }
               ]

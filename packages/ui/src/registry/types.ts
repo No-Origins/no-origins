@@ -41,6 +41,12 @@ export type PropSpec = PropType & {
   /** Overrides the field name in the inspector. */
   label?: string;
   help?: string;
+  /**
+   * A prop that is going: the note says what replaced it (Scene-Schema.md §5 — a removal ships its migration).
+   * A document may still carry it for one minor: the adapter accepts it, drops it with a warning, and the
+   * inspector does not show it.
+   */
+  deprecated?: string;
 };
 
 export type PropSchema = Record<string, PropSpec>;

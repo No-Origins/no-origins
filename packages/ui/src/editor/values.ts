@@ -66,8 +66,9 @@ const same = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stri
 export function intersection(selection: readonly Selected[]): Array<[string, PropSpec]> {
   const first = selection[0];
   if (!first) return [];
-  return Object.entries(first.entry.props).filter(([name, spec]) =>
-    selection.every((s) => s.entry.props[name] && same(s.entry.props[name], spec)),
+  // a deprecated prop is accepted from a document and never offered: the inspector shows what replaced it
+  return Object.entries(first.entry.props).filter(
+    ([name, spec]) => !spec.deprecated && selection.every((s) => s.entry.props[name] && same(s.entry.props[name], spec)),
   );
 }
 
