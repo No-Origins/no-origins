@@ -9,5 +9,5 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
-  external: ["react", "react-dom", "react/jsx-runtime", "@xyflow/react"],
+  external: ["react", "react-dom", "react/jsx-runtime", "@xyflow/react", "@phosphor-icons/react", "@phosphor-icons/react/dist/ssr"],
 });

@@ -163,12 +163,12 @@ export default function BlobFixture() {
 
       <Section title="In a row" note="How they sit together at nav and sm — list avatars, chips, block cards.">
         <div className="flex flex-wrap items-center gap-6">
-          <div className="glass glass-2 flex items-center gap-3 rounded-pill px-4 py-2">
+          <div className="noo-glass noo-glass--2 flex items-center gap-3 rounded-pill px-4 py-2">
             <Blob size="nav" variant="glass" label="Bhargav" />
             <span className="text-[15px] font-medium text-ink">Hey! What&apos;s on your mind today?</span>
           </div>
           {characterHues.map((h) => (
-            <span key={h} className="glass glass-1 inline-flex items-center gap-2 rounded-pill py-1 pl-1 pr-3 text-[14px] font-medium text-ink">
+            <span key={h} className="noo-glass noo-glass--1 inline-flex items-center gap-2 rounded-pill py-1 pl-1 pr-3 text-[14px] font-medium text-ink">
               <Blob size="sm" hue={h} refraction={false} />
               {owner(h)}
             </span>

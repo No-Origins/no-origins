@@ -81,7 +81,7 @@ export default function PrimitivesFixture() {
         </div>
       </Section>
 
-      <Section title="Button" note="A pill, 44px minimum. Primary is ink; secondary is glass-1 with its hairline; ghost is text that underlines on hover. Small is 36px.">
+      <Section title="Button" note="A pill, 44px minimum. Primary is ink; secondary is noo-glass--1 with its hairline; ghost is text that underlines on hover. Small is 36px.">
         <div className="flex flex-col gap-6">
           <div className="flex flex-wrap items-center gap-3">
             <Button>Say hello</Button>
@@ -124,7 +124,7 @@ export default function PrimitivesFixture() {
         </div>
       </Section>
 
-      <Section title="Card" note="Surface or glass-1, radius 20, padding 24 (small: 20). Interactive cards lift a pixel and a level on hover. Below, the composition the Work section will use: card, blob at sm, h4, a line, chips.">
+      <Section title="Card" note="Surface or noo-glass--1, radius 20, padding 24 (small: 20). Interactive cards lift a pixel and a level on hover. Below, the composition the Work section will use: card, blob at sm, h4, a line, chips.">
         <div className="grid gap-5 md:grid-cols-3">
           <Card>
             <p className="noo-label text-muted">solid</p>
@@ -185,7 +185,7 @@ export default function PrimitivesFixture() {
         </div>
       </Section>
 
-      <Section title="Field" note="Label above in caption; a glass-1 box, radius 14, 48px tall; the focus ring is 1.5px accent-deep inside and 3px accent at 25% outside. Errors turn it --bad and are announced.">
+      <Section title="Field" note="Label above in caption; a noo-glass--1 box, radius 14, 48px tall; the focus ring is 1.5px accent-deep inside and 3px accent at 25% outside. Errors turn it --bad and are announced.">
         <div className="grid gap-6 md:grid-cols-2">
           <Field label="Name" placeholder="What should the blobs call you?" />
           <Field label="Email" type="email" placeholder="you@somewhere.com" hint="Only for the reply. Never shared." />

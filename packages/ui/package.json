@@ -1,7 +1,7 @@
 {
   "name": "@no-origins/ui",
   "version": "0.0.1",
-  "description": "No Origins design system \u2014 tokens, glass, motion, the blob, and the components every block shares.",
+  "description": "No Origins design system — tokens, atoms, molecules, organisms and templates: the glass, the blob, and the building blocks every block shares.",
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -12,7 +12,7 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./canvas": "./src/canvas/index.ts",
+    "./canvas": "./src/templates/canvas/index.ts",
     "./css": "./src/css/index.css",
     "./index.css": "./src/css/index.css",
     "./tokens.css": "./src/css/tokens.css",
@@ -21,7 +21,12 @@
     "./glass.css": "./src/css/glass.css",
     "./motion.css": "./src/css/motion.css",
     "./components.css": "./src/css/components.css",
-    "./registry": "./src/registry/index.ts"
+    "./registry": "./src/registry/index.ts",
+    "./icons": "./src/icons/index.ts",
+    "./atoms.css": "./src/css/atoms.css",
+    "./molecules.css": "./src/css/molecules.css",
+    "./organisms.css": "./src/css/organisms.css",
+    "./templates.css": "./src/css/templates.css"
   },
   "publishConfig": {
     "exports": {
@@ -30,8 +35,8 @@
         "import": "./dist/index.js"
       },
       "./canvas": {
-        "types": "./dist/canvas/index.d.ts",
-        "import": "./dist/canvas/index.js"
+        "types": "./dist/templates/canvas/index.d.ts",
+        "import": "./dist/templates/canvas/index.js"
       },
       "./css": "./src/css/index.css",
       "./index.css": "./src/css/index.css",
@@ -44,7 +49,15 @@
       "./registry": {
         "types": "./dist/registry/index.d.ts",
         "import": "./dist/registry/index.js"
-      }
+      },
+      "./icons": {
+        "types": "./dist/icons/index.d.ts",
+        "import": "./dist/icons/index.js"
+      },
+      "./atoms.css": "./src/css/atoms.css",
+      "./molecules.css": "./src/css/molecules.css",
+      "./organisms.css": "./src/css/organisms.css",
+      "./templates.css": "./src/css/templates.css"
     }
   },
   "scripts": {
@@ -55,14 +68,19 @@
   "peerDependencies": {
     "@xyflow/react": ">=12",
     "react": ">=18",
-    "react-dom": ">=18"
+    "react-dom": ">=18",
+    "@phosphor-icons/react": ">=2.1"
   },
   "peerDependenciesMeta": {
     "@xyflow/react": {
       "optional": true
+    },
+    "@phosphor-icons/react": {
+      "optional": true
     }
   },
   "devDependencies": {
+    "@phosphor-icons/react": "2.1.10",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@xyflow/react": "^12.11.6",

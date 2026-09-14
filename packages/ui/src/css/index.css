@@ -1,10 +1,13 @@
-/* @no-origins/ui — everything, no framework required: tokens · typography · glass · motion · components.
-   Component rules live in the `components` cascade layer. On a Tailwind 4 host that is Tailwind's own components
-   layer, ordered before `utilities`, so a host utility (`className="absolute"`, `"flex"`) always beats a package
-   rule. On any other host an unlayered host stylesheet beats it too. Tokens stay unlayered: they are custom
-   properties and collide with nothing. */
+/* @no-origins/ui — everything, no framework required: tokens · typography · glass · motion · atoms · molecules · organisms
+   · templates. Component rules live in the `components` cascade layer. On a Tailwind 4 host that is Tailwind's own components
+   layer, ordered before `utilities`, so a host utility (`className="absolute"`, `"flex"`) always beats a package rule. On any
+   other host an unlayered host stylesheet beats it too. Tokens stay unlayered: they are custom properties and collide with
+   nothing. The four layer files import in the order they read from each other (Atomic.md rule 3). */
 @import "./tokens.css";
 @import "./typography.css" layer(components);
 @import "./glass.css" layer(components);
 @import "./motion.css" layer(components);
-@import "./components.css" layer(components);
+@import "./atoms.css" layer(components);
+@import "./molecules.css" layer(components);
+@import "./organisms.css" layer(components);
+@import "./templates.css" layer(components);
