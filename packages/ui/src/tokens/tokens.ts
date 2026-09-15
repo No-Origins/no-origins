@@ -1,4 +1,4 @@
-/** The seven family hues (Design-System.md §2.2). Grey has no tint: it is the host, and the host is clear glass. */
+/** The seven family hues (Design-System.md §2.2). Grey is the host's: the host has no colour of its own. */
 export const hues = ["pink", "green", "grey", "lavender", "peach", "yellow", "blue"] as const;
 export type Hue = (typeof hues)[number];
 

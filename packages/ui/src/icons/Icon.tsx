@@ -7,7 +7,7 @@ import { cx } from "../cx";
  * Icon (Atomic.md D8) — one set, one weight, three sizes.
  *
  * The glyphs are Phosphor's, regular weight, through `@no-origins/ui/icons` — a separate entry so the main entry
- * never depends on the icon library, the way `@no-origins/ui/canvas` keeps `@xyflow/react` optional (§11.2 rule 1
+ * never depends on the icon library — it is the one optional peer (§11.2 rule 1
  * gains its second named exception). Only the glyphs listed in `glyphs.ts` exist here: a curated set, named in the
  * system's words, so a document may name one (the registry offers the list) and the bundle carries only those.
  *

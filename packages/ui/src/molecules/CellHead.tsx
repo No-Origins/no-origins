@@ -1,7 +1,6 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { cx } from "../cx";
 import { Label } from "../atoms/Label";
-import type { Hue } from "../tokens/tokens";
 
 /**
  * CellHead (§9) — a widget cell's mono label over a title, spread across the cell.
@@ -22,11 +21,9 @@ export interface CellHeadProps extends Omit<ComponentPropsWithoutRef<"div">, "ti
   title: ReactNode;
   /** A logo or a picture at 24px, inline in the title's first line — where the dot used to be. */
   media?: ReactNode;
-  /** @deprecated The dot is gone (Admin.md §6.5c F1): it said nothing the cell's own hue did not. Accepted for one minor and ignored — use `media`. */
-  dot?: Hue;
 }
 
-export function CellHead({ label, title, media, dot: _dot, className, ...rest }: CellHeadProps) {
+export function CellHead({ label, title, media, className, ...rest }: CellHeadProps) {
   return (
     <div className={cx("noo-cellhead", className)} {...rest}>
       {label ? <Label>{label}</Label> : null}

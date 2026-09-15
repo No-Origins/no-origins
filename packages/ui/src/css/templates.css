@@ -1,4 +1,4 @@
-/* @no-origins/ui — templates (Atomic.md layer 5): the shells a screen is poured into — Page, the railed page, the canvas. */
+/* @no-origins/ui — templates (Atomic.md layer 5): the shells a screen is poured into — Page, Tool, Document. */
 
 /* ===== Page mode layout (§8) — the reading column ===== */
 .noo-page { min-height: 100dvh; display: flex; flex-direction: column; }
@@ -13,11 +13,14 @@
 .noo-container--sm { max-width: 480px; }
 
 
-/* ===== Tool (Atomic.md D6) — rail · header · main · inspector · bar. A control surface, not a reading column ===== */
-.noo-tool { min-height: 100dvh; display: grid; grid-template-areas: "rail column"; grid-template-columns: auto minmax(0, 1fr); background: var(--ground); }
-.noo-tool__column { grid-area: column; min-width: 0; display: flex; flex-direction: column; min-height: 100dvh; }
+/* ===== Tool (Atomic.md D6) — menu · header · main · sidebar · inspector · bar. A control surface, not a reading column =====
+   The tool IS the viewport (2026-09-15): it is exactly one screen tall and the COLUMN scrolls, never the document —
+   the menu stays put, the header stays put. Every scroll region in the tool wears the same thin thumb, on a
+   transparent track, inset from the surface it sits in (see `__scroll`). */
+.noo-tool { height: 100dvh; overflow: hidden; display: grid; grid-template-areas: "menu column"; grid-template-columns: auto minmax(0, 1fr); background: var(--ground); scrollbar-color: color-mix(in oklch, var(--ink) 22%, transparent) transparent; }
+.noo-tool__column { grid-area: column; min-width: 0; min-height: 0; height: 100dvh; display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .noo-tool__screen {
-  flex: 1; min-height: 0;
+  flex: none; min-height: 100%;                                                            /* at least the column, and it GROWS: the column scrolls, its children never shrink */
   display: grid;
   grid-template-areas: "header header" "main inspector" "bar bar";
   grid-template-columns: minmax(0, 1fr) auto;
@@ -28,7 +31,7 @@
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; justify-content: space-between; gap: var(--s-6);
   min-height: var(--bar); padding: var(--s-2) var(--s-8);
-  background: color-mix(in oklch, var(--ground) 92%, transparent); backdrop-filter: blur(12px);
+  background: var(--ground);
   border-bottom: 1px solid var(--rule);
 }
 .noo-tool__heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--s-1) var(--s-4); min-width: 0; }
@@ -41,16 +44,27 @@
   display: flex; flex-direction: column; gap: var(--s-10);
   padding: var(--s-8);                                                                     /* fluid, 32px gutters, no 1120 cap */
 }
-.noo-tool__inspector {
-  grid-area: inspector;
+.noo-tool__main > * { flex-shrink: 0; }                                                     /* a table is never squeezed to fit a row; the column scrolls instead */
+/* The side regions are a surface around a scroll region, not a scrolling surface: the thumb sits 8px inside the
+   edge and stops 12px short of the corners, so it reads as part of the panel rather than a bar hung off its side. */
+.noo-tool__sidebar, .noo-tool__inspector {
+  box-sizing: border-box;
   position: sticky; top: calc(var(--bar) + var(--s-3)); align-self: start;
-  width: 320px; max-height: calc(100dvh - var(--bar) - 2 * var(--s-3));
-  margin: var(--s-3) var(--s-3) var(--s-3) 0; padding: var(--s-5);
-  border-radius: var(--r-xl); overflow-y: auto;
+  max-height: calc(100dvh - var(--bar) - 2 * var(--s-3));
+  padding: var(--s-3) var(--s-2);
+  border-radius: var(--r-xl); overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.noo-tool__inspector { grid-area: inspector; width: 320px; margin: var(--s-3) var(--s-3) var(--s-3) 0; }
+.noo-tool__sidebar { grid-area: sidebar; width: 280px; margin: var(--s-3) 0 var(--s-3) var(--s-3); }
+.noo-tool__screen--sidebar { grid-template-areas: "header header header" "sidebar main inspector" "bar bar bar"; grid-template-columns: auto minmax(0, 1fr) auto; }
+.noo-tool__scroll {
+  flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
+  padding: var(--s-2) var(--s-3);
   display: flex; flex-direction: column; gap: var(--s-5);
 }
 .noo-tool__bar {
-  grid-area: bar;
+  grid-area: bar; box-sizing: border-box;
   position: sticky; bottom: var(--s-3);
   display: flex; align-items: center; justify-content: space-between; gap: var(--s-4);
   min-height: var(--ctl-md); margin: 0 var(--s-3) var(--s-3); padding: var(--s-1) var(--s-3);
@@ -58,57 +72,31 @@
 }
 @media (max-width: 1199.98px) {
   .noo-tool__screen { grid-template-areas: "header" "main" "inspector" "bar"; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto auto; }
+  .noo-tool__screen--sidebar { grid-template-areas: "header" "sidebar" "main" "inspector" "bar"; grid-template-rows: auto auto minmax(0, 1fr) auto auto; }
   .noo-tool__inspector { position: static; width: auto; max-height: none; margin: 0 var(--s-8) var(--s-8); }
+  .noo-tool__sidebar { position: static; width: auto; max-height: none; margin: var(--s-8) var(--s-8) 0; }
 }
-/* the Menu decides its own form (column ≥ md, rail to sm, sheet below): the rail stays beside the column; the sheet
-   is fixed and takes no grid space, so the column pads for it */
+/* the Menu decides its own form (column ≥ md, sheet below): the column stays beside the screen; the sheet is fixed
+   and takes no grid space, so the column pads for it */
 .noo-tool:has(.noo-menu--sheet) .noo-tool__column { padding-bottom: calc(var(--ctl-lg) + 4 * var(--s-3) + env(safe-area-inset-bottom, 0px)); }
 @media (max-width: 899.98px) {
   .noo-tool__header { padding: var(--s-2) var(--s-4); }
   .noo-tool__main { padding: var(--s-4); gap: var(--s-8); }
   .noo-tool__inspector { margin: 0 var(--s-4) var(--s-4); }
-}
-
-/* --- the editor's shell (Admin.md §6.5 row 1, 2026-09-14): a sidebar for the palette and the outline, and a flush
-       main for the canvas. The sidebar is the inspector's mirror — glass-1, sticky under the header, its own scroll —
-       at the Menu column's width, so the two side regions read as one family with the navigation beside them.
-       Flush pins the screen to the viewport and strips main's gutters and gap: its one child fills it, and the
-       sidebar, the inspector and the bar float over the canvas's ground rather than beside a padded well. --- */
-.noo-tool__screen--sidebar { grid-template-areas: "header header header" "sidebar main inspector" "bar bar bar"; grid-template-columns: auto minmax(0, 1fr) auto; }
-.noo-tool__sidebar {
-  grid-area: sidebar;
-  position: sticky; top: calc(var(--bar) + var(--s-3)); align-self: start;
-  width: 280px; max-height: calc(100dvh - var(--bar) - 2 * var(--s-3));
-  margin: var(--s-3) 0 var(--s-3) var(--s-3); padding: var(--s-5);
-  border-radius: var(--r-xl); overflow-y: auto;
-  display: flex; flex-direction: column; gap: var(--s-5);
-}
-.noo-tool__screen--flush { flex: none; height: 100dvh; }                                  /* `flex: 1` would size the grid to its content and push the bar below the fold */
-.noo-tool__screen--flush .noo-tool__sidebar, .noo-tool__screen--flush .noo-tool__inspector { max-height: calc(100% - 2 * var(--s-3)); }   /* the row, not the viewport: the bar has its own row */
-.noo-tool__main--flush { padding: 0; gap: 0; overflow: hidden; }
-.noo-tool__main--flush > * { flex: 1; min-width: 0; min-height: 0; }
-@media (max-width: 1199.98px) {
-  .noo-tool__screen--sidebar { grid-template-areas: "header" "sidebar" "main" "inspector" "bar"; grid-template-rows: auto auto minmax(0, 1fr) auto auto; }
-  .noo-tool__sidebar { position: static; width: auto; max-height: none; margin: var(--s-8) var(--s-8) 0; }
-  .noo-tool__screen--flush { flex: 1; height: auto; }                                       /* the regions stack; a pinned height would clip them */
-  .noo-tool__screen--flush .noo-tool__sidebar, .noo-tool__screen--flush .noo-tool__inspector { max-height: none; }
-}
-@media (max-width: 899.98px) {
   .noo-tool__sidebar { margin: var(--s-4) var(--s-4) 0; }
-  .noo-tool__main--flush { padding: 0; }
 }
 
 
-/* ===== Document — the 68ch reading column, markdown into the ramp. `.noo-prose` is the old name ===== */
-.noo-document, .noo-prose { max-width: 68ch; color: var(--ink-2); font: 400 var(--t-body)/1.55 var(--ff-sans); }
+/* ===== Document — the 68ch reading column, markdown into the ramp ===== */
+.noo-document { max-width: 68ch; color: var(--ink-2); font: 400 var(--t-body)/1.55 var(--ff-sans); }
 .noo-document--wide { max-width: 80ch; }
+.noo-document :where(p) { margin: 0; }                                                     /* BEFORE the rhythm rule below: same specificity, and the later one must be the one that spaces */
 .noo-document > * + * { margin-top: var(--s-4); }
 .noo-document :where(h1, h2, h3, h4) { color: var(--ink); margin: 0; }
 .noo-document :where(h2) { font: 400 var(--t-h2)/1.05 var(--ff-display); letter-spacing: -0.01em; margin-top: var(--s-12); }
 .noo-document :where(h3) { font: 600 var(--t-h3)/1.15 var(--ff-sans); letter-spacing: -0.01em; margin-top: var(--s-10); }
 .noo-document :where(h4) { font: 600 var(--t-h4)/1.25 var(--ff-sans); margin-top: var(--s-8); }
 .noo-document :where(h2, h3, h4) + * { margin-top: var(--s-3); }
-.noo-document :where(p) { margin: 0; }
 .noo-document :where(a) { color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent-deep); text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
 .noo-document :where(a:hover) { text-decoration-color: currentColor; }
 .noo-document :where(strong) { color: var(--ink); font-weight: 600; }
@@ -129,179 +117,9 @@
 .noo-document :where(th) { text-align: left; padding: var(--s-2) var(--s-3); font: 500 var(--t-label)/1 var(--ff-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--rule); }
 .noo-document :where(td) { padding: var(--s-2) var(--s-3); border-bottom: 1px solid var(--rule); vertical-align: top; }
 
-
-@media (max-width: 899.98px) {
-  .noo-page--railed { grid-template-areas: "rail" "column"; grid-template-columns: minmax(0, 1fr); }
-  .noo-page__column { min-height: 0; }
-}
-
-
-/* React Flow's Background renders a <path>; `stroke` is a presentation attribute and cannot take a var(), so
-   the colour is set here instead of passed in — which also keeps it right in both themes for free. */
-.noo-canvas .react-flow__background path { stroke: var(--grid-line); }
-
-
-/* ===== Canvas (§8) — the base layout of No Origins; the host also imports @xyflow/react/dist/base.css ===== */
-.noo-canvas {
-  position: relative;
-  width: 100%;
-  height: 100dvh;
-  background: var(--ground);
-  --xy-background-color: var(--ground);
-  --xy-background-pattern-color: color-mix(in oklch, var(--ink) var(--grid-ink), var(--ground));
-}
-.noo-canvas .react-flow__node-blob { border-radius: var(--r-pill); }
-.noo-canvas .react-flow__node:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 4px; }
-.noo-canvas .react-flow__node-toolbar { pointer-events: none; }                            /* bubbles are read, not pressed */
-.noo-canvas__bubble { white-space: nowrap; margin-top: -30px; }                             /* top-right of the blob, 8px gap */
-.noo-canvas__bubble--below { margin-top: 0; }
-.noo-canvas .react-flow__panel { margin: 20px; }
-.noo-canvas .react-flow__panel.bottom.center { transform: translateX(-20px) translateX(-50%); }
-.noo-canvas .react-flow__attribution { background: transparent; padding: 0; font: 400 10px/1 var(--ff-mono); } /* stylelint-disable-line declaration-property-value-disallowed-list -- React Flow's own attribution */
-.noo-canvas .react-flow__attribution a { color: var(--muted); }
-.noo-canvas__wordmark { color: var(--ink); font-size: var(--t-h4); }
-.noo-canvas .react-flow__node-menu { border-radius: var(--r-xl); }                          /* the view switcher is a node in canvas space (D9, 2026-09-14) */
-.noo-canvas__menu { --menu-hue: var(--accent-deep); }
-.noo-canvas__panel--tools { display: flex; align-items: center; gap: 10px; }
-
-/* --- panels (§8.2): reading matter in canvas space --- */
-.noo-panel {
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-  padding: 24px;
-  overflow: hidden;
-  cursor: auto;
-  -webkit-user-select: text;
-          user-select: text;                                                               /* base.css sets `none` on every node: without this, not one word can be copied */
-}
-.noo-panel--glass { border-radius: var(--r-lg); }
-.noo-panel--solid { background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--e1); }
-.noo-panel--bare { padding: 0; background: none; }                                          /* type straight on the grid, for region intros */
-.noo-panel__content { min-width: 0; width: 100%; }
-.noo-panel--bare > .noo-panel__content { height: 100%; }
-.noo-panel--scroll > .noo-panel__content { height: 100%; overflow-y: auto; }
-.noo-panel__title { margin: 0 0 10px; color: var(--ink); }
-.noo-panel__lead { margin: 0; color: var(--ink-2); max-width: 46ch; }
-.noo-panel__prose { display: flex; flex-direction: column; gap: 14px; color: var(--ink-2); }
-.noo-panel__prose p { margin: 0; }
-
-/* RETIRED 2026-09-11, step 12 (Design-System.md §8.4): the three opacity tiers — map · titles · full — that
-   faded a document's words to nothing as you zoomed out. It was a trick, and it was standing in for a design.
-   A section now has two real layouts instead: a WIDGET built to be read at map size, and a full view that is
-   simply not visible until it is open (`.noo-full` below). Nothing fades by zoom any more, which is also why
-   the Me column stopped going blank on the map. `useZoomTier` survives for anything that wants to know. */
-
-/* --- regions (§8.2): the map label. Decorative — the section's real h2 is in its intro panel --- */
-.noo-region { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 10px; width: 100%; height: 100%; pointer-events: none; }
-.noo-region__label { font: 400 var(--t-widget-figure)/0.9 var(--ff-display); color: color-mix(in oklch, var(--ink) 20%, var(--ground)); letter-spacing: -0.02em; }
-.noo-region__rule { width: 100%; border-top: 1.5px dotted var(--rule); }
-
-/* --- the minimap (§8.1): content off-screen is content that does not exist --- */
-.noo-canvas__map.react-flow__minimap {
-  width: 196px; height: 124px;
-  background: color-mix(in oklch, var(--surface) 66%, transparent);
-  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--r-md);
-  box-shadow: var(--e1);
-  margin: 46px 20px 20px;                                                                   /* below the attribution, clear of the switcher entirely */
-}
-.noo-canvas__map .react-flow__minimap-mask { fill: color-mix(in oklch, var(--ink) 6%, transparent); stroke: var(--accent-deep); stroke-width: 2; }
-
-/* --- the through-line, drawn (§8.1) --- */
-.noo-canvas__threads { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; z-index: -1; }
-.noo-canvas__threads path { fill: none; stroke: var(--rule); stroke-width: 1.5; stroke-dasharray: 4 7; stroke-linecap: round; }
-
-/* --- document mode (§8.6): below md the canvas keeps its nodes and stops being infinite.
-       A media query rather than a class, so the server gets it right too. The `!important`s are the only way
-       past React Flow's inline transforms. The same declarations run in the app's <noscript> at every width. --- */
-@media (max-width: 899.98px) {
-  .noo-canvas { height: auto; }
-  .noo-canvas .react-flow,
-  .noo-canvas .react-flow__renderer,
-  .noo-canvas .react-flow__pane,
-  .noo-canvas .react-flow__viewport,
-  .noo-canvas .react-flow__nodes { position: static; width: auto; height: auto !important; transform: none !important; }
-  .noo-canvas .react-flow { overflow: visible !important; }                                 /* React Flow sets height and overflow inline: only !important gets past them */
-  .noo-canvas .react-flow__background,
-  .noo-canvas .react-flow__edges,
-  .noo-canvas .react-flow__node-toolbar,
-  .noo-canvas__threads,
-  .noo-canvas__map { display: none; }              /* the ground draws the grid; bubbles render inline, not as toolbars */
-  .noo-canvas .react-flow__nodes { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; padding: 64px 16px 140px; }   /* clear of the fixed theme switch */
-  .noo-canvas .react-flow__node { position: static !important; transform: none !important; width: auto !important; height: auto !important; }
-  .noo-canvas .react-flow__node-blob { flex: 0 0 calc(50% - 10px); display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-  .noo-canvas .react-flow__node-panel, .noo-canvas .react-flow__node-region, .noo-canvas .react-flow__node-menu { flex: 0 0 100%; }
-  .noo-canvas__menu { width: 100%; }
-  .noo-canvas .react-flow__node-region { margin-top: 24px; }
-  .noo-canvas__bubble { white-space: normal; margin-top: 0; }
-  .noo-region__label { font-size: var(--t-h2); }
-  .noo-placeholder { padding: 16px; }
-  .noo-region__rule { border-top-width: 1px; }
-  .noo-panel { padding: 18px; }
-  .noo-panel--bare { padding: 0; }
-  .noo-canvas .react-flow__panel { margin: 12px; }
-  .noo-canvas .react-flow__panel.bottom.center { position: fixed; transform: translateX(-12px) translateX(-50%); }
-  .noo-canvas__panel--brand { display: none; }                                              /* the theme switch has top-right; the wordmark would collide */
-  .noo-canvas__panel--tools { position: fixed; }
-  .noo-canvas__wordmark { font-size: var(--t-lead); }
-}
-
-/* ── Widget and full — two layouts, one snap (Design-System.md §8.4) ──────────────────────────────────────────
-   Nothing is ever unmounted or `hidden`: both layouts stay in the DOM at every zoom, so every word is in the
-   accessibility tree and the server renders all of it (§12). Focus mode is opacity and pointer-events, nothing
-   more — which is also why it costs nothing to leave. */
-.noo-widget { width: 100%; height: 100%; cursor: pointer; }
-.react-flow__node:has(> .noo-widget) { border-radius: var(--r-lg); }
-.react-flow__node:focus-visible:has(> .noo-widget) { outline: 2px solid var(--accent-deep); outline-offset: 4px; }
-
-/* `!important` is load-bearing, not laziness: React Flow writes `pointer-events` as an INLINE style on every
-   node wrapper, and an inline style beats a class. Without it a full view — invisible, but stacked above the
-   ring it hangs from — still swallows every click meant for the widget underneath. That cost an hour. */
-.react-flow__node.noo-full { opacity: 0; pointer-events: none !important; }   /* hidden until its section is open */
-.react-flow__node.noo-full.is-open { opacity: 1; pointer-events: all !important; }
-.react-flow__node.is-faded { opacity: 0.05; pointer-events: none !important; }  /* what the open section does not own */
-.react-flow__node.is-source { opacity: 0; pointer-events: none !important; }    /* the widget it came out of */
-.react-flow__node.noo-full,
-.react-flow__node.is-faded,
-.react-flow__node.is-source { transition: opacity var(--d-slow) var(--ease); }
-
-@media (prefers-reduced-motion: reduce) {
-  .react-flow__node.noo-full,
-  .react-flow__node.is-faded,
-  .react-flow__node.is-source { transition: none; }                     /* the state change is instant (§8.4) */
-}
-
-/* In focus mode the map is not the surface you are on, and it sits exactly where a full view's heading goes. */
-.noo-canvas--open .noo-canvas__map { display: none; }
-
-/* Document mode (§8.6) and no-JS (§8.7): there is no zoom, so there is no snap and no focus mode. Widgets are
-   not rendered at all — a widget is a preview of something you can open, and on a phone you simply read the
-   thing — and the full views stop being hidden and become the content, stacked in reading order.
-   `!important` because these have to beat the base `.noo-full` rule above, which React Flow's inline
-   pointer-events forced into using it too. */
-@media (max-width: 899.98px) {
-  .noo-canvas .react-flow__node-widget { display: none; }
-  .noo-canvas .react-flow__node.noo-full { opacity: 1 !important; pointer-events: all !important; }
-  .noo-canvas .react-flow__node.is-faded,
-  .noo-canvas .react-flow__node.is-source { opacity: 1 !important; pointer-events: all !important; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .noo-panel :is(
-  .noo-block-card__meta, .noo-block-card__title, .noo-block-card__line, .noo-block-card__details, .noo-block-card__chips,
-  .noo-roadmap-item__title, .noo-roadmap-item__description, .noo-roadmap-item__progress,
-  .noo-panel__title, .noo-panel__lead, .noo-panel__prose, .noo-panel__extra, .noo-panel .noo-bubble,
-  .noo-placeholder__tag, .noo-placeholder__title, .noo-placeholder__body
-  ) { transition: none; }
-}
-
 @media (forced-colors: active) {
-  .noo-panel--glass, .noo-panel--solid, .noo-bento__cell { border: 1px solid CanvasText; }
+  .noo-bento__cell { border: 1px solid CanvasText; }
   .noo-bento__cell--fill { background: Canvas; color: CanvasText; }
-  .noo-region__label { color: CanvasText; }
-  .noo-canvas__threads path { stroke: CanvasText; }
   .noo-ill { --ill-line: CanvasText; }
   .noo-textured::after, .noo-bento__cell::after { display: none; }                             /* no grain where the system picks the colours */
 }

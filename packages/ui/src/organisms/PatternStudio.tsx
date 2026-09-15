@@ -25,7 +25,7 @@ export interface PatternStudioProps {
   open: boolean;
   onClose?: () => void;
   onSave?: (pattern: PatternOption) => void;
-  /** The node's hue, so the thumbnail shows what the canvas will. */
+  /** The cell's hue, so the thumbnail shows what the cell will. */
   hue?: Hue | "accent";
   /** Where the dials start; defaults to `patterns.fan`. */
   initial?: Family;

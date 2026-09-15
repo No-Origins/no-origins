@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, type ComponentPropsWithoutRef, type MouseEven
 import { cx } from "../cx";
 
 /**
- * Dialog · Sheet (Admin.md §10) — the first consumers noo-glass--3 has ever had. Radius xl, e4, one primary action.
+ * Dialog · Sheet (Admin.md §10) — a level-3 surface. Radius xl, e4, one primary action.
  *
  * **A native `<dialog>`, on purpose.** `showModal()` gives the top layer, the focus trap, Escape, `inert` for
  * everything behind and a `::backdrop` — the four behaviours a headless library would be imported for. So there
@@ -46,7 +46,7 @@ export function Dialog({ open, onClose, title, description, actions, form = "dia
     <dialog
       ref={ref}
       open={modal ? undefined : open}
-      className={cx("noo-glass noo-glass--3 noo-dialog", `noo-dialog--${form}`, `noo-dialog--${size}`, !modal && "noo-dialog--inline", className)}
+      className={cx("noo-surface noo-surface--3 noo-dialog", `noo-dialog--${form}`, `noo-dialog--${size}`, !modal && "noo-dialog--inline", className)}
       aria-labelledby={`${id}-title`}
       aria-describedby={description ? `${id}-desc` : undefined}
       onClose={onClose}

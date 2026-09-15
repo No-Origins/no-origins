@@ -15,10 +15,42 @@ export const registryNames: readonly string[] = entries.map((e) => e.name);
 
 export const byGroup = (group: RegistryGroup): readonly RegistryEntry[] => entries.filter((e) => e.group === group);
 
-export const groups: readonly RegistryGroup[] = ["text", "marks", "actions", "controls", "feedback", "layout", "surfaces", "figures", "composites"];
+export const groups: readonly RegistryGroup[] = ["text", "marks", "actions", "controls", "feedback", "layout", "surfaces", "figures", "composites", "motion"];
 
 export const layers: readonly RegistryLayer[] = ["atom", "molecule", "organism"];
 export const byLayer = (layer: RegistryLayer): readonly RegistryEntry[] => entries.filter((e) => e.layer === layer);
+
+/**
+ * What each layer is called and what it is (Atomic.md §1).
+ *
+ * It lives here rather than inside `Catalogue` because a screen that renders ONE layer names that layer in its own
+ * header — the showcase's `/components/atoms` and its two siblings — and a second copy of these sentences in the
+ * app is the drift the registry exists to prevent. `slug` is the route segment; `path` is where the source sits.
+ */
+export const layerNotes: Record<RegistryLayer, { title: string; slug: string; line: string; path: string }> = {
+  atom: {
+    title: "Atoms",
+    slug: "atoms",
+    line: "One thing, one job — the pieces everything else is made of. They read tokens and nothing else.",
+    path: "packages/ui/src/atoms",
+  },
+  molecule: {
+    title: "Molecules",
+    slug: "molecules",
+    line: "Atoms combined into one thing with one job: a field, a header, a control.",
+    path: "packages/ui/src/molecules",
+  },
+  organism: {
+    title: "Organisms",
+    slug: "organisms",
+    line: "Molecules and atoms assembled into a piece of a screen: a card, a menu, a grid.",
+    path: "packages/ui/src/organisms",
+  },
+};
+
+/** The layer a route segment names — `"atoms"` → `"atom"`. `undefined` for anything else, so a bad URL 404s. */
+export const layerBySlug = (slug: string): RegistryLayer | undefined =>
+  layers.find((l) => layerNotes[l].slug === slug);
 
 /** Entries a slot admitting `"blocks"` will take: everything placeable inside another component. */
 export const blockEntries: readonly RegistryEntry[] = entries.filter((e) => e.kind.includes("slot"));

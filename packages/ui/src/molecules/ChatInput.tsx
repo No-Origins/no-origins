@@ -5,7 +5,7 @@ import type { Hue } from "../tokens/tokens";
 import { cx } from "../cx";
 
 /**
- * ChatInput (§9) — a noo-glass--2 pill, 56px tall; the send button is a 36px circle in the block accent with the blob's
+ * ChatInput (§9) — a level-2 surface as a pill, 56px tall; the send button is a 36px circle in the block accent with the blob's
  * eyes inside. `suggestions` render as chips above it: the guided menu until the harness can answer for itself.
  */
 export interface ChatSuggestion {
@@ -56,7 +56,7 @@ export function ChatInput({
           ))}
         </div>
       ) : null}
-      <div className="noo-glass noo-glass--2 noo-chat__bar">
+      <div className="noo-surface noo-surface--2 noo-chat__bar">
         <input
           id={id}
           className="noo-chat__input"

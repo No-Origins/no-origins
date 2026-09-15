@@ -2,7 +2,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { FieldShell } from "./FieldShell";
 
 /**
- * Field (§9) — a text input or textarea in the `FieldShell`: label above, noo-glass--1 box at `--ctl-md`, hint or
+ * Field (§9) — a text input or textarea in the `FieldShell`: label above, a level-1 surface at `--ctl-md`, hint or
  * error below. `className` styles the wrapper; the control receives everything else.
  */
 export interface FieldProps extends Omit<ComponentPropsWithoutRef<"input">, "id"> {

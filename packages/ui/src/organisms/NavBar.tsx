@@ -4,7 +4,7 @@ import { Wordmark } from "../atoms/Wordmark";
 import { Menu } from "./Menu";
 
 /**
- * NavBar (§9) — noo-glass--2, 60px, sticky. Wordmark left, links right; the current link is `--accent-deep` with a
+ * NavBar (§9) — a level-2 surface, 60px, sticky. Wordmark left, links right; the current link is `--accent-deep` with a
  * 2px underline. Below `md` the links move to a `Menu` in its sheet form at the bottom of the viewport (D9); the bar
  * keeps the wordmark. `linkComponent` is the router's link (Next: `Link`); default `<a>` (§11.2 rule 1). The first
  * thing in the bar is a skip link to `#main`.
@@ -45,7 +45,7 @@ export function NavBar({ links, currentHref, homeHref = "/", linkComponent, trai
     });
   return (
     <>
-      <header className={cx("noo-glass noo-glass--2 noo-nav", className)} {...rest}>
+      <header className={cx("noo-surface noo-surface--2 noo-nav", className)} {...rest}>
         <a href={skipTo} className="noo-skip">
           {skipLabel}
         </a>

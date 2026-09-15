@@ -5,7 +5,7 @@ import { cx } from "../cx";
  * Divider (§9) — a hairline in `--rule`.
  *
  * An `<hr>`, because that is what it means: a thematic break, which assistive tech announces as a separator.
- * `dotted` is the canvas voice — it is the line under a region label (§8.2) and the one the threads are drawn in.
+ * `dotted` is the drawn boundary — a rule that reads as a mark rather than a wall.
  */
 export interface DividerProps extends ComponentPropsWithoutRef<"hr"> {
   dotted?: boolean;

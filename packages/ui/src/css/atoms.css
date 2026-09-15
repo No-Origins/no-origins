@@ -2,11 +2,9 @@
    Components are styled here, by the package's own classes — never by Tailwind utilities — so a host without
    Tailwind gets the full look (§11.2 rule 3). Every value is a token or the hue slot; a literal is a bug (rule 1). */
 
-/* The ground — every page, both layout modes; what glass refracts and what the blobs live on (§8).
-   LINES, not dots, since 2026-09-11. The canvas is a grid of 160 boxes and every bento cell sits in one, so a
-   second ground at 32 was a second grid saying something the first one already said. The blob sits on the
-   ORIGIN CROSSHAIR, which is the whole reason this was worth doing: both axes pass through the one glass blob. */
-.noo-ground, .noo-graph {                                                                  /* .noo-graph: the same ground under its old name, one release */
+/* The ground — every page; what the blobs live on (§8). LINES, not dots, since 2026-09-11: boxes of 160, and
+   every bento cell sits in one. */
+.noo-ground {
   background-color: var(--ground);
   background-image:
     linear-gradient(to right, var(--grid-line) var(--grid-line-w), transparent var(--grid-line-w)),
@@ -15,16 +13,15 @@
 }
 
 
-/* ===== the blob (§3 material · §4 geometry) — a 96 × 64 pill; scale, never redraw =====
+/* ===== the blob (§4 geometry) — a 96 × 64 pill; scale, never redraw. Flat since v1: the colour IS the character =====
    Markup (React or copied by hand):
    <span class="noo-blob noo-blob--character noo-blob--md noo-blob--breathe" data-hue="peach">
-     <span class="noo-blob__glass"><svg class="noo-blob__svg" viewBox="0 0 96 64"> …defs… body · ref · rim · eyes </svg></span>
+     <span class="noo-blob__skin"><svg class="noo-blob__svg" viewBox="0 0 96 64"> body · rim · eyes </svg></span>
    </span> */
 .noo-blob {
   --blob-w: 72px;                                   /* md — the sketch size; height is always 2/3 */
-  --blob-fill: var(--hue-tint);                     /* the hue slot (D1): the block's tint unless data-hue says otherwise */
-  --blob-fill-opacity: var(--glass-blob-opacity);   /* 24% light · 36% dark */
-  --blob-rim: 0.8;                                  /* rim stroke, user units */
+  --blob-fill: var(--hue);                          /* the hue slot (D1): the block's pastel unless data-hue says otherwise */
+  --blob-rim: transparent;                          /* a character has no edge; the host wears a hairline */
   position: relative;
   display: inline-flex;
   flex: none;
@@ -41,30 +38,26 @@
 .noo-blob--md      { --blob-w: 72px; }
 .noo-blob--lg      { --blob-w: 96px; }
 .noo-blob--hero    { --blob-w: 168px; }
-.noo-blob--host { --blob-fill: #fff; /* stylelint-disable-line color-no-hex -- the host blob's white is the glass itself, not a theme colour */ --blob-fill-opacity: var(--glass-host-opacity); --blob-rim: 0.95; }   /* the host: glass with nothing in it */
+.noo-blob--host { --blob-fill: var(--surface); --blob-rim: color-mix(in oklch, var(--ink) 16%, transparent); }   /* the host: the surface itself, with an edge so it reads on the ground */
 
 .noo-blob--interactive { cursor: pointer; }
 .noo-blob--interactive:hover { transform: scale(1.04); }
 
-/* the material: frost that mutes what's behind, a drop shadow beneath; this layer breathes */
-.noo-blob__glass {
+/* the skin: the layer that breathes, with the drop shadow beneath */
+.noo-blob__skin {
   display: block;
   width: 100%;
   height: 100%;
   border-radius: var(--r-pill);
-  -webkit-backdrop-filter: blur(2px) saturate(0.6);
-          backdrop-filter: blur(2px) saturate(0.6);
   filter: drop-shadow(0 5px 14px color-mix(in oklch, var(--shade) 10%, transparent));
   transform-origin: 50% 50%;
 }
-.noo-blob--breathe .noo-blob__glass { animation: noo-breathe var(--d-ambient) ease-in-out infinite; animation-delay: var(--blob-phase, 0s); }
-.noo-blob--sleep .noo-blob__glass { animation-duration: 9000ms; }
+.noo-blob--breathe .noo-blob__skin { animation: noo-breathe var(--d-ambient) ease-in-out infinite; animation-delay: var(--blob-phase, 0s); }
+.noo-blob--sleep .noo-blob__skin { animation-duration: 9000ms; }
 
 .noo-blob__svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.noo-blob__body { fill: var(--blob-fill); fill-opacity: var(--blob-fill-opacity); }
-.noo-blob__ref  { opacity: 0.32; }                                                             /* the grid, bent: band .32 → .92 of the radius */
-.noo-blob__gline { fill: var(--grid-line); }   /* the refracted grid line, in the same colour as the ground's */
-.noo-blob__rim  { stroke-width: var(--blob-rim); }
+.noo-blob__body { fill: var(--blob-fill); }
+.noo-blob__rim  { fill: none; stroke: var(--blob-rim); stroke-width: 1.5; }
 .noo-blob__eyes { transition: transform var(--d-base) var(--ease); }                          /* look */
 .noo-blob__eye  { fill: var(--eye); transform-box: fill-box; transform-origin: 50% 50%; }
 .noo-blob__eyes.is-blinking .noo-blob__eye { animation: noo-blink var(--d-fast) var(--ease) both; }
@@ -72,15 +65,6 @@
 /* logotype: the outline, in whatever colour the text is */
 .noo-blob--logotype .noo-blob__outline { stroke: currentColor; stroke-width: 5.5; }
 .noo-blob--logotype .noo-blob__eye { fill: currentColor; }
-
-@supports not (backdrop-filter: blur(1px)) {
-  .noo-blob__body { fill-opacity: calc(var(--blob-fill-opacity) + 0.2); }                     /* no frost → a little more body */
-}
-@media (prefers-reduced-transparency: reduce) {
-  .noo-blob__glass { -webkit-backdrop-filter: none; backdrop-filter: none; }
-  .noo-blob__body { fill-opacity: 0.55; }
-  .noo-blob__ref { display: none; }
-}
 
 
 /* ===== the wordmark (§4.4) — N [blob] RIGINS ===== */
@@ -108,20 +92,26 @@
 }
 
 
-/* ===== radius helpers (Glass `radius`) ===== */
+/* ===== Surface (§3) — the one material: the surface fill, a hairline, an elevation. Flat; three levels are three shadows ===== */
+.noo-surface { background: var(--surface); border: 1px solid var(--rule); box-shadow: var(--e1); }
+.noo-surface--2 { box-shadow: var(--e2); }
+.noo-surface--3 { box-shadow: var(--e4); }
+
+
+/* ===== radius helpers (Surface `radius`) ===== */
 .noo-r-xs { border-radius: var(--r-xs); } .noo-r-sm { border-radius: var(--r-sm); } .noo-r-md { border-radius: var(--r-md); }
 .noo-r-lg { border-radius: var(--r-lg); } .noo-r-xl { border-radius: var(--r-xl); } .noo-r-pill { border-radius: var(--r-pill); }
 
 
 /* ===== focus (§12) — one ring everywhere something takes focus: 2px accent-deep, 2px out ===== */
 :where(a, button, summary, [tabindex]):focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
-:where(.noo-btn, .noo-chip--interactive, .noo-toggle, .noo-card--interactive, .noo-blob--interactive, .noo-nav__link, .noo-nav__home, .noo-footer__link, .noo-segmented__btn, .noo-theme__btn, .noo-dots__dot, .noo-toast__close, .noo-skip):focus-visible {
+:where(.noo-btn, .noo-chip--interactive, .noo-toggle, .noo-card--interactive, .noo-blob--interactive, .noo-nav__link, .noo-nav__home, .noo-footer__link, .noo-segmented__btn, .noo-dots__dot, .noo-toast__close, .noo-skip):focus-visible {
   outline: 2px solid var(--accent-deep);
   outline-offset: 2px;
 }
 /* text selection in the block's colour */
 ::selection { background: color-mix(in oklch, var(--accent) 45%, var(--surface)); color: var(--ink); }
-/* visually hidden, still read — for the heading a canvas page needs */
+/* visually hidden, still read */
 .noo-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 
 
@@ -129,7 +119,7 @@
 .noo-btn--sm, .noo-chip--interactive, .noo-footer__link { position: relative; }
 .noo-btn--sm::before { content: ""; position: absolute; inset: -4px 0; }
 .noo-chip--interactive::before { content: ""; position: absolute; inset: -8px 0; }
-.noo-segmented__btn::before, .noo-theme__btn::before { content: ""; position: absolute; inset: -8px -2px; }
+.noo-segmented__btn::before { content: ""; position: absolute; inset: -8px -2px; }
 .noo-footer__link::before { content: ""; position: absolute; inset: -6px 0; }
 .noo-nav__link::before { content: ""; position: absolute; inset: -2px 0; }
 
@@ -152,8 +142,8 @@
 .noo-btn__icon > svg { width: 1.1em; height: 1.1em; }
 .noo-btn--primary { background: var(--ink); color: var(--ground); box-shadow: var(--e1); }
 .noo-btn--primary:hover { transform: translateY(-1px); box-shadow: var(--e2); }
-.noo-btn--secondary { color: var(--ink); }                                                   /* + .noo-glass .noo-glass--1: the hairline is the glass border */
-.noo-btn--secondary:hover { transform: translateY(-1px); --gs: var(--e2); }
+.noo-btn--secondary { color: var(--ink); background: var(--surface); border-color: var(--rule); box-shadow: var(--e1); }   /* a level-1 surface as a pill */
+.noo-btn--secondary:hover { transform: translateY(-1px); box-shadow: var(--e2); }
 .noo-btn--ghost { background: transparent; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 4px; text-decoration-thickness: 1.5px; padding-inline: 8px; }
 .noo-btn--ghost:hover { text-decoration-color: currentColor; }
 .noo-btn:active { transform: translateY(0); }
@@ -182,16 +172,13 @@
 .noo-chip--interactive[aria-pressed="true"] .noo-chip__dot, .noo-chip--interactive[aria-pressed="true"] .noo-chip__icon { background: var(--ground); color: var(--ground); }
 
 
-/* ===== Card (§9) — surface or glass-1 · radius 20 · padding 24 (sm 20) · e1 → e2 on hover ===== */
-.noo-card { display: block; border-radius: var(--r-lg); padding: var(--s-6); color: inherit; text-decoration: none; }
-.noo-card:not(.noo-glass) { background: var(--surface); box-shadow: var(--e1); }
+/* ===== Card (§9) — the surface · radius 20 · padding 24 (sm 20) · e1 → e2 on hover ===== */
+.noo-card { display: block; border-radius: var(--r-lg); padding: var(--s-6); color: inherit; text-decoration: none; background: var(--surface); box-shadow: var(--e1); }
 .noo-card--pad-sm { padding: var(--s-5); }
 .noo-card--pad-lg { padding: var(--s-10); }                                                /* Quote stands on this (D3) */
 .noo-card--r-xl { border-radius: var(--r-xl); }
 .noo-card--interactive { cursor: pointer; transition: transform var(--d-fast) var(--ease), box-shadow var(--d-fast) var(--ease); }
-.noo-card--interactive:hover { transform: translateY(-1px); }
-.noo-card--interactive:not(.noo-glass):hover { box-shadow: var(--e2); }
-.noo-card--interactive.noo-glass:hover { --gs: var(--e2); }
+.noo-card--interactive:hover { transform: translateY(-1px); box-shadow: var(--e2); }
 
 
 /* ===== Text · Stack · Row (§9) — the three that let a page be composed without a utility class =====
@@ -221,7 +208,7 @@
 .noo-row--nowrap { flex-wrap: nowrap; }
 
 
-/* ===== Heading · Label · Dot · Divider · Intro · CellHead (§9) — the small named things =====
+/* ===== Heading · Label · Dot · Divider · CellHead (§9) — the small named things =====
    Every one of these was typed out inline somewhere, in an app file, as a class on a bare tag. Naming them is
    what makes them placeable in the editor (Scene-Schema.md §2.3). Label lives in typography.css; the rest here. */
 .noo-heading { margin: 0; }                                                                    /* the container spaces headings, as it does text */
@@ -234,12 +221,15 @@
 
 
 
-/* ===== Bubble (§9) — glass-1 pill of real text · 15/1.4 Hanken 500 · padding 10 × 16 ===== */
+/* ===== Bubble (§9) — a level-1 surface as a pill of real text · 15/1.4 Hanken 500 · padding 10 × 16 ===== */
 .noo-bubble {
   display: inline-block;
   margin: 0;
   padding: 10px 16px;
   border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  box-shadow: var(--e1);
   font: 500 var(--t-ui)/1.4 var(--ff-sans);
   color: var(--ink);
   max-width: 38ch;
@@ -288,9 +278,9 @@
 .noo-img--tint { filter: saturate(0.9) contrast(1.02); }
 
 
-/* ===== forced colours (Windows high contrast) — glass and tints vanish; keep every edge and state legible ===== */
+/* ===== forced colours (Windows high contrast) — tints vanish; keep every edge and state legible ===== */
 @media (forced-colors: active) {
-  .noo-glass, .noo-card, .noo-chip, .noo-bubble, .noo-field__box, .noo-chat__bar { border: 1px solid CanvasText; }
+  .noo-surface, .noo-card, .noo-chip, .noo-bubble, .noo-field__box, .noo-chat__bar { border: 1px solid CanvasText; }
   .noo-toggle { border: 1px solid ButtonText; }
   .noo-toggle__knob { background: ButtonText; }
   .noo-toggle[aria-checked="true"] { background: Highlight; }

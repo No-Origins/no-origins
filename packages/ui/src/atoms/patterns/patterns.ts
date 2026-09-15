@@ -103,9 +103,3 @@ export const patterns: Record<PatternName, Family> = {
   arc:     { seed: 37, flow: 135, scale: 1.6, swing: 40, breath: 32, drift: 0.35, spread: 0.45, curl: 1, taper: 0.4 },
 };
 
-/** @deprecated Renamed `PatternName` on 2026-09-14 (Admin.md §6.5b); alias removed next minor. */
-export type FieldName = PatternName;
-/** @deprecated Renamed `patterns`; alias removed next minor. */
-export const fields = patterns;
-/** @deprecated Renamed `patternNames`; alias removed next minor. */
-export const fieldNames = patternNames;

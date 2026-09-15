@@ -3,7 +3,7 @@ import { cx } from "../cx";
 
 /**
  * Button (§9) — a pill, 44px minimum (36px `sm`).
- *  - `primary`: ink fill, ground text.  - `secondary`: noo-glass--1 with a hairline.  - `ghost`: text, underline on hover.
+ *  - `primary`: ink fill, ground text.  - `secondary`: a level-1 surface as a pill.  - `ghost`: text, underline on hover.
  * With `href` it renders an `<a>`; pass `as={Link}` for a router's link component (§11.2 rule 1).
  */
 export type ButtonVariant = "primary" | "secondary" | "ghost";
@@ -25,7 +25,7 @@ export function Button({ variant = "primary", size = "md", leading, trailing, hr
   const Tag: ElementType = as ?? (href ? "a" : "button");
   return (
     <Tag
-      className={cx("noo-btn", `noo-btn--${variant}`, size === "sm" && "noo-btn--sm", variant === "secondary" && "noo-glass noo-glass--1", className)}
+      className={cx("noo-btn", `noo-btn--${variant}`, size === "sm" && "noo-btn--sm", className)}
       href={href}
       type={Tag === "button" ? (type ?? "button") : undefined}
       {...rest}

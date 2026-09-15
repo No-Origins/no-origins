@@ -1,0 +1,24 @@
+# The Vercel CLI does not fully honour .gitignore, and the visual review loop
+# (CLAUDE.md) leaves ~400MB of screenshots, traces and reports in e2e/.
+# None of it is part of a build, so keep it out of the upload.
+#
+# Repo-root entries are anchored with a leading slash on purpose: an unanchored
+# pattern matches at every depth, so a bare `supabase` would also drop
+# apps/admin/src/lib/supabase/ and break that build.
+
+# build output, at any depth
+node_modules
+.next
+out
+dist
+.turbo
+*.tsbuildinfo
+*.log
+.DS_Store
+
+# repo root only
+/e2e
+/playwright-report
+/playwright.config.ts
+/supabase
+/.claude

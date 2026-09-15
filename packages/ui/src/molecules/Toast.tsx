@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { cx } from "../cx";
 
 /**
- * Toast (§9) — one short message that arrives and leaves: noo-glass--2, radius lg, a semantic wash behind the text.
+ * Toast (§9) — one short message that arrives and leaves: a level-2 surface, radius lg, a semantic wash mixed in.
  * Admin.md §10: the one place the admin speaks in the brand voice, so the words are a sentence, not a status code.
  *
  * `tone` is the semantic colour — `good` is `--good`, `warn`, `bad`; `neutral` is ink. `role="status"` for the
@@ -25,7 +25,7 @@ export function Toast({ tone = "neutral", title, action, onDismiss, dismissLabel
   return (
     <div
       role={tone === "bad" ? "alert" : "status"}
-      className={cx("noo-glass noo-glass--2 noo-toast", `noo-toast--${tone}`, className)}
+      className={cx("noo-surface noo-surface--2 noo-toast", `noo-toast--${tone}`, className)}
       {...rest}
     >
       <span className="noo-toast__mark" aria-hidden="true" />

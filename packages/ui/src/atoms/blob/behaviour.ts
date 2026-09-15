@@ -1,13 +1,12 @@
 "use client";
 import { useEffect, useLayoutEffect, type RefObject } from "react";
+import { prefersReducedMotion } from "../../tokens/motion";
 
 /** Plain DOM behaviour (§11.2 rule 4): blink and look run on timers, one shared pointer listener and rAF. */
 
 export const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-export function prefersReducedMotion(): boolean {
-  return typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
+export { prefersReducedMotion };
 
 /** Deterministic 0..1 from a string — the breathe phase has to agree between server and client render. */
 export function phaseOf(id: string): number {

@@ -60,7 +60,7 @@ export interface SlotSpec {
   label: string;
 }
 
-export type RegistryGroup = "text" | "marks" | "actions" | "controls" | "feedback" | "layout" | "surfaces" | "figures" | "composites";
+export type RegistryGroup = "text" | "marks" | "actions" | "controls" | "feedback" | "layout" | "surfaces" | "figures" | "composites" | "motion";
 
 /** The Atomic layer the component lives in (Atomic.md §1). The catalogue reads it; the palette reads `group`. */
 export type RegistryLayer = "atom" | "molecule" | "organism";

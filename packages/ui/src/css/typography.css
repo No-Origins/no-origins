@@ -13,7 +13,7 @@
 .noo-body { font: 400 var(--t-body)/1.55 var(--ff-sans); text-wrap: pretty; }
 .noo-body-sm { font: 400 var(--t-body-sm)/1.5 var(--ff-sans); text-wrap: pretty; }
 .noo-ui    { font: 600 var(--t-ui)/1.2 var(--ff-sans); }                                  /* a control's voice: buttons, links */
-.noo-ui-sm { font: 600 var(--t-ui-sm)/1 var(--ff-sans); }                                /* a small control: chips, the rail */
+.noo-ui-sm { font: 600 var(--t-ui-sm)/1 var(--ff-sans); }                                /* a small control: chips, small buttons */
 .noo-bubble-text { font: 500 var(--t-ui)/1.4 var(--ff-sans); }                           /* speech: the ui step at weight 500 */
 .noo-caption { font: 500 var(--t-caption)/1.45 var(--ff-sans); }
 .noo-label { font: 500 var(--t-label)/1.3 var(--ff-mono); letter-spacing: 0.1em; text-transform: uppercase; }

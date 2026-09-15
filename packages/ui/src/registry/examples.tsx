@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
 import type { Hue } from "../tokens/tokens";
+import { Button } from "../atoms/Button";
+import { Motion } from "../atoms/Motion";
+import { Text } from "../atoms/Text";
 import { Field } from "../molecules/Field";
 import { HueSwatch, type HueValue } from "../molecules/HueSwatch";
 import { PatternPicker, libraryPatterns, type PatternOption } from "../molecules/PatternPicker";
@@ -93,3 +96,24 @@ export function TreeExample() {
 }
 
 export type { HueValue };
+
+const EFFECTS = ["rise", "pop", "lift", "breathe"] as const;
+
+/** The four patterns side by side, replayed on demand — an animation the eye missed is one it cannot judge. */
+export function MotionExample() {
+  const [run, setRun] = useState(0);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div key={run} style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
+        {EFFECTS.map((effect, i) => (
+          <Motion key={effect} effect={effect} delay={i * 60} className="noo-surface noo-surface--1 noo-r-lg" style={{ padding: "16px 20px" }}>
+            <Text size="small"><code className="noo-code">{effect}</code></Text>
+          </Motion>
+        ))}
+      </div>
+      <div>
+        <Button variant="secondary" size="sm" onClick={() => setRun((n) => n + 1)}>Play again</Button>
+      </div>
+    </div>
+  );
+}

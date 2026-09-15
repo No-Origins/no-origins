@@ -12,7 +12,7 @@ import { Icon } from "../icons/Icon";
  *
  * The library's patterns in a grid, each drawn by the generator in the node's own hue with its name under; the
  * chosen one wears the same ink ring as the `HueSwatch`, so "chosen" looks the same everywhere in the inspector.
- * A picture is chosen by looking, and the canvas node is the live preview. The eighteen in `patterns.ts` come
+ * A picture is chosen by looking, and the cell it lands in is the live preview. The eighteen in `patterns.ts` come
  * first; a document's own patterns (`extra`) follow, drawn the same way; and when `onNew` is given the grid ends
  * with *New pattern*, which the host answers by opening a `PatternStudio`.
  *
