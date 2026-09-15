@@ -1,6 +1,6 @@
 # no-origins
 
-pnpm workspace. Apps live in `apps/*` — `portfolio` (bhargav.no-origins.com, :3000), `design` (design.no-origins.com, the showcase, :3001) and `admin` (admin.no-origins.com, the control surface, :3002), all Next.js 16; the shared design system is `packages/ui` (`@no-origins/ui`, consumed from source). Each app has its own CLAUDE.md / AGENTS.md; read them before editing app code.
+pnpm workspace. Apps live in `apps/*` — `portfolio` (bhargav.no-origins.com, :3000), `design` (design.no-origins.com, the showcase, :3001) and `admin` (admin.no-origins.com, the control surface, :3002), all Next.js 16; the shared design system is `packages/ui` (`@no-origins/ui`, **1.0.0** since 2026-09-16, consumed from source — Atomic.md is its record). Each app has its own CLAUDE.md / AGENTS.md; read them before editing app code.
 
 `supabase/` is the admin's database — schema, RLS, the allowlist gate and both buckets. `supabase/README.md` says how to run it and what has been verified. The portfolio and the showcase have no database anywhere near them and that is deliberate: the live site renders static output, never a query.
 

@@ -2,6 +2,8 @@
 
 *Opened 2026-09-13. The design system organised by Atomic Design, every token and component reviewed, and the decisions that turn `@no-origins/ui` into a production release. Companion to Brand.md (what), Design-System.md (the values) and Admin.md (the first consumer that found the gaps). Decided 2026-09-14; the build follows §6. Where this document and Design-System.md disagree, this one is newer; the values there stand, the organisation here supersedes §9's flat table.*
 
+*Amended 2026-09-16 by the v1 revamp — four more decisions (§4, D10–D13), a smaller tree (§5) and step 7 (§6). D1–D9 stand as they were decided; what v1 reversed is recorded as a reversal in the decision that reversed it.*
+
 The review canvas — every layer rendered from the live package CSS, every item with a verdict — is at
 https://claude.ai/code/artifact/13bff065-8753-40a2-8388-84ddd0f1d9ba and is rebuilt from `packages/ui/design/release/` (§7).
 
@@ -26,14 +28,16 @@ A layer reads only the layers before it. ✚ marks what does not exist yet.
 
 | # | Layer | Definition | Members |
 |---|---|---|---|
-| 1 | **Tokens** | Values. No markup. | colour roles · the family + **the hue slot ✚** · semantic · block accent (+ `--accent-ink` ✚) · glass · radius · elevation · motion · **space ✚** · **type steps for controls ✚** · **control heights ✚** · **icon sizes + stroke ✚** · grid · grain · fonts (host) · breakpoints |
-| 2 | **Atoms** | One job; contain nothing of their own kind. | Ground · Blob · Wordmark · Glass · Text · Heading · Label · Dot · Divider · Image · **Icon ✚** · Button · Chip · Toggle · Bubble · Card · Placeholder · Stack · Row · Illustration · (focus ring, skip link, sr-only) |
+| 1 | **Tokens** | Values. No markup. | colour roles · the family + **the hue slot ✚** · semantic · block accent (+ `--accent-ink` ✚) · radius · elevation · motion · **space ✚** · **type steps for controls ✚** · **control heights ✚** · **icon sizes + stroke ✚** · grid · grain · fonts (host) · breakpoints |
+| 2 | **Atoms** | One job; contain nothing of their own kind. | Ground · Blob · Wordmark · **Surface** · **Motion** · Text · Heading · Label · Dot · Divider · Image · **Icon ✚** · Button · Chip · Toggle · Bubble · Card · Placeholder · Stack · Row · Pattern · (focus ring, skip link, sr-only) |
 | 3 | **Molecules** | Atoms combined; still one job. | Field · Segmented (ThemeSwitch is an instance) · ChatInput · SectionHeader (absorbs Intro) · CellHead · Figure · Steps · **Speaker ✚** · Dots (out of Carousel) · ContrastRow · **Select · Checkbox · Radio · Tabs · Toast · Dialog/Sheet · Menu · Tooltip · Tree ✚** |
-| 4 | **Organisms** | A distinct section of a screen. | NavBar · **Menu ✚** (absorbs Rail, the canvas menu and the NavBar sheet) · Footer · BlockCard (absorbs RoadmapItem) · MediaCard · Quote · ProfileCard · Deck · Carousel · Bento + BentoCell · Catalogue · ContrastReport · the canvas nodes · **Table ✚ · Inspector ✚** |
-| 5 | **Templates** | The shells. | Page · **Tool ✚** · Canvas · **Document ✚** |
+| 4 | **Organisms** | A distinct section of a screen. | NavBar · **Menu ✚** (absorbed Rail and the NavBar sheet) · Footer · BlockCard (absorbs RoadmapItem) · MediaCard · Quote · ProfileCard · Deck · Carousel · Bento + BentoCell · Catalogue · ContrastReport · **Table ✚ · Inspector ✚** |
+| 5 | **Templates** | The shells. | Page · **Tool ✚** · **Document ✚** |
 | 6 | **Pages** | Instances — the apps. | portfolio · design · admin · the next block |
 
 **Tokens** are the sub-atomic layer; Atomic Design does not name it, and here it is the one that matters most, because it is the layer every other one reads.
+
+**Amended 2026-09-16 (v1).** Four members left the table and two joined it, and the reasons are D10–D13: the glass tokens are gone and `Surface` is the one material; `Motion` is an atom because motion is a layer of the system now, not a note in a stylesheet; `Rail` and the canvas nodes are gone with React Flow, and so is the `Canvas` template. `Illustration` reads `Pattern`, which is the name it has had since 2026-09-14 — the alias went with 1.0. The ✚ marks are left where they were: they say what did not exist on 2026-09-13, which is the only thing they ever said.
 
 ## 2. Five wiring rules
 
@@ -89,9 +93,11 @@ Keep = ship as is · Fix = same component, reads the tokens it should · Merge =
 
 Tally: 22 Keep · 25 Fix · 5 Merge · 1 Retire · 9 Missing, over 62 items (the Icons and Menu boards are option boards and are not counted).
 
-## 4. Decided — nine rules
+The verdicts are of 2026-09-13 and are left as they were given. Five of the items they cover no longer exist: Glass, Rail, the canvas nodes, the `Canvas` template and `Page with a rail` all went in v1 (§4, D10–D13). A verdict that has been overtaken is still the record of what was thought at the time, which is the only reason this table is worth keeping.
 
-All nine settled **2026-09-14**, as a note on the canvas: *"Let's proceed with your recommendations."* Each records the pick, the reason and the cost, in the style of Admin.md §12 — a rule whose price is known is one that can be revisited honestly.
+## 4. Decided — thirteen rules
+
+D1–D9 settled **2026-09-14**, as a note on the canvas: *"Let's proceed with your recommendations."* D10–D13 settled **2026-09-16**, in one message asking for a complete revamp and the v1 release. Each records the pick, the reason and the cost, in the style of Admin.md §12 — a rule whose price is known is one that can be revisited honestly, and two of the four below revisit an earlier one.
 
 ### D1 · Hue is a slot, declared once
 `[data-hue="x"]` sets `--hue · --hue-deep · --hue-tint · --hue-ink` in tokens.css; the root sets the same four from the block accent; `data-hue="accent"` resets to it. Component CSS never lists a hue.
@@ -129,22 +135,62 @@ An `Icon` atom — `sm` 16 · `md` 20 · `lg` 24, `--icon-stroke` 1.5, `currentC
 A `Menu` organism — column 280 · icon rail 72 · two columns 280 + 240 · floating on the canvas · bottom sheet — replaces `Rail`, `CanvasShell`'s built-in `menu` panel and the NavBar's sheet. Every form shares the column's radii: xl outside, pill items (Bhargav, note 4). The current item is an ink pill (his reference), replacing the Rail's 2px edge bar — an amendment to Admin.md §10. Placeable as a `menu` node; items `{ label, view | href }` edited in the inspector. **Amended 2026-09-14 (Bhargav):** on a canvas the menu is a node in canvas space — position in canvas units, dragged and dropped like a blob or a panel, part of the reading order — not a panel fixed to a viewport corner. It pans with the map; the chat's suggestions and ← / → remain the ways to move that never pan away.
 **Cost:** three hand-built menus are deleted; `Tooltip` is needed for the rail's labels. **Rejected:** keeping Rail and Menu as siblings (two answers to "where am I").
 
+---
+
+The four below were decided on **2026-09-16**, from one message: *"complete revamp… finalise and release the v.1 of the design system today. No more glass effects. Let's remove the react flow and all react flow related items completely. I want to take a different approach later. Motion should also be part of the design system. Remove rail too."*
+
+### D10 · One flat surface
+
+`Surface` replaces `Glass`. One material: the `--surface` fill, a `--rule` hairline and one of three elevations — level 1 (`--e1`) for a card, a field, a chip; level 2 (`--e2`) for a bar, the Menu, a toast, the ChatInput; level 3 (`--e4`) for a dialog. Everything that was translucent wears it: Menu, NavBar, the Tool sidebar, inspector and bar, Card, the secondary Button, the Field box, Segmented and ThemeSwitch, Bubble, Toast, Dialog. Gone: the `Glass` atom, `glass.css` and its export, every `--glass-*` token and every `.noo-glass*` class; `Card`'s `surface` prop; `BentoCell`'s `glass` tone; `Blob`'s `refraction` prop with `GroundProvider`, `useGround`, `measureGround` and `REFRACTION_ZOOM`.
+
+**Cost:** the idea the material carried goes with it — *"the platform is always visible through its own UI"* (Design-System.md §3) is no longer true of anything. The blob is flat: a character is its pastel, opaque, and the host is `--surface` with a hairline in ink at 16%, so *"you can tell which one is him because he is made of the platform"* (Brand.md §11) is now said with an edge rather than with refraction — a weaker version of the same sentence, and the honest price of the pick. `ProfileCard` lost its frosted bottom and its bloom and holds its words up with a scrim alone; `Blob`'s variant `glass` is `host` and `Speaker`'s is too. `prefers-reduced-transparency` stops being a theming axis (Design-System.md §10), because there is no transparency left to reduce. **Rejected:** keeping glass for the blob alone. One translucent object in a flat system is an exception every component built afterwards has to be told about, and the Blob Lab's numbers (tint 24%, frost 2, rim 0.8) were tuned against a dot grid that no longer exists either.
+
+### D11 · No React Flow — the canvas, the editor and the document layer are removed
+
+*"I want to take a different approach later."* So this is a removal, not a replacement. Out of the package: the `@no-origins/ui/canvas`, `/editor` and `/document` subpaths and `editor.css`; `CanvasShell` and every node type, `useCanvasNav`, `useCanvasZoom`, `sceneToNodes`, `SceneNode`, `documentToScene`, `SceneDocument`, `PanLink`, `PropsForm`, `DocumentForm`, `Palette`, `SaveState`, `CanvasOverlay`. Out of the dependencies: `@xyflow/react` (peer and dev) and `zod`. The portfolio is **pages** for now — a home that introduces him and carries the six widgets, one route per section — and the admin authors nothing: the editor route and the draft autosave API went with the layer they drove.
+
+**What survives, deliberately:** the registry. `entries`, `layers`, `groups`, and each entry's `kind` and `slots` are the description of *what a component is and where it may go*, and that description is the first thing any new approach will need — it took the longest to write and it is not React Flow's. Scene-Schema.md §2 and §3 stay readable for the same reason (Scene-Schema.md now carries a superseded banner saying exactly that).
+
+**Cost:** the ring, the snap and three sessions of editor work stop being running code — Design-System.md §8, Admin.md §3 and §6, and the whole of Scene-Schema.md describe a thing that no longer exists. None of it is deleted; it is banner-marked as history, because an approach that cannot read what the last one learned starts from nothing. The portfolio loses the sentence that made it itself — *moving the viewport is the nav* — and gains URLs a visitor can send someone. **Rejected:** leaving the canvas exports behind a flag. A dependency nobody builds against rots quietly, and a flag is a promise to the next approach that the next approach may not want kept.
+
+### D12 · Motion is a layer, not a note in the stylesheet
+
+*"Motion should also be part of the design system."* It was already tokens and four keyframes; now it is something a person can find, name and show. `tokens/motion.ts` exports `durations` (fast 140 · base 220 · slow 380 · ambient 6000), `easings` (standard · enter · spring, as cubic-bezier strings), `motionPatterns` — **rise · pop · breathe · lift · blink** — `motionNotes` (a duration, an easing and one line per pattern) and `prefersReducedMotion()`. `atoms/Motion.tsx` is the `Motion` atom (`effect`, `delay`, `as`) and `useReducedMotion()`. The registry gains a `motion` group and entries for `Surface` and `Motion`, so both appear in the catalogue like everything else. The showcase's `/tokens/motion` is a real screen that reads `durations`, `easings` and `motionNotes` from the package instead of restating them.
+
+**Cost:** one duplication, stated rather than hidden. The numbers exist twice — as custom properties in `tokens.css`, which is what the stylesheet animates against, and as values in `tokens/motion.ts`, which is what a script reads — and the two must agree. The file says so in its own first paragraph. **Rejected:** generating one from the other at build time (a build step for seven numbers, and a package that can no longer be read as source), and leaving motion as classes only (then nothing but a stylesheet knows a pattern exists, and the catalogue has nothing to show).
+
+### D13 · One navigation, one width
+
+*"Remove rail too."* The `Rail` organism is gone, and so are `Menu`'s `rail` and `floating` forms, its `onToggleForm` collapse and `Page`'s `rail` prop. `MenuForm` is `auto | column | sheet`: column at 280 from `md` (900) up, sheet below it, and the two-column panel when the current item declares one. `ToolScreen` loses `flush`. The admin's rail and the showcase's rail are both plain Menus now.
+
+**Cost:** the 72px icon column was the only form that fitted beside a full-width canvas, so nothing can shrink the navigation to make room any more — and the screen that needed that, the editor, is gone anyway (D11). The admin and the showcase each lose a remembered per-browser choice, and a visitor who had collapsed one gets it back at 280. **Rejected:** keeping the rail as a form nobody asks for. D9's own argument — one answer to "where am I" — applies to two forms of one component as much as it did to two components, and a form with no consumer is a form that is never looked at.
+
+### Every deprecated alias went with 1.0
+
+D3 and D4 said the old names would alias "for one release". 1.0.0 is the release after, so they are gone: `Intro` (→ `SectionHeader rhythm={false}`), `RoadmapItem` (→ `BlockCard state="sleep" line progress`), `RegionLabel`, `Illustration` / `IllustrationCanvas` (→ `Pattern` / `PatternCanvas`), `fields` / `fieldNames` / `FieldName` (→ `patterns` / `patternNames` / `PatternName`), `Glyph` / `glyphNames` / `GlyphName` (the six-glyph grammar the illustrations replaced), `CellHead`'s `dot` prop, and the bare CSS classes `.glass*`, `.rise-in`, `.pop-in`, `.lift`, `.breathe`, `.noo-prose` (→ `.noo-document`), `.noo-theme*` (→ `.noo-segmented*`), `.noo-graph` (→ `.noo-ground`) and `.noo-intro`.
+
+**Cost:** a host that took 0.1.0's CSS and happens to write `.lift` in its own markup breaks on upgrade — which is the one thing a major version is for. Keeping them would have made every alias permanent by default, since nothing forces a second look at a name that still works.
+
 ## 5. The release, on disk
 
 ```
 packages/ui/src/
-├─ tokens/        tokens.css · tailwind.css · tokens.ts · theme.ts        layer 1 — values, the hue slot, both themes
-├─ atoms/         *.tsx + atoms.css                                       layer 2
-├─ molecules/     *.tsx + molecules.css                                   layer 3
-├─ organisms/     *.tsx + organisms.css                                   layer 4
-├─ templates/     Page · Tool · Document · canvas/ (CanvasShell + nodes)  layer 5 — canvas keeps its own entry
+├─ tokens/        tokens.ts · theme.ts · motion.ts                        layer 1 — the values a script reads (motion.ts is D12)
+├─ atoms/         *.tsx — Surface · Motion · Blob · Ground · …            layer 2
+├─ molecules/     *.tsx                                                   layer 3
+├─ organisms/     *.tsx                                                   layer 4
+├─ templates/     Page · Tool · Document                                  layer 5
 ├─ registry/      entries grouped by layer · Catalogue · ContrastReport
-└─ css/index.css  @import tokens; @import atoms|molecules|organisms|templates layer(components)
+├─ icons/         Icon + a curated glyphs.ts (Phosphor, an optional peer) D8
+└─ css/           tokens.css · tailwind.css · typography.css · motion.css · one file per layer;
+                  index.css imports tokens, then atoms|molecules|organisms|templates in layer(components)
 
 apps/*            layer 6 — compose, never style; data-block names the app
 ```
 
 `components.css` (76 KB, one file) splits into four by layer. Public exports and class names do not change except where D3–D5 say so, so the three apps keep building through the move.
+
+**Amended 2026-09-16 (v1).** Three directories and two stylesheets left: `templates/canvas/`, `editor/` and `document/` with React Flow (D11), and `css/glass.css` and `css/editor.css` with the material and the editor chrome (D10, D11). `tokens/motion.ts` arrived (D12), `atoms/Surface.tsx` replaced `atoms/Glass.tsx` (D10) and `atoms/Motion.tsx` joined it. Nothing else moved: the layer folders are what they were, and a file's place in them is still the only thing that says which layer it belongs to.
 
 ## 6. Build order — and where it stands
 
@@ -155,10 +201,14 @@ apps/*            layer 6 — compose, never style; data-block names the app
 5. ✅ **Templates — done 2026-09-14.** `Tool` + `ToolScreen` (D6, option B): the shell holds a `Menu` beside a column; each screen is a 60px header on the ground — layer eyebrow, title, `meta`, `actions` — then `main#main` fluid with 32px gutters, and an `inspector` (320, glass-1, sticky) and a `bar` (glass-2) only where a screen passes them. Below `lg` the inspector drops under main; the Menu keeps its own forms beside the column. `Document`: the 68ch reading column with every element markdown produces set on the ramp (`.noo-prose` aliased). `Container` gained `size="sm"` (480) for the sign-in. **The admin's nine screens are re-poured** with zero utility classes and Tailwind removed from its globals: every screen is a `ToolScreen` whose eyebrow is the rail group's own word (Projects · Systems · Products); stat cards are gone — Tables carry the density (documents, projects, systems, the registry by layer, buckets and files, products), `Steps` carries the publish pipeline, and Systems → Design System renders the package's own `Catalogue` and `ContrastReport` in `Tabs`, which is what Admin.md §13 step 5 asked for. `Page`'s `rail` prop is deprecated. Reviewed by signing in through Mailpit's magic link and screenshotting all nine screens at 1440, 1100, 760 and 412 in both themes, plus the new `/fixtures/tool` route in the sweep (Tool with every region filled, and Document). Found and fixed on the way: below `md` the rail took the whole first grid row and pushed the content off screen; the rail's trailing slot (theme switch, address) cannot fit 72px and is hidden in that form. Design-System.md §9's "not in v1" list and §11's package tree now point here. **Amended 2026-09-14 (Admin.md §6.5 row 1):** `ToolScreen` gains a `sidebar` on the left — the palette and the outline, glass-1 and sticky like the inspector, at the Menu column's 280 — and a `flush` mode that pins the screen to the viewport and strips main's gutters so the canvas fills it edge to edge; below `lg` the sidebar stacks above main. The admin's Menu drops to its rail form on the editor route.
 6. ✅ **Release — done 2026-09-14.** Steps 1–5 are five commits on `docs/admin-design`, one per step (a narrative split: moved files carry their final content, so the tree is guaranteed green at the release commit, not at each). **Rule 1 is checked**: `packages/ui/.stylelintrc.json` forbids hex and colour functions, literal px font sizes (in `font-size` and the `font` shorthand), and literal radii other than the 1–2px hairline markers, in every layer stylesheet — tokens.css, which defines the values, is the one file it ignores; `pnpm --filter @no-origins/ui lint` runs it after `tsc`. The rule found sixteen literals the hand sweep had missed; eight took a token (the wordmark sizes → `--t-h4`/`--t-lead`, the region label → `--t-h2`, widget chips and tags → `--t-body`/`--t-body-sm`, a 999px → `--r-pill`) and five keep the literal with a stated reason on the line (a mask gradient reads alpha only; the host blob's white and the words over a photograph are not theme colours; a 10px count inside a 16px badge; React Flow's own attribution). Spacing is not in the rule yet — most remaining px are hairlines, dots and SVG geometry, and a rule that allowed those would need a longer allowlist than it is worth today. **`@no-origins/ui` is 0.1.0** via a changeset (minor; `CHANGELOG.md` written; `design` and `admin` joined `portfolio` in the changeset ignore list so an internal bump never renumbers an app). Not published to a registry — that is a separate act. The canvas's Main board reads as the record of the release, not the review.
 
-Steps 1–4 carry no visitor risk: the portfolio reads the same class names throughout. Step 5 changes only the admin. All six shipped on 2026-09-14.
+7. ✅ **v1 — done 2026-09-16.** The revamp, in the order the decisions are written: **D10**, `Surface` at three levels replacing `Glass` everywhere the system was translucent — Menu, NavBar, Tool's sidebar, inspector and bar, Card, the secondary Button, Field, Segmented, Bubble, ChatInput, Toast, Dialog — with the blob flat and `ProfileCard` on a scrim; **D11**, React Flow and everything downstream of it removed from the package (`/canvas`, `/editor`, `/document`, `editor.css`) along with `@xyflow/react` and `zod`; **D12**, `tokens/motion.ts`, the `Motion` atom, `useReducedMotion`, a `motion` group in the registry; **D13**, one Menu in three forms and no `Rail`; and every deprecated alias from D3 and D4 dropped, which is what makes this a major rather than a minor. The three consumers moved with it: the **portfolio** is pages — a home that introduces him and carries the six widgets, one route per section — the **admin** lost the editor route and the draft API and wears the plain Menu, and the **showcase** wears it too and gained a real `/tokens/motion` reading `durations`, `easings` and `motionNotes` from the package rather than restating them. **`@no-origins/ui` is 1.0.0** (`version` in `src/index.ts`, a major changeset). Still not published to a registry — that remains a separate act, and nobody has asked for it. Verified: `pnpm -C packages/ui lint` (tsc + stylelint) and `pnpm -C packages/ui build`; `tsc --noEmit` in all three apps; `pnpm review` over the portfolio's and the showcase's routes on desktop and mobile in both themes; the admin by signing in and looking, because it is not in the sweep.
+
+Steps 1–4 carry no visitor risk: the portfolio reads the same class names throughout. Step 5 changes only the admin. All six shipped on 2026-09-14. Step 7 is the one that does carry visitor risk, and it is the only one that does: the portfolio's layout, its URLs and its material all change on 2026-09-16.
 
 ## 7. The canvas, and how to rebuild it
 
 `packages/ui/design/release/` holds the source of the review canvas: `lib.mjs` (helpers; embeds the live package CSS; the icon glyphs), `boards/*.mjs` (one per layer, plus `icons` and `menu` — the two option boards that answer the 2026-09-14 notes), `build.mjs` (assembles `*.dc.html` and counts the tally), `canvas.json` (layout). `node build.mjs` re-renders every sample from the current `packages/ui/src/css/*` — so after a token change the boards show the new system with no edit to the boards. The seeded `no-origins-design-system-release.html` is the published page; it is regenerated, never edited.
 
 Not rendered on the canvas: the blob's refraction pattern and the six illustrations (both need the runtime) and the canvas nodes (React Flow). All three are marked as stand-ins where they appear.
+
+**Not regenerated for v1 (2026-09-16).** Every board under `packages/ui/design/` — `release/`, `editor/` and `screen/` — still shows the 0.1.0 system: glass panels, the rail, the canvas nodes, the editor chrome. The release boards *could* be rebuilt, since `build.mjs` re-reads the live `packages/ui/src/css/*` and would come back flat on its own; the editor and screen boards could not, because they describe work that no longer exists and would have to be rewritten rather than re-rendered. All of them are left alone. They are the record of what was decided on them — and the decisions are still the decisions, even where the code they produced has been removed. Read them as history, not as the system; the system is §1–§6 and the registry.

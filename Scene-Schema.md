@@ -2,6 +2,8 @@
 
 *Opened 2026-09-11. The contract between the admin editor (Admin.md), `@no-origins/ui/canvas`, and every project that renders a canvas.*
 
+> **Superseded 2026-09-16.** The document layer, the adapter and the editor this schema fed were removed with React Flow (Atomic.md D11). Bhargav: *"Let's remove the react flow and all react flow related items completely. I want to take a different approach later."* This document is kept as the record of what was learned — and **the registry's contract (§2, §3) is what survives**: `entries`, each entry's `kind` and `slots`, and the prop schemas are still in the package, because they describe what a component is and where it may go, which is the first thing any new approach will need. The body below is not rewritten; read it as the account of the first attempt.
+
 This is a **System** in the sense of Admin.md §1: every project shares it, no project may fork it, and both the editor that writes it and the renderer that reads it are downstream of this document rather than of each other.
 
 ---
@@ -87,6 +89,8 @@ The first draft made boxes the storage unit, on the reasoning that an off-grid l
 
 Sub-pixel placement is still not supported: `at` and `size` are integers. Anything finer is a component's internal layout, not a scene.
 
+**Revised again, 2026-09-15 — Bhargav, on first use of the editor:** *"one full block of grid item should be the minimum space any item should take. No dynamic sizes. Sizes are always defined in terms of blocks."* So the unit stays canvas units, but the RULE changes for every kind: `at` lands on a box corner and `size` is whole boxes, one at least — blobs included (a blob without a `size` is one box). Me was the argument for free placement; it is now on the grid: the blob in the box at `[0, −320]`, the intro at `[−320, 160]` 4 × 1, the story under it 4 × 3, the menu one box further left so it touches rather than covers. The editor snaps on drop, on drag and on resize (handles on the selected node), and the layout form counts in boxes. A node also carries **`align`** — `start · center · end`, default **center**: content sits in the middle of its boxes unless told otherwise. §6 rule 7 now applies to every node in canvas space.
+
 ### 1.2 `order` is reading order
 
 Design-System.md §12: *"canvas nodes are absolutely positioned, so DOM order is reading order and tab order"*, and §8.3: a ring has no natural order, so reading order is declared. `order` lists sections; within a section, array order in `nodes` is DOM order.
@@ -102,6 +106,8 @@ The adapter emits nodes in that order and **never sorts by position**. A documen
 ```
 
 Width authored, height measured (written back by the editor, never typed); both in canvas units. `slack` is what the probes report. A panel with no `measured` renders at its content's natural height and is flagged before publish.
+
+**Retired 2026-09-15** (§1.1 revision): *"no dynamic sizes."* A panel's height is authored in whole boxes like every other node's; content that does not fit is the author's to see and the handles' to fix. `null` heights and `measured` are still read from older documents and rendered at whole boxes with a warning; the editor never writes them.
 
 ---
 
