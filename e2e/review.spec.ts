@@ -11,7 +11,6 @@ export const ROUTES = [
   "/philosophy",
   "/fixtures",
   "/fixtures/bento", "/fixtures/studio", "/fixtures/controls",
-  "/fixtures/canvas",
   "/fixtures/layout",
   "/fixtures/primitives",
   "/fixtures/compose",
@@ -20,15 +19,40 @@ export const ROUTES = [
   "/fixtures/blob",
   "/fixtures/tool",
   "/fixtures/inspector",
-  "/fixtures/document",
 ];
 
 /** The showcase is a second app on its own port (Design-System.md §11.4) — its own project, its own domain. */
 export const DESIGN = "http://localhost:3001";
-export const DESIGN_ROUTES = ["/", "/components", "/tokens"];
+export const DESIGN_ROUTES = [
+  "/",
+  "/tokens",
+  "/tokens/colour", "/tokens/contrast", "/tokens/type", "/tokens/space",
+  "/tokens/radius", "/tokens/elevation", "/tokens/motion",
+  "/components",
+  "/components/atoms", "/components/molecules", "/components/organisms",
+];
 
 const slug = (route: string) =>
   route === "/" ? "home" : route.slice(1).replace(/\//g, "__");
+
+/**
+ * A Tool owns its own scroll (`.noo-tool__column`, Design-System.md §8 / Atomic.md D6), so `fullPage: true` sees only
+ * the fold. Where a route renders one, the viewport is grown to the column's height before the capture, so the
+ * screenshot shows the whole screen the way it does for a page. Capped, so a runaway layout cannot ask for a
+ * hundred-thousand-pixel PNG.
+ */
+async function growForTool(page: import("@playwright/test").Page) {
+  const tall = await page.evaluate(() => {
+    const col = document.querySelector<HTMLElement>(".noo-tool__column");
+    return col ? Math.min(col.scrollHeight, 8000) : 0;
+  });
+  if (!tall) return;
+  const vp = page.viewportSize();
+  if (vp && tall > vp.height) {
+    await page.setViewportSize({ width: vp.width, height: tall });
+    await page.waitForTimeout(150);
+  }
+}
 
 for (const route of ROUTES) {
   test(`review ${route}`, async ({ page }, testInfo) => {
@@ -45,6 +69,7 @@ for (const route of ROUTES) {
 
     // Let fonts, the blob, and entrance motion settle before the capture.
     await page.waitForTimeout(400);
+    await growForTool(page);
 
     const file = `e2e/screenshots/${testInfo.project.name}/${slug(route)}.png`;
     await page.screenshot({ path: file, fullPage: true, animations: "disabled" });
@@ -104,6 +129,7 @@ for (const route of DESIGN_ROUTES) {
     expect(response, `no response for ${route}`).not.toBeNull();
     expect(response!.status(), `${route} returned ${response!.status()}`).toBeLessThan(400);
     await page.waitForTimeout(400);
+    await growForTool(page);
 
     const file = `e2e/screenshots/${testInfo.project.name}/design__${slug(route)}.png`;
     await page.screenshot({ path: file, fullPage: true, animations: "disabled" });

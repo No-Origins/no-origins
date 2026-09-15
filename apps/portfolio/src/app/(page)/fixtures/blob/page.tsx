@@ -36,7 +36,7 @@ export default function BlobFixture() {
           <Eyebrow>no origins · build step 2 · fixture</Eyebrow>
           <h1 className="mt-3 font-display text-[44px] leading-[1.02] text-ink">The blob, every way it appears</h1>
           <p className="mt-4 max-w-[60ch] text-[17px] leading-[1.5] text-ink-2">
-            Tinted glass over the grid. Move the pointer near one and it looks at you. Every few seconds one of them blinks; none blink together.
+            Flat colour on the ground, drawn on one 96 × 64 box and scaled. Move the pointer near one and it looks at you. Every few seconds one of them blinks; none blink together.
           </p>
         </div>
         <ThemeSwitch />
@@ -53,15 +53,15 @@ export default function BlobFixture() {
         </div>
       </Section>
 
-      <Section title="Three variants" note="Every character is glass with colour in it. The host is the same glass with nothing in it. The logotype is the outline, in whatever colour the text is.">
+      <Section title="Three variants" note="A character IS its colour — the hue's pastel, opaque, with a drop shadow under it. The host is the surface itself with a hairline, so you can tell which one is you. The logotype is the outline, in whatever colour the text is.">
         <div className="flex flex-wrap items-end gap-10">
           <figure className="flex flex-col items-start gap-3">
             <Blob variant="character" size="lg" label="Portfolio blob, peach" />
             <Caption>character · accent (peach) · lg</Caption>
           </figure>
           <figure className="flex flex-col items-start gap-3">
-            <Blob variant="glass" size="lg" label="Bhargav, the host" />
-            <Caption>glass · the host · lg</Caption>
+            <Blob variant="host" size="lg" label="Bhargav, the host" />
+            <Caption>host · the surface · lg</Caption>
           </figure>
           <figure className="flex flex-col items-start gap-3 text-ink">
             <Blob variant="logotype" size="lg" label="No Origins mark" />
@@ -74,7 +74,7 @@ export default function BlobFixture() {
         </div>
       </Section>
 
-      <Section title="The family" note="Seven blobs, one per block. Each tint at 24% (36% in the dark); the host has no tint at all.">
+      <Section title="The family" note="Seven blobs, one per block. Each one the hue at full strength; the host has no hue at all.">
         <div className="flex flex-wrap items-end gap-8">
           {characterHues.map((h) => (
             <figure key={h} className="flex flex-col items-start gap-3">
@@ -87,7 +87,7 @@ export default function BlobFixture() {
             </figure>
           ))}
           <figure className="flex flex-col items-start gap-3">
-            <Blob variant="glass" size="md" label="Bhargav" />
+            <Blob variant="host" size="md" label="Bhargav" />
             <Caption>
               host
               <br />
@@ -138,38 +138,15 @@ export default function BlobFixture() {
         </div>
       </Section>
 
-      <Section title="Refraction follows the grid" note="The band inside the pill re-draws the grid lines behind it, magnified 6%, phase-aligned to the nearest ground. Since the ground moved from 32px dots to 160px boxes the effect only shows where a line actually passes through a blob — which is why the one glass blob sits on the canvas origin, with both axes through it. On a solid card there is no grid to bend, so refraction is turned off.">
-        <div className="grid gap-6 md:grid-cols-3">
-          <figure className="flex flex-col gap-3">
-            <div className="flex h-[168px] items-center justify-center rounded-lg">
-              <Blob size="lg" />
-            </div>
-            <Caption>page ground · 160px boxes · no line here to bend</Caption>
-          </figure>
-          <figure className="flex flex-col gap-3">
-            <div className="noo-ground flex h-[168px] items-center justify-center rounded-lg shadow-e1" style={{ "--grid-box": "56px" } as React.CSSProperties}>
-              <Blob size="lg" hue="yellow" />
-            </div>
-            <Caption>a tighter local ground · 56px · a line through the pill</Caption>
-          </figure>
-          <figure className="flex flex-col gap-3">
-            <div className="flex h-[168px] items-center justify-center rounded-lg bg-surface shadow-e1">
-              <Blob size="lg" hue="pink" refraction={false} />
-            </div>
-            <Caption>solid surface · refraction off</Caption>
-          </figure>
-        </div>
-      </Section>
-
       <Section title="In a row" note="How they sit together at nav and sm — list avatars, chips, block cards.">
         <div className="flex flex-wrap items-center gap-6">
-          <div className="noo-glass noo-glass--2 flex items-center gap-3 rounded-pill px-4 py-2">
-            <Blob size="nav" variant="glass" label="Bhargav" />
+          <div className="noo-surface noo-surface--2 flex items-center gap-3 rounded-pill px-4 py-2">
+            <Blob size="nav" variant="host" label="Bhargav" />
             <span className="text-[15px] font-medium text-ink">Hey! What&apos;s on your mind today?</span>
           </div>
           {characterHues.map((h) => (
-            <span key={h} className="noo-glass noo-glass--1 inline-flex items-center gap-2 rounded-pill py-1 pl-1 pr-3 text-[14px] font-medium text-ink">
-              <Blob size="sm" hue={h} refraction={false} />
+            <span key={h} className="noo-surface noo-surface--1 inline-flex items-center gap-2 rounded-pill py-1 pl-1 pr-3 text-[14px] font-medium text-ink">
+              <Blob size="sm" hue={h} />
               {owner(h)}
             </span>
           ))}
@@ -177,8 +154,8 @@ export default function BlobFixture() {
       </Section>
 
       <p className="mt-20 max-w-[62ch] font-mono text-[12px] leading-[1.6] text-muted">
-        Reduced motion: no breathing, no looking; blinks slow to every 8–14s. Reduced transparency: the frost goes, the body
-        thickens to 55%, the refraction band hides. No backdrop-filter: the body gains 20%.
+        Reduced motion: no breathing, no looking; blinks slow to every 8–14s. The blob is flat since v1 (2026-09-16): no frost,
+        no refraction band, no rim light, so there is nothing left for reduced transparency to turn off.
       </p>
     </div>
   );

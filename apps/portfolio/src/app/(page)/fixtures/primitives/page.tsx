@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Blob, Bubble, Button, Card, Chip, Field, Glass, Toggle, blocks, hues, type Hue , ThemeSwitch } from "@no-origins/ui";
+import { Blob, Bubble, Button, Card, Chip, Field, Surface, Toggle, blocks, hues, type Hue , ThemeSwitch } from "@no-origins/ui";
 
 export const metadata: Metadata = { title: "Primitives fixture", robots: { index: false } };
 
-// Build step 3 fixture: the glass surface and the six primitives, every variant and state, over the real grid.
+// Build step 3 fixture: the one surface and the six primitives, every variant and state, over the real grid.
 
 const owner = (hue: Hue) => Object.entries(blocks).find(([, h]) => h === hue)?.[0] ?? "host";
 
@@ -38,9 +38,9 @@ export default function PrimitivesFixture() {
       <div className="flex flex-wrap items-start justify-between gap-6">
         <div>
           <p className="noo-label text-muted">no origins · build step 3 · fixture</p>
-          <h1 className="noo-h1 mt-3 text-ink">Glass and the six primitives</h1>
+          <h1 className="noo-h1 mt-3 text-ink">Surface and the six primitives</h1>
           <p className="noo-lead mt-4 max-w-[60ch] text-ink-2">
-            One surface recipe at three levels, and the pieces every block is assembled from. Tab through it: every control shows the same focus ring.
+            One material at three levels, and the pieces every block is assembled from. Tab through it: every control shows the same focus ring.
           </p>
         </div>
         <ThemeSwitch />
@@ -63,25 +63,25 @@ export default function PrimitivesFixture() {
         </div>
       </Section>
 
-      <Section title="Glass" note="Three levels of one recipe. Over the grid the dots stay faintly there; the brighter top edge and the sweep are what make it liquid.">
+      <Section title="Surface" note="The one material, at three levels. A flat --surface fill, a --rule hairline, and an elevation for how far off the ground the thing sits. Nothing is seen through it, so nothing is asked of the ground behind it.">
         <div className="grid gap-5 md:grid-cols-3">
           {([1, 2, 3] as const).map((level) => (
-            <Glass key={level} level={level} radius="lg" className="p-5">
-              <p className="noo-label text-muted">glass-{level}</p>
-              <p className="noo-h4 mt-2 text-ink">{level === 1 ? "Bubbles, chips, small cards" : level === 2 ? "Nav bar, chat input, panels" : "Sheets, dialogs, menus"}</p>
-              <p className="noo-body-sm mt-2 text-ink-2">{level === 1 ? "58% fill · 14px blur · e1" : level === 2 ? "66% fill · 18px blur · e2" : "74% fill · 22px blur · e4"}</p>
-            </Glass>
+            <Surface key={level} level={level} radius="lg" className="p-5">
+              <p className="noo-label text-muted">surface-{level}</p>
+              <p className="noo-h4 mt-2 text-ink">{level === 1 ? "Cards, fields, chips" : level === 2 ? "Nav bar, chat input, menus" : "Dialogs and sheets"}</p>
+              <p className="noo-body-sm mt-2 text-ink-2">{level === 1 ? "e1" : level === 2 ? "e2" : "e4"}</p>
+            </Surface>
           ))}
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-3">
-          <Glass level={1} radius="pill" className="px-4 py-2 text-[14px] font-medium text-ink">radius pill</Glass>
-          <Glass level={1} radius="md" className="px-4 py-2 text-[14px] font-medium text-ink">radius md</Glass>
-          <Glass level={1} radius="xs" className="px-4 py-2 text-[14px] font-medium text-ink">radius xs</Glass>
-          <Glass as="section" level={2} radius="xl" className="px-5 py-3 text-[14px] font-medium text-ink">as=&quot;section&quot; · radius xl</Glass>
+          <Surface level={1} radius="pill" className="px-4 py-2 text-[14px] font-medium text-ink">radius pill</Surface>
+          <Surface level={1} radius="md" className="px-4 py-2 text-[14px] font-medium text-ink">radius md</Surface>
+          <Surface level={1} radius="xs" className="px-4 py-2 text-[14px] font-medium text-ink">radius xs</Surface>
+          <Surface as="section" level={2} radius="xl" className="px-5 py-3 text-[14px] font-medium text-ink">as=&quot;section&quot; · radius xl</Surface>
         </div>
       </Section>
 
-      <Section title="Button" note="A pill, 44px minimum. Primary is ink; secondary is noo-glass--1 with its hairline; ghost is text that underlines on hover. Small is 36px.">
+      <Section title="Button" note="A pill, 44px minimum. Primary is ink; secondary is the level-1 surface with its hairline; ghost is text that underlines on hover. Small is 36px.">
         <div className="flex flex-col gap-6">
           <div className="flex flex-wrap items-center gap-3">
             <Button>Say hello</Button>
@@ -124,17 +124,17 @@ export default function PrimitivesFixture() {
         </div>
       </Section>
 
-      <Section title="Card" note="Surface or noo-glass--1, radius 20, padding 24 (small: 20). Interactive cards lift a pixel and a level on hover. Below, the composition the Work section will use: card, blob at sm, h4, a line, chips.">
+      <Section title="Card" note="The level-1 surface, radius 20, padding 24 (small: 20). Interactive cards lift a pixel and a level on hover. Below, the composition the Work section will use: card, blob at sm, h4, a line, chips.">
         <div className="grid gap-5 md:grid-cols-3">
           <Card>
             <p className="noo-label text-muted">solid</p>
             <p className="noo-h4 mt-2 text-ink">A surface card</p>
             <p className="noo-body-sm mt-2 text-ink-2">Padding 24, e1, radius 20. The default for content that has to be read.</p>
           </Card>
-          <Card surface="glass">
-            <p className="noo-label text-muted">glass</p>
-            <p className="noo-h4 mt-2 text-ink">A glass card</p>
-            <p className="noo-body-sm mt-2 text-ink-2">Glass-1 over the grid. For panels the platform should show through.</p>
+          <Card padding="lg" radius="xl">
+            <p className="noo-label text-muted">padding lg · radius xl</p>
+            <p className="noo-h4 mt-2 text-ink">The roomy card</p>
+            <p className="noo-body-sm mt-2 text-ink-2">Padding 40, radius 28. What Quote stands on, and the only other size a card comes in.</p>
           </Card>
           <Card interactive as="a" href="/fixtures/blob" padding="sm">
             <p className="noo-label text-muted">interactive · sm · as=&quot;a&quot;</p>
@@ -145,7 +145,7 @@ export default function PrimitivesFixture() {
         <div className="mt-5 grid gap-5 md:grid-cols-2">
           {(["lavender", "blue"] as const).map((h) => (
             <Card key={h} interactive as="article" className="flex gap-5">
-              <Blob size="sm" hue={h} refraction={false} className="mt-1" />
+              <Blob size="sm" hue={h} className="mt-1" />
               <div className="min-w-0">
                 <p className="noo-h4 text-ink">{h === "lavender" ? "A rich-text editor, twice" : "An agents harness"}</p>
                 <p className="noo-body-sm mt-1 text-ink-2">{h === "lavender" ? "Two production editors on tiptap; the second one taught the first one's lessons." : "Cloud core, local agents, a thin client — the thing this whole site is a front door for."}</p>
@@ -160,7 +160,7 @@ export default function PrimitivesFixture() {
         </div>
       </Section>
 
-      <Section title="Bubble" note="Glass-1 pill of real text, 15 over 1.4, padding 10 × 16. Tint mixes a hue's pastel at 45%. Anchored top-right of a blob with an 8px gap; the pop plays on mount.">
+      <Section title="Bubble" note="A level-1 surface as a pill of real text, 15 over 1.4, padding 10 × 16. Tint mixes a hue's pastel at 45%. Anchored top-right of a blob with an 8px gap; the pop plays on mount.">
         <div className="flex flex-col gap-8">
           <div className="flex flex-wrap items-center gap-3">
             <Bubble>What are we doing today?</Bubble>
@@ -170,7 +170,7 @@ export default function PrimitivesFixture() {
           </div>
           <div className="flex flex-wrap items-end gap-14 pt-12">
             <div className="relative inline-flex">
-              <Blob variant="glass" size="md" label="Bhargav" />
+              <Blob variant="host" size="md" label="Bhargav" />
               <Bubble pop className="absolute bottom-[calc(100%-6px)] left-[calc(100%+8px)] whitespace-nowrap">
                 Hey! What&apos;s on your mind today?
               </Bubble>
@@ -185,7 +185,7 @@ export default function PrimitivesFixture() {
         </div>
       </Section>
 
-      <Section title="Field" note="Label above in caption; a noo-glass--1 box, radius 14, 48px tall; the focus ring is 1.5px accent-deep inside and 3px accent at 25% outside. Errors turn it --bad and are announced.">
+      <Section title="Field" note="Label above in caption; a level-1 surface box, radius 14, 48px tall; the focus ring is 1.5px accent-deep inside and 3px accent at 25% outside. Errors turn it --bad and are announced.">
         <div className="grid gap-6 md:grid-cols-2">
           <Field label="Name" placeholder="What should the blobs call you?" />
           <Field label="Email" type="email" placeholder="you@somewhere.com" hint="Only for the reply. Never shared." />

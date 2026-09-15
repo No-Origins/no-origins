@@ -43,7 +43,7 @@ export function InspectorFixture() {
         </div>
         <div className="fx-insp__row">
           <span className="noo-field__label">Tone</span>
-          <Segmented label="Tone" options={[{ value: "quiet", label: "quiet" }, { value: "glass", label: "glass" }, { value: "fill", label: "fill" }, { value: "ink", label: "ink" }]} defaultValue="fill" />
+          <Segmented label="Tone" options={[{ value: "quiet", label: "quiet" }, { value: "fill", label: "fill" }, { value: "ink", label: "ink" }, { value: "bare", label: "bare" }]} defaultValue="fill" />
         </div>
         <Select label="Size" defaultValue="md" options={[{ value: "sm", label: "sm" }, { value: "md", label: "md" }, { value: "lg", label: "lg" }, { value: "hero", label: "hero" }, { value: "favicon", label: "favicon" }]} />
         <div className="fx-insp__row">

@@ -8,7 +8,7 @@
  *
  * Two things this is NOT. It is not a second copy of the generator: it imports the same `illoLines` the studio's
  * batches draw with, so a setting found here is a setting that ships. And it is not a preview of a picture — it
- * is a preview of a CELL, with the real text on top, the real card gradient and grain underneath, at the three
+ * is a preview of a CELL, with the real text on top, the real card wash and grain underneath, at the three
  * sizes an illustration has to survive: the loud tile, a quiet one, and the 0.27 overview.
  *
  * The controls split in two, and the split matters. GEOMETRY is what the function takes. LOOK is what the card

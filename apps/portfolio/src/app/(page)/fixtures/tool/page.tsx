@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
-import { Button, Chip, Document, Field, Ground, Menu, Placeholder, SectionHeader, Segmented, Select, Table, Tabs, Text, ThemeSwitch, Tool, ToolScreen, Toggle, Tree, type TreeNode } from "@no-origins/ui";
-import { entries, layers } from "@no-origins/ui/registry";
+import { Button, Chip, Document, Field, Menu, Placeholder, SectionHeader, Segmented, Select, Table, Tabs, Text, ThemeSwitch, Tool, ToolScreen, Toggle } from "@no-origins/ui";
 
 export const metadata: Metadata = { title: "Tool template", robots: { index: false } };
 
 /**
- * Step 5's fixture (Atomic.md D6): the `Tool` template as the admin wears it, with every region filled — rail,
+ * Step 5's fixture (Atomic.md D6): the `Tool` template as the admin wears it, with every region filled — menu,
  * header, main, inspector, bar — on data that needs no database, so the review sweep can look at the shell the
  * admin's own routes hide behind auth. Below it, the `Document` template with every element markdown produces.
- * Third, the editor's shell (Admin.md §6.5 row 1, 2026-09-14): the Menu in its rail form, a `sidebar` holding the
- * palette (the registry by layer) and the outline (a `Tree`), a `flush` main the canvas will fill, the inspector
- * and the bar. The canvas itself is step 3; the ground with its grid stands in so the flush edges can be seen.
+ *
+ * There used to be a third shell here: the editor, with the Menu in its rail form and a `flush` main for the
+ * canvas. The rail, `flush` and the canvas all went in v1 (2026-09-16), and a fixture for a shell that no longer
+ * exists is worse than no fixture at all.
+ *
+ * The menus are `form="auto"`, not `"column"`: below 900 a forced column keeps its 280px and squeezes the screen
+ * off the side of a phone, which is exactly what `auto` exists to prevent — it hands the same items to the sheet
+ * at the bottom of the viewport instead, and `.noo-tool:has(.noo-menu--sheet)` pads the column for it.
  */
 const GROUPS = [
   { items: [{ href: "/fixtures/tool", label: "Overview" }] },
@@ -28,19 +32,10 @@ const VERSIONS = [
   { v: 10, label: "First publish", by: "bhargav", when: "2026-09-08", state: "superseded" },
 ];
 
-const OUTLINE: TreeNode[] = [
-  { id: "me", label: "Me", children: [{ id: "me-blob", label: "The blob" }, { id: "me-intro", label: "Intro" }] },
-  { id: "work", label: "Work", children: [{ id: "work-widget", label: "Widget" }, { id: "work-full", label: "Full view" }] },
-  { id: "status", label: "Status", children: [{ id: "status-widget", label: "Widget" }] },
-  { id: "menu", label: "Sections menu" },
-];
-
-const PALETTE = layers.map((layer) => ({ layer, names: entries.filter((e) => e.layer === layer).map((e) => e.name) }));
-
 export default function ToolFixture() {
   return (
     <>
-      <Tool menu={<Menu groups={GROUPS} currentHref="/fixtures/tool" form="column" trailing={<ThemeSwitch />} />}>
+      <Tool menu={<Menu groups={GROUPS} currentHref="/fixtures/tool" form="auto" trailing={<ThemeSwitch />} />}>
         <ToolScreen
           eyebrow="Projects"
           title="Portfolio"
@@ -108,7 +103,7 @@ export default function ToolFixture() {
         </ToolScreen>
       </Tool>
 
-      <Tool menu={<Menu groups={GROUPS.slice(0, 1)} currentHref="/fixtures/tool" form="column" />}>
+      <Tool menu={<Menu groups={GROUPS.slice(0, 1)} currentHref="/fixtures/tool" form="auto" />}>
         <ToolScreen eyebrow="Systems" title="Document" meta={<Chip hue="lavender">the reading column</Chip>}>
           <Document>
             <h2>What a document wears</h2>
@@ -137,59 +132,6 @@ export default function ToolFixture() {
             <hr />
             <p>Then a rule, and the next section.</p>
           </Document>
-        </ToolScreen>
-      </Tool>
-
-      <style>{`
-        .fx-palette { display: flex; flex-direction: column; gap: var(--s-2); }
-        .fx-palette__list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-3); color: var(--ink-2); }
-        .fx-canvas { display: grid; place-items: center; min-height: 480px; padding: var(--s-8); }
-      `}</style>
-      <Tool menu={<Menu groups={GROUPS} currentHref="/fixtures/tool" form="rail" />}>
-        <ToolScreen
-          eyebrow="Projects"
-          title="Portfolio"
-          meta={<><Chip hue="grey">draft</Chip><Text size="small" tone="muted" as="span">saved 2 minutes ago</Text></>}
-          actions={<><Button variant="secondary" size="sm">Preview</Button><Button size="sm">Publish</Button></>}
-          flush
-          sidebar={
-            <>
-              <SectionHeader level={4} rhythm={false} label="palette" title="Components" lead="The registry, by layer." />
-              {PALETTE.map((g) => (
-                <div key={g.layer} className="fx-palette">
-                  <p className="noo-label text-muted">{g.layer}s</p>
-                  <ul className="fx-palette__list noo-body-sm">
-                    {g.names.map((n) => <li key={n}>{n}</li>)}
-                  </ul>
-                </div>
-              ))}
-              <SectionHeader level={4} rhythm={false} label="outline" title="Reading order" />
-              <Tree label="Outline" nodes={OUTLINE} defaultSelected="work-widget" defaultExpanded={["work"]} />
-            </>
-          }
-          inspector={
-            <>
-              <SectionHeader level={4} rhythm={false} label="selected" title="Bento widget" lead="Work" />
-              <Field label="Eyebrow" defaultValue="WORK EXPERIENCE" />
-              <Select label="Hue" defaultValue="peach" options={["peach", "lavender", "blue", "green", "pink", "yellow", "grey"].map((h) => ({ value: h, label: h }))} />
-              <Segmented label="Pattern words" options={[{ value: "on", label: "Shown" }, { value: "off", label: "Hidden" }]} />
-            </>
-          }
-          bar={
-            <>
-              <Segmented label="Viewport" options={[{ value: "desktop", label: "Desktop" }, { value: "phone", label: "Phone" }]} />
-              <Segmented label="Grid" options={[{ value: "on", label: "Grid" }, { value: "off", label: "Off" }]} />
-              <Text size="small" tone="muted" as="span">zoom 0.9</Text>
-              <ThemeSwitch />
-            </>
-          }
-        >
-          <Ground className="fx-canvas">
-            <Placeholder title="The canvas" draft>
-              CanvasShell lands here at step 3. Flush: no gutters, the grid runs to every edge, and the sidebar, the
-              inspector and the bar float over it.
-            </Placeholder>
-          </Ground>
         </ToolScreen>
       </Tool>
     </>

@@ -153,7 +153,7 @@ export const sections: SectionDef[] = [
             {(site.interests ?? []).slice(0, 4).map((line) => <li key={line}>{line}</li>)}
           </ul>
         </BentoCell>
-        <BentoCell span={W([4, 1]) as [number, number]} tone="glass">
+        <BentoCell span={W([4, 1]) as [number, number]}>
           <p className="noo-label">and the rest</p>
           <p className="noo-bento__text">A handful more, each one a line.</p>
         </BentoCell>
@@ -174,7 +174,7 @@ export const sections: SectionDef[] = [
           <Sample of="philosophy" />
           <p className="noo-bento__text">{(site.philosophy ?? [])[0]?.replace(/^Sample copy\. /, "")}</p>
         </BentoCell>
-        <BentoCell span={W([4, 1]) as [number, number]} tone="glass">
+        <BentoCell span={W([4, 1]) as [number, number]}>
           <p className="noo-label">two more like it</p>
           <p className="noo-bento__text">Each one a paragraph, in the full view.</p>
         </BentoCell>

@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "@no-origins/ui/tailwind.css";
 @import "@no-origins/ui/index.css";
-@import "@xyflow/react/dist/base.css" layer(base); /* the canvas home (§8); in `base` so the package's components layer overrides it */
 
 html { height: 100%; }
 body { min-height: 100%; }              /* never a fixed height: a flex column of fixed height shrinks its children */
