@@ -26,11 +26,11 @@ on conflict (slug) do update
   set name = excluded.name, kind = excluded.kind, description = excluded.description;
 
 -- ── layer 1 · the first project ──────────────────────────────────────────────
--- `status = 'draft'` is R5 in the data: the live portfolio still renders from
--- `scene.tsx`, and nothing here is what a visitor sees until step 10.
+-- `status = 'draft'` is R5 in the data: the live portfolio renders from source,
+-- and nothing here is what a visitor sees until a document is published.
 insert into public.projects (slug, name, domain, description, hue, status) values
   ('portfolio', 'Portfolio', 'bhargav.no-origins.com',
-   'The canvas portfolio. The canvas IS the portfolio — sections sit on a box grid around Me.',
+   'Bhargav''s portfolio: an intro and seven sections, each a page, built from the design system.',
    'peach', 'draft')
 on conflict (slug) do update
   set name = excluded.name, domain = excluded.domain,

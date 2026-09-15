@@ -9,7 +9,7 @@ export const metadata = { title: "Overview" };
  *
  * Right now the true answer to all three is "nothing", and the screen says so in the tables' own empty rows rather
  * than with a dashboard of zeroes (Brand.md §10). Under R5 that emptiness is correct and not a gap — the live
- * portfolio renders from `scene.tsx` and will keep doing so until there is a composed document worth replacing it
+ * portfolio renders from source and will keep doing so until there is a composed document worth replacing it
  * with.
  */
 export default async function Overview() {
@@ -79,7 +79,7 @@ export default async function Overview() {
           { key: "state", header: "State", render: (r) => <Chip hue={r.state === "published" ? "green" : r.state === "drafted" ? "yellow" : "grey"}>{r.state}</Chip> },
         ]}
         rows={docs}
-        empty="No documents. Under R5 the first one is a blank canvas, composed in the editor; the live portfolio keeps rendering from scene.tsx until then."
+        empty="No documents. Nothing is authored in the admin yet; the live portfolio renders from source until then."
       />
 
       <Placeholder title="What changed">

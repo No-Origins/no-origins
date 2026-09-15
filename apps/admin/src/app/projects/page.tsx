@@ -17,7 +17,7 @@ export default async function Projects() {
         level={3}
         rhythm={false}
         title="A project is a thing with pages"
-        lead="A page is a document on the canvas, composed from the component library and published with a version number."
+        lead="A page is a document composed from the component library and published with a version number."
       />
       <Table
         caption="Projects"

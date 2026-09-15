@@ -6,9 +6,10 @@ export const metadata = { title: "Document" };
 /**
  * Systems → Document (Admin.md §4) — the schema, the registry, and what each component accepts.
  *
- * The fingerprint is the point of this screen existing before the editor does. Every published version stores the
- * `registry_hash` it was rendered against; when this number changes, a document published under the old one may
- * name a prop that no longer exists. Showing it here means the number is visible before it is a problem.
+ * The fingerprint is the point of this screen existing before anything is authored. Every published version
+ * stores the `registry_hash` it was rendered against; when this number changes, a document published under the
+ * old one may name a prop that no longer exists. Showing it here means the number is visible before it is a
+ * problem.
  */
 export default function DocumentSystem() {
   const rows = entries.map((e) => ({
@@ -20,7 +21,7 @@ export default function DocumentSystem() {
         level={3}
         rhythm={false}
         title="What a document may say"
-        lead="The scene schema, the component registry, and the one inline directive set prose is allowed. FNV-1a over every entry's name, kinds, props and slots — a document published before a component changed can be spotted rather than discovered."
+        lead="The component registry: every component a document may name, what it is placed as, and how many props it accepts. The fingerprint is FNV-1a over every entry's name, kinds, props and slots — a document published before a component changed can be spotted rather than discovered."
       />
       <Table
         caption="The registry"
@@ -38,10 +39,11 @@ export default function DocumentSystem() {
         ]}
         rows={rows}
       />
-      <Placeholder title="Directives">
-        R4: prose is markdown plus one declared extension — <code>:pan[Work]{"{view=work}"}</code>, a link that
-        moves the viewport instead of loading a document. It is inserted by a control, never typed. The set is a
-        registry like everything else and will be listed here once the renderer is built (step 6).
+      <Placeholder title="The document model">
+        Being redesigned. The canvas scene the first draft assumed came out with React Flow in version 1.0 of the
+        design system, and nothing is authored in the admin until its replacement is decided — so there is no
+        schema to print here yet. The registry above is not waiting on that: it is the source the catalogue is
+        built from, and its fingerprint is the number every future publish records.
       </Placeholder>
     </ToolScreen>
   );

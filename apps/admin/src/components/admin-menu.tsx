@@ -4,23 +4,21 @@ import { usePathname } from "next/navigation";
 import { Menu, Text, ThemeSwitch, type MenuGroup } from "@no-origins/ui";
 
 /**
- * The rail (Admin.md §4) — a `Menu` (Atomic.md D9): column on a desktop, rail between `sm` and `md`, sheet below.
+ * The admin's navigation (Admin.md §4) — a `Menu` (Atomic.md D9) in its `auto` form: a column from `md` up, the
+ * sheet below it. One navigation, one width; the collapsing rail went with v1 of the package.
  *
  * The groups ARE the three layers, in the order of dependence — Projects → Systems ← Products — which is why
  * Overview sits outside them rather than becoming a fourth. Each group's hue carries its layer, so §1's claim is
  * visible in the navigation and not only in the eyebrow each screen prints.
  *
- * On the editor route (`…/edit`, Admin.md §6.5 row 1) it takes its rail form whatever the width, so the screen's
- * sidebar and inspector have the room; the theme switch that the rail hides sits in the editor's own bar.
- *
- * A client island purely because it needs the pathname.
+ * A client island because it needs the pathname to mark the current item.
  */
 export const GROUPS: MenuGroup[] = [
   { items: [{ href: "/", label: "Overview" }] },
   {
     label: "Projects",
     hue: "peach",
-    items: [{ href: "/projects", label: "All projects", items: [{ href: "/projects/portfolio", label: "Portfolio" }] }],
+    items: [{ href: "/projects", label: "Projects", items: [{ href: "/projects/portfolio", label: "Portfolio" }] }],
   },
   {
     label: "Systems",
@@ -28,7 +26,7 @@ export const GROUPS: MenuGroup[] = [
     items: [
       {
         href: "/systems",
-        label: "All systems",
+        label: "Systems",
         items: [
           { href: "/systems/design", label: "Design System" },
           { href: "/systems/document", label: "Document" },
@@ -38,16 +36,14 @@ export const GROUPS: MenuGroup[] = [
       },
     ],
   },
-  { label: "Products", hue: "blue", items: [{ href: "/products", label: "All products" }] },
+  { label: "Products", hue: "blue", items: [{ href: "/products", label: "Products" }] },
 ];
 
-export function AdminRail({ email }: { email?: string | null }) {
+export function AdminMenu({ email }: { email?: string | null }) {
   const pathname = usePathname();
-  const editing = /\/edit(\/|$)/.test(pathname);
   return (
     <Menu
       groups={GROUPS}
-      form={editing ? "rail" : "auto"}
       currentHref={pathname}
       linkComponent={Link}
       trailing={
