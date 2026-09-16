@@ -5,22 +5,20 @@ import { Wordmark } from "../atoms/Wordmark";
 import { breakpoints, type Hue } from "../tokens/tokens";
 
 /**
- * Menu (Atomic.md D9) — the one navigation column, in five forms.
+ * Menu (Atomic.md D9) — the one navigation, in three forms.
  *
  * - `column` (280): brand, groups of pill items at `--ctl-md`, one level of children on a rule, a trailing slot.
- *   The current item is an ink pill — the primary button's material — replacing the Rail's 2px edge bar.
- * - `rail` (72): the same items with their labels lifted into a hover/focus bubble; groups keep a hairline.
+ *   The current item is an ink pill — the primary button's material.
  * - two columns (≥ `lg`): when the current top-level item declares a `panel`, its groups open in a second column;
  *   below `lg` the panel folds into the item's children. Not a form you ask for — the item asks for it.
- * - `floating` (188): no brand, items at `--ctl-sm`. The canvas's view switcher, placed as a `menu` node.
- * - `sheet`: the small-screen bottom bar with icons over short labels — the NavBar's old sheet, now this.
+ * - `sheet`: the small-screen bottom bar with a glyph over a short label.
  *
- * `auto` picks column ≥ `md`, rail between `sm` and `md`, and below `sm` a sheet when five or fewer top-level
- * items fit in it, else the rail. Same grammar throughout: xl outside, pill items, the current item in ink.
+ * `auto` picks the column from `md` up and the sheet below it. Same grammar throughout: a level-2 surface at
+ * radius xl, pill items, the current item in ink. The rail form — 72px, labels in a hover bubble, a collapse
+ * toggle — went in v1 (2026-09-16): one navigation has one width.
  *
- * It replaces `Rail`, the NavBar's sheet and `CanvasShell`'s built-in menu — three hand-built menus, one answer to
- * "where am I". `linkComponent` is the router's link (Next: `Link`); the default is `<a>` (§11.2 rule 1). An item
- * with `onSelect` and no `href` renders a button; with both, the click is intercepted and `onSelect` runs unless a
+ * `linkComponent` is the router's link (Next: `Link`); the default is `<a>` (§11.2 rule 1). An item with
+ * `onSelect` and no `href` renders a button; with both, the click is intercepted and `onSelect` runs unless a
  * modifier key asks for a new tab.
  */
 export interface MenuItem {
@@ -28,19 +26,19 @@ export interface MenuItem {
   id?: string;
   label: ReactNode;
   href?: string;
-  /** Moves something instead of loading something — the canvas pans. */
+  /** Does something instead of loading something. */
   onSelect?: () => void;
   /** An `<Icon>` from `@no-origins/ui/icons`, or any 20px glyph. */
   icon?: ReactNode;
   /** A short count. */
   badge?: ReactNode;
-  /** A trailing control beside the item — an add button, a pin. Hidden in the rail and the sheet. */
+  /** A trailing control beside the item — an add button, a pin. Hidden in the sheet. */
   action?: ReactNode;
   /** One level of children, shown while this item is current. A menu that needs two is a `Tree`. */
   items?: MenuItem[];
   /** Groups for a second column while this item is current (≥ `lg`); they fold into children below. */
   panel?: MenuGroup[];
-  /** Mark current without a pathname (the canvas knows which view it is looking at). */
+  /** Mark current without a pathname. */
   current?: boolean;
 }
 
@@ -52,7 +50,7 @@ export interface MenuGroup {
   items: MenuItem[];
 }
 
-export type MenuForm = "auto" | "column" | "rail" | "floating" | "sheet";
+export type MenuForm = "auto" | "column" | "sheet";
 
 export interface MenuProps extends Omit<ComponentPropsWithoutRef<"nav">, "title"> {
   groups?: MenuGroup[];
@@ -82,19 +80,14 @@ function isCurrent(href: string | undefined, current?: string): boolean {
 const keyOf = (item: MenuItem, i: number) => item.id ?? item.href ?? (typeof item.label === "string" ? item.label : String(i));
 
 /* `auto` resolves against the viewport on the client; the server renders the column. */
-const QUERIES = { md: `(min-width: ${breakpoints.md}px)`, sm: `(min-width: ${breakpoints.sm}px)` };
+const QUERY = `(min-width: ${breakpoints.md}px)`;
 const subscribeWidth = (cb: () => void) => {
   if (typeof window === "undefined") return () => undefined;
-  const mqs = Object.values(QUERIES).map((q) => window.matchMedia(q));
-  mqs.forEach((m) => m.addEventListener("change", cb));
-  return () => mqs.forEach((m) => m.removeEventListener("change", cb));
+  const mq = window.matchMedia(QUERY);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
 };
-const readWidth = (): "md" | "sm" | "xs" => {
-  if (typeof window === "undefined") return "md";
-  if (window.matchMedia(QUERIES.md).matches) return "md";
-  if (window.matchMedia(QUERIES.sm).matches) return "sm";
-  return "xs";
-};
+const readWidth = (): "md" | "xs" => (typeof window !== "undefined" && window.matchMedia(QUERY).matches ? "md" : "xs");
 const serverWidth = () => "md" as const;
 
 export function Menu({
@@ -113,10 +106,8 @@ export function Menu({
 }: MenuProps) {
   const L: ElementType = linkComponent ?? "a";
   const groups: MenuGroup[] = givenGroups ?? (items ? [{ items }] : []);
-  const topLevel = groups.reduce((n, g) => n + g.items.length, 0);
   const width = useSyncExternalStore(subscribeWidth, readWidth, serverWidth);
-  const resolved: Exclude<MenuForm, "auto"> =
-    form !== "auto" ? form : width === "md" ? "column" : width === "sm" ? "rail" : topLevel <= 5 ? "sheet" : "rail";
+  const resolved: Exclude<MenuForm, "auto"> = form !== "auto" ? form : width === "md" ? "column" : "sheet";
 
   const current = (item: MenuItem): boolean => item.current ?? isCurrent(item.href, currentHref);
   const open = (item: MenuItem): boolean => current(item) || (item.items?.some(open) ?? false) || (item.panel?.some((g) => g.items.some(open)) ?? false);
@@ -136,7 +127,7 @@ export function Menu({
         {item.icon ? (
           <span className="noo-menu__icon" aria-hidden="true">{item.icon}</span>
         ) : (
-          /* the rail and the sheet need a glyph; without an icon the label's initial stands in */
+          /* the sheet needs a glyph; without an icon the label's initial stands in */
           <span className="noo-menu__initial" aria-hidden="true">{typeof item.label === "string" ? item.label.trim().charAt(0) : "·"}</span>
         )}
         <span className="noo-menu__label">{item.label}</span>
@@ -183,14 +174,14 @@ export function Menu({
       </div>
     ));
 
-  const showBrand = brand !== false && resolved !== "floating" && resolved !== "sheet";
+  const showBrand = brand !== false && resolved !== "sheet";
   return (
     <nav
-      className={cx("noo-glass noo-glass--2 noo-menu", `noo-menu--${resolved}`, panelOwner && resolved === "column" && "noo-menu--two", className)}
+      className={cx("noo-surface noo-surface--2 noo-menu", `noo-menu--${resolved}`, panelOwner && resolved === "column" && "noo-menu--two", className)}
       aria-label={rest["aria-label"] ?? "Primary"}
       {...rest}
     >
-      {skipTo && resolved !== "floating" ? (
+      {skipTo ? (
         <a href={skipTo} className="noo-skip">
           {skipLabel}
         </a>

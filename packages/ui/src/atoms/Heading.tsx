@@ -6,7 +6,7 @@ import { cx } from "../cx";
  *
  * The Bowlby rule (§5) is carried here rather than remembered: the display face appears at level 2 (34px) and
  * nowhere smaller; 3 and 4 are Hanken 600. Level 1 is not offered, because a surface has exactly one `h1` (§12)
- * and it is the page's or the canvas's, never a composed block's.
+ * and it is the page's, never a composed block's.
  *
  * `as` separates the look from the semantics for the rare case where the outline needs a different rank than the
  * size — use it deliberately, and never to get an `h1`.

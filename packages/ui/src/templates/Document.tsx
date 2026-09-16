@@ -8,8 +8,6 @@ import { cx } from "../cx";
  * code on `--ground-2`, a blockquote on a rule, a table on hairlines, an image at the column's own corner. R4 fixed
  * the prose's shape (markdown plus one directive); this is what it wears. Nothing here is a component a document
  * names — it is the stylesheet a document's plain HTML lands in, so a renderer emits `<h2>` and gets `h2`.
- *
- * `.noo-prose` is the old name and stays as an alias for one release.
  */
 export interface DocumentProps extends ComponentPropsWithoutRef<"article"> {
   as?: ElementType;

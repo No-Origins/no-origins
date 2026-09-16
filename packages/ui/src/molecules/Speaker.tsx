@@ -8,7 +8,7 @@ import { cx } from "../cx";
  * Speaker (§9) — a blob with its bubble: the pairing the brand is built on, named.
  *
  * The bubble sits top-right of the blob with an 8px gap in a page; `below` puts it under the blob for a narrow
- * column. `BlobNode` renders this in document mode; the fixtures and the About panel used to build it by hand.
+ * column. The fixtures and the About panel used to build it by hand.
  * The blob is the mark for an agent (Brand.md §9), so this is for something that speaks — never decoration.
  */
 export interface SpeakerProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
@@ -20,7 +20,7 @@ export interface SpeakerProps extends Omit<ComponentPropsWithoutRef<"div">, "chi
   size?: BlobSize;
   /** What it says. Without one it is a blob alone. */
   say?: ReactNode;
-  /** Tint for the bubble; default is plain glass. */
+  /** Tint for the bubble; default is the plain surface. */
   tint?: Hue;
   below?: boolean;
   /** Play bubble-pop on mount. */

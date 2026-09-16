@@ -51,7 +51,7 @@ export function BlockCard({ hue, title, line, meta, details, chips, progress, hr
       {...rest}
     >
       {blob ? (
-        <Blob size="sm" hue={hue} state={state} refraction={false} className="noo-block-card__blob" />
+        <Blob size="sm" hue={hue} state={state} className="noo-block-card__blob" />
       ) : (
         <span className="noo-block-card__hue" aria-hidden="true" />
       )}

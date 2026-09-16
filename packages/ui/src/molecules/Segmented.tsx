@@ -3,7 +3,7 @@ import { useState, type ComponentPropsWithoutRef, type ReactNode } from "react";
 import { cx } from "../cx";
 
 /**
- * Segmented (§9) — a few exclusive choices in a noo-glass--1 pill; the chosen one is ink on ground.
+ * Segmented (§9) — a few exclusive choices in a level-1 surface as a pill; the chosen one is ink on ground.
  *
  * One control for every "one of these" that fits in a row: light · system · dark, desktop · phone, grid · off.
  * More than four options, or options that need a sentence, is a `Select` or a `RadioGroup`. Controlled with
@@ -38,7 +38,7 @@ export function Segmented<V extends string = string>({ options, value, defaultVa
     onChange?.(v);
   };
   return (
-    <div role="group" aria-label={label} className={cx("noo-glass noo-glass--1 noo-segmented", size === "md" && "noo-segmented--md", className)} {...rest}>
+    <div role="group" aria-label={label} className={cx("noo-surface noo-surface--1 noo-segmented", size === "md" && "noo-segmented--md", className)} {...rest}>
       {options.map((o) => (
         <button
           key={o.value}

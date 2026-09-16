@@ -10,13 +10,13 @@
 |---|---|
 | Mark | **The blob** — a pill with two eyes. Outlined = logotype; filled = character. From Bhargav's sketch. |
 | Colour | **Sketch** — pastels on warm grey; ink does the pointing. |
-| Material | **Liquid glass** — translucent frosted surfaces over a dot-grid ground. Our own warm, soft version. |
+| Material | **One flat surface** — `--surface`, a `--rule` hairline, an elevation. Nothing is seen through anything; glass was removed 2026-09-16 (§3, Atomic.md D10). |
 | Type | **Bowlby One** (display, h2 and up, wordmark) · **Hanken Grotesk** (body, UI, h3/h4) · **JetBrains Mono** (labels, code) |
-| Home concept | A canvas of blobs that talk, one chat input, the wordmark bottom-right. |
+| Home concept | A canvas of blobs that talk, one chat input, the wordmark bottom-right. **Retired 2026-09-16** with React Flow (Atomic.md D11): the portfolio is pages, and a different approach to the canvas comes later. §8 is the record of what was built. |
 | Character | Warm, playful, expressive, approachable — and *passion, bold, curious*. |
 | Scope | Portfolio first: About · Work · Roadmap · Contact. The system is `packages/ui` in the No Origins monorepo; the portfolio is `apps/portfolio`, its first consumer. |
 
-**The one tension, resolved:** the palette is the softest of the eight offered, and the brief says *bold* and *passion*. So boldness is never saturation here. It comes from **scale** (big type, big blobs), **shape** (fully-round pills, generous radii), **material** (glass with real depth) and **character** (things that look at you and speak). Quiet means uncluttered, not muted.
+**The one tension, resolved:** the palette is the softest of the eight offered, and the brief says *bold* and *passion*. So boldness is never saturation here. It comes from **scale** (big type, big blobs), **shape** (fully-round pills, generous radii), **material** (one opaque surface with a warm shadow under it) and **character** (things that look at you and speak). Quiet means uncluttered, not muted.
 
 ## 1. Principles → rules
 
@@ -24,7 +24,7 @@
 |---|---|
 | Blocks, not pages | Every surface is a component with tokens in; no page-specific CSS. A new block imports the package and is native. |
 | Warm by default | Light theme is primary. Ground is warm grey, ink is warm near-black. Dark theme exists, is cared for, and swaps tokens only. |
-| Play without noise | Expression goes into blobs, colour tints, glass and motion. Layout stays single-column-calm with generous space. |
+| Play without noise | Expression goes into blobs, colour tints and motion. Layout stays single-column-calm with generous space. |
 | Make the making visible | Roadmap is a first-class component. Unfinished things get a sleeping blob, not a "coming soon." |
 | One system, every block | One token file, one component set, one motion vocabulary. A block picks a **hue**; nothing else changes. |
 
@@ -38,7 +38,7 @@ All values are `oklch()`; hex is the sRGB fallback. Tailwind 4 consumes these th
 |---|---|---|---|
 | `--ground` | `oklch(0.95 0.004 90)` | `#EFEEEB` | Page background. The dot grid sits on this. |
 | `--ground-2` | `oklch(0.92 0.005 90)` | `#E6E4E1` | Wells, inset areas, code blocks. |
-| `--surface` | `oklch(0.985 0.003 90)` | `#FBFAF8` | Solid cards; the *base* of glass before transparency. |
+| `--surface` | `oklch(0.985 0.003 90)` | `#FBFAF8` | The one material (§3): cards, bars, menus, dialogs — opaque, at one of three elevations. |
 | `--ink` | `oklch(0.30 0.012 60)` | `#322C28` | Text, icons, primary buttons, outlined blob. |
 | `--ink-2` | `oklch(0.42 0.012 60)` | `#524C47` | Secondary text. |
 | `--muted` | `oklch(0.55 0.01 60)` | `#76706C` | Captions, placeholders, disabled. |
@@ -55,7 +55,7 @@ Each hue has a **fill** (the blob, tints, chips) and a **deep** tier (text, icon
 |---|---|---|---|---|---|
 | `pink` | `oklch(0.82 0.10 20)` | `#FEAAA9` | `oklch(0.45 0.16 20)` | `#9A1C2E` | unassigned |
 | `green` | `oklch(0.91 0.10 130)` | `#CBEFA8` | `oklch(0.45 0.12 140)` | `#2B641D` | Writing — and the greeter ("Hey there!!") |
-| `grey` | `oklch(0.93 0.006 90)` | `#E9E8E3` | `oklch(0.45 0.01 90)` | `#57554F` | unassigned — the host is clear glass (§4.1b), not grey |
+| `grey` | `oklch(0.93 0.006 90)` | `#E9E8E3` | `oklch(0.45 0.01 90)` | `#57554F` | unassigned — the host is `--surface` with a hairline (§4.1b), not grey |
 | `lavender` | `oklch(0.85 0.08 300)` | `#D5C2FB` | `oklch(0.45 0.14 300)` | `#623E96` | Editor |
 | `peach` | `oklch(0.87 0.07 50)` | `#FBC8AC` | `oklch(0.45 0.120 50)` | `#883C00` | **Portfolio** — this block's accent |
 | `yellow` | `oklch(0.92 0.11 100)` | `#F5E78F` | `oklch(0.45 0.090 90)` | `#695205` | Tools |
@@ -65,7 +65,7 @@ Owners are proposals. What's fixed: fill and deep move together, and a block get
 
 **How the pastel actually happens — the tint tier.** Bhargav's Figma fill is **`#8268FF` at 23%** — a saturated violet, nearly transparent, over the grey ground. The pastel is the *result*, not the paint. So every hue carries a third value, the **tint**: the saturated colour the blob is filled with at 24% opacity (tuned from Figma's 23%). Fill (the pastel it reads as) is what chips, bubbles and tints use; deep is for text; tint is for glass.
 
-| Hue | Tint (glass fill @ 23%) | Reads as |
+| Hue | Tint (the saturated source) | Reads as |
 |---|---|---|
 | `--pink-tint` | `oklch(0.62 0.22 20)` | `--pink` |
 | `--green-tint` | `oklch(0.72 0.22 135)` | `--green` |
@@ -74,7 +74,9 @@ Owners are proposals. What's fixed: fill and deep move together, and a block get
 | `--yellow-tint` | `oklch(0.85 0.19 95)` | `--yellow` |
 | `--blue-tint` | `oklch(0.62 0.19 260)` | `--blue` |
 
-Grey has no tint: the uncoloured blob is the host. Dark theme raises the glass opacity to 36% so tints still read over a dark ground. Each block also gets `--accent-tint` alongside `--accent` / `--accent-deep`.
+Each block also gets `--accent-tint` alongside `--accent` / `--accent-deep`.
+
+**What the tints are for, since 2026-09-16.** They were the paint behind the glass, and there is no glass (§3). They stay because two other things read them: a pattern's line is a mix of `--hue-tint` with `currentColor` (Patterns.md §4), and the `Placeholder` tag is drawn on one. Grey gained a tint on 2026-09-11 for exactly that reason — it had none while it was only the host's non-fill.
 
 **Tints.** Never hand-pick a lighter version. Derive: `color-mix(in oklch, var(--hue) 45%, var(--surface))` for bubble tints and chip backgrounds; `22%` for large areas.
 
@@ -137,67 +139,34 @@ Theme wiring (three states — system, explicit light, explicit dark):
 
 **Ink on a tile (added 2026-09-10).** The `-deep` tiers flip in dark — `--peach-deep` is L 0.45 in light and L 0.82 in dark — because their job is *this hue as text on the ground*. A pastel tile is light in both themes, so text on it needs a different token: **`--{hue}-ink`**, the light deep value, defined once in `:root` and never redefined. Found when the bento's loud cells lost their figures in dark. Anything that paints a hue as a surface and writes on it uses `-ink`, not `-deep`.
 
-## 3. Material — liquid glass, our way
+## 3. Material — one flat surface
 
-Glass is a **surface**, not a style. It exists so that the dot grid and the blobs behind a panel are still faintly there — the platform is always visible through its own UI. Three levels, one recipe.
+One material, three elevations. A surface is the `--surface` fill, a `--rule` hairline and a shadow; nothing shows through it, so nothing is asked of whatever is behind it. In the package it is the `Surface` atom (`level` 1 | 2 | 3, `radius` xs…pill, `as`); on a host without React it is the class.
 
 ```css
-.glass {
-  background: color-mix(in oklch, var(--surface) var(--glass-fill), transparent);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
-          backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
-  border: 1px solid color-mix(in oklch, var(--ink) 8%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklch, white var(--glass-highlight), transparent), /* top edge catches light */
-    inset 0 -1px 0 color-mix(in oklch, var(--ink) 4%, transparent),               /* bottom edge sits */
-    var(--glass-shadow);
-  position: relative; overflow: hidden;
-}
-.glass::before { /* specular sweep — the "liquid" */
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(118deg, color-mix(in oklch, white 38%, transparent) 0%, transparent 42%);
-}
+.noo-surface    { background: var(--surface); border: 1px solid var(--rule); box-shadow: var(--e1); }
+.noo-surface--2 { box-shadow: var(--e2); }
+.noo-surface--3 { box-shadow: var(--e4); }
 ```
 
-| Level | `--glass-fill` | `--glass-blur` | `--glass-highlight` | `--glass-shadow` | Used for |
-|---|---|---|---|---|---|
-| `glass-1` | 58% | 14px | 65% | `--e1` | Bubbles, chips, secondary buttons, small cards |
-| `glass-2` | 66% | 18px | 75% | `--e2` | Nav bar, chat input, panels, block cards |
-| `glass-3` | 74% | 22px | 85% | `--e4` | Sheets, dialogs, menus |
-
-Dark theme: highlight drops to 14% / 18% / 22%; fill stays; border becomes `white 10%`.
+| Level | Shadow | Used for |
+|---|---|---|
+| 1 | `--e1` | Cards, the Field box, Bubble, the secondary Button, Segmented and ThemeSwitch, the Tool sidebar and inspector — a thing resting on the ground |
+| 2 | `--e2` | NavBar, Menu, the Tool bar, ChatInput, Toast — a thing sitting over a screen's content |
+| 3 | `--e4` | Dialog and Sheet, and nothing else. Nothing floats this high but a thing that has taken the whole screen's attention |
 
 **Rules.**
-- Glass only over something worth seeing through: the dot grid, blobs, an image. Glass on a flat solid ground is just a grey box — use `--surface` there.
-- At most **two** stacked glass layers (a chip on a panel). Never three.
-- Never glass on scrolling lists or repeated rows — one panel, not forty.
-- The sweep sits **under** the content: `.glass` is `isolation: isolate` and its `::before` is `z-index: -1`, so text and children are never washed out (fixed in step 3).
-- Budget: **≤ 6 glass elements visible at once**, blur ≤ 22px. Test on a mid-range phone.
-- Fallbacks are solid, not broken:
+- **A surface is opaque.** No `backdrop-filter`, no translucent fill, no `color-mix` with `transparent`. Two surfaces that stack simply stack; the top one is on top.
+- **Nothing is asked of the ground.** A surface reads the same on the grid, on `--ground-2` and on a photograph, so no component has to know where it was placed. The old "glass only over something worth seeing through" rule has nothing left to govern.
+- **Hover lifts one level and one pixel** — `.noo-lift`, `--e1` → `--e2` over `--d-fast`. That is the only motion a surface makes (§7).
+- **A level changes the shadow and nothing else.** Not the fill, not the hairline, not the radius; radius is the component's own (§6).
+- Forced colours (Windows high contrast): the hairline becomes `CanvasText`, as it always did.
 
-```css
-@supports not (backdrop-filter: blur(1px)) { .glass { background: color-mix(in oklch, var(--surface) 96%, transparent); } }
-@media (prefers-reduced-transparency: reduce) { .glass { background: var(--surface); backdrop-filter: none; } .glass::before { display: none; } }
-```
+**Removed 2026-09-16 — what glass was, and why it went.** Bhargav, asking for the v1 revamp: *"No more glass effects."* Gone from the package: the `Glass` atom, `glass.css` and its export, every `--glass-*` token and every `.noo-glass*` class, `Card`'s `surface` prop, `BentoCell`'s `glass` tone, and the blob's `refraction` prop with `GroundProvider`, `useGround` and `measureGround`. The recipe is worth stating once more, because it is what the numbers further down were tuned against: a `--surface` fill at 58 / 66 / 74%, `backdrop-filter: blur(14 / 18 / 22px) saturate(1.35)`, a hairline of ink at 8%, a lit top edge, a settled bottom edge, and `--e1` / `--e2` / `--e4` beneath — three levels used at exactly the places the three surface levels are used now, which is why the swap was one edit per component rather than a redesign. It had already lost its specular sweep earlier the same day, under the no-gradients rule, which left it thinner than it was ever designed to be. The cost of the removal is recorded in Atomic.md D10: the platform is no longer visible through its own UI, and `prefers-reduced-transparency` stops being a theming axis (§10).
 
-**Blob material — tinted glass, tuned by Bhargav in the Blob Lab (2026-09-09, `decisions/blob`).** Four cues from the Figma effect; the numbers are his.
+**Blob material — flat since 2026-09-16.** A character *is* its colour: the body is filled with the hue itself, opaque, no tint tier and no frost. The host is `--surface` with a **1.5** hairline in ink at 16% — that hairline is now the whole of how you tell the host from a character. The drop shadow beneath is kept, `0 5px 14px ink/10%`, because it is what puts the pill in the room; it is an elevation, not a material.
 
-1. **Transparency.** `rect.body` filled with the hue's *tint* at **24%** (host: white at **5%**). The grid is always visible through the body.
-2. **Frost 2 — and it mutes.** The wrapper carries `backdrop-filter: blur(2px) saturate(0.6)`. Glass here *desaturates* what's behind it rather than enriching it; that's most of why the pill reads as calm.
-3. **Light −45°, thin and nearly continuous.** One rim stroke, **0.8** wide (host 0.95), with a linear gradient along the light axis: white **90%** at the top-left, easing to 17% at 40% of the way, then back up to **40%** on the far side — so the rim reads all the way round, brightest where the light is. **No inner shadow.** Depth was tuned to zero: the pill is a flat sheet of glass, not a thick lens.
-4. **Refraction, faint and wide.** The grid behind is re-drawn *inside* the pill as an SVG pattern, magnified **6%** about the centre, masked to a band from **32%** of the radius outward (full at 92%), at **32%** opacity. Phase-aligned to the real grid from the node's position — React Flow supplies it.
-
-Nothing else. No highlight ellipse, no radial glow, no shadow band — each of those was tried and read as a sticker or a lens. Dispersion (colour fringing) waits for a shader. Drop shadow beneath: `0 5px 14px ink/10%`.
-
-```svg
-<span class="blob-wrap">                                    <!-- border-radius 999 · backdrop-filter: blur(2px) saturate(.6) · drop-shadow(0 5px 14px ink/10%) -->
-<svg viewBox="0 0 96 64">
-  <rect class="body" width="96" height="64" rx="32" fill="var(--accent-tint)" fill-opacity=".24"/>
-  <g clip-path="url(#bl-clip)" mask="url(#bl-mask)" opacity=".32"><rect width="96" height="64" fill="url(#grid-N)"/></g>   <!-- mask: radial .32→0 … .92→1; pattern ×1.06 about (48,32), phase from node position -->
-  <rect x=".5" y=".5" width="95" height="63" rx="31.5" fill="none" stroke="url(#bl-rim)" stroke-width=".8"/>              <!-- bl-rim: (.146,.146)→(.854,.854) white .90 → .17 @40% → .40 -->
-  <circle cx="30" cy="32" r="10" fill="var(--eye)"/><circle cx="66" cy="32" r="10" fill="var(--eye)"/>
-</svg></span>
-```
+*Kept as history — the Blob Lab numbers* (2026-09-09, `decisions/blob`), tuned by Bhargav against the dot grid. Four cues, in his numbers. **Transparency:** the hue's tint at 24% (host: white at 5%), the grid always visible through the body. **Frost 2:** `blur(2px) saturate(0.6)` on the wrapper — glass here *desaturated* what was behind it rather than enriching it, and that was most of why the pill read as calm. **Light −45°, thin and nearly continuous:** one rim stroke 0.8 wide (host 0.95) along the light axis, white 90% at the top-left easing to 17% at 40% of the way and back to 40% on the far side, and **no inner shadow** — depth was tuned to zero, so the pill was a flat sheet of glass and not a thick lens. **Refraction, faint and wide:** the grid redrawn inside the pill, magnified 6% about the centre, masked to a band from 32% of the radius outward (full at 92%) at 32% opacity, phase-aligned to the real grid from the node's position. Nothing else: a highlight ellipse, a radial glow and a shadow band were each tried and each read as a sticker or a lens; dispersion waited for a shader and never got one. Two of the four cues needed a canvas to supply the phase and the viewport, so they would have gone with React Flow in any case (Atomic.md D11).
 
 ## 4. The blob
 
@@ -211,13 +180,12 @@ Everything is defined on a **96 × 64** box (3 : 2), exactly the Figma frame. Sc
 | Eyes | `circle (30, 32) r 10` and `circle (66, 32) r 10` | 20px eyes · gap 16 · padding 20 horizontal, 22 vertical. **Tuned in the Blob Lab** — wider and larger than the Figma auto-layout (24 / 10); his call. |
 | Eye colour | `--eye` = `#474747` light, `#000000` dark | His selection colour; pure black in dark mode |
 | Outline (logotype) | `rect 2.75 2.75 90.5 58.5, rx 29.25, stroke 5.5, fill none` | stroke = 8.6% of height, inset by half the stroke |
-| Material (colour character) | tint @ 24% · frost 2px, saturate .6 · rim 0.8 white .90→.17→.40 · **no inner shadow** · refraction ×1.06, band .32→.92 @ .32 | See §3 — the numbers are Bhargav's, from the Blob Lab |
+| Material (colour character) | **Flat since 2026-09-16:** the body is the hue itself, opaque; no rim, no frost, no refraction. The drop shadow beneath stays | See §3. The Blob Lab numbers — tint 24%, frost 2, rim 0.8 — are kept there as history |
 
 ```svg
-<!-- colour character: see §3 "Blob material" for the full layered markup -->
+<!-- colour character: the hue, opaque. The host adds a 1.5 hairline in ink at 16% (§4.1b) -->
 <svg viewBox="0 0 96 64" width="72" role="img" aria-label="Portfolio blob">
-  <rect class="body" width="96" height="64" rx="32" fill="var(--accent-tint)" fill-opacity="0.24"/>
-  <!-- refraction band · rim light — §3 -->
+  <rect class="noo-blob__body" width="96" height="64" rx="32" fill="var(--hue)"/>
   <circle cx="30" cy="32" r="10" fill="var(--eye)"/><circle cx="66" cy="32" r="10" fill="var(--eye)"/>
 </svg>
 <!-- logotype -->
@@ -227,20 +195,15 @@ Everything is defined on a **96 × 64** box (3 : 2), exactly the Figma frame. Sc
 </svg>
 ```
 
-### 4.1b The host — Bhargav's blob is clear glass
+### 4.1b The host — Bhargav's blob has no colour
 
-Every other blob is a colour. **The host has no fill**: it is the glass material itself, refracting the dot grid behind it. That is how you tell which one is you without a label — you're made of the platform.
+Every other blob is a colour. **The host has no colour of its own**: it is `--surface` with a **1.5** hairline in ink at 16%, the same material as a card, so it reads as a pill standing on the ground rather than a hole cut in it. That is how you tell which one is him without a label.
 
-Figma effect, as set on every blob: *Glass · light −45° @ 80% · refraction 80 · depth 20 · dispersion 50 · frost 2 · splay 0.* Fill: a saturated hue at 23% — or nothing, for the host. §3 maps each parameter to a web technique; only dispersion waits:
+**Amended 2026-09-16 (Atomic.md D10).** It was the glass material itself, refracting the dot grid behind it, and the sentence it carried was the better one — *you're made of the platform*. Flat, the host says only *uncoloured*, and a hairline does the work refraction used to do. That is the plainest thing removing glass cost, and it belongs here rather than in a footnote.
 
-**v1 — glass with nothing in it (`.blob-wrap.host`)**
+*The record, kept.* Figma effect, as Bhargav set it on every blob: *Glass · light −45° @ 80% · refraction 80 · depth 20 · dispersion 50 · frost 2 · splay 0*; fill a saturated hue at 23%, or nothing for the host. As built in 0.1.0: the same cues as every character with **no tint** — `rect.body` white at 5% purely for presence, the rim 0.95 rather than 0.8, frost and rim refraction identical. He tuned the lab looking at the host, so those numbers were the host's first, and over the grid it read as the light frosted pill in the sketch: transparent, not milky, not outlined. A **v2** was planned and never built — real refraction through an SVG `feDisplacementMap` or a Skia/WebGL shader, which is where dispersion (the faint colour fringe at the rim) would have become possible. If the different approach D11 leaves room for brings a canvas back, that is where to start reading.
 
-The same cues as every character (§3), with **no tint**: `rect.body` is white at **5%** purely for presence; the rim is 0.95 instead of 0.8; frost and rim refraction are identical. He tuned the lab looking at the host, so these numbers are the host's first. Over the grid it reads as the light frosted pill in the sketch — transparent, not milky, not outlined.
-
-
-**v2 — real refraction (later, with the harness)**: an SVG `feDisplacementMap` over the dot grid, or a Skia/WebGL shader — you've shipped Skia before. Dispersion (the faint colour fringe at the rim) only becomes possible here. Not v1.
-
-Rules: the host is the **only** uncoloured blob — every blob is glass; his is the one with nothing in it. Its eyes are `--eye` like everyone else's. It speaks first ("What are we doing today?").
+Rules: the host is the **only** uncoloured blob. Its eyes are `--eye` like everyone else's, and where it speaks it speaks first ("What are we doing today?").
 
 ### 4.2 Sizes
 
@@ -269,7 +232,7 @@ All 3 : 2. Eye radius scales with the box (r = 12.5% of height).
 
 Reduced motion: no breathe, no look; blink stays (it's the only thing that makes them alive) but at 8–14s.
 
-**As built (step 2).** Blink is a per-blob timer toggling `is-blinking` on the eye group (CSS `noo-blink`, `transform-box: fill-box`); look is one shared `pointermove` listener per page, flushed on `requestAnimationFrame`, writing a `translate` on the eye group that CSS transitions over 240ms; breathe animates the `scale` property with a phase derived from the component id, so hover's `transform: scale(1.04)` composes with it and server and client agree. Refraction measures the nearest `.dots` / `[data-dots]` ancestor (its `--grid-gap`, `--grid-dot`, bounding rect) after layout, again on resize and once fonts settle; inside the canvas a `DotGridProvider` supplies the dot origin and zoom from the React Flow viewport instead.
+**As built (step 2).** Blink is a per-blob timer toggling `is-blinking` on the eye group (CSS `noo-blink`, `transform-box: fill-box`); look is one shared `pointermove` listener per page, flushed on `requestAnimationFrame`, writing a `translate` on the eye group that CSS transitions over 240ms; breathe animates the `scale` property with a phase derived from the component id, so hover's `transform: scale(1.04)` composes with it and server and client agree. Refraction went with the glass on 2026-09-16 (§3): the body is the hue, and nothing has to be measured against the ground any more — which also removed the one piece of blob behaviour that could not server-render.
 
 ### 4.4 Wordmark
 
@@ -319,7 +282,7 @@ Rules: measure 60–70ch for running text; `text-wrap: balance` on headings, `pr
 | `--r-sm` | 10 | Code blocks, inputs inside cards |
 | `--r-md` | 14 | Small cards, fields |
 | `--r-lg` | 20 | Cards, panels |
-| `--r-xl` | 28 | Glass sheets, hero panels |
+| `--r-xl` | 28 | Sheets, the Menu, hero panels |
 | `--r-2xl` | 48 | **Large-format media** — anything where the picture is the whole surface. Added 2026-09-11: at 420px wide, 28 reads as a rounded rectangle and 48 reads as an object. **`ProfileCard` is the one exception on the platform**: it uses a *proportional* radius (15%) because the same card renders at 280 in a row and 420 at the front of a deck, and a fixed radius changes shape between the two. A square whose whole content is one photograph is the only case where that is worth an exception. A `corner-shape: squircle` version was tried and removed: Chromium clips composited descendants — a masked overlay is one — with a circular arc whatever `corner-shape` says, so the card's corner and its overlay's corner disagreed |
 | `--r-pill` | 999 | Blobs, buttons, chips, bubbles, the chat input |
 
@@ -346,18 +309,38 @@ Hover lifts one level (`--e1` → `--e2`) and one pixel. Nothing floats above `-
 | `--ease-enter` | `cubic-bezier(0.16, 1, 0.3, 1)` |
 | `--ease-spring` | `cubic-bezier(0.34, 1.56, 0.64, 1)` |
 
-| Pattern | Spec |
-|---|---|
-| **rise-in** | opacity 0→1, translateY 8→0, `--d-slow` `--ease-enter`; siblings stagger 40ms; **from a visible state** — never park content at opacity 0 waiting for an observer |
-| **bubble-pop** | scale 0.92→1, opacity 0→1, `--d-base` `--ease-spring`; origin bottom-left (toward the blob) |
-| **blob-breathe** | scale 1→1.03→1, `--d-ambient`, sine, infinite; each blob offset by a random phase |
-| **blob-blink** | scaleY on the eye group, 140ms, every 4–9s randomised |
-| **glass-hover** | translateY −1px, `--e1`→`--e2`, `--d-fast` |
-| **page** | one orchestrated arrival per page: nav, then hero, then blocks. No scroll-jacking, no parallax. *As built:* every `Section` carries `rise-in` (siblings stagger 40ms) unless `arrive={false}`; the nav is static; off under reduced motion |
+**Five named patterns**, and there are only five. Four of them are a class in `motion.css` and an `effect` on the `Motion` atom; blink is the blob's own, because only `Blob` can time it. All five have a line in `motionNotes`, so a pattern is described once and read wherever it is shown.
 
-`prefers-reduced-motion: reduce` → ambient animations off, transitions reduced to opacity only, blink slowed. Motion is a brand asset (Brand.md §8), which is exactly why it is rationed.
+| Pattern | Class | Spec |
+|---|---|---|
+| **rise** | `.noo-rise` | opacity 0.35→1, translateY 8→0, `--d-slow` `--ease-enter`; siblings stagger 40ms; **from a visible state** — never park content at opacity 0 waiting for an observer |
+| **pop** | `.noo-pop` | scale 0.92→1, opacity 0→1, `--d-base` `--ease-spring`; origin bottom-left (toward the blob that is speaking) |
+| **breathe** | `.noo-breathe` | scale 1→1.03→1, `--d-ambient`, sine, infinite; each blob offset by a phase derived from its id, so none breathe in step |
+| **lift** | `.noo-lift` | translateY −1px, `--e1`→`--e2`, `--d-fast`. The only motion a surface makes (§3) |
+| **blink** | — (the blob's own) | scaleY on the eye group, `--d-fast`, every 4–9s randomised. It has no class because only `Blob` can time it |
+| **page** | — | one orchestrated arrival per page: nav, then hero, then blocks. No scroll-jacking, no parallax. *As built:* every `Section` carries `rise` (siblings stagger 40ms) unless `arrive={false}`; the nav is static; off under reduced motion. A composition rule, not a sixth pattern |
+
+`prefers-reduced-motion: reduce` → ambient animations off, transitions reduced to opacity only, blink slowed to 8–14s. Motion is a brand asset (Brand.md §8), which is exactly why it is rationed.
+
+**Motion is a layer of the system (2026-09-16, Atomic.md D12).** Bhargav: *"Motion should also be part of the design system."* It was already tokens and four keyframes; what it was not was something a person could find, name or show. Now:
+
+| Export | From | What |
+|---|---|---|
+| `durations` | `@no-origins/ui` (`tokens/motion.ts`) | `{ fast: 140, base: 220, slow: 380, ambient: 6000 }` — the same numbers as `--d-*`, in milliseconds |
+| `easings` | same | `{ standard, enter, spring }` as `cubic-bezier(…)` strings — the same curves as `--ease*` |
+| `motionPatterns` | same | `["rise", "pop", "breathe", "lift", "blink"]`, and the `MotionPattern` type |
+| `motionNotes` | same | per pattern: its duration, its easing and one line saying what it is for — what the showcase renders |
+| `prefersReducedMotion()` | same | a plain function, safe on the server (false there) |
+| `Motion` | `@no-origins/ui` (`atoms/Motion.tsx`) | the atom: `effect: rise \| pop \| breathe \| lift`, `delay` in ms for a stagger `:nth-child` cannot see, `as` |
+| `useReducedMotion()` | same | the preference, live, through `useSyncExternalStore` — for a script that has to ask before it moves anything |
+
+The `Motion` atom exists so a pattern is a **thing** — something the registry can hold (it and `Surface` are the `motion` group), the catalogue can show and a document could once have named — rather than a class an app is expected to remember. `/tokens/motion` on the showcase is the screen: it reads `durations`, `easings` and `motionNotes` out of the package and plays each pattern, so the page cannot describe motion the system does not have.
+
+**The one duplication, stated.** The numbers live twice: as custom properties in `tokens.css`, which is what every stylesheet animates against, and as values in `tokens/motion.ts`, which is what a script reads. **They must agree, and nothing enforces it** — a `var()` cannot be read without a live element, and generating one file from the other would buy a build step for seven numbers. So the rule is written in three places instead: here, at the top of `motion.ts`, and on the showcase screen. Change one, change the other.
 
 ## 8. Layout
+
+> **Superseded 2026-09-16: React Flow and the canvas were removed from the system** (Atomic.md D11). The portfolio renders as **pages** — `Page` · `NavBar` · `Footer`, one route per section, and the six widgets on the home, which introduces him and leads into them. A different approach to the canvas comes later; Bhargav's words were *"I want to take a different approach later."* The text below is the record of what was built and why: the grid and the bento (§8, still live — they are the layout, not the canvas), and then §8.1–§8.7, which describe a renderer that is no longer in the package. Read those as history. What survives of them in code is the registry's contract (Scene-Schema.md §2–§3), the box grid, and every measurement taken on the way.
 
 **Ground — the grid** (revised 2026-09-10, evening; it was a dot grid). Large lines, boxes of **160** in canvas units, and **every bento cell sits in a box with 8 of padding** — so a cell is 144, the gutter between cells is 16 (two paddings meeting), a cell spanning *n* boxes is `n · 160 − 16`, and a 4 × 3 widget is exactly 640 × 480. The layout and the ground are the same grid, which is why widgets look *placed* rather than floated.
 
@@ -503,39 +486,41 @@ Anatomy in one line each; variants where they exist. Every component reads only 
 
 | Component | Anatomy · variants |
 |---|---|
-| **Blob** | §4. `variant: character \| logotype \| glass` (glass = the host, §4.1b; `hue="grey"` renders it too) · `size` (§4.2 name or a px width) · `state: idle \| sleep` · `hue` (defaults to the block accent; ignored for glass) · `label` (none → `aria-hidden`) · `blink` `look` `breathe` `refraction` — on by default for idle characters, all off for the logotype; `refraction={false}` over a solid surface · `interactive` (hover 1.04; defaults on with `onClick`; wrap in a `<button>` for keyboard) · every other prop reaches the outer `<span>` |
+| **Blob** | §4. `variant: character \| logotype \| host` (**`glass` → `host`, 2026-09-16**: the host is `--surface` with a hairline, §4.1b; `hue="grey"` renders it too) · `size` (§4.2 name or a px width) · `state: idle \| sleep` · `hue` (defaults to the block accent; ignored for the host) · `label` (none → `aria-hidden`) · `blink` `look` `breathe` — on by default for idle characters, all off for the logotype; **`refraction` went with the glass** · `interactive` (hover 1.04; defaults on with `onClick`; wrap in a `<button>` for keyboard) · every other prop reaches the outer `<span>` |
 | **Wordmark** | §4.4. `as: lockup \| text` · sizes with `font-size` on the element (`className="text-[34px]"`) · the lockup is one `role="img"` named "No Origins"; the text form is a plain span |
-| **Glass** | Surface primitive. `level: 1 \| 2 \| 3` (default 1) · `radius: xs \| sm \| md \| lg \| xl \| pill` (default lg) · `as` any element. Renders `.glass .glass-N .noo-r-*`. Everything translucent is built on it |
-| **DotGridProvider** | §3 cue 4. Publishes the on-screen dot grid — origin, gap, dot size, scale — so every blob aligns its refraction band to it. `CanvasShell` feeds it from the flow's viewport, so refraction stays phase-aligned while panning and zooming; elsewhere the nearest `.dots` ancestor is measured |
-| **Bubble** | glass-1 pill of real text (a `<p>`), `bubble` type, padding 10 × 16, max 38ch. `tint?: hue` (pastel at 45% over surface) · `pop` plays bubble-pop on mount. Anchoring is the layout's job: top-right of the blob, 8px gap (Page); a NodeToolbar (Canvas) |
-| **ChatInput** | glass-2 pill, 56px tall; placeholder *"Hey! What's on your mind today?"*; send = 36px circle in `--accent`, the blob's two eyes inside. `suggestions: {label, value, hue?}[]` render as chips above it — the guided menu until the harness answers for itself; `onSend(text)`, `onSuggestion(s)`. Built step 6 |
-| **CanvasShell** (`@no-origins/ui/canvas`) | §8 — the base layout of every block, renamed from step 6's `Canvas`. `scene: SceneNode[]`, a discriminated union of `blob` · `panel` · `region` nodes, hand-placed and **in reading order** (§8.3) · `views` / `initialView` / `onViewChange` (§8.5) · `threads` (§8.1) · `onOpen(href, node)` (the host routes; click or Enter) · `chat` / `menu` / `brand` / `trailing` panel slots · `minimap` · `heading` (the hidden `h1`) · a skip link to the chat · "Reset view" after the first move (positions restored too). A blob's `view` pans, its `href` opens. Server-renders the whole scene — the provider is seeded with nodes, their declared dimensions and a 1280 × 800 viewport — at the identity transform (§8.5). Host imports `@xyflow/react/dist/base.css` into `layer(base)` |
-| **PanelNode** | §8.2. A surface in canvas space holding one card. `surface: glass \| solid \| none` (default glass; `none` is bare type on the grid, for region intros) · `width` / `height` in canvas units; overrun scrolls inside (`nowheel`); `nodrag` on everything interactive; `user-select: text` over React Flow's `none`; the body cross-fades by zoom tier and is never unmounted |
-| **RegionNode** | §8.2. A column's map label: an 80px display-face word over a dotted `--rule` hairline, on a short plate above the column. `pointer-events: none`, `aria-hidden` — decorative by design, because the meaningful `<h2>` belongs in the intro panel |
-| **useCanvasNav** | §8.5. `{ goTo, current }` from inside the canvas, so a link in a panel's prose can move the viewport. `null` outside a `CanvasShell` |
+| ~~**Glass**~~ | **Struck 2026-09-16 → `Surface`** (Atomic.md D10). It was the translucent primitive: three levels of fill, blur and lit edge. |
+| **Surface** | The one material (§3), added 2026-09-16. `level: 1 \| 2 \| 3` (default 1 — `--e1` / `--e2` / `--e4`) · `radius: xs \| sm \| md \| lg \| xl \| pill` (default lg) · `as` any element. Renders `.noo-surface .noo-surface--N .noo-r-*`. Everything that was glass is built on it |
+| **Motion** | The named patterns as a component (§7), added 2026-09-16. `effect: rise \| pop \| breathe \| lift` · `delay` ms · `as`. Renders the pattern's class; `useReducedMotion()` is beside it for a script that moves things itself |
+| ~~**DotGridProvider**~~ | **Struck 2026-09-16** (D10, D11). It published the on-screen grid so every blob could phase-align its refraction band; a flat blob measures nothing. `GroundProvider`, `useGround` and `measureGround` went with it. |
+| **Bubble** | A level-1 surface, pill, of real text (a `<p>`), `bubble` type, padding 10 × 16, max 38ch. `tint?: hue` (pastel at 45% over surface) · `pop` plays bubble-pop on mount. Anchoring is the layout's job: top-right of the blob, 8px gap (Page); a NodeToolbar (Canvas) |
+| **ChatInput** | A level-2 surface, pill, 56px tall; placeholder *"Hey! What's on your mind today?"*; send = 36px circle in `--accent`, the blob's two eyes inside. `suggestions: {label, value, hue?}[]` render as chips above it — the guided menu until the harness answers for itself; `onSend(text)`, `onSuggestion(s)`. Built step 6 |
+| ~~**CanvasShell**~~ (`@no-origins/ui/canvas`) | **Struck 2026-09-16 with React Flow** (D11) — the subpath is gone, and what follows is the record. §8 — the base layout of every block, renamed from step 6's `Canvas`. `scene: SceneNode[]`, a discriminated union of `blob` · `panel` · `region` nodes, hand-placed and **in reading order** (§8.3) · `views` / `initialView` / `onViewChange` (§8.5) · `threads` (§8.1) · `onOpen(href, node)` (the host routes; click or Enter) · `chat` / `menu` / `brand` / `trailing` panel slots · `minimap` · `heading` (the hidden `h1`) · a skip link to the chat · "Reset view" after the first move (positions restored too). A blob's `view` pans, its `href` opens. Server-renders the whole scene — the provider is seeded with nodes, their declared dimensions and a 1280 × 800 viewport — at the identity transform (§8.5). Host imports `@xyflow/react/dist/base.css` into `layer(base)` |
+| ~~**PanelNode**~~ | **Struck 2026-09-16** (D11). §8.2. A surface in canvas space holding one card. `surface: glass \| solid \| none` (default glass; `none` is bare type on the grid, for region intros) · `width` / `height` in canvas units; overrun scrolls inside (`nowheel`); `nodrag` on everything interactive; `user-select: text` over React Flow's `none`; the body cross-fades by zoom tier and is never unmounted |
+| ~~**RegionNode**~~ | **Struck 2026-09-16** (D11). §8.2. A column's map label: an 80px display-face word over a dotted `--rule` hairline, on a short plate above the column. `pointer-events: none`, `aria-hidden` — decorative by design, because the meaningful `<h2>` belongs in the intro panel |
+| ~~**useCanvasNav**~~ | **Struck 2026-09-16** (D11). §8.5. `{ goTo, current }` from inside the canvas, so a link in a panel's prose can move the viewport. `null` outside a `CanvasShell` |
 | **Bento** | §8.3–8.4. **The one grid, at two sizes** (2026-09-11). A CSS grid of `cols × rows` cells. A cell is a grid box minus its padding — `--grid-box` 160 − 2 · `--grid-pad` 8 = 144 — and the gutter is two paddings, 16, so a 4 × 3 widget is exactly 640 × 480 and snaps into four boxes by three. `hue` sets `--bento-hue` / `--bento-hue-deep`; `label` names the group for assistive tech. **`page`** switches to a full view: `cols` 10, fluid columns to a 1600 max, `grid-auto-rows: minmax(144px, auto)`, and the block scrolls in the document rather than sitting in canvas space. Widget and page are the same component and the same cells |
-| **BentoCell** | `span: [cols, rows]` (default `[1, 1]`) · `tone: quiet` (`--surface`, e1 — default) \| `glass` (glass-1) \| `fill` (the widget's hue as the tile, text in **`--{hue}-ink`** — the loud one) \| `ink` (ink on ground, for later). Every tone but glass is a **textured gradient card** (Patterns.md §4b): a 135° wash of the cell's hue — the blob's light — under a `--grain` mask painted in `currentColor` at `--grain-strength`, which darkens a light card and lightens a dark one. Radius lg, padding 20, `overflow: hidden` so an illustration can bleed off its edge. Every cell does one job: a figure, a word, an illustration, a list, chips, media |
+| **BentoCell** | `span: [cols, rows]` (default `[1, 1]`) · `tone: quiet` (`--surface`, e1 — default) \| `fill` (the widget's hue as the tile, text in **`--{hue}-ink`** — the loud one) \| `ink` (ink on ground, for later). Every tone is a **textured card** (Patterns.md §4b; the `glass` tone was struck 2026-09-16 and there is no exception left to state): a flat wash of the cell's hue (a gradient until 2026-09-16) under a `--grain` mask painted in `currentColor` at `--grain-strength`, which darkens a light card and lightens a dark one. Radius lg, padding 20, `overflow: hidden` so an illustration can bleed off its edge. Every cell does one job: a figure, a word, an illustration, a list, chips, media |
 | ~~**SectionWidget**~~ | **Retired 2026-09-11 (Bhargav): total freedom over guard rails.** It was `Bento` plus a fixed 2 × 2 loud cell, enforcing the three widget rules — one loud cell, the diagonal, a field illustration. Those are now **conventions, not constraints**: a widget is a plain `Bento` with cells placed by hand. The rules still hold for the six on the ring, because the ring only reads as one family if they are built alike — but nothing in the code enforces it. So it becomes a **probe** rather than a prop: `probe12` counts `--fill` cells per widget and fails on anything but one. It lives in `e2e/review.spec.ts`, so `pnpm review` runs it on every route — unlike `probe10` and `probe11`, which sit in the gitignored `e2e/.mcp/` and are enforced by memory (Admin.md §6.3). The rule is a *widget's*: six of them are compared side by side across the overview and must read as a family, while a full view (§8.4) is read alone and carries no such constraint. A rule worth keeping is worth checking; a rule worth checking does not need a component to hold it. `illustration` moves to `BentoCell`; the six parameter sets stay in `content/sections.tsx`, still measured, never estimated |
 | **BentoFigure** | A number or a short word as image: `value` in the display face (`size: lg` 96 \| `md` 56) with a mono `label` under it — `4` roles, `0` shipped yet. Honest about empty sections because it states the count |
 | **Illustration** | **Patterns.md** — the living document; this row is a pointer. A named picture drawn by code from six primitives (rosette, bands, ring, stack, pebbles, spiral): **fine lines in one hue, never filled**, all at one weight and one colour (`--ill-w`, `--ill-line`), no two lines touching and none of them parallel, deterministic (seeded scatter). The −45° light is the card's now, not the drawing's. The line is `color-mix(hue-tint 64%, currentColor)`, so it takes the right contrast from whatever card it is on, in either theme. `name`, `hue`, `title`. In a `BentoCell` as `.noo-bento__ill` — **top-right**, the diagonal from the bottom-left figure or word; `--field` (`inset: 0`) for a drawing that crosses the whole cell and runs off every edge, which is the direction round 1 of the studio set; `--alone` in an empty cell. Never under text: a corner illustration must not overlap a glyph, a field must stay 8px clear of one (probe10 measures both). Six exist; Me has none, its illustration is the blob |
-| **ProfileCard** | §9. Large-format media: the picture is the whole card, and **the bottom of the picture turns to frosted glass** — blurred, brightened, slightly more saturated, masked so it has no edge anywhere — with the words standing on it in white. Added 2026-09-11 and corrected three times the same day, which is why the row is long. (1) A full-bleed photo under a gradient scrim: wore none of §3's material. (2) A `glass-2` plate under the words: read as ours, but "there is background behind the text". (3) No plate at all: "still don't have the glossy design". Both complaints are true, and the reference resolves them — its shine is neither a panel nor a highlight but the photograph's own surface going to glass, and **a boundary is the entire difference** between the two rejections. Implemented by blurring a third copy of the media, not by `backdrop-filter`: Chromium clips a filtered backdrop to the border box and ignores the mask, so the fade comes out as a hard line (seen, not assumed). On top of that the card carries all four §3 cues — hairline, lit top edge, 118° sweep, grain at 0.7 — and every layer over the picture is clipped to the *same* corner, which is why the corner is a plain arc and not a squircle (see §6). `crop: fill \| cutout`; a cutout, and a card with no media at all, has no photograph to frost and gets a `--shade` scrim instead. `bloom` renders the media again beneath the card: the light it casts on the surface, without extracting a colour |
+| **ProfileCard** | §9. Large-format media: the picture is the whole card. **Flat since 2026-09-16** (D10): a scrim in `--shade` fading upward under the words, the grain over it, the words on top — no frost, no bloom, no plate. `crop: fill \| cutout`; a cutout, and a card with no media, gets the hue's wash with the grain over it. The three corrections below are the record of how it got there, and the reason the row is long. *Was:* **the bottom of the picture turned to frosted glass** — blurred, brightened, slightly more saturated, masked so it has no edge anywhere — with the words standing on it in white. Added 2026-09-11 and corrected three times the same day, which is why the row is long. (1) A full-bleed photo under a gradient scrim: wore none of §3's material. (2) A `glass-2` plate under the words: read as ours, but "there is background behind the text". (3) No plate at all: "still don't have the glossy design". Both complaints are true, and the reference resolves them — its shine is neither a panel nor a highlight but the photograph's own surface going to glass, and **a boundary is the entire difference** between the two rejections. Implemented by blurring a third copy of the media, not by `backdrop-filter`: Chromium clips a filtered backdrop to the border box and ignores the mask, so the fade comes out as a hard line (seen, not assumed). On top of that the card carries all four §3 cues — hairline, lit top edge, 118° sweep, grain at 0.7 — and every layer over the picture is clipped to the *same* corner, which is why the corner is a plain arc and not a squircle (see §6). `crop: fill \| cutout`; a cutout, and a card with no media at all, had no photograph to frost and got a `--shade` scrim instead — which is what every card wears now. `bloom` rendered the media again beneath the card, the light it cast on the surface without extracting a colour; the prop is gone |
 | **Deck** | §9. A stack of cards with one forward, and **still a scroll container** — scroll-snap gives the trackpad, the swipe, arrow keys and a screen reader's own scrolling; the script only publishes each card's distance from centre as `--d` and lets CSS do the depth. `visible: 0 \| 1 \| 2` cards either side, and the card width is *derived* from it in container units so the two cannot disagree. `start: number \| "middle"`. Reduced motion drops the transforms and it is a plain snapping row |
 | **Placeholder** | Brand.md §9. A section that is on the map but has no copy: dashed `--rule` box, `title` for what will be there, children for why it isn't. `draft` adds a visible tag and an accent border — scaffolding, so nobody mistakes it for finished writing. Without `draft` it *is* the honest empty state. Never "coming soon" |
-| **CanvasMap** | `MiniMap` dressed as glass-1: node dots in their own hue, the viewport rectangle in `--accent`. Off in v1 stopped being right the moment the canvas grew wider than a screen |
-| **useZoomTier** | §8.4. `map \| titles \| full`, from the flow's transform; always `full` in document mode. **Nothing uses it to fade any more** — the three tiers were retired in step 12, because a widget is a design and fading a document's words to nothing was a trick standing in for one. Kept for anything that wants to know the zoom band |
-| **Button** | pill, 44px min (`size: sm` = 36). `variant: primary` = ink fill, ground text, e1 → e2 · `secondary` = glass-1 + its hairline · `ghost` = text, underline on hover. `leading` / `trailing` icon slots · `href` → `<a>` · `as={Link}` for a router (§11.2 rule 1) · `disabled` = 50% |
+| ~~**CanvasMap**~~ | **Struck 2026-09-16** (D11). `MiniMap` dressed as glass-1: node dots in their own hue, the viewport rectangle in `--accent`. Off in v1 stopped being right the moment the canvas grew wider than a screen |
+| ~~**useZoomTier**~~ | **Struck 2026-09-16** (D11). §8.4. `map \| titles \| full`, from the flow's transform; always `full` in document mode. **Nothing uses it to fade any more** — the three tiers were retired in step 12, because a widget is a design and fading a document's words to nothing was a trick standing in for one. Kept for anything that wants to know the zoom band |
+| **Button** | pill, 44px min (`size: sm` = 36). `variant: primary` = ink fill, ground text, e1 → e2 · `secondary` = a level-1 surface with its hairline (glass until 2026-09-16) · `ghost` = text, underline on hover. `leading` / `trailing` icon slots · `href` → `<a>` · `as={Link}` for a router (§11.2 rule 1) · `disabled` = 50% |
 | **Chip** | pill, 28px. `hue` (pastel at 45% over surface) + ink text; deep tier for the leading dot (`dot={false}` or a `leading` icon instead). `onClick` → `<button>`, `href` → `<a>`; `pressed` = selected filter (deep fill, ground text) |
-| **Card** | `surface: solid` (`--surface`, e1) or `glass` (glass-1); `--r-lg`; `padding: md` 24 / `sm` 20; `interactive` = e1 → e2 + 1px lift on hover; `as` / `href` for the element you mean |
+| **Card** | A level-1 surface; `--r-lg`; **`surface` was removed 2026-09-16** — there is one material, so there was nothing left to choose between; `padding: md` 24 / `sm` 20; `interactive` = e1 → e2 + 1px lift on hover; `as` / `href` for the element you mean |
 | **BlockCard** | Card + `meta` eyebrow + h4 `title` + one `line` + optional `details` list + `chips: {label, hue?}[]` (default the card's hue). `blob` (default **false** since 2026-09-10 — the blob means *agent*, and a job is not an agent) puts a `Blob sm` in `hue` back; without it the hue is a leading rule on the card. `href` makes the whole card a link (chips stay labels). `state="sleep"` for a block that isn't here. The Work item |
 | **RoadmapItem** | Card + h4 `title` (`blob` re-adds the sleeping `Blob sm` in `hue`, default false) + `description` ("Not here yet. Here's what it'll do…") + optional `progress` in the mono label voice. Principle 4 as a component |
-| **NavBar** | glass-2, 60px, sticky (`z-index` 30). Wordmark left (links home); `links: {href, label}[]` right; `currentHref` marks the current one (`aria-current`, `--accent-deep`, 2px underline; exact or nested match) · `linkComponent` = the router's link, default `<a>` · `trailing` slot · a skip link to `skipTo` (`#main`) is the first thing in the bar. Below `md` the links render as a fixed bottom glass sheet (a sibling, not a child, so glass never clips it); `Page` pads for it via `:has()` |
-| **Rail** | Page mode's `NavBar` as a column, for a surface with seven-plus destinations — a row collides there the way the canvas view switcher did at five (§8.5), and the answer was a column both times. Added 2026-09-11 for the admin (Admin.md §4, §10). `groups: {label?, hue?, items}[]` · an item may carry one level of `items`, shown only when that branch is current · `currentHref` · `linkComponent` · `brand` · `trailing` (pinned to the bottom) · a skip link first, as in the bar. **The current marker is the one translated detail**: an underline in a stack reads as a divider between two items rather than a mark on one, so it is the same 2px `--accent-deep` on the leading edge. A group's `hue` is structural, not decoration — it is how the navigation states which layer a destination belongs to. Below 900 the column becomes a strip across the top that scrolls sideways, groups intact. `Page` takes a `rail` and becomes two columns; `rail` and `nav` are alternatives, because two primary navigations on one screen is two answers to "where am I" |
+| **NavBar** | A level-2 surface, 60px, sticky (`z-index` 30). Wordmark left (links home); `links: {href, label}[]` right; `currentHref` marks the current one (`aria-current`, `--accent-deep`, 2px underline; exact or nested match) · `linkComponent` = the router's link, default `<a>` · `trailing` slot · a skip link to `skipTo` (`#main`) is the first thing in the bar. Below `md` the links render as a fixed bottom sheet — `Menu form="sheet"` since the 0.1.0 release — a sibling and not a child, so nothing clips it; `Page` pads for it via `:has()` |
+| ~~**Rail**~~ | **Struck 2026-09-14 into `Menu`'s column, and the column's rail form struck 2026-09-16** (D13): one navigation, one width. What follows is the record. Page mode's `NavBar` as a column, for a surface with seven-plus destinations — a row collides there the way the canvas view switcher did at five (§8.5), and the answer was a column both times. Added 2026-09-11 for the admin (Admin.md §4, §10). `groups: {label?, hue?, items}[]` · an item may carry one level of `items`, shown only when that branch is current · `currentHref` · `linkComponent` · `brand` · `trailing` (pinned to the bottom) · a skip link first, as in the bar. **The current marker is the one translated detail**: an underline in a stack reads as a divider between two items rather than a mark on one, so it is the same 2px `--accent-deep` on the leading edge. A group's `hue` is structural, not decoration — it is how the navigation states which layer a destination belongs to. Below 900 the column becomes a strip across the top that scrolls sideways, groups intact. `Page` takes a `rail` and becomes two columns; `rail` and `nav` are alternatives, because two primary navigations on one screen is two answers to "where am I" |
 | **SectionHeader** | `label` eyebrow (mono) · `title` · optional `lead` (60ch) · `level: 2` (Bowlby 34) or `3` (Hanken 26, inside a block) · `titleId` for `aria-labelledby`. 32px below; 64px above when it follows something (`:not(:first-child)`) |
-| **Field** | `label` above in `caption`; glass-1 box, `--r-md`, 48px, holding the control; `hint` or `error` below (error = `--bad` ring, `role="alert"`, `aria-describedby`); focus = 1.5px `--accent-deep` inside + 3px `--accent` @ 25% outside; `leading` / `trailing` adornments; `multiline` → textarea (min 96px). `className` styles the wrapper; every other prop reaches the control |
+| **Field** | `label` above in `caption`; a level-1 surface box, `--r-md`, 48px, holding the control; `hint` or `error` below (error = `--bad` ring, `role="alert"`, `aria-describedby`); focus = 1.5px `--accent-deep` inside + 3px `--accent` @ 25% outside; `leading` / `trailing` adornments; `multiline` → textarea (min 96px). `className` styles the wrapper; every other prop reaches the control |
 | **Toggle** | `<button role="switch">`, 44 × 26 pill; on = ink track, ground knob; off = ink 18% over ground, surface knob; hit area padded to 44px tall. `checked` + `onChange` or `defaultChecked`; `label` wraps it in a clickable `<label>` row, else pass `aria-label` |
 | **Footer** | On the ground, hairline above, 64px margin-top. `Wordmark as="text"` · `meta` (the domain) · `links` via `linkComponent` · `trailing` slot for the `ThemeSwitch` · stacks under `sm` |
-| **ThemeSwitch** | light · system · dark in a glass-1 pill; reads and writes `<html data-theme>` + `localStorage.theme` through `readTheme` / `applyTheme` / `subscribeTheme`; the host inlines `themeBootScript` in `<head>` (all exported, no React in `theme.ts`) |
-| **Page · Container · Section** | Page mode (§8), for documents: `Page` = `nav` slot + `<main id="main" tabIndex=-1>` + `footer` slot, fills the viewport · `Container` = 1120 measure, 24 / 48 gutters · `Section` = Container + rhythm (96 desktop / 64 mobile between sections) · `.noo-prose` = 68ch |
+| **ThemeSwitch** | light · system · dark in a level-1 surface pill; reads and writes `<html data-theme>` + `localStorage.theme` through `readTheme` / `applyTheme` / `subscribeTheme`; the host inlines `themeBootScript` in `<head>` (all exported, no React in `theme.ts`) |
+| **Page · Container · Section** | Page mode (§8), for documents: `Page` = `nav` slot + `<main id="main" tabIndex=-1>` + `footer` slot, fills the viewport · `Container` = 1120 measure, 24 / 48 gutters · `Section` = Container + rhythm (96 desktop / 64 mobile between sections) · `.noo-document` = 68ch (`.noo-prose` was its alias until 1.0) · **`rail` was removed 2026-09-16** (D13) |
 
 ~~Not in v1: Dialog/Sheet (glass-3), Toast, Tabs, Table, Editor surfaces.~~ **Built in the 2026-09-14 release** (Atomic.md §6 steps 3–5): Dialog and Sheet on a native `<dialog>`, Toast, Tabs, Table, Tree, Menu, Segmented, Select, Checkbox, Radio, Tooltip, Speaker, and the `Tool` and `Document` templates. The inventory of what exists, by layer, is Atomic.md §1–§3 and the registry itself; this section is the anatomy record of v1 and is not updated for later components. A detail sheet was considered for the canvas and rejected: it would re-introduce pages through the back door, and a 560 × 520 panel holds a role with five bullets comfortably.
 
@@ -545,12 +530,13 @@ Anatomy in one line each; variants where they exist. Every component reads only 
 
 ## 10. Theming axes
 
-Four independent switches; the system multiplies them without new CSS.
+Three independent switches; the system multiplies them without new CSS.
 
 1. **Theme** — light / dark, via `data-theme` and `prefers-color-scheme` (§2.5).
 2. **Block accent** — one hue per block via `data-block` (§2.3).
-3. **Transparency** — `prefers-reduced-transparency` flattens glass to `--surface` (§3).
-4. **Motion** — `prefers-reduced-motion` removes ambient motion (§7).
+3. **Motion** — `prefers-reduced-motion` removes ambient motion (§7).
+
+*There were four until 2026-09-16.* **Transparency** — `prefers-reduced-transparency` flattening glass to `--surface` — stopped being an axis when the material did (§3, Atomic.md D10): every surface is already what that preference used to fall back to. Nothing is lost for the person who asks for it; the system simply has one fewer thing to be honest about.
 
 ## 11. The package — `@no-origins/ui` in the No Origins monorepo
 
@@ -563,7 +549,7 @@ no-origins/
 ├─ .changeset/                  release config from day one — publishing later is one command, not a project
 ├─ Brand.md · Design-System.md  platform documents
 ├─ packages/ui/                 @no-origins/ui
-│  ├─ package.json              exports below · peerDependencies: react, react-dom ≥ 18 · @xyflow/react (optional peer, canvas only)
+│  ├─ package.json              exports below · peerDependencies: react, react-dom ≥ 18 · @phosphor-icons/react (optional peer, icons only)
 │  ├─ design/                   the boards and the lab — where the decisions were made
 │  ├─ tsup.config.ts · tsconfig.json
 │  └─ src/
@@ -580,10 +566,13 @@ no-origins/
 | Export | What | Needs React | Needs Tailwind |
 |---|---|---|---|
 | `@no-origins/ui/tokens.css` | The tokens, both themes, fallback font stacks | no | no |
-| `@no-origins/ui/css` (alias `/index.css`) | tokens + typography + glass + motion + every component's classes; `/typography.css`, `/glass.css`, `/motion.css`, `/components.css` are also exported individually | no | no |
+| `@no-origins/ui/css` (alias `/index.css`) | tokens + typography + motion + every component's classes; `/tokens.css`, `/typography.css`, `/motion.css`, `/components.css` and one file per layer (`/atoms.css`, `/molecules.css`, `/organisms.css`, `/templates.css`) are also exported individually. `/glass.css` went with the material on 2026-09-16 | no | no |
 | `@no-origins/ui/tailwind.css` | `@theme inline` layer: `bg-ground`, `text-peach-deep`, `bg-accent-tint`, `rounded-pill` (999), `rounded-lg` (20), `shadow-e2`, `font-display`, `ease-noo-enter` … Utilities read the live variable, so they follow theme and block accent. Import after `tailwindcss`. | no | v4 |
 | `@no-origins/ui` | React components — ESM, typed | ≥ 18 | no |
-| `@no-origins/ui/canvas` | `CanvasShell`, `BlobNode` (bubble = its NodeToolbar), `PanelNode`, `RegionNode`, `CanvasMap`, `Threads`, `useZoomTier`, `useCanvasNav`, `sceneToNodes` / `sceneBoxes` / `viewCentres`, `NARROW_QUERY`, `BUBBLE_MIN_ZOOM`, the scene types; the host also imports `@xyflow/react/dist/base.css` into `layer(base)` | ≥ 18 + `@xyflow/react` | no |
+| `@no-origins/ui/registry` | `entries`, `layers`, `layerNotes`, `layerBySlug`, `byLayer`, `groups`, `registryHash`, `Catalogue`, `ContrastReport` — what a component is and where it may go, rendered the same way by the showcase and the admin | ≥ 18 | no |
+| `@no-origins/ui/icons` | `Icon` and the curated `glyphs.ts` (D8) — Phosphor regular through `@phosphor-icons/react`, an optional peer | ≥ 18 + `@phosphor-icons/react` | no |
+
+**Gone 2026-09-16** (Atomic.md D10, D11): `@no-origins/ui/canvas`, `/editor` and `/document`, and `/glass.css`. The canvas subpath exported `CanvasShell`, the three node types, `CanvasMap`, `Threads`, `useZoomTier`, `useCanvasNav`, `sceneToNodes` / `sceneBoxes` / `viewCentres`, `NARROW_QUERY`, `BUBBLE_MIN_ZOOM` and the scene types, and asked its host to import `@xyflow/react/dist/base.css` into `layer(base)`. No host does that any more, and `@xyflow/react` is not a peer dependency of anything.
 
 ### 11.2 Portability rules — what keeps it usable outside Next.js
 
@@ -591,7 +580,7 @@ Written so that an Elixir + React project, a Vite SPA, or a LiveView app can use
 
 1. **The package imports React and its own CSS. Nothing else.** No `next/*`, no router, no image component. `NavBar` takes a `linkComponent` prop (default `<a>`); images are `<img>`.
 2. **Fonts are the host's job.** The host sets `--ff-display`, `--ff-sans`, `--ff-mono` (Next: `next/font` with `variable: "--ff-display"` etc.; Phoenix: a `<link>` to Google Fonts or self-hosted `@font-face` plus three declarations). The package never loads a font. `tokens.css` ships fallback stacks for the three in a cascade layer, so a host that forgets still renders and any host declaration wins. *Why `--ff-*` and not `--font-*`:* Tailwind 4's `@theme` owns the `--font-*` namespace to generate `font-display` and friends; a runtime token with the same name would make the theme variable reference itself. The same applies to every Tailwind theme namespace — a runtime token named `--shadow` was silently replaced by Tailwind's default `--shadow` value at build time (caught in step 7; renamed `--shade`). Runtime tokens stay clear of `--color-*`, `--font-*`, `--shadow-*` (including bare `--shadow`), `--radius-*`, `--ease-*`, `--text-*`, `--spacing*`, `--blur-*`, `--animate-*`.
-3. **Components are styled by the package's own CSS classes, never by Tailwind utilities.** A host without Tailwind gets the full look from `@no-origins/ui/css`. A Tailwind 4 host additionally gets the utilities from the `@theme` layer. No host ever has to `@source`-scan the package. **The component CSS lives in the `components` cascade layer** (`index.css` imports each file with `layer(components)`): on a Tailwind host that is Tailwind's own components layer, ordered before `utilities`, so a host utility (`className="absolute"`, `"flex"`) always beats a package rule; on any other host an unlayered host stylesheet wins the same way. Found in the first visual review: unlayered package CSS silently overrode every utility the app added. Third-party CSS a host adds (React Flow's `base.css`) should be imported into `layer(base)` so the package can style over it. Tokens stay unlayered.
+3. **Components are styled by the package's own CSS classes, never by Tailwind utilities.** A host without Tailwind gets the full look from `@no-origins/ui/css`. A Tailwind 4 host additionally gets the utilities from the `@theme` layer. No host ever has to `@source`-scan the package. **The component CSS lives in the `components` cascade layer** (`index.css` imports each file with `layer(components)`): on a Tailwind host that is Tailwind's own components layer, ordered before `utilities`, so a host utility (`className="absolute"`, `"flex"`) always beats a package rule; on any other host an unlayered host stylesheet wins the same way. Found in the first visual review: unlayered package CSS silently overrode every utility the app added. Third-party CSS a host adds should be imported into `layer(base)` so the package can style over it — that rule was learned from React Flow's `base.css`, which no host imports any more (D11), and it holds for whatever the next one is. Tokens stay unlayered.
 4. **Behaviour is plain DOM.** Blink, look and refraction alignment run on `requestAnimationFrame` and `getBoundingClientRect` — no framework hooks beyond React's own. The blob's markup is documented SVG (§3–§4), so a non-React surface (a HEEx function component, a LiveView hook) renders the same blob with the same CSS.
 5. **`'use client'`** sits on stateful components for Next's RSC; every other bundler ignores the string.
 6. **Build:** `tsup` → ESM + `.d.ts`, **unbundled** — one output file per source file, so each component keeps its own `"use client"` directive (a bundled entry would hoist or drop it); CSS copied as files; `"sideEffects": ["*.css"]`; Node ≥ 20. Inside the workspace, `exports` point at `src/` and Next transpiles the package; `publishConfig.exports` swap to `dist/` at publish time, so consumers of the npm package get built ESM and types. Versioned with changesets; published to npm under the public `@no-origins` scope (GitHub Packages if it should stay private).
@@ -617,13 +606,12 @@ Vercel: one project per app, framework Next.js, `pnpm install` at the repo root 
 - Hit targets ≥ 44px. Controls drawn smaller (small buttons 36, chips 28, theme switch 28, nav and footer links) reach 44 through an absolutely positioned `::before` that extends the hit area without changing the look. Blobs that do something are buttons with labels (canvas nodes: `role="button"`, Enter opens); decorative blobs are `aria-hidden`.
 - One `h1` per page: the first `SectionHeader` is `level={1}` (Bowlby 44); the canvas has a visually hidden one (`.noo-sr-only`). Landmarks: header, primary nav, `main#main` (the skip target), footer nav.
 - `::selection` is the block's tint; `<meta name="theme-color">` follows the ground in both schemes; `color-scheme` is declared so native controls match.
-- Forced colours (Windows high contrast): glass, cards, chips, bubbles and fields get a `CanvasText` border; the toggle's state is drawn with system colours; blob eyes and bodies keep their outline.
-- Bubbles are real text, read in order; the canvas has a skip-link to the chat input.
-- Canvas nodes are absolutely positioned, so **DOM order is reading order and tab order**: the scene lists nodes region by region. Level of detail (§8.4) cross-fades opacity and never unmounts or `hidden`s text — a screen reader has no zoom level.
-- Canvas panels re-enable `user-select: text` over React Flow's `user-select: none`, and every link or button inside a node carries `nodrag`, so a click is a click and prose can be copied.
-- One `h1` per surface: the canvas keeps a visually hidden one, region labels are `h2`, panel titles `h3`. With JavaScript off, a single `<noscript><style>` linearises the server-rendered scene (§8.7).
-- LCP: hero is type + inline SVG blobs, no images; only the NavBar is glass above the fold in Page mode. Canvas mode server-renders the seven blobs too (§9 Canvas); bubbles arrive on hydration.
-- Glass budget from §3. Blob animations are `transform`/`opacity` only — compositor-friendly.
+- Forced colours (Windows high contrast): surfaces, cards, chips, bubbles and fields get a `CanvasText` border; the toggle's state is drawn with system colours; blob eyes and bodies keep their outline.
+- Bubbles are real text, read in order.
+- ~~Canvas nodes are absolutely positioned, so **DOM order is reading order and tab order**: the scene lists nodes region by region. Level of detail (§8.4) cross-fades opacity and never unmounts or `hidden`s text — a screen reader has no zoom level.~~ ~~Canvas panels re-enable `user-select: text` over React Flow's `user-select: none`, and every link or button inside a node carries `nodrag`.~~ **Struck 2026-09-16** with the canvas (D11). Both were hard-won and both are worth re-reading before anything is placed in free space again.
+- One `h1` per surface: the first `SectionHeader` is `level={1}`; section titles are `h2`, card titles `h3`.
+- LCP: the hero is type and inline SVG blobs, no images; nothing above the fold waits on a script. Every surface is opaque, so nothing above the fold is blurred either.
+- Blob animations are `transform`/`opacity` only — compositor-friendly. The glass budget (≤ 6 translucent elements, blur ≤ 22px) is gone with the material it rationed: an opaque surface costs nothing to composite, which is the one performance thing v1 simply bought.
 - Fonts: three families, latin subset, `swap`, fallbacks with close metrics (`Helvetica Neue` / `system-ui`).
 
 ## 13. Open
@@ -667,11 +655,18 @@ Resolved 2026-09-09: the host blob is clear glass (§4.1b); the canvas home ship
 
     **Not done:** `RegionNode` is unused by the portfolio now but still exported and exercised by `/fixtures/canvas`.
 13. Deploy to Vercel → `bhargav.no-origins.com`.
-14. ✅ **Done 2026-09-11. `design.no-origins.com` — the showcase.** `apps/design`, a second Next app, three routes: an overview, **Components** (the whole registry, rendered by `Catalogue` from the package so the showcase and the admin cannot drift), and **Tokens** (the family, the type scale, space, radius, elevation, motion, and the contrast report).
+14. ✅ **Done 2026-09-11, reorganised 2026-09-16. `design.no-origins.com` — the showcase.** `apps/design`, a second Next app: an overview, **Tokens** (the family, the type scale, space, radius, elevation, motion, and the contrast report — a screen each) and **Components** (the whole registry, rendered by `Catalogue` from the package so the showcase and the admin cannot drift — a screen per Atomic layer).
 
-    It is **page mode, not a canvas** — the first thing on the platform to wear `Page`, `NavBar`, `Footer` and `SectionHeader` since the portfolio retired them in step 9. §9 kept them specified on the grounds that documents would need them, and a catalogue is a document. Block accent lavender, so it never reads as part of the portfolio.
+    It shipped in **page mode** — the first thing on the platform to wear `Page`, `NavBar`, `Footer` and `SectionHeader` since the portfolio retired them in step 9, on the grounds that a catalogue is a document. Block accent blue, so it never reads as part of the portfolio (peach) or the admin (lavender).
+
+    **✅ Reorganised 2026-09-16 — it is a Tool now, and it has eleven screens.** Three routes was two long scrolls: every token on one page, all 48 components on another, and no way to compare two radii without remembering what the hues looked like eight screens up. Tokens became a screen each for colour, contrast, type, space, radius, elevation and motion; Components became a screen per **Atomic layer** — by layer and not by group, because the layer is what a component IS, and the reading order is the build order. Eleven destinations is the exact case §4 of Admin.md settles: a row collides at seven-plus and the answer is a column. So the showcase wears the admin's shell — `Tool`, the `Menu` (D9) and a `ToolScreen` per route — and the `NavBar` and `Footer` go with page mode. (It had a hand collapse, remembered per browser, until the rail went on 2026-09-16: D13.) Page mode does not lose its consumer: the portfolio's `(page)` group still wears `Page`, `NavBar` and `Footer` across the fixtures.
+
+    Three things carry the no-drift rule through the split. `Catalogue` gained a **`layer` prop** rather than the app learning to filter the registry — the admin renders the same component whole (Admin.md §5.1), and a second rendering is the drift the registry exists to prevent. `layerNotes` moved out of `Catalogue` into the registry index, so the screen that names a layer in its header and the catalogue that describes it read one declaration. And `/components/[layer]` is a **dynamic route with `generateStaticParams`**, so a fourth layer added to `layers` adds its screen instead of waiting for someone to remember.
+
+    **The nav names the two halves and nothing else.** The admin puts a labelled group over each destination because each of its groups holds several; here a group would hold one item of the same name, and the column would read "TOKENS · All tokens · Colour" — the same word three times before it says anything. Unlabelled groups also mean no group hue, since a group's hue is drawn on its label's dot and nowhere else. The items are **Tokens** and **Components**, not "All tokens" and "All components", and that is what makes the small forms work: the Menu falls back to a label's first letter where the label does not fit, so two items beginning "All" are two identical glyphs in the phone's sheet (and, until 2026-09-16, in the rail). Found by looking at the mobile screenshot, which is the only place it is visible.
 
     **The contrast report earned its place immediately**, by finding three pairs below §12's floors on the day it was built: `--muted` on `--ground` at 4.20:1, `pink-ink` on `pink` at 4.47:1 and `blue-ink` on `blue` at 4.05:1, against a floor of 4.5. Under R3 the showcase cannot refuse a token — tokens are code — so making a broken floor impossible to miss is the whole of its job, and it did that before anyone asked it to.
 
     It measures rather than computes, and the reason is worth keeping: `getComputedStyle` resolves a `var()` but keeps the colour in the space it was authored in, so every `oklch()` token came back as `oklch(...)`. Reading three numbers out of that as R, G and B made every ratio about 1:1 — the wrong answer in the most convincing possible form. The resolved colour is painted into a 1×1 canvas and the pixel read back instead. Caught by looking at the page, not by a passing test.
 15. The browser-side model — a fine-tuned small model that helps a visitor navigate the map and ask about Bhargav, wearing the centre blob (§8.3). Needs the portfolio's copy to exist first: it is the training material.
+16. ✅ **v1 — 2026-09-16.** The complete revamp Bhargav asked for in one message, released as **`@no-origins/ui` 1.0.0** and recorded as Atomic.md D10–D13. **No more glass:** one flat surface at three elevations, everywhere the system used to be translucent (§3), with the blob flat and `ProfileCard` on a scrim. **No more React Flow:** the canvas, the editor and the document layer left the package with `@xyflow/react` and `zod`, and the portfolio became **pages** — a home that introduces him and carries the six widgets, one route per section — while the admin stopped authoring anything. Bhargav: *"I want to take a different approach later,"* so the registry's contract is kept and §8 above is kept, as the record. **Motion is a layer:** `durations`, `easings`, `motionPatterns`, `motionNotes`, `prefersReducedMotion`, the `Motion` atom, `useReducedMotion`, and a `/tokens/motion` screen on the showcase that reads them (§7). **One navigation:** no `Rail`, no rail form, no collapse — `Menu` is column, two columns, or sheet (D13). Every deprecated alias from the 0.1.0 release went at the same time, which is what makes this a major. Verified the way everything here is verified: the package's lint and build, all three apps' typechecks, `pnpm review` over the portfolio and the showcase in both themes on desktop and mobile, and the admin by signing in and looking.

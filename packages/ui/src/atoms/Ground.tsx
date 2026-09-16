@@ -6,7 +6,7 @@ import { cx } from "../cx";
  *
  * It was a class every app typed onto `<body>` by hand; now it is a component too, so a page, a fixture or a
  * demo well can stand on the ground without knowing the class. The class still works on `<body>`, where React
- * has no element to give you. `.noo-graph` was a second copy of the same declarations and is now an alias.
+ * has no element to give you.
  */
 export interface GroundProps extends ComponentPropsWithoutRef<"div"> {
   as?: ElementType;

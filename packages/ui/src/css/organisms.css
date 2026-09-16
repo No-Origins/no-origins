@@ -6,6 +6,7 @@
 .noo-cat__counts { display: flex; flex-wrap: wrap; gap: var(--s-4); }
 .noo-cat__note { max-width: 66ch; }
 .noo-cat__layer { display: flex; flex-direction: column; gap: var(--s-8); padding-top: var(--s-12); border-top: 1px solid var(--rule); }
+.noo-cat--solo .noo-cat__layer { padding-top: 0; border-top: 0; }   /* one layer on its own screen: the rule separated it from the summary, and there is no summary */
 .noo-cat__layer-head { display: flex; flex-direction: column; gap: var(--s-2); }
 .noo-cat__eyebrow { color: var(--muted); }
 .noo-cat__lead { max-width: 60ch; }
@@ -46,7 +47,7 @@
 .noo-media-card { --mc-hue: var(--hue); display: grid; gap: 0; background: var(--surface);
   border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--e1); color: inherit; text-decoration: none; }
 .noo-media-card__media { position: relative; min-height: 200px; overflow: hidden;
-  background-image: linear-gradient(135deg, color-mix(in oklch, var(--mc-hue) 70%, var(--surface)), var(--surface) 78%); }
+  background-color: color-mix(in oklch, var(--mc-hue) 40%, var(--surface)); }                /* a flat wash of the hue; a gradient until 2026-09-16 */
 .noo-media-card__media > * { display: block; width: 100%; height: 100%; object-fit: cover; }
 .noo-media-card__body { display: flex; flex-direction: column; gap: 10px; padding: 28px; min-width: 0; }
 .noo-media-card__meta { margin: 0; color: var(--muted); }
@@ -82,9 +83,8 @@
 
 
 /* ===== ProfileCard + Deck (§9) — large-format media, and a stack of it =====
-   The scrim over the words is the GROUND colour, not black: black over a warm photograph is a bruise. The bloom
-   is the media rendered a second time, blurred and scaled beneath the card — the picture already knows what
-   colour it is, so nothing has to extract one. */
+   Flat since v1 (2026-09-16): the frosted bottom and the bloom beneath went with the glass. What holds the words up
+   is a scrim in the SHADE, not black — black over a warm photograph is a bruise — fading upward under the type. */
 .noo-profile { --pf-hue: var(--hue); position: relative; display: block; width: 100%; }
 
 .noo-profile__card {
@@ -102,17 +102,12 @@
      card border radius"). Every layer agreeing on one shape is worth more than a more continuous curve. */
   border-radius: 15%;
   /* the hue's wash under the grain, exactly as a bento cell (§9) — it is what shows through a cutout, and what
-     the card is when there is no picture at all */
-  background-color: var(--surface);
-  background-image: linear-gradient(135deg, color-mix(in oklch, var(--pf-hue) 62%, var(--surface)), var(--surface) 74%);
-  /* the hairline and the top edge catching light, drawn INSIDE so they sit over the picture (§3 cues 1 and 2),
-     plus the bottom rim a thick glass object gets where it turns away from the light */
+     the card is when there is no picture at all. Flat since 2026-09-16 (no gradients anywhere in the system) */
+  background-color: color-mix(in oklch, var(--pf-hue) 36%, var(--surface));
+  /* the hairline, drawn INSIDE so it sits over the picture, and the elevation */
   box-shadow:
-    inset 0 0 0 1px var(--glass-border),
-    inset 0 1.5px 0 color-mix(in oklch, white var(--glass-hl-3), transparent),
-    inset 0 -1px 0 color-mix(in oklch, var(--shade) 10%, transparent),
-    var(--e3),
-    0 18px 40px color-mix(in oklch, var(--shade) 12%, transparent);
+    inset 0 0 0 1px var(--rule),
+    var(--e3);
 }
 
 .noo-profile__media { position: absolute; inset: 0; z-index: 0; }
@@ -121,63 +116,20 @@
 .noo-profile--cutout .noo-profile__media { inset: 6% 0 0 0; }
 .noo-profile--cutout .noo-profile__media > * { object-fit: contain; object-position: center bottom; }
 
-/* THE GLOSS (Bhargav, 2026-09-11: "still don't have the glossy design").
-   The reference's shine is not a highlight painted on top — it is the bottom of the picture going to frosted
-   glass: blurred, a little brighter, a little more saturated, and with NO edge anywhere. That last part is the
-   whole trick, and it is why this is not the `glass-2` plate that was rejected an hour earlier. A plate has a
-   boundary, so it reads as a panel sitting on the photograph; this fades out upward, so the picture simply
-   becomes glass as it goes down and the words are already standing on it.
-
-   **It blurs a second copy of the picture rather than the backdrop.** `backdrop-filter` is the obvious tool and
-   it is the wrong one: Chromium clips the filtered backdrop to the element's border box and ignores the mask, so
-   the fade that is the entire point comes out as a hard horizontal line across the card. Confirmed by looking,
-   not assumed. A duplicated `<img>` under `filter: blur()` is the element's own content, so the mask applies to
-   it normally, and it renders the same everywhere instead of only where backdrop-filter is feathered. The copy
-   is scaled up because a blur samples past its own edges and would otherwise leave a transparent fringe. */
-.noo-profile__frost {
-  /* NO `overflow: hidden` here, deliberately. The card already clips to its own corner, and a second clip on this
-     element gets drawn with a CIRCULAR arc rather than the card's squircle — visible as a lighter wedge in each
-     bottom corner where the frost stops short of the edge (Bhargav, 2026-09-11: "the overlay border radius don't
-     match"). The scaled-up copy inside only needs *a* clip, and the card's is the right one. The mask applies to
-     the whole subtree, overflow included, so nothing else changes. */
-  position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  /* the card's own corner, restated: this layer is clipped separately and has to agree with it exactly */
-  border-radius: inherit; overflow: hidden;
-  -webkit-mask-image: linear-gradient(to top, #000 0 26%, color-mix(in oklch, #000 50%, transparent) 46%, transparent 64%); /* stylelint-disable-line color-no-hex -- a mask reads alpha only; the colour is not a colour */
-  mask-image: linear-gradient(to top, #000 0 26%, color-mix(in oklch, #000 50%, transparent) 46%, transparent 64%); /* stylelint-disable-line color-no-hex -- a mask reads alpha only; the colour is not a colour */
-}
-.noo-profile__frost > * {
-  display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 0;
-  filter: blur(18px) saturate(1.5) brightness(1.2);
-  transform: scale(1.22);
-}
-/* the white film a frosted surface has. It shares the parent's mask, so it fades out with the blur and never
-   becomes an edge — which is the only reason this is allowed to exist at all. */
-.noo-profile__frost:not(:empty)::after {
-  content: ""; position: absolute; inset: 0;
-  background: linear-gradient(to top, color-mix(in oklch, white 15%, transparent), transparent 72%);
-}
-/* A cutout figure and a bare card have no photograph to frost, and white words on the hue's own wash are not
-   legible on their own. Those get the one thing this component otherwise refuses — a scrim — in the GROUND's
-   shade rather than black, because black over a warm wash is a bruise. */
-.noo-profile__frost:empty {
-  /* its own ramp, not the mask's: the mask is shaped for a blur that reads from about two thirds down, and a
-     scrim spread over that same distance is too thin to hold white type where the type actually sits. */
+/* The scrim: white words need something under them, and a plate was rejected twice ("there is background behind the
+   text"). This fades upward under the type in the ground's shade — an opacity ramp, kept and flagged when every other
+   gradient went (2026-09-16); the one legibility device the card has. */
+.noo-profile__scrim {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: inherit;
   background: linear-gradient(to top,
     color-mix(in oklch, var(--shade) 74%, transparent) 0%,
     color-mix(in oklch, var(--shade) 46%, transparent) 16%,
     transparent 44%);
 }
 
-/* the sweep and the grain: the card's material, above the frost and below the words */
+/* the grain: the card's material, above the scrim and below the words. */
 .noo-profile__sheen {
   position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit;
-  background:
-    /* the specular streak a curved glass face throws — short, bright, and off the top-left corner */
-    linear-gradient(118deg,
-      color-mix(in oklch, white calc(var(--glass-sweep) + 14%), transparent) 0%,
-      color-mix(in oklch, white var(--glass-sweep), transparent) 12%,
-      transparent 46%);
 }
 .noo-profile__sheen::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
@@ -206,14 +158,6 @@
   margin: 0; font-family: var(--ff-sans); font-weight: 400;
   font-size: clamp(13px, 5.7cqw, 25px); line-height: 1.25; opacity: 0.92;
 }
-/* The light the picture spills onto the surface under it — the other half of the gloss. It sits low and tight
-   rather than haloing the whole card, because that is where a lit object throws light: down and a little out. */
-.noo-profile__bloom {
-  position: absolute; inset: 26% -7% -13% -7%; z-index: -1; pointer-events: none;
-  filter: blur(40px) saturate(1.9) brightness(1.1); opacity: 0.62; transform: scaleY(0.9);
-}
-.noo-profile__bloom > * { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
-
 /* the deck — a scroll container that publishes each card's distance from centre as --d, and lets CSS do depth */
 /* The card width is derived from `visible` and `overlap`, in CONTAINER units — and the container unit is the
    whole point. It was a percentage first, which is circular and silently wrong: the track's padding-inline is
@@ -263,21 +207,20 @@
      less to look at, identical to operate. */
   .noo-deck__track { scroll-behavior: auto; }
   .noo-deck__slide { transform: none; opacity: 1; transition: none; margin-inline: 6px; }
-  .noo-profile__bloom { display: none; }
 }
 @media (forced-colors: active) {
   .noo-profile__card { border: 1px solid CanvasText; }
   .noo-profile__words { background: Canvas; color: CanvasText; }
-  .noo-profile__frost, .noo-profile__sheen, .noo-profile__bloom { display: none; }
+  .noo-profile__scrim, .noo-profile__sheen { display: none; }
 }
 
 
-/* ===== NavBar (§9) — glass-2 · 60px · sticky · wordmark left, links right · current = accent-deep + 2px ===== */
+/* ===== NavBar (§9) — a level-2 surface · 60px · sticky · wordmark left, links right · current = accent-deep + 2px ===== */
 .noo-nav {
   position: sticky; top: 0; z-index: 30;
   height: var(--bar);
   border-radius: 0;
-  border-width: 0 0 1px 0;                                                                 /* the glass hairline, bottom only */
+  border-width: 0 0 1px 0;                                                                 /* the hairline, bottom only */
 }
 .noo-nav__inner { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .noo-nav__home { display: inline-flex; align-items: center; height: var(--ctl-md); color: var(--ink); text-decoration: none; font-size: var(--t-h4); border-radius: var(--r-pill); }
@@ -303,10 +246,10 @@
 }
 
 
-/* ===== Menu (Atomic.md D9) — one navigation, five forms: column · rail · two columns · floating · sheet =====
-   The grammar is the same everywhere: glass-2 at radius xl, pill items at a control height, the current item an
-   ink pill (the primary button's material). Rail's 2px edge bar, the NavBar's sheet and the canvas's hand-built
-   view switcher are all this now. */
+/* ===== Menu (Atomic.md D9) — one navigation, three forms: column · two columns · sheet =====
+   The grammar is the same everywhere: a level-2 surface at radius xl, pill items at a control height, the current
+   item an ink pill (the primary button's material). The rail form and its collapse toggle went in v1 (2026-09-16):
+   one navigation has one width. */
 .noo-menu {
   --menu-w: 280px; --menu-item: var(--ctl-md); --menu-hue: var(--accent-deep);
   position: relative; display: flex; gap: var(--s-3);
@@ -314,14 +257,14 @@
   border-radius: var(--r-xl);
 }
 .noo-menu__col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-2); }
-.noo-menu--column, .noo-menu--rail {
-  grid-area: rail;
+.noo-menu--column {
+  grid-area: menu; box-sizing: border-box;
   position: sticky; top: var(--s-3); align-self: start;
   height: calc(100dvh - 2 * var(--s-3)); margin: var(--s-3) 0 var(--s-3) var(--s-3);
   overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none;
 }
-.noo-menu--column::-webkit-scrollbar, .noo-menu--rail::-webkit-scrollbar { display: none; }
-.noo-menu__brand { display: flex; align-items: center; min-height: var(--menu-item); padding: 0 var(--s-4); }
+.noo-menu--column::-webkit-scrollbar { display: none; }
+.noo-menu__brand { display: flex; align-items: center; min-height: var(--menu-item); padding: 0 var(--s-2) 0 var(--s-4); }
 .noo-menu__home { display: inline-flex; align-items: center; height: var(--menu-item); color: var(--ink); text-decoration: none; font-size: var(--t-h4); border-radius: var(--r-pill); }
 .noo-menu__groups { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
 .noo-menu__group { --menu-hue: var(--hue-deep); display: flex; flex-direction: column; gap: 2px; }
@@ -343,8 +286,8 @@
 .noo-menu__link[aria-current] { background: var(--ink); color: var(--ground); box-shadow: var(--e1); }   /* the ink pill (D9) */
 .noo-menu__icon { flex: none; display: inline-flex; width: var(--icon-md); height: var(--icon-md); }
 .noo-menu__icon > svg { width: 100%; height: 100%; }
-.noo-menu__initial { display: none; }                                                       /* the icon's stand-in; only where the label is hidden */
-.noo-menu--rail .noo-menu__initial, .noo-menu--sheet .noo-menu__initial { display: grid; place-items: center; flex: none; width: var(--icon-md); height: var(--icon-md); font: 600 var(--t-ui-sm)/1 var(--ff-sans); text-transform: uppercase; }
+.noo-menu__initial { display: none; }                                                       /* the icon's stand-in; only where the label is small */
+.noo-menu--sheet .noo-menu__initial { display: grid; place-items: center; flex: none; width: var(--icon-md); height: var(--icon-md); font: 600 var(--t-ui-sm)/1 var(--ff-sans); text-transform: uppercase; }
 .noo-menu__label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .noo-menu__badge { display: grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: var(--r-pill); background: var(--ink); color: var(--ground); font: 600 var(--t-caption)/1 var(--ff-sans); }
 .noo-menu__link[aria-current] .noo-menu__badge { background: var(--ground); color: var(--ink); }
@@ -352,29 +295,7 @@
 .noo-menu__list--sub { margin: 2px 0 var(--s-2) calc(var(--s-4) + var(--icon-md) / 2); padding-left: var(--s-4); border-left: 1px solid var(--rule); }
 .noo-menu__list--sub .noo-menu__link { min-height: var(--ctl-sm); font-weight: 400; font-size: var(--t-ui-sm); }
 .noo-menu__list--sub .noo-menu__link[aria-current] { background: var(--surface); color: var(--ink); }   /* the current child is a surface pill */
-.noo-menu__trailing { margin-top: auto; padding-top: var(--s-3); border-top: 1px solid var(--glass-border); display: flex; flex-direction: column; gap: var(--s-2); }
-
-/* rail: labels lift into a bubble on hover and focus — the accessible name is untouched */
-.noo-menu--rail { --menu-w: 72px; overflow: visible; }
-.noo-menu--rail .noo-menu__col { align-items: center; }
-.noo-menu--rail .noo-menu__brand { padding: 0; justify-content: center; width: var(--menu-item); }
-.noo-menu--rail .noo-wordmark > span[aria-hidden]:not(.noo-blob) { display: none; }      /* the letters go; the blob stays */
-.noo-menu--rail .noo-menu__groups { width: 100%; align-items: center; gap: var(--s-2); }
-.noo-menu--rail .noo-menu__group { align-items: center; width: 100%; }
-.noo-menu--rail .noo-menu__group + .noo-menu__group { padding-top: var(--s-2); border-top: 1px solid var(--glass-border); }
-.noo-menu--rail .noo-menu__group-label, .noo-menu--rail .noo-menu__action, .noo-menu--rail .noo-menu__list--sub, .noo-menu--rail .noo-menu__divider, .noo-menu--rail .noo-menu__panel { display: none; }
-.noo-menu--rail .noo-menu__list { align-items: center; }
-.noo-menu--rail .noo-menu__link { width: var(--menu-item); padding: 0; justify-content: center; flex: none; }
-.noo-menu--rail .noo-menu__label {
-  position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%); z-index: 50;
-  flex: none; overflow: visible; padding: 6px 10px; border-radius: var(--r-sm);
-  background: var(--ink); color: var(--ground); font: 500 var(--t-caption)/1.35 var(--ff-sans); box-shadow: var(--e2);
-  opacity: 0; visibility: hidden; pointer-events: none;
-  transition: opacity var(--d-fast) var(--ease), visibility 0s linear var(--d-fast);
-}
-.noo-menu--rail .noo-menu__link:hover .noo-menu__label, .noo-menu--rail .noo-menu__link:focus-visible .noo-menu__label { opacity: 1; visibility: visible; transition-delay: 0s, 0s; }
-.noo-menu--rail .noo-menu__badge { position: absolute; top: 2px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; font-size: 10px; }             /* stylelint-disable-line declaration-property-value-disallowed-list -- a count inside a 16px badge; --t-label at 12 overflows it */
-.noo-menu--rail .noo-menu__trailing { display: none; }                                      /* a theme switch and an address do not fit 72px; the sheet hides it too */
+.noo-menu__trailing { margin-top: auto; padding-top: var(--s-3); border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: var(--s-2); }
 
 /* two columns (≥ lg): the current item's panel opens beside the column; below lg it folds into children */
 .noo-menu__divider, .noo-menu__panel { display: none; }
@@ -382,31 +303,24 @@
 @media (min-width: 1200px) {
   .noo-menu--two { width: auto; }
   .noo-menu--two .noo-menu__col:first-of-type { flex: none; width: calc(var(--menu-w) - 2 * var(--s-3)); }
-  .noo-menu--two .noo-menu__divider { display: block; width: 1px; margin: var(--s-2) 0; background: var(--glass-border); }
+  .noo-menu--two .noo-menu__divider { display: block; width: 1px; margin: var(--s-2) 0; background: var(--rule); }
   .noo-menu--two .noo-menu__panel { display: flex; flex: none; width: 240px; padding-top: calc(var(--menu-item) + var(--s-2)); }
   .noo-menu--two .noo-menu__fold { display: none; }
 }
 
-/* floating: the canvas's view switcher — no brand, items at --ctl-sm */
-.noo-menu--floating { --menu-w: 188px; --menu-item: var(--ctl-sm); padding: var(--s-2); }
-.noo-menu--floating .noo-menu__link { font-size: var(--t-ui-sm); }
-.noo-menu--floating .noo-menu__trailing { padding-top: var(--s-2); }
-
-/* sheet: the small-screen bottom bar — icon over a short label, five items at most */
+/* sheet: the small-screen bottom bar — a glyph over a short label; past five items it scrolls sideways */
 .noo-menu--sheet {
   position: fixed; left: var(--s-3); right: var(--s-3); bottom: calc(var(--s-3) + env(safe-area-inset-bottom, 0px)); z-index: 30;
   width: auto; padding: var(--s-2);
 }
 .noo-menu--sheet .noo-menu__col, .noo-menu--sheet .noo-menu__groups, .noo-menu--sheet .noo-menu__group, .noo-menu--sheet .noo-menu__list { flex-direction: row; flex: 1; gap: 2px; min-width: 0; }
-.noo-menu--sheet .noo-menu__item { flex: 1; }
+.noo-menu--sheet .noo-menu__list { overflow-x: auto; scrollbar-width: none; }
+.noo-menu--sheet .noo-menu__list::-webkit-scrollbar { display: none; }
+.noo-menu--sheet .noo-menu__item { flex: 1 0 auto; min-width: 56px; }
 .noo-menu--sheet .noo-menu__link { flex-direction: column; justify-content: center; gap: 2px; min-height: var(--ctl-lg); padding: 0 var(--s-2); font-size: var(--t-caption); }
 .noo-menu--sheet .noo-menu__label { flex: none; max-width: 100%; }
 .noo-menu--sheet .noo-menu__brand, .noo-menu--sheet .noo-menu__trailing, .noo-menu--sheet .noo-menu__group-label, .noo-menu--sheet .noo-menu__list--sub, .noo-menu--sheet .noo-menu__action, .noo-menu--sheet .noo-menu__divider, .noo-menu--sheet .noo-menu__panel, .noo-menu--sheet .noo-skip { display: none; }
 @media (max-width: 899.98px) { .noo-page:has(.noo-menu--sheet) { padding-bottom: calc(var(--ctl-lg) + 4 * var(--s-3) + env(safe-area-inset-bottom, 0px)); } }
-
-/* the railed page: two columns, and the rail is the one that does not scroll with the document */
-.noo-page--railed { display: grid; grid-template-areas: "rail column"; grid-template-columns: auto minmax(0, 1fr); }
-.noo-page__column { grid-area: column; min-width: 0; display: flex; flex-direction: column; min-height: 100dvh; }
 
 /* ===== Footer (§9) — on the ground, a hairline above; the name in running text, meta, links, a trailing slot ===== */
 .noo-footer { margin-top: var(--s-16); border-top: 1px solid var(--rule); padding-block: var(--s-10); color: var(--ink-2); font: 400 var(--t-body-sm)/1.5 var(--ff-sans); }
@@ -421,7 +335,7 @@
 @media (max-width: 639.98px) { .noo-footer__inner { flex-direction: column; align-items: flex-start; } }
 
 
-/* ===== BlockCard · RoadmapItem (§9) — the Work item and the not-yet item ===== */
+/* ===== BlockCard (§9) — the Work item; asleep, the not-yet item ===== */
 .noo-block-card { display: flex; gap: 20px; align-items: flex-start; }
 .noo-block-card__blob { margin-top: 2px; }
 .noo-block-card__hue { flex: none; width: 10px; height: 10px; margin-top: 7px; border-radius: var(--r-pill); background: var(--hue-deep); }
@@ -464,27 +378,24 @@
   overflow: hidden;                                                                          /* a glyph bleeds off the edge */
   color: var(--ink);
 }
-/* Textured gradient cards (Patterns.md §4b): the card carries the light and the material now that the
-   drawing on it is a line. The gradient runs −45°, the blob's light; the grain sits on top of it. */
+/* Textured cards (Patterns.md §4b): the card carries the material now that the drawing on it is a line — a FLAT
+   wash of the hue with the grain on top. The 135° gradient that used to carry the blob's −45° light went on
+   2026-09-16 (Bhargav: "let's remove all the gradients"); the light is the blob's alone now. */
 .noo-bento__cell--quiet {
-  background-color: var(--surface);
-  background-image: linear-gradient(135deg, color-mix(in oklch, var(--bento-hue) 34%, var(--surface)), var(--surface) 66%);
+  background-color: color-mix(in oklch, var(--bento-hue) 16%, var(--surface));                 /* a trace of the hue, about what the old wash averaged */
   box-shadow: var(--e1);
 }
 .noo-bento__cell--fill {                                                                       /* the loud one; ink stays dark in both themes */
   background-color: var(--bento-hue);
-  background-image: linear-gradient(135deg, color-mix(in oklch, var(--bento-hue) 58%, white), var(--bento-hue) 72%);
   color: var(--bento-hue-ink);
 }
 .noo-bento__cell--ink {
   background-color: var(--ink);
-  background-image: linear-gradient(135deg, color-mix(in oklch, var(--ink) 84%, var(--bento-hue)), var(--ink) 70%);
   color: var(--ground);
 }
 .noo-bento__cell--bare { background: none; box-shadow: none; padding-inline: 4px; }               /* type on the grid: a page's intro */
-.noo-bento__cell--glass { border-radius: var(--r-lg); }                                        /* glass has its own material: no gradient, no grain */
-.noo-textured, .noo-bento__cell:not(.noo-bento__cell--glass):not(.noo-bento__cell--bare) { position: relative; }
-.noo-textured::after, .noo-bento__cell:not(.noo-bento__cell--glass):not(.noo-bento__cell--bare)::after {
+.noo-textured, .noo-bento__cell:not(.noo-bento__cell--bare) { position: relative; }
+.noo-textured::after, .noo-bento__cell:not(.noo-bento__cell--bare)::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
   background: currentColor;                                                                    /* the card's own ink: right polarity on every ground */
   -webkit-mask-image: var(--grain); mask-image: var(--grain);
@@ -498,7 +409,7 @@
 /* twice the document scale: read from twice as far away, nothing under 20 */
 .noo-bento__title { margin: 0; font: 600 var(--t-widget-title)/1.15 var(--ff-sans); letter-spacing: -0.005em; text-wrap: balance; }
 .noo-bento__text  { margin: 0; font: 400 var(--t-widget-text)/1.35 var(--ff-sans); color: var(--ink-2); text-wrap: pretty; }
-.noo-bento__cell--fill .noo-bento__text { color: inherit; opacity: 0.85; }
+.noo-bento__cell--fill .noo-bento__text, .noo-bento__cell--fill .noo-widget-text { color: inherit; opacity: 0.85; }
 .noo-bento__word  { margin: 0; font: 400 var(--t-widget-word)/0.95 var(--ff-display); letter-spacing: -0.01em; }        /* two lines in a 2 × 2 cell; 56 wrapped to three and met the illustration */
 .noo-bento__list  { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font: 500 var(--t-widget-title)/1.25 var(--ff-sans); }
 .noo-bento__list li { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -510,7 +421,13 @@
 .noo-bento__value { font: 400 var(--t-widget-figure)/0.9 var(--ff-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .noo-bento__figure--md .noo-bento__value { font-size: var(--t-display-2); }
 .noo-bento__figure-label { font-size: var(--t-widget-text); letter-spacing: 0.08em; }
+/* A Figure set as a WORD (Admin.md §6.5c F3): the same corner and the same job, in the display face at the word's
+   size. No tabular nums — that alignment is for digits, and it widens letters. */
+.noo-bento__figure--word .noo-bento__value { font: 400 var(--t-widget-word)/0.95 var(--ff-display); letter-spacing: -0.01em; font-variant-numeric: normal; }
 .noo-bento__cell .noo-placeholder__tag { align-self: flex-start; font-size: var(--t-body-sm); padding: 6px 10px; }
+/* A list inside a widget cell (Admin.md §6.5c F5): lines, not bullets. A widget is a handful of lines read from
+   across the room; a marker column is document furniture and steals the width. The rhythm stays. */
+.noo-bento__cell .noo-text--blocks ul { list-style: none; padding-left: 0; }
 
 
 .noo-block-card__body { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 8px; }
@@ -540,7 +457,7 @@
 .noo-table__empty { padding: var(--s-8) var(--s-4); text-align: center; color: var(--muted); }
 
 
-/* ===== Dialog · Sheet (Admin.md §10) — glass-3, radius xl, e4; a native <dialog> does the modal work ===== */
+/* ===== Dialog · Sheet (Admin.md §10) — a level-3 surface, radius xl, e4; a native <dialog> does the modal work ===== */
 @keyframes noo-dialog-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
 @keyframes noo-sheet-in { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
 @keyframes noo-sheet-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
@@ -552,7 +469,7 @@
 .noo-dialog[open] { display: flex; flex-direction: column; gap: var(--s-3); animation: noo-dialog-in var(--d-base) var(--ease); }
 .noo-dialog--sm { width: min(400px, calc(100vw - 2 * var(--s-4))); }
 .noo-dialog--lg { width: min(720px, calc(100vw - 2 * var(--s-4))); }
-.noo-dialog::backdrop { background: color-mix(in oklch, var(--shade) 32%, transparent); backdrop-filter: blur(6px); }
+.noo-dialog::backdrop { background: color-mix(in oklch, var(--shade) 32%, transparent); }
 .noo-dialog__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s-3); }
 .noo-dialog__title { margin: 0; }
 .noo-dialog__close {
@@ -594,7 +511,7 @@
 .noo-tree__item[aria-expanded="false"] > .noo-tree__group { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .noo-menu__link, .noo-tree__row, .noo-tree__caret, .noo-dialog__close, .noo-menu--rail .noo-menu__label { transition: none; }
+  .noo-menu__link, .noo-tree__row, .noo-tree__caret, .noo-dialog__close { transition: none; }
   .noo-dialog[open], .noo-dialog--sheet[open] { animation: none; }
 }
 @media (forced-colors: active) {

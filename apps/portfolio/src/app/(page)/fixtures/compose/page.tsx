@@ -151,11 +151,11 @@ export default function ComposeFixture() {
         </Box>
       </Case>
 
-      <Case title="CellHead — the same shape four times in one widget" note="Two <p> tags typed by hand in the app's content file, once per role. Composable from Label, Dot and a title — and registered anyway, because authoring a widget cell should be one node, not four.">
+      <Case title="CellHead — the same shape four times in one widget" note="Two <p> tags typed by hand in the app's content file, once per role. Composable from Label, a title and — in the media slot — a Dot; registered anyway, because authoring a widget cell should be one node, not four.">
         <Row gap={16} align="start">
           {([["now", "Radise", "peach"], ["before", "Dataflix", "green"], ["one year", "Hashnode", "blue"], ["two years", "Terrible Tiny Tales", "pink"]] as const).map(([l, t, h]) => (
             <div key={t} className="noo-bento__cell noo-bento__cell--quiet w-[144px] h-[144px]">
-              <CellHead label={l} title={t} dot={h} />
+              <CellHead label={l} title={t} media={<Dot hue={h} />} />
             </div>
           ))}
         </Row>

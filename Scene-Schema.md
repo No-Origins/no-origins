@@ -2,6 +2,8 @@
 
 *Opened 2026-09-11. The contract between the admin editor (Admin.md), `@no-origins/ui/canvas`, and every project that renders a canvas.*
 
+> **Superseded 2026-09-16.** The document layer, the adapter and the editor this schema fed were removed with React Flow (Atomic.md D11). Bhargav: *"Let's remove the react flow and all react flow related items completely. I want to take a different approach later."* This document is kept as the record of what was learned — and **the registry's contract (§2, §3) is what survives**: `entries`, each entry's `kind` and `slots`, and the prop schemas are still in the package, because they describe what a component is and where it may go, which is the first thing any new approach will need. The body below is not rewritten; read it as the account of the first attempt.
+
 This is a **System** in the sense of Admin.md §1: every project shares it, no project may fork it, and both the editor that writes it and the renderer that reads it are downstream of this document rather than of each other.
 
 ---
@@ -87,6 +89,8 @@ The first draft made boxes the storage unit, on the reasoning that an off-grid l
 
 Sub-pixel placement is still not supported: `at` and `size` are integers. Anything finer is a component's internal layout, not a scene.
 
+**Revised again, 2026-09-15 — Bhargav, on first use of the editor:** *"one full block of grid item should be the minimum space any item should take. No dynamic sizes. Sizes are always defined in terms of blocks."* So the unit stays canvas units, but the RULE changes for every kind: `at` lands on a box corner and `size` is whole boxes, one at least — blobs included (a blob without a `size` is one box). Me was the argument for free placement; it is now on the grid: the blob in the box at `[0, −320]`, the intro at `[−320, 160]` 4 × 1, the story under it 4 × 3, the menu one box further left so it touches rather than covers. The editor snaps on drop, on drag and on resize (handles on the selected node), and the layout form counts in boxes. A node also carries **`align`** — `start · center · end`, default **center**: content sits in the middle of its boxes unless told otherwise. §6 rule 7 now applies to every node in canvas space.
+
 ### 1.2 `order` is reading order
 
 Design-System.md §12: *"canvas nodes are absolutely positioned, so DOM order is reading order and tab order"*, and §8.3: a ring has no natural order, so reading order is declared. `order` lists sections; within a section, array order in `nodes` is DOM order.
@@ -102,6 +106,8 @@ The adapter emits nodes in that order and **never sorts by position**. A documen
 ```
 
 Width authored, height measured (written back by the editor, never typed); both in canvas units. `slack` is what the probes report. A panel with no `measured` renders at its content's natural height and is flagged before publish.
+
+**Retired 2026-09-15** (§1.1 revision): *"no dynamic sizes."* A panel's height is authored in whole boxes like every other node's; content that does not fit is the author's to see and the handles' to fix. `null` heights and `measured` are still read from older documents and rendered at whole boxes with a warning; the editor never writes them.
 
 ---
 
@@ -145,6 +151,8 @@ export interface RegistryEntry<P = Record<string, unknown>> {
   example: () => React.ReactNode;     // the catalogue's live sample
   since: string;                      // the ui version it appeared in
   status: "stable" | "draft" | "deprecated";
+  childrenFrom?: string;              // the authored prop rendered as `children` — Heading.text, Text.markdown (§10 ①)
+  adapt?: (props, parent?) => props;  // authored shape → React shape where they differ — BentoCell.span (§10 ②)
 }
 ```
 
@@ -402,11 +410,13 @@ And the six parameter sets lived in `apps/portfolio/src/content/sections.tsx` �
 ## 4. The adapter
 
 ```ts
-// @no-origins/ui/canvas
-export function documentToScene(doc: SceneDocument, registry: Registry): {
+// @no-origins/ui/document  (built 2026-09-14 — §10 ③ says why not /canvas)
+export function documentToScene(doc: unknown, registry: Registry, ctx?: { content?: unknown }): {
+  valid: boolean;          // no error-level issue: what Publish is gated on (§6)
   scene: SceneNode[];
   views: CanvasView[];
   threads: SceneThread[];
+  pages: DocumentPage[];   // `page` nodes, rendered — not in canvas space (Design-System.md §8.4), for their own route
   issues: Issue[];
 }
 ```
@@ -704,3 +714,81 @@ Source: the `work` block of `scene.tsx`, `content/work.ts`, and the `work` entry
 ### 9.5 Where the schema stands
 
 Two sections hand-authored, twelve findings, and the shape has stopped moving in the places Me tested and started moving in the places it could not reach. The five sections still unwritten (Design-System.md §13) are `Placeholder` panels today, so they exercise nothing new — **the schema is ready for step 2, and the next thing that can invalidate it is the editor, not another document.**
+
+---
+
+## 10. Built — the read path, 2026-09-14
+
+Admin.md §13 step 6, done as Admin.md §6.5's step 2: the schema as Zod, the registry's prop schemas as validators, refs, markdown with the two directives, and the adapter — in `packages/ui/src/document/`, exported at **`@no-origins/ui/document`**. The portfolio's map is written as a document in `apps/portfolio/src/content/document.ts` and rendered at **`/fixtures/document`** (in the sweep); `e2e/document.spec.ts` compares that render with the hand-written one pixel for pixel, and the numbers below are what it measured. Nothing in `@no-origins/ui/canvas` changed, as §0 promised.
+
+### 10.1 What building it amended
+
+Eight things the text above did not say, each decided by the code and recorded here so the text is true again.
+
+| | Amendment | Why |
+|---|---|---|
+| ① | `RegistryEntry` gains **`childrenFrom`** — the authored prop that renders as the component's `children` (`Heading.text`, `Label.text`, `Chip.label`, `Button.label`, `Text.markdown`, `Quote.markdown`, `Toast.text`, `RegionLabel.text`) | §2.2 re-types a `ReactNode` prop as `text`; something has to say which React prop it was. On the entry, not in a table inside the adapter — two lists drift |
+| ② | `RegistryEntry` gains **`adapt(props, parent)`** — authored shape → React shape. `BentoCell.span` is authored as `{ cols, rows }` (an `object` the inspector renders as a labelled group) and taken as `[cols, rows]`; a cell inherits its bento's `hue` for its pattern; `Pattern.name` naming a document pattern becomes `family` | The alternative was a bespoke branch per component in the adapter, which is the drift §3.1 forbids. §9's examples write `"span": [2, 2]` — read them as `{ "cols": 2, "rows": 2 }` |
+| ③ | The adapter lives at **`/document`**, not `/canvas` | It carries the whole registry and zod. The live portfolio renders a hand-written scene from `/canvas` and needs neither |
+| ④ | **`BentoCell` (the component) gains `pattern` and `hue`** | The registry declared `pattern` on the cell before the component had it — §2.2 read the other way: the authorable surface is a subset of the React one, so the component grew. What `SectionWidget` did by hand, the cell does itself |
+| ⑤ | `component` is **absent on `region` and `menu`**; `menu` carries `node: { label, items: [{ label, view \| href }] }` (Admin.md §6.5) | `RegionNode` and `MenuNode` draw themselves. `region` may still name `RegionLabel` for its text; it is deprecated |
+| ⑥ | **`page` nodes come back as `pages`**, rendered, not in `scene` | §9.2 took them off the canvas; `SceneNode` has no place for them. Nothing mounts a page yet — that is the full-view work, with the editor |
+| ⑦ | Nodes **with no section are emitted first**, in array order; then each section in `order`, in array order | §1.2 said what happens within a section and not what happens to the menu and the blob |
+| ⑧ | **Numeric enums are numbers on the way out** (`of: ["2","3","4"]` → `level: 2`); **registry `default`s are not applied on read** (they are what a dropped instance starts with); a panel with **no height and no `measured`** renders at one box with a warning; **markdown** is paragraphs, bullet lists, `**`, `*`, `` ` ``, `[text](href)` and the two directives, and block prose in a `Text` renders it as a `div.noo-text--blocks` | Each is the smallest rule that made the fixture render. An unknown directive is its text, as §3.5 promised |
+
+### 10.2 The proof, and its numbers
+
+Playwright's comparator, the hand-written render written as the baseline on every run, the blob masked. Ratios are pixels different over all pixels.
+
+| Compared | Ratio | What the pixels are |
+|---|---|---|
+| **The map at home** — `/` against `/fixtures/document`, 1440 × 900 | **1 %** | The minimap: the hand-written scene keeps nineteen full-view panels in the DOM and the minimap draws them; the document has none. Then the widget differences below, at map size |
+| **Widgets at 1:1** — `/fixtures/bento` against the document's, element for element | status **3 %** · work **3 %** · cases **3 %** · projects **2 %** · interests **9 %** · philosophy **9 %** | Listed in §10.3. The loud cells — label, figure, pattern in the section's hue — are identical in all six |
+| Section routes (`/work` …) | not compared | `/work` opens the hand-written **full view**; a document has no full views (§9.2, Design-System.md §8.4). A viewport comparison there compares two different things |
+
+The Me column matched at map size: `Intro` for the hand-written `h2` + lead, a `Stack` of `Row` + `Text` for the story panel, the two `:pan` directives resolving to the views' hrefs. Adapter issues on the document: **none** — every node named a registered component, every prop passed, every ref resolved, every widget landed on a box corner.
+
+### 10.3 What the proof found
+
+Every difference is one of these. None is a bug in the adapter; each is a place the registry cannot yet say what `content/sections.tsx` says by hand — §9.3 ⑨'s finding, continued. **They want decisions, not fixes**, and they are the next option boards.
+
+1. **`CellHead` groups the label and the title; a hand-written cell spreads them.** A bento cell is a column that pushes its children apart, so the mono label sits top-left and the title bottom-left — the diagonal (Design-System.md §8.3). `CellHead` wraps both in one block at the top, and puts the dot beside a wrapped title rather than inline in its first line ("Terrible Tiny Tales"). Every widget's 3 % is mostly this.
+2. **Nothing renders the widget text scale.** `.noo-bento__text` (`--t-widget-text`, the size a widget is read at from twice the distance) has no component; `Text size="small"` is the document scale and is visibly smaller. Status, cases, projects and the two glass cells all show it.
+3. **Nothing renders the loud cell's word.** Interests and philosophy set `outside the work` and `how I build` in `.noo-bento__word` — the display face at `--t-widget-word`, two lines. `Figure` caps `value` at 4 characters (rightly, for a number); `Heading` level 2 is the nearest thing and is smaller. Most of the 9 %.
+4. **The sample-copy tag has nowhere to live.** §3.4 says it is a field on the content record; the schema carries nothing that renders it, so the document version of interests and philosophy is silently not marked as sample copy. Until it is, a document must not carry sampled copy.
+5. **A list in a widget.** The interests cell is four lines with no markers; markdown's list renders bullets in the document scale. Whether a widget list is a `Text` with a list, a `Stack` of `Text`, or a component of its own is open.
+6. **Story panel spacing.** `scene.tsx` uses a 20px utility gap; `Stack` offers 8 · 16 · 24. 16 was used. The hand-written value was off the scale.
+7. **The document was right once.** Sample copy has `*is*` in it; the hand-written cell prints the asterisks, the document renders emphasis.
+8. **Interpolation (§8.1 ⑦) held its line.** "Based in …", the first four interests as a list, the first philosophy paragraph are three derived keys the host composes into the content it hands the adapter. One more case and it is a feature.
+
+**What the document cannot express at all:** the hand-written full views — `full: true` panels flowed into two columns by `section()`. §9.2 made them pages and the adapter returns pages, but nothing mounts one. The five section routes still render the hand-written scene, and will until the editor's full-view work lands.
+
+### 10.4 Built to the picks — 2026-09-14
+
+§10.3's five findings were put on the canvas as option boards and decided; Admin.md §6.5c has the picks. Built here, in the package and the registry, and the thresholds re-measured against what they then achieved.
+
+| | What changed |
+|---|---|
+| **F1** | `CellHead` fills its cell and spreads — `flex: 1` + `space-between`, so the mono label sits at the top and the title at the bottom without the author typing the diagonal. A page bento's rows grow, so it collapses back there. **The dot is gone**: `dot` stays as a deprecated prop for one minor and renders nothing. In its place a **`media` slot** — one `Image`, `Blob` or `Pattern` at 24 square, inline in the title's first line. The registry entry drops `dot` and declares the slot; the adapter already maps a `max: 1` non-children slot to a prop of that name |
+| **F2** | `Text` gains **`size="widget"`** — `.noo-widget-text`, `--t-widget-text` 20/1.35, the size a bento cell is read at. The fourth step; the enum grows to four |
+| **F3** | `BentoFigure` (registered as `Figure`) gains **`kind="figure" \| "word"`**. A word is the display face at `--t-widget-word` over two lines, no tabular nums, same corner. The schema has one cap, so `value` is capped at 24 with the help text saying a figure is at most 4 characters and a word up to 24 |
+| **F4** | `DocumentContext` gains **`sampled?: (path: string) => boolean`**. `resolveDeep` now collects the refs that resolved as well as those that did not; a node whose props read a sampled path renders the *sample copy* tag as its first child and pushes a `warn` — `props read sampled copy: site.interestsMarkdown`. The portfolio maps a ref path to a slot key by taking the second segment and stripping the derived suffixes (`Markdown`, `First`, `Line`). Three warns on the portfolio document now: location, interests, philosophy |
+| **F5** | A `Text` list inside a bento cell renders **without markers** — one rule on `.noo-bento__cell .noo-text--blocks ul`. The rhythm stays; F2 gives it the size |
+
+The portfolio's document was re-poured to match: no dots on its heads, `size: "widget"` on every widget cell's text, and the two loud words as `Figure` `kind: "word"` rather than a `Heading`.
+
+**The numbers now** (`DOC_DIFF=0 pnpm review -g "like scene|like sections"`, light and dark, against §10.2's):
+
+| Compared | Was | Is |
+|---|---|---|
+| The map at home | 1 % | **< 1 %** (3258 px of 1 296 000) |
+| Current status | 3 % | **0** — identical, pixel for pixel |
+| Work experience | 3 % | **< 1 %** (2829 px) |
+| Case studies | 3 % | **< 1 %** (2203 px) |
+| Projects | 2 % | **0** — identical, pixel for pixel |
+| Interests | 9 % | **3 %** (9761 px) |
+| Philosophy | 9 % | **5 %** (15 390 px) |
+
+**What the residue is**, and why it is not an adapter bug. Work keeps a dot's worth of pixels because `content/sections.tsx` still draws them and is not re-poured until the editor's full-view work lands. Interests and Philosophy carry the rest twice over: the word wraps where the hand-written one has an explicit `<br>` (`outside the work`, `how I build`), and the *sample copy* tag sits **inline** inside a one-paragraph `Text` — it is the component's first child, and a `<p>`'s first child is on the first line — where the hand-written cell puts the tag on its own line above. The interests cell, whose markdown is a list and so renders as a `div`, puts it on its own line and matches. That is the next small decision: whether the tag is the component's child or the cell's sibling.
+
+**Removing a prop, in practice (§5).** F1 removed `dot` from `CellHead` and the first document the editor opened still carried it — four cells rendered as errors. So a `PropSpec` gains **`deprecated: string`** (the note says what replaced it): the adapter accepts the prop, drops it before the component sees it and pushes a warning naming the replacement; the inspector never offers it. `CellHead.dot` is the first. A deprecated prop leaves the registry at the next minor, and a document that still names it then fails validation as any unknown prop does — which is the migration §5 asked for, with a minor's grace.

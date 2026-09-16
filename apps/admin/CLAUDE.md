@@ -32,10 +32,11 @@ rest of the platform is reviewed — a passing typecheck has never caught a visu
 
 Two things to know when you do:
 
-- The circular **N** at the bottom-left is Next's dev-tools button sitting over the rail's sign-out row. Dev
+- The circular **N** at the bottom-left is Next's dev-tools button sitting over the menu's sign-out row. Dev
   only; it is not a layout bug.
-- The rail is rendered in the root layout, not per route, so it does not remount between screens. `/sign-in` is
-  the one route that renders without it.
+- The menu is rendered in the root layout, not per route, so it does not remount between screens. `/sign-in` is
+  the one route that renders without it. It is a plain `Menu` — column at 280, sheet on a phone; the rail form
+  went in v1 (Atomic.md D13).
 
 ## What is true here and easy to get wrong
 

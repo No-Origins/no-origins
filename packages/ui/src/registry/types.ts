@@ -41,6 +41,12 @@ export type PropSpec = PropType & {
   /** Overrides the field name in the inspector. */
   label?: string;
   help?: string;
+  /**
+   * A prop that is going: the note says what replaced it (Scene-Schema.md §5 — a removal ships its migration).
+   * A document may still carry it for one minor: the adapter accepts it, drops it with a warning, and the
+   * inspector does not show it.
+   */
+  deprecated?: string;
 };
 
 export type PropSchema = Record<string, PropSpec>;
@@ -54,7 +60,7 @@ export interface SlotSpec {
   label: string;
 }
 
-export type RegistryGroup = "text" | "marks" | "actions" | "controls" | "feedback" | "layout" | "surfaces" | "figures" | "composites";
+export type RegistryGroup = "text" | "marks" | "actions" | "controls" | "feedback" | "layout" | "surfaces" | "figures" | "composites" | "motion";
 
 /** The Atomic layer the component lives in (Atomic.md §1). The catalogue reads it; the palette reads `group`. */
 export type RegistryLayer = "atom" | "molecule" | "organism";
@@ -77,6 +83,18 @@ export interface RegistryEntry {
   status: "stable" | "draft" | "deprecated";
   /** One line, for the palette and the catalogue. */
   line: string;
+  /**
+   * The authored prop the adapter renders as the component's `children` (Scene-Schema.md §2.2: a `ReactNode`
+   * prop is re-typed as `text` or `markdown`, and this names which one it was). `Heading.text`, `Chip.label`,
+   * `Text.markdown`. Without it every authored prop is passed by name.
+   */
+  childrenFrom?: string;
+  /**
+   * Maps the authored shape onto the React one where the two differ — `BentoCell.span` is authored as
+   * `{ cols, rows }` (an `object` the inspector can render) and taken as `[cols, rows]`. Receives the parent
+   * component's authored props, so a cell can inherit its bento's hue. Pure; never adds behaviour.
+   */
+  adapt?: (props: Record<string, unknown>, parent?: Record<string, unknown>) => Record<string, unknown>;
 }
 
 export type Registry = Record<string, RegistryEntry>;

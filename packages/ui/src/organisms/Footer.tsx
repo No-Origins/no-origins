@@ -5,7 +5,7 @@ import type { NavLink } from "./NavBar";
 
 /**
  * Footer (§9) — the name in running text, a line of meta (the domain), links, and a trailing slot for the theme
- * switch. Sits on the ground, not on glass; a hairline above.
+ * switch. Sits on the ground, not on a surface; a hairline above.
  */
 export interface FooterProps extends ComponentPropsWithoutRef<"footer"> {
   links?: NavLink[];

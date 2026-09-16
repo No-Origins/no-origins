@@ -187,16 +187,14 @@ export default function PatternsFixture() {
       </Case>
 
       <Case
-        title="ProfileCard — the picture turns to glass at the bottom"
+        title="ProfileCard — the picture is the whole card"
         note={
           <>
-            The gloss is not a panel and not a highlight: the lower half of the photograph is blurred, brightened
-            and a little more saturated, masked so it has <b>no edge anywhere</b>. A plate has a boundary, so it
-            reads as a thing placed on the picture; this reads as the picture&apos;s own surface, and the words are
-            already standing on it by the time they appear. It blurs a second copy of the media rather than using{" "}
-            <span className="noo-code">backdrop-filter</span>, which Chromium clips to the border box and renders
-            as a hard line straight across the card. Over it the card keeps all four §3 cues — hairline, lit top
-            edge, 118° sweep, grain.
+            Large-format media: no frame, no plate, no panel. Legibility is one scrim in the ground&apos;s own shade,
+            fading upward under the words and with <b>no edge anywhere</b> — a plate has a boundary, so it reads as
+            a thing placed on the picture, and it was rejected twice for exactly that. Over it, the grain that is
+            every card&apos;s material. The corner is a proportional 15%, so it is the same <i>shape</i> at 280 in a
+            row and at 420 at the front of a deck.
           </>
         }
       >
@@ -214,7 +212,7 @@ export default function PatternsFixture() {
               name="The host"
               role="Standing on the wash"
               hue="peach"
-              media={<Blob size="hero" variant="glass" />}
+              media={<Blob size="hero" variant="host" />}
             />
           </div>
           <div className="w-[280px]">

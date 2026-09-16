@@ -1,7 +1,6 @@
 import { Blob } from "../atoms/blob/Blob";
 import { BlockCard } from "../organisms/BlockCard";
 import { CellHead } from "../molecules/CellHead";
-import { Intro } from "../molecules/Intro";
 import { SectionHeader } from "../molecules/SectionHeader";
 import { Segmented } from "../molecules/Segmented";
 import { Select } from "../molecules/Select";
@@ -16,8 +15,6 @@ import { Menu } from "../organisms/Menu";
 import { Table } from "../organisms/Table";
 import { Dialog } from "../organisms/Dialog";
 import { Tree } from "../organisms/Tree";
-import { RegionLabel } from "../organisms/RegionLabel";
-import { RoadmapItem } from "../organisms/RoadmapItem";
 import { Pattern } from "../atoms/patterns/Pattern";
 import { patterns } from "../atoms/patterns/patterns";
 import { HueSwatch } from "../molecules/HueSwatch";
@@ -25,7 +22,7 @@ import { PatternPicker } from "../molecules/PatternPicker";
 import { Range } from "../molecules/Range";
 import { Repeater } from "../molecules/Repeater";
 import { PatternStudio } from "../organisms/PatternStudio";
-import { PatternPickerExample, RepeaterExample, TreeExample } from "./examples";
+import { MotionExample, PatternPickerExample, RepeaterExample, TreeExample } from "./examples";
 import { MediaCard } from "../organisms/MediaCard";
 import { Quote } from "../organisms/Quote";
 import { Step, Steps } from "../molecules/Steps";
@@ -39,7 +36,8 @@ import { Card } from "../atoms/Card";
 import { Chip } from "../atoms/Chip";
 import { Divider } from "../atoms/Divider";
 import { Dot } from "../atoms/Dot";
-import { Glass } from "../atoms/Glass";
+import { Surface } from "../atoms/Surface";
+import { Motion } from "../atoms/Motion";
 import { Heading } from "../atoms/Heading";
 import { Label } from "../atoms/Label";
 import { Placeholder } from "../atoms/Placeholder";
@@ -48,9 +46,10 @@ import { Stack } from "../atoms/Stack";
 import { Text } from "../atoms/Text";
 import { hues } from "../tokens/tokens";
 import type { RegistryEntry } from "./types";
+import type { Family } from "../atoms/patterns/generator";
 
 /**
- * The twenty-two authorable components (Scene-Schema.md §2.3, §3.2).
+ * The authorable components — every one the catalogue shows and a document may name.
  *
  * **One declaration, three consumers** — the public showcase at `design.no-origins.com`, the admin's catalogue
  * (read-only under R3), and the editor's palette. Two hand-maintained lists would drift within a week, and drift
@@ -71,6 +70,7 @@ const heading: RegistryEntry = {
     level: { type: "enum", of: ["2", "3", "4"], default: "2", help: "Display face at 2; Hanken 600 at 3 and 4. There is no level 1: a surface has exactly one h1 (§12)." },
     text: { type: "text", max: 80, required: true },
   },
+  childrenFrom: "text",
   defaults: { level: 2, text: "A heading" },
   example: () => <Heading level={2}>Four roles, told as blocks</Heading>,
   since: "0.1.0", status: "draft",
@@ -78,12 +78,13 @@ const heading: RegistryEntry = {
 
 const text: RegistryEntry = {
   name: "Text", kind: ["slot", "panel"], group: "text", layer: "atom", component: Text as never,
-  line: "A run of prose, at one of three steps of the scale.",
+  line: "A run of prose, at one of four steps of the scale.",
   props: {
     markdown: { type: "markdown", required: true, help: "Markdown, plus the declared inline directives (R4). The adapter parses it; the package parses nothing." },
-    size: { type: "enum", of: ["lead", "body", "small"], default: "body" },
+    size: { type: "enum", of: ["lead", "body", "small", "widget"], default: "body", help: "`widget` is the fourth step (Admin.md §6.5c F2): 20/1.35, the size a bento cell is read at." },
     tone: { type: "enum", of: ["default", "muted"], default: "default" },
   },
+  childrenFrom: "markdown",
   defaults: { markdown: "Write here.", size: "body" },
   example: () => <Text size="lead">I build editors, design systems and agent tools. No Origins is where I keep them.</Text>,
   since: "0.1.0", status: "draft",
@@ -93,6 +94,7 @@ const label: RegistryEntry = {
   name: "Label", kind: ["slot"], group: "text", layer: "atom", component: Label as never,
   line: "The mono eyebrow. One line, uppercase.",
   props: { text: { type: "text", max: 24, required: true, help: "Capped at 24: a widget sets its type at twice a document's, so a long eyebrow wraps and breaks the diagonal (§8.3)." } },
+  childrenFrom: "text",
   defaults: { text: "now" },
   example: () => <Label>the through-line</Label>,
   since: "0.1.0", status: "draft",
@@ -110,6 +112,7 @@ const chip: RegistryEntry = {
     pressed: { type: "boolean", default: false },
     href: { type: "href" },
   },
+  childrenFrom: "label",
   defaults: { label: "chip", hue: "peach" },
   example: () => <Chip hue="lavender">editors</Chip>,
   since: "0.0.1", status: "stable",
@@ -133,8 +136,9 @@ const button: RegistryEntry = {
     label: { type: "text", max: 24, required: true },
     variant: { type: "enum", of: ["primary", "secondary", "ghost"], default: "secondary" },
     size: { type: "enum", of: ["sm", "md"], default: "md" },
-    href: { type: "href", help: "`download` and `target` are not authorable: a canvas handing a visitor a file from a database row is a different security question." },
+    href: { type: "href", help: "`download` and `target` are not authorable: a document handing a visitor a file from a database row is a different security question." },
   },
+  childrenFrom: "label",
   defaults: { label: "Do the thing", variant: "secondary" },
   example: () => <Button variant="secondary">Download the résumé</Button>,
   since: "0.0.1", status: "stable",
@@ -185,7 +189,7 @@ const row: RegistryEntry = {
 const divider: RegistryEntry = {
   name: "Divider", kind: ["slot"], group: "layout", layer: "atom", component: Divider as never,
   line: "A hairline. An <hr>, because that is what it means.",
-  props: { dotted: { type: "boolean", default: false, help: "The canvas voice — the line under a region label." } },
+  props: { dotted: { type: "boolean", default: false, help: "The dotted line — a boundary that is drawn, not built." } },
   defaults: {},
   example: () => <Divider />,
   since: "0.1.0", status: "draft",
@@ -198,7 +202,7 @@ const bento: RegistryEntry = {
     hue: { type: "hue" },
     cols: { type: "number", unit: "columns", min: 1, max: 12, help: "Defaults to 4 as a widget, 10 as a page." },
     rows: { type: "number", unit: "rows", min: 1, max: 8, default: 3 },
-    page: { type: "boolean", default: false, help: "A section's full view: fluid columns to 1600, rows minmax(144px, auto), scrolling in the document rather than canvas space (§8.4)." },
+    page: { type: "boolean", default: false, help: "A section's full view: fluid columns to 1600, rows minmax(144px, auto) that grow with their content (§8.4)." },
     label: { type: "text", max: 40, help: "Names the grid for assistive tech." },
   },
   slots: { cells: { admits: ["BentoCell"], label: "Cells" } },
@@ -206,9 +210,9 @@ const bento: RegistryEntry = {
   example: () => (
     <Bento hue="peach" label="Work experience">
       <BentoCell span={[2, 2]} tone="fill"><Label>work</Label><BentoFigure value="4" label="roles" /></BentoCell>
-      <BentoCell><CellHead label="now" title="Radise" dot="peach" /></BentoCell>
-      <BentoCell><CellHead label="one year" title="Hashnode" dot="blue" /></BentoCell>
-      <BentoCell span={[2, 1]}><CellHead label="before" title="Dataflix" dot="green" /></BentoCell>
+      <BentoCell><CellHead label="now" title="Radise" /></BentoCell>
+      <BentoCell><CellHead label="one year" title="Hashnode" /></BentoCell>
+      <BentoCell span={[2, 1]}><CellHead label="before" title="Dataflix" /></BentoCell>
       <BentoCell span={[4, 1]}>
         <Label>the through-line</Label>
         <Row gap={8}><Chip hue="lavender">editors</Chip><Chip hue="peach">design systems</Chip></Row>
@@ -223,14 +227,21 @@ const bentoCell: RegistryEntry = {
   line: "One cell of the grid. Every cell does one job.",
   props: {
     span: { type: "object", fields: { cols: { type: "number", unit: "columns" }, rows: { type: "number", unit: "rows" } }, default: { cols: 1, rows: 1 } },
-    tone: { type: "enum", of: ["quiet", "glass", "fill", "ink", "bare"], default: "quiet", help: "`fill` is the loud one, and probe12 allows exactly one per widget. `bare` is type on the grid with no card under it." },
-    pattern: { type: "pattern", help: "One of the library’s eighteen, or a pattern the document made (Admin.md §6.5b). `words` is measured by the editor where the cell is composed, never typed (Scene-Schema.md §3.6)." },
+    tone: { type: "enum", of: ["quiet", "fill", "ink", "bare"], default: "quiet", help: "`fill` is the loud one, and probe12 allows exactly one per widget. `bare` is type on the grid with no card under it." },
+    pattern: { type: "pattern", help: "One of the library’s eighteen, or a pattern made in the studio. `words` is measured where the cell is composed, never typed." },
   },
   slots: { content: { admits: "blocks", label: "Contents" } },
-  defaults: { span: [1, 1], tone: "quiet" },
+  defaults: { span: { cols: 1, rows: 1 }, tone: "quiet" },
+  // Authored as `{ cols, rows }` — an object the inspector renders as a labelled group — taken as `[cols, rows]`.
+  // The pattern is drawn in the bento's hue, which the cell has no prop for: it comes from the parent here.
+  adapt: (p, parent) => {
+    const span = p.span as { cols?: number; rows?: number } | [number, number] | undefined;
+    const tuple = Array.isArray(span) ? span : [span?.cols ?? 1, span?.rows ?? 1];
+    return { ...p, span: tuple, hue: p.pattern ? parent?.hue : undefined };
+  },
   example: () => (
     <Bento hue="blue" cols={2} rows={1}>
-      <BentoCell tone="quiet"><CellHead label="quiet" title="Recedes" dot="blue" /></BentoCell>
+      <BentoCell tone="quiet"><CellHead label="quiet" title="Recedes" /></BentoCell>
       <BentoCell tone="fill"><Label>fill</Label><Heading level={4}>The loud one</Heading></BentoCell>
     </Bento>
   ),
@@ -241,13 +252,13 @@ const bentoCell: RegistryEntry = {
 
 const card: RegistryEntry = {
   name: "Card", kind: ["panel", "slot"], group: "surfaces", layer: "atom", component: Card as never,
-  line: "A container: surface or glass.",
+  line: "A container on the surface, with padding.",
   props: {
-    surface: { type: "enum", of: ["solid", "glass"], default: "solid" },
-    padding: { type: "enum", of: ["md", "sm"], default: "md" },
+    padding: { type: "enum", of: ["md", "sm", "lg"], default: "md" },
+    radius: { type: "enum", of: ["lg", "xl"], default: "lg" },
   },
   slots: { body: { admits: "blocks", label: "Contents" } },
-  defaults: { surface: "solid", padding: "md" },
+  defaults: { padding: "md", radius: "lg" },
   example: () => (
     <Card>
       <Stack gap={8}>
@@ -259,17 +270,36 @@ const card: RegistryEntry = {
   since: "0.0.1", status: "stable",
 };
 
-const glass: RegistryEntry = {
-  name: "Glass", kind: ["slot"], group: "surfaces", layer: "atom", component: Glass as never,
-  line: "The material, at three levels. Never more than two stacked.",
+const surface: RegistryEntry = {
+  name: "Surface", kind: ["slot"], group: "surfaces", layer: "atom", component: Surface as never,
+  line: "The one material, flat, at three elevations.",
   props: {
-    level: { type: "enum", of: ["1", "2", "3"], default: "1" },
+    level: { type: "enum", of: ["1", "2", "3"], default: "1", help: "How far off the ground: a card or a field (1), a bar or a menu (2), a dialog (3)." },
     radius: { type: "enum", of: ["xs", "sm", "md", "lg", "xl", "pill"], default: "lg" },
   },
   slots: { body: { admits: "blocks", label: "Contents" } },
   defaults: { level: 1 },
-  example: () => <Glass level={1} className="noo-card"><Text size="small">Glass 1 — bubbles, chips, secondary buttons.</Text></Glass>,
-  since: "0.0.1", status: "stable",
+  example: () => (
+    <Row gap={16} align="start">
+      <Surface level={1} style={{ padding: "16px 20px" }}><Text size="small">Level 1 — a card, a field.</Text></Surface>
+      <Surface level={2} style={{ padding: "16px 20px" }}><Text size="small">Level 2 — a bar, a menu.</Text></Surface>
+      <Surface level={3} style={{ padding: "16px 20px" }}><Text size="small">Level 3 — a dialog.</Text></Surface>
+    </Row>
+  ),
+  since: "1.0.0", status: "stable",
+};
+
+const motion: RegistryEntry = {
+  name: "Motion", kind: ["slot"], group: "motion", layer: "atom", component: Motion as never,
+  line: "One of the named patterns — rise, pop, breathe, lift — on whatever it wraps. Off under reduced motion.",
+  props: {
+    effect: { type: "enum", of: ["rise", "pop", "breathe", "lift"], default: "rise", required: true },
+    delay: { type: "number", unit: "ms", min: 0, max: 2000, help: "A sibling's stagger." },
+  },
+  slots: { body: { admits: "blocks", label: "What moves" } },
+  defaults: { effect: "rise" },
+  example: () => <MotionExample />,
+  since: "1.0.0", status: "stable",
 };
 
 const placeholder: RegistryEntry = {
@@ -293,28 +323,28 @@ const placeholder: RegistryEntry = {
 
 const figure: RegistryEntry = {
   name: "Figure", kind: ["slot"], group: "figures", layer: "molecule", component: BentoFigure as never,
-  line: "A number or short word as an image. Honest counts only.",
+  line: "A number or a short word as an image. Honest counts only.",
   props: {
-    value: { type: "text", max: 4, required: true, help: "Capped at 4. Where nothing is countable, use a word instead — inventing a number to fill the slot is the failure mode (Patterns.md principle 8)." },
+    value: { type: "text", max: 24, required: true, help: "A figure is at most 4 characters; a word up to 24. Where nothing is countable, set `kind` to word — inventing a number to fill the slot is the failure mode (Patterns.md principle 8)." },
     label: { type: "text", max: 20 },
-    size: { type: "enum", of: ["lg", "md"], default: "lg" },
+    kind: { type: "enum", of: ["figure", "word"], default: "figure", help: "A word is the display face at 48 over two lines, in the same corner (Admin.md §6.5c F3)." },
+    size: { type: "enum", of: ["lg", "md"], default: "lg", help: "A figure's two sizes: 96 for a 2 × 2 cell, 56 for a single one. A word has one." },
   },
-  defaults: { value: "0", label: "of them", size: "lg" },
+  defaults: { value: "0", label: "of them", kind: "figure", size: "lg" },
   example: () => <BentoFigure value="4" label="roles" />,
   since: "0.0.1", status: "stable",
 };
 
 const blob: RegistryEntry = {
   name: "Blob", kind: ["blob"], group: "figures", layer: "atom", component: Blob as never,
-  line: "The character. One on the portfolio — the glass host at the centre.",
+  line: "The character. One on the portfolio — the host, the one with no colour.",
   props: {
-    variant: { type: "enum", of: ["character", "logotype", "glass"], default: "character" },
+    variant: { type: "enum", of: ["character", "logotype", "host"], default: "character" },
     size: { type: "blobSize", default: "md" },
     state: { type: "enum", of: ["idle", "sleep"], default: "idle" },
     hue: { type: "hue", accent: true },
     label: { type: "text", max: 40, help: "Without one the blob is decorative and hidden from assistive tech." },
     blink: { type: "boolean" }, look: { type: "boolean" }, breathe: { type: "boolean" },
-    refraction: { type: "boolean", help: "Off over a solid surface, where there is no grid to bend." },
   },
   defaults: { variant: "character", size: "md", hue: "peach" },
   example: () => <Blob size="lg" hue="peach" label="A blob" />,
@@ -331,6 +361,7 @@ const pattern: RegistryEntry = {
     placement: { type: "enum", of: ["inline", "field"], default: "inline", help: "`field` fills its cell absolutely — a bento's loud cell. Anywhere without a positioned ancestor it would escape to the page." },
   },
   defaults: { name: "work", placement: "inline" },
+  adapt: ({ name, ...rest }) => (typeof name === "string" ? { name, ...rest } : { family: name as Family, ...rest }),
   // Drawn at the size it is composed for: a 2 × 2 loud cell is 304 square. A field is tuned to cross THAT cell and
   // leave through its edges, so showing it at any other aspect misrepresents it.
   example: () => (
@@ -347,32 +378,21 @@ const pattern: RegistryEntry = {
 
 /* ── composites ─────────────────────────────────────────────────────────────────────────────────────────── */
 
-const intro: RegistryEntry = {
-  name: "Intro", kind: ["panel", "slot"], group: "composites", layer: "molecule", component: Intro as never,
-  line: "Merged into SectionHeader (rhythm off). Documents naming it still render.",
-  props: {
-    title: { type: "text", max: 60, required: true },
-    lead: { type: "text", max: 160, help: "Accepts a ref. It is a real step on the scale (19/1.5), which is why this is a component: markdown cannot express one." },
-    level: { type: "enum", of: ["2", "3", "4"], default: "2" },
-  },
-  defaults: { title: "A section", lead: "What it is, in one line." },
-  example: () => <Intro title="Four roles, told as blocks" lead="Editors, design systems, agent systems, and shipping full-stack." />,
-  since: "0.1.0", status: "deprecated",
-};
 
 const cellHead: RegistryEntry = {
   name: "CellHead", kind: ["slot"], group: "composites", layer: "molecule", component: CellHead as never,
-  line: "A widget cell's label, dot and title.",
+  line: "A widget cell's label and title, spread top to bottom, with room for a logo.",
   props: {
     label: { type: "text", max: 24 },
     title: { type: "text", max: 40, required: true },
-    dot: { type: "hue" },
+    dot: { type: "hue", deprecated: "a widget cell's head has no dot (Admin.md §6.5c F1); place a logo in the media slot instead" },
   },
+  slots: { media: { admits: ["Image", "Blob", "Pattern"], max: 1, label: "Logo" } },
   defaults: { label: "now", title: "A thing" },
   example: () => (
     <Bento hue="peach" cols={2} rows={1}>
-      <BentoCell><CellHead label="now" title="Radise" dot="peach" /></BentoCell>
-      <BentoCell tone="fill"><CellHead label="one year" title="Hashnode" dot="blue" /></BentoCell>
+      <BentoCell><CellHead label="now" title="Radise" media={<Image src={STAND_IN} alt="" radius="none" width={24} height={24} />} /></BentoCell>
+      <BentoCell tone="fill"><CellHead label="one year" title="Hashnode" /></BentoCell>
     </Bento>
   ),
   since: "0.1.0", status: "draft",
@@ -406,35 +426,7 @@ const blockCard: RegistryEntry = {
   since: "0.0.1", status: "stable",
 };
 
-const roadmapItem: RegistryEntry = {
-  name: "RoadmapItem", kind: ["panel", "slot"], group: "composites", layer: "organism", component: RoadmapItem as never,
-  line: "Merged into BlockCard (state sleep, progress). Documents naming it still render.",
-  props: {
-    hue: { type: "hue", required: true },
-    title: { type: "text", max: 80, required: true },
-    description: { type: "markdown", required: true },
-    progress: { type: "text", max: 40, help: "A short state in the mono voice: “designing”, “after the portfolio”." },
-  },
-  defaults: { hue: "lavender", title: "Not here yet", description: "Here's what it'll do…" },
-  example: () => (
-    <RoadmapItem
-      hue="lavender"
-      title="An editor to write and publish"
-      description="Not here yet. Here's what it'll do: write articles in a WYSIWYG editor and publish them on No Origins. I've built two editors on tiptap for other people. This one is mine."
-      progress="after the portfolio · designing"
-    />
-  ),
-  since: "0.0.1", status: "deprecated",
-};
 
-const regionLabel: RegistryEntry = {
-  name: "RegionLabel", kind: ["region"], group: "composites", layer: "organism", component: RegionLabel as never,
-  line: "Retired: RegionNode draws the map label itself. Documents naming it still render.",
-  props: { text: { type: "text", max: 24, required: true } },
-  defaults: { text: "Work" },
-  example: () => <div style={{ height: 150 }}><RegionLabel>Work</RegionLabel></div>,
-  since: "0.1.0", status: "deprecated",
-};
 
 
 
@@ -491,7 +483,7 @@ const checkbox: RegistryEntry = {
     defaultChecked: { type: "boolean", default: false },
   },
   defaults: { label: "Show the grid" },
-  example: () => <Checkbox label="Show the grid" hint="The 144px box grid the canvas snaps to." defaultChecked />,
+  example: () => <Checkbox label="Show the grid" hint="The 160px box grid every bento cell sits in." defaultChecked />,
   since: "0.1.0", status: "draft",
 };
 
@@ -547,6 +539,7 @@ const toast: RegistryEntry = {
     title: { type: "text", max: 40 },
     text: { type: "text", max: 120, required: true },
   },
+  childrenFrom: "text",
   defaults: { tone: "good", title: "Published", text: "The site will catch up within a minute." },
   example: () => (
     <Stack gap={8}>
@@ -584,16 +577,16 @@ const speaker: RegistryEntry = {
     label: { type: "text", max: 40, required: true, help: "Who is speaking, for assistive tech." },
     say: { type: "text", max: 120 },
     hue: { type: "hue", accent: true },
-    variant: { type: "enum", of: ["character", "glass"], default: "character" },
+    variant: { type: "enum", of: ["character", "host"], default: "character" },
     state: { type: "enum", of: ["idle", "sleep"], default: "idle" },
     size: { type: "blobSize", default: "md" },
     tint: { type: "hue" },
     below: { type: "boolean", default: false },
   },
-  defaults: { label: "Bhargav", say: "What are we doing today?", variant: "glass" },
+  defaults: { label: "Bhargav", say: "What are we doing today?", variant: "host" },
   example: () => (
     <Row gap={40} align="end">
-      <Speaker label="Bhargav" variant="glass" say="What are we doing today?" />
+      <Speaker label="Bhargav" variant="host" say="What are we doing today?" />
       <Speaker label="The editor" hue="lavender" say="Not here yet." tint="lavender" state="sleep" />
     </Row>
   ),
@@ -602,31 +595,14 @@ const speaker: RegistryEntry = {
 
 const menu: RegistryEntry = {
   name: "Menu", kind: ["panel"], group: "layout", layer: "organism", component: Menu as never,
-  line: "The one navigation, in five forms. The current item is an ink pill.",
+  line: "The one navigation: a column, two columns, or a sheet. The current item is an ink pill.",
   props: {
     label: { type: "text", max: 40, help: "What the menu is for — “Sections”." },
-    items: { type: "list", of: { type: "object", fields: { label: { type: "text", max: 24 }, href: { type: "href" }, view: { type: "text", max: 24 } } }, max: 9, required: true, help: "On a canvas the menu is a node in canvas space — placed and dragged like any other, and part of the reading order." },
+    items: { type: "list", of: { type: "object", fields: { label: { type: "text", max: 24 }, href: { type: "href" }, view: { type: "text", max: 24 } } }, max: 9, required: true },
   },
   defaults: { label: "Sections", items: [{ label: "Me", href: "/" }, { label: "Work", href: "/work" }] },
   example: () => (
     <Row gap={24} align="start">
-      <Menu
-        form="floating"
-        skipTo={false}
-        aria-label="Sections"
-        items={["Me", "Status", "Work", "Cases", "Projects", "Interests", "Philosophy"].map((l, i) => ({ id: l, label: l, href: `#${l.toLowerCase()}`, current: i === 2 }))}
-      />
-      <Menu
-        form="rail"
-        skipTo={false}
-        aria-label="Admin, collapsed"
-        style={{ position: "static", height: "auto", margin: 0 }}
-        groups={[
-          { items: [{ href: "#overview", label: "Overview" }] },
-          { label: "Projects", hue: "peach", items: [{ href: "#projects", label: "Projects", badge: 2 }] },
-          { label: "Systems", hue: "lavender", items: [{ href: "#systems", label: "Systems", current: true }] },
-        ]}
-      />
       <Menu
         form="column"
         skipTo={false}
@@ -684,7 +660,7 @@ const table: RegistryEntry = {
 
 const dialog: RegistryEntry = {
   name: "Dialog", kind: ["panel"], group: "surfaces", layer: "organism", component: Dialog as never,
-  line: "Glass-3 over everything, one primary action. A native dialog does the modal work.",
+  line: "A level-3 surface over everything, one primary action. A native dialog does the modal work.",
   props: {
     title: { type: "text", max: 60, required: true },
     description: { type: "text", max: 160 },
@@ -723,11 +699,12 @@ const tree: RegistryEntry = {
  * everything this component does — `alt`, the reserved box, `fit`, the radius — without pretending to be
  * someone's portrait. Replace it with a real photograph the day there is one.
  */
+// A flat stand-in for a photograph (no gradients anywhere in the system, 2026-09-16): the peach pastel, and a
+// smaller lavender square so the picture reads as a picture rather than a swatch.
 const STAND_IN =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='240'%3E" +
-  "%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E" +
-  "%3Cstop offset='0' stop-color='%23c9b8e8'/%3E%3Cstop offset='1' stop-color='%23f2d9c4'/%3E" +
-  "%3C/linearGradient%3E%3C/defs%3E%3Crect width='360' height='240' fill='url(%23g)'/%3E%3C/svg%3E";
+  "%3Crect width='360' height='240' fill='%23fbc8ac'/%3E" +
+  "%3Crect x='210' y='60' width='120' height='120' rx='24' fill='%23d5c2fb'/%3E%3C/svg%3E";
 
 const image: RegistryEntry = {
   name: "Image", kind: ["slot"], group: "figures", layer: "atom", component: Image as never,
@@ -786,7 +763,8 @@ const quote: RegistryEntry = {
     figure: { type: "object", fields: { value: { type: "text", max: 8 }, label: { type: "text", max: 30 } }, help: "A measurement or nothing. Honest counts only." },
     markdown: { type: "markdown", required: true, label: "The quote" },
   },
-  slots: { media: { admits: ["Image", "Illustration", "Blob"], max: 1, label: "Beside the words" } },
+  slots: { media: { admits: ["Image", "Pattern", "Blob"], max: 1, label: "Beside the words" } },
+  childrenFrom: "markdown",
   defaults: { markdown: "It just works now.", by: "Someone", role: "Their job" },
   example: () => (
     <Quote figure={{ value: "4", label: "roles, so far" }} by="Bhargav" role="No Origins">
@@ -808,7 +786,7 @@ const mediaCard: RegistryEntry = {
     href: { type: "href" },
   },
   slots: {
-    media: { admits: ["Image", "Illustration", "Blob"], max: 1, label: "The picture" },
+    media: { admits: ["Image", "Pattern", "Blob"], max: 1, label: "The picture" },
     footer: { admits: "blocks", label: "Chips, a button" },
   },
   defaults: { title: "A thing worth reading", layout: "beside", hue: "lavender" },
@@ -865,7 +843,7 @@ const profileCard: RegistryEntry = {
     hue: { type: "hue", help: "Fills the card when there is no media, and tints the bloom under it." },
     bloom: { type: "boolean", default: true, help: "The media rendered again, blurred beneath the card — the light it casts on the surface. Off where the surface has its own." },
   },
-  slots: { media: { admits: ["Image", "Illustration", "Blob"], max: 1, label: "The face" } },
+  slots: { media: { admits: ["Image", "Pattern", "Blob"], max: 1, label: "The face" } },
   defaults: { name: "Someone", role: "What they do", hue: "blue" },
   example: () => (
     <div style={{ width: 260 }}>
@@ -904,7 +882,7 @@ const hueSwatch: RegistryEntry = {
   line: "Seven 20px dots, an ink ring on the chosen one, the name beside. What a `hue` prop renders (E1 A).",
   props: {
     label: { type: "text", max: 40, required: true },
-    accent: { type: "boolean", default: false, help: "Offers the block accent as an eighth, glass dot with an ink hairline." },
+    accent: { type: "boolean", default: false, help: "Offers the block accent as an eighth dot, with an ink hairline to say so." },
   },
   defaults: { label: "Hue", accent: false },
   example: () => (
@@ -985,10 +963,10 @@ export const entries: readonly RegistryEntry[] = [
   heading, text, label,
   chip, dot,
   button,
-  stack, row, divider, bento, bentoCell, carousel, deck,
-  card, glass, placeholder,
+  stack, row, divider, motion, bento, bentoCell, carousel, deck,
+  card, surface, placeholder,
   figure, blob, pattern, image,
-  sectionHeader, intro, cellHead, blockCard, roadmapItem, regionLabel, steps, step, quote, mediaCard, profileCard,
+  sectionHeader, cellHead, blockCard, steps, step, quote, mediaCard, profileCard,
   segmented, select, checkbox, radioGroup, tabs, toast, tooltip, hueSwatch, patternPicker, range, repeater,
   speaker, menu, table, dialog, tree, patternStudio,
 ];

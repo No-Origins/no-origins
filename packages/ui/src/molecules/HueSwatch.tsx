@@ -8,7 +8,7 @@ import { hues, type Hue } from "../tokens/tokens";
  *
  * The seven `Dot`s at 20px in each hue's deep tier, in one row; the chosen one wears a 2px ink ring with a gap; the
  * hue's name reads beside the row, because seven unlabelled circles are a riddle. Where the schema allows
- * `accent`, an eighth glass dot with an ink hairline stands for "the block's own colour".
+ * `accent`, an eighth dot in the block's own colour, with an ink hairline, stands for it.
  *
  * Not the seven-blob swatch §6.1 first asked for: Brand.md makes the blob the mark of an agent, and seven sleeping
  * faces in a form are seven agents that aren't there. A radiogroup — arrow keys move and pick, Home/End jump.

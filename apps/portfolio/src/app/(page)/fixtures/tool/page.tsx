@@ -4,9 +4,17 @@ import { Button, Chip, Document, Field, Menu, Placeholder, SectionHeader, Segmen
 export const metadata: Metadata = { title: "Tool template", robots: { index: false } };
 
 /**
- * Step 5's fixture (Atomic.md D6): the `Tool` template as the admin wears it, with every region filled — rail,
+ * Step 5's fixture (Atomic.md D6): the `Tool` template as the admin wears it, with every region filled — menu,
  * header, main, inspector, bar — on data that needs no database, so the review sweep can look at the shell the
  * admin's own routes hide behind auth. Below it, the `Document` template with every element markdown produces.
+ *
+ * There used to be a third shell here: the editor, with the Menu in its rail form and a `flush` main for the
+ * canvas. The rail, `flush` and the canvas all went in v1 (2026-09-16), and a fixture for a shell that no longer
+ * exists is worse than no fixture at all.
+ *
+ * The menus are `form="auto"`, not `"column"`: below 900 a forced column keeps its 280px and squeezes the screen
+ * off the side of a phone, which is exactly what `auto` exists to prevent — it hands the same items to the sheet
+ * at the bottom of the viewport instead, and `.noo-tool:has(.noo-menu--sheet)` pads the column for it.
  */
 const GROUPS = [
   { items: [{ href: "/fixtures/tool", label: "Overview" }] },
@@ -27,7 +35,7 @@ const VERSIONS = [
 export default function ToolFixture() {
   return (
     <>
-      <Tool menu={<Menu groups={GROUPS} currentHref="/fixtures/tool" form="column" trailing={<ThemeSwitch />} />}>
+      <Tool menu={<Menu groups={GROUPS} currentHref="/fixtures/tool" form="auto" trailing={<ThemeSwitch />} />}>
         <ToolScreen
           eyebrow="Projects"
           title="Portfolio"
@@ -95,7 +103,7 @@ export default function ToolFixture() {
         </ToolScreen>
       </Tool>
 
-      <Tool menu={<Menu groups={GROUPS.slice(0, 1)} currentHref="/fixtures/tool" form="column" />}>
+      <Tool menu={<Menu groups={GROUPS.slice(0, 1)} currentHref="/fixtures/tool" form="auto" />}>
         <ToolScreen eyebrow="Systems" title="Document" meta={<Chip hue="lavender">the reading column</Chip>}>
           <Document>
             <h2>What a document wears</h2>

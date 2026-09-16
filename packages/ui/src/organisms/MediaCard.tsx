@@ -5,7 +5,7 @@ import type { Hue } from "../tokens/tokens";
 /**
  * MediaCard (§9) — a card with a picture beside its words.
  *
- * `media` takes an `Image`, an `Illustration` or a `Blob`; with nothing passed, `hue` fills the region with the
+ * `media` takes an `Image`, a `Pattern` or a `Blob`; with nothing passed, `hue` fills the region with the
  * hue's wash under the grain, so a card is never a blank rectangle waiting for a picture. (The 2026-09-10 "no
  * photographs" rule was lifted when `Image` and `ProfileCard` arrived; this docstring said otherwise until the
  * 2026-09-14 release.)
@@ -18,7 +18,7 @@ export interface MediaCardProps extends Omit<ComponentPropsWithoutRef<"article">
   meta?: ReactNode;
   /** One line under the title. */
   line?: ReactNode;
-  /** An Image, an Illustration, a Blob — or nothing, and `hue` paints the region. */
+  /** An Image, a Pattern, a Blob — or nothing, and `hue` paints the region. */
   media?: ReactNode;
   /** Fills the media region when nothing is passed: the hue's wash under the grain. */
   hue?: Hue;

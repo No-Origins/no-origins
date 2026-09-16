@@ -1,10 +1,18 @@
 /* @no-origins/ui — molecules (Atomic.md layer 3): atoms combined into one thing with one job. Reads tokens and atoms. */
 
-/* ===== CellHead (§9) — a widget cell's label over a title ===== */
-.noo-cellhead { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+/* ===== CellHead (§9) — a widget cell's label over a title, spread across the cell (Admin.md §6.5c F1) =====
+   `flex: 1` + `space-between` is the whole rule: the head takes the cell's height and pushes the mono label to the
+   top and the title to the bottom — the diagonal an author used to get by typing the two tags into the cell itself.
+   A page bento's rows grow, so there is no height to spread into: it collapses back to a block there. */
+.noo-cellhead { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; flex: 1; justify-content: space-between; }
+.noo-bento--page .noo-cellhead { flex: none; justify-content: flex-start; }
 .noo-cellhead__title { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
+/* The media slot: a logo at 24px, inline in the title's first line, where the dot was. */
+.noo-cellhead__media { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: var(--r-sm); overflow: hidden; }
+.noo-cellhead__media > * { width: 100%; height: 100%; }
+.noo-cellhead__media img { object-fit: cover; }
 
-/* ===== Field (§9) — caption label · glass-1 box, radius 14, 48px · accent focus ring ===== */
+/* ===== Field (§9) — caption label · a level-1 surface as the box, radius 14, 44 · accent focus ring ===== */
 .noo-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .noo-field__label { font: 500 var(--t-caption)/1.45 var(--ff-sans); color: var(--ink-2); }
 .noo-field__box {
@@ -17,10 +25,10 @@
   box-shadow:
     inset 0 0 0 1.5px var(--accent-deep),
     0 0 0 3px color-mix(in oklch, var(--accent) 25%, transparent),
-    var(--gs, var(--e1));
+    var(--e1);
 }
-.noo-field--invalid .noo-field__box { box-shadow: inset 0 0 0 1.5px var(--bad), var(--gs, var(--e1)); }
-.noo-field--invalid .noo-field__box:focus-within { box-shadow: inset 0 0 0 1.5px var(--bad), 0 0 0 3px color-mix(in oklch, var(--bad) 22%, transparent), var(--gs, var(--e1)); }
+.noo-field--invalid .noo-field__box { box-shadow: inset 0 0 0 1.5px var(--bad), var(--e1); }
+.noo-field--invalid .noo-field__box:focus-within { box-shadow: inset 0 0 0 1.5px var(--bad), 0 0 0 3px color-mix(in oklch, var(--bad) 22%, transparent), var(--e1); }
 .noo-field__input {
   flex: 1; min-width: 0; width: 100%;
   padding: 10px 0;
@@ -54,7 +62,7 @@
 .noo-contrast__row:nth-child(odd) { background: var(--ground-2); }
 .noo-contrast__row[data-fail] { outline: 1.5px solid var(--bad); }
 .noo-contrast__chip { display: grid; place-items: center; height: 34px; border-radius: var(--r-xs);
-  font: 600 var(--t-body-sm)/1 var(--ff-sans); border: 1px solid var(--glass-border); }
+  font: 600 var(--t-body-sm)/1 var(--ff-sans); border: 1px solid var(--rule); }
 .noo-contrast__name { font-family: var(--ff-mono); font-size: var(--t-label); color: var(--ink-2); }
 .noo-contrast__num { font-family: var(--ff-mono); font-size: var(--t-caption); color: var(--ink); }
 .noo-contrast__floor { font-family: var(--ff-mono); font-size: var(--t-label); color: var(--ink-2); }
@@ -86,16 +94,16 @@
 /* ===== SectionHeader (§9) — eyebrow · title · lead; 64 above when it follows something, 32 below ===== */
 .noo-section-header { display: flex; flex-direction: column; gap: 12px; margin: 0 0 32px; }
 .noo-section-header:not(:first-child) { margin-top: 64px; }
-.noo-section-header--flush, .noo-intro { margin: 0; gap: 10px; }                             /* the top of a panel: no rhythm (was Intro — D3) */
+.noo-section-header--flush { margin: 0; gap: 10px; }                                        /* the top of a panel: no rhythm */
 .noo-section-header--flush:not(:first-child) { margin-top: 0; }
 .noo-section-header__label { margin: 0; color: var(--muted); }
 .noo-section-header__title { margin: 0; color: var(--ink); }
 .noo-section-header__lead { margin: 0; max-width: 60ch; color: var(--ink-2); }
 
 
-/* ===== Segmented (§9) — a few exclusive choices in a glass-1 pill; the chosen one is ink on ground. ThemeSwitch is an instance (D3) ===== */
-.noo-segmented, .noo-theme { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border-radius: var(--r-pill); }
-.noo-segmented__btn, .noo-theme__btn {
+/* ===== Segmented (§9) — a few exclusive choices in a level-1 surface as a pill; the chosen one is ink on ground. ThemeSwitch is an instance (D3) ===== */
+.noo-segmented { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border-radius: var(--r-pill); }
+.noo-segmented__btn {
   position: relative;
   height: var(--ctl-xs); padding: 0 10px;
   border: 0; border-radius: var(--r-pill); background: transparent;
@@ -104,8 +112,8 @@
   transition: background-color var(--d-fast) var(--ease), color var(--d-fast) var(--ease);
 }
 .noo-segmented--md .noo-segmented__btn { height: var(--ctl-sm); padding: 0 14px; font-size: var(--t-ui); }
-.noo-segmented__btn:hover, .noo-theme__btn:hover { color: var(--ink); }
-.noo-segmented__btn[aria-pressed="true"], .noo-theme__btn[aria-pressed="true"] { background: var(--ink); color: var(--ground); }
+.noo-segmented__btn:hover { color: var(--ink); }
+.noo-segmented__btn[aria-pressed="true"] { background: var(--ink); color: var(--ground); }
 .noo-segmented__btn:disabled { color: var(--muted); cursor: not-allowed; }
 
 
@@ -170,7 +178,7 @@
 .noo-tabs__panel:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 4px; border-radius: var(--r-sm); }
 
 
-/* ===== Toast (§9) — glass-2, radius lg, a semantic wash behind the text. The one place the admin speaks in the brand voice ===== */
+/* ===== Toast (§9) — a level-2 surface, radius lg, a semantic wash mixed into it. The one place the admin speaks in the brand voice ===== */
 .noo-toasts { position: fixed; right: var(--s-6); bottom: var(--s-6); z-index: 60; display: flex; flex-direction: column; gap: var(--s-3); width: min(400px, calc(100vw - 2 * var(--s-6))); pointer-events: none; }
 .noo-toasts > * { pointer-events: auto; }
 @media (max-width: 639.98px) { .noo-toasts { right: var(--s-4); left: var(--s-4); bottom: calc(var(--s-4) + env(safe-area-inset-bottom, 0px)); width: auto; } }
@@ -180,7 +188,7 @@
   padding: var(--s-4) var(--s-4) var(--s-4) var(--s-5);
   border-radius: var(--r-lg);
   color: var(--ink);
-  background-image: linear-gradient(color-mix(in oklch, var(--toast-tone) 9%, transparent), color-mix(in oklch, var(--toast-tone) 9%, transparent));
+  background-color: color-mix(in oklch, var(--toast-tone) 9%, var(--surface));   /* the surface with a 9% tint of the tone mixed in — one colour, no image layer */
 }
 .noo-toast--good { --toast-tone: var(--good); }
 .noo-toast--warn { --toast-tone: var(--warn); }
@@ -227,11 +235,11 @@
 .noo-tip--right .noo-tip__bubble { left: calc(100% + 6px); top: 50%; transform: translateY(-50%); }
 
 
-/* ===== ChatInput (§9) — glass-2 pill, 56px; send = 36px accent circle with the blob's eyes ===== */
+/* ===== ChatInput (§9) — a level-2 surface as a pill, 56px; send = 36px accent circle with the blob's eyes ===== */
 .noo-chat { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: min(640px, 92vw); }
 .noo-chat__suggestions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .noo-chat__bar { display: flex; align-items: center; gap: 8px; height: var(--ctl-lg); padding: 0 10px 0 20px; border-radius: var(--r-pill); transition: box-shadow var(--d-fast) var(--ease); }
-.noo-chat__bar:focus-within { box-shadow: inset 0 0 0 1.5px var(--accent-deep), 0 0 0 3px color-mix(in oklch, var(--accent) 25%, transparent), var(--gs, var(--e2)); }
+.noo-chat__bar:focus-within { box-shadow: inset 0 0 0 1.5px var(--accent-deep), 0 0 0 3px color-mix(in oklch, var(--accent) 25%, transparent), var(--e2); }
 .noo-chat__input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: 400 var(--t-body)/1.3 var(--ff-sans); color: var(--ink); }
 .noo-chat__input::placeholder { color: var(--muted); }
 .noo-chat__send {
@@ -259,7 +267,7 @@
 
 /* ── Inspector controls (Admin.md §6.5a, 2026-09-14) ──────────────────────────────────────────────────────────── */
 
-/* The editor's one drop indicator: a 2px accent line with a dot at its head. Repeater and Tree both render it. */
+/* The one drop indicator: a 2px accent line with a dot at its head. Repeater and Tree both render it. */
 .noo-drop { position: relative; height: 0; margin: 0; padding: 0; list-style: none; pointer-events: none; }
 .noo-drop::before { content: ""; position: absolute; left: 6px; right: 0; top: -1px; height: 2px; border-radius: 1px; background: var(--accent-deep); }
 .noo-drop::after { content: ""; position: absolute; left: 0; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-deep); }
@@ -276,7 +284,7 @@
 .noo-swatch__dot:hover { transform: scale(1.1); }
 .noo-swatch__dot[aria-checked="true"] { box-shadow: 0 0 0 2px var(--ground), 0 0 0 4px var(--ink); }
 .noo-swatch__dot:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 5px; }
-.noo-swatch__dot--accent { background: color-mix(in oklch, var(--accent) 55%, transparent); box-shadow: inset 0 0 0 1px var(--ink); }   /* the block's own colour: a glass dot with an ink hairline */
+.noo-swatch__dot--accent { background: var(--accent); box-shadow: inset 0 0 0 1px var(--ink); }   /* the block's own colour, with an ink hairline to say so */
 .noo-swatch__dot--accent[aria-checked="true"] { box-shadow: inset 0 0 0 1px var(--ink), 0 0 0 2px var(--ground), 0 0 0 4px var(--ink); }
 .noo-swatch__dot:disabled { cursor: not-allowed; }
 .noo-swatch__name { font: 500 var(--t-label)/1 var(--ff-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }

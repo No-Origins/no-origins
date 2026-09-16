@@ -44,8 +44,8 @@ What we leave: the phone (a device render), the person (a photograph), the avata
 
    **The generator uses the first, and round 9 is why.** Level sets look like the stronger guarantee and they are, but they buy it by making every line in the picture the *same curve*: the contours of one field are one shape drawn again and again. That is exactly what *“all curves are parallel”* named, and no parameter could have fixed it. Ordering is the weaker promise and therefore the freer one — each line may be its own curve, at its own distance from the last, and they still cannot meet. It is also the promise that can be **measured** rather than only asserted: ∂Φ/∂s > 0 is a local condition, and the sampling that checks it returns the true gap between every neighbouring pair, so the generator settles its own clearance (§6.0) instead of hoping. Either way it is a property of the geometry, not of the drawing: each primitive in §6 states how it keeps the promise, and `e2e/.mcp/probe11.mjs` measures the closest approach of every pair of lines on the rendered SVG in screen pixels, minus their own stroke widths, and takes a path against itself too (skipping a good fraction of its own length, because a smooth curve is always about one stroke from the sample next to it — the question is whether it *comes back*). Across the library the tightest gap is 6.2px and the loosest 29.3px; the studio's candidates are held to the same rule.
 4. **Soft geometry.** Circles, capsules, arcs, smooth waves. Round caps, round joins. Nothing has a corner radius under a tenth of its shortest side. Straight edges may exist; sharp corners may not.
-5. **The card is lit; the drawing is not.** The −45° light is the blob's light (Design-System.md §4.1b) and it lives in the card's gradient and grain (§4b). The lines take no part in it: a stroke gradient fading toward the bottom-right was tried and retired on 2026-09-11 with principle 2, because a line that fades is a second colour. What this costs is worth naming — **fading was how everything got pushed back**, so depth, emphasis and absence now have to be said with geometry: where a line goes, how much room it has, how many there are.
-6. **The card is textured; the drawing is not.** Colour, gradient and grain live on the surface underneath (§4b). The illustration adds nothing but line. Glass is the exception: it has its own material and takes neither.
+5. **The card is lit; the drawing is not.** The −45° light is the blob's light (Design-System.md §4.1b) and it lived in the card's gradient until 2026-09-16; the card is a flat wash and grain now (§4b) and the light is the blob's alone. The lines take no part in it: a stroke gradient fading toward the bottom-right was tried and retired on 2026-09-11 with principle 2, because a line that fades is a second colour. What this costs is worth naming — **fading was how everything got pushed back**, so depth, emphasis and absence now have to be said with geometry: where a line goes, how much room it has, how many there are.
+6. **The card is textured; the drawing is not.** Colour and grain live on the surface underneath (§4b). The illustration adds nothing but line. ~~Glass is the exception: it has its own material and takes neither.~~ **Amended 2026-09-16:** there are no glass cells. The material was removed from the system (Design-System.md §3, Atomic.md D10) and `BentoCell`'s `glass` tone with it, so every cell is a textured card and the principle has no exception left to state.
 7. **A field, not an object on a card — and the words choose the levels.** A cell holds one illustration. It crosses the whole cell and leaves through its edges, so it reads as something continuing past the frame rather than a motif placed inside it (Bhargav, rounds 1 and 3). No quiet corner: a field that keeps out of a third of the cell is not a field.
 
    The text is not exempted, and the way it is handled is the best thing the studio has produced so far. **A contour at height *v* cannot enter a region whose values never reach *v*.** So sample the field over each block of text, forbid those value ranges, and space the levels through what is left (`clearLevels`). No line can touch a word — by construction, not by care — and nothing is bent out of shape to manage it: the lines run above, below and between the words at their own natural spacing, and the count comes out exact.
@@ -78,19 +78,19 @@ Two choices are doing the work.
 
 There is no depth ramp. An earlier version had three — two weights and three opacities — and it went out with principle 5 on 2026-09-11.
 
-### 4b. The textured gradient card
+### 4b. The textured card
 
-The card carries what the drawing gave up.
+The card carries what the drawing gave up. (Until 2026-09-16 this section was "the textured **gradient** card"; Bhargav removed every gradient from the system that day — *"I'm not liking the gradients in the system. Let's remove all the gradients."* — and the wash is flat now.)
 
 ```css
 --grain: url("data:image/svg+xml,… feTurbulence fractalNoise baseFrequency='0.9' numOctaves='3' seed='7' …");
 --grain-strength: 0.075;
 ```
 
-- **Gradient.** Every bento cell has one, at 135° — the same −45° light as the drawing on it. A quiet cell runs a 34% wash of its hue at the top-left into `--surface`; a loud cell runs its hue lightened 58% into the flat hue; an inverted cell runs `--ink` with a trace of the hue.
+- **Wash, flat.** A quiet cell is `--surface` with 16% of its hue mixed in — about what the old 34%-to-nothing gradient averaged; a loud cell is the flat hue; an inverted cell is flat `--ink`. The −45° light lives in the blob alone now.
 - **Grain.** A `::after` filling the cell, painted in `currentColor` and *masked* by the noise, at 7.5% opacity. Painting it in the card's own ink means it darkens a light card and lightens a dark one — the same trick as the line colour, and the reason there is no dark-theme grain rule.
-- **No bitmap is shipped.** The grain is a `feTurbulence` filter with a fixed seed that the browser runs; it is code, like a gradient, and it obeys §0.
-- Glass cells take neither (principle 6). Forced-colors mode drops the grain and the line becomes `CanvasText`.
+- **No bitmap is shipped.** The grain is a `feTurbulence` filter with a fixed seed that the browser runs; it is code, and it obeys §0.
+- Forced-colors mode drops the grain and the line becomes `CanvasText`. *(This bullet used to exempt glass cells, which took neither the wash nor the grain. The `glass` tone went with the material on 2026-09-16 — Design-System.md §3 — so every cell takes both.)*
 
 ### 4c. How much attention a drawing is allowed (Bhargav, 2026-09-11)
 

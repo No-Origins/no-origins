@@ -49,7 +49,7 @@ export default async function Storage() {
           { key: "created_at", header: "Added", align: "num", render: (r) => String(r.created_at).slice(0, 10) },
         ]}
         rows={assets ?? []}
-        empty="Nothing uploaded yet. Both buckets exist and both have their policies; the first file arrives when the editor does."
+        empty="Nothing uploaded yet. Both buckets exist and both have their policies; the first file arrives when something in the admin authors a document."
       />
     </ToolScreen>
   );

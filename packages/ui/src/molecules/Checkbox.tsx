@@ -3,7 +3,7 @@ import { useEffect, useRef, type ComponentPropsWithoutRef, type ReactNode } from
 import { cx } from "../cx";
 
 /**
- * Checkbox (§9) — a native checkbox wearing a 20px box: surface with the glass hairline off, ink with a ground
+ * Checkbox (§9) — a native checkbox wearing a 20px box: surface with a hairline off, ink with a ground
  * tick on. The input stays in the tree (`appearance: none`, not `display: none`), so the keyboard, the form and
  * the screen reader all get the real control; the box is what the eye gets.
  *

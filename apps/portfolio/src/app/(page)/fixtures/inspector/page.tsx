@@ -20,7 +20,7 @@ export default function InspectorPage() {
       <Label className="text-muted">no origins · the editor · fixture</Label>
       <Heading level={2} className="mt-2">Inspector controls</Heading>
       <Text size="lead" className="mt-3 max-w-[64ch] text-ink-2">
-        The three controls the schema needed and the package lacked, plus the outline's reordering — built to the picks
+        The three controls the schema needed and the package lacked, plus the outline&apos;s reordering — built to the picks
         of 2026-09-14. Everything here is what a `hue`, `pattern`, `list` or `enum` prop will render in the editor.
       </Text>
       <InspectorFixture />

@@ -4,50 +4,24 @@ import { cx } from "../cx";
 /**
  * Page mode (Design-System.md §8): a reading layout. `Page` is the column — nav, `<main id="main">`, footer —
  * that fills the viewport; `Container` is the 1120px measure with 24 / 48 gutters; `Section` adds the vertical
- * rhythm (96 desktop / 64 mobile between sections). Canvas mode (the home) does not use these.
+ * rhythm (96 desktop / 64 mobile between sections). A tool wears `Tool` instead (Atomic.md D6).
  */
 export interface PageProps extends ComponentPropsWithoutRef<"div"> {
   nav?: ReactNode;
   footer?: ReactNode;
-  /**
-   * @deprecated A tool wears `Tool` (Atomic.md D6), not a Page with a rail. Given one, the page still becomes two
-   * columns, for one release. `nav` and `rail` are alternatives, not a pair.
-   */
-  rail?: ReactNode;
   /** id of the main landmark; the NavBar's skip link points here. */
   mainId?: string;
   mainClassName?: string;
 }
 
-export function Page({ nav, rail, footer, mainId = "main", mainClassName, className, children, ...rest }: PageProps) {
-  const body = (
-    <>
+export function Page({ nav, footer, mainId = "main", mainClassName, className, children, ...rest }: PageProps) {
+  return (
+    <div className={cx("noo-page", className)} {...rest}>
+      {nav}
       <main id={mainId} tabIndex={-1} className={cx("noo-page__main", mainClassName)}>
         {children}
       </main>
       {footer}
-    </>
-  );
-
-  // Two shapes, not one shape with a modifier class doing the work. Without a rail the DOM is exactly what it
-  // always was — a flex column of nav, main, footer — because the portfolio and the showcase are laid out by
-  // that shape and a wrapper introduced for the admin's benefit would quietly change both.
-  if (!rail) {
-    return (
-      <div className={cx("noo-page", className)} {...rest}>
-        {nav}
-        {body}
-      </div>
-    );
-  }
-
-  return (
-    <div className={cx("noo-page noo-page--railed", className)} {...rest}>
-      {rail}
-      <div className="noo-page__column">
-        {nav}
-        {body}
-      </div>
     </div>
   );
 }

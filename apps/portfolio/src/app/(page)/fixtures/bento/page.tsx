@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Glyph, Section, SectionHeader, glyphNames, type GlyphName, type Hue } from "@no-origins/ui";
+import { Section, SectionHeader } from "@no-origins/ui";
 import { SectionWidget } from "@/components/section-widget";
 import { sections } from "@/content/sections";
 
@@ -16,8 +16,6 @@ export const metadata: Metadata = { title: "Bento widgets", robots: { index: fal
 const OVERVIEW = 0.27;
 const W = 640;
 const H = 480;
-
-const HUE: Record<GlyphName, Hue> = { status: "blue", work: "peach", cases: "lavender", projects: "green", interests: "yellow", philosophy: "pink" };
 
 export default function BentoFixture() {
   return (
@@ -72,28 +70,6 @@ export default function BentoFixture() {
         </div>
       </Section>
 
-      <Section aria-labelledby="ill-title">
-        <SectionHeader
-          level={3}
-          label="illustrations · first six"
-          title="The six they replace"
-          titleId="ill-title"
-          lead="The original six, drawn from the old grammar of six primitives. They are corner objects, not fields, and the widgets above no longer use them — they are shown until the grammar is deleted so the two can be compared. Patterns.md §6.1 and §10.2."
-        />
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
-          {glyphNames.map((name) => (
-            <figure key={name} className="flex flex-col items-center gap-3">
-              <div className="noo-bento__cell noo-bento__cell--quiet flex w-full items-center justify-center p-4" style={{ aspectRatio: "1 / 1", "--bento-hue": `var(--${HUE[name]})` } as React.CSSProperties}>
-                <Glyph name={name} hue={HUE[name]} className="w-full" />
-              </div>
-              <div className="noo-bento__cell noo-bento__cell--fill flex w-full items-center justify-center p-4" style={{ aspectRatio: "1 / 1", "--bento-hue": `var(--${HUE[name]})`, "--bento-hue-ink": `var(--${HUE[name]}-ink)` } as React.CSSProperties}>
-                <Glyph name={name} hue={HUE[name]} className="w-full" />
-              </div>
-              <figcaption className="noo-label text-muted">{name} · {HUE[name]}</figcaption>
-            </figure>
-          ))}
-        </div>
-      </Section>
     </>
   );
 }

@@ -10,8 +10,8 @@ export const metadata = { title: "Publishing" };
  * keeps serving the old one. So publishing does not end at the webhook; it ends at a read-back.
  */
 const STEPS = [
-  ["Probes pass", "The same checks the editor runs on save. A document that fails one is not publishable."],
-  ["Version row written", "An integer and a required label (R1). The label may not be empty and may not repeat — a check constraint and a unique index, not editor manners."],
+  ["Probes pass", "The same checks a draft is held to while it is written. A document that fails one is not publishable."],
+  ["Version row written", "An integer and a required label (R1). The label may not be empty and may not repeat — a check constraint and a unique index, not a form's good manners."],
   ["Pointer moved", "documents.current_version_id. The draft is untouched; publishing is not a save."],
   ["Revalidate called", "A webhook on the portfolio for the routes the change touches. Output stays static, so §9's bar holds."],
   ["Live route read back", "The published page states its version in a meta tag. The admin fetches it and compares. Green only when they match."],

@@ -2,7 +2,7 @@ import { useId, type ReactNode } from "react";
 import { cx } from "../cx";
 
 /**
- * FieldShell — the frame every form field wears: label above in `caption`, a noo-glass--1 box (radius md, 44) holding
+ * FieldShell — the frame every form field wears: label above in `caption`, a level-1 surface (radius md, 44) holding
  * the control, hint or error below. `Field`, `Select` and any control that arrives later render this and put their
  * own element in the box, so "what a field looks like" is decided once.
  *
@@ -41,7 +41,7 @@ export function FieldShell({ label, hint, error, id: givenId, leading, trailing,
       <label htmlFor={id} className="noo-field__label">
         {label}
       </label>
-      <div className="noo-glass noo-glass--1 noo-field__box">
+      <div className="noo-surface noo-surface--1 noo-field__box">
         {leading ? <span className="noo-field__adorn">{leading}</span> : null}
         {children({ id, "aria-invalid": error ? true : undefined, "aria-describedby": describedBy })}
         {trailing ? <span className="noo-field__adorn">{trailing}</span> : null}
