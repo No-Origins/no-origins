@@ -1,14 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Bowlby_One, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
-import { Tool, themeBootScript } from "@no-origins/ui";
-import { AdminMenu } from "@/components/admin-menu";
-import { currentProfile } from "@/lib/supabase/server";
+import { Geist_Mono, Inter, Montserrat } from "next/font/google";
+import { ThemeProvider } from "@no-origins/ui/components/theme-provider";
+import { cn } from "@no-origins/ui/lib/utils";
 import "./globals.css";
 
-// Fonts are the host's job (Design-System.md §11.2 rule 2): the app sets --ff-*; the package only reads them.
-const display = Bowlby_One({ weight: "400", subsets: ["latin"], variable: "--ff-display", display: "swap" });
-const sans = Hanken_Grotesk({ subsets: ["latin"], variable: "--ff-sans", display: "swap" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--ff-mono", display: "swap" });
+// Fonts stay the host's job: the app declares --font-sans / --font-heading / --font-mono, the package only reads them.
+const fontSans = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const fontHeading = Montserrat({ subsets: ["latin"], variable: "--font-heading" });
+const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   title: { default: "No Origins — Admin", template: "%s — No Origins Admin" },
@@ -19,39 +18,26 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#EFEEEB" },
-    { media: "(prefers-color-scheme: dark)", color: "#181513" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
   ],
 };
 
 /**
  * admin.no-origins.com — the control surface (Admin.md §4).
  *
- * **A Tool, not a Page** (Atomic.md D6). §4 asks for a column, not tabs — seven-plus destinations in a row collide,
- * and the answer to that has always been a column. `Tool` holds that column — a `Menu` — beside the screens; each
- * screen is a `ToolScreen` with the layer eyebrow, the title and its actions in a 60px header.
- *
- * The block accent is **admin** (lavender, Admin.md §2 and Atomic.md D5), so the admin is never mistaken for the portfolio
- * (peach) or the showcase (blue) in a screenshot. The three layer hues live in the menu's groups, not here.
- *
- * The menu is rendered here rather than per-route, so it is not remounted between screens — and the sign-in page
- * is the one route that renders without it, which is why it does its own centring.
+ * The shell it used to wear (`Tool`, `Menu`) went with the old design system. Until the new shell is designed,
+ * the layout is fonts, the theme and nothing else; each route renders itself.
  */
-export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const profile = await currentProfile();
-
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      data-block="admin"
-      className={`${display.variable} ${sans.variable} ${mono.variable}`}
       suppressHydrationWarning
+      className={cn("h-full antialiased font-sans", fontSans.variable, fontHeading.variable, fontMono.variable)}
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
-      </head>
-      <body className="noo-ground">
-        {profile ? <Tool menu={<AdminMenu email={profile.email} />}>{children}</Tool> : children}
+      <body className="min-h-full">
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

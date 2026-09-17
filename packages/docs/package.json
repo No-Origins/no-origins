@@ -1,0 +1,14 @@
+{
+  "name": "@no-origins/docs",
+  "version": "0.0.0",
+  "description": "No Origins knowledge base — the documents that decide the brand, the design system and the apps. Prose only, no build, no exports.",
+  "private": true,
+  "type": "module",
+  "files": [
+    "brand",
+    "system",
+    "apps",
+    "archive",
+    "README.md"
+  ]
+}
