@@ -7,5 +7,10 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["portfolio", "design", "admin"]
+  "ignore": [
+    "portfolio",
+    "design",
+    "admin",
+    "@no-origins/docs"
+  ]
 }

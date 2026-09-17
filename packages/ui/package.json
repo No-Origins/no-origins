@@ -1,81 +1,55 @@
 {
   "name": "@no-origins/ui",
-  "version": "1.0.0",
-  "description": "No Origins design system — tokens, motion, atoms, molecules, organisms and templates: the blob, one flat surface, and the building blocks every block shares.",
+  "version": "2.0.0",
+  "description": "No Origins design system — shadcn/ui (radix-sera, radix base) atoms and molecules, consumed from source by every app.",
   "type": "module",
+  "private": true,
   "sideEffects": [
     "*.css"
   ],
-  "files": [
-    "dist",
-    "src/css"
-  ],
   "exports": {
-    ".": "./src/index.ts",
-    "./css": "./src/css/index.css",
-    "./index.css": "./src/css/index.css",
-    "./tokens.css": "./src/css/tokens.css",
-    "./typography.css": "./src/css/typography.css",
-    "./tailwind.css": "./src/css/tailwind.css",
-    "./motion.css": "./src/css/motion.css",
-    "./components.css": "./src/css/components.css",
-    "./registry": "./src/registry/index.ts",
-    "./icons": "./src/icons/index.ts",
-    "./atoms.css": "./src/css/atoms.css",
-    "./molecules.css": "./src/css/molecules.css",
-    "./organisms.css": "./src/css/organisms.css",
-    "./templates.css": "./src/css/templates.css"
-  },
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "import": "./dist/index.js"
-      },
-      "./css": "./src/css/index.css",
-      "./index.css": "./src/css/index.css",
-      "./tokens.css": "./src/css/tokens.css",
-      "./typography.css": "./src/css/typography.css",
-      "./tailwind.css": "./src/css/tailwind.css",
-      "./motion.css": "./src/css/motion.css",
-      "./components.css": "./src/css/components.css",
-      "./registry": {
-        "types": "./dist/registry/index.d.ts",
-        "import": "./dist/registry/index.js"
-      },
-      "./icons": {
-        "types": "./dist/icons/index.d.ts",
-        "import": "./dist/icons/index.js"
-      },
-      "./atoms.css": "./src/css/atoms.css",
-      "./molecules.css": "./src/css/molecules.css",
-      "./organisms.css": "./src/css/organisms.css",
-      "./templates.css": "./src/css/templates.css"
-    }
+    "./globals.css": "./src/styles/globals.css",
+    "./postcss.config": "./postcss.config.mjs",
+    "./lib/*": "./src/lib/*.ts",
+    "./components/*": "./src/components/*.tsx",
+    "./hooks/*": "./src/hooks/*.ts"
   },
   "scripts": {
-    "build": "tsup",
-    "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit && stylelint \"src/css/*.css\""
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.8.0",
+    "@shadcn/react": "^0.3.1",
+    "class-variance-authority": "^0.7.1",
+    "cmdk": "^1.1.1",
+    "cn": "^0.3.0",
+    "date-fns": "^4.4.0",
+    "embla-carousel-react": "^8.6.0",
+    "input-otp": "^1.5.0",
+    "lucide-react": "^1.46.0",
+    "next-themes": "^0.4.6",
+    "radix-ui": "^1.6.7",
+    "react-day-picker": "^10.0.1",
+    "react-resizable-panels": "^4.12.4",
+    "recharts": "3.8.0",
+    "sonner": "^2.0.8",
+    "tw-animate-css": "^1.4.0",
+    "vaul": "^1.1.2",
+    "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "@phosphor-icons/react": ">=2.1",
-    "react": ">=18",
-    "react-dom": ">=18"
-  },
-  "peerDependenciesMeta": {
-    "@phosphor-icons/react": {
-      "optional": true
-    }
+    "react": ">=19",
+    "react-dom": ">=19"
   },
   "devDependencies": {
-    "@phosphor-icons/react": "2.1.10",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.7",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "stylelint": "^16.26.1",
-    "tsup": "^8.5.0",
-    "typescript": "^5.9.3"
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "shadcn": "^4.21.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

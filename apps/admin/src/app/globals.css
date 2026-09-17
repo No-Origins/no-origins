@@ -1,17 +1,5 @@
-@import "@no-origins/ui/index.css";
+/* The app styles nothing. Everything — Tailwind, the shadcn theme, the base layer — comes from the package. */
+@import "@no-origins/ui/globals.css";
 
-/* No Tailwind here (Atomic.md rule 5): the admin composes the package and styles nothing. The one thing it owes the
-   package is the reset the other hosts get from Tailwind's preflight — border-box sizing. The package is written
-   against it: without it every `height: calc(100dvh - …)` and every padded panel measures content-box and
-   overruns its box by its own padding. */
-*, *::before, *::after { box-sizing: border-box; }
 html { height: 100%; }
-body { min-height: 100%; margin: 0; }   /* never a fixed height: a flex column of fixed height shrinks its children */
-body {
-  font-family: var(--ff-sans);
-  color: var(--ink);
-  background: var(--ground);
-  font-size: 16px;
-  line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
-}
+body { min-height: 100%; }   /* never a fixed height: a flex column of fixed height shrinks its children */

@@ -1,6 +1,0 @@
-/* @no-origins/ui — every component class, by layer (Atomic.md §5). Kept under its old name so `@no-origins/ui/components.css`
-   still resolves; the four files are also exported individually. */
-@import "./atoms.css";
-@import "./molecules.css";
-@import "./organisms.css";
-@import "./templates.css";
