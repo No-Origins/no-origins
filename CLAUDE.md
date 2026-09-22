@@ -1,8 +1,9 @@
 # no-origins
 
 pnpm workspace. Apps live in `apps/*` — `portfolio` (hiddenstack.no-origins.com, :3000; bhargav.no-origins.com
-redirects to it), `design` (design.no-origins.com,
-the showcase, :3001) and `admin` (admin.no-origins.com, the control surface, :3002), all Next.js 16; the shared design
+redirects to it), `design` (design.no-origins.com, the showcase, :3001), `admin` (admin.no-origins.com, the control
+surface, :3002) and `engineering` (engineering.no-origins.com, the engineering publish library, :3003), all
+Next.js 16; the shared design
 system is `packages/ui` (`@no-origins/ui`, **2.0.0** since 2026-09-16), consumed from source. Each app has its own
 CLAUDE.md / AGENTS.md; read them before editing app code.
 
@@ -23,8 +24,8 @@ is a block on the grid that talks to this runtime. Agent lifecycle stays on the 
 to run it and what has been verified. The portfolio and the showcase hold no database key for anything they render:
 **the page is static, a component may be live** (Admin.md §0.6, 2026-09-18). A quest's structure is baked at Publish
 from the public `publish` bucket and served from the edge, never queried at visit; a component that needs live data
-declares it, fetches with the anon key through a per-table RLS policy, and has a fallback state. The showcase has no
-database anywhere near it.
+declares it, fetches with the anon key through a per-table RLS policy, and has a fallback state. The showcase and
+engineering (Layer A) have no database anywhere near them, and that is deliberate.
 
 ## The design system
 
@@ -187,3 +188,6 @@ Add new routes to `DESIGN_ROUTES` when you add pages. Screenshots, traces, and r
 
 **The admin is not in the sweep.** Every one of its routes is behind auth and needs a running Supabase, which
 `pnpm review` does not boot. Review it by signing in and looking — see `apps/admin/CLAUDE.md`.
+
+**Engineering (Layer A)** is also not in the sweep yet — see `apps/engineering/CLAUDE.md` for the TODO to add
+`ENGINEERING_ROUTES` and a `:3003` webServer when convenient.

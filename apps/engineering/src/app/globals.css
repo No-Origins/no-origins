@@ -1,0 +1,5 @@
+/* The app styles nothing. Everything — Tailwind, the shadcn theme, the base layer — comes from the package. */
+@import "@no-origins/ui/globals.css";
+
+html { height: 100%; }
+body { min-height: 100%; }   /* never a fixed height: a flex column of fixed height shrinks its children */
