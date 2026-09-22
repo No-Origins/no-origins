@@ -1,7 +1,8 @@
 # no-origins
 
 pnpm workspace. Apps live in `apps/*` — `portfolio` (bhargav.no-origins.com, :3000), `design` (design.no-origins.com,
-the showcase, :3001) and `admin` (admin.no-origins.com, the control surface, :3002), all Next.js 16; the shared design
+the showcase, :3001), `admin` (admin.no-origins.com, the control surface, :3002) and
+`engineering` (engineering.no-origins.com, the engineering publish library, :3003), all Next.js 16; the shared design
 system is `packages/ui` (`@no-origins/ui`, **2.0.0** since 2026-09-16), consumed from source. Each app has its own
 CLAUDE.md / AGENTS.md; read them before editing app code.
 
@@ -12,8 +13,8 @@ filename (`Brand.md §1`, `Atomic.md D11`), never by path, and so do the ~50 sou
 keep it that way.
 
 `supabase/` is the admin's database — schema, RLS, the allowlist gate and both buckets. `supabase/README.md` says how
-to run it and what has been verified. The portfolio and the showcase have no database anywhere near them and that is
-deliberate: the live site renders static output, never a query.
+to run it and what has been verified. The portfolio, the showcase and engineering (Layer A) have no database anywhere
+near them and that is deliberate: the live site renders static output, never a query.
 
 ## The design system
 
@@ -108,3 +109,6 @@ Add new routes to `DESIGN_ROUTES` when you add pages. Screenshots, traces, and r
 
 **The admin is not in the sweep.** Every one of its routes is behind auth and needs a running Supabase, which
 `pnpm review` does not boot. Review it by signing in and looking — see `apps/admin/CLAUDE.md`.
+
+**Engineering (Layer A)** is also not in the sweep yet — see `apps/engineering/CLAUDE.md` for the TODO to add
+`ENGINEERING_ROUTES` and a `:3003` webServer when convenient.
