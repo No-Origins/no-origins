@@ -46,15 +46,32 @@ export const GRID_SPACING = [0, 4, 8, 12, 16] as const
 export type GridSpacing = (typeof GRID_SPACING)[number]
 
 /**
- * One breakpoint, whole: the side of its square cell in px and the gutter between cells, a step of GRID_SPACING
- * (Grid.md D15). That is the entire config — there are no counts to decide and no pad, because the pad is the gap.
+ * The pager bar's width in cells when a breakpoint does not name one (Grid.md D27, D29): four cells then ↑ ↓. It
+ * lives here rather than in the model because since D29 the width is a config decision like `cell · gap`, checked
+ * against §5's principles and recorded in D29. The model imports it from here, as it already imports
+ * BREAKPOINT_ORDER — the other direction would be a cycle.
  */
-export type GridSpec = { cell: number; gap: number }
+export const PAGER_CELLS = 6
+
+/**
+ * One breakpoint, whole: the side of its square cell in px, the gutter between cells — a step of GRID_SPACING
+ * (Grid.md D15) — and how many cells wide the pager's bar is (D29). There are still no counts to decide and no pad,
+ * because the pad is the gap.
+ */
+export type GridSpec = { cell: number; gap: number; pager?: number }
 export type GridConfig = Partial<Record<GridBreakpoint, GridSpec>>
 
 /** The cell stepper's range on `/grid`: below 16 a cell holds nothing; 200 is a cap against a runaway click. */
 export const MIN_CELL = 16
 export const MAX_CELL = 200
+
+/**
+ * The pager stepper's range in the composer, and its step — even, because the bar is (D29). Two is the arrows alone;
+ * 16 is a cap against a runaway click, not a decision. A number this wide only exists on a field wide enough for it.
+ */
+export const MIN_PAGER = 2
+export const MAX_PAGER = 16
+export const PAGER_STEP = 2
 
 /**
  * The brick — DECIDED, Grid.md D13, 2026-09-21. One gutter everywhere so the field has one texture and one edge
@@ -63,11 +80,11 @@ export const MAX_CELL = 200
  * touch and 132px on a pointer. Grid.md §5 has the six principles these were checked against.
  */
 export const DEFAULT_GRID_CONFIG: GridConfig = {
-  base: { cell: 72, gap: 12 },
-  sm: { cell: 72, gap: 12 },
-  md: { cell: 72, gap: 12 },
-  lg: { cell: 60, gap: 12 },
-  xl: { cell: 60, gap: 12 },
+  base: { cell: 72, gap: 12, pager: PAGER_CELLS },
+  sm: { cell: 72, gap: 12, pager: PAGER_CELLS },
+  md: { cell: 72, gap: 12, pager: PAGER_CELLS },
+  lg: { cell: 60, gap: 12, pager: PAGER_CELLS },
+  xl: { cell: 60, gap: 12, pager: PAGER_CELLS },
 }
 
 export type GridField = {
@@ -84,6 +101,12 @@ export type GridField = {
   /** How many whole cells fit the box, across and down (D12). Derived, never decided. */
   cols: number
   rows: number
+  /**
+   * How many cells of the bottom row the pager's bar takes (D29) — this breakpoint's `pager`, made even and clamped
+   * to the field. Zero on a field with no room for it. The model reserves exactly this much, so it is the one number
+   * the packer and the bar both read.
+   */
+  pager: number
 }
 
 export type GridMetrics = GridField & {
@@ -147,13 +170,27 @@ export function countFor(span: number, cell: number, gap: number) {
  */
 export function resolveField(config: GridConfig, width: number, height: number): GridField {
   const spec = specFor(config, breakpointFor(width))
+  const cols = countFor(width, spec.cell, spec.gap)
   return {
     bp: spec.key,
     cell: spec.cell,
     gap: spec.gap,
-    cols: countFor(width, spec.cell, spec.gap),
+    cols,
     rows: countFor(height, spec.cell, spec.gap),
+    pager: pagerWidth(spec.pager ?? PAGER_CELLS, cols),
   }
+}
+
+/**
+ * The pager bar's width on a field of this many columns (D29). EVEN, rounded down and never below two, because D26's
+ * promise is that the field's centre is a grid line and an odd bar sits half a cell off it; and never wider than the
+ * field, so a narrow phone gets as many cells as it has (D27's clamp). Counts are even (D26), so the clamp cannot
+ * make an even width odd.
+ */
+export function pagerWidth(width: number, cols: number): number {
+  if (cols < 2) return 0
+  const even = Math.max(2, Math.floor(width / 2) * 2)
+  return Math.min(even, cols)
 }
 
 const clamp = (n: number, min: number, max: number) => Math.min(Math.max(n, min), max)

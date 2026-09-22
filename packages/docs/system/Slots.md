@@ -64,6 +64,11 @@ they fit, packed only when they do not — **with nothing reserved**: one page o
 first build reserved it, and a slot's heading vanished on every narrow field — his report, 2026-09-21.) A child that
 still does not fit is not shown; the slot is too small, and the composer should say so — §6.
 
+*The pager's bar is this rule's first fixture.* Since Grid-v2.md D29 the bottom row is a reserved slot whose children
+are the bar's cells, authored the same way — which is why nothing reserved inside a slot matters: the bar is one page
+and does not turn, even though turning pages is what it is for. It hangs off the layout (`layout.bar`) rather than off
+a page, because there is one bar for every page of a layout.
+
 **S6 — The registry lives in the package, and loads lazily.** *Recommended and accepted.* It belongs to the design
 system, so the admin's composer reads the same list as the showcase's. Each entry loads its component on first
 render, so a page that renders an exported layout with one `Input` in it does not pull all sixty components.
@@ -89,6 +94,12 @@ Accordion, Tabs, Breadcrumb, Pagination, ButtonGroup, ToggleGroup, Field, InputG
 ones that need a trigger and a portal (Dialog, Sheet, Drawer, the menus, Popover, Tooltip, HoverCard) are in the
 system but not in the palette yet — in a slot they would show only their trigger, and what that should look like is a
 question for when one is needed.
+
+**The pager's arrows** join as one entry, span 2 × 1 (Grid-v2.md D29). It is the first registered component that
+reads the grid rather than only its props — the turn comes from context, not from the inspector. It is offered inside
+the pager's bar only, and the reason is the turn, not the wiring: an ordinary slot is clipped as the page turns, so an
+arrow placed on a page would cut itself away under the finger pressing it and then leave with the page. What a
+floating turner would cost is written in D29.
 
 ---
 

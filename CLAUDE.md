@@ -82,9 +82,11 @@ rules in short, each one his:
   field's centre is always a grid line, so a centred block is symmetric. Nobody decides cols or rows, and nothing in
   the config or the props names them. **The grid never scrolls and never overflows its box.**
 - **The numbers in `DEFAULT_GRID_CONFIG` are decided (D13, 2026-09-21):** `base`/`sm`/`md` 72 · 12, `lg`/`xl`
-  60 · 12. Fingers get 72 because a 1×1 is the touch target; pointers get 60; the gutter is one number so the field has
+  60 · 12, and since D29 (2026-09-23) a third per breakpoint — the pager bar's width in cells, 6 everywhere.
+  Fingers get 72 because a 1×1 is the touch target; pointers get 60; the gutter is one number so the field has
   one texture. Grid-v2.md §5 has the six principles they were checked against — change a number only against those,
-  and record it in D13. The **Cell** popover on `/composer` still steps them, for trying, not for deciding.
+  and record it in D13 (or D29 for the bar). The **Cell** popover on `/composer` steps all three, for trying, not
+  for deciding.
 - **Cells are square, always** (D9, 2026-09-18: "only square. No stretch"). Trivially now: the side is the decided
   number. There is no `fit` prop, no `GridFit` type and no toggle. Do not reintroduce one.
 - **The remainder is centred margin (D14).** What is left after the count is split equally on both sides by the
@@ -105,10 +107,16 @@ rules in short, each one his:
 - **Boxes are placed by coordinate**, 1-based like CSS grid lines. A move is **refused, never reflowed**: landing
   out of bounds, on another box or on a pager cell leaves the box where it was and turns the ghost red.
 - **Overflow goes to another PAGE, never off the edge (D5).** A layout is pages. **The pager is a navbar on the bottom
-  row (D27, 2026-09-21)**: six 1×1 cells at the bottom centre of every field, on every page — four empty `card`
-  slots, then ↑ ↓ — a fixture drawn by `GridPages` and `GridEditor` (`grid-pager.tsx`), never a box on a page. Its
-  cells are reserved in the model (`pagerCells`): nothing packs or drops there, and a kept page is centred in the
-  room above the row. **The scroll turns the page, and scrolling UP is forward — the hand's up: fingers moving up
+  row (D27, 2026-09-21)**: 1×1 cells at the bottom centre of every field, on every page — by default four empty
+  `card` slots then ↑ ↓ — a fixture drawn by `GridPages` and `GridEditor` (`grid-pager.tsx`), never a box on a page.
+  Its cells are reserved in the model (`pagerCells`): nothing packs or drops there, and a kept page is centred in the
+  room above the row. **The bar is a slot and its cells are sub-slots (D29, 2026-09-23)**: its width is a number per
+  breakpoint in the config beside `cell · gap`, even and never below two, and the ↑ ↓ pair is one registry molecule
+  placed in the bar rather than hardwired to the last two cells — it takes the turn from context, not from props, and
+  is offered in the bar only, because an ordinary slot is clipped by the turn. The **Cell** popover steps the width
+  in twos, for trying. **The bar is the layout's, one per layout** (`layout.bar`), never a page's — it is drawn on
+  every page, so contents that changed between pages would move the arrows under the hand. A bar may leave the arrows
+  out and nothing stops it; the default keeps them in the last two cells. **The scroll turns the page, and scrolling UP is forward — the hand's up: fingers moving up
   the trackpad or the screen, a positive `deltaY`, never negated** (↑ is the next page, ↓ the one
   before): a turn is a progress from 0 to 1 that the wheel or a finger drives (a third of the field is one page);
   every box **loses height from its bottom edge, keeping its top**, by exactly the share the arrow fills — one
@@ -117,8 +125,8 @@ rules in short, each one his:
   nothing is squeezed, narrowed or re-laid-out. Scaling in Y squashed the glyphs and scaling uniformly changed the
   width; both were sent back on 2026-09-21. Do not reintroduce a transform here. Let go short of
   half way and it settles back. The arrows, ← → and the composer's toolbar play the same turn over time, and the
-  wheel turns the composer's pages too; the flip is gone. The field, rulers and pager never move. Nothing decides
-  what the four empty cells hold.
+  wheel turns the composer's pages too; the flip is gone. The field, rulers and pager never move. What the bar's
+  empty cells hold is now a layout question, not an open one (D29).
 - **The theme falls over the field as a sheet of paint (D28, 2026-09-22).** Toggling light/dark — `d`, or the
   showcase's button, both through `useThemeToggle` — is one beat on the outermost grid: one sheet in the NEW theme's
   colours, plain — no cells drawn on it — with a sharp, moving wave of two to five uneven crests for its bottom and

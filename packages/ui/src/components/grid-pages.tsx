@@ -691,7 +691,7 @@ function GridPages({
       {...handlers}
     >
       <GridPageSurface items={items} turn={turn} renderItem={renderItem} />
-      <GridPager page={Math.min(shown, count - 1)} count={count} onTurn={(dir) => setPage(page + dir)} />
+      <GridPager page={Math.min(shown, count - 1)} count={count} onTurn={(dir) => setPage(page + dir)} bar={layout.bar} />
     </Grid>
   )
 }

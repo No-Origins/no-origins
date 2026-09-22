@@ -128,7 +128,7 @@ function GridEditor({
   const canEdit = !readOnly && !!metrics && !turning
 
   const reserved = React.useMemo<GridRect[]>(
-    () => (metrics ? [...(pager ? pagerCells(shownIndex, count, metrics.cols, metrics.rows) : []), ...(reservedProp ?? [])] : []),
+    () => (metrics ? [...pagerCells(shownIndex, count, metrics.cols, metrics.rows, pager && metrics.pager), ...(reservedProp ?? [])] : []),
     [metrics, pager, shownIndex, count, reservedProp],
   )
 
@@ -203,7 +203,9 @@ function GridEditor({
         renderItem={renderItem}
         editing={canEdit ? { selected, onSelect: setSelected, onCommit: commitItems, reserved, onDropInto, canDropInto, onDoubleClick: onItemDoubleClick } : undefined}
       />
-      {pager ? <GridPager page={shownIndex} count={count} onTurn={(dir) => onPageChange(Math.max(0, Math.min(count - 1, current + dir)))} /> : null}
+      {pager ? (
+        <GridPager page={shownIndex} count={count} onTurn={(dir) => onPageChange(Math.max(0, Math.min(count - 1, current + dir)))} bar={layout.bar} />
+      ) : null}
       {/* The host's own grid children — a drop ghost from a palette (Grid.md D19), say. Placed by coordinate like
           everything else; they read the metrics from context. */}
       {children}

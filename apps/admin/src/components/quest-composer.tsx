@@ -102,7 +102,7 @@ export function QuestComposer({ quest }: { quest: Quest }) {
 
   const addMolecule = (molecule: (typeof PALETTE)[number]) => {
     if (!metrics) return;
-    const reserved = pagerCells(current, count, metrics.cols, metrics.rows);
+    const reserved = pagerCells(current, count, metrics.cols, metrics.rows, metrics.pager);
     const rect =
       findFreeRect(items, metrics.cols, metrics.rows, molecule.colSpan, molecule.rowSpan, reserved) ??
       findFreeRect(items, metrics.cols, metrics.rows, 1, 1, reserved);

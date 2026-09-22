@@ -42,14 +42,19 @@ import {
   GRID_SPACING,
   GridItem,
   MAX_CELL,
+  MAX_PAGER,
   MIN_CELL,
+  MIN_PAGER,
+  PAGER_CELLS,
+  PAGER_STEP,
+  pagerWidth,
   specFor,
   type GridBreakpoint,
   type GridConfig,
   type GridMetrics,
 } from "@no-origins/ui/components/grid";
 import { GridFrame, referenceBox, referenceShape, type GridFrameSize } from "@no-origins/ui/components/grid-frame";
-import { defaultProps, REGISTRY, registryEntry, type RegistryEntry } from "@no-origins/ui/components/registry";
+import { defaultProps, PALETTE as PLACEABLE, registryEntry, type RegistryEntry } from "@no-origins/ui/components/registry";
 import { defaultInset, isSlotItem, SLOT_ALIGNS, SLOT_FILLS, Slot, SlotContent } from "@no-origins/ui/components/slot";
 import {
   addPage,
@@ -103,7 +108,7 @@ type PaletteEntry = { key: string; name: string; group: string; span: { colSpan:
 
 const PALETTE: PaletteEntry[] = [
   ...SLOT_FILLS.map<PaletteEntry>((fill) => ({ key: `slot:${fill}`, name: `${fill} slot`, group: "Slots", span: { colSpan: 2, rowSpan: 2 }, fill })),
-  ...REGISTRY.map<PaletteEntry>((entry) => ({ key: entry.kind, name: entry.name, group: entry.group === "atom" ? "Atoms" : "Molecules", span: entry.span, entry })),
+  ...PLACEABLE.map<PaletteEntry>((entry) => ({ key: entry.kind, name: entry.name, group: entry.group === "atom" ? "Atoms" : "Molecules", span: entry.span, entry })),
 ];
 const PALETTE_GROUPS = ["Slots", "Atoms", "Molecules"];
 
@@ -299,7 +304,7 @@ function Composer() {
 
   const reservedOutside = React.useMemo(() => (scoped && metrics && level ? outside(level.rect, metrics.cols, metrics.rows) : []), [scoped, metrics, level]);
   /** The level's reserved cells, relative to the level: the pager's on the page, none inside a slot. */
-  const levelReserved = scoped || !metrics ? [] : pagerCells(current, count, metrics.cols, metrics.rows);
+  const levelReserved = scoped || !metrics ? [] : pagerCells(current, count, metrics.cols, metrics.rows, metrics.pager);
 
   // Mobile-first (D22): the narrowest authored breakpoint is the layout's source; the rest derive from it upward.
   const narrowest = narrowestAuthored(layout);
@@ -405,10 +410,12 @@ function Composer() {
     setPath([]);
   };
 
+  // Each of these rewrites one number and keeps the rest of the breakpoint's spec — dropping `pager` here would
+  // reset the bar every time the cell was stepped.
   const setCell = (key: GridBreakpoint, dir: 1 | -1) => {
     setConfig((previous) => {
       const spec = specFor(previous, key);
-      return { ...previous, [key]: { cell: Math.max(MIN_CELL, Math.min(MAX_CELL, spec.cell + dir * CELL_STEP)), gap: spec.gap } };
+      return { ...previous, [key]: { ...spec, cell: Math.max(MIN_CELL, Math.min(MAX_CELL, spec.cell + dir * CELL_STEP)) } };
     });
   };
   const setGap = (key: GridBreakpoint, dir: 1 | -1) => {
@@ -416,7 +423,15 @@ function Composer() {
       const spec = specFor(previous, key);
       const nearest = GRID_SPACING.reduce((best, step) => (Math.abs(step - spec.gap) < Math.abs(best - spec.gap) ? step : best));
       const index = Math.max(0, Math.min(GRID_SPACING.length - 1, GRID_SPACING.indexOf(nearest) + dir));
-      return { ...previous, [key]: { cell: spec.cell, gap: GRID_SPACING[index]! } };
+      return { ...previous, [key]: { ...spec, gap: GRID_SPACING[index]! } };
+    });
+  };
+  /** The bar's width in cells (D29) — in twos, because an odd bar would not sit on the centre line (D26). */
+  const setPagerCells = (key: GridBreakpoint, dir: 1 | -1) => {
+    setConfig((previous) => {
+      const spec = specFor(previous, key);
+      const now = spec.pager ?? PAGER_CELLS;
+      return { ...previous, [key]: { ...spec, pager: Math.max(MIN_PAGER, Math.min(MAX_PAGER, now + dir * PAGER_STEP)) } };
     });
   };
 
@@ -433,10 +448,14 @@ function Composer() {
 
   /** The field a breakpoint is authored on for the PAGE: the one on show, else its reference field (D18). */
   const shapeOf = (key: GridBreakpoint) => (metrics && key === bp ? { cols: metrics.cols, rows: metrics.rows } : referenceShape(key, config, NAV_HEIGHT));
-  const spanAt = (key: GridBreakpoint, id: string) => {
+  /** That shape as a whole field, with the bar's width for the breakpoint (D29) — what the model reserves. */
+  const fieldAt = (key: GridBreakpoint) => {
     const shape = shapeOf(key);
     const spec = specFor(config, key);
-    for (const p of resolvePages(layout, { bp: key, cell: spec.cell, gap: spec.gap, ...shape }).pages) {
+    return { bp: key, cell: spec.cell, gap: spec.gap, ...shape, pager: pagerWidth(spec.pager ?? PAGER_CELLS, shape.cols) };
+  };
+  const spanAt = (key: GridBreakpoint, id: string) => {
+    for (const p of resolvePages(layout, fieldAt(key)).pages) {
       const item = p.items.find((candidate) => candidate.id === id);
       if (item) return { colSpan: item.colSpan, rowSpan: item.rowSpan };
     }
@@ -444,14 +463,14 @@ function Composer() {
   };
   const setSpan = (key: GridBreakpoint, axis: "colSpan" | "rowSpan", delta: number) => {
     if (!selected) return;
-    const shape = shapeOf(key);
-    const spec = specFor(config, key);
-    const at = resolvePages(layout, { bp: key, cell: spec.cell, gap: spec.gap, ...shape });
+    const field = fieldAt(key);
+    const shape = { cols: field.cols, rows: field.rows };
+    const at = resolvePages(layout, field);
     const next = at.pages.map((p, index) => {
       const item = p.items.find((candidate) => candidate.id === selected);
       if (!item) return p;
       const others = p.items.filter((candidate) => candidate.id !== selected);
-      const reserved = pagerCells(index, at.pages.length, shape.cols, shape.rows);
+      const reserved = pagerCells(index, at.pages.length, shape.cols, shape.rows, field.pager);
       const wanted: GridRect = { ...item, [axis]: Math.max(1, Math.min(axis === "colSpan" ? shape.cols : shape.rows, item[axis] + delta)) };
       const rect = rectIsValid(wanted, others, shape.cols, shape.rows, reserved) ? wanted : findFreeRect(others, shape.cols, shape.rows, wanted.colSpan, wanted.rowSpan, reserved);
       if (!rect) return p;
@@ -700,7 +719,7 @@ function Composer() {
                     <NativeSelectOption value="">— none —</NativeSelectOption>
                     {(["atom", "molecule"] as const).map((group) => (
                       <optgroup key={group} label={group === "atom" ? "Atoms" : "Molecules"}>
-                        {REGISTRY.filter((entry) => entry.group === group).map((entry) => (
+                        {PLACEABLE.filter((entry) => entry.group === group).map((entry) => (
                           <NativeSelectOption key={entry.kind} value={entry.kind}>
                             {entry.name}
                           </NativeSelectOption>
@@ -886,15 +905,15 @@ function Composer() {
               Cell
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-[20rem]">
+          <PopoverContent align="start" className="w-[26rem]">
             <p className="text-muted-foreground mb-3 text-xs">
-              One row per breakpoint, two numbers (Grid.md D15): the cell in px, and the gutter along the spacing scale, {GRID_SPACING.join(" · ")}. The
-              counts follow the box (D12). The row in use is highlighted.
+              One row per breakpoint, three numbers (Grid.md D15, D29): the cell in px, the gutter along the spacing scale, {GRID_SPACING.join(" · ")}, and
+              the pager bar's width in cells — in twos, so it stays on the centre line (D26). The counts follow the box (D12). The row in use is highlighted.
             </p>
             <div className="space-y-1">
               <div className="text-muted-foreground flex items-center gap-2 px-2 text-[10px] uppercase tracking-wider">
                 <span className="w-10 shrink-0" />
-                {["cell", "gap"].map((h) => (
+                {["cell", "gap", "pager"].map((h) => (
                   <span key={h} className="w-[5.5rem] shrink-0 text-center">
                     {h}
                   </span>
@@ -907,6 +926,7 @@ function Composer() {
                     <span className="w-10 shrink-0 font-mono text-xs uppercase">{key}</span>
                     <Stepper label="cell" value={spec.cell} onChange={(d) => setCell(key, d > 0 ? 1 : -1)} />
                     <Stepper label="gap" value={spec.gap} onChange={(d) => setGap(key, d > 0 ? 1 : -1)} />
+                    <Stepper label="pager" value={spec.pager ?? PAGER_CELLS} onChange={(d) => setPagerCells(key, d > 0 ? 1 : -1)} />
                   </div>
                 );
               })}

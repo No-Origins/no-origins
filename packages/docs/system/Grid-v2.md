@@ -490,12 +490,70 @@ observer made a new metrics object for the same numbers, and the timeline keyed 
 again. The grid now reports only a **change** of size, and the timeline is built once per toggle from a ref. *(D28
 had been the grid-as-canvas scene for an hour on 2026-09-21; he removed it and the number was reused.)*
 
+**D29 — The pager's row is a strip of slots, its width is decided per breakpoint, and the arrows are one molecule
+placed in it.** *2026-09-23, on the bar in the portfolio and the admin: "I want that to be a molecule … 1. Each item
+should be a slot. 2. Controllable slots (increase or decrease the slots). 3. The pager buttons can also be one
+molecule."* Amends D27, which left the bar six fixed cells and said outright that what the four empty ones hold "is
+not decided". This decides it: they hold whatever a slot holds.
+
+*The bar is a slot.* The row the pager occupies is one reserved **slot** spanning the bar's cells on the bottom row,
+and its `children` are a `GridLayout` on those cells — S2 and S5 exactly, no new shape in the model. Each cell of the
+bar is a sub-slot, with a slot's own tokens (S3), and is authored per breakpoint like every other slot's children.
+Inside the bar nothing is reserved: it is one page and it does not turn (S5).
+
+*The width is decided, not constant.* `PAGER_CELLS = 6` becomes a number per breakpoint in `DEFAULT_GRID_CONFIG`,
+beside `cell · gap` (D13) — the same kind of decision, made the same way, against §5's principles. Six is the default
+at every breakpoint, so nothing moves until a number is changed. Two rules bound it. It is **even**, rounded down and
+never below two, because D26's promise is that the field's centre is a grid line and an odd bar sits half a cell off
+it. And a field narrower than the number still gets as many cells as it has, arrows last — D27's clamp, unchanged.
+The bar's cells stay **reserved** in the model (`pagerCells`), so the packer never lands on the bottom row and the
+composer still refuses a drop there; widening the bar takes those cells away from the page, which is the cost of
+asking for them. The composer's **Cell** popover steps it per breakpoint beside the cell and the gutter, in twos —
+for trying, not for deciding, exactly as D13 says of the other two. A decision is a number in `DEFAULT_GRID_CONFIG`
+and a line in this rule.
+
+*The arrows are a molecule.* ↑ and ↓ together are one registry entry (S6), span 2 × 1, dropped into the bar like any
+other component rather than hardwired to the last two cells. Two consequences. It cannot take `onTurn` as a prop any
+more — a molecule in a slot is handed props by the inspector, not by the pager — so `GridPages` publishes the turn on
+context beside `useGridMetrics`, and the molecule reads it there. And its fill relocates for free: the band is driven
+by `--grid-turn-fill-front` / `--grid-turn-fill-back`, which are custom properties inherited from the grid, so the
+arrow fills in proportion in whatever cell it is placed. The part that looked most fragile is the part that already
+works anywhere.
+
+*Where it may go: the bar, and the reason is the clip, not the wiring.* Nothing stops the molecule working elsewhere —
+the fill's custom properties inherit from the grid root and the turn is on context, so any box on the field could
+drive a turn. Two things about the turn stop it being useful there. A page box carries `data-turn` and is clipped by
+the turn (`globals.css`), so an arrow in an ordinary slot would cut its own height away under the finger pressing it
+and then leave with the page; the bar's cells carry no `data-turn`, which is why the pager never moves. And a box
+belongs to one page, so arrows placed on page 2 are not there on page 3 — being drawn on every page is the whole
+reason the bar is a fixture. So the molecule is offered in the bar only. A floating turner is not forbidden, and this
+is what it would cost: a slot that opts out of `data-turn` and is drawn as a second fixture on every page, which is a
+larger change than this rule makes. Recorded so the next person reads a price rather than a prohibition.
+
+*The default is D27's bar.* Four empty `card` slots then the arrows, which is what both apps draw today, so a layout
+that says nothing about its pager gets exactly what it had. A bar is still a fixture in the sense that matters — it is
+drawn on every page by `GridPages` and `GridEditor`, never packed, never a box on a page. What changed is that its
+cells now have somewhere for their contents to be written down.
+
+*One bar per layout, not per page — decided 2026-09-23.* *"Let's leave it on the layout."* The bar lives on the
+`GridLayout` as `bar`, beside `authored` and `shapes`, and is drawn on every page of it. A page cannot have its own:
+the bar is the one thing on the field that does not turn, and contents that changed between pages would move the
+arrows under the hand reaching for them. It travels with the layout everywhere — `withAuthored` and `withoutAuthored`
+carry it through, and the export writes it out — so re-authoring a breakpoint's pages never drops it.
+
+*The arrows may be left out, and nothing stops you — decided the same day.* *"The bar can. But for now let's put them
+in the same last two slots they are in."* So the default is unchanged: every cell but the last two an empty `card`
+slot, then the arrows. A bar that omits them is allowed and is not guarded — no composer refusal, no export warning —
+and the cost is known and accepted: the wheel, a finger and ← → still turn the page, but a phone has nothing to press,
+so a reader who does not try the scroll stays on page one. If that ever bites, the guard goes here.
+
 ---
 
 ## 9. Where it lives
 
 Field and config in `grid.tsx`, the model in `grid-layout.ts` (with `layoutFromSpans`, `layoutCode`, `configCode`),
-pages and the turn in `grid-pages.tsx`, the pager in `grid-pager.tsx` (D27), the theme flip in `grid.tsx` with
+pages and the turn in `grid-pages.tsx`, the pager in `grid-pager.tsx` (D27, D29) with its arrows in the registry
+(`registry.tsx`), the theme flip in `grid.tsx` with
 `theme-provider.tsx` (D28), tools in `grid-editor.tsx`, the frame in
 `grid-frame.tsx` (with `referenceShape`), the slot in `slot.tsx`. Designed on at `design.no-origins.com/composer` (`apps/design/src/app/composer/page.tsx`, §8); the
 pages it designs are data in `apps/design/src/content/`. First composed on by the quest composer (Admin.md §0.5), which

@@ -7,7 +7,9 @@ Rebuilt from nothing on 2026-09-16; the hand-written 1.0 system was deleted in f
 src/components/*.tsx    60 shadcn components + theme-provider.tsx (`useThemeToggle` — every toggle goes through the
                           grid's flip, Grid.md D28; `useThemeFlipRegistry` is how the grid takes it)
                         + grid.tsx (field, and `GridThemeFlip`, D28), grid-pages.tsx, grid-pager.tsx, grid-editor.tsx, grid-frame.tsx — the base layout, ours
-                          (see repo-root CLAUDE.md); grid-pager.tsx is the navbar on the bottom row and grid-pages.tsx the turn (Grid.md D27)
+                          (see repo-root CLAUDE.md); grid-pager.tsx is the navbar on the bottom row — a slot whose
+                          cells are sub-slots, width decided per breakpoint, arrows a registry molecule (Grid.md D27,
+                          D29) — and grid-pages.tsx the turn (Grid.md D27)
                         + slot.tsx (the box on the grid: fill · inset · alignment; a component or sub-slots) and
                           registry.tsx (every component the composer's palette offers, lazy) — Slots.md
                         + text.tsx — the seven typography roles, Type.md; every piece of text in an app is a Text

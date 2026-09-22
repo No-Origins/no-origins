@@ -28,6 +28,12 @@ export type RegistryEntry = {
   /** The slot a drop makes, in cells — at the desktop cell; `spans` may say otherwise for a breakpoint. */
   span: { colSpan: number; rowSpan: number }
   spans?: Partial<Record<GridBreakpoint, { colSpan: number; rowSpan: number }>>
+  /**
+   * Whether the composer's Add list offers it. False for a component that only works somewhere particular — the
+   * pager's arrows, which read the turn from context and so mean nothing outside the bar (Grid.md D29). It is still
+   * registered, because `Placed` has to be able to render it.
+   */
+  palette?: boolean
   props: PropField[]
   /** Renders the component with its props. Lazy: the module is imported on first render. */
   View: React.ComponentType<{ props: Record<string, unknown> }>
@@ -683,9 +689,28 @@ export const REGISTRY: RegistryEntry[] = [
       },
     ),
   },
+  {
+    // The pager's ↑ ↓ as one molecule (Grid.md D29) — the first entry that reads the grid rather than only its props,
+    // since the turn comes from context. It means nothing outside the pager's bar, so it is registered (Placed has to
+    // render it) but kept out of the Add list. The lazy import is also what keeps grid-pager → slot → registry from
+    // being a static cycle.
+    kind: "pager-arrows",
+    name: "Pager arrows",
+    group: "molecule",
+    palette: false,
+    span: { colSpan: 2, rowSpan: 1 },
+    props: [],
+    View: lazy(
+      () => import("@no-origins/ui/components/grid-pager"),
+      (m) => <m.GridPagerArrows />,
+    ),
+  },
 ]
 
 const BY_KIND = new Map(REGISTRY.map((entry) => [entry.kind, entry]))
+
+/** What the composer's Add list offers — everything but the components that only work in one place (D29). */
+export const PALETTE = REGISTRY.filter((entry) => entry.palette !== false)
 
 /** The entry for a kind, or undefined for a kind the registry does not know (an old export, a typo). */
 export function registryEntry(kind: string) {
