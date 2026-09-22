@@ -1,17 +1,20 @@
 import type { NextConfig } from "next";
 
+/** Where the portfolio lives (Portfolio.md P1, 2026-09-21). The old host redirects here, path and query intact. */
+export const CANONICAL_HOST = "hiddenstack.no-origins.com";
+const OLD_HOSTS = ["bhargav.no-origins.com"];
+
 const nextConfig: NextConfig = {
-  // the four old sections became seven (Brand.md §9); nothing is deployed, but the docs and screenshots
-  // reference the old paths, so they land somewhere sensible rather than 404
   async redirects() {
-    return [
-      { source: "/about", destination: "/", permanent: false },
-      { source: "/contact", destination: "/status", permanent: false },
-      { source: "/roadmap", destination: "/", permanent: false },
-    ];
+    return OLD_HOSTS.map((host) => ({
+      source: "/:path*",
+      has: [{ type: "host" as const, value: host }],
+      destination: `https://${CANONICAL_HOST}/:path*`,
+      permanent: true,
+    }));
   },
 
-  // the design system is consumed from source inside the workspace (Design-System.md §11)
+  // the design system is consumed from source inside the workspace
   transpilePackages: ["@no-origins/ui"],
 };
 

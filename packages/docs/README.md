@@ -19,8 +19,9 @@ Patterns.md were written for that system and have **not** been rewritten — **d
 component work.** The root CLAUDE.md is the authority on the system as it stands today.
 
 What survives the rebuild is everything upstream of components: what No Origins is and who it is for
-(Brand.md), the avatar brief (Character.md), and what the admin is meant to do (Admin.md). Read those as
-live. Read the rest as the record of a system that was built, released and replaced — which is worth
+(Brand.md), the avatar brief (Character.md), and what the admin is meant to do (Admin.md). **Grid.md**, **Slots.md** and **Type.md** are new since,
+and are the `system/` documents written for the system as it stands — it is **versioned**: `Grid.md` is a pointer,
+`Grid-v2.md` is current and `Grid-v1.md` is the record of the version before. Read those as live. Read the rest as the record of a system that was built, released and replaced — which is worth
 keeping, because the next system inherits the decisions rather than the code.
 
 ## Reading order
@@ -41,6 +42,11 @@ Reach for `system/` when you want to know *why* something was decided, never for
 
 | Document | Decides | Status |
 |---|---|---|
+| **Grid.md** | Nothing — it is the **pointer** to the current grid document, and says how a `Grid.md Dn` citation resolves across versions. Cite `Grid.md`, read the version it names. | **Live** · repointed whenever the direction changes |
+| **Grid-v2.md** | The base layout of 2.0, second direction: **the cell is decided, the counts derive** (D12, 2026-09-21). Per breakpoint two numbers, `cell · gap` (D13, D15); the remainder is centred margin (D14); what each of v1's D1–D11 becomes; the spacing scale. Authoring is per breakpoint in the **composer** (§8, D16–D21: Compose on every page, palette, inspector, two-block export, four kinds of box). | **Live · current** · field, numbers, the six principles (§5) and the composer (§8) all decided 2026-09-21; the code is on it |
+| **Grid-v1.md** | The first direction, 2026-09-18 → 2026-09-21: the square cell, the field **per breakpoint**, pages, derivation, the frame, D1–D11, and the table of counts that was never filled. A one-page summary sits in front of the full unedited text. | **Superseded 2026-09-21** by Grid-v2.md · the code moved the same day; a `Grid.md D1`–`D11` citation anywhere names its rules |
+| **Slots.md** | The layer between the grid and the components: a **slot** holds one component or sub-slots on the same cells; tokens fill · inset · alignX · alignY, no margin (S3); the component registry in the package (S6); how the composer places and enters slots. Opened 2026-09-21. | **Live** · S1–S6 decided; organisms = slots with sub-slots, named ones are the next document |
+| **Type.md** | The seven typography roles — display · title · heading · label · body · caption · mono — with tone and alignment as the only other knobs, read off the showcase's pages rather than a ratio; `Text` is the component. Opened 2026-09-21. | **Live** · T1–T2 decided; line length and a second body size open |
 | **Design-System.md** | The values: the Sketch palette, the one flat surface, the blob, type, space, motion, layout, theming axes, the package. Was the spec 1.0 implemented. | **Historical** · describes the deleted system; §8 was already superseded before that |
 | **Atomic.md** | The same system organised by Atomic Design, every token and component given a verdict, and the thirteen rules (D1–D13) that turned it into a release. | **Historical** · D1–D13 are the best record of *why*; the components they govern no longer exist |
 | **Patterns.md** | How No Origins drew pictures — a pattern is a function returning SVG, never a bitmap. Ten principles, the generator grammar, the library of eighteen. | **Historical** · the generator went with 1.0; the ten principles outlive it. Renamed from *Illustrations.md* 2026-09-14 |
@@ -49,7 +55,8 @@ Reach for `system/` when you want to know *why* something was decided, never for
 
 | Document | Decides | Status |
 |---|---|---|
-| **Admin.md** | `admin.no-origins.com` — the three layers (Projects, Systems, Products), the information architecture, Supabase, publishing, the five rules. | **Live for intent** · Supabase, RLS and the buckets still stand; the editor (§6) went with React Flow and the pages await the 2.0 rebuild |
+| **Portfolio.md** | `hiddenstack.no-origins.com` — the portfolio on the grid: the host and the redirect from `bhargav` (P1), a page as an arrangement on the live field (P2), the empty top row (P3), the profile card and its spans (P4–P5), the content in his voice (P6). Opened 2026-09-21. | **Live** · the first screen is built; the rest of the résumé is §4 |
+| **Admin.md** | `admin.no-origins.com` — **§0.5 is the live spec: Quests** (the schema reset, the grid-of-cards home, the compose dashboard) and **§0.6 is Publishing** (the subdomain pipeline, the `publish` bucket, the portfolio as quest host, and the rule *the page is static, a component may be live*). Everything below is the superseded three-layer model, kept as the record. | **§0.5 live · §0.6 decided 2026-09-18, not yet built** · §1/§4/§6–§9 superseded (they described the deleted editor) |
 
 ### `archive/` — kept as the record
 

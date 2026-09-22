@@ -1,18 +1,23 @@
 "use client"
 
 import * as React from "react"
+import gsap from "gsap"
 import { cn } from "cn"
 
+import { useThemeFlipRegistry, type ThemeFlipper } from "@no-origins/ui/components/theme-provider"
+
 /**
- * The base layout.
+ * The base layout (Grid.md — v2 since 2026-09-21).
  *
- * One square cell is the unit. The number of columns AND rows is decided per breakpoint, not by content, and the
- * grid never scrolls: items are placed on cells by coordinate and the grid fits whatever box it is given. When a
- * layout holds more than the field can, the surplus goes to another PAGE (grid-pages.tsx) — never off the edge.
+ * One square cell is the unit, and THE CELL IS DECIDED: a breakpoint is two numbers, `cell · gap` (D13, D15). The
+ * counts are not decided by anyone — a field is as many whole cells as fit across and down the box it is given
+ * (D12), so the grid never scrolls and never overflows. What is left over is centred margin (D14), and the box's
+ * own padding is one gutter, so the edge of the screen is one more grid line (D15). When a layout holds more than the
+ * field can, the surplus goes to another PAGE (grid-pages.tsx) — never off the edge.
  *
- * Two ways to reconcile "square cells" with "fill the viewport", because at most viewport ratios they disagree:
- *   fit="square"  — cell side is min(trackW, trackH); the grid is centred and the remainder becomes margin.
- *   fit="stretch" — tracks fill the box exactly; cells are only as square as the viewport lets them be.
+ * The grid is always its box: the viewport, or the frame inside `/grid` (D11). There is no `fill`, because nothing
+ * ever holds a grid as a block in a page — "everything will always be on the grid once we are out of the grid
+ * editor" — and no `pad`, because the pad IS the gutter.
  */
 
 export type GridBreakpoint = "base" | "sm" | "md" | "lg" | "xl"
@@ -31,53 +36,68 @@ export const GRID_BREAKPOINTS: Record<GridBreakpoint, number> = {
 export const BREAKPOINT_ORDER: GridBreakpoint[] = ["base", "sm", "md", "lg", "xl"]
 
 /**
- * A box shorter than this, and wider than it is tall, is a SHORT LANDSCAPE box — a phone on its side. Breakpoints are
- * keyed on width, which would hand such a box a tall field it cannot hold (8 columns and 7 rows in 390px is an 18px
- * cell). Instead it keys on its height and the field is turned on its side: base's 4x8 becomes 8x4.
+ * The spacing scale the gutter draws from (Grid.md §3). A breakpoint's gap is one of these, never a free number; a
+ * box's own inset draws from the same five so the space between boxes and the space inside them read as one family.
+ * 4px steps because that is the base of the Tailwind spacing the apps lay out with; 0 is on it on purpose — cells
+ * that touch are the only field that still reads as a grid at high column counts. The CELL is not on this scale: it
+ * is a size, not a spacing, and its own decision (D13).
  */
-export const SHORT_BOX = GRID_BREAKPOINTS.sm
-
-export type GridTracks = { cols: number; rows: number }
-export type GridConfig = Partial<Record<GridBreakpoint, GridTracks>>
+export const GRID_SPACING = [0, 4, 8, 12, 16] as const
+export type GridSpacing = (typeof GRID_SPACING)[number]
 
 /**
- * The default shape of the grid. Fewer, larger cells on a phone; more, smaller ones on a desktop. Row counts fall
- * as the viewport widens because a wide screen is short relative to its width.
+ * One breakpoint, whole: the side of its square cell in px and the gutter between cells, a step of GRID_SPACING
+ * (Grid.md D15). That is the entire config — there are no counts to decide and no pad, because the pad is the gap.
+ */
+export type GridSpec = { cell: number; gap: number }
+export type GridConfig = Partial<Record<GridBreakpoint, GridSpec>>
+
+/** The cell stepper's range on `/grid`: below 16 a cell holds nothing; 200 is a cap against a runaway click. */
+export const MIN_CELL = 16
+export const MAX_CELL = 200
+
+/**
+ * The brick — DECIDED, Grid.md D13, 2026-09-21. One gutter everywhere so the field has one texture and one edge
+ * margin; 72 where there are fingers (a 1×1 is the touch target — the pager fills its cell); 60 from `lg` up where a
+ * pointer is likely, and never rising again. Every phone from 375 to 430 gets four columns; a 2×2 card is 156px on
+ * touch and 132px on a pointer. Grid.md §5 has the six principles these were checked against.
  */
 export const DEFAULT_GRID_CONFIG: GridConfig = {
-  base: { cols: 4, rows: 8 },
-  sm: { cols: 6, rows: 8 },
-  md: { cols: 8, rows: 7 },
-  lg: { cols: 12, rows: 6 },
+  base: { cell: 72, gap: 12 },
+  sm: { cell: 72, gap: 12 },
+  md: { cell: 72, gap: 12 },
+  lg: { cell: 60, gap: 12 },
+  xl: { cell: 60, gap: 12 },
 }
-
-export type GridFit = "square" | "stretch"
 
 export type GridField = {
   /**
-   * The breakpoint whose config produced this field. A viewport that is `xl` by width but whose config only defines
-   * `lg` reports `lg`: the field IS the breakpoint, and two viewports with the same field share a layout.
+   * The breakpoint whose config supplied the cell and gap — the config key, walking down, so a viewport that is `xl`
+   * by width on a config with no `xl` row reports `lg`. It keys the cell (D13) and, until authoring is redecided
+   * (Grid-v2.md §7), the layout's authored pages (v1 D6). It does NOT decide the counts: the box does.
    */
   bp: GridBreakpoint
+  /** The side of one square cell, in px — this breakpoint's, from the config (D13). */
+  cell: number
+  /** The gutter between cells, in px, and the box's own padding (D15). */
+  gap: number
+  /** How many whole cells fit the box, across and down (D12). Derived, never decided. */
   cols: number
   rows: number
-  /** True when a short landscape box turned the field on its side. */
-  transposed: boolean
 }
 
 export type GridMetrics = GridField & {
-  /** One cell, in px. Equal on both axes when fit="square". */
-  cellW: number
-  cellH: number
-  gap: number
-  pad: number
-  /** The grid box itself, excluding padding. */
+  /** The field itself, excluding the margin around it. */
   gridW: number
   gridH: number
   /** The box the grid was given. */
   boxW: number
   boxH: number
-  fit: GridFit
+  /**
+   * How much a GridFrame around the grid has shrunk it to fit on screen: 1 outside a frame or in one that fits.
+   * Layout px times `scale` is screen px. Pointer maths has to divide by it (Grid.md D11).
+   */
+  scale: number
 }
 
 export function breakpointFor(size: number): GridBreakpoint {
@@ -98,31 +118,42 @@ export function resolveResponsive<T>(value: Responsive<T> | undefined, bp: GridB
   return fallback
 }
 
-/** The track counts at a breakpoint and the config key that supplied them, walking down to the nearest defined. */
-export function tracksFor(config: GridConfig, bp: GridBreakpoint): GridTracks & { key: GridBreakpoint } {
+/** A breakpoint's cell and gap and the config key that supplied them, walking down to the nearest defined. */
+export function specFor(config: GridConfig, bp: GridBreakpoint): GridSpec & { key: GridBreakpoint } {
   for (let i = BREAKPOINT_ORDER.indexOf(bp); i >= 0; i--) {
     const key = BREAKPOINT_ORDER[i]!
     const found = config[key]
     if (found) return { ...found, key }
   }
-  return { cols: 4, rows: 8, key: "base" }
+  return { ...(DEFAULT_GRID_CONFIG.base as GridSpec), key: "base" }
 }
 
 /**
- * The field a box of this size gets. `height` is only meaningful when the grid fills its box; a content-block grid
- * passes none and keys on width alone. `force` names a breakpoint outright — the editor uses it to preview a narrow
- * field on a wide screen — and skips the short-landscape rule, because a forced field is the one you asked to see.
+ * How many whole cells of this size fit a span, with one gutter of padding at each end (D15) and a gutter between
+ * every two cells: `floor((span − gap) / (cell + gap))`, then rounded down to an EVEN count (D26) so the field's
+ * centre is always a grid line and a centred block (D14, D25) is symmetric. Never fewer than two, so a field always
+ * exists; the odd cell that would have fit becomes margin.
  */
-export function resolveField(config: GridConfig, width: number, height?: number, force?: GridBreakpoint): GridField {
-  if (force) {
-    const t = tracksFor(config, force)
-    return { bp: t.key, cols: t.cols, rows: t.rows, transposed: false }
+export function countFor(span: number, cell: number, gap: number) {
+  const fit = Math.floor((span - gap) / (cell + gap))
+  return Math.max(2, fit - (fit % 2))
+}
+
+/**
+ * The field a box of this size gets (D12). Width picks the breakpoint, the breakpoint supplies the cell and gap
+ * (D13), and both axes are then simply how many cells fit. A phone on its side gets more columns than rows with no
+ * rule for it — v1's transposition fell out. There is no way to name a breakpoint outright: the box decides, and a
+ * tool that wants to see another size gives the grid a box of that size — a GridFrame (grid-frame.tsx, D11).
+ */
+export function resolveField(config: GridConfig, width: number, height: number): GridField {
+  const spec = specFor(config, breakpointFor(width))
+  return {
+    bp: spec.key,
+    cell: spec.cell,
+    gap: spec.gap,
+    cols: countFor(width, spec.cell, spec.gap),
+    rows: countFor(height, spec.cell, spec.gap),
   }
-  const short = height !== undefined && height < SHORT_BOX && width > height
-  const t = tracksFor(config, breakpointFor(short ? height : width))
-  return short
-    ? { bp: t.key, cols: t.rows, rows: t.cols, transposed: true }
-    : { bp: t.key, cols: t.cols, rows: t.rows, transposed: false }
 }
 
 const clamp = (n: number, min: number, max: number) => Math.min(Math.max(n, min), max)
@@ -134,110 +165,102 @@ export function useGridMetrics() {
   return React.useContext(GridContext)
 }
 
+/**
+ * What a GridFrame tells the grid inside it: that it is framed, and by how much the frame has been scaled down to
+ * fit. Defined here rather than in grid-frame.tsx so the grid reads it without importing the frame.
+ */
+export type GridFrameState = { scale: number }
+export const GridFrameContext = React.createContext<GridFrameState | null>(null)
+
+/** The frame around the nearest Grid, or null when the grid stands on its own. */
+export function useGridFrame() {
+  return React.useContext(GridFrameContext)
+}
+
 export type GridProps = Omit<React.ComponentProps<"div">, "children"> & {
   children?: React.ReactNode
   config?: GridConfig
-  fit?: GridFit
-  /** Own the viewport: 100dvh, no page scroll. Override the height with a className if there is chrome above. */
-  fill?: boolean
-  gap?: number
-  pad?: number
   /** Draw the cells behind the items. */
   overlay?: boolean
   /** Number the columns and rows along the edges. Implies the overlay. */
   rulers?: boolean
-  /** Force the field of this breakpoint regardless of the measured size. Cells still size to the real box. */
-  breakpoint?: GridBreakpoint
   onMetrics?: (metrics: GridMetrics) => void
 }
 
 function Grid({
   children,
   config = DEFAULT_GRID_CONFIG,
-  fit = "square",
-  fill = false,
-  gap = 12,
-  pad = 16,
   overlay = false,
   rulers = false,
-  breakpoint,
   onMetrics,
   className,
   style,
+  ref: refProp,
   ...props
 }: GridProps) {
   const ref = React.useRef<HTMLDivElement>(null)
+  // The box measures itself through `ref`; a host's own ref (grid-pages.tsx writes the turn's progress here) is set
+  // alongside it, not instead of it — spread after `ref={ref}` it once replaced it, and the field was never measured.
+  const setRef = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      ref.current = node
+      if (typeof refProp === "function") refProp(node)
+      else if (refProp) refProp.current = node
+    },
+    [refProp],
+  )
+  const frame = useGridFrame()
+  const scale = frame?.scale ?? 1
   const [box, setBox] = React.useState<{ w: number; h: number } | null>(null)
 
   React.useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
-    const read = () => setBox({ w: el.clientWidth, h: el.clientHeight })
+    // Only a CHANGE of size is a new box: a fresh object for the same numbers would make new metrics, and anything
+    // keyed on them — the theme flip's timeline — would start over. The theme switch nudges layout enough to fire the
+    // observer, and the flip committing the theme, restarting, and committing again was a loop (his report, 2026-09-21).
+    const read = () => setBox((prev) => (prev && prev.w === el.clientWidth && prev.h === el.clientHeight ? prev : { w: el.clientWidth, h: el.clientHeight }))
     read()
     const ro = new ResizeObserver(read)
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
 
-  // Rulers are drawn OUTSIDE the grid box — along the top and the left only — so those two sides need room of their
-  // own or the padding clips them. Only those two: a gutter on the right as well cost every phone a 24px strip it
-  // had no numbers in, and the field lost a cell's worth of width to symmetry.
-  const rulerPad = rulers ? 24 : 0
-
+  // Rulers are drawn ON the field — the numbers sit at the centre of the top row's and left column's cells (Grid.md
+  // D24) — so they take no space and showing them changes nothing about the count. They used to reserve a 24px strip
+  // on every side, and toggling them re-counted the field and repacked the layout.
   const metrics = React.useMemo<GridMetrics | null>(() => {
-    if (!box || box.w <= 0) return null
-    const field = resolveField(config, box.w, fill ? box.h : undefined, breakpoint)
-    const { cols, rows } = field
-    const innerW = Math.max(0, box.w - pad * 2 - rulerPad)
-    const trackW = (innerW - gap * (cols - 1)) / cols
-
-    let cellW: number
-    let cellH: number
-    if (fill) {
-      const innerH = Math.max(0, box.h - pad * 2 - rulerPad)
-      const trackH = (innerH - gap * (rows - 1)) / rows
-      if (fit === "square") {
-        const side = Math.max(0, Math.min(trackW, trackH))
-        cellW = side
-        cellH = side
-      } else {
-        cellW = Math.max(0, trackW)
-        cellH = Math.max(0, trackH)
-      }
-    } else {
-      // Not filling: width decides the cell and the grid is as tall as its rows make it. Always square.
-      cellW = Math.max(0, trackW)
-      cellH = cellW
-    }
-
+    if (!box || box.w <= 0 || box.h <= 0) return null
+    const field = resolveField(config, box.w, box.h)
+    const { cell, gap, cols, rows } = field
     return {
       ...field,
-      cellW,
-      cellH,
-      gap,
-      pad,
-      gridW: cellW * cols + gap * (cols - 1),
-      gridH: cellH * rows + gap * (rows - 1),
+      gridW: cell * cols + gap * (cols - 1),
+      gridH: cell * rows + gap * (rows - 1),
       boxW: box.w,
       boxH: box.h,
-      fit,
+      scale,
     }
-  }, [box, config, fit, fill, gap, rulerPad, pad, breakpoint])
+  }, [box, config, scale])
 
   React.useEffect(() => {
     if (metrics) onMetrics?.(metrics)
   }, [metrics, onMetrics])
 
   const showOverlay = overlay || rulers
+  // The box's padding is the gutter (D15) — before the field is measured it is the breakpoint's gap by width alone,
+  // which is what it will be once measured too. Whatever the count leaves over is centred by the flex box (D14).
+  const gap = metrics?.gap ?? specFor(config, breakpointFor(box?.w ?? 0)).gap
 
   return (
     <div
-      ref={ref}
+      ref={setRef}
       data-slot="grid"
-      data-fit={fit}
       data-breakpoint={metrics?.bp}
-      className={cn("relative flex items-center justify-center", fill ? "h-dvh w-full" : "w-full", className)}
-      style={{ padding: `${pad + rulerPad}px ${pad}px ${pad}px ${pad + rulerPad}px`, ...style }}
+      // The grid is always its box: the frame's viewport inside a GridFrame, the screen otherwise. A className may
+      // give it another height when there is chrome above (`h-[calc(100dvh-3.5rem)]`), never a width.
+      className={cn("relative flex items-center justify-center", frame ? "h-full w-full" : "h-dvh w-full", className)}
+      style={{ padding: `${gap}px`, ...style }}
       {...props}
     >
       {metrics ? (
@@ -245,25 +268,183 @@ function Grid({
           <div
             data-slot="grid-box"
             className="relative"
-            style={{ width: metrics.gridW, height: fill ? metrics.gridH : undefined }}
+            style={{ width: metrics.gridW, height: metrics.gridH }}
           >
             {showOverlay ? <GridOverlay rulers={rulers} /> : null}
             <div
               data-slot="grid-tracks"
               className="relative grid"
               style={{
-                gridTemplateColumns: `repeat(${metrics.cols}, ${metrics.cellW}px)`,
-                gridTemplateRows: `repeat(${metrics.rows}, ${metrics.cellH}px)`,
+                gridTemplateColumns: `repeat(${metrics.cols}, ${metrics.cell}px)`,
+                gridTemplateRows: `repeat(${metrics.rows}, ${metrics.cell}px)`,
                 gap: metrics.gap,
-                // The page flip (grid-pages.tsx) rotates items in 3D; the vanishing point belongs to their parent.
-                perspective: 1600,
               }}
             >
               {children}
             </div>
           </div>
+          {/* The theme's flip (D28) — the outermost grid on the page takes the switch; a framed grid leaves it alone. */}
+          {frame ? null : <GridThemeFlip />}
         </GridContext.Provider>
       ) : null}
+    </div>
+  )
+}
+
+/**
+ * The sheet's fall, in seconds — the one beat, down over the field. Mine; `FLIP_TEMPO` stretches it (1 is the
+ * designed pace; raise it to watch slowly). The wave on the sheet's leading and trailing edge: its full height in px,
+ * how many crests it may have — "we should just have 2 to 5 different sized crests", 2026-09-22 — and how it moves:
+ * it drifts one full width sideways in `1 / WAVE_DRIFT` beats and breathes in height every `WAVE_BREATH` seconds.
+ */
+const FLIP_TEMPO = 1
+const FALL_MS = 0.9 * FLIP_TEMPO
+/** The dissolve, once the box is covered: the sheet fades and the new page comes through it. */
+const DISSOLVE_MS = 0.35 * FLIP_TEMPO
+const WAVE_H = 72
+const WAVE_CRESTS: [number, number] = [2, 5]
+const WAVE_DRIFT = 0.5
+const WAVE_BREATH = 0.8
+
+/** One crest of the wave: its share of the width and its height, 0..1 of WAVE_H. */
+type Crest = { width: number; height: number }
+
+/** Draw the crests for one toggle: between two and five, each its own width and height, so no two falls are alike. */
+function drawCrests(): Crest[] {
+  const [min, max] = WAVE_CRESTS
+  const n = min + Math.floor(Math.random() * (max - min + 1))
+  const weights = Array.from({ length: n }, () => 0.6 + Math.random())
+  const total = weights.reduce((a, b) => a + b, 0)
+  return weights.map((w) => ({ width: w / total, height: 0.45 + Math.random() * 0.55 }))
+}
+
+/**
+ * The wave's line across one width of the sheet, in a 1000 × 100 box, rising and falling once per crest from the
+ * midline; starting and ending on the midline, so a copy set after it continues it seamlessly.
+ */
+function wavePath(crests: Crest[]) {
+  let d = "M0 50"
+  for (const c of crests) {
+    const w = 1000 * c.width
+    const a = 50 * c.height
+    d += ` q ${w / 4} ${-a} ${w / 2} 0 q ${w / 4} ${a} ${w / 2} 0`
+  }
+  return d
+}
+
+/**
+ * The theme change as a SHEET OF PAINT falling down the field (Grid-v2.md D28). It began on 2026-09-21 as cells
+ * flipping row by row, became a wave of columns with gutters filling to the average of their neighbours, then cells
+ * filling from the top — and on 2026-09-22, having watched that slowed down: "I didn't like this too. I'm thinking we
+ * should just make it like a paint sheet falling down."
+ *
+ * So: one sheet, the size of the grid's box, in the NEW theme's colours — the layer wears that theme's class, and
+ * globals.css puts the light tokens on `.light` as well as `:root` for exactly this. The sheet is PLAIN paint: it
+ * carried the new theme's empty field for a day, the cells drawn on it, and he took that off ("looks like the sheet
+ * has grids on it. It should not", 2026-09-22) — the grid is what the paint reveals, not what it carries. Its
+ * bottom edge is a WAVE, sharp — "instead of blurred edge, make it sharp; instead of straight bottom, let's make it
+ * like a wave", 2026-09-22 — two to five crests of different sizes, drawn afresh at every toggle, moving as it falls
+ * ("dynamic waves"); its top edge is the same wave turned over, for the moment it shows. ONE beat: the sheet falls from
+ * above the box until it covers it, gathering speed the way a thing falls; the theme is committed under the cover and
+ * the sheet DISSOLVES — it is the new page's own background, so its fade is the content coming through. It kept
+ * falling off the bottom for a second beat at first, and the wait read as broken; then it was removed on the spot,
+ * and he asked for the dissolve (2026-09-22). One element moves, on a transform and then opacity, so nothing lays
+ * out and nothing repaints.
+ * GSAP drives it (packages/ui/CLAUDE.md rule 7). Reduced motion switches at once; a toggle during a fall is ignored.
+ * The names here — flip, flipper — keep the word he first used for the whole motion.
+ */
+function GridThemeFlip() {
+  const m = useGridMetrics()
+  const registry = useThemeFlipRegistry()
+  const [flip, setFlip] = React.useState<{ to: "light" | "dark"; commit: () => void; crests: Crest[] } | null>(null)
+  const sheet = React.useRef<HTMLDivElement>(null)
+  const busy = React.useRef(false)
+  const metricsRef = React.useRef(m)
+  metricsRef.current = m
+
+  React.useEffect(() => {
+    if (!registry) return
+    const flipper: ThemeFlipper = (to, commit) => {
+      if (busy.current) return
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        commit()
+        return
+      }
+      busy.current = true
+      setFlip({ to, commit, crests: drawCrests() })
+    }
+    return registry.register(flipper)
+  }, [registry])
+
+  // The timeline is built once per toggle from a ref of the metrics, never restarted by a re-render.
+  React.useEffect(() => {
+    const el = sheet.current
+    const m = metricsRef.current
+    if (!flip || !el || !m) return
+    let committed = false
+    // The wave moves on its own clock for as long as the sheet is on screen: it drifts one width of the box sideways
+    // and loops — the edges are drawn a width wider on each side so the loop never shows — and breathes in height.
+    const movers = Array.from(el.querySelectorAll<SVGElement>("[data-wave]")).flatMap((wave) => [
+      gsap.fromTo(wave, { x: 0 }, { x: -m.boxW, duration: FALL_MS / WAVE_DRIFT, ease: "none", repeat: -1 }),
+      gsap.to(wave, {
+        scaleY: 0.6,
+        duration: WAVE_BREATH * FLIP_TEMPO,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+        transformOrigin: wave.dataset.wave === "top" ? "50% 100%" : "50% 0%",
+      }),
+    ])
+    const tl = gsap.timeline({
+      onComplete: () => {
+        busy.current = false
+        setFlip(null)
+      },
+    })
+    // One fall, then a dissolve: the moment the sheet covers the box the theme is committed under it, and the sheet
+    // fades away — "instead of immediately removing, dissolve it", 2026-09-22 — so the new page comes through the
+    // paint. It used to keep falling off the bottom for a second beat: "it feels like something is broken as the user
+    // is waiting". The sheet is the new page's own background, so the dissolve is the content fading in.
+    tl.set(el, { y: -m.boxH - WAVE_H, opacity: 1 })
+      .to(el, { y: 0, duration: FALL_MS, ease: "power2.in" })
+      .call(() => {
+        if (committed) return
+        committed = true
+        flip.commit()
+      })
+      .to(el, { opacity: 0, duration: DISSOLVE_MS, ease: "power1.out" })
+    return () => {
+      tl.kill()
+      movers.forEach((tween) => tween.kill())
+    }
+  }, [flip])
+
+  if (!flip || !m) return null
+
+  // The wave is drawn three widths of the box wide, one copy each side of the one on show, so it can drift a whole
+  // width and loop without its end ever showing.
+  const path = wavePath(flip.crests)
+  const edge = (side: "top" | "bottom") => (
+    <svg
+      data-wave={side}
+      className={cn("fill-background absolute block will-change-transform", side === "bottom" ? "top-full" : "bottom-full")}
+      style={{ left: -m.boxW, width: m.boxW * 3, height: WAVE_H }}
+      viewBox="0 0 3000 100"
+      preserveAspectRatio="none"
+    >
+      {[0, 1000, 2000].map((dx) => (
+        <path key={dx} transform={`translate(${dx} 0)`} d={`${path} L1000 ${side === "bottom" ? 0 : 100} L0 ${side === "bottom" ? 0 : 100} Z`} />
+      ))}
+    </svg>
+  )
+
+  return (
+    <div data-slot="grid-theme-flip" aria-hidden className={cn("pointer-events-none absolute inset-0 z-20 overflow-hidden", flip.to)}>
+      <div ref={sheet} className="bg-background absolute inset-0 will-change-transform" style={{ transform: `translateY(${-m.boxH - WAVE_H}px)` }}>
+        {/* The wave: the sheet's bottom edge leading the fall, and the same wave turned over as its top edge trailing it. */}
+        {edge("bottom")}
+        {edge("top")}
+      </div>
     </div>
   )
 }
@@ -279,8 +460,8 @@ function GridOverlay({ rulers = false, className }: { rulers?: boolean; classNam
       <div
         className="grid h-full w-full"
         style={{
-          gridTemplateColumns: `repeat(${m.cols}, ${m.cellW}px)`,
-          gridTemplateRows: `repeat(${m.rows}, ${m.cellH}px)`,
+          gridTemplateColumns: `repeat(${m.cols}, ${m.cell}px)`,
+          gridTemplateRows: `repeat(${m.rows}, ${m.cell}px)`,
           gap: m.gap,
         }}
       >
@@ -289,28 +470,27 @@ function GridOverlay({ rulers = false, className }: { rulers?: boolean; classNam
         ))}
       </div>
       {rulers ? (
-        <>
-          <div
-            className="text-muted-foreground absolute inset-x-0 -top-5 grid font-mono text-[10px]"
-            style={{ gridTemplateColumns: `repeat(${m.cols}, ${m.cellW}px)`, gap: m.gap }}
-          >
-            {Array.from({ length: m.cols }, (_, i) => (
-              <span key={i} className="text-center">
-                {i + 1}
-              </span>
-            ))}
-          </div>
-          <div
-            className="text-muted-foreground absolute inset-y-0 -left-5 grid font-mono text-[10px]"
-            style={{ gridTemplateRows: `repeat(${m.rows}, ${m.cellH}px)`, gap: m.gap }}
-          >
-            {Array.from({ length: m.rows }, (_, i) => (
-              <span key={i} className="flex items-center justify-end">
-                {i + 1}
-              </span>
-            ))}
-          </div>
-        </>
+        // Over the cells (D24): column numbers down the centre of the top row, row numbers down the centre of the left
+        // column. The top-left cell is 1 both ways and shows it once.
+        <div
+          className="text-muted-foreground/70 absolute inset-0 grid font-mono text-[10px]"
+          style={{
+            gridTemplateColumns: `repeat(${m.cols}, ${m.cell}px)`,
+            gridTemplateRows: `repeat(${m.rows}, ${m.cell}px)`,
+            gap: m.gap,
+          }}
+        >
+          {Array.from({ length: m.cols }, (_, i) => (
+            <span key={`c${i}`} className="flex items-center justify-center" style={{ gridColumn: i + 1, gridRow: 1 }}>
+              {i + 1}
+            </span>
+          ))}
+          {Array.from({ length: m.rows - 1 }, (_, i) => (
+            <span key={`r${i}`} className="flex items-center justify-center" style={{ gridColumn: 1, gridRow: i + 2 }}>
+              {i + 2}
+            </span>
+          ))}
+        </div>
       ) : null}
     </div>
   )
@@ -326,8 +506,8 @@ export type GridItemProps = React.ComponentProps<"div"> & {
 /**
  * One item, placed by coordinate. Coordinates are 1-based, like CSS grid lines.
  *
- * Column counts change with the breakpoint, so a coordinate that is valid at lg may not exist at base. Values can be
- * responsive; whatever is left over is CLAMPED into the grid rather than allowed to overflow it.
+ * Counts change with the box, so a coordinate that is valid on one field may not exist on another. Values can be
+ * responsive by breakpoint; whatever is left over is CLAMPED into the grid rather than allowed to overflow it.
  */
 function GridItem({ col, row, colSpan, rowSpan, className, style, ...props }: GridItemProps) {
   const m = useGridMetrics()

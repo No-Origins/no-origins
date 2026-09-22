@@ -3,18 +3,18 @@ import { test, expect } from "@playwright/test";
 /**
  * The review sweep, 2026-09-16.
  *
- * The design system was rebuilt on shadcn/ui and every component of the old one was deleted. The portfolio and the
- * admin still import that old system, so neither serves a page — they are out of the sweep until their pages are
- * rebuilt, and `ROUTES` is empty rather than deleted so that putting them back is one list.
+ * The design system was rebuilt on shadcn/ui and every component of the old one was deleted. The portfolio came back
+ * into the sweep on 2026-09-21, rebuilt on the grid (Portfolio.md); the admin still imports the old system and stays
+ * out until its pages are rebuilt.
  *
  * `probe12` went with the Bento it policed, and `growForTool` with the Tool that owned its own scroll. Both were
  * rules about components that no longer exist; neither is re-added until there is something new to hold them to.
  */
-export const ROUTES: string[] = [];
+export const ROUTES: string[] = ["/"];
 
 /** The showcase is a second app on its own port — its own project, its own domain. */
 export const DESIGN = "http://localhost:3001";
-export const DESIGN_ROUTES = ["/", "/atoms", "/molecules", "/grid"];
+export const DESIGN_ROUTES = ["/", "/atoms", "/molecules", "/composer"];
 
 const slug = (route: string) => (route === "/" ? "home" : route.slice(1).replace(/\//g, "__"));
 

@@ -20,6 +20,117 @@ It is **not**:
 
 ---
 
+## 0.5 Reset — Quests, 2026-09-17
+
+**Bhargav, 2026-09-17: "Remove all the previous and unwanted tables. Let's start fresh. Quest should be a new feature."** Everything below §0.5 was written for the three-layer model (Projects · Systems · Products) and the document/editor/publishing machinery that drove the React-Flow editor. That editor was deleted with React Flow (Atomic.md D11); the schema it needed has outlived it. So the admin's data model is reset, and this section is the live specification — **§1, §4, §6, §7, §8.1, §9 and §13 are superseded for the build and kept only as the record of what was learned.**
+
+### What a quest is
+
+A **quest** is a surface we deploy as its own subdomain — the successor to what §1 called a Layer-1 *Project*, renamed and made the admin's one first-class thing. The portfolio is the first quest. A quest is composed on **the grid** (the base layout, repo-root CLAUDE.md): you pull components onto it, arrange them, and save. Subdomains, deployment and the components you drag are **deferred** — this pass builds the quest itself.
+
+### The fresh schema
+
+Two tables survive the reset because they are the login we just built, and the login is wanted:
+
+- **`profiles`** and **`allowlist`** — identity, the `before_user_created` allowlist gate, and their RLS. Untouched. §8.3 and §8.4 still stand.
+
+Everything else — `projects`, `documents`, `document_versions`, `systems`, `products`, `product_installs`, `assets`, `audit_log` — is **dropped**. It served the document/editor/publishing design that no longer exists.
+
+In their place, one table:
+
+```sql
+quests (
+  id         uuid pk,
+  slug       text unique,            -- the subdomain-to-be, and the route
+  name       text,
+  subdomain  text,                   -- reserved; deployment is deferred
+  hue        text,                   -- a Brand.md hue
+  status     enum(draft, live, archived) default draft,
+  layout     jsonb,                  -- the GridLayout (grid-layout.ts): pages of coordinate-placed items
+  rev        integer default 0,      -- bumped by the DB on a layout change; the editor's conflict check
+  created_at, updated_at
+)
+```
+
+`layout` is a `GridLayout` — the same pure model the grid renders and the editor mutates (`packages/ui/src/lib/grid-layout.ts`), so what the dashboard saves is exactly what a quest would ship. `rev` is maintained by a trigger and carries the optimistic-concurrency check the old `documents.rev` carried; there is no immutable-versions table yet — publishing (old §7/§9) is deferred with everything else. RLS mirrors the surviving pattern: deny-by-default, `owner`/`editor` write, `viewer` read, keyed on `profiles.role`.
+
+### The admin is the grid
+
+The admin home stops being a rail (**this supersedes §4's "rail, not tabs"**) and becomes **the grid itself** — a field of feature cards: **Quests**, and later Design, Products, Settings, with the account/passkey/password controls collapsing into Settings. The admin renders in the same base layout every quest is composed in; the control surface eats its own dog food.
+
+- **Home (`/`)** — the grid of feature cards. The **Quests** card opens the quests dashboard.
+- **`/quests`** — the quests dashboard: the **first grid row is the feature's action bar** (its title, the quest count, a *Create quest* button, and the home for future quest actions/settings); the **quest cards pack beneath it from the second row, 3 × 2 each**. Create names a quest and derives its slug; a quest can be deleted (owner). A quest card opens its compose dashboard.
+- **`/quests/[slug]`** — the compose dashboard: the real `GridEditor` (`@no-origins/ui`) bound to the quest's `layout`, saving back on the `rev` check with a save-state indicator (unsaved · saving · saved · saved-elsewhere). A **stub palette** of placeholder molecules (Heading, Text, Image, Blob, Pattern, Card) — each a name and a default box size. Placing one **adds a labelled box to the grid** (click; it lands at the first free cell of its size), which then moves, resizes, paginates and deletes like any other box through the grid's own gestures. The tiles are placeholders and the interaction is click-to-place; the real component molecules and pointer-drag placement come together, later.
+
+### Scope of this pass
+
+CRUD on quests, the grid-of-cards home, and a working compose dashboard with a stub palette. **Deferred, by Bhargav:** subdomains, deployment, the real component molecules, and pointer-drag placement (which lands with the molecules). The rule of the house holds — every visible element is composed from `@no-origins/ui` (repo-root CLAUDE.md); the palette tiles and the cards are system components, not hand-rolled ones.
+
+---
+
+## 0.6 Publishing a quest — subdomains, 2026-09-18
+
+**Bhargav, 2026-09-18: "once I create a quest, map it to a domain, it should deploy on the portfolio. Basically, I should be able to deploy a quest on a subdomain if I want to."** This section decides how. It is the piece §0.5 deferred, and it stands on §0.5's schema and the grid (Grid.md). §7 and §9 below described publishing for the deleted editor and stay superseded; this is the live design.
+
+### The rule, sharpened
+
+The root CLAUDE.md has said since the start that the live site renders static output and never queries a database. That rule was written when a quest could only be structure. Asked the same day what happens when a quest contains a component that needs live data — a status feed, a form, a counter — the rule became:
+
+> **The page is static. A component may be live.**
+
+Two kinds of data, treated differently:
+
+- **Structure** — which boxes, where, what size, on which page. Authored in the admin; changes only when Bhargav changes it. **Baked at Publish**, served from the edge, never queried at visit.
+- **Live content** — what a box shows when that content has a life of its own. Baking it would be stale the moment the build finished. **A component that needs it declares `live` and fetches for itself once it is on screen.** The page does not know or care.
+
+What that keeps: the site never goes down with Supabase (the page loads; the one live box shows its fallback); first paint is static; a quest with no live components costs exactly what it does today. What it costs, and each is a decision made when the first live component is designed, not now:
+
+1. The portfolio gets the **anon key** — the one designed to be public; the admin's browser already holds it. What the public can read is decided by row-level security, not by hiding the key.
+2. **RLS opens a door per table.** Everything is deny-by-default and signed-in-only today. A live component means a public-read policy on the specific table it reads — or a dedicated table for public data — so `quests` itself is never exposed. §8.3's prohibition on a blanket anon read policy stands.
+3. **Every live component has a fallback state** — skeleton, dash, last-known value. It is part of the component's design, not an afterthought; a live box that shows nothing when the fetch fails is a broken box.
+
+Writes (a form, a guestbook) go the same way, through an insert policy or a small route handler, decided per component.
+
+### What Publish does
+
+A quest is `draft` until published. Publish:
+
+1. **Validates** — the quest has a `subdomain` (see below), and the layout resolves on every breakpoint without out-of-bounds boxes.
+2. **Snapshots** — copies `layout` into `published` (jsonb), records `published_rev = rev` and `published_at`, sets `status = live`. Drafts keep changing afterwards without leaking; the site shows the snapshot until the next Publish.
+3. **Writes the artefact** — `publish/quests/<subdomain>.json` (the snapshot plus `name`, `hue`, `published_at`) and `publish/quests/index.json` (every live quest) into the **`publish` storage bucket**, which already exists with public read and staff write for exactly this (§8.2 — "the published doc JSON at a stable path"). The portfolio reads these over plain HTTPS. **No database key of any kind exists in the portfolio for structure.**
+4. **Pokes the deploy hook** — a Vercel deploy hook URL for the portfolio project, held as an admin server env var (`PORTFOLIO_DEPLOY_HOOK`). The portfolio rebuilds; a minute or two later the quest is live.
+
+**Unpublish** sets `status = draft`, removes the artefact, rewrites the index, pokes the hook. The subdomain then serves the portfolio's not-found page. `archived` is unpublish plus "not listed for republishing."
+
+Schema this adds to `quests` (one migration, with the build): `published jsonb`, `published_rev integer`, `published_at timestamptz`; `subdomain` becomes `unique`, checked against `^[a-z0-9]+(-[a-z0-9]+)*$`, and `not null` is enforced by Publish rather than the column so a draft may exist without one. **Reserved subdomains**, refused by Publish: `admin`, `design`, `www`, `api`, `publish`, and the apex.
+
+### What the portfolio becomes
+
+**§0.5 already says the portfolio is the first quest.** Taken literally: `apps/portfolio` stops being a site with hand-written pages and becomes **the quest host** — one renderer, many subdomains — and `bhargav.no-origins.com` is the quest whose subdomain is `bhargav`. The 32 files still importing the deleted 1.0 system are replaced, not rebuilt, and the repo's "what does not build" closes with them.
+
+- **Wildcard domain.** `*.no-origins.com` is added to the portfolio's Vercel project, with a wildcard `CNAME` at the DNS provider. Both are Bhargav's to do in his accounts; the two exact steps are given at build time.
+- **Host → quest.** Middleware reads the `Host` header, takes the first label, and rewrites to `/q/<subdomain>`. Unknown labels fall through to not-found. The apex and `www` render the index of live quests, or redirect to `bhargav` — **open**, his call.
+- **Build-time fetch.** `generateStaticParams` reads `index.json` from the `publish` bucket; each `/q/[subdomain]` page reads its snapshot. Static output. `output: "export"` is not required and not used — the middleware needs a Node runtime — but every quest page is statically generated.
+- **The renderer.** `GridPages` from `@no-origins/ui` with the quest's `published` layout and `renderItem` dispatching on the item's component kind. Today every kind is a stub, so every box renders as the labelled placeholder the composer shows. **That is what a deployed quest looks like on day one, and it is deliberate**: the pipeline does not care what a box renders, it proves the whole path, and the molecules land on something live when they come.
+- **Live components** fetch with the anon key from `NEXT_PUBLIC_SUPABASE_*` on the portfolio; nothing else on the portfolio touches Supabase.
+
+### Order of the build
+
+1. Migration: the three `published*` columns, `subdomain` unique + check.
+2. Admin: the subdomain field on the quest, Publish / Unpublish on the compose dashboard with the validation above, the artefact writer, the hook poke. Save state gains *published · unpublished changes*.
+3. Portfolio: delete the 1.0 pages; middleware; `/q/[subdomain]`; the renderer on `GridPages`; build-time fetch from the bucket; not-found.
+4. Vercel and DNS: the wildcard, the deploy hook — his two steps, then one end-to-end publish of `bhargav`.
+5. Only then: molecules, one at a time, each with its default box size (Grid.md §6) and, if live, its table policy and fallback.
+
+### Open
+
+- Apex and `www` behaviour (index of quests, or redirect to `bhargav`).
+- Draft previews — a tokenised preview URL that renders the *draft* layout without publishing. Wanted eventually; not in this pass.
+- Versions — Publish keeps one snapshot. Keeping history (old §7's immutable versions) is deferred until there is a reason to roll back.
+- Per-quest hue and metadata on the rendered page (title, description, favicon) — decided with the first molecules.
+
+---
+
 ## 1. The three layers
 
 Bhargav's model, 2026-09-11. Sharpened here into definitions, a test, and a dependency rule.

@@ -12,7 +12,11 @@
 @source "../**/*.{ts,tsx}";
 @source "../../../../apps/**/*.{ts,tsx}";
 
-:root {
+/* The light tokens are also on `.light`, so a subtree can wear the light theme inside a dark page — the grid's
+   theme flip (grid.tsx, Grid.md D28) paints its tiles in the theme being switched TO, before the page has switched.
+   next-themes puts `light` or `dark` on <html>, so on a light page the second selector is simply the first. */
+:root,
+.light {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -133,32 +137,51 @@
   }
 }
 
-/* ── the grid's page flip (grid-pages.tsx) ──────────────────────────────────────────────────────────────────
-   Turning a page rotates the boxes edge-on and away, then the next page's boxes in from the other side. The
-   direction comes from --grid-flip-dir (1 forward, -1 back) on the grid; each box adds its own delay inline so
-   the field turns as a wave from the top-left. Reduced motion: a fade, no rotation. */
-[data-slot="grid-item"][data-flip] {
-  backface-visibility: hidden;
-  transform-style: preserve-3d;
-  will-change: transform, opacity;
+/* ── the grid's page turn (grid-pages.tsx, Grid.md D27) ───────────────────────────────────────────────────
+   Turning a page is a progress from 0 to 1 that the wheel, a finger or a click drives; it is written per frame to
+   --grid-turn on the grid (signed: + forward, − back) with its magnitude in --grid-turn-abs. What changes is the
+   box's VISIBLE HEIGHT and nothing else — his rule, 2026-09-21: "only the components container height should change
+   without squeezing the content inside it", and no horizontal scaling. So the box is CLIPPED, never scaled: the
+   content inside keeps its exact size and position and is progressively cut off, which is the only way a container
+   can lose height without re-laying-out or distorting what it holds. (It was scaleY first, which squashed the
+   glyphs, and then a uniform scale, which changed the width — both sent back.)
+
+   --grid-turn-base / --grid-turn-sign give the VISIBLE share: out falls from 1 (base 1, sign −1), in rises from 0
+   (base 0, sign +1). The hidden share is the rest, taken off the edge the box is NOT anchored to, so the motion runs
+   in the direction of travel: forward, a box keeps its top and loses its bottom, and the next page's boxes are
+   revealed from their bottom edge upward. The pager's arrows read the same progress for their fill, so fill and
+   height are one proportion. Reduced motion: no clip — the page still turns, at once. */
+[data-slot="grid"] {
+  --grid-turn: 0;
+  --grid-turn-abs: 0;
+  /* The pager's arrow reads these, not --grid-turn: the front and back edge of its fill. The front advances with the
+     hand; once the page has turned the back advances instead, so the fill leaves the way it came. */
+  --grid-turn-fill-front: 0;
+  --grid-turn-fill-back: 0;
+  --grid-turn-base: 1;
+  --grid-turn-sign: -1;
+  --grid-turn-hide-top: 0;
+  --grid-turn-hide-bottom: 1;
 }
-[data-slot="grid-item"][data-flip="out"] {
-  animation: grid-flip-out 260ms cubic-bezier(0.4, 0, 1, 1) both;
-}
-[data-slot="grid-item"][data-flip="in"] {
-  animation: grid-flip-in 260ms cubic-bezier(0, 0, 0.2, 1) both;
-}
-@keyframes grid-flip-out {
-  from { transform: rotateY(0deg); }
-  to   { transform: rotateY(calc(var(--grid-flip-dir, 1) * -90deg)); }
-}
-@keyframes grid-flip-in {
-  from { transform: rotateY(calc(var(--grid-flip-dir, 1) * 90deg)); }
-  to   { transform: rotateY(0deg); }
+[data-slot="grid-item"][data-turn] {
+  /* The share of the box that is gone: 1 − visible. */
+  --grid-turn-gone: calc(1 - (var(--grid-turn-base) + var(--grid-turn-sign) * var(--grid-turn-abs)));
+  /* A clip removes everything the box paints, and a card's hairline (`ring-1`) and shadow are box-shadows painted
+     OUTSIDE its border box — so a clip flush with the box took them off every side (his report, 2026-09-21). The
+     three sides that are not moving therefore bleed 8px past the box, room for a 1px ring and a 3px blur inside the
+     12px gutter, and keep both. The moving edge starts the same 8px outside and sweeps in to 100%, so the shadow on
+     that side fades with the cut rather than vanishing on the first frame; at the cut itself there is no ring, and
+     cannot be — see Grid.md D27. Per edge: hide × gone × (100% + bleed) − bleed, which is −bleed when the edge is
+     fixed or the turn has not begun, and exactly 100% when the box is gone. */
+  --grid-turn-bleed: 8px;
+  clip-path: inset(
+    calc(var(--grid-turn-hide-top) * var(--grid-turn-gone) * (100% + var(--grid-turn-bleed)) - var(--grid-turn-bleed))
+    calc(-1 * var(--grid-turn-bleed))
+    calc(var(--grid-turn-hide-bottom) * var(--grid-turn-gone) * (100% + var(--grid-turn-bleed)) - var(--grid-turn-bleed))
+    calc(-1 * var(--grid-turn-bleed))
+  );
+  will-change: clip-path;
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-slot="grid-item"][data-flip="out"] { animation-name: grid-fade-out; }
-  [data-slot="grid-item"][data-flip="in"]  { animation-name: grid-fade-in; }
+  [data-slot="grid-item"][data-turn] { clip-path: none; }
 }
-@keyframes grid-fade-out { from { opacity: 1; } to { opacity: 0; } }
-@keyframes grid-fade-in  { from { opacity: 0; } to { opacity: 1; } }

@@ -40,9 +40,14 @@ export default defineConfig({
       use: { ...devices["Pixel 7"], colorScheme: "dark" },
     },
   ],
-  // Only the showcase is booted. The portfolio serves no page until its routes are rebuilt on the new design
-  // system, and a webServer that never answers fails the whole sweep rather than the one app it belongs to.
+  // Both apps are booted (the admin is not: every route of it is behind auth and needs a running Supabase).
   webServer: [
+    {
+      command: "pnpm --filter portfolio dev",
+      url: "http://localhost:3000",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
     {
       command: "pnpm --filter design dev",
       url: "http://localhost:3001",

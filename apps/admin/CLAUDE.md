@@ -32,11 +32,11 @@ rest of the platform is reviewed — a passing typecheck has never caught a visu
 
 Two things to know when you do:
 
-- The circular **N** at the bottom-left is Next's dev-tools button sitting over the menu's sign-out row. Dev
-  only; it is not a layout bug.
-- The menu is rendered in the root layout, not per route, so it does not remount between screens. `/sign-in` is
-  the one route that renders without it. It is a plain `Menu` — column at 280, sheet on a phone; the rail form
-  went in v1 (Atomic.md D13).
+- The circular **N** at the bottom-left is Next's dev-tools button. Dev only; it is not a layout bug.
+- **There is no menu.** The IA is Admin.md §0.5, not §4: the home (`/`) is a grid of feature cards, `/quests`
+  is the quests dashboard (cards on the grid), `/quests/[slug]` is the compose dashboard (the real `GridEditor`),
+  and account controls live at `/settings`. The old page-mode `Menu`/rail went with the 1.0 system; each route
+  renders itself, and the grid *is* the shell.
 
 ## What is true here and easy to get wrong
 

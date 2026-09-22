@@ -1,19 +1,30 @@
-# Supabase — Admin.md §13 step 3
+# Supabase — the admin's database
 
-One project, `no-origins`: Postgres + Auth + Storage. No edge functions in v1 —
-the admin's Next route handlers do the work with the service role key held
-server-side only.
+One project, `no-origins`: Postgres + Auth + Storage.
+
+> **Reset to the Quests model — 2026-09-17 (Admin.md §0.5).** The three-layer
+> schema (projects · documents · document_versions · systems · products ·
+> product_installs · assets · audit_log) was built for the document editor that
+> was deleted with React Flow. It is dropped in `…_quests.sql`, which keeps
+> identity — `profiles`, `allowlist`, the allowlist gate and their RLS — and adds
+> one table, `quests`. The rows below marked *(pre-reset)* describe tables that no
+> longer exist; they are kept as the record of what was verified when they did.
+>
+> The reset migration was applied to the **local** stack with `supabase migration
+> up` (which preserves the local allowlist row); the **hosted** project still
+> carries the old tables until a deliberate `db push`, which is Bhargav's to make.
 
 ## What is here
 
 | File | What it is |
 |---|---|
 | `config.toml` | Local stack config. Auth is set for the admin on **:3002** (portfolio is :3000, the design showcase :3001). |
-| `migrations/…_schema.sql` | The tables of §8.1 |
-| `migrations/…_rls.sql` | Deny-by-default RLS, the `noo_is()` policy shape, and the append-only guard |
-| `migrations/…_allowlist_gate.sql` | Magic-link membership (§8.4) |
+| `migrations/…_schema.sql` | The tables of §8.1 *(pre-reset; most dropped by `…_quests.sql`)* |
+| `migrations/…_rls.sql` | Deny-by-default RLS, the `noo_is()` policy shape, the append-only guard *(pre-reset)* |
+| `migrations/…_allowlist_gate.sql` | Magic-link membership (§8.4) — **kept** |
 | `migrations/…_storage.sql` | The two buckets of §8.2 and their policies |
-| `seed.sql` | The four systems and the `portfolio` project. **No email addresses** — see below. |
+| `migrations/…_quests.sql` | **The reset (§0.5):** drops the document/editor/products era, keeps identity, adds `quests` (+ its `rev` trigger and RLS) |
+| `seed.sql` | The `portfolio` **quest**. **No email addresses** — see below. |
 
 ## Running it locally
 
@@ -46,7 +57,18 @@ magic link to attach to.
 
 ## What was verified, and how
 
-Run against a local stack, not read and hoped for:
+**Quests (2026-09-17), against the local stack after the reset migration:**
+
+- only `allowlist`, `profiles`, `quests` remain in `public`; the document/editor/products
+  tables are gone, and the shared functions (`noo_is`, `noo_current_role`, the
+  allowlist gate, `touch_updated_at`) survived;
+- `quests` has all four policies (read/insert/update/delete) and the `rev` trigger;
+- placing two molecules on the compose dashboard and pressing Save wrote the layout,
+  the trigger bumped `rev` 0 → 1, and the save indicator read *Saved*;
+- a save on a stale `rev` moves 0 rows and the dashboard shows the conflict rather
+  than clobbering (the `where slug and rev` update).
+
+**Pre-reset — verified when the three-layer schema existed, kept as the record:**
 
 - an unlisted address is **rejected** at `auth.users` insert;
 - a listed one is accepted and gets a `profiles` row **carrying the invited role**;
@@ -75,5 +97,8 @@ Run against a local stack, not read and hoped for:
 
 ## Next
 
-Step 4: `apps/admin` — page-mode rail, the three layer sections, auth, empty
-screens, deployed to `admin.no-origins.com` before there is anything in it.
+The admin's **Quests** feature is built on this schema (Admin.md §0.5): the
+grid-of-cards home, `/quests` (create · delete), and `/quests/[slug]` (compose on
+the grid, save to `quests.layout`). Still ahead, and deliberately deferred:
+subdomains and deployment per quest, the real component molecules (the palette is a
+stub), and pushing the reset to the hosted project.
