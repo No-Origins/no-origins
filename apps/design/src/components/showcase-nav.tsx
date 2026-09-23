@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useThemeToggle } from "@no-origins/ui/components/theme-provider";
-import { MoonIcon, PenToolIcon, SunIcon } from "lucide-react";
+import { MoonIcon, SunIcon } from "lucide-react";
 import { Button } from "@no-origins/ui/components/button";
 import { Text } from "@no-origins/ui/components/text";
 import { cn } from "@no-origins/ui/lib/utils";
@@ -12,15 +12,9 @@ const ROUTES = [
   { href: "/", label: "Overview" },
   { href: "/atoms", label: "Atoms" },
   { href: "/molecules", label: "Molecules" },
-  { href: "/composer", label: "Composer" },
 ];
 
-/**
- * The one piece of chrome. Sticky, so the layer you are reading is always named.
- *
- * Every page has a Compose button (Grid.md D17): it opens the composer on this page's layout. Always shown — the
- * showcase has no auth and no database, and the composer changes nothing until its export is pasted into code.
- */
+/** The one piece of chrome. Sticky, so the layer you are reading is always named. */
 export function ShowcaseNav() {
   const pathname = usePathname();
   // Through the grid's flip when a grid is on the page (Grid.md D28), like the `d` key.
@@ -47,13 +41,6 @@ export function ShowcaseNav() {
             </Button>
           ))}
         </nav>
-        {pathname !== "/composer" ? (
-          <Button asChild variant="outline" size="sm" className="shrink-0">
-            <Link href={`/composer?from=${encodeURIComponent(pathname)}`}>
-              <PenToolIcon data-icon="inline-start" /> Compose
-            </Link>
-          </Button>
-        ) : null}
         <Button
           variant="ghost"
           size="icon-sm"

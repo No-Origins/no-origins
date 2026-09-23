@@ -207,7 +207,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@no-origins/ui/components/select";
-import { Separator } from "@no-origins/ui/components/separator";
 import {
   Sheet,
   SheetClose,
@@ -277,7 +276,6 @@ const CARD = (rows: number): Responsive<Span> => ({
 /**
  * Every specimen, in reading order, with its size in cells — the one design decision each one carries now that the
  * page is a field (Grid.md D1) rather than a column. A box that clips its content is too small; make it bigger here.
- * When the composer has been over this page (Grid.md D20), its exported `layout` goes on the content too and wins.
  */
 export const MOLECULES: PageContent = {
   title: "Molecules",
@@ -288,7 +286,6 @@ export const MOLECULES: PageContent = {
       items: [
       {
         id: "header",
-        palette: false,
         span: band(1),
         variant: "none",
         render: (placed) => <SectionHeader index="02" label="Molecules · 42 components" title="Atoms with a job to do" cols={placed.colSpan} />,
@@ -1235,7 +1232,6 @@ export const MOLECULES: PageContent = {
       },
       {
         id: "not-shown",
-        palette: false,
         span: band(1, 2),
         variant: "transparent",
         render: () => (

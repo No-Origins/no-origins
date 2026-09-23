@@ -23,20 +23,13 @@ const LAYERS = [
     count: 42,
     note: "Two or more atoms with a job between them.",
   },
-  {
-    href: "/composer",
-    title: "Composer",
-    count: 2,
-    note: "Where a page is designed — square cells, a cell per breakpoint, boxes placed on the field.",
-  },
 ] as const;
 
 /**
- * A layer card: four columns on `lg` and `xl`, so the three stand side by side and fill the page's 12-column band; on
- * a tablet two to a row, and one to a row on a phone. 276px square on a pointer field — the same physical card the
- * portfolio's roles are (Portfolio.md P10).
+ * A layer card: six columns on `lg` and `xl`, so the two stand side by side and fill the page's 12-column band; on a
+ * tablet two to a row as well, and one to a row on a phone.
  */
-const LAYER: Record<string, Span> = { base: { cols: 4, rows: 3 }, sm: { cols: 6, rows: 3 }, md: { cols: 4, rows: 4 }, lg: { cols: 4, rows: 4 }, xl: { cols: 4, rows: 4 } };
+const LAYER: Record<string, Span> = { base: { cols: 4, rows: 3 }, sm: { cols: 6, rows: 3 }, md: { cols: 4, rows: 4 }, lg: { cols: 6, rows: 4 }, xl: { cols: 6, rows: 4 } };
 
 /** A short piece of text; `code` inside it keeps the mono role (Type.md). */
 const Code = ({ children }: { children: string }) => (
@@ -47,14 +40,14 @@ const Code = ({ children }: { children: string }) => (
 
 /**
  * The overview, on the grid (2026-09-21) and arranged the portfolio's way (2026-09-22): one section, one screen where
- * it fits, on a 12-column band. The text sits in transparent boxes as `Text` roles, as wide as the band; the three
+ * it fits, on a 12-column band. The text sits in transparent boxes as `Text` roles, as wide as the band; the two
  * layer cards go on the field unwrapped — a Card is already a box. It reads top to bottom: intro, the cards in a row,
  * the notes.
  */
 export const OVERVIEW: PageContent = {
   title: "Overview",
   variant: "transparent",
-  // Three cards divide 12 columns and not 16: the page keeps a 12-column measure on xl, centred like any other block.
+  // Two six-column cards divide 12 and not 16: the page keeps a 12-column measure on xl, centred like any other block.
   band: { xl: 12 },
   sections: [
     {
@@ -62,7 +55,6 @@ export const OVERVIEW: PageContent = {
       items: [
         {
           id: "intro",
-          palette: false,
           span: band(3, 4),
           variant: "transparent",
           render: () => (
@@ -83,7 +75,6 @@ export const OVERVIEW: PageContent = {
         },
         ...LAYERS.map<SpecimenItem>((layer) => ({
           id: layer.href,
-          palette: false,
           span: LAYER,
           // A Card is already a box; wrapping it would clip its ring at the cell edge (Grid.md D21).
           variant: "none",
@@ -110,14 +101,12 @@ export const OVERVIEW: PageContent = {
         })),
         {
           id: "notes",
-          palette: false,
           span: band(2, 3),
           variant: "transparent",
           render: () => (
             <div className="flex h-full min-h-0 max-w-3xl flex-col justify-start gap-1.5">
               <Text role="body" tone="muted">
-                The grid is the base layout: everything an app lays out snaps onto it, this page included. Press{" "}
-                <span className="text-foreground font-semibold">Compose</span> on any page to arrange it in the composer.
+                The grid is the base layout: everything an app lays out snaps onto it, this page included.
               </Text>
               <Text role="body" tone="muted">
                 Organisms and templates are not here yet. The old ones went with the old system; the new ones get designed on top

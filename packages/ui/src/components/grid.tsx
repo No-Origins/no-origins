@@ -15,7 +15,7 @@ import { useThemeFlipRegistry, type ThemeFlipper } from "@no-origins/ui/componen
  * own padding is one gutter, so the edge of the screen is one more grid line (D15). When a layout holds more than the
  * field can, the surplus goes to another PAGE (grid-pages.tsx) — never off the edge.
  *
- * The grid is always its box: the viewport, or the frame inside `/grid` (D11). There is no `fill`, because nothing
+ * The grid is always its box: the viewport (D11). There is no `fill`, because nothing
  * ever holds a grid as a block in a page — "everything will always be on the grid once we are out of the grid
  * editor" — and no `pad`, because the pad IS the gutter.
  */
@@ -36,6 +36,19 @@ export const GRID_BREAKPOINTS: Record<GridBreakpoint, number> = {
 export const BREAKPOINT_ORDER: GridBreakpoint[] = ["base", "sm", "md", "lg", "xl"]
 
 /**
+ * Each breakpoint's reference box — Grid-v1.md §4's `Reference box` column, verbatim. A breakpoint is a RANGE, so
+ * these are starting points, not the only sizes a page meets: since v2 every width in between is a different field
+ * (D12). A page that has to lay itself out before the grid has measured its box assumes one of these.
+ */
+export const GRID_REFERENCE_BOX: Record<GridBreakpoint, { width: number; height: number }> = {
+  base: { width: 390, height: 844 },
+  sm: { width: 640, height: 960 },
+  md: { width: 768, height: 1024 },
+  lg: { width: 1024, height: 768 },
+  xl: { width: 1440, height: 900 },
+}
+
+/**
  * The spacing scale the gutter draws from (Grid.md §3). A breakpoint's gap is one of these, never a free number; a
  * box's own inset draws from the same five so the space between boxes and the space inside them read as one family.
  * 4px steps because that is the base of the Tailwind spacing the apps lay out with; 0 is on it on purpose — cells
@@ -43,7 +56,6 @@ export const BREAKPOINT_ORDER: GridBreakpoint[] = ["base", "sm", "md", "lg", "xl
  * is a size, not a spacing, and its own decision (D13).
  */
 export const GRID_SPACING = [0, 4, 8, 12, 16] as const
-export type GridSpacing = (typeof GRID_SPACING)[number]
 
 /**
  * The pager bar's width in cells when a breakpoint does not name one (Grid.md D27, D29): four cells then ↑ ↓. It
@@ -61,17 +73,6 @@ export const PAGER_CELLS = 6
 export type GridSpec = { cell: number; gap: number; pager?: number }
 export type GridConfig = Partial<Record<GridBreakpoint, GridSpec>>
 
-/** The cell stepper's range on `/grid`: below 16 a cell holds nothing; 200 is a cap against a runaway click. */
-export const MIN_CELL = 16
-export const MAX_CELL = 200
-
-/**
- * The pager stepper's range in the composer, and its step — even, because the bar is (D29). Two is the arrows alone;
- * 16 is a cap against a runaway click, not a decision. A number this wide only exists on a field wide enough for it.
- */
-export const MIN_PAGER = 2
-export const MAX_PAGER = 16
-export const PAGER_STEP = 2
 
 /**
  * The brick — DECIDED, Grid.md D13, 2026-09-21. One gutter everywhere so the field has one texture and one edge
@@ -116,11 +117,6 @@ export type GridMetrics = GridField & {
   /** The box the grid was given. */
   boxW: number
   boxH: number
-  /**
-   * How much a GridFrame around the grid has shrunk it to fit on screen: 1 outside a frame or in one that fits.
-   * Layout px times `scale` is screen px. Pointer maths has to divide by it (Grid.md D11).
-   */
-  scale: number
 }
 
 export function breakpointFor(size: number): GridBreakpoint {
@@ -165,8 +161,7 @@ export function countFor(span: number, cell: number, gap: number) {
 /**
  * The field a box of this size gets (D12). Width picks the breakpoint, the breakpoint supplies the cell and gap
  * (D13), and both axes are then simply how many cells fit. A phone on its side gets more columns than rows with no
- * rule for it — v1's transposition fell out. There is no way to name a breakpoint outright: the box decides, and a
- * tool that wants to see another size gives the grid a box of that size — a GridFrame (grid-frame.tsx, D11).
+ * rule for it — v1's transposition fell out. There is no way to name a breakpoint outright: the box decides (D11).
  */
 export function resolveField(config: GridConfig, width: number, height: number): GridField {
   const spec = specFor(config, breakpointFor(width))
@@ -202,18 +197,6 @@ export function useGridMetrics() {
   return React.useContext(GridContext)
 }
 
-/**
- * What a GridFrame tells the grid inside it: that it is framed, and by how much the frame has been scaled down to
- * fit. Defined here rather than in grid-frame.tsx so the grid reads it without importing the frame.
- */
-export type GridFrameState = { scale: number }
-export const GridFrameContext = React.createContext<GridFrameState | null>(null)
-
-/** The frame around the nearest Grid, or null when the grid stands on its own. */
-export function useGridFrame() {
-  return React.useContext(GridFrameContext)
-}
-
 export type GridProps = Omit<React.ComponentProps<"div">, "children"> & {
   children?: React.ReactNode
   config?: GridConfig
@@ -246,8 +229,6 @@ function Grid({
     },
     [refProp],
   )
-  const frame = useGridFrame()
-  const scale = frame?.scale ?? 1
   const [box, setBox] = React.useState<{ w: number; h: number } | null>(null)
 
   React.useLayoutEffect(() => {
@@ -276,9 +257,8 @@ function Grid({
       gridH: cell * rows + gap * (rows - 1),
       boxW: box.w,
       boxH: box.h,
-      scale,
     }
-  }, [box, config, scale])
+  }, [box, config])
 
   React.useEffect(() => {
     if (metrics) onMetrics?.(metrics)
@@ -294,9 +274,9 @@ function Grid({
       ref={setRef}
       data-slot="grid"
       data-breakpoint={metrics?.bp}
-      // The grid is always its box: the frame's viewport inside a GridFrame, the screen otherwise. A className may
-      // give it another height when there is chrome above (`h-[calc(100dvh-3.5rem)]`), never a width.
-      className={cn("relative flex items-center justify-center", frame ? "h-full w-full" : "h-dvh w-full", className)}
+      // The grid is always its box: the screen. A className may give it another height when there is chrome above
+      // (`h-[calc(100dvh-3.5rem)]`), never a width.
+      className={cn("relative flex items-center justify-center h-dvh w-full", className)}
       style={{ padding: `${gap}px`, ...style }}
       {...props}
     >
@@ -320,8 +300,8 @@ function Grid({
               {children}
             </div>
           </div>
-          {/* The theme's flip (D28) — the outermost grid on the page takes the switch; a framed grid leaves it alone. */}
-          {frame ? null : <GridThemeFlip />}
+          {/* The theme's flip (D28) — the outermost grid on the page takes the switch. */}
+          <GridThemeFlip />
         </GridContext.Provider>
       ) : null}
     </div>

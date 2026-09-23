@@ -4,8 +4,8 @@ export const metadata = { title: "Home" };
 
 /**
  * The admin home (Admin.md §0.5) — the grid of feature cards. This supersedes §4's rail: the control surface
- * renders in the same base layout every quest is composed in. Middleware sends anyone unauthenticated to
- * `/sign-in`, so if this renders at all, you are in.
+ * renders on the grid, the base layout. Middleware sends anyone unauthenticated to `/sign-in`, so if this renders
+ * at all, you are in.
  */
 export default function Home() {
   return <HomeGrid />;

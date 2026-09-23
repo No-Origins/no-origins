@@ -2,9 +2,8 @@
 
 import * as React from "react";
 
-import { countFor, DEFAULT_GRID_CONFIG, specFor } from "@no-origins/ui/components/grid";
+import { countFor, DEFAULT_GRID_CONFIG, GRID_REFERENCE_BOX, specFor } from "@no-origins/ui/components/grid";
 import { GridPages } from "@no-origins/ui/components/grid-pages";
-import { GRID_REFERENCE_BOX } from "@no-origins/ui/components/grid-frame";
 import type { GridLayout } from "@no-origins/ui/lib/grid-layout";
 
 import type { PortfolioField, PortfolioPage } from "@/content";

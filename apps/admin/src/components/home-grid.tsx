@@ -2,17 +2,16 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { PackageIcon, PaletteIcon, SettingsIcon, SwordsIcon } from "lucide-react";
+import { PackageIcon, PaletteIcon, SettingsIcon } from "lucide-react";
 
 import { cn } from "@no-origins/ui/lib/utils";
 import { Badge } from "@no-origins/ui/components/badge";
-import { GridEditor } from "@no-origins/ui/components/grid-editor";
+import { GridPages } from "@no-origins/ui/components/grid-pages";
 import type { GridLayout, GridLayoutItem } from "@no-origins/ui/lib/grid-layout";
 
 /**
- * The admin home (Admin.md §0.5): the control surface rendered in the base layout every quest is composed in.
- * Each feature is a card on the grid. Read-only — the field is the point, not the editing — and the cards are the
- * design system's `Card` grammar wearing a `Link`.
+ * The admin home (Admin.md §0.5): the control surface, on the grid. Each feature is a card on the field, and the
+ * cards are the design system's `Card` grammar wearing a `Link`.
  */
 
 type Feature = {
@@ -24,12 +23,6 @@ type Feature = {
 };
 
 const FEATURES: Record<string, Feature> = {
-  quests: {
-    title: "Quests",
-    blurb: "The surfaces we deploy. Compose one on the grid.",
-    href: "/quests",
-    icon: SwordsIcon,
-  },
   design: {
     title: "Design System",
     blurb: "Every component and token, live in both themes.",
@@ -52,8 +45,8 @@ const FEATURES: Record<string, Feature> = {
   },
 };
 
-// Authored on a 12 × 6 field at lg as a 2 × 2 of features; every other field derives by packing (grid-layout.ts) —
-// since Grid.md D12 the counts are the box's, so that is most screens.
+// Authored on a 12 × 6 field at lg as three features in a row; every other field derives by packing (grid-layout.ts)
+// — since Grid.md D12 the counts are the box's, so that is most screens.
 const LAYOUT: GridLayout = {
   shapes: { lg: { cols: 12, rows: 6 } },
   authored: {
@@ -61,10 +54,9 @@ const LAYOUT: GridLayout = {
       {
         id: "home",
         items: [
-          { id: "quests", label: "Quests", col: 1, row: 1, colSpan: 6, rowSpan: 3 },
-          { id: "design", label: "Design System", col: 7, row: 1, colSpan: 6, rowSpan: 3 },
-          { id: "products", label: "Products", col: 1, row: 4, colSpan: 6, rowSpan: 3 },
-          { id: "settings", label: "Settings", col: 7, row: 4, colSpan: 6, rowSpan: 3 },
+          { id: "design", label: "Design System", col: 1, row: 1, colSpan: 4, rowSpan: 3 },
+          { id: "products", label: "Products", col: 5, row: 1, colSpan: 4, rowSpan: 3 },
+          { id: "settings", label: "Settings", col: 9, row: 1, colSpan: 4, rowSpan: 3 },
         ],
       },
     ],
@@ -113,19 +105,9 @@ function FeatureCard({ item }: { item: GridLayoutItem }) {
 }
 
 export function HomeGrid() {
-  const [page, setPage] = React.useState(0);
   return (
     <div className="h-dvh">
-      <GridEditor
-        layout={LAYOUT}
-        onLayoutChange={() => {}}
-        page={page}
-        onPageChange={setPage}
-        readOnly
-        overlay
-        className="h-full"
-        renderItem={(item) => <FeatureCard item={item} />}
-      />
+      <GridPages layout={LAYOUT} overlay className="h-full" renderItem={(item) => <FeatureCard item={item} />} />
     </div>
   );
 }

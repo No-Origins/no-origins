@@ -12,7 +12,7 @@ import { pagerCells, type GridLayout, type GridLayoutItem } from "@no-origins/ui
 /**
  * The pager — the navbar (Grid.md D27, 2026-09-21; D29, 2026-09-23). A row of 1×1 cells at the bottom centre of every
  * field, on every page. It is a FIXTURE, not a placeable component: `pagerCells` reserves its cells in the model so
- * nothing is ever packed or dropped there, and `GridPages` and `GridEditor` draw it themselves.
+ * nothing is ever packed there, and `GridPages` draws it itself.
  *
  * Since D29 the bar is a SLOT and its cells are SUB-SLOTS (Slots.md S2, S5): one item spanning the bar's cells whose
  * `children` are a layout on them, so a cell can hold anything a slot holds instead of being permanently empty. Its

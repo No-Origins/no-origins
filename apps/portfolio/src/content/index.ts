@@ -22,7 +22,6 @@ export type PortfolioSection = { id: string; items: PortfolioItem[] };
 /**
  * The portfolio is one page of sections, ARRANGED on the field it is shown on (Portfolio.md P2, `src/lib/arrange.ts`)
  * rather than authored on a reference field and derived: the one rule every screen has — the empty top row — is a
- * rule about the top of THIS field. When the composer has been over a section and its export pasted back (Grid.md
- * D20), an authored `layout` is the thing to add here, and it wins.
+ * rule about the top of THIS field.
  */
 export type PortfolioPage = { title: string; sections: PortfolioSection[] };

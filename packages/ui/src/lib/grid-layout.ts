@@ -1,12 +1,10 @@
-import { BREAKPOINT_ORDER, PAGER_CELLS, pagerWidth, type GridBreakpoint, type GridConfig, type GridField } from "@no-origins/ui/components/grid"
+import { BREAKPOINT_ORDER, GRID_SPACING, PAGER_CELLS, pagerWidth, type GridBreakpoint, type GridField } from "@no-origins/ui/components/grid"
 
 /**
- * The layout model, as pure functions. Nothing here renders; grid-pages.tsx and grid-editor.tsx call it.
+ * The layout model, as pure functions. Nothing here renders; grid-pages.tsx calls it.
  *
- * A LAYOUT is a set of PAGES, authored per breakpoint. The widest authored breakpoint is the truth; a narrower
- * breakpoint with no authored pages of its own is DERIVED from the nearest wider one by packing, page by page. Hand-
- * editing a derived breakpoint writes its pages down and it stops deriving — until they are removed again. That is
- * v1's D6, still in force while authoring is deferred (Grid-v2.md §7).
+ * A LAYOUT is a set of PAGES, authored per breakpoint. A breakpoint with no authored pages of its own is DERIVED from
+ * the nearest authored one — narrower first, else wider (Grid-v2.md D22, mobile-first) — by packing, page by page.
  *
  * Since v2 (D12) the counts are not the breakpoint's but the box's, so two boxes in the same breakpoint can have
  * different fields. Authored pages therefore carry the SHAPE — the cols × rows — they were written on, and when the
@@ -17,7 +15,8 @@ import { BREAKPOINT_ORDER, PAGER_CELLS, pagerWidth, type GridBreakpoint, type Gr
 
 export type SlotFill = "transparent" | "background" | "muted" | "card"
 export type SlotAlign = "start" | "center" | "end" | "stretch"
-export type SlotInset = 0 | 4 | 8 | 12 | 16
+/** A slot's padding: a step of the grid's spacing scale, the gutter's own (Grid.md §3). */
+export type SlotInset = (typeof GRID_SPACING)[number]
 
 /** A slot's tokens (Slots.md S3): fill, padding, and the alignment of the component in it. No margin. */
 export type SlotSpec = { fill?: SlotFill; inset?: SlotInset; alignX?: SlotAlign; alignY?: SlotAlign }
@@ -139,17 +138,6 @@ export function findFreeRect(
   return null
 }
 
-/** How many boxes sit on a cell another box already claims. Zero for any layout that fits. */
-export function countOverlaps(items: readonly GridRect[]) {
-  let n = 0
-  for (let i = 0; i < items.length; i++) {
-    for (let j = i + 1; j < items.length; j++) {
-      if (rectsOverlap(items[i]!, items[j]!)) n++
-    }
-  }
-  return n
-}
-
 /** Top-left first, the way the eye reads the field. */
 export function readingOrder<T extends GridRect>(items: readonly T[]): T[] {
   return [...items].sort((a, b) => a.row - b.row || a.col - b.col)
@@ -206,10 +194,9 @@ function packOnce(queue: readonly GridLayoutItem[], cols: number, rows: number, 
  */
 /**
  * How pages are derived. `pager: false` inside a slot (Slots.md S5): one page, no bar cells reserved. A number is the
- * bar's width in cells (D29) — `resolvePages` passes the field's. `keep: false` forces packing even when a page
- * would fit — for a page that has no arrangement yet (`layoutFromSpans`).
+ * bar's width in cells (D29) — `resolvePages` passes the field's.
  */
-export type DeriveOptions = { pager?: PagerWidth; keep?: boolean }
+export type DeriveOptions = { pager?: PagerWidth }
 
 /** The block a page uses: the bounding box of its boxes. Null for an empty page. */
 export function usedBlock(items: readonly GridRect[]): GridRect | null {
@@ -285,11 +272,10 @@ function packSourcePage(
  */
 export function derivePages(sourcePages: readonly GridPage[], cols: number, rows: number, options: DeriveOptions = {}): GridPage[] {
   const pager = options.pager ?? true
-  const keep = options.keep ?? true
   const out: GridPage[] = []
   for (const page of sourcePages) {
     // A page that fits is kept as authored and centred (D25); only a page that does not fit is packed.
-    const kept = keep ? centredOnField(page.items, cols, rows, pager) : null
+    const kept = centredOnField(page.items, cols, rows, pager)
     if (kept) out.push({ id: page.id, items: kept })
     else out.push(...packSourcePage(page.items, cols, rows, out.length, page.id, pager))
   }
@@ -298,58 +284,7 @@ export function derivePages(sourcePages: readonly GridPage[], cols: number, rows
   return out.length ? out : [{ id: "page-1", items: [] }]
 }
 
-/** What a box wants to be, before it has a place: an id, a size in cells, and what it is. */
-export type GridSpan = Omit<GridLayoutItem, "col" | "row">
-
-/**
- * A layout from a list of sizes, in reading order, packed onto one shape and authored there.
- *
- * For a page whose boxes have sizes but no positions worth deciding by hand — the showcase's specimens, a list of
- * cards — this is the whole authoring step: the packer places them first-fit in the order given, spilling onto more
- * pages as it goes, and every other field derives from the result (v1 D6, still in force). The shape should be a
- * real one — the widest reference box's field, minus whatever chrome sits above the grid — so the source is a field
- * someone could see.
- */
-export function layoutFromSpans(
-  spans: readonly GridSpan[],
-  shape: GridShape,
-  bp: GridBreakpoint = "xl",
-  /** The bar's width on the shape being packed onto (D29). Omit for the default — this takes no config to read it from. */
-  pager: PagerWidth = true,
-): GridLayout {
-  // One source page holding every box in order; derivePages does the placing and the paging. Only the layout's own
-  // fields travel: a caller's richer objects (a render function, say) must not end up in an export.
-  const queue: GridLayoutItem[] = spans.map(({ id, colSpan, rowSpan, label, slot, component, children }, i) => ({
-    id,
-    colSpan,
-    rowSpan,
-    ...(label !== undefined && { label }),
-    ...(slot !== undefined && { slot }),
-    ...(component !== undefined && { component }),
-    ...(children !== undefined && { children }),
-    col: 1,
-    row: i + 1,
-  }))
-  const pages = derivePages([{ id: "page-1", items: queue }], shape.cols, shape.rows, { keep: false, pager })
-  return { shapes: { [bp]: { cols: shape.cols, rows: shape.rows } }, authored: { [bp]: pages } }
-}
-
 // ── resolution ───────────────────────────────────────────────────────────────────────────────────────────────
-
-/** The widest breakpoint with authored pages. Null for an empty layout. */
-export function widestAuthored(layout: GridLayout): GridBreakpoint | null {
-  for (let i = BREAKPOINT_ORDER.length - 1; i >= 0; i--) {
-    const bp = BREAKPOINT_ORDER[i]!
-    if (layout.authored[bp]) return bp
-  }
-  return null
-}
-
-/** The narrowest breakpoint with authored pages — the layout's source of truth since D22 (mobile-first). */
-export function narrowestAuthored(layout: GridLayout): GridBreakpoint | null {
-  for (const bp of BREAKPOINT_ORDER) if (layout.authored[bp]) return bp
-  return null
-}
 
 /**
  * The nearest authored breakpoint to derive from: the closest NARROWER one, else the closest wider (Grid.md D22,
@@ -395,13 +330,13 @@ export function resolvePages(layout: GridLayout, field: GridField, options: Deri
   const sameShape = sourceShape.cols === cols && sourceShape.rows === rows
   if (sameShape) return { pages: clonePages(sourcePages), source, sourceShape, authored: source === bp, mode: "same" }
   const pages = derivePages(sourcePages, cols, rows, { ...options, pager })
-  const centred = (options.keep ?? true) && sourcePages.every((page) => centredOnField(page.items, cols, rows, pager) !== null)
+  const centred = sourcePages.every((page) => centredOnField(page.items, cols, rows, pager) !== null)
   return { pages, source, sourceShape, authored: false, mode: centred ? "centred" : "packed" }
 }
 
 /**
  * A slot's sub-slots on the slot's own cells at a field's breakpoint (Slots.md S2, S5): one page, no pager, the
- * parent's cell and gutter. What `SlotContent` draws and what the composer edits when you enter a slot.
+ * parent's cell and gutter. What `SlotContent` draws.
  */
 export function resolveSubSlots(
   children: GridLayout | undefined,
@@ -414,178 +349,4 @@ export function resolveSubSlots(
     { bp: field.bp, cell: field.cell, gap: field.gap, cols: parent.colSpan, rows: parent.rowSpan, pager: 0 },
     { pager: false },
   ).pages[0]?.items ?? []
-}
-
-// ── editing ──────────────────────────────────────────────────────────────────────────────────────────────────
-
-/**
- * Write pages for a breakpoint, on the shape they were written on. On a derived breakpoint this is what DETACHES
- * it; on an authored one whose pages were written on another shape, it replaces them — a breakpoint holds one set of
- * pages, on one shape, until authoring is redecided (Grid-v2.md §7).
- */
-export function withAuthored(layout: GridLayout, bp: GridBreakpoint, pages: GridPage[], shape: GridShape): GridLayout {
-  return {
-    ...layout,
-    authored: { ...layout.authored, [bp]: pages },
-    shapes: { ...layout.shapes, [bp]: { cols: shape.cols, rows: shape.rows } },
-  }
-}
-
-/** Drop a breakpoint's own pages so it derives again. The last authored breakpoint cannot be dropped. */
-export function withoutAuthored(layout: GridLayout, bp: GridBreakpoint): GridLayout {
-  if (Object.keys(layout.authored).filter((key) => layout.authored[key as GridBreakpoint]).length <= 1) return layout
-  const authored = { ...layout.authored }
-  delete authored[bp]
-  const shapes = { ...layout.shapes }
-  delete shapes[bp]
-  // The bar belongs to the layout, not to a breakpoint's pages (D29), so dropping pages never drops it.
-  return { ...layout, authored, shapes }
-}
-
-/**
- * Move any box that sits on a pager cell out of its way — to the first free cell of its size on the same page, else
- * onto the next page. Run after anything that changes the page count, because adding page 2 is what puts a › on
- * page 1's corner.
- */
-export function evictFromPagerCells(pages: readonly GridPage[], cols: number, rows: number, pager: PagerWidth = true): GridPage[] {
-  const out = clonePages(pages)
-  for (let index = 0; index < out.length; index++) {
-    const page = out[index]!
-    const reserved = pagerCells(index, out.length, cols, rows, pager)
-    if (!reserved.length) continue
-
-    const staying: GridLayoutItem[] = []
-    const displaced: GridLayoutItem[] = []
-    for (const item of page.items) {
-      if (reserved.some((cell) => rectsOverlap(item, cell))) displaced.push(item)
-      else staying.push(item)
-    }
-    if (!displaced.length) continue
-
-    for (const item of displaced) {
-      const rect = findFreeRect(staying, cols, rows, item.colSpan, item.rowSpan, reserved)
-      if (rect) {
-        staying.push({ ...item, ...rect })
-      } else if (index + 1 < out.length) {
-        out[index + 1] = { ...out[index + 1]!, items: [...out[index + 1]!.items, item] }
-      } else {
-        staying.push(item) // last page, nowhere to go: it stays and overlaps, and countOverlaps will say so
-      }
-    }
-    out[index] = { ...page, items: staying }
-  }
-  return out
-}
-
-let pageSeq = 0
-export const newPageId = () => `page-${Date.now().toString(36)}-${(pageSeq++).toString(36)}`
-
-export function addPage(pages: readonly GridPage[], cols: number, rows: number): GridPage[] {
-  return evictFromPagerCells([...pages, { id: newPageId(), items: [] }], cols, rows)
-}
-
-/** Remove a page and everything on it. A layout always keeps at least one page. */
-export function removePage(pages: readonly GridPage[], index: number, cols: number, rows: number): GridPage[] {
-  if (pages.length <= 1) return clonePages(pages)
-  return evictFromPagerCells(
-    pages.filter((_, i) => i !== index),
-    cols,
-    rows,
-  )
-}
-
-/** Move one box to another page, at the first free cell of its size. Null when that page has no room for it. */
-export function moveItemToPage(
-  pages: readonly GridPage[],
-  itemId: string,
-  from: number,
-  to: number,
-  cols: number,
-  rows: number,
-  pager: PagerWidth = true,
-): GridPage[] | null {
-  if (to < 0 || to >= pages.length || from === to) return null
-  const item = pages[from]?.items.find((candidate) => candidate.id === itemId)
-  if (!item) return null
-  const target = pages[to]!
-  const rect = findFreeRect(target.items, cols, rows, item.colSpan, item.rowSpan, pagerCells(to, pages.length, cols, rows, pager))
-  if (!rect) return null
-  return pages.map((page, i) => {
-    if (i === from) return { ...page, items: page.items.filter((candidate) => candidate.id !== itemId) }
-    if (i === to) return { ...page, items: [...page.items, { ...item, ...rect }] }
-    return page
-  })
-}
-
-// ── export ───────────────────────────────────────────────────────────────────────────────────────────────────
-
-/**
- * The layout as code — every authored breakpoint with the shape its pages were written on, because coordinates only
- * mean something on the shape that produced them. This is the first of the export's two copy blocks (Grid.md D20):
- * it is what gets pasted to the agent, which puts it on the page the composer was opened from.
- */
-export function layoutCode(layout: GridLayout) {
-  return `const layout: GridLayout = ${layoutLiteral(layout, "")}`
-}
-
-/** A value as a TS literal, one line: identifier keys unquoted, strings quoted, nested objects inline. */
-function literal(value: unknown): string {
-  if (typeof value === "string") return JSON.stringify(value)
-  if (typeof value === "function") return "undefined"
-  if (typeof value !== "object" || value === null) return String(value)
-  if (Array.isArray(value)) return `[${value.map(literal).join(", ")}]`
-  const entries = Object.entries(value).filter(([, v]) => v !== undefined && typeof v !== "function")
-  if (!entries.length) return "{}"
-  return `{ ${entries.map(([k, v]) => `${/^[A-Za-z_$][\w$]*$/.test(k) ? k : JSON.stringify(k)}: ${literal(v)}`).join(", ")} }`
-}
-
-function layoutLiteral(layout: GridLayout, indent: string): string {
-  const i1 = indent + "  "
-  const i2 = i1 + "  "
-  const i3 = i2 + "  "
-  const i4 = i3 + "  "
-  const lines: string[] = [`{`, `${i1}shapes: {`]
-  for (const bp of BREAKPOINT_ORDER) {
-    if (!layout.authored[bp]) continue
-    const shape = authoredShape(layout, bp)
-    lines.push(`${i2}${bp}: { cols: ${shape.cols}, rows: ${shape.rows} },`)
-  }
-  lines.push(`${i1}},`, `${i1}authored: {`)
-  for (const bp of BREAKPOINT_ORDER) {
-    const pages = layout.authored[bp]
-    if (!pages) continue
-    lines.push(`${i2}${bp}: [`)
-    for (const page of pages) {
-      lines.push(`${i3}{ id: "${page.id}", items: [`)
-      for (const item of page.items) {
-        const { children, ...rest } = item
-        const head = literal(rest).slice(0, -2) // drop the closing " }"
-        if (children) {
-          lines.push(`${i4}${head}, children: ${layoutLiteral(children, i4)} },`)
-        } else {
-          lines.push(`${i4}${head} },`)
-        }
-      }
-      lines.push(`${i3}] },`)
-    }
-    lines.push(`${i2}],`)
-  }
-  lines.push(`${i1}},`)
-  // The bar rides with the layout it belongs to (D29), so an export that changed it carries it back.
-  if (layout.bar) lines.push(`${i1}bar: ${layoutLiteral(layout.bar, i1)},`)
-  lines.push(`${indent}}`)
-  return lines.join("\n")
-}
-
-/** The config as code — the second copy block (Grid.md D20). `cell · gap` per breakpoint (D15), and the bar (D29). */
-export function configCode(config: GridConfig) {
-  const lines: string[] = [`const config: GridConfig = {`]
-  for (const bp of BREAKPOINT_ORDER) {
-    const spec = config[bp]
-    if (!spec) continue
-    const pager = spec.pager !== undefined && spec.pager !== PAGER_CELLS ? `, pager: ${spec.pager}` : ""
-    lines.push(`  ${bp}: { cell: ${spec.cell}, gap: ${spec.gap}${pager} },`)
-  }
-  lines.push(`}`)
-  return lines.join("\n")
 }
