@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@no-origins/ui/components/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@no-origins/ui/components/tabs";
@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@no-origins/ui/components/a
 import { FieldSeparator } from "@no-origins/ui/components/field";
 import { KeyRound } from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { useWebAuthn } from "@/lib/webauthn";
 
 /**
  * The admin's login card (Admin.md §8.4) — composed entirely from `@no-origins/ui`, centered on the grid.
@@ -67,15 +68,11 @@ function LoginCardInner() {
 }
 
 function PasskeyButton({ next }: { next: string }) {
-  const [available, setAvailable] = useState(false);
+  // Only offer the door if the browser can open it. The server may still have passkeys off — that surfaces as
+  // an error on click, not a missing button, which is the right failure for a rare case.
+  const available = useWebAuthn();
   const [state, setState] = useState<"idle" | "signing">("idle");
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Only offer the door if the browser can open it. The server may still have passkeys off — that surfaces as
-    // an error on click, not a missing button, which is the right failure for a rare case.
-    setAvailable(typeof window !== "undefined" && !!window.PublicKeyCredential);
-  }, []);
 
   if (!available) return null;
 
