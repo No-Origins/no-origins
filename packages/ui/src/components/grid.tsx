@@ -199,19 +199,17 @@ export function useGridMetrics() {
 
 export type GridProps = Omit<React.ComponentProps<"div">, "children"> & {
   children?: React.ReactNode
-  config?: GridConfig
   /** Draw the cells behind the items. */
   overlay?: boolean
-  /** Number the columns and rows along the edges. Implies the overlay. */
-  rulers?: boolean
   onMetrics?: (metrics: GridMetrics) => void
 }
 
+/** The grid reads the decided numbers (D13) and nothing else: no prop overrides a breakpoint's `cell · gap`. */
+const config = DEFAULT_GRID_CONFIG
+
 function Grid({
   children,
-  config = DEFAULT_GRID_CONFIG,
   overlay = false,
-  rulers = false,
   onMetrics,
   className,
   style,
@@ -244,9 +242,6 @@ function Grid({
     return () => ro.disconnect()
   }, [])
 
-  // Rulers are drawn ON the field — the numbers sit at the centre of the top row's and left column's cells (Grid.md
-  // D24) — so they take no space and showing them changes nothing about the count. They used to reserve a 24px strip
-  // on every side, and toggling them re-counted the field and repacked the layout.
   const metrics = React.useMemo<GridMetrics | null>(() => {
     if (!box || box.w <= 0 || box.h <= 0) return null
     const field = resolveField(config, box.w, box.h)
@@ -258,13 +253,12 @@ function Grid({
       boxW: box.w,
       boxH: box.h,
     }
-  }, [box, config])
+  }, [box])
 
   React.useEffect(() => {
     if (metrics) onMetrics?.(metrics)
   }, [metrics, onMetrics])
 
-  const showOverlay = overlay || rulers
   // The box's padding is the gutter (D15) — before the field is measured it is the breakpoint's gap by width alone,
   // which is what it will be once measured too. Whatever the count leaves over is centred by the flex box (D14).
   const gap = metrics?.gap ?? specFor(config, breakpointFor(box?.w ?? 0)).gap
@@ -287,7 +281,7 @@ function Grid({
             className="relative"
             style={{ width: metrics.gridW, height: metrics.gridH }}
           >
-            {showOverlay ? <GridOverlay rulers={rulers} /> : null}
+            {overlay ? <GridOverlay /> : null}
             <div
               data-slot="grid-tracks"
               className="relative grid"
@@ -467,7 +461,7 @@ function GridThemeFlip() {
 }
 
 /** The cells, drawn behind the items. Reads the metrics from context, so it is only valid inside a Grid. */
-function GridOverlay({ rulers = false, className }: { rulers?: boolean; className?: string }) {
+function GridOverlay({ className }: { className?: string }) {
   const m = useGridMetrics()
   if (!m) return null
   const cells = Array.from({ length: m.cols * m.rows })
@@ -486,29 +480,6 @@ function GridOverlay({ rulers = false, className }: { rulers?: boolean; classNam
           <div key={i} className="border-border/70 border border-dashed" />
         ))}
       </div>
-      {rulers ? (
-        // Over the cells (D24): column numbers down the centre of the top row, row numbers down the centre of the left
-        // column. The top-left cell is 1 both ways and shows it once.
-        <div
-          className="text-muted-foreground/70 absolute inset-0 grid font-mono text-[10px]"
-          style={{
-            gridTemplateColumns: `repeat(${m.cols}, ${m.cell}px)`,
-            gridTemplateRows: `repeat(${m.rows}, ${m.cell}px)`,
-            gap: m.gap,
-          }}
-        >
-          {Array.from({ length: m.cols }, (_, i) => (
-            <span key={`c${i}`} className="flex items-center justify-center" style={{ gridColumn: i + 1, gridRow: 1 }}>
-              {i + 1}
-            </span>
-          ))}
-          {Array.from({ length: m.rows - 1 }, (_, i) => (
-            <span key={`r${i}`} className="flex items-center justify-center" style={{ gridColumn: 1, gridRow: i + 2 }}>
-              {i + 2}
-            </span>
-          ))}
-        </div>
-      ) : null}
     </div>
   )
 }

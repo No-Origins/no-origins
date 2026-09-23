@@ -10,7 +10,9 @@ The composer is removed, and with it everything only the composer used (2026-09-
 - `grid.tsx`: no `GridFrameContext`, `useGridFrame` or `metrics.scale`, and no `MIN_CELL`, `MAX_CELL`, `MIN_PAGER`,
   `MAX_PAGER`, `PAGER_STEP` or `GridSpacing`.
 - `grid-pages.tsx`: the surface is read-only — no `GridEditing`, no drag or resize, and `RenderGridItem` takes only
-  the item. `GridPageSurface` is no longer exported.
+  the item. `GridPageSurface` is no longer exported. `GridPages` loses `config`, `rulers` and `onResolved`.
+- `Grid` loses `config` (it reads `DEFAULT_GRID_CONFIG`, as D13 decided) and `rulers` (D24, withdrawn).
+- `resolvePages` returns the pages; `ResolvedPages` and its source/shape/mode report are gone.
 - `grid-layout.ts`: no `withAuthored`, `withoutAuthored`, `addPage`, `removePage`, `moveItemToPage`,
   `evictFromPagerCells`, `newPageId`, `layoutCode`, `configCode`, `widestAuthored`, `narrowestAuthored`,
   `countOverlaps`, `layoutFromSpans` or `GridSpan`, and no `keep` option. `SlotInset` derives from `GRID_SPACING`.

@@ -76,18 +76,6 @@ export function authoredShape(layout: GridLayout, bp: GridBreakpoint): GridShape
   return layout.shapes?.[bp] ?? LEGACY_SHAPES[bp]
 }
 
-export type ResolvedPages = {
-  pages: GridPage[]
-  /** The breakpoint whose authored pages these are, or were derived from. */
-  source: GridBreakpoint
-  /** The shape the source pages were authored on. Equal to the field's when `authored` is true. */
-  sourceShape: GridShape
-  /** True when the pages are the breakpoint's own, on the field they were written on; false when they were derived. */
-  authored: boolean
-  /** How a derived page got here: `same` shape, `centred` as authored on a field it fits (D25), or `packed`. */
-  mode: "same" | "centred" | "packed"
-}
-
 const clamp = (n: number, min: number, max: number) => Math.min(Math.max(n, min), max)
 
 // ── rectangles ───────────────────────────────────────────────────────────────────────────────────────────────
@@ -316,22 +304,18 @@ const clonePages = (pages: readonly GridPage[]): GridPage[] =>
  * them, so a same-breakpoint pack is not a special case: a 1440px desktop and a 1300px one are both `lg` and get
  * different fields (D12), and the second is packed from the first like any derivation.
  */
-export function resolvePages(layout: GridLayout, field: GridField, options: DeriveOptions = {}): ResolvedPages {
+export function resolvePages(layout: GridLayout, field: GridField, options: DeriveOptions = {}): GridPage[] {
   const { bp, cols, rows } = field
   // The bar's width is the field's (D29) unless the caller switches it off — which is what a slot's children do (S5).
   const pager: PagerWidth = options.pager ?? field.pager
   const source = layout.authored[bp] ? bp : nearestAuthored(layout, bp)
-  if (!source) {
-    return { pages: [{ id: "page-1", items: [] }], source: bp, sourceShape: { cols, rows }, authored: false, mode: "same" }
-  }
+  if (!source) return [{ id: "page-1", items: [] }]
 
   const sourcePages = layout.authored[source]!
   const sourceShape = authoredShape(layout, source)
   const sameShape = sourceShape.cols === cols && sourceShape.rows === rows
-  if (sameShape) return { pages: clonePages(sourcePages), source, sourceShape, authored: source === bp, mode: "same" }
-  const pages = derivePages(sourcePages, cols, rows, { ...options, pager })
-  const centred = sourcePages.every((page) => centredOnField(page.items, cols, rows, pager) !== null)
-  return { pages, source, sourceShape, authored: false, mode: centred ? "centred" : "packed" }
+  if (sameShape) return clonePages(sourcePages)
+  return derivePages(sourcePages, cols, rows, { ...options, pager })
 }
 
 /**
@@ -348,5 +332,5 @@ export function resolveSubSlots(
     children,
     { bp: field.bp, cell: field.cell, gap: field.gap, cols: parent.colSpan, rows: parent.rowSpan, pager: 0 },
     { pager: false },
-  ).pages[0]?.items ?? []
+  )[0]?.items ?? []
 }

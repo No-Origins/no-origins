@@ -3,15 +3,9 @@
 import * as React from "react"
 import { cn } from "cn"
 import { isSlotItem, SlotContent } from "@no-origins/ui/components/slot"
-import {
-  Grid,
-  GridItem,
-  DEFAULT_GRID_CONFIG,
-  type GridConfig,
-  type GridMetrics,
-} from "@no-origins/ui/components/grid"
+import { Grid, GridItem, type GridMetrics } from "@no-origins/ui/components/grid"
 import { GridPager } from "@no-origins/ui/components/grid-pager"
-import { resolvePages, type GridLayout, type GridLayoutItem, type ResolvedPages } from "@no-origins/ui/lib/grid-layout"
+import { resolvePages, type GridLayout, type GridLayoutItem } from "@no-origins/ui/lib/grid-layout"
 
 /**
  * A layout, one page at a time.
@@ -23,7 +17,7 @@ import { resolvePages, type GridLayout, type GridLayoutItem, type ResolvedPages 
  * the same share. When the scroll is complete the page turns and the next page's boxes are revealed from their
  * bottom edge upward. Scrolling down is the same in reverse, with the ↓. Let go short of the turn and the
  * boxes settle back; past half way and the turn completes on its own. A click on the pager's arrow, ← →, or a
- * host's toolbar play the same turn over time. Only the boxes move — the field, the rulers and the pager stay where
+ * host's toolbar play the same turn over time. Only the boxes move — the field and the pager stay where
  * they are, because they are the room and the boxes are the furniture.
  *
  * The progress lives in `--grid-turn` on the grid, written per frame without a render: each box's clip and the
@@ -372,9 +366,7 @@ function GridPageSurface({ items, turn, renderItem }: GridPageSurfaceProps) {
 export type GridPagesProps = {
   layout: GridLayout
   renderItem?: RenderGridItem
-  config?: GridConfig
   overlay?: boolean
-  rulers?: boolean
   /** Controlled page; omit to let the pager manage it. */
   page?: number
   defaultPage?: number
@@ -383,23 +375,19 @@ export type GridPagesProps = {
   keyboard?: boolean
   className?: string
   onMetrics?: (metrics: GridMetrics) => void
-  onResolved?: (resolved: ResolvedPages) => void
 }
 
 /** The grid an app renders a layout with. */
 function GridPages({
   layout,
   renderItem,
-  config = DEFAULT_GRID_CONFIG,
   overlay,
-  rulers,
   page: pageProp,
   defaultPage = 0,
   onPageChange,
   keyboard = true,
   className,
   onMetrics,
-  onResolved,
 }: GridPagesProps) {
   const [metrics, setMetrics] = React.useState<GridMetrics | null>(null)
   const handleMetrics = React.useCallback(
@@ -410,12 +398,9 @@ function GridPages({
     [onMetrics],
   )
 
-  const resolved = React.useMemo(() => (metrics ? resolvePages(layout, metrics) : null), [layout, metrics])
-  React.useEffect(() => {
-    if (resolved) onResolved?.(resolved)
-  }, [resolved, onResolved])
+  const pages = React.useMemo(() => (metrics ? resolvePages(layout, metrics) : null), [layout, metrics])
 
-  const count = resolved?.pages.length ?? 1
+  const count = pages?.length ?? 1
   const [pageState, setPageState] = React.useState(defaultPage)
   const page = Math.min(pageProp ?? pageState, count - 1)
   const setPage = React.useCallback(
@@ -441,14 +426,12 @@ function GridPages({
     return () => window.removeEventListener("keydown", onKeyDown)
   }, [keyboard, page, setPage])
 
-  const items = resolved?.pages[Math.min(shown, count - 1)]?.items ?? []
+  const items = pages?.[Math.min(shown, count - 1)]?.items ?? []
 
   return (
     <Grid
       ref={rootRef}
-      config={config}
       overlay={overlay}
-      rulers={rulers}
       onMetrics={handleMetrics}
       // touch-none: a finger on the field drives the turn, and the browser must not pan or refresh under it.
       className={cn("touch-none", className)}
