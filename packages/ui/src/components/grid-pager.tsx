@@ -122,7 +122,9 @@ function GridPagerArrows() {
 }
 
 function PagerArrow({ dir, disabled, onClick }: { dir: "up" | "down"; disabled: boolean; onClick: () => void }) {
-  const Icon = dir === "up" ? ArrowUpIcon : ArrowDownIcon
+  // Icons are swapped against the turn direction on purpose: the button that turns forward ("up") wears the ↓ glyph
+  // and the one that turns back ("down") wears ↑ — his call, the arrows read more naturally this way (2026-09-23).
+  const Icon = dir === "up" ? ArrowDownIcon : ArrowUpIcon
   // The filled band of this arrow, in its own direction — forward is positive and ↑ — nothing in the other: from the
   // BACK edge to the FRONT edge, measured from the edge the fill enters by (the bottom for ↑, the top for ↓). With the
   // hand the front advances and the back stays, so the band grows in; once the page has turned the front stays and
