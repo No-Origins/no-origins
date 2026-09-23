@@ -211,12 +211,14 @@ typecheck`, `pnpm -r lint`, and `mix test` in `services/agents`. It runs what a 
 builds. Vercel's preview builds are the build check, so CI does not build. Warnings pass; errors fail.
 
 A manual deploy, when one is wanted, runs from the repo root. The root `.vercel/project.json` is linked to
-`no-origins`; every other project is selected with env vars, and that file is never rewritten:
+`no-origins`; every other project is selected with env vars, and that file is never rewritten. **The IDs are not in
+the repo**, which is public: they are in `.private/vercel.env`, gitignored, with a README saying what else belongs
+there. A fresh clone has no `.private/` — copy it across.
 
 ```bash
+. .private/vercel.env                                           # the team ID and VERCEL_PROJECT_ID_<APP> for each
 vercel --prod                                                   # portfolio
-VERCEL_ORG_ID=team_RUVcB0hsMzGRHyzJt1rTqwOd \
-VERCEL_PROJECT_ID=prj_mL4BHwxlyyjBzkTGItoyf5amMXPE vercel --prod # design
+VERCEL_ORG_ID=$VERCEL_ORG_ID VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_DESIGN vercel --prod # design; _ADMIN, _ENGINEERING
 ```
 
 `.vercelignore` at the repo root keeps `e2e/`, `supabase/`, `services/` and `.claude/` out of the upload; its repo-root entries are
