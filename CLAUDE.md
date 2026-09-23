@@ -177,15 +177,14 @@ Four Vercel projects under the `no-origins` team, one per app, each with its **R
 `no-origins` → portfolio, `design`, `admin`, `engineering`. Production is `main`.
 
 **`apps/<app>/vercel.json` is the source of truth, not the dashboard.** A `vercel.json` in a project's root directory
-**overrides** the dashboard's fields, so the three commands live in the repo, travel through review, and cannot
-quietly drift apart the way they did through 2026-09-22 (three projects, three different install commands). All four
-files are byte-identical on purpose:
+**overrides** the dashboard's fields, so the commands live in the repo, travel through review, and cannot quietly
+drift apart the way they did through 2026-09-22 (three projects, three different install commands). The dashboards
+still show the old commands; the file wins. All four files are byte-identical on purpose:
 
 ```json
 {
   "buildCommand": "pnpm run build",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ../../packages/ui ../../pnpm-lock.yaml"
+  "installCommand": "pnpm install --frozen-lockfile"
 }
 ```
 
@@ -193,16 +192,23 @@ files are byte-identical on purpose:
 nothing. `--frozen-lockfile` so a stale lockfile fails the build loudly instead of resolving something else — the
 failure that produced the engineering lockfile PRs.
 
-**The ignore step decides whether a push builds at all.** Vercel runs it from the root directory and reads the exit
-code: **0 skips, 1 builds** — which is exactly what `git diff --quiet` returns. The watch list is the app, plus
-`packages/ui` because all four consume it, plus the lockfile so a dependency bump rebuilds everything. Verified
-against real history: the merge of PR #4 (which touched `packages/ui`) returns 1 for every app, while the
-engineering-only commit `a14aa89` returns 0 for portfolio and design and 1 for engineering. If `HEAD^` cannot resolve
-the command errors non-zero, so it fails **towards** building.
+**Which apps a push builds is Vercel's call, not a command's.** All four projects have *Skip deployments for
+unaffected projects* on (`enableAffectedProjectsDeployments` in the project API): Vercel reads the pnpm workspace
+graph and compares against the last deployed commit, so a change to `packages/ui` rebuilds all four and an
+engineering-only change rebuilds engineering — PR #5 and PR #7 deployed engineering and nothing else. **There is no
+`ignoreCommand`, and there should not be one.** One was written on 2026-09-23 (`git diff --quiet HEAD^ HEAD -- .
+../../packages/ui ../../pnpm-lock.yaml`) and taken out the same day: it compared only a push's last commit, so a push
+whose `packages/ui` commit was not the tip skipped every app it touched, and it rebuilt all four on any lockfile
+change where the graph rebuilds only the apps whose dependencies moved.
 
-**Two things the ignore step does not cover.** It only runs for Git-triggered deploys — a manual `vercel --prod`
-always builds, whatever changed. And connecting a project does not backfill: the hooks fire on the next push, so a
-newly connected project stays on its last manual deployment until something lands on `main`.
+**Two things the skip does not cover.** It only applies to Git-triggered deploys — a manual `vercel --prod` always
+builds, whatever changed. And connecting a project does not backfill: the hooks fire on the next push, so a newly
+connected project stays on its last manual deployment until something lands on `main`.
+
+**CI is `.github/workflows/ci.yml`**, on every pull request and every push to `main`: a frozen install, `pnpm -r
+typecheck`, `pnpm -r lint`, and `mix test` in `services/agents`. It runs what a Vercel build does not — lint, which
+`next build` stopped running in Next 16; `packages/ui` checked on its own; and the harness, which no Vercel project
+builds. Vercel's preview builds are the build check, so CI does not build. Warnings pass; errors fail.
 
 A manual deploy, when one is wanted, runs from the repo root. The root `.vercel/project.json` is linked to
 `no-origins`; every other project is selected with env vars, and that file is never rewritten:
@@ -213,7 +219,7 @@ VERCEL_ORG_ID=team_RUVcB0hsMzGRHyzJt1rTqwOd \
 VERCEL_PROJECT_ID=prj_mL4BHwxlyyjBzkTGItoyf5amMXPE vercel --prod # design
 ```
 
-`.vercelignore` at the repo root keeps `e2e/`, `supabase/` and `.claude/` out of the upload; its repo-root entries are
+`.vercelignore` at the repo root keeps `e2e/`, `supabase/`, `services/` and `.claude/` out of the upload; its repo-root entries are
 anchored with a leading slash on purpose, because an unanchored `supabase` would also drop
 `apps/admin/src/lib/supabase/`.
 
