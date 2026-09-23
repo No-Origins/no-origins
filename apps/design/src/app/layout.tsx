@@ -27,9 +27,10 @@ export const viewport: Viewport = {
 /**
  * design.no-origins.com — the showcase.
  *
- * Rebuilt on shadcn/ui (style `radix-sera`, base `radix`). It is a reference you scroll, not a tool you navigate:
- * two routes, one per Atomic layer, and a sticky bar that names where you are. Everything it renders is imported
- * from `@no-origins/ui/components/*` — the showcase owns no components of its own beyond this shell.
+ * Rebuilt on shadcn/ui (style `radix-sera`, base `radix`) and put on the grid: nothing here scrolls, every page is a
+ * `GridPages` under the one bar that names where you are, arranged the portfolio's way (Portfolio.md P2). Everything
+ * it renders is imported from `@no-origins/ui/components/*` — the showcase owns no components of its own beyond this
+ * shell.
  */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -42,7 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThemeProvider>
           <TooltipProvider>
             <ShowcaseNav />
-            {/* No container here: /grid fills the viewport. Reading pages wrap themselves in `Reading`. */}
+            {/* No container here: every page is a grid that fills the viewport under the nav. */}
             <main>{children}</main>
             <Toaster />
           </TooltipProvider>

@@ -13,7 +13,7 @@ export const metadata = { title: "Sign in" };
 export default function SignIn() {
   return (
     <div className="relative min-h-dvh">
-      <Grid fill overlay className="absolute inset-0" aria-hidden />
+      <Grid overlay className="absolute inset-0" aria-hidden />
       <div className="relative z-10 flex min-h-dvh items-center justify-center p-4">
         <LoginCard />
       </div>

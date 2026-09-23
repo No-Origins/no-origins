@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // the 1.0 pages, parked outside the build until they are deleted (see CLAUDE.md)
+    ".legacy/**",
   ]),
 ]);
 

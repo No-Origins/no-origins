@@ -1,5 +1,5 @@
 -- =============================================================================
--- Seed — Admin.md §13 step 3: "Seeded with one project row: `portfolio`."
+-- Seed — Admin.md §0.5: the first quest.
 --
 -- Reference data only. **No email address is seeded here**, deliberately: the
 -- allowlist is the one table whose contents are personal, and a repository is
@@ -9,29 +9,14 @@
 -- seed you stop running.
 -- =============================================================================
 
--- ── layer 2 · the systems the admin's rail is made of (§4) ───────────────────
--- `config` stays empty for `design`. Under R3 the package is the source of truth
--- for tokens and the admin only displays them, so a row here holding token
--- values would be the second source of truth R3 exists to prevent.
-insert into public.systems (slug, name, kind, description) values
-  ('design',     'Design System', 'design',
-   'Tokens, primitives, components and blocks. Read-only under R3: the package is truth, this section shows it live in both themes and writes nothing.'),
-  ('document',   'Document',      'document',
-   'The scene schema, the component registry, and the inline directive set (R4). What each component accepts, in one place.'),
-  ('publishing', 'Publishing',    'publishing',
-   'The pipeline of §9: version row, pointer, revalidate webhook, and the read-back that makes R2 safe.'),
-  ('storage',    'Storage',       'storage',
-   'The two buckets of §8.2 and what is in them.')
+-- ── the first quest ──────────────────────────────────────────────────────────
+-- `status = 'draft'`: the live portfolio still renders from source, and nothing
+-- here is what a visitor sees until a quest is deployed (which is deferred).
+-- `layout` stays null — the quest opens on an empty grid, composed in the admin.
+insert into public.quests (slug, name, description, subdomain, hue, status) values
+  ('portfolio', 'Portfolio',
+   'Bhargav''s portfolio — composed on the grid from the design system.',
+   'bhargav.no-origins.com', 'peach', 'draft')
 on conflict (slug) do update
-  set name = excluded.name, kind = excluded.kind, description = excluded.description;
-
--- ── layer 1 · the first project ──────────────────────────────────────────────
--- `status = 'draft'` is R5 in the data: the live portfolio renders from source,
--- and nothing here is what a visitor sees until a document is published.
-insert into public.projects (slug, name, domain, description, hue, status) values
-  ('portfolio', 'Portfolio', 'bhargav.no-origins.com',
-   'Bhargav''s portfolio: an intro and seven sections, each a page, built from the design system.',
-   'peach', 'draft')
-on conflict (slug) do update
-  set name = excluded.name, domain = excluded.domain,
-      description = excluded.description, hue = excluded.hue;
+  set name = excluded.name, description = excluded.description,
+      subdomain = excluded.subdomain, hue = excluded.hue;
