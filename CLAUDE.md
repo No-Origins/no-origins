@@ -162,12 +162,60 @@ the composer** and comes back as code: Compose → arrange → Export → the `G
 puts it on the page (Grid-v2.md D20). There is no design mode and nothing is edited in place. Components go into slots; the palette reads the registry.
 **Text is a `Text`** (`text.tsx`, Type.md): seven roles, tone, alignment — an app does not reach for `text-2xl`.
 
-## What does not build
+## What builds
 
-The admin still imports the deleted system from its page and content files, so it serves no page. Its root layout,
-stylesheet and wiring are already on the new system; what is left is the pages themselves. It is out of the review
-sweep until it is rebuilt. **The portfolio was rebuilt on the grid on 2026-09-21** (Portfolio.md, `apps/portfolio/CLAUDE.md`):
-one route, the first screen; its 1.0 pages are parked in `apps/portfolio/.legacy/`, outside the build.
+**All four apps build** — `pnpm -r build` is green, admin included, since the grid moved to v2 on 2026-09-21. (This
+section used to say the admin served no page; that was true until its quests, settings and composer were rebuilt in
+the same commit. It stays out of the **review sweep** — every route is behind auth and needs a running Supabase,
+which `pnpm review` does not boot — but that is the sweep, not the build.) **The portfolio was rebuilt on the grid on
+2026-09-21** (Portfolio.md, `apps/portfolio/CLAUDE.md`): one route, the first screen; its 1.0 pages are parked in
+`apps/portfolio/.legacy/`, outside the build.
+
+## Deploying
+
+Four Vercel projects under the `no-origins` team, one per app, each with its **Root Directory** set to `apps/<app>`:
+`no-origins` → portfolio, `design`, `admin`, `engineering`. Production is `main`.
+
+**`apps/<app>/vercel.json` is the source of truth, not the dashboard.** A `vercel.json` in a project's root directory
+**overrides** the dashboard's fields, so the three commands live in the repo, travel through review, and cannot
+quietly drift apart the way they did through 2026-09-22 (three projects, three different install commands). All four
+files are byte-identical on purpose:
+
+```json
+{
+  "buildCommand": "pnpm run build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ../../packages/ui ../../pnpm-lock.yaml"
+}
+```
+
+`pnpm run build` rather than `pnpm --filter <app> build` so no app name is embedded and renaming a package breaks
+nothing. `--frozen-lockfile` so a stale lockfile fails the build loudly instead of resolving something else — the
+failure that produced the engineering lockfile PRs.
+
+**The ignore step decides whether a push builds at all.** Vercel runs it from the root directory and reads the exit
+code: **0 skips, 1 builds** — which is exactly what `git diff --quiet` returns. The watch list is the app, plus
+`packages/ui` because all four consume it, plus the lockfile so a dependency bump rebuilds everything. Verified
+against real history: the merge of PR #4 (which touched `packages/ui`) returns 1 for every app, while the
+engineering-only commit `a14aa89` returns 0 for portfolio and design and 1 for engineering. If `HEAD^` cannot resolve
+the command errors non-zero, so it fails **towards** building.
+
+**Two things the ignore step does not cover.** It only runs for Git-triggered deploys — a manual `vercel --prod`
+always builds, whatever changed. And connecting a project does not backfill: the hooks fire on the next push, so a
+newly connected project stays on its last manual deployment until something lands on `main`.
+
+A manual deploy, when one is wanted, runs from the repo root. The root `.vercel/project.json` is linked to
+`no-origins`; every other project is selected with env vars, and that file is never rewritten:
+
+```bash
+vercel --prod                                                   # portfolio
+VERCEL_ORG_ID=team_RUVcB0hsMzGRHyzJt1rTqwOd \
+VERCEL_PROJECT_ID=prj_mL4BHwxlyyjBzkTGItoyf5amMXPE vercel --prod # design
+```
+
+`.vercelignore` at the repo root keeps `e2e/`, `supabase/` and `.claude/` out of the upload; its repo-root entries are
+anchored with a leading slash on purpose, because an unanchored `supabase` would also drop
+`apps/admin/src/lib/supabase/`.
 
 ## Visual review loop (Playwright)
 
