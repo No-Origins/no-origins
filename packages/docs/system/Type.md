@@ -36,10 +36,13 @@ it is not done.
 **T1 — Text is a `Text`.** `packages/ui/src/components/text.tsx`: `<Text role="body" tone="muted" align="center">`.
 The seven roles are the whole scale; a page does not reach for `text-2xl` on its own. The showcase's pages are the
 one exception for now — they were written before this and are documentation, not an app — and get moved over as they
-are recomposed in the composer.
+are recomposed in the composer. *The composer went 2026-09-23 (Grid.md D30); they move over when their content files
+are next rewritten.*
 
 **T2 — In the composer, text is a slot holding `Text`** (Slots.md S1). The registry entry carries the text, the role,
 the tone and the alignment as its props; where the text sits in its slot is the slot's `alignX`/`alignY`.
+**Withdrawn in part 2026-09-23 (Slots.md S7).** The composer and the registry's `Text` entry are gone; text in a slot
+is a `Text` written in code, and where it sits is still the slot's `alignX`/`alignY`.
 
 ## 3. Open
 

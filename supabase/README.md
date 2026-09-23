@@ -2,7 +2,25 @@
 
 One project, `no-origins`: Postgres + Auth + Storage.
 
-> **Reset to the Quests model — 2026-09-17 (Admin.md §0.5).** The three-layer
+> **Quests removed — 2026-09-23 (Admin.md §0.7).** *"remove showcase /composes,
+> admin's too and also quests feature."* `…_drop_quests.sql` drops `quests` (its
+> four policies and both triggers go with it by `cascade`),
+> `noo_touch_quest_layout()` and the `noo_quest_status` enum. Identity is
+> untouched. `seed.sql`, which seeded only the `portfolio` quest, is deleted and
+> seeding is off in `config.toml`. The schema is now identity and the two buckets,
+> nothing else.
+>
+> **The hosted project is not migrated.** The drop was applied to the **local**
+> stack and verified (below); it has **not** been pushed. Until someone runs
+> `supabase db push` (or applies the file by hand) deliberately, the hosted
+> database keeps what it has — `quests` and its rows included, if the 2026-09-17
+> reset below was pushed since it was written. **A push drops data**: it applies
+> every pending migration in order, so on a project that never took the reset it
+> drops the three-layer tables and their seeded rows first, then `quests`. It is
+> Bhargav's to run.
+
+> **Reset to the Quests model — 2026-09-17 (Admin.md §0.5).** *(Record: its
+> `quests` table was dropped on 2026-09-23, above.)* The three-layer
 > schema (projects · documents · document_versions · systems · products ·
 > product_installs · assets · audit_log) was built for the document editor that
 > was deleted with React Flow. It is dropped in `…_quests.sql`, which keeps
@@ -18,19 +36,19 @@ One project, `no-origins`: Postgres + Auth + Storage.
 
 | File | What it is |
 |---|---|
-| `config.toml` | Local stack config. Auth is set for the admin on **:3002** (portfolio is :3000, the design showcase :3001). |
+| `config.toml` | Local stack config. Auth is set for the admin on **:3002** (portfolio is :3000, the design showcase :3001). Seeding is **off** since 2026-09-23 — there is no seed file. |
 | `migrations/…_schema.sql` | The tables of §8.1 *(pre-reset; most dropped by `…_quests.sql`)* |
 | `migrations/…_rls.sql` | Deny-by-default RLS, the `noo_is()` policy shape, the append-only guard *(pre-reset)* |
 | `migrations/…_allowlist_gate.sql` | Magic-link membership (§8.4) — **kept** |
 | `migrations/…_storage.sql` | The two buckets of §8.2 and their policies |
-| `migrations/…_quests.sql` | **The reset (§0.5):** drops the document/editor/products era, keeps identity, adds `quests` (+ its `rev` trigger and RLS) |
-| `seed.sql` | The `portfolio` **quest**. **No email addresses** — see below. |
+| `migrations/…_quests.sql` | **The reset (§0.5):** drops the document/editor/products era, keeps identity, adds `quests` (+ its `rev` trigger and RLS) *(its `quests` dropped by `…_drop_quests.sql`)* |
+| `migrations/…_drop_quests.sql` | **Quests removed (§0.7):** drops `quests`, `noo_touch_quest_layout()` and `noo_quest_status`; identity untouched. **Drops data** on any database that has quest rows. |
 
 ## Running it locally
 
 ```bash
 npx supabase start      # needs Docker (OrbStack works)
-npx supabase db reset   # re-applies every migration, then seeds
+npx supabase db reset   # re-applies every migration (seeding is off; re-add your allowlist row after)
 npx supabase stop
 ```
 
@@ -57,7 +75,25 @@ magic link to attach to.
 
 ## What was verified, and how
 
-**Quests (2026-09-17), against the local stack after the reset migration:**
+**Quests removed (2026-09-23), against the local stack after `…_drop_quests.sql`:**
+
+- only `allowlist` and `profiles` remain in `public`, and `noo_role` is the only
+  enum left — `quests`, `noo_touch_quest_layout()` and `noo_quest_status` are gone;
+- identity survived whole: `noo_is`, `noo_current_role`, the allowlist gate and
+  the profile-making trigger on `auth.users`, and the three policies on
+  `allowlist` and `profiles`;
+- `touch_updated_at()` is dropped too: `quests` was the last trigger calling it
+  (`profiles` has no `updated_at`), so the four functions left in `public` are
+  `noo_current_role`, `noo_enforce_allowlist`, `noo_handle_new_user`, `noo_is`;
+- `supabase db reset --local` replays every migration from scratch to that same
+  state. Seeding is off, so a reset leaves the allowlist EMPTY — re-add the owner
+  with the one line below before signing in (a magic link then recreates the user
+  and its profile as `owner`, checked the same day);
+- the admin, signed in: home (three cards) and settings render, the passkey door
+  on sign-in is there, and `/quests` is a 404.
+
+**Quests (2026-09-17), against the local stack after the reset migration** —
+*historical: the table was dropped on 2026-09-23, above:*
 
 - only `allowlist`, `profiles`, `quests` remain in `public`; the document/editor/products
   tables are gone, and the shared functions (`noo_is`, `noo_current_role`, the
@@ -97,8 +133,13 @@ magic link to attach to.
 
 ## Next
 
-The admin's **Quests** feature is built on this schema (Admin.md §0.5): the
+The admin's **Quests** feature was built on this schema (Admin.md §0.5) — the
 grid-of-cards home, `/quests` (create · delete), and `/quests/[slug]` (compose on
-the grid, save to `quests.layout`). Still ahead, and deliberately deferred:
-subdomains and deployment per quest, the real component molecules (the palette is a
-stub), and pushing the reset to the hosted project.
+the grid, save to `quests.layout`) — and **removed on 2026-09-23** (Admin.md
+§0.7), with subdomains and deployment per quest (§0.6) withdrawn alongside. What
+the admin reads now is identity: sign-in, the allowlist, `profiles` and Settings.
+
+Still ahead, and deliberately Bhargav's: **pushing to the hosted project.** Both
+`…_quests.sql` and `…_drop_quests.sql` may be pending there (see the note at the
+top), and either one drops rows. Check what the hosted database holds before the
+push, not after.

@@ -27,8 +27,7 @@ turned by the scroll, the pager's ↑ ↓ or ← →. With one page both arrows 
   it. An item taller than the room gives up rows — at most a quarter of them while it shares a page, then it takes a
   page of its own.
 - **`PortfolioPages`** (`src/components/portfolio-pages.tsx`) is the renderer: a `GridPages` that runs `arrange` on
-  whatever field the grid reports, so every coordinate is honoured as written. When a section has been through the
-  composer and its export pasted back (Grid.md D20), an authored `layout` beside its items is the thing to add.
+  whatever field the grid reports, so every coordinate is honoured as written.
 - **The cards** (`profile-card.tsx`, `cards.tsx`, `logo.tsx`) are app-specific islands composed from `Card`,
   `Avatar`, `Text`, `Badge`, `Button`, `Progress` and `Slot` — nothing hand-rolled. Each reads its own size off the
   grid and gets denser as the slot shrinks (P5); a slot clips, so a card that is cut off is in a slot that is too
@@ -49,9 +48,8 @@ turned by the scroll, the pager's ↑ ↓ or ← →. With one page both arrows 
 
 - **The app owns no components.** Everything visible is from `@no-origins/ui/components/*`. If you are writing a
   component here, it belongs in the package (or it is a composition of package components, like the card).
-- **`.legacy/` is the 1.0 site**, parked out of the build (`tsconfig` and eslint both exclude it) because it still
-  imports the deleted system. It is there to read copy and content out of when the later screens are built; delete
-  it when nothing in it is wanted. Do not import from it.
+- **The 1.0 site is gone.** It was parked in `.legacy/` to read copy out of, and deleted as dead code on
+  2026-09-23. Its copy is in git history (anything before that date) if a later screen wants it.
 - **Turbopack caches the design system's `exports` map.** If `@no-origins/ui/globals.css` is reported as "not
   exported under the condition style" after the package manifest changed, stop the dev server and delete
   `.next/dev/cache`. It is the stale cache, not the manifest.

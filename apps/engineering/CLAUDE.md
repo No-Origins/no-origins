@@ -31,12 +31,12 @@ Later (B): `/learn/[slug]` driven from Supabase published pieces.
 - **A (this PR):** static seed. First piece is the Jido tour in-repo. No Supabase, no MCP.
 - **B (next):** pieces table; MCP `list` / `create` / `update` / `publish`; writers = Bhargav + bots only.
 
-## Review sweep TODO
+## Reviewing it
 
-`pnpm review` currently boots only the design showcase on :3001. When convenient, add
-`ENGINEERING_ROUTES = ["/", "/learn/jido"]` and a `webServer` entry for
-`pnpm --filter engineering dev` on :3003 in `e2e/review.spec.ts` / `playwright.config.ts`.
-Until then, review this app by running the filter and looking by hand — do not break the design-only sweep.
+In the sweep since 2026-09-23: `pnpm review` boots this app on :3003 with the portfolio and the showcase and visits
+`ENGINEERING_ROUTES` (`/`, `/learn/jido`) in `e2e/review.spec.ts` on desktop and mobile in both themes; CI runs the
+same sweep on every PR. Screenshots land as `e2e/screenshots/<project>/engineering__<route>.png`. `/jido` is only a
+redirect and is not swept. Add a route to the list when you add one.
 
 ## Non-goals (A)
 

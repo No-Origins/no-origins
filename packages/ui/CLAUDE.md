@@ -6,16 +6,18 @@ Rebuilt from nothing on 2026-09-16; the hand-written 1.0 system was deleted in f
 ```
 src/components/*.tsx    60 shadcn components + theme-provider.tsx (`useThemeToggle` — every toggle goes through the
                           grid's flip, Grid.md D28; `useThemeFlipRegistry` is how the grid takes it)
-                        + grid.tsx (field, and `GridThemeFlip`, D28), grid-pages.tsx, grid-pager.tsx, grid-editor.tsx, grid-frame.tsx — the base layout, ours
+                        + grid.tsx (field, `GridThemeFlip`, D28, and `GRID_REFERENCE_BOX`), grid-pages.tsx, grid-pager.tsx — the base layout, ours
                           (see repo-root CLAUDE.md); grid-pager.tsx is the navbar on the bottom row — a slot whose
                           cells are sub-slots, width decided per breakpoint, arrows a registry molecule (Grid.md D27,
-                          D29) — and grid-pages.tsx the turn (Grid.md D27)
+                          D29) — and grid-pages.tsx the turn (Grid.md D27). The grid renders and nothing edits it:
+                          grid-editor.tsx and grid-frame.tsx went with the composer (Grid-v2.md D30, 2026-09-23)
                         + slot.tsx (the box on the grid: fill · inset · alignment; a component or sub-slots) and
-                          registry.tsx (every component the composer's palette offers, lazy) — Slots.md
+                          registry.tsx (what a layout item can name by `kind`, drawn by `Placed` — one entry left,
+                          the pager's arrows) — Slots.md
                         + text.tsx — the seven typography roles, Type.md; every piece of text in an app is a Text
 src/hooks/*.ts          use-mobile.ts
 src/lib/utils.ts        re-exports `cn` from the `cn` package
-src/lib/grid-layout.ts  the grid's layout model as pure functions: rects, packing, pages, derivation, page ops
+src/lib/grid-layout.ts  the grid's layout model as pure functions: rects, packing, pages, derivation
 src/styles/globals.css  Tailwind + the theme + the @theme inline map — the only stylesheet in the workspace
 components.json         what the CLI reads; aliases resolve to @no-origins/ui/*
 ```

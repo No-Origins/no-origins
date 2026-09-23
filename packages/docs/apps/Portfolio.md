@@ -6,7 +6,7 @@ P1 onward.*
 
 Companion documents: **Brand.md** (§5 voice, §9 the seven sections this portfolio will eventually hold),
 **Grid-v2.md** (the field every page is on), **Slots.md** (a card on the grid is a slot holding a component),
-**Type.md** (every piece of text is a `Text`), **Admin.md §0.6** (the portfolio as quest host — the path this is on).
+**Type.md** (every piece of text is a `Text`), **Admin.md §0.6** (the page is static, a component may be live; its quest host was withdrawn with quests, §0.7).
 
 ---
 
@@ -30,7 +30,8 @@ are attached to the same Vercel project (`no-origins`); attaching the new one is
 function from the live field (`bp · cols × rows`) to pages with every coordinate on that field. It is not authored on
 a reference field and derived, because the first screen's one rule is about the top of *this* field (P3), and D25's
 centring of a kept page would not honour it. When the composer has been over a page and its export pasted back
-(Grid.md D20), the authored `layout` is added beside the arrangement and wins.
+(Grid.md D20), the authored `layout` is added beside the arrangement and wins. **Withdrawn 2026-09-23 (Grid.md
+D30):** the composer and its export are gone, so the arrangement is the whole of a page.
 
 **P3 — An empty row on top where there is room for one; on a phone and a tablet the content takes it.** It began as
 one row everywhere — *"let's leave 1 row on top in all breakpoints for first screen"* — and was **amended the same
@@ -146,15 +147,16 @@ Reduced motion draws the bars full, at once.
 | The company mark on its tile (P9) | `apps/portfolio/src/components/logo.tsx` |
 | The bars' growth (P11) | `packages/ui/src/components/progress.tsx` — `animate` + `delay`; `BarsCard` staggers |
 | The redirect (P1) | `apps/portfolio/next.config.ts` |
-| The 1.0 pages, parked | `apps/portfolio/.legacy/` — out of the build; delete when nothing in them is wanted |
+| The 1.0 pages | deleted 2026-09-23 (they were parked in `apps/portfolio/.legacy/`); git history keeps them |
 
 ## 4. Open
 
 - **The rest of the résumé.** Work, the case studies, interests, philosophy (Brand.md §9) — each a page or a run of
-  slots after the first screen, designed in the composer and pasted back (Grid.md D20).
+  slots after the first screen, designed in the composer and pasted back (Grid.md D20). *Since 2026-09-23 (Grid.md
+  D30) there is no composer: each is a section in `site.tsx`, arranged like the rest (P2, P7).*
 - ~~**Turning the page on a phone.**~~ Closed by Grid.md D27: the pager on the bottom row and the scroll — a finger
   on a phone — turn it. Nothing to see until there is a second page.
-- **The quest host.** Admin.md §0.6 says the portfolio becomes one renderer for many subdomains, with `bhargav` (now
+- **The quest host.** *Withdrawn 2026-09-23 with quests (Admin.md §0.7).* Admin.md §0.6 says the portfolio becomes one renderer for many subdomains, with `bhargav` (now
   `hiddenstack`) a quest. This build is hand-written content on the same renderer; moving it into a quest is the step
   after the pipeline exists.
 - **LinkedIn** — the URL (P6).
