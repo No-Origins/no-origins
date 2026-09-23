@@ -53,7 +53,7 @@ function buildLayout(quests: Quest[]): GridLayout {
   ];
 
   const pages: GridPage[] = [];
-  let queue = [...quests];
+  const queue = [...quests];
   let index = 0;
   do {
     const bar: GridLayoutItem = { id: ACTIONS, col: 1, row: 1, colSpan: COLS, rowSpan: 1 };

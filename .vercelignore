@@ -16,9 +16,12 @@ dist
 *.log
 .DS_Store
 
-# repo root only
+# repo root only. /services is the Elixir harness: no Vercel project builds it, and its gitignored _build and
+# deps (~60MB) would ride along, because this file replaces .gitignore for the upload.
+/services
 /e2e
 /playwright-report
 /playwright.config.ts
 /supabase
 /.claude
+/.private

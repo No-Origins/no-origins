@@ -148,15 +148,17 @@ function Composer() {
   const from = params.get("from") ?? "";
   const source = PAGES[from];
 
-  const [content, setContent] = React.useState<PageContent | null>(null);
+  // Kept with the page it was loaded for, so a stale page's content never stands in for the one asked for.
+  const [fetched, setFetched] = React.useState<{ from: string; content: PageContent } | null>(null);
   React.useEffect(() => {
+    if (!source) return;
     let live = true;
-    if (!source) setContent(null);
-    else source.load().then((loaded) => live && setContent(loaded));
+    source.load().then((loaded) => live && setFetched({ from, content: loaded }));
     return () => {
       live = false;
     };
-  }, [source]);
+  }, [source, from]);
+  const content = source && fetched?.from === from ? fetched.content : null;
 
   const history = useHistory<GridLayout>(EMPTY);
   const layout = history.value;
@@ -190,6 +192,8 @@ function Composer() {
           history.reset(saved.layout);
           restored = true;
         }
+        // A one-shot restore from storage, once the field is measured — it cannot run during render.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (isConfig(saved.config)) setConfig(saved.config);
         if (saved.frame && saved.frame.width > 0 && saved.frame.height > 0) setFrame(saved.frame);
         else if (saved.frame === null) setFrame(null);
@@ -908,7 +912,7 @@ function Composer() {
           <PopoverContent align="start" className="w-[26rem]">
             <p className="text-muted-foreground mb-3 text-xs">
               One row per breakpoint, three numbers (Grid.md D15, D29): the cell in px, the gutter along the spacing scale, {GRID_SPACING.join(" · ")}, and
-              the pager bar's width in cells — in twos, so it stays on the centre line (D26). The counts follow the box (D12). The row in use is highlighted.
+              the pager bar&apos;s width in cells — in twos, so it stays on the centre line (D26). The counts follow the box (D12). The row in use is highlighted.
             </p>
             <div className="space-y-1">
               <div className="text-muted-foreground flex items-center gap-2 px-2 text-[10px] uppercase tracking-wider">
@@ -1011,7 +1015,7 @@ function Composer() {
             </React.Fragment>
           ))}
           <span className="ms-auto">
-            {level.shape.cols}×{level.shape.rows} cells — the slot's own field · Esc or double-click outside to go up
+            {level.shape.cols}×{level.shape.rows} cells — the slot&apos;s own field · Esc or double-click outside to go up
           </span>
         </div>
       ) : null}

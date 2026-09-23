@@ -162,12 +162,68 @@ the composer** and comes back as code: Compose → arrange → Export → the `G
 puts it on the page (Grid-v2.md D20). There is no design mode and nothing is edited in place. Components go into slots; the palette reads the registry.
 **Text is a `Text`** (`text.tsx`, Type.md): seven roles, tone, alignment — an app does not reach for `text-2xl`.
 
-## What does not build
+## What builds
 
-The admin still imports the deleted system from its page and content files, so it serves no page. Its root layout,
-stylesheet and wiring are already on the new system; what is left is the pages themselves. It is out of the review
-sweep until it is rebuilt. **The portfolio was rebuilt on the grid on 2026-09-21** (Portfolio.md, `apps/portfolio/CLAUDE.md`):
-one route, the first screen; its 1.0 pages are parked in `apps/portfolio/.legacy/`, outside the build.
+**All four apps build** — `pnpm -r build` is green, admin included, since the grid moved to v2 on 2026-09-21. (This
+section used to say the admin served no page; that was true until its quests, settings and composer were rebuilt in
+the same commit. It stays out of the **review sweep** — every route is behind auth and needs a running Supabase,
+which `pnpm review` does not boot — but that is the sweep, not the build.) **The portfolio was rebuilt on the grid on
+2026-09-21** (Portfolio.md, `apps/portfolio/CLAUDE.md`): one route, the first screen; its 1.0 pages are parked in
+`apps/portfolio/.legacy/`, outside the build.
+
+## Deploying
+
+Four Vercel projects under the `no-origins` team, one per app, each with its **Root Directory** set to `apps/<app>`:
+`no-origins` → portfolio, `design`, `admin`, `engineering`. Production is `main`.
+
+**`apps/<app>/vercel.json` is the source of truth, not the dashboard.** A `vercel.json` in a project's root directory
+**overrides** the dashboard's fields, so the commands live in the repo, travel through review, and cannot quietly
+drift apart the way they did through 2026-09-22 (three projects, three different install commands). The dashboards
+still show the old commands; the file wins. All four files are byte-identical on purpose:
+
+```json
+{
+  "buildCommand": "pnpm run build",
+  "installCommand": "pnpm install --frozen-lockfile"
+}
+```
+
+`pnpm run build` rather than `pnpm --filter <app> build` so no app name is embedded and renaming a package breaks
+nothing. `--frozen-lockfile` so a stale lockfile fails the build loudly instead of resolving something else — the
+failure that produced the engineering lockfile PRs.
+
+**Which apps a push builds is Vercel's call, not a command's.** All four projects have *Skip deployments for
+unaffected projects* on (`enableAffectedProjectsDeployments` in the project API): Vercel reads the pnpm workspace
+graph and compares against the last deployed commit, so a change to `packages/ui` rebuilds all four and an
+engineering-only change rebuilds engineering — PR #5 and PR #7 deployed engineering and nothing else. **There is no
+`ignoreCommand`, and there should not be one.** One was written on 2026-09-23 (`git diff --quiet HEAD^ HEAD -- .
+../../packages/ui ../../pnpm-lock.yaml`) and taken out the same day: it compared only a push's last commit, so a push
+whose `packages/ui` commit was not the tip skipped every app it touched, and it rebuilt all four on any lockfile
+change where the graph rebuilds only the apps whose dependencies moved.
+
+**Two things the skip does not cover.** It only applies to Git-triggered deploys — a manual `vercel --prod` always
+builds, whatever changed. And connecting a project does not backfill: the hooks fire on the next push, so a newly
+connected project stays on its last manual deployment until something lands on `main`.
+
+**CI is `.github/workflows/ci.yml`**, on every pull request and every push to `main`: a frozen install, `pnpm -r
+typecheck`, `pnpm -r lint`, and `mix test` in `services/agents`. It runs what a Vercel build does not — lint, which
+`next build` stopped running in Next 16; `packages/ui` checked on its own; and the harness, which no Vercel project
+builds. Vercel's preview builds are the build check, so CI does not build. Warnings pass; errors fail.
+
+A manual deploy, when one is wanted, runs from the repo root. The root `.vercel/project.json` is linked to
+`no-origins`; every other project is selected with env vars, and that file is never rewritten. **The IDs are not in
+the repo**, which is public: they are in `.private/vercel.env`, gitignored, with a README saying what else belongs
+there. A fresh clone has no `.private/` — copy it across.
+
+```bash
+. .private/vercel.env                                           # the team ID and VERCEL_PROJECT_ID_<APP> for each
+vercel --prod                                                   # portfolio
+VERCEL_ORG_ID=$VERCEL_ORG_ID VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_DESIGN vercel --prod # design; _ADMIN, _ENGINEERING
+```
+
+`.vercelignore` at the repo root keeps `e2e/`, `supabase/`, `services/` and `.claude/` out of the upload; its repo-root entries are
+anchored with a leading slash on purpose, because an unanchored `supabase` would also drop
+`apps/admin/src/lib/supabase/`.
 
 ## Visual review loop (Playwright)
 

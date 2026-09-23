@@ -1,0 +1,57 @@
+# The gate in front of production. Vercel builds each app on its own (apps/<app>/vercel.json), and its preview
+# builds are the build check; this runs what a Vercel build does not: types across the whole workspace, including
+# packages/ui on its own; lint, which `next build` stopped running in Next 16; and the agents harness, which no
+# Vercel project builds. Warnings pass, errors fail.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  web:
+    name: Typecheck and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6 # the version comes from `packageManager` in package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24 # what all four Vercel projects run
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r typecheck
+      - run: pnpm -r lint
+
+  agents:
+    name: Agents tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/agents
+    env:
+      MIX_ENV: test
+    steps:
+      - uses: actions/checkout@v7
+      - id: beam
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "29"
+          elixir-version: "1.20"
+      - uses: actions/cache@v6
+        with:
+          path: |
+            services/agents/deps
+            services/agents/_build
+          key: mix-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles('services/agents/mix.lock') }}
+          restore-keys: mix-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-
+      - run: mix deps.get
+      - run: mix test

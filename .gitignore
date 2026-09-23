@@ -12,6 +12,9 @@ next-env.d.ts
 .DS_Store
 *.log
 
+# the repo is public: IDs, tokens and credentials live here, never in git (.private/README.md)
+/.private/
+
 # playwright review loop
 e2e/.results
 e2e/.mcp

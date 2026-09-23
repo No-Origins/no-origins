@@ -7,8 +7,17 @@ import { Alert, AlertDescription, AlertTitle } from "@no-origins/ui/components/a
 import { Spinner } from "@no-origins/ui/components/spinner";
 import { KeyRound, Trash2 } from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { useWebAuthn } from "@/lib/webauthn";
 
 type Passkey = { id: string; friendly_name?: string; created_at: string; last_used_at?: string };
+
+/** The passkeys on this account, or `null` when the list call fails. */
+async function listPasskeys(): Promise<Passkey[] | null> {
+  const { data, error } = await supabaseBrowser().auth.passkey.list();
+  // A 404/feature-off reads as "not enabled on the server"; anything else is a real error.
+  if (error) return null;
+  return data ?? [];
+}
 
 /**
  * Passkey enrollment (Admin.md §8.4 — the third door).
@@ -22,32 +31,22 @@ type Passkey = { id: string; friendly_name?: string; created_at: string; last_us
  * rather than showing a broken button.
  */
 export function Passkeys() {
+  const webauthn = useWebAuthn();
   const [passkeys, setPasskeys] = useState<Passkey[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [unsupported, setUnsupported] = useState(false);
 
-  const load = useCallback(async () => {
-    const supabase = supabaseBrowser();
-    const { data, error } = await supabase.auth.passkey.list();
-    if (error) {
-      // A 404/feature-off reads as "not enabled on the server"; anything else is a real error.
-      setUnsupported(true);
-      setPasskeys([]);
-      return;
-    }
-    setUnsupported(false);
-    setPasskeys(data ?? []);
+  const show = useCallback((list: Passkey[] | null) => {
+    setUnsupported(list === null);
+    setPasskeys(list ?? []);
   }, []);
 
+  const load = useCallback(async () => show(await listPasskeys()), [show]);
+
   useEffect(() => {
-    if (typeof window !== "undefined" && !window.PublicKeyCredential) {
-      setUnsupported(true);
-      setPasskeys([]);
-      return;
-    }
-    void load();
-  }, [load]);
+    if (webauthn) void listPasskeys().then(show);
+  }, [webauthn, show]);
 
   async function register() {
     setBusy(true);
@@ -76,7 +75,7 @@ export function Passkeys() {
     await load();
   }
 
-  if (unsupported) {
+  if (unsupported || webauthn === false) {
     return (
       <Alert>
         <KeyRound />

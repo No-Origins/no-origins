@@ -67,10 +67,10 @@ export function QuestComposer({ quest }: { quest: Quest }) {
   const [saveState, setSaveState] = React.useState<SaveState>("idle");
 
   const revRef = React.useRef(quest.rev);
-  const savedRef = React.useRef(JSON.stringify(quest.layout ?? EMPTY));
+  const [saved, setSaved] = React.useState(() => JSON.stringify(quest.layout ?? EMPTY));
   const seq = React.useRef(0);
 
-  const dirty = JSON.stringify(layout) !== savedRef.current;
+  const dirty = JSON.stringify(layout) !== saved;
 
   const pages = resolved?.pages ?? [];
   const count = pages.length || 1;
@@ -146,7 +146,7 @@ export function QuestComposer({ quest }: { quest: Quest }) {
     const result = await saveQuestLayout(quest.slug, layout, revRef.current);
     if (result.ok) {
       revRef.current = result.rev;
-      savedRef.current = JSON.stringify(layout);
+      setSaved(JSON.stringify(layout));
       setSaveState("saved");
     } else if (result.conflict) {
       setSaveState("conflict");
