@@ -149,8 +149,9 @@ rules in short, each one his:
   lagged (2 s of raster in a 1.2 s intro). `useGridIntro` is a timer per pass; the numbers are `INTRO_*` in
   `grid.tsx`, his except the reveal and the wait.
 - **The same ripple plays between pages (D32, 2026-09-25).** `ripple` on `GridPages`; the portfolio has it. When the
-  page changes, one lines-only pass runs through the field — up from the bottom going forward, down from the top going
-  back — lime and violet counting on from the intro — and **the pager's arrow fills in that turn's ripple colour**
+  last page's boxes have gone, one lines-only pass runs through the empty field, and **the next page comes up only once
+  it has crossed** (the turn holds for `rippleSpan`). The pass runs up from the bottom going forward, down from the top
+  going back, lime and violet counting on from the intro, and **the pager's arrow fills in that turn's ripple colour**
   (his pick), read off the grid's `data-ripple-next` as the turn starts and held until it ends. **The turn's custom
   properties are written on the grid's tracks, not its root**: they inherit, and on the root they restyled every
   element in the grid every frame of a turn.

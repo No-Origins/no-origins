@@ -783,6 +783,17 @@ marks the next pass's colour on itself (`data-ripple-next`); the turn reads it a
 after it is the other one, so a fill that read it live would change colour while it leaves. A grid without the ripple
 keeps D27's reverse-colour fill, as the showcase does.
 
+**Amended 2026-09-25, the same evening: the ripple first, then the page.** *"The ripple is now coming after the
+components on the page are loading. I think it would be great if the ripple ends and then the components come up on
+the grid."* The pass had played as the next page arrived, so the page rose in while the ripple ran under it. Now a turn
+holds between its out and its in: once the last page's boxes are gone, **the ripple runs through the empty field, and
+the next page is put on the field only when the pass has crossed it** (`rippleSpan`, about 345ms on an 18 × 12
+desktop and 220ms on a phone, plus the frame the pass starts on); then it rises in, as the lines fade. The hold is
+the out-phase's, so nothing turns and the wheel stays muted through it, and the arrow stays full in the pass's colour
+until the page comes. Because the page mounts after the hold, what its cards do on arriving (the portfolio's bars) is
+still seen. A turn is now about 660ms on a desktop, where it was 320; a grid without the ripple, and reduced motion,
+do not hold.
+
 **D33 — A field is never fewer than six columns; below that the cell gives way. And the cone keeps its angle.**
 *2026-09-25, looking at the deployment on his phone: "only having four cells on the mobile feels pretty off … minimum
 number of columns in any screen should be six."* D12 decided the cell and derived the counts; on every phone that
