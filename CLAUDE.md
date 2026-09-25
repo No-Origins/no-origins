@@ -81,7 +81,9 @@ rules in short, each one his:
 - **The cell is decided; the counts derive (D12).** A breakpoint is **two numbers, `cell · gap`** (D13, D15), living
   in `DEFAULT_GRID_CONFIG`. A field is as many whole cells as fit the box it is given, across and down,
   `floor((span − gap) / (cell + gap))`, **rounded down to an even number, never below two (D26, 2026-09-21)** — the
-  field's centre is always a grid line, so a centred block is symmetric. Nobody decides cols or rows, and nothing in
+  field's centre is always a grid line, so a centred block is symmetric. **And never fewer than six across (D33,
+  2026-09-25):** where the decided cell gives fewer — every phone — the count is held at six and the cell derives from
+  the width (51px on a 390). Nobody decides cols or rows, and nothing in
   the config or the props names them. **The grid never scrolls and never overflows its box.**
 - **The numbers in `DEFAULT_GRID_CONFIG` are decided (D13, 2026-09-21):** `base`/`sm`/`md` 72 · 12, `lg`/`xl`
   60 · 12, and since D29 (2026-09-23) a third per breakpoint — the pager bar's width in cells, 6 everywhere.
@@ -134,9 +136,10 @@ rules in short, each one his:
   the sheet wears the theme before the page does. No grid on the page: the switch is instant.
 - **The grid opens by drawing itself, and the drawing is the loader (D31, 2026-09-24).** `intro` on `Grid` or
   `GridPages`; the portfolio has it. A cover in the visitor's own colour (black on dark, `--grid-intro-from`) lifts
-  cell by cell as a front rises from the bottom with a cone for its edge — twelve steps deep, 15ms a step, every cell a
-  cut. Each line lights as it is drawn and fades back over 500ms, glowing 16px on light and 12px on dark: **the one
-  blur the system keeps**, on a line, for the length of the intro. While the page loads (fonts, window load, images on
+  cell by cell as a front rises from the bottom with a cone for its edge — twelve steps deep on a desktop's eighteen
+  columns and the same angle, shallower, on a narrower field (D33), 15ms a step, every cell a cut. Each line lights as
+  it is drawn and fades back over 500ms, glowing 16px on light and 12px on dark: **the one blur the system keeps**, on
+  a line, for the length of the intro. While the page loads (fonts, window load, images on
   the field, 3 s at most) the drawing goes again at once, lines only, lime and violet turn about; then page 1 and the
   pager are revealed from their bottom edge upward, the turn's own "in". Once per document load, none under reduced
   motion, and nothing turns a page meanwhile. **No frame loop**: every tile and line is a CSS opacity animation with

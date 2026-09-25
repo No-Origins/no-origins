@@ -24,12 +24,12 @@ const WORK_HEADER: Record<string, Span> = { base: { cols: BAND, rows: 1 }, sm: {
  * 470px, and on eight the rest pooled as one hole at its end (P9's rule), so a tablet gets the 492px card `sm` has.
  * A pointer keeps eight because six, 420px, is short of the row and seven is not even (Grid.md D26).
  */
-const PROFILE: Record<string, Span> = { base: { cols: 4, rows: 2 }, sm: { cols: 6, rows: 2 }, md: { cols: 6, rows: 2 }, lg: { cols: 8, rows: 2 }, xl: { cols: 8, rows: 2 } };
+const PROFILE: Record<string, Span> = { base: { cols: 6, rows: 3 }, sm: { cols: 6, rows: 2 }, md: { cols: 6, rows: 2 }, lg: { cols: 8, rows: 2 }, xl: { cols: 8, rows: 2 } };
 /**
  * His tagline over the card: as wide as it, and two rows for its two lines. It is `above`, out of the flow, so the card
  * is centred where it was alone and the tagline takes the rows over it (Portfolio.md P4).
  */
-const TAGLINE: Record<string, Span> = PROFILE;
+const TAGLINE: Record<string, Span> = Object.fromEntries(Object.entries(PROFILE).map(([bp, { cols }]) => [bp, { cols, rows: 2 }]));
 /**
  * A line under the card — a mark on one cell and its words beside it — as wide as the card and one row tall. Each goes
  * `below` what came before it; on `xl` the sixteen-column band would otherwise pack it beside the card.
@@ -37,22 +37,22 @@ const TAGLINE: Record<string, Span> = PROFILE;
 const FACT: Record<string, Span> = Object.fromEntries(Object.entries(PROFILE).map(([bp, { cols }]) => [bp, { cols, rows: 1 }]));
 /**
  * The row of links under the city — five cells, one each — with a row of air above it (his: "leave a row"). As wide as
- * the card; a phone's four columns wrap the fifth cell, so there it is two rows.
+ * the card, one row everywhere: even a phone's band is six cells (Grid.md D33).
  */
-const LINK_ROW: Record<string, Span> = { ...FACT, base: { cols: 4, rows: 2 } };
+const LINK_ROW: Record<string, Span> = FACT;
 /**
  * A company on the Work screen: its mark on a square of cells two a side and a row for the name under it (Portfolio.md
  * P12). From `lg` up the four stand in one row, a quarter of the band each (P10, his, 2026-09-21); below it two to a
  * row, so the section is still one screen on a phone. The mark is the same two cells everywhere — 132px on a pointer,
  * 156px on touch — centred in the slot with its name centred under it; the columns either side are air, for now.
  */
-const MARK: Record<string, Span> = { base: { cols: 2, rows: 3 }, sm: { cols: 3, rows: 3 }, md: { cols: 4, rows: 3 }, lg: { cols: 3, rows: 3 }, xl: { cols: 4, rows: 3 } };
-const STACK_SPAN: Record<string, Span> = { base: { cols: 4, rows: 5 }, sm: { cols: 6, rows: 5 }, md: { cols: 8, rows: 5 }, lg: { cols: 7, rows: 5 }, xl: { cols: 10, rows: 5 } };
-const SKILLS_SPAN: Record<string, Span> = { base: { cols: 4, rows: 4 }, sm: { cols: 6, rows: 4 }, md: { cols: 8, rows: 4 }, lg: { cols: 5, rows: 5 }, xl: { cols: 6, rows: 5 } };
-const NOTE: Record<string, Span> = { base: { cols: 4, rows: 2 }, sm: { cols: 6, rows: 3 }, md: { cols: 8, rows: 3 }, lg: { cols: 6, rows: 3 }, xl: { cols: 8, rows: 3 } };
+const MARK: Record<string, Span> = { base: { cols: 3, rows: 4 }, sm: { cols: 3, rows: 3 }, md: { cols: 4, rows: 3 }, lg: { cols: 3, rows: 3 }, xl: { cols: 4, rows: 3 } };
+const STACK_SPAN: Record<string, Span> = { base: { cols: 6, rows: 6 }, sm: { cols: 6, rows: 5 }, md: { cols: 8, rows: 5 }, lg: { cols: 7, rows: 5 }, xl: { cols: 10, rows: 5 } };
+const SKILLS_SPAN: Record<string, Span> = { base: { cols: 6, rows: 6 }, sm: { cols: 6, rows: 4 }, md: { cols: 8, rows: 4 }, lg: { cols: 5, rows: 5 }, xl: { cols: 6, rows: 5 } };
+const NOTE: Record<string, Span> = { base: { cols: 6, rows: 3 }, sm: { cols: 6, rows: 3 }, md: { cols: 8, rows: 3 }, lg: { cols: 6, rows: 3 }, xl: { cols: 8, rows: 3 } };
 /** Bars and a wrapping row of chips need a third row on a phone; a note does with two. */
-const TALL_NOTE: Record<string, Span> = { ...NOTE, base: { cols: 4, rows: 3 } };
-const CONTACT: Record<string, Span> = { base: { cols: 4, rows: 4 }, sm: { cols: 6, rows: 4 }, md: { cols: 8, rows: 4 }, lg: { cols: 8, rows: 4 }, xl: { cols: 8, rows: 4 } };
+const TALL_NOTE: Record<string, Span> = { ...NOTE, base: { cols: 6, rows: 5 } };
+const CONTACT: Record<string, Span> = { base: { cols: 6, rows: 5 }, sm: { cols: 6, rows: 4 }, md: { cols: 8, rows: 4 }, lg: { cols: 8, rows: 4 }, xl: { cols: 8, rows: 4 } };
 
 const header = (id: string, index: string, label: string, title: string, span = HEADER, alignY: "start" | "end" = "end"): PortfolioItem => ({
   id,

@@ -248,7 +248,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@no-origins/ui/componen
 import type { Responsive } from "@no-origins/ui/components/grid";
 import { cn } from "@no-origins/ui/lib/utils";
 
-import { band, SectionHeader, Specimen } from "@/components/specimen";
+import { band, onPhone, SectionHeader, Specimen } from "@/components/specimen";
 import type { PageContent, Span } from "@/content";
 
 const ROWS = [
@@ -266,7 +266,7 @@ const ROWS = [
  * stacks what it holds already, and the probe says which one needs a row there.
  */
 const CARD = (rows: number): Responsive<Span> => ({
-  base: { cols: 4, rows },
+  base: { cols: 6, rows: onPhone(rows) },
   sm: { cols: 6, rows },
   md: { cols: 8, rows },
   lg: { cols: 6, rows },
@@ -1211,7 +1211,7 @@ export const MOLECULES: PageContent = {
       },
       {
         id: "Skeleton in place",
-        span: { ...CARD(5), base: { cols: 4, rows: 6 } },
+        span: { ...CARD(5), base: { cols: 6, rows: onPhone(6) } },
         render: () => (
           <Specimen name="Skeleton in place" note="What a card looks like while it loads — the atoms above, composed.">
             <Card className="w-80">
