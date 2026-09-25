@@ -160,6 +160,11 @@ phone was re-measured, not scaled:
 - **The Work marks** — *"the icons are too big in the mobile"* — **are two cells a side on every field** (P12's rule,
   now held in `CompanyMark` as well as the span): 114px on a 390 phone, 156 before; two to a row in three-column
   slots, four rows tall, so a two-line name has its room.
+  *Then one cell on a phone, the same evening:* *"in mobile, in work reduce the logos size more."* Marks are sized in
+  cells, not tokens, so the next size down on the grid is one cell: **46 to 57px on a phone** (51 on a 390), two cells
+  from a tablet up as P12 has it. The slots are three rows, the name has the two under the mark, and "Terribly Tiny
+  Tales" still takes two lines on the narrower phones. At one cell Radise's wordmark is small — it is wide — and the
+  names in `heading` now outweigh the marks.
 - **Everything else took the rows it needed at a phone's cell**, measured by `e2e/.mcp/phone-sweep.mjs` (every page,
   every run of text and every image against its own box): Skills six, the notes three, Languages and Hobbies five,
   Contact five; the degree wraps to two lines instead of an ellipsis. Nothing clips from 360 to 430 wide, on a

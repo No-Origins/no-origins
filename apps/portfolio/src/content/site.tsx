@@ -43,10 +43,11 @@ const LINK_ROW: Record<string, Span> = FACT;
 /**
  * A company on the Work screen: its mark on a square of cells two a side and a row for the name under it (Portfolio.md
  * P12). From `lg` up the four stand in one row, a quarter of the band each (P10, his, 2026-09-21); below it two to a
- * row, so the section is still one screen on a phone. The mark is the same two cells everywhere — 132px on a pointer,
- * 156px on touch — centred in the slot with its name centred under it; the columns either side are air, for now.
+ * row, so the section is still one screen on a phone. The mark is two cells from a tablet up — 132px on a pointer,
+ * 156px on touch — and one on a phone, 46 to 57px (his, 2026-09-25), centred in the slot with its name centred under
+ * it and two rows for the name; the columns either side are air, for now.
  */
-const MARK: Record<string, Span> = { base: { cols: 3, rows: 4 }, sm: { cols: 3, rows: 3 }, md: { cols: 4, rows: 3 }, lg: { cols: 3, rows: 3 }, xl: { cols: 4, rows: 3 } };
+const MARK: Record<string, Span> = { base: { cols: 3, rows: 3 }, sm: { cols: 3, rows: 3 }, md: { cols: 4, rows: 3 }, lg: { cols: 3, rows: 3 }, xl: { cols: 4, rows: 3 } };
 const STACK_SPAN: Record<string, Span> = { base: { cols: 6, rows: 6 }, sm: { cols: 6, rows: 5 }, md: { cols: 8, rows: 5 }, lg: { cols: 7, rows: 5 }, xl: { cols: 10, rows: 5 } };
 const SKILLS_SPAN: Record<string, Span> = { base: { cols: 6, rows: 6 }, sm: { cols: 6, rows: 4 }, md: { cols: 8, rows: 4 }, lg: { cols: 5, rows: 5 }, xl: { cols: 6, rows: 5 } };
 const NOTE: Record<string, Span> = { base: { cols: 6, rows: 3 }, sm: { cols: 6, rows: 3 }, md: { cols: 8, rows: 3 }, lg: { cols: 6, rows: 3 }, xl: { cols: 8, rows: 3 } };
