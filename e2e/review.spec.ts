@@ -43,6 +43,9 @@ for (const app of APPS) {
       const response = await page.goto(`${app.base}${route}`, { waitUntil: "networkidle" });
       expect(response, `no response for ${title}`).not.toBeNull();
       expect(response!.status(), `${title} returned ${response!.status()}`).toBeLessThan(400);
+      // A grid with an intro (Grid.md D31) draws itself in and holds page 1 back until the page has loaded — at most
+      // 3 s, then a pass and the reveal. The screenshot is of what it hands over to; a page stuck in it fails here.
+      await page.waitForFunction(() => !document.querySelector('[data-slot="grid"][data-intro]'), null, { timeout: 10_000 });
       await page.waitForTimeout(400);
 
       const file = `e2e/screenshots/${testInfo.project.name}/${app.name ? `${app.name}__` : ""}${slug(route)}.png`;

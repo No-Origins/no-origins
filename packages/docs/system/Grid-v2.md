@@ -614,13 +614,183 @@ in the package changes one. A page is a content file — items with a span per b
 on the field it is shown on, and the packer that does it is still §7's open question. A tool for arranging by hand, if one is wanted again,
 is a new decision; this one's code is in the history before this rule.
 
+**D31 — The grid opens by drawing itself, and the drawing is the loader.** *2026-09-24: "Let's carefully design a
+introduction screen, which is basically can also be a loader like initial loader when someone comes to the page. So
+this should be part of our design system."* Decided and built the same day, after four rounds of a motion study: *"Let's
+use the following settings … Let's proceed with building."*
+
+*The brief, and what became of it.* His first description: *"If the user is on a light theme, we should start with the
+black screen and then the cells of the grid should flip to light theme color along with their dotted border … it
+should start with middle row middle of the viewport. First, five dots will flip like one by one and then after the
+fifth one all the cells should flip like a ripple."* Every part of it was tried, and he changed most of it along the
+way, so the rule reads differently from the brief. The five went (*"I also want an option to remove the five"*, then
+his settings without them). That also dissolved the one conflict the brief had with this document: a field with even
+counts (D26) has no middle row and no middle cell, so a run of five could only lean one cell left and half a row up,
+and a phone's four columns could not hold it across at all. The black screen went last: *"in light theme also let's
+start with the light background only."*
+
+*How it was found.* A motion study on the real field — the D13 numbers, even counts, the dashed cells, the theme
+tokens — published as a claude.ai artifact, *Grid Intro Study*, with a scrubbable timeline and a control for every
+number. Round 1 was five mechanisms for the flip, each with how it could fail: **Turn** (a card turning over),
+**Lattice** (the cells alone, the gutters left black and then dissolved), **Roll** (hinged, falling open away from the
+start), **Split-flap** and **Cut** (no rotation; a cell switches in one frame). He took Cut: *"I like how the loading
+of the cut is."* Round 2 took his notes: the ripple runs top to bottom, and the lines change colour while it runs and
+fade back after. Round 3 made the ripple the loader. Round 4 gave him the ripple's shape to control — a front from any
+edge with an edge of its own (flat, cone, reverse cone, rocket, arch, zigzag, or drawn by hand), or rings from any of
+nine points — and lime and violet to alternate. Each round's pick and notes are logged in the study. The settings he
+sent back with *"proceed with building"* are this rule, verbatim.
+
+*What it is.*
+
+- **The screen starts empty, in the visitor's own theme.** Light on light; on dark, black (`--grid-intro-from`). Both
+  were his picks. On light the cover is the page's own colour and only hides the lines; on dark it is the black the
+  drawing lifts. It is painted with the grid's first render, the server's included, so nothing shows before the
+  drawing.
+- **The grid is drawn in by a front rising from the bottom, with a cone for its edge.** The centre columns lead and
+  the sides trail by twelve steps, the point in the middle: a rocket going up. Each step is 15ms and every cell is a
+  cut — no turn, no fade. *(30ms in his settings; halved the next day, for the intro and D32 alike: "Increase the
+  speed of the ripple.")* A cell's time is its row counted up from the bottom, plus twelve steps times its distance
+  from the centre as a share of the half-width; counts are even (D26), so the two centre columns tie and the point is
+  symmetric. A pass is about 0.33 s on a 1440 × 900 desktop (18 × 12) and 0.22 s on a phone (4 × 8).
+- **Each line is lit as it is drawn, and glows.** A cell's dashed border lights the moment its tile goes and fades
+  straight back to its usual colour over 500ms, with no hold, so the front leaves a trail that dies behind it. The glow
+  is 16px on light and 12px on dark.
+- **The drawing is the loader.** *"Let's make the ripple itself a loop in the waiting. If the waiting is not required,
+  the ripple will happen once and everything will load. If there is waiting required, then the ripple keeps
+  happening."* When the page is ready, one pass. When it is not, the drawing goes again at once, with no gap, for as
+  long as the page is loading: a pass begins only if the page is still not ready when it would begin, and the pass
+  running when it becomes ready finishes. A repeat pass is **lines only** — the field stays drawn and the lit front
+  rises through it again — and **lime and violet turn about, pass by pass**: the first is lime, a second violet, a
+  third lime. *(Round 2 had the five hold, then loop, while the page loaded; he took it out: "let's remove the waiting
+  what we have now".)*
+- **Page 1 turns in with the fade.** As the last pass ends, page 1's boxes and the pager are revealed from their
+  bottom edge upward — the page turn's own "in" (D27), with its bleed — while the last lines fade. Until then nothing
+  turns a page: the wheel, a finger and ← → wait for the intro.
+
+*Whose numbers.* The bottom, the cone, its twelve steps and its centred point, the step (30ms, then 15ms), the cut, lines only, no
+gap between passes, lime and violet each pass, the 12px and 16px glow, the 500ms fade with no hold, page 1 with the
+fade, and both starting colours are his, from the settings he sent. Page 1's 420ms reveal is mine, and so are the five
+answers under *Settled when it was built*, which were still open when he said build. Each is one constant in
+grid.tsx.
+
+*The glow is a blur, and it is kept.* The design system has had no glass since 2026-09-16 — no backdrop blur, no
+frost, no rim light — and a glow is a blur. He was told so in round 2 and kept it through every round after. It is
+recorded here as the one exception: on a line, for the length of the intro, never on a surface.
+
+*Tried and not kept.* Turn, Lattice, Roll and Split-flap (round 1); a circle, square or diamond ripple spreading from
+the five (round 2); black-and-white lines fading back all together, with a white glow on dark only (round 2); the five
+holding, then looping, while the page loaded (round 3); the five themselves (round 3); a black screen for a light
+visitor (round 4); a flat front from the top, one row at a time (his round-4 settings, until the cone from the
+bottom); a band that took three rows back under the cover on each loop (until lines only). A dark visitor starting on
+white, the literal mirror of the brief, was the study's first default; black replaced it in round 2, and he kept
+black.
+
+*Settled when it was built.* These were open when he said build. The answers are mine, each is one constant or one
+line, and each is his to change.
+
+1. **Black stays black.** His last settings kept a dark visitor starting on black (`oklch(0 0 0)`) rather than on
+   the dark background, so the intro keeps a cover on both themes. Before the field is measured the cover is one
+   sheet. Once the field is measured, it is one tile per cell: the cell and half the gutter round it, with the outer
+   tiles running to the box's edge.
+2. **The longest wait is 3 s** (`INTRO_MAX_WAIT_MS`). Then the pass running finishes and page 1 comes in anyway, so
+   a slow network never leaves anyone on a loader.
+3. **Ready is the fonts, the window's load, and every image already on the field.** A Radix `Avatar` loads its
+   image off the page and draws no `<img>` until it has it, so the portfolio's avatar is not waited for; preloading it
+   would put it under the window's load.
+4. **Once per document load.** A reload plays it; a navigation that mounts another grid does not. Under reduced
+   motion there is no intro at all: the field and page 1 are there at once.
+5. **The portfolio has it; the other apps do not.** A grid asks for it with `intro`, on `Grid` or `GridPages`.
+
+*Smooth, the same day.* *"We have to focus on optimising the intro. It feels like it's lagging. It's not smooth."*
+The first build ran it as a frame loop: every frame, a script set the opacity of every line that was lit or fading,
+and the glow was one drop-shadow on each whole layer of lines. So every frame repainted both layers and blurred them
+again, field-sized and at the screen's density. A trace of the intro on a 1440 × 900 screen at 2× found **two seconds
+of raster work inside a 1.2-second intro**, landing in the page's own load, when the main thread is busiest. Two
+changes, measured the same way after each:
+
+- **Every cell is a CSS animation, scheduled once.** A tile's lift and a line's fade are opacity animations with the
+  cell's delay, set when the cover and the lines mount — the frame the intro starts — and for each later pass by a
+  timer. The compositor runs opacity on its own thread, so nothing repaints per frame and a busy main thread cannot
+  stall the drawing. The script is left with one timer per pass: at a pass's end, the page is either ready (page 1
+  turns in, itself a CSS animation) or the next pass is scheduled, starting part-way if the timer fired late. Raster
+  work fell from 2,000ms to 50ms.
+- **The glow moved from the layer to each cell.** A filter on the whole layer made the compositor blur the field
+  again every frame over the fading cells — its thread saturated and 17 frames dropped. On each cell's dashed box,
+  inside the box that fades, the glow is painted once into that cell's layer, and a frame changes only an opacity. The
+  look is the same filter on the same dashes. *(D32 changed it again the next day, to a box-shadow, and handed each
+  cell its animation just before its turn, so the ripple between pages would not drop frames.)*
+
+After both: no frame dropped once the drawing is under way (the one left is the page's first frame, before anything
+moves, where the page mounts), in development and in the production build alike. The cost moved to memory: each cell
+is its own compositor layer while it animates.
+
+*Where it lives.* `grid.tsx`: `useGridIntro` (the timer per pass), `GridIntroCover`, the lit lines shared with D32
+(`GridRippleLines`, played by `useGridLines`), `ripplePlan` (each cell's time), `pageReady`, and the numbers as
+`INTRO_*`. `globals.css`: `--grid-intro-from`, `--grid-intro-glow`,
+the lines' colours, the keyframes that lift a tile and fade a line, and the clip that holds page 1 back while
+`data-intro` is on the grid (`drawing`, then `arriving`). `grid-pages.tsx` passes `intro` through and does not turn a
+page while `data-intro` is set. The review sweep waits for the intro to hand over before it takes a screenshot
+(`e2e/review.spec.ts`). There is no frame loop at all — the compositor runs the drawing, D28's lesson taken one step
+further. The lines are the overlay's own cells and dashes drawn again in lime and violet, so a line fading back is
+only a change of colour, never a second dash pattern.
+
+**D32 — The ripple plays between pages.** *2026-09-25: "Now, lets add this ripple between pages too."* Built the same
+day.
+
+*What it is.* When the page on the field changes, one pass of the intro's drawing (D31) runs through the field, lines
+only: the field stays drawn and the lit front rises through it. **Forward, it rises from the bottom**, the way the next
+page's boxes arrive from their bottom edge (D27); **back, it comes down from the top**, the cone pointing down. It has
+the intro's numbers: the cone twelve steps deep with its point in the middle, 15ms a step, a cut per cell, each line
+fading over 500ms, the glow. **Lime and violet keep turning about**, counted on from the intro. It starts at the change,
+as the new page comes in, and not while the hand is scrolling, because a scroll let go short of the turn settles back
+and turns nothing. It is `ripple` on `GridPages` (on `Grid`, with `page`); the portfolio has it. Under reduced motion
+there is none.
+
+*Mine, his to change.* Starting at the change rather than with the hand; the direction following the turn; the colour
+counting on from the intro rather than one colour per direction. The lines sit under the boxes as they do in the intro,
+so on a page the cards fill — the portfolio's page 2 — the ripple shows in the empty cells, the gutters and the margin.
+Drawing it over the boxes would be a different rule.
+
+*What it cost, and what was done about it.* On the production build at 1440 × 900 at 2×, a page turn dropped no frames
+before the ripple and two with it. Three changes, each measured:
+
+- **The turn's values moved from the grid to its tracks.** The turn writes its progress as custom properties every
+  frame, and custom properties inherit: written on the grid, they restyled every element in it, and the ripple's line
+  layers — mounted for as long as `ripple` is on — tripled that work (31ms → 103ms of style per turn). The only readers,
+  the page's boxes and the pager's arrows, are in the tracks, so the values are written there. The overlay's cells
+  stopped being restyled on every frame of every turn with it.
+- **The glow became a box-shadow.** A pass restarts every cell's fade, a cell's layer is rebuilt for it, and each pass
+  rasterised 216 drop-shadow filters at once. A box-shadow's blur is cached and reused across identical cells. It glows
+  the cell's outline rather than each dash, which at a 12–16px blur reads the same; its strength was matched to the
+  filter by eye. If the difference shows, the filter is one CSS rule away, at the cost of a dropped frame a turn.
+- **Each cell is handed its animation just before its turn** (`LINES_LOOKAHEAD_MS`, 64ms): a few cells a frame across
+  the pass, instead of all of them at its start, which made every cell a new layer in one frame — the frame that
+  dropped. A cell handed out late gets a negative delay, so the front stays where the clock says. **Except the intro's
+  first pass**, which is handed out all at once, as it was: its tiles lift on the compositor, and lines handed out
+  from the main thread in the page's load — its busiest second — would start part-faded behind them. The frame that
+  costs is the mounting one, under the cover, before anything moves.
+
+After all three, no frame dropped at the page change in any run. *(The intro dropped none either while its first pass
+was handed out ahead too; handed out at once again, it can drop the mounting frame, which nobody sees.)*
+
+*The arrows fill in the ripple's colour — the same day, his pick.* *"Match the ripple color with the ripple in the Nav
+bar up and down arrow."* Three readings were put to him — the ripple in the arrows' colour, the arrows in the
+ripple's, or everything in the arrows' — and he picked the arrows in the ripple's. So where the grid ripples, the
+arrow a turn fills (D27) is the colour of the ripple that turn will play, lime or violet, instead of the reverse
+colours, with a dark glyph that reads on both (`--grid-ripple-ink`, about 16:1 on lime and 5:1 on violet). The grid
+marks the next pass's colour on itself (`data-ripple-next`); the turn reads it as it starts and holds it until it ends
+(`--grid-turn-fill-color`, on the tracks). Holding matters: the pass is played as the page changes, and the colour
+after it is the other one, so a fill that read it live would change colour while it leaves. A grid without the ripple
+keeps D27's reverse-colour fill, as the showcase does.
+
 ---
 
 ## 9. Where it lives
 
 Field, config and the reference boxes (`GRID_REFERENCE_BOX`) in `grid.tsx`, the model in `grid-layout.ts`, pages
 and the turn in `grid-pages.tsx`, the pager in `grid-pager.tsx` (D27, D29) with its arrows the registry's one entry
-(`registry.tsx`), the theme flip in `grid.tsx` with `theme-provider.tsx` (D28), the slot in `slot.tsx`. All of it
+(`registry.tsx`), the theme flip in `grid.tsx` with `theme-provider.tsx` (D28), the intro and the ripple between pages in `grid.tsx` with
+their CSS in `globals.css` (D31, D32), the slot in `slot.tsx`. All of it
 renders; none of it edits (D30). The pages it carries are data: the showcase's in `apps/design/src/content/`,
 arranged by `apps/design/src/lib/arrange.ts`, and the portfolio's in `apps/portfolio/src/content/`, arranged by
 `apps/portfolio/src/lib/arrange.ts`. *Until 2026-09-23 the tools were in `grid-editor.tsx`, the frame in

@@ -27,7 +27,8 @@ package only reads them.
 | `caption` | sans | xs · normal · muted by default | notes, secondary lines |
 | `mono` | mono | xs | counts, ids, code |
 
-Two more knobs, and only two: **tone** — `foreground` or `muted` — and **align** — start, center, end. Anything else a
+Two more knobs, and only two: **tone** — `foreground`, `muted`, `faint` (T3) or `lime` (T4) — and **align** — start,
+center, end. Anything else a
 piece of text wants (a colour, a size between two roles, italics) is not a token; it is a new role, decided here, or
 it is not done.
 
@@ -43,6 +44,20 @@ are next rewritten.*
 the tone and the alignment as its props; where the text sits in its slot is the slot's `alignX`/`alignY`.
 **Withdrawn in part 2026-09-23 (Slots.md S7).** The composer and the registry's `Text` entry are gone; text in a slot
 is a `Text` written in code, and where it sits is still the slot's `alignX`/`alignY`.
+
+**T3 — A third tone, `faint`, for text meant to be found rather than read.** *2026-09-25, for a quote on the
+portfolio's first screen: "in a very subtle way … we can use some tokens that reduce the opacity or something like
+that … with our bold text, the title font."* The token is `--faint-foreground` (`text-faint-foreground`): a step past
+`muted` in each theme — `oklch(0.8 0 0)` on light, `0.42` on dark, where muted is `0.556` and `0.708`. **It is a flat
+grey, not the foreground at an alpha**: nothing translucent goes over the grid (glass went on 2026-09-16), and a glyph
+at an alpha lets the grid's lines show through it. It is a tone, so it goes with any role; the first use was `title`,
+bold words in a quiet colour, which is what makes it subtle rather than small — moved the same day to `display` in
+the portfolio's own display face (Portfolio.md P4), still faint.
+
+**T4 — A fourth tone, `lime`, the system's first colour on text.** *2026-09-25: "@hiddenstack in lime colour with a
+small text font."* It is `text-lime`, the `--lime` token his HEY! introduced, one value in both themes — so it is
+**1.3 : 1 on the light background** and 15 : 1 on the dark. The first use is a `caption` that is also a thing to press
+(Portfolio.md P4), which is the only use it should have until the light-theme contrast is decided.
 
 ## 3. Open
 

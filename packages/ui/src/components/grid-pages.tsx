@@ -20,7 +20,7 @@ import { resolvePages, type GridLayout, type GridLayoutItem } from "@no-origins/
  * host's toolbar play the same turn over time. Only the boxes move — the field and the pager stay where
  * they are, because they are the room and the boxes are the furniture.
  *
- * The progress lives in `--grid-turn` on the grid, written per frame without a render: each box's clip and the
+ * The progress lives in `--grid-turn` on the grid's tracks, written per frame without a render: each box's clip and the
  * pager's fill are CSS functions of it. **Only the box's visible height changes** (D27): the box is CLIPPED, never
  * scaled, so the content inside keeps its exact size and position and nothing is squeezed or narrowed. Scaling in Y
  * squashed the glyphs and scaling uniformly changed the width; both were sent back, 2026-09-21.
@@ -98,9 +98,18 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
   onPageRef.current = onPage
   const range = Math.max(1, (metrics?.gridH ?? 0) * RANGE_OF_FIELD)
 
+  // The turn's values are written on the grid's TRACKS, not its root: the page's boxes and the pager's arrows are the
+  // only readers, and custom properties inherit, so a write on the root restyled every element in the grid every frame
+  // of a turn — the overlay's cells and, since D32, the ripple's line layers (three times the style work, and dropped
+  // frames, measured 2026-09-25). The root keeps the defaults (globals.css), which the tracks override.
+  const target = React.useCallback(
+    () => rootRef.current?.querySelector<HTMLElement>(':scope [data-slot="grid-tracks"]') ?? rootRef.current,
+    [],
+  )
+
   const write = React.useCallback((p: number) => {
     progress.current = p
-    const el = rootRef.current
+    const el = target()
     if (!el) return
     el.style.setProperty("--grid-turn", String(p))
     el.style.setProperty("--grid-turn-abs", String(Math.abs(p)))
@@ -113,13 +122,28 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
     const inward = phaseRef.current === "in"
     el.style.setProperty("--grid-turn-fill-front", String(inward ? dirRef.current : p))
     el.style.setProperty("--grid-turn-fill-back", String(inward ? p : 0))
-  }, [])
+  }, [target])
 
   const setPhase = React.useCallback((phase: TurnPhase, dir: 1 | -1) => {
+    const from = phaseRef.current
     phaseRef.current = phase
     dirRef.current = dir
-    const el = rootRef.current
+    const el = target()
     if (el) {
+      // The arrow fills in the colour of the ripple this turn will play (Grid.md D32, his pick, 2026-09-25), read off
+      // the grid as the turn starts and held until it ends: the pass is played as the page changes, and the colour
+      // after it is the other one, so reading it live would turn the fill's colour as it leaves. No ripple on the
+      // grid, and the arrows keep their own fill.
+      if (from === "idle" && phase !== "idle") {
+        const next = rootRef.current?.dataset.rippleNext
+        if (next) {
+          el.style.setProperty("--grid-turn-fill-color", `var(--${next})`)
+          el.style.setProperty("--grid-turn-fill-ink", "var(--grid-ripple-ink)")
+        } else {
+          el.style.removeProperty("--grid-turn-fill-color")
+          el.style.removeProperty("--grid-turn-fill-ink")
+        }
+      }
       // Out falls from 1, in rises from 0 — set with the progress so no frame sees one without the other. The box
       // is anchored to one edge and clipped from the other, so the motion runs in the direction of travel: forward,
       // a box keeps its top and loses its bottom on the way out, and the next page is revealed from its bottom edge
@@ -132,7 +156,7 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
       el.style.setProperty("--grid-turn-hide-bottom", anchorBottom ? "0" : "1")
     }
     setTurn({ phase, dir })
-  }, [])
+  }, [target])
 
   const stop = React.useCallback(() => {
     if (raf.current) window.cancelAnimationFrame(raf.current)
@@ -225,6 +249,8 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
     (deltaPx: number) => {
       const phase = phaseRef.current
       if (phase === "out" || phase === "in" || count <= 1) return false
+      // Nothing turns while the grid is still drawing itself (Grid.md D31): page 1 has not arrived yet.
+      if (rootRef.current?.hasAttribute("data-intro")) return false
       let p = Math.max(-1, Math.min(1, progress.current + deltaPx / range))
       // Nothing before the first page or after the last: the progress stops at 0 in that direction.
       if (shownRef.current <= 0) p = Math.max(0, p)
@@ -373,6 +399,10 @@ export type GridPagesProps = {
   onPageChange?: (page: number) => void
   /** ← and → turn the page while nothing is focused that wants the keys. The wheel, a finger and the pager's arrows always do. */
   keyboard?: boolean
+  /** Open by drawing the grid in, holding the drawing while the page loads (Grid.md D31). */
+  intro?: boolean
+  /** Run the intro's drawing through the field as the page turns: up going forward, down going back (Grid.md D32). */
+  ripple?: boolean
   className?: string
   onMetrics?: (metrics: GridMetrics) => void
 }
@@ -386,6 +416,8 @@ function GridPages({
   defaultPage = 0,
   onPageChange,
   keyboard = true,
+  intro,
+  ripple,
   className,
   onMetrics,
 }: GridPagesProps) {
@@ -419,12 +451,13 @@ function GridPages({
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
       if (target && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))) return
+      if (rootRef.current?.hasAttribute("data-intro")) return
       if (event.key === "ArrowRight") setPage(page + 1)
       else if (event.key === "ArrowLeft") setPage(page - 1)
     }
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
-  }, [keyboard, page, setPage])
+  }, [keyboard, page, setPage, rootRef])
 
   const items = pages?.[Math.min(shown, count - 1)]?.items ?? []
 
@@ -432,13 +465,26 @@ function GridPages({
     <Grid
       ref={rootRef}
       overlay={overlay}
+      intro={intro}
+      ripple={ripple}
+      page={Math.min(shown, count - 1)}
       onMetrics={handleMetrics}
       // touch-none: a finger on the field drives the turn, and the browser must not pan or refresh under it.
       className={cn("touch-none", className)}
       {...handlers}
     >
       <GridPageSurface items={items} turn={turn} renderItem={renderItem} />
-      <GridPager page={Math.min(shown, count - 1)} count={count} onTurn={(dir) => setPage(page + dir)} bar={layout.bar} />
+      {/* The arrows wait for the intro like the wheel, the finger and the keys (D31): hidden by its cover, they can still
+          take focus, and a turn under the cover would hand over to the wrong page. */}
+      <GridPager
+        page={Math.min(shown, count - 1)}
+        count={count}
+        onTurn={(dir) => {
+          if (rootRef.current?.hasAttribute("data-intro")) return
+          setPage(page + dir)
+        }}
+        bar={layout.bar}
+      />
     </Grid>
   )
 }

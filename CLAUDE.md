@@ -132,6 +132,25 @@ rules in short, each one his:
   top edge, falls
   from above until the box is covered, the theme commits underneath, and the sheet dissolves. `GridThemeFlip` in `grid.tsx`, GSAP, one transform; the light tokens sit on `.light` as well as `:root` so
   the sheet wears the theme before the page does. No grid on the page: the switch is instant.
+- **The grid opens by drawing itself, and the drawing is the loader (D31, 2026-09-24).** `intro` on `Grid` or
+  `GridPages`; the portfolio has it. A cover in the visitor's own colour (black on dark, `--grid-intro-from`) lifts
+  cell by cell as a front rises from the bottom with a cone for its edge — twelve steps deep, 15ms a step, every cell a
+  cut. Each line lights as it is drawn and fades back over 500ms, glowing 16px on light and 12px on dark: **the one
+  blur the system keeps**, on a line, for the length of the intro. While the page loads (fonts, window load, images on
+  the field, 3 s at most) the drawing goes again at once, lines only, lime and violet turn about; then page 1 and the
+  pager are revealed from their bottom edge upward, the turn's own "in". Once per document load, none under reduced
+  motion, and nothing turns a page meanwhile. **No frame loop**: every tile and line is a CSS opacity animation with
+  its cell's delay, run by the compositor, handed to each cell just before its turn (the intro's first pass all at once,
+  in step with the tiles); the glow is a box-shadow on each
+  cell (its blur is cached across cells), never a filter on a whole layer — a per-frame writer with a layer-wide blur
+  lagged (2 s of raster in a 1.2 s intro). `useGridIntro` is a timer per pass; the numbers are `INTRO_*` in
+  `grid.tsx`, his except the reveal and the wait.
+- **The same ripple plays between pages (D32, 2026-09-25).** `ripple` on `GridPages`; the portfolio has it. When the
+  page changes, one lines-only pass runs through the field — up from the bottom going forward, down from the top going
+  back — lime and violet counting on from the intro — and **the pager's arrow fills in that turn's ripple colour**
+  (his pick), read off the grid's `data-ripple-next` as the turn starts and held until it ends. **The turn's custom
+  properties are written on the grid's tracks, not its root**: they inherit, and on the root they restyled every
+  element in the grid every frame of a turn.
 - **Nothing forces a breakpoint (D11).** `resolveField` takes a width and a height and nothing else; no grid
   component takes a `breakpoint` prop. To see another size, give the grid a box of that size — a browser window, a
   device in the review sweep. `GRID_REFERENCE_BOX` (`grid.tsx`) is each breakpoint's reference size, which a page
@@ -236,7 +255,8 @@ After any UI change, look at the result before reporting done.
 
 1. `pnpm review` boots the portfolio on :3000, the showcase on :3001 and engineering on :3003 (or reuses running
    ones), visits every route in `ROUTES`, `DESIGN_ROUTES` and `ENGINEERING_ROUTES` in `e2e/review.spec.ts` on desktop
-   (1440x900) and mobile (Pixel 7) in both themes, fails on a route that answers 400+ or throws, echoes
+   (1440x900) and mobile (Pixel 7) in both themes, waits for a grid's intro (D31) to hand over, fails on a route that
+   answers 400+ or throws, echoes
    `console.error` output, and writes full-page screenshots to `e2e/screenshots/<project>/<route>.png`. CI runs the
    same sweep and uploads the screenshots.
 2. Open the relevant PNGs with the Read tool and inspect them. Narrow with `pnpm review --project=desktop` or

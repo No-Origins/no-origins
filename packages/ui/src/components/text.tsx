@@ -2,13 +2,18 @@ import * as React from "react"
 import { cn } from "cn"
 
 /**
- * Text (Type.md). Seven roles, read off the showcase as it stood on 2026-09-21; two knobs besides the role, tone and
- * alignment. Every piece of text in an app is one of these — a page does not reach for `text-2xl` on its own (T1).
+ * Text (Type.md). Seven roles, read off the showcase as it stood on 2026-09-21; two knobs besides the role, tone (four
+ * since 2026-09-25) and alignment. Every piece of text in an app is one of these — a page does not reach for
+ * `text-2xl` on its own (T1).
  */
 
 export const TEXT_ROLES = ["display", "title", "heading", "label", "body", "caption", "mono"] as const
 export type TextRole = (typeof TEXT_ROLES)[number]
-export const TEXT_TONES = ["foreground", "muted"] as const
+/**
+ * `faint` is for text meant to be found rather than read — a step past muted, flat, in both themes (Type.md T3).
+ * `lime` is the system's lime (`--lime`), one value in both themes, for a word that is also a thing to press (T4).
+ */
+export const TEXT_TONES = ["foreground", "muted", "faint", "lime"] as const
 export type TextTone = (typeof TEXT_TONES)[number]
 export const TEXT_ALIGNS = ["start", "center", "end"] as const
 export type TextAlign = (typeof TEXT_ALIGNS)[number]
@@ -23,7 +28,7 @@ const ROLE: Record<TextRole, { className: string; tag: keyof React.JSX.Intrinsic
   mono: { className: "font-mono text-xs", tag: "p", tone: "foreground" },
 }
 
-const TONE: Record<TextTone, string> = { foreground: "text-foreground", muted: "text-muted-foreground" }
+const TONE: Record<TextTone, string> = { foreground: "text-foreground", muted: "text-muted-foreground", faint: "text-faint-foreground", lime: "text-lime" }
 const ALIGN: Record<TextAlign, string> = { start: "text-start", center: "text-center", end: "text-end" }
 
 export type TextProps = Omit<React.ComponentProps<"p">, "children"> & {
