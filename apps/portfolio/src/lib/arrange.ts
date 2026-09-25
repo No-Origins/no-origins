@@ -18,11 +18,12 @@ export const TOP_ROWS: Record<GridBreakpoint, number> = { base: 0, sm: 0, md: 0,
 export const BAND = 999;
 
 /**
- * How many columns the content uses at each breakpoint, centred on the field (Portfolio.md P2). The field can be any
+ * How many columns the content uses at each breakpoint, centred on the field (Portfolio.md P2). A phone's is six, the
+ * whole field, since every field is at least six across (Grid.md D33, 2026-09-25); it was four. The field can be any
  * even count (Grid.md D12, D26); the content keeps a measure it was designed for and the rest is margin, so a 26-column
  * monitor gets the 16-column page with air around it rather than a page stretched to the edges.
  */
-export const BAND_COLS: Record<GridBreakpoint, number> = { base: 4, sm: 6, md: 8, lg: 12, xl: 16 };
+export const BAND_COLS: Record<GridBreakpoint, number> = { base: 6, sm: 6, md: 8, lg: 12, xl: 16 };
 
 export type Span = { cols: number; rows: number };
 
@@ -75,6 +76,9 @@ export function arrange(page: PortfolioPage, field: PortfolioField): GridPage[] 
         const span = resolveResponsive<Span>(item.span, bp, { cols: band, rows: 1 });
         items = placeAbove(items, item.id, Math.min(span.cols, band), span.rows, start, band, top + 1, usable);
       }
+      // Down, the page is centred with what stands over it: once the card had lines and links under it, centring the
+      // block alone left the tagline on the room's first row and the air all under the links (a phone, 2026-09-25).
+      if (over.length) items = centreDown(items, top + 1, usable);
       over = [];
       out.push({ id: `${section.id}${index ? `-${index + 1}` : ""}`, items });
       index += 1;
@@ -152,6 +156,14 @@ function placeAbove(items: GridLayoutItem[], id: string, colSpan: number, rowSpa
   if (h < 1) return moved;
   const col = Math.max(start, Math.min(start + band - colSpan, block.col + Math.floor((block.colSpan - colSpan) / 2)));
   return [...moved, { id, col, row: top - h, colSpan, rowSpan: h }];
+}
+
+/** Shift a page down so its whole block is centred in the room, floored as `centreInRoom` is; across is left alone. */
+function centreDown(items: GridLayoutItem[], first: number, usable: number): GridLayoutItem[] {
+  const block = usedBlock(items);
+  if (!block) return items;
+  const dr = first + Math.floor((usable - block.rowSpan) / 2) - block.row;
+  return dr ? items.map((item) => ({ ...item, row: item.row + dr })) : items;
 }
 
 /** A span per breakpoint, walking down to the nearest defined (the grid's own resolution rule). */

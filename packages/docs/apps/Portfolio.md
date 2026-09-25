@@ -77,7 +77,8 @@ line, 'Let the stack overflow' in the second line — and add quotes."* So `Prof
 - **In the display face** — the app's own `--font-display`, Anton, until now the HEY!'s alone — at the `display` size,
   36px, and still in the `faint` tone, which he did not take back. Anton has one weight, so the role's bold is set back
   to normal rather than let the browser fake a heavier one. Under 360px wide it steps down to `title`, as the card's
-  name does: a phone's four columns are 324px and the second line is 326px at `display`.
+  name does: a phone's four columns are 324px and the second line is 326px at `display`. *(Six columns since
+  Grid.md D33, 294 to 402px: a phone's tagline is `title` under 420.)*
 - **In curly quotes, a sentence a line** — “Start with curiosity. / Let the stack overflow.” — each line kept whole.
 - **Over the card, out of the flow.** It is an **`above`** item (`PortfolioItem.above`, `arrange.ts`): the page is
   packed and centred without it, so **the card is exactly where it was alone**, and the tagline takes the two rows
@@ -124,7 +125,8 @@ effect that we have in the logos of the work page."*
   `Button` (`ghost`, its hover fill taken off, because the band is the hover). The brand marks are **simple-icons**
   (CC0 path data; lucide dropped its brand icons at 1.0); the download is lucide's. On a pointer the **P13 band** is
   drawn behind the mark, violet, lime, violet along the row (`MarkBand` and `drawBand` in `band.tsx`, which the Work
-  screen now shares). On a phone the band is four columns, so the download wraps to a second row.
+  screen now shares). On a phone the band is four columns, so the download wraps to a second row. *(Six since
+  Grid.md D33: one row everywhere.)*
   *Resized the same hour:* *"the hover effect is over the icon — it should be under the icon, and it should reach
   from edge to edge of the cell."* Sized off the icon, as a company's band is off its mark, it was a 39 × 29 patch the
   icon's own size laid across it, lime through Discord's eyes and between X's strokes, 11px short of each side. Now it
@@ -143,6 +145,26 @@ effect that we have in the logos of the work page."*
   *And two marks a step smaller:* *"reduce the size of X icon by one token, and also the download icon."* X fills its
   whole 24-unit box and lucide's arrow is stroked, so at half the cell both read bigger than the three filled marks;
   they are one step of the grid's spacing scale (`GRID_SPACING`, 4px) smaller — 26px on a pointer, 32 on touch.
+
+**And on a phone, the same evening** — *"none of the pages, loaders, intros are optimized for mobile."* Since Grid.md
+D33 every field is at least six columns, and a phone's cell gives way to them (51px on a 390), so the portfolio's
+phone was re-measured, not scaled:
+
+- **The band on a phone is six, the whole field** (`BAND_COLS`, was four), and every phone span is six wide.
+- **The first screen stays one page on every phone from 360 to 430** — *"the row where we have socials and download
+  resume has been moved to the next page in the mobile, so that should also stay in the first page."* The card is
+  three rows on a phone (its name balanced over two lines, "Bhargav / Reddy V"), the tagline two with the handle on
+  its own line under it, and the five link cells fit one row of six. **The page is centred down with the tagline** —
+  centring the block alone had left the tagline on the room's first row and the air all under the links. On a phone
+  the fact lines' words are `body`: the cell is 51px and `heading` wrapped the years to 56.
+- **The Work marks** — *"the icons are too big in the mobile"* — **are two cells a side on every field** (P12's rule,
+  now held in `CompanyMark` as well as the span): 114px on a 390 phone, 156 before; two to a row in three-column
+  slots, four rows tall, so a two-line name has its room.
+- **Everything else took the rows it needed at a phone's cell**, measured by `e2e/.mcp/phone-sweep.mjs` (every page,
+  every run of text and every image against its own box): Skills six, the notes three, Languages and Hobbies five,
+  Contact five; the degree wraps to two lines instead of an ellipsis. Nothing clips from 360 to 430 wide, on a
+  tablet or on a desktop. **A 320 phone** (the first SE) still clips a section header and three cards: its 39px cell is
+  too short for a header's two lines. It is the one size left.
 - **Discord, X and Instagram have no URL yet.** Their cells show the mark and go nowhere — no cursor, not focusable —
   until he gives them one; this bends P6 (a link with no value is not rendered) for the row's sake, and is his to
   settle.

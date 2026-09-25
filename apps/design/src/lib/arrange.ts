@@ -26,7 +26,8 @@ export const BAND = 999;
  * even count (Grid.md D12, D26); the content keeps a measure it was designed for and the rest is margin, so a 26-column
  * monitor gets the 16-column page with air around it rather than specimens stretched to the edges.
  */
-export const BAND_COLS: Record<GridBreakpoint, number> = { base: 4, sm: 6, md: 8, lg: 12, xl: 16 };
+// A phone's band is six, the whole field, since every field is at least six across (Grid.md D33, 2026-09-25); it was four.
+export const BAND_COLS: Record<GridBreakpoint, number> = { base: 6, sm: 6, md: 8, lg: 12, xl: 16 };
 
 /**
  * Arrange a showcase page on the field it is shown on (Portfolio.md P2).

@@ -48,11 +48,19 @@ const FIRST_FIELD: ShowcaseField = {
 // a phone's four columns takes one more, since its rows of controls wrap to twice as many. A specimen whose rows
 // wrap on one breakpoint only spreads the preset and sets that breakpoint by hand.
 
+/**
+ * A phone's rows for a span measured on a touch cell. Since every field is six across (Grid.md D33, 2026-09-25) a
+ * phone's cell gives way — 51px on a 390 phone, where it was 72 — so one step down is 63px, three quarters of the 84
+ * the rows were counted in, and a phone span takes a third more of them to stay the height it was. Its six columns are
+ * wider than the four it had (366px to 324), so it wraps a little less and the round up is the margin.
+ */
+export const onPhone = (rows: number) => Math.ceil((rows * 4) / 3);
+
 /** As wide as the band, `rows` tall — `phoneRows` on a phone, where text wraps to twice the lines. */
-export const band = (rows: number, phoneRows = rows): Responsive<Span> => ({ base: { cols: BAND, rows: phoneRows }, sm: { cols: BAND, rows } });
+export const band = (rows: number, phoneRows = rows): Responsive<Span> => ({ base: { cols: BAND, rows: onPhone(phoneRows) }, sm: { cols: BAND, rows } });
 /** Half the band from `lg` up; the whole band under it. */
 export const half = (rows: number): Responsive<Span> => ({
-  base: { cols: 4, rows: rows >= 4 ? rows + 1 : rows },
+  base: { cols: 6, rows: onPhone(rows >= 4 ? rows + 1 : rows) },
   sm: { cols: 6, rows },
   md: { cols: 8, rows },
   lg: { cols: 6, rows },
@@ -60,7 +68,7 @@ export const half = (rows: number): Responsive<Span> => ({
 });
 /** A quarter of the band on xl, a half on lg and on a tablet — 276 to 420px; the whole band on a phone. */
 export const quarter = (rows: number): Responsive<Span> => ({
-  base: { cols: 4, rows },
+  base: { cols: 6, rows: onPhone(rows) },
   sm: { cols: 6, rows },
   md: { cols: 4, rows },
   lg: { cols: 6, rows },
