@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cn } from "cn"
 import { isSlotItem, SlotContent } from "@no-origins/ui/components/slot"
-import { Grid, GridItem, type GridMetrics } from "@no-origins/ui/components/grid"
+import { Grid, GridItem, rippleSpan, type GridMetrics } from "@no-origins/ui/components/grid"
 import { GridPager } from "@no-origins/ui/components/grid-pager"
 import { resolvePages, type GridLayout, type GridLayoutItem } from "@no-origins/ui/lib/grid-layout"
 
@@ -28,6 +28,8 @@ import { resolvePages, type GridLayout, type GridLayoutItem } from "@no-origins/
 
 /** One phase — out or in — in ms. Short: the turn is snappy. */
 export const TURN_MS = 160
+/** The frame between a page being set and its ripple starting (grid.tsx, `useGridRipple`). */
+const RIPPLE_START_MS = 16
 /** Settling back after the hand lets go. */
 const RELAX_MS = 120
 /** No wheel event for this long is the hand letting go. */
@@ -64,6 +66,11 @@ function usePrefersReducedMotion() {
 export type PageTurn = {
   /** The page whose boxes are on the field right now. */
   shown: number
+  /**
+   * The page the field is turning to: `shown` at rest, and the next page from the moment the last page's boxes are
+   * gone — through the hold, while the ripple runs — until it is shown. The ripple plays on this (D32).
+   */
+  coming: number
   turn: TurnState
   turning: boolean
   /** Goes on the Grid: the progress is written here. */
@@ -75,10 +82,15 @@ export type PageTurn = {
 /**
  * Drive the turn. `page` is where the caller wants to be; `shown` is the page on the field. A change of `page` plays
  * an out-phase and then an in-phase; the wheel or a finger drives the out-phase by hand and, when it completes,
- * turns the page itself and tells the caller through `onPage`.
+ * turns the page itself and tells the caller through `onPage`. `hold` is how long the field stays empty between the
+ * two — the ripple's crossing, when there is one (D32) — and the next page is only put on the field after it.
  */
-export function usePageTurn(page: number, count: number, metrics: GridMetrics | null, onPage?: (page: number) => void): PageTurn {
+export function usePageTurn(page: number, count: number, metrics: GridMetrics | null, onPage?: (page: number) => void, hold = 0): PageTurn {
   const [shown, setShown] = React.useState(page)
+  const [coming, setComing] = React.useState(page)
+  const holdRef = React.useRef(hold)
+  holdRef.current = hold
+  const holdTimer = React.useRef(0)
   const [turn, setTurn] = React.useState<TurnState>({ phase: "idle", dir: 1 })
   const reduce = usePrefersReducedMotion()
   const rootRef = React.useRef<HTMLDivElement | null>(null)
@@ -163,6 +175,8 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
     raf.current = 0
     if (settle.current) window.clearTimeout(settle.current)
     settle.current = 0
+    if (holdTimer.current) window.clearTimeout(holdTimer.current)
+    holdTimer.current = 0
   }, [])
 
   /** Run |progress| from where it is to `to` over `ms`, then `done`. */
@@ -209,7 +223,11 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
     [reduce, setPhase, tween, write],
   )
 
-  /** Finish a turn from wherever the progress is: out to 1, then arrive. */
+  /**
+   * Finish a turn from wherever the progress is: out to 1, then hold, then arrive. The hold keeps the phase at "out"
+   * with every box gone, so nothing turns and the wheel stays muted while the ripple crosses the empty field; the
+   * next page is mounted only when it has, so what it does on arriving (the bars' growth, P11) is seen.
+   */
   const complete = React.useCallback(
     (next: number, dir: 1 | -1) => {
       // From the hand, the boxes are already moving: ease out of it. From rest, ease in.
@@ -217,7 +235,15 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
       setPhase("out", dir)
       const left = 1 - Math.abs(progress.current)
       const ms = reduce ? 0 : Math.max(0, TURN_MS * left)
-      tween(1, ms, fromHand ? easeOut : easeIn, dir, () => arrive(next, dir))
+      tween(1, ms, fromHand ? easeOut : easeIn, dir, () => {
+        setComing(next)
+        const wait = reduce ? 0 : holdRef.current
+        if (wait <= 0) return arrive(next, dir)
+        holdTimer.current = window.setTimeout(() => {
+          holdTimer.current = 0
+          arrive(next, dir)
+        }, wait)
+      })
     },
     [reduce, setPhase, tween, arrive],
   )
@@ -324,6 +350,7 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
     if (!metrics) {
       shownRef.current = page
       setShown(page)
+      setComing(page)
       setPhase("idle", 1)
       write(0)
       return
@@ -344,6 +371,7 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
 
   return {
     shown,
+    coming,
     turn,
     turning: turn.phase !== "idle",
     rootRef,
@@ -444,7 +472,13 @@ function GridPages({
     [count, onPageChange],
   )
 
-  const { shown, turn, rootRef, handlers } = usePageTurn(page, metrics ? count : 1, metrics, setPage)
+  // With the ripple on (D32), a turn holds the next page back while the pass crosses the field — and a frame more, since
+  // the pass starts the frame after the page it plays for is set (grid.tsx, `useGridRipple`).
+  const hold = React.useMemo(
+    () => (ripple && metrics ? rippleSpan(metrics.cols, metrics.rows) + RIPPLE_START_MS : 0),
+    [ripple, metrics],
+  )
+  const { shown, coming, turn, rootRef, handlers } = usePageTurn(page, metrics ? count : 1, metrics, setPage, hold)
 
   React.useEffect(() => {
     if (!keyboard) return
@@ -467,7 +501,8 @@ function GridPages({
       overlay={overlay}
       intro={intro}
       ripple={ripple}
-      page={Math.min(shown, count - 1)}
+      // The ripple plays for the page the field is turning to, as soon as the last page has gone (`coming`).
+      page={Math.min(coming, count - 1)}
       onMetrics={handleMetrics}
       // touch-none: a finger on the field drives the turn, and the browser must not pan or refresh under it.
       className={cn("touch-none", className)}
