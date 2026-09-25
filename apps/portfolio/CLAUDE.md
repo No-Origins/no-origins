@@ -21,18 +21,27 @@ turned by the scroll, the pager's ↑ ↓ or ← →. With one page both arrows 
   a **span per breakpoint** and a render function. `resume.ts` is every fact from the résumé, in his voice (P6) — a
   link with no `href` is not rendered. `index.ts` is the model.
 - **`arrange`** (`src/lib/arrange.ts`) places a page on the live field (P2, P8): every section starts a page, items
-  pack first-fit inside a centred band of 4 · 6 · 8 · 12 · 16 columns, the pager's row and (on `lg`/`xl`) the top row
-  are reserved, overflow goes to the next page, and a page's block is centred in the band **and in the room** — across
-  and down, between the top row and the pager's (P8, amended 2026-09-21); a block that fills an axis does not move on
-  it. An item taller than the room gives up rows — at most a quarter of them while it shares a page, then it takes a
+  pack first-fit inside a centred band of 4 · 6 · 8 · 12 · 16 columns (an item marked `below` starts under everything
+  before it, never beside it, `air` rows lower — the lines and the links under the profile card; one marked `above` is
+  out of the flow: the page is centred without it and it takes the rows over the block — the tagline over the card —
+  and its rows are held back while the page packs, so it is never the one squeezed out), the pager's row and (on
+  `lg`/`xl`) the top row are reserved, overflow goes to the next page, and a page's block is centred in the band **and
+  in the room** — across and down, between the top row and the pager's (P8, amended 2026-09-21); a block that fills an
+  axis does not move on it. An item taller than the room gives up rows — at most a quarter of them while it shares a page, then it takes a
   page of its own.
 - **`PortfolioPages`** (`src/components/portfolio-pages.tsx`) is the renderer: a `GridPages` that runs `arrange` on
-  whatever field the grid reports, so every coordinate is honoured as written.
+  whatever field the grid reports, so every coordinate is honoured as written. It opens with the grid's `intro`
+  (Grid.md D31): the grid draws itself in, loops while the page loads, and page 1 turns in after; and `ripple` (D32):
+  every turn after runs the same drawing through the field.
 - **The cards** (`profile-card.tsx`, `cards.tsx`, `logo.tsx`) are app-specific islands composed from `Card`,
   `Avatar`, `Text`, `Badge`, `Button`, `Progress` and `Slot` — nothing hand-rolled. Each reads its own size off the
   grid and gets denser as the slot shrinks (P5); a slot clips, so a card that is cut off is in a slot that is too
-  small. A company's mark sits on a small white tile, because the marks are the companies' own colours, and lives on
-  the role card for that company only — **never on the profile card** (P9, amended 2026-09-21).
+  small. A company's mark lives on the Work screen only — **never on the profile card** (P9, amended 2026-09-21).
+  There it is the whole item: the mark straight on a square of the grid's own cells, two a side, with the name under
+  it — no tile, no Card (`CompanyMark`, P12, 2026-09-25). The role cards went with that; their facts are still in
+  `ROLES`. On hover a flat band of lime or violet, slanted 16°, is drawn in behind the mark with GSAP and wiped out
+  when the pointer leaves (P13, his mock); touch draws nothing. The band is `band.tsx`, shared with the first screen's
+  link cells (P4), whose brand marks are simple-icons path data.
 - **A card whose air pools in one place has a span that is too big** — the mirror of P5. `justify-between` turns the
   surplus into a visible hole, and `node e2e/.mcp/profile-slack.mjs` prints that hole in rows, so the span is
   corrected from a measurement rather than a guess. This is how the profile card lost a row at every breakpoint (three

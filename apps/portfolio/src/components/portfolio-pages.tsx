@@ -21,7 +21,9 @@ const FIRST_FIELD: PortfolioField = {
 /**
  * The portfolio on the grid. The grid is the viewport (Grid.md D3, D11): nothing here scrolls, and what does not fit
  * a screen is on the next page — scrolling up turns it, so do the pager's ↑ ↓ on the bottom row and ← → (D27). The
- * page's sections are arranged on the field the grid reports, so every coordinate is honoured as written.
+ * page's sections are arranged on the field the grid reports, so every coordinate is honoured as written. It opens
+ * with the grid's intro (Grid.md D31): the grid draws itself in, and page 1 turns in once the page has loaded; and
+ * every turn after runs the same drawing through the field (D32).
  */
 export function PortfolioPages({ page }: { page: PortfolioPage }) {
   const [field, setField] = React.useState<PortfolioField | null>(null);
@@ -35,6 +37,8 @@ export function PortfolioPages({ page }: { page: PortfolioPage }) {
     <GridPages
       layout={layout}
       overlay
+      intro
+      ripple
       onMetrics={(m) =>
         setField((prev) => (prev && prev.cols === m.cols && prev.rows === m.rows && prev.bp === m.bp ? prev : { cols: m.cols, rows: m.rows, bp: m.bp }))
       }

@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpRightIcon, CalendarIcon, GraduationCapIcon, MapPinIcon } from "lucide-react";
+import * as React from "react";
 
 import { Badge } from "@no-origins/ui/components/badge";
 import { Button } from "@no-origins/ui/components/button";
@@ -11,19 +12,22 @@ import { Slot } from "@no-origins/ui/components/slot";
 import { Text } from "@no-origins/ui/components/text";
 import { cn } from "@no-origins/ui/lib/utils";
 
+import { drawBand, MarkBand } from "@/components/band";
 import { CompanyLogo } from "@/components/logo";
 import { LinkButtons } from "@/components/profile-card";
-import { EDUCATION, HOBBIES, type Role } from "@/content/resume";
+import { EDUCATION, HOBBIES, type Company } from "@/content/resume";
 
 /**
  * A section's name, on the row above its cards: the number and the section in small caps, the title under them. The
- * title steps down a role on a narrow slot (a phone's four columns) so it stays one line.
+ * title steps down a role on a narrow slot (a phone's four columns) so it stays one line. It sits at the foot of its
+ * slot, a gutter above a card whose own padding is the rest of the air; over content with no box of its own it sits
+ * at the head instead (`alignY="start"`), so the rows under it are the air (Portfolio.md P12).
  */
-export function SectionHeader({ index, label, title, cols }: { index: string; label: string; title: string; cols: number }) {
+export function SectionHeader({ index, label, title, cols, alignY = "end" }: { index: string; label: string; title: string; cols: number; alignY?: "start" | "end" }) {
   const m = useGridMetrics();
   const width = m ? cols * m.cell + (cols - 1) * m.gap : 999;
   return (
-    <Slot fill="transparent" alignY="end">
+    <Slot fill="transparent" alignY={alignY}>
       <div className="flex min-w-0 flex-col justify-end gap-0.5">
         <Text role="label" tone="muted">
           {index} — {label}
@@ -37,79 +41,33 @@ export function SectionHeader({ index, label, title, cols }: { index: string; la
 }
 
 /**
- * As many lines as the room holds, in order, costed one by one.
- *
- * A fixed count clipped Terribly Tiny Tales, whose lines are twice the length of Radise's, on the very card where
- * Radise's four fitted — so each line is costed instead: characters per line from the card's width, 20px a line, 6px
- * between. The estimate is deliberately pessimistic, because over-counting drops a line, which is fine, while
- * under-counting clips one, which is the card lying about its span. It stops at the first line that does not fit
- * rather than skipping it, so what is shown is always the start of the list.
+ * One company on the Work screen (Portfolio.md P12): its mark straight on the cells and its name under it, both
+ * centred in the slot — nothing else, for now. The mark takes a square of cells as many a side as the slot is wide or
+ * the rows above the last one, whichever is less, and the name the rows under it, a gutter down. Where the slot is an
+ * even number of cells wider than the mark (four and two on `xl`, `md` and a phone; two and two when they match), the
+ * centred mark's edges are the field's lines; a three-column slot (`lg`, `sm`) centres it half a cell off them.
  */
-function linesThatFit(lines: readonly string[], charsPerLine: number, bodyPx: number): string[] {
-  const out: string[] = [];
-  let used = 0;
-  for (const line of lines) {
-    const cost = Math.ceil(line.length / charsPerLine) * 20 + 6;
-    if (used + cost > bodyPx) break;
-    used += cost;
-    out.push(line);
-  }
-  return out;
-}
-
-/**
- * One role: the company's mark and name, the title and the dates, what I did there, and the stack, as chips.
- *
- * How many lines it shows is a function of the slot, because a slot clips (Slots.md) and a bullet cut in half is the
- * card saying its span is wrong. A NARROW card — a phone's four columns — wraps every line to two or three, so a
- * short one carries the first two rather than all four; the résumé itself is one click away for the rest.
- */
-export function RoleCard({ role, cols = 8, rows = 4 }: { role: Role; cols?: number; rows?: number }) {
+export function CompanyMark({ company, accent, cols, rows }: { company: Company; accent: "lime" | "violet"; cols: number; rows: number }) {
   const m = useGridMetrics();
-  const height = m ? rows * m.cell + (rows - 1) * m.gap : 276;
-  const width = m ? cols * m.cell + (cols - 1) * m.gap : 564;
-  // A column card — a quarter of the band from `lg` up — has no room for the mark beside the name, so it goes above it.
-  const stacked = width < 300;
-  // How many lines the card carries is a budget (`linesThatFit`), not a count.
-  const charsPerLine = Math.max(16, Math.floor((width - 56) / 7.6));
-  const fitted = linesThatFit(role.did, charsPerLine, height - (stacked ? 210 : 150));
-  // A card always says at least one thing; if even that does not fit, the slot is too small and the clip is the report.
-  const did = fitted.length ? fitted : role.did.slice(0, 1);
+  const cell = m?.cell ?? 60;
+  const gap = m?.gap ?? 12;
+  const side = Math.max(1, Math.min(cols, rows - 1));
+  const px = side * cell + (side - 1) * gap;
+  const fill = React.useRef<HTMLSpanElement>(null);
+  const onPointer = (event: React.PointerEvent) => {
+    if (event.pointerType === "touch" || !fill.current) return;
+    drawBand(fill.current, event.type === "pointerenter");
+  };
   return (
-    <Card size="sm" className="h-full min-h-0 gap-4">
-      <CardHeader className="gap-0">
-        <div className={cn("flex gap-3", stacked ? "flex-col items-start" : "items-center")}>
-          <CompanyLogo company={role.company} />
-          <div className="min-w-0 flex-1">
-            <Text role="heading" as="h3" className={stacked ? "wrap-break-word" : "truncate"}>
-              {role.company.name}
-            </Text>
-            <Text role="caption" className={stacked ? "line-clamp-3" : "line-clamp-2"}>
-              {role.title} · {role.from} — {role.to}
-              {role.location ? ` · ${role.location}` : ""}
-            </Text>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="min-h-0 flex-1 overflow-hidden">
-        <ul className="marker:text-muted-foreground/60 flex flex-col gap-1.5 ps-4">
-          {did.map((line) => (
-            <li key={line} className="list-disc">
-              <Text role="body" tone="muted">
-                {line}
-              </Text>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-      <CardFooter className="mt-auto flex-wrap gap-x-3 gap-y-1">
-        {role.stack.map((tech) => (
-          <Badge key={tech} variant="secondary">
-            {tech}
-          </Badge>
-        ))}
-      </CardFooter>
-    </Card>
+    <div className="flex h-full min-h-0 cursor-pointer flex-col items-center overflow-hidden" style={{ gap }} onPointerEnter={onPointer} onPointerLeave={onPointer}>
+      <div className="relative shrink-0" style={{ width: px, height: px }}>
+        <MarkBand box={px} mark={px} accent={accent} fill={fill} />
+        <CompanyLogo company={company} className="relative size-full" />
+      </div>
+      <Text role="heading" as="h3" align="center" className="line-clamp-2">
+        {company.name}
+      </Text>
+    </div>
   );
 }
 

@@ -54,19 +54,48 @@ export function arrange(page: PortfolioPage, field: PortfolioField): GridPage[] 
   for (const section of page.sections) {
     let placed: GridLayoutItem[] = [];
     let index = 0;
+    // Out of the flow: they wait for the section's first page to be centred, then go over its block. Their rows are
+    // held back at the foot of the room while that page packs, so the block always leaves them room over it.
+    let over = section.items.filter((item) => item.above);
+    const lift = Math.min(usable - 1, Math.max(0, ...over.map((item) => resolveResponsive<Span>(item.span, bp, { cols: band, rows: 1 }).rows)));
+    const held: GridRect = { col: 1, row: top + usable - lift + 1, colSpan: cols, rowSpan: lift };
     const commit = () => {
+      // A section that is all `above` has no block to stand over: its items are the page, packed like any other.
+      if (!placed.length && over.length) {
+        for (const item of over) {
+          const span = resolveResponsive<Span>(item.span, bp, { cols: band, rows: 1 });
+          const rect = findFreeRect(placed, cols, rows, Math.min(span.cols, band), Math.min(span.rows, usable), reserved);
+          if (rect) placed.push({ id: item.id, ...rect });
+        }
+        over = [];
+      }
       if (!placed.length) return;
-      out.push({ id: `${section.id}${index ? `-${index + 1}` : ""}`, items: centreInRoom(placed, start, band, top + 1, usable) });
+      let items = centreInRoom(placed, start, band, top + 1, usable);
+      for (const item of over) {
+        const span = resolveResponsive<Span>(item.span, bp, { cols: band, rows: 1 });
+        items = placeAbove(items, item.id, Math.min(span.cols, band), span.rows, start, band, top + 1, usable);
+      }
+      over = [];
+      out.push({ id: `${section.id}${index ? `-${index + 1}` : ""}`, items });
       index += 1;
       placed = [];
     };
 
     for (const item of section.items) {
+      if (item.above) continue;
       const span = resolveResponsive<Span>(item.span, bp, { cols: band, rows: 1 });
       const colSpan = Math.min(span.cols, band);
       const want = Math.min(span.rows, usable);
+      // An item that goes `below` finds its place under the page's block so far: every row down to its foot is taken,
+      // and its `air` under that.
+      const search = (h: number) => {
+        const block = item.below ? usedBlock(placed) : null;
+        const taken = block ? [{ col: 1, row: 1, colSpan: cols, rowSpan: block.row + block.rowSpan - 1 + (item.air ?? 0) }] : [];
+        const hold = index === 0 && lift > 0 ? [held] : [];
+        return findFreeRect(placed, cols, rows, colSpan, h, [...reserved, ...hold, ...taken]);
+      };
       let rowSpan = want;
-      let rect = findFreeRect(placed, cols, rows, colSpan, rowSpan, reserved);
+      let rect = search(rowSpan);
       // On a page that already holds something, give up a quarter of the rows before starting a new page — so a
       // header keeps its first card under it on a short field instead of standing alone (seen on an iPhone SE). Not
       // more than a quarter: at half, a four-row card became two rows and clipped its own content, which is the
@@ -74,16 +103,16 @@ export function arrange(page: PortfolioPage, field: PortfolioField): GridPage[] 
       const floor = Math.max(3, Math.ceil((want * 3) / 4));
       while (!rect && placed.length && rowSpan > floor) {
         rowSpan -= 1;
-        rect = findFreeRect(placed, cols, rows, colSpan, rowSpan, reserved);
+        rect = search(rowSpan);
       }
       if (!rect && placed.length) {
         commit();
         rowSpan = want;
-        rect = findFreeRect(placed, cols, rows, colSpan, rowSpan, reserved);
+        rect = search(rowSpan);
       }
       while (!rect && rowSpan > 1) {
         rowSpan -= 1;
-        rect = findFreeRect(placed, cols, rows, colSpan, rowSpan, reserved);
+        rect = search(rowSpan);
       }
       if (!rect) continue;
       placed.push({ id: item.id, ...rect });
@@ -105,6 +134,24 @@ function centreInRoom(items: GridLayoutItem[], start: number, band: number, firs
   const dc = start + Math.floor((band - block.colSpan) / 2) - block.col;
   const dr = first + Math.floor((usable - block.rowSpan) / 2) - block.row;
   return dc || dr ? items.map((item) => ({ ...item, col: item.col + dc, row: item.row + dr })) : items;
+}
+
+/**
+ * Put an item that is out of the flow on the rows directly over a centred page's block, centred on it across (the
+ * block's own centring is not redone, so the block stays where it was alone). Where the room above is short, the block
+ * moves down just enough, never past the room's last row; what still does not fit comes off the item's height, and an
+ * item left with no row is not placed.
+ */
+function placeAbove(items: GridLayoutItem[], id: string, colSpan: number, rowSpan: number, start: number, band: number, first: number, usable: number): GridLayoutItem[] {
+  const block = usedBlock(items);
+  if (!block) return items;
+  const drop = Math.max(0, Math.min(rowSpan - (block.row - first), first + usable - (block.row + block.rowSpan)));
+  const moved = drop ? items.map((item) => ({ ...item, row: item.row + drop })) : items;
+  const top = block.row + drop;
+  const h = Math.min(rowSpan, top - first);
+  if (h < 1) return moved;
+  const col = Math.max(start, Math.min(start + band - colSpan, block.col + Math.floor((block.colSpan - colSpan) / 2)));
+  return [...moved, { id, col, row: top - h, colSpan, rowSpan: h }];
 }
 
 /** A span per breakpoint, walking down to the nearest defined (the grid's own resolution rule). */
