@@ -80,14 +80,15 @@ function useHey() {
  * he has been, which is what the Work screen is for.
  *
  * It is sized by the slot it is in, and a slot clips (Slots.md), so the card reads its own size off the grid (P5): a
- * narrow card steps the avatar and the name down, and on a pointer's two rows, 40px short of a touch pair, the face
+ * narrow card — a phone's — steps the avatar and the name down, and on a pointer's two rows, 40px short of a touch pair, the face
  * gives up 8px so the row still clears the card's padding. Nothing in it scrolls.
  */
 export function ProfileCard({ colSpan, rowSpan }: { colSpan: number; rowSpan: number }) {
   const m = useGridMetrics();
   const height = m ? rowSpan * m.cell + (rowSpan - 1) * m.gap : 564;
   const width = m ? colSpan * m.cell + (colSpan - 1) * m.gap : 564;
-  const narrow = width < 360;
+  // A phone's card: since every field is six across (Grid.md D33) a phone's is the whole field, 294 to 402px wide.
+  const narrow = width < 420;
   // The padding is the small card's whenever the row is short, which on two rows it always is; the face is the full
   // 96px where the room under that padding holds it, 88px where it does not.
   const short = height < 180;
@@ -143,10 +144,11 @@ export function ProfileCard({ colSpan, rowSpan }: { colSpan: number; rowSpan: nu
           </svg>
         </Avatar>
         <div className="min-w-0">
-          <Text role={narrow ? "title" : "display"} as="h1">
+          {/* Balanced, so a phone's two lines are "Bhargav / Reddy V" rather than "Bhargav Reddy / V". */}
+          <Text role={narrow ? "title" : "display"} as="h1" className="text-balance">
             {profile.name}
           </Text>
-          <Text role="label" tone="muted" className="mt-1.5">
+          <Text role="label" tone="muted" className="mt-1.5 text-balance">
             {profile.role} @ {profile.company.name}
           </Text>
         </div>
@@ -162,12 +164,12 @@ export function ProfileCard({ colSpan, rowSpan }: { colSpan: number; rowSpan: nu
  * the HEY!'s — at the `display` size, in the `faint` tone (Type.md T3), in quotes, a sentence a line. Straight on the
  * grid with no box, at the foot of its slot so it stands a gutter over the card. It is out of the flow (`above`): the
  * card is centred as if it were alone and this takes the rows over it. Anton has one weight, so the role's bold is put
- * back to normal rather than let the browser fake a heavier one. Under 360px wide it steps down to `title`, as the
- * card's name does: a phone's four columns are 324px and the second line is 326px at `display`.
+ * back to normal rather than let the browser fake a heavier one. On a phone (under 420px wide) it steps down to
+ * `title`, as the card's name does: the second line is 326px at `display`, and a phone's six columns are 294 to 402.
  *
  * After the second line, on its baseline, **— @hiddenstack** in `caption` and the `lime` tone (Type.md T4), his: a
  * button, and pressing it sets off the avatar's HEY! (`useHey`), the face leaping from the card as if it had been
- * clicked. Where the line has no room for it — a phone — it wraps under the line rather than break the sentence.
+ * clicked. On a phone it takes its own line under the second, at its own height, rather than break the sentence.
  */
 export function ProfileTagline({ colSpan }: { colSpan: number }) {
   const m = useGridMetrics();
@@ -176,7 +178,7 @@ export function ProfileTagline({ colSpan }: { colSpan: number }) {
   const { pop, overlay } = useHey();
   return (
     <Slot fill="transparent" alignY="end">
-      <Text role={width < 360 ? "title" : "display"} tone="faint" as="blockquote" className="font-(family-name:--font-display) font-normal">
+      <Text role={width < 420 ? "title" : "display"} tone="faint" as="blockquote" className="font-(family-name:--font-display) font-normal">
         <span className="block whitespace-nowrap">&ldquo;{first}</span>
         <span className="block">
           <span className="whitespace-nowrap">{second}&rdquo;</span>{" "}
@@ -186,7 +188,12 @@ export function ProfileTagline({ colSpan }: { colSpan: number }) {
             tone="lime"
             aria-label={`Say hi to ${profile.name}`}
             onClick={(e) => pop(document.querySelector<HTMLElement>("[data-hey-face]") ?? e.currentTarget)}
-            className="inline cursor-pointer whitespace-nowrap underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            // On a phone its own line, at its own height: wrapped inline, its line took the tagline's 36px and the tagline
+            // ran past its two rows on the narrowest phones.
+            className={cn(
+              "cursor-pointer whitespace-nowrap underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+              width < 420 ? "mt-1 block" : "inline"
+            )}
           >
             &mdash; @{profile.handle}
           </Text>
@@ -212,7 +219,9 @@ function FactLine({ mark, children }: { mark: ReactNode; children: ReactNode }) 
         <div className="flex shrink-0 items-center justify-center" style={{ width: cell, height: cell }}>
           {mark}
         </div>
-        <Text role="heading" tone="muted">
+        {/* A phone's cell has given way to the six columns (Grid.md D33), 39 to 57px: `heading` wraps the years to two
+            lines there, 56px, and the row clips it, so a phone's words are `body`. */}
+        <Text role={cell < 60 ? "body" : "heading"} tone="muted">
           {children}
         </Text>
       </div>
@@ -269,8 +278,7 @@ const SMALLER: Link["id"][] = ["x", "resume"];
  * full width, edge to edge, rather than sized off the mark, so the whole icon stands on it (`MarkBand`'s `edge`). Where
  * it has reached, a lime band shows the icon in its own dark ink (`--lime-foreground`), so it reads in both themes. Each cell is a `Button` (`ghost`, its hover fill taken off: the band is the hover),
  * a link out in a new tab, or the résumé's download. A link with no URL yet shows its mark and goes nowhere — no cursor,
- * not focusable — until he gives it one. On a phone the band is four columns, so the fifth cell wraps to a second row;
- * the item's span asks for it.
+ * not focusable — until he gives it one. Five cells fit every band, a phone's six included (Grid.md D33).
  */
 export function ProfileLinks() {
   const m = useGridMetrics();

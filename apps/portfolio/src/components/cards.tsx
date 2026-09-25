@@ -51,7 +51,10 @@ export function CompanyMark({ company, accent, cols, rows }: { company: Company;
   const m = useGridMetrics();
   const cell = m?.cell ?? 60;
   const gap = m?.gap ?? 12;
-  const side = Math.max(1, Math.min(cols, rows - 1));
+  // Two cells a side (P12), never more than the slot holds — and ONE on a phone (his, 2026-09-25: "in mobile, in work
+  // reduce the logos size more"), where the cell has given way to the six columns (Grid.md D33) and two were 104 to
+  // 126px. One cell is the grid's next size down: 46 to 57px. The name has the rows under it.
+  const side = Math.max(1, Math.min(cell < 60 ? 1 : 2, cols, rows - 1));
   const px = side * cell + (side - 1) * gap;
   const fill = React.useRef<HTMLSpanElement>(null);
   const onPointer = (event: React.PointerEvent) => {
@@ -155,7 +158,8 @@ export function EducationCard() {
   return (
     <Card size="sm" className="h-full min-h-0 gap-3">
       <CardHeader className="gap-1">
-        <CardTitle className="truncate">{EDUCATION.degree}</CardTitle>
+        {/* Two lines, not an ellipsis: on a phone the degree is wider than the card, and the card has the room. */}
+        <CardTitle className="line-clamp-2">{EDUCATION.degree}</CardTitle>
         <CardDescription>{EDUCATION.school}</CardDescription>
       </CardHeader>
       <CardFooter className="mt-auto flex-wrap gap-x-4 gap-y-1">

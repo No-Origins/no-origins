@@ -77,8 +77,9 @@ export type GridConfig = Partial<Record<GridBreakpoint, GridSpec>>
 /**
  * The brick — DECIDED, Grid.md D13, 2026-09-21. One gutter everywhere so the field has one texture and one edge
  * margin; 72 where there are fingers (a 1×1 is the touch target — the pager fills its cell); 60 from `lg` up where a
- * pointer is likely, and never rising again. Every phone from 375 to 430 gets four columns; a 2×2 card is 156px on
- * touch and 132px on a pointer. Grid.md §5 has the six principles these were checked against.
+ * pointer is likely, and never rising again. A 2×2 card is 156px on touch and 132px on a pointer. Grid.md §5 has the
+ * six principles these were checked against. On a box too narrow for MIN_COLS of these cells — every phone — the cell
+ * gives way to the count (D33).
  */
 export const DEFAULT_GRID_CONFIG: GridConfig = {
   base: { cell: 72, gap: 12, pager: PAGER_CELLS },
@@ -95,7 +96,7 @@ export type GridField = {
    * (Grid-v2.md §7), the layout's authored pages (v1 D6). It does NOT decide the counts: the box does.
    */
   bp: GridBreakpoint
-  /** The side of one square cell, in px — this breakpoint's, from the config (D13). */
+  /** The side of one square cell, in px — this breakpoint's, from the config (D13), or smaller on a box too narrow for MIN_COLS of them (D33). */
   cell: number
   /** The gutter between cells, in px, and the box's own padding (D15). */
   gap: number
@@ -159,19 +160,38 @@ export function countFor(span: number, cell: number, gap: number) {
 }
 
 /**
+ * The fewest columns a field has (Grid-v2.md D33, his, 2026-09-25: "minimum number of columns in any screen should be
+ * six"). Four 72px cells on a phone "feel pretty off". Where the decided cell would give fewer, the count is held at
+ * six and the cell derives from the width instead — as big as six cells and seven gutters allow, floored, so the
+ * field still sits a whole gutter from each edge — and the rows are counted with that cell. The gutter never changes
+ * (D13: one texture). Below MIN_CELL the cell stops giving way, so a sliver of a box keeps whatever count fits.
+ */
+export const MIN_COLS = 6
+const MIN_CELL = 24
+
+/**
  * The field a box of this size gets (D12). Width picks the breakpoint, the breakpoint supplies the cell and gap
- * (D13), and both axes are then simply how many cells fit. A phone on its side gets more columns than rows with no
- * rule for it — v1's transposition fell out. There is no way to name a breakpoint outright: the box decides (D11).
+ * (D13), and both axes are then simply how many cells fit — except that a field is never fewer than MIN_COLS across
+ * (D33), where the cell derives from the width instead. A phone on its side gets more columns than rows with no rule
+ * for it — v1's transposition fell out. There is no way to name a breakpoint outright: the box decides (D11).
  */
 export function resolveField(config: GridConfig, width: number, height: number): GridField {
   const spec = specFor(config, breakpointFor(width))
-  const cols = countFor(width, spec.cell, spec.gap)
+  let cell = spec.cell
+  let cols = countFor(width, cell, spec.gap)
+  if (cols < MIN_COLS) {
+    const fit = Math.floor((width - spec.gap * (MIN_COLS + 1)) / MIN_COLS)
+    if (fit >= MIN_CELL) {
+      cell = fit
+      cols = MIN_COLS
+    }
+  }
   return {
     bp: spec.key,
-    cell: spec.cell,
+    cell,
     gap: spec.gap,
     cols,
-    rows: countFor(height, spec.cell, spec.gap),
+    rows: countFor(height, cell, spec.gap),
     pager: pagerWidth(spec.pager ?? PAGER_CELLS, cols),
   }
 }
@@ -339,6 +359,13 @@ function Grid({
  */
 const INTRO_STEP_MS = 15
 const INTRO_DEPTH = 12
+/**
+ * The field the cone was tuned on: a 1440 desktop, eighteen columns. INTRO_DEPTH is how far its sides trail THERE; on a
+ * narrower field the cone keeps that angle and is shallower, never deeper (his, 2026-09-25: on a phone "the ripple
+ * completes the middle two columns and then there is a ripple on the left and right columns" — twelve steps of trail
+ * across a half-width of two columns, on a field eight rows tall, was a spike, not a front).
+ */
+const INTRO_CONE_COLS = 18
 const INTRO_POINT = 0.5
 const INTRO_FADE_HOLD_MS = 0
 const INTRO_FADE_MS = 500
@@ -363,18 +390,21 @@ type PassFrom = "bottom" | "top"
 
 /**
  * When a pass reaches each cell, in ms from the pass's start, row-major; and how long the pass is. `along` counts rows
- * from the edge the pass starts at; the cone adds up to INTRO_DEPTH steps with the distance from the point. The first
- * cell to be drawn is drawn at 0. Counts are even (D26), so the two centre columns tie and the point is symmetric.
+ * from the edge the pass starts at; the cone adds up to `depth` steps with the distance from the point — INTRO_DEPTH
+ * on a field as wide as INTRO_CONE_COLS or wider, and in proportion on a narrower one, so the edge keeps its angle.
+ * The first cell to be drawn is drawn at 0. Counts are even (D26), so the two centre columns tie and the point is
+ * symmetric.
  */
 function ripplePlan(cols: number, rows: number, from: PassFrom = "bottom") {
   const delays = new Float64Array(cols * rows)
   const reach = Math.max(INTRO_POINT, 1 - INTRO_POINT) || 1
+  const depth = INTRO_DEPTH * Math.min(1, Math.max(0, cols - 1) / (INTRO_CONE_COLS - 1))
   let min = Infinity
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const across = cols > 1 ? c / (cols - 1) : INTRO_POINT
       const along = from === "bottom" ? rows - 1 - r : r
-      const d = along + INTRO_DEPTH * Math.min(1, Math.abs(across - INTRO_POINT) / reach)
+      const d = along + depth * Math.min(1, Math.abs(across - INTRO_POINT) / reach)
       delays[r * cols + c] = d
       min = Math.min(min, d)
     }

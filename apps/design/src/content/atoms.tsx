@@ -21,7 +21,7 @@ import { Switch } from "@no-origins/ui/components/switch";
 import { Textarea } from "@no-origins/ui/components/textarea";
 import { Toggle } from "@no-origins/ui/components/toggle";
 
-import { band, half, quarter, SectionHeader, Specimen } from "@/components/specimen";
+import { band, half, onPhone, quarter, SectionHeader, Specimen } from "@/components/specimen";
 import type { PageContent } from "@/content";
 
 const BUTTON_VARIANTS = ["default", "secondary", "outline", "ghost", "destructive", "link"] as const;
@@ -230,7 +230,7 @@ export const ATOMS: PageContent = {
       },
       {
         id: "Skeleton",
-        span: { ...half(2), base: { cols: 4, rows: 3 } },
+        span: { ...half(2), base: { cols: 6, rows: onPhone(3) } },
         render: () => (
           <Specimen name="Skeleton" note="The shape of content that has not arrived.">
             <div className="w-72 space-y-2">

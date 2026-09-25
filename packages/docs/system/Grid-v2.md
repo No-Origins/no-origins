@@ -116,7 +116,7 @@ texture; the cell never rises). *"Let's go with your recommendation and set the 
 
 | Breakpoint | cell | gap | why |
 |---|---|---|---|
-| **base** | 72 | 12 | A 1×1 is a finger target (P1); every phone from 375 to 430 gets four columns (P4) |
+| **base** | 72 | 12 | A 1×1 is a finger target (P1); every phone from 375 to 430 gets four columns (P4). *Since D33 no field is under six columns: a phone's cell gives way, 46 to 57px.* |
 | **sm** | 72 | 12 | Still fingers; same brick as the phone, so a card is the same card |
 | **md** | 72 | 12 | Same |
 | **lg** | 60 | 12 | A pointer is likely from here; the brick shrinks once (P2) and never again |
@@ -782,6 +782,25 @@ marks the next pass's colour on itself (`data-ripple-next`); the turn reads it a
 (`--grid-turn-fill-color`, on the tracks). Holding matters: the pass is played as the page changes, and the colour
 after it is the other one, so a fill that read it live would change colour while it leaves. A grid without the ripple
 keeps D27's reverse-colour fill, as the showcase does.
+
+**D33 — A field is never fewer than six columns; below that the cell gives way. And the cone keeps its angle.**
+*2026-09-25, looking at the deployment on his phone: "only having four cells on the mobile feels pretty off … minimum
+number of columns in any screen should be six."* D12 decided the cell and derived the counts; on every phone that
+gave four 72px columns. Now the count has a floor, `MIN_COLS` (6, `grid.tsx`): where the decided cell would give
+fewer, the count is held at six and **the cell derives from the width** — as big as six cells and seven gutters allow,
+floored, so the field still sits a whole gutter from each edge (D15) — and the rows are counted with that cell. The
+gutter does not change (D13: one texture). On a 390 phone the cell is 51px and the field 6 × 12; 46px on a 360, 48 on
+a 375, 54 on a 412, 57 on a 430. A tablet and every pointer field already had six or more, so nothing changed there.
+Below `MIN_CELL` (24px) the cell stops giving way. **This relaxes D13's "a 1×1 is the touch target" on phones:** 51px
+is still over the 44 a finger needs, and his call outranks the principle.
+
+*The same day, of the ripple on his phone:* *"instead of just rippling with the four columns … the ripple completes
+the middle two columns and then there is a ripple on the left and right columns."* D31's cone trailed its sides by
+twelve steps at any width — a wide V on an 18-column desktop, a spike on a four-column phone, whose middle had drawn
+all eight rows before its sides began. So `INTRO_DEPTH` is now how far the sides trail **on the field it was tuned
+on** (`INTRO_CONE_COLS`, a 1440 desktop's eighteen), and a narrower field keeps that angle with a shallower cone: three
+and a half steps on a phone's six columns, never deeper than twelve. Both the intro and the ripple draw from the same
+plan, so both changed; a desktop is exactly as it was.
 
 ---
 

@@ -7,7 +7,7 @@ import { Badge } from "@no-origins/ui/components/badge";
 import { Button } from "@no-origins/ui/components/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@no-origins/ui/components/card";
 import { Text } from "@no-origins/ui/components/text";
-import { band } from "@/components/specimen";
+import { band, onPhone } from "@/components/specimen";
 import type { PageContent, Span, SpecimenItem } from "@/content";
 
 const LAYERS = [
@@ -29,7 +29,7 @@ const LAYERS = [
  * A layer card: six columns on `lg` and `xl`, so the two stand side by side and fill the page's 12-column band; on a
  * tablet two to a row as well, and one to a row on a phone.
  */
-const LAYER: Record<string, Span> = { base: { cols: 4, rows: 3 }, sm: { cols: 6, rows: 3 }, md: { cols: 4, rows: 4 }, lg: { cols: 6, rows: 4 }, xl: { cols: 6, rows: 4 } };
+const LAYER: Record<string, Span> = { base: { cols: 6, rows: onPhone(3) }, sm: { cols: 6, rows: 3 }, md: { cols: 4, rows: 4 }, lg: { cols: 6, rows: 4 }, xl: { cols: 6, rows: 4 } };
 
 /** A short piece of text; `code` inside it keeps the mono role (Type.md). */
 const Code = ({ children }: { children: string }) => (
