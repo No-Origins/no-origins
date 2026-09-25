@@ -380,6 +380,15 @@ const INTRO_REVEAL_MS = 420
 const INTRO_MAX_WAIT_MS = 3000
 
 /**
+ * How long a ripple takes to cross a field of this many cells, in ms: from the first cell it draws to the last (D32).
+ * A page turn holds the next page back this long, so the ripple runs through an empty field and the page comes up
+ * after it (his, 2026-09-25: "it would be great if the ripple ends and then the components come up on the grid").
+ */
+export function rippleSpan(cols: number, rows: number) {
+  return cols > 0 && rows > 0 ? ripplePlan(cols, rows).span : 0
+}
+
+/**
  * Once per document load (D31, open item 5 — mine): a navigation that mounts another grid does not play it again; a
  * reload does. Set only in the browser, so the server's render always carries the cover.
  */
