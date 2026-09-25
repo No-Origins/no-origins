@@ -22,9 +22,13 @@ It is **not**:
 
 ## 0.5 Reset — Quests, 2026-09-17
 
+> **Quests withdrawn 2026-09-23 (§0.7).** The reset stands — the three-layer tables stay dropped and identity is untouched — and so does the grid-of-cards home. What a quest is, the `quests` table, `/quests`, `/quests/[slug]` and this pass's scope are the record of a feature that was built and removed; this section is no longer the live specification.
+
 **Bhargav, 2026-09-17: "Remove all the previous and unwanted tables. Let's start fresh. Quest should be a new feature."** Everything below §0.5 was written for the three-layer model (Projects · Systems · Products) and the document/editor/publishing machinery that drove the React-Flow editor. That editor was deleted with React Flow (Atomic.md D11); the schema it needed has outlived it. So the admin's data model is reset, and this section is the live specification — **§1, §4, §6, §7, §8.1, §9 and §13 are superseded for the build and kept only as the record of what was learned.**
 
 ### What a quest is
+
+**Withdrawn 2026-09-23 (§0.7).** There are no quests.
 
 A **quest** is a surface we deploy as its own subdomain — the successor to what §1 called a Layer-1 *Project*, renamed and made the admin's one first-class thing. The portfolio is the first quest. A quest is composed on **the grid** (the base layout, repo-root CLAUDE.md): you pull components onto it, arrange them, and save. Subdomains, deployment and the components you drag are **deferred** — this pass builds the quest itself.
 
@@ -54,21 +58,28 @@ quests (
 
 `layout` is a `GridLayout` — the same pure model the grid renders and the editor mutates (`packages/ui/src/lib/grid-layout.ts`), so what the dashboard saves is exactly what a quest would ship. `rev` is maintained by a trigger and carries the optimistic-concurrency check the old `documents.rev` carried; there is no immutable-versions table yet — publishing (old §7/§9) is deferred with everything else. RLS mirrors the surviving pattern: deny-by-default, `owner`/`editor` write, `viewer` read, keyed on `profiles.role`.
 
+**Dropped 2026-09-23 (§0.7).** `…_drop_quests.sql` removes `quests` with its policies, triggers, `noo_touch_quest_layout()` and the `noo_quest_status` enum. Identity, above, is what the schema is now.
+
 ### The admin is the grid
 
 The admin home stops being a rail (**this supersedes §4's "rail, not tabs"**) and becomes **the grid itself** — a field of feature cards: **Quests**, and later Design, Products, Settings, with the account/passkey/password controls collapsing into Settings. The admin renders in the same base layout every quest is composed in; the control surface eats its own dog food.
 
-- **Home (`/`)** — the grid of feature cards. The **Quests** card opens the quests dashboard.
+- **Home (`/`)** — the grid of feature cards. The **Quests** card opens the quests dashboard. *Since 2026-09-23 (§0.7) the Quests card is gone: three cards, Design System, Products and Settings.*
+- **Withdrawn 2026-09-23 (§0.7)** — the two routes below, and the stub palette with them.
 - **`/quests`** — the quests dashboard: the **first grid row is the feature's action bar** (its title, the quest count, a *Create quest* button, and the home for future quest actions/settings); the **quest cards pack beneath it from the second row, 3 × 2 each**. Create names a quest and derives its slug; a quest can be deleted (owner). A quest card opens its compose dashboard.
 - **`/quests/[slug]`** — the compose dashboard: the real `GridEditor` (`@no-origins/ui`) bound to the quest's `layout`, saving back on the `rev` check with a save-state indicator (unsaved · saving · saved · saved-elsewhere). A **stub palette** of placeholder molecules (Heading, Text, Image, Blob, Pattern, Card) — each a name and a default box size. Placing one **adds a labelled box to the grid** (click; it lands at the first free cell of its size), which then moves, resizes, paginates and deletes like any other box through the grid's own gestures. The tiles are placeholders and the interaction is click-to-place; the real component molecules and pointer-drag placement come together, later.
 
 ### Scope of this pass
+
+**Withdrawn 2026-09-23 (§0.7).** Built, then removed; what it deferred is not coming as a quest.
 
 CRUD on quests, the grid-of-cards home, and a working compose dashboard with a stub palette. **Deferred, by Bhargav:** subdomains, deployment, the real component molecules, and pointer-drag placement (which lands with the molecules). The rule of the house holds — every visible element is composed from `@no-origins/ui` (repo-root CLAUDE.md); the palette tiles and the cards are system components, not hand-rolled ones.
 
 ---
 
 ## 0.6 Publishing a quest — subdomains, 2026-09-18
+
+> **The pipeline withdrawn with quests, 2026-09-23 (§0.7); the rule stands.** Everything here that publishes a quest — Publish and Unpublish, the `published*` columns, the `publish/quests/` artefacts, the deploy hook, the portfolio as quest host, the build order — extended a table that no longer exists, and none of it was built. **The page is static, a component may be live** is not about quests: it governs the portfolio and any live component, and the repo-root CLAUDE.md carries it.
 
 **Bhargav, 2026-09-18: "once I create a quest, map it to a domain, it should deploy on the portfolio. Basically, I should be able to deploy a quest on a subdomain if I want to."** This section decides how. It is the piece §0.5 deferred, and it stands on §0.5's schema and the grid (Grid.md). §7 and §9 below described publishing for the deleted editor and stay superseded; this is the live design.
 
@@ -128,6 +139,38 @@ Schema this adds to `quests` (one migration, with the build): `published jsonb`,
 - Draft previews — a tokenised preview URL that renders the *draft* layout without publishing. Wanted eventually; not in this pass.
 - Versions — Publish keeps one snapshot. Keeping history (old §7's immutable versions) is deferred until there is a reason to roll back.
 - Per-quest hue and metadata on the rendered page (title, description, favicon) — decided with the first molecules.
+
+---
+
+## 0.7 Removed — Quests, 2026-09-23
+
+**Bhargav, 2026-09-23: "And also let's remove the Composer feature completely and all the dead code."** And, on how far that reaches: *"remove showcase /composes, admin's too and also quests feature."* The admin's composer was the quest compose dashboard, so the feature goes whole. This section withdraws the quest parts of §0.5 and the pipeline of §0.6; identity is untouched. The showcase's side of the same instruction is Grid-v2.md D30 and Slots.md S7.
+
+### What went
+
+- **The routes.** `/quests` (the dashboard, its action bar, create and delete) and `/quests/[slug]` (the compose dashboard: `QuestComposer` on the real `GridEditor`, the stub palette, `saveQuestLayout` and its `rev` check, the save-state indicator), with `lib/quests.ts` and the quests grid. `/quests` is a 404.
+- **The home's Quests card.** The home is still §0.5's grid of feature cards, now three — **Design System** and **Products**, both still marked *soon*, and **Settings** (the account, passkey and password controls §0.5 said would collapse into it) — on a read-only `GridPages`, from a layout written in code.
+- **The table.** `supabase/migrations/20260923090000_drop_quests.sql` drops `public.quests` — `cascade` takes its four policies, both triggers and its indexes — then `noo_touch_quest_layout()` and the `noo_quest_status` enum. **It drops data**: every quest row goes with the table.
+- **The seed.** `supabase/seed.sql` seeded only the `portfolio` quest, so it is deleted and seeding is off in `config.toml`. The allowlist was never seeded and still is not (supabase/README.md).
+- **In the package**, `GridEditor` — what the compose dashboard stood on — went with the showcase's composer (Grid-v2.md D30).
+
+### What stands
+
+- **Identity, exactly as §0.5 left it**: `profiles`, `allowlist`, the `before_user_created` gate, their RLS, the `noo_role` enum, `noo_current_role()` and `noo_is()`. §8.3 and §8.4 stand. `touch_updated_at()` goes with the table: `quests` was the last trigger calling it (`profiles` has no `updated_at`).
+- **§0.5's reset.** The three-layer tables stay dropped; nothing comes back.
+- **The admin is the grid** (§0.5) — the home, above.
+- **§0.6's rule**, *the page is static, a component may be live*. It is not about quests.
+- **The `publish` bucket** (§8.2, `…_storage.sql`) stays, with nothing writing to it.
+
+### What it withdraws
+
+- From §0.5: *What a quest is*, the `quests` table of *The fresh schema*, the `/quests` and `/quests/[slug]` bullets of *The admin is the grid*, and *Scope of this pass*.
+- From §0.6: the pipeline — Publish, Unpublish, the `published*` columns, the `publish/quests/` artefacts, the deploy hook, the portfolio as quest host, and its build order. None of it was built, and it extended a table that is gone. If a surface deployed on its own subdomain is wanted again, that is a new decision, and §0.6 is the record to read first.
+
+### Where the database stands
+
+- **Local — applied and verified 2026-09-23.** `public` holds `allowlist` and `profiles` and nothing else; `noo_role` is the one enum left; both triggers on `auth.users` (the gate, and the one that makes a profile) and the three identity policies are in place; `touch_updated_at()` is dropped with the table, since no trigger calls it any more. `supabase db reset --local` replays every migration to the same state; seeding is off, so the allowlist row has to be re-added after a reset (supabase/README.md).
+- **Hosted — not applied.** The hosted project keeps whatever it carries until a deliberate `supabase db push`, which applies every pending migration in order. supabase/README.md recorded §0.5's reset as local-only on 2026-09-17; if it has been pushed since, the hosted database has `quests` and its rows, and the push drops them; if not, the push runs the reset first — dropping the three-layer tables and their seeded rows — and then this. Either way it drops data, and it is Bhargav's to run.
 
 ---
 

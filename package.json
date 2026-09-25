@@ -1,6 +1,9 @@
 {
   "name": "no-origins",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev": "pnpm --filter portfolio dev",
@@ -8,7 +11,7 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "changeset": "changeset",
-    "release": "pnpm -r build && changeset publish",
+    "version-packages": "changeset version",
     "review": "playwright test",
     "review:report": "playwright show-report"
   },
@@ -16,6 +19,6 @@
     "@changesets/cli": "^2.29.0",
     "@playwright/mcp": "^0.0.80",
     "@playwright/test": "^1.63.0",
-    "@types/node": "^20.19.43"
+    "@types/node": "^24.13.6"
   }
 }

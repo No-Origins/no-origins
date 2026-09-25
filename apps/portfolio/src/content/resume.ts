@@ -22,17 +22,35 @@ export const profile = {
   years: "6+ years",
   blurb:
     "I build editors, design systems and agent tools. Six years across four startups: the Fambase front end at Terribly Tiny Tales, the Neptune editor at Hashnode, RAG and agent applications at Dataflix, and now the platform team and the agent harness behind Sia at Radise. No Origins is where I keep what I make.",
+  // The two lines under the card (his, 2026-09-25; Portfolio.md P4): a figure or a mark on one cell, and what it says
+  // beside it. The figure is the résumé's "6+ years"; the Charminar is his picture of Hyderabad, from `hyderabad.png`
+  // in his Downloads, its white made transparent so it goes straight on the cell.
+  shipping: { figure: "6+", line: "years shipping products from 0 → 1" },
+  city: { name: "Hyderabad", mark: "/hyderabad.png" },
+  // Not from the résumé: his tagline, for the first screen, 2026-09-25 (Portfolio.md P4). A sentence a line.
+  tagline: ["Start with curiosity.", "Let the stack overflow."],
   avatar: { src: "/avatar.png", alt: "Bhargav, drawn: round glasses, a black tee, arms crossed, smiling." },
+  // The faces the avatar's "HEY!" wears, one picked at random each time (his, 2026-09-24). 768px WebP, cut down from
+  // his 2048px PNGs: the face is never shown wider than ~370px.
+  heyFaces: [
+    { src: "/avatar-bolt.webp", alt: "Bhargav, drawn: round shades, a blue jacket with a pink lightning bolt, arms crossed." },
+    { src: "/avatar-flame.webp", alt: "Bhargav, drawn: round shades, a black jacket with flames, arms crossed." },
+  ],
   initials: "BR",
 };
 
-export type Link = { id: "github" | "linkedin" | "email" | "resume"; label: string; href?: string };
+export type Link = { id: "github" | "linkedin" | "email" | "resume" | "discord" | "x" | "instagram"; label: string; href?: string };
 
 export const LINKS: Link[] = [
   { id: "email", label: "Email", href: "mailto:hiddenstack@icloud.com" },
   { id: "github", label: "GitHub", href: "https://github.com/bhargavAtgithub" },
   // The résumé links a LinkedIn profile but does not print the URL; fill it and the button appears.
   { id: "linkedin", label: "LinkedIn" },
+  // His, for the row of cells on the first screen (Portfolio.md P4, 2026-09-25). The URLs are his to give: until then
+  // each cell shows its mark and goes nowhere.
+  { id: "discord", label: "Discord" },
+  { id: "x", label: "X" },
+  { id: "instagram", label: "Instagram" },
   // The résumé itself, as the download Brand.md §11 decision 5 asked for.
   { id: "resume", label: "Résumé", href: "/bhargav-reddy-v.pdf" },
 ];

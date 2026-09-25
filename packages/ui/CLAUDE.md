@@ -6,16 +6,18 @@ Rebuilt from nothing on 2026-09-16; the hand-written 1.0 system was deleted in f
 ```
 src/components/*.tsx    60 shadcn components + theme-provider.tsx (`useThemeToggle` — every toggle goes through the
                           grid's flip, Grid.md D28; `useThemeFlipRegistry` is how the grid takes it)
-                        + grid.tsx (field, and `GridThemeFlip`, D28), grid-pages.tsx, grid-pager.tsx, grid-editor.tsx, grid-frame.tsx — the base layout, ours
+                        + grid.tsx (field, `GridThemeFlip`, D28, the intro — `intro`, `useGridIntro`, D31 — and `GRID_REFERENCE_BOX`), grid-pages.tsx, grid-pager.tsx — the base layout, ours
                           (see repo-root CLAUDE.md); grid-pager.tsx is the navbar on the bottom row — a slot whose
                           cells are sub-slots, width decided per breakpoint, arrows a registry molecule (Grid.md D27,
-                          D29) — and grid-pages.tsx the turn (Grid.md D27)
+                          D29) — and grid-pages.tsx the turn (Grid.md D27). The grid renders and nothing edits it:
+                          grid-editor.tsx and grid-frame.tsx went with the composer (Grid-v2.md D30, 2026-09-23)
                         + slot.tsx (the box on the grid: fill · inset · alignment; a component or sub-slots) and
-                          registry.tsx (every component the composer's palette offers, lazy) — Slots.md
+                          registry.tsx (what a layout item can name by `kind`, drawn by `Placed` — one entry left,
+                          the pager's arrows) — Slots.md
                         + text.tsx — the seven typography roles, Type.md; every piece of text in an app is a Text
 src/hooks/*.ts          use-mobile.ts
 src/lib/utils.ts        re-exports `cn` from the `cn` package
-src/lib/grid-layout.ts  the grid's layout model as pure functions: rects, packing, pages, derivation, page ops
+src/lib/grid-layout.ts  the grid's layout model as pure functions: rects, packing, pages, derivation
 src/styles/globals.css  Tailwind + the theme + the @theme inline map — the only stylesheet in the workspace
 components.json         what the CLI reads; aliases resolve to @no-origins/ui/*
 ```
@@ -43,6 +45,14 @@ components.json         what the CLI reads; aliases resolve to @no-origins/ui/*
    `translateX(-100%)` arrives as `x` in px and an `xPercent` tween lands on top of it — pin `x: 0` in the vars. And
    drop any CSS `transition` on a property GSAP writes every frame. Reduced motion is checked in the component, not
    globally; `gsap.set` to the end state.
+   **The grid's intro is neither** (Grid.md D31): hundreds of cells moving at once while the page is still loading
+   are CSS opacity animations, one per cell with its own delay, because the compositor runs those off the main thread.
+   Never animate many elements from a per-frame script, and never put a filter (a glow, a blur) on a layer whose
+   children change every frame — paint it into each child instead. Both were measured: 2 s of raster in a 1.2 s intro.
+   Three more from the ripple between pages (D32), each a dropped frame: a custom property written every frame goes on
+   the narrowest element that reads it, because it restyles everything under it; many identical glows are a
+   box-shadow, whose blur is cached, not a `filter: drop-shadow`, which is rasterised per element; and hundreds of
+   animations are handed out a few frames before they are due, not all at once, because each is a new layer.
 
 `pnpm --filter @no-origins/ui typecheck` checks the package on its own. Everything visual is reviewed through the
 showcase — see the repo-root CLAUDE.md.

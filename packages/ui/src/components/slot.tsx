@@ -20,9 +20,6 @@ import { resolveSubSlots, type GridLayoutItem, type SlotAlign, type SlotFill, ty
  * transparent`, `inset: 0` and `stretch`, so the slot is invisible around it and the card's own ring shows.
  */
 
-export const SLOT_FILLS: SlotFill[] = ["transparent", "background", "muted", "card"]
-export const SLOT_ALIGNS: SlotAlign[] = ["start", "center", "end", "stretch"]
-
 const SURFACE: Record<SlotFill, string> = {
   transparent: "",
   background: "bg-background",
@@ -31,7 +28,7 @@ const SURFACE: Record<SlotFill, string> = {
 }
 
 /** A fill's inset when none is set. */
-export function defaultInset(fill: SlotFill): SlotInset {
+function defaultInset(fill: SlotFill): SlotInset {
   return fill === "muted" || fill === "card" ? 12 : 0
 }
 
@@ -111,4 +108,4 @@ export function isSlotItem(item: GridLayoutItem) {
   return !!(item.slot || item.component || item.children)
 }
 
-export { Slot, SlotContent, SubSlots }
+export { Slot, SlotContent }

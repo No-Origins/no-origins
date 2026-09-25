@@ -3,10 +3,9 @@
 import * as React from "react";
 import type { ReactNode } from "react";
 
-import { countFor, DEFAULT_GRID_CONFIG, specFor, useGridMetrics, type Responsive } from "@no-origins/ui/components/grid";
+import { countFor, DEFAULT_GRID_CONFIG, GRID_REFERENCE_BOX, specFor, useGridMetrics, type Responsive } from "@no-origins/ui/components/grid";
 import { Slot } from "@no-origins/ui/components/slot";
 import { GridPages } from "@no-origins/ui/components/grid-pages";
-import { GRID_REFERENCE_BOX } from "@no-origins/ui/components/grid-frame";
 import { Text } from "@no-origins/ui/components/text";
 import type { GridLayout, GridLayoutItem } from "@no-origins/ui/lib/grid-layout";
 
@@ -70,27 +69,25 @@ export const quarter = (rows: number): Responsive<Span> => ({
 
 // ── the pages ─────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** One placed item, in its box or bare. Shared by the pages and the composer so both draw a page the same way. */
-export function renderContentItem(content: PageContent, placed: GridLayoutItem) {
+/** One placed item, in its box or bare. */
+function renderContentItem(content: PageContent, placed: GridLayoutItem) {
   const item = findItem(content, placed.id);
   if (!item) return null;
   return renderSpecimen(content, item, placed);
 }
 
-export function renderSpecimen(content: PageContent, item: SpecimenItem, placed: GridLayoutItem) {
+function renderSpecimen(content: PageContent, item: SpecimenItem, placed: GridLayoutItem) {
   const variant = item.variant ?? content.variant;
   return variant === "none" ? item.render(placed) : <Slot fill={variant}>{item.render(placed)}</Slot>;
 }
 
 /**
- * A page of specimens on the grid. With an authored `layout` (pasted back from the composer, Grid.md D20) that is
- * what renders, deriving where the field's shape differs. Without one, the sections are arranged on the field the
- * page is on, so every coordinate is honoured as written (Portfolio.md P2).
+ * A page of specimens on the grid: the sections are arranged on the field the page is on, so every coordinate is
+ * honoured as written (Portfolio.md P2).
  */
 export function SpecimenPages({ content }: { content: PageContent }) {
   const [field, setField] = React.useState<ShowcaseField | null>(null);
   const layout = React.useMemo<GridLayout>(() => {
-    if (content.layout) return content.layout;
     const on = field ?? FIRST_FIELD;
     return { shapes: { [on.bp]: { cols: on.cols, rows: on.rows } }, authored: { [on.bp]: arrange(content, on) } };
   }, [content, field]);

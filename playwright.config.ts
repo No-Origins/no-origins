@@ -1,12 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // Visual review loop for the workspace apps.
-// `pnpm review` boots BOTH dev servers (or reuses ones already running) — the portfolio on :3000 and the design
-// showcase on :3001 — sweeps every route in e2e/review.spec.ts on desktop + mobile viewports in both themes, and
-// drops full-page screenshots into e2e/screenshots/<project>/<route>.png.
+// `pnpm review` boots THREE dev servers (or reuses ones already running) — the portfolio on :3000, the design
+// showcase on :3001 and engineering on :3003 — sweeps every route in e2e/review.spec.ts on desktop + mobile viewports
+// in both themes, and drops full-page screenshots into e2e/screenshots/<project>/<route>.png. CI runs the same sweep
+// (.github/workflows/ci.yml) and uploads the screenshots.
 //
-// The showcase joined the sweep the day it was built: a second app outside the loop is a second app whose
-// screenshots nobody looks at, and CLAUDE.md's rule is that you look at the result before reporting done.
+// An app outside the loop is an app whose screenshots nobody looks at, and CLAUDE.md's rule is that you look at the
+// result before reporting done.
 export default defineConfig({
   testDir: "./e2e",
   outputDir: "./e2e/.results",
@@ -40,7 +41,7 @@ export default defineConfig({
       use: { ...devices["Pixel 7"], colorScheme: "dark" },
     },
   ],
-  // Both apps are booted (the admin is not: every route of it is behind auth and needs a running Supabase).
+  // Three apps are booted (the admin is not: every route of it is behind auth and needs a running Supabase).
   webServer: [
     {
       command: "pnpm --filter portfolio dev",
@@ -51,6 +52,12 @@ export default defineConfig({
     {
       command: "pnpm --filter design dev",
       url: "http://localhost:3001",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      command: "pnpm --filter engineering dev",
+      url: "http://localhost:3003",
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

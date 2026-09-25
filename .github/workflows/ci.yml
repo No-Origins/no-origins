@@ -1,7 +1,9 @@
-# The gate in front of production. Vercel builds each app on its own (apps/<app>/vercel.json), and its preview
-# builds are the build check; this runs what a Vercel build does not: types across the whole workspace, including
-# packages/ui on its own; lint, which `next build` stopped running in Next 16; and the agents harness, which no
-# Vercel project builds. Warnings pass, errors fail.
+# The gate in front of production: branch protection requires every job below. Vercel still builds and deploys each
+# app on its own (apps/<app>/vercel.json), but it skips apps a change does not touch, and a skipped app reports no
+# status, so a Vercel check cannot be required. This workflow builds all four instead, and runs what a Vercel build
+# does not: types across the whole workspace, including packages/ui on its own; lint, which `next build` stopped
+# running in Next 16; the visual review; and the agents harness, which no Vercel project builds. Warnings pass,
+# errors fail. Node comes from .nvmrc, the same 24 that engines.node pins for Vercel.
 name: CI
 
 on:
@@ -25,11 +27,58 @@ jobs:
       - uses: pnpm/action-setup@v6 # the version comes from `packageManager` in package.json
       - uses: actions/setup-node@v7
         with:
-          node-version: 24 # what all four Vercel projects run
+          node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r typecheck
       - run: pnpm -r lint
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v6
+        with:
+          path: apps/*/.next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('apps/*/src/**', 'packages/ui/src/**') }}
+          restore-keys: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+      # No env: the admin creates its Supabase clients per request, so it builds without keys, as a fork's PR would.
+      - run: pnpm -r build
+
+  review:
+    name: Visual review
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - run: pnpm exec playwright install --with-deps chromium
+      # The sweep of CLAUDE.md: portfolio, showcase and engineering on their dev servers, every route on desktop and
+      # mobile in both themes. It fails on a route that answers 400+ or throws; the screenshots are for looking at.
+      - run: pnpm review
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: review-screenshots
+          path: |
+            e2e/screenshots/
+            playwright-report/
+          retention-days: 14
 
   agents:
     name: Agents tests

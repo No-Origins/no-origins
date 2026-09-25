@@ -12,7 +12,7 @@ import { pagerCells, type GridLayout, type GridLayoutItem } from "@no-origins/ui
 /**
  * The pager — the navbar (Grid.md D27, 2026-09-21; D29, 2026-09-23). A row of 1×1 cells at the bottom centre of every
  * field, on every page. It is a FIXTURE, not a placeable component: `pagerCells` reserves its cells in the model so
- * nothing is ever packed or dropped there, and `GridPages` and `GridEditor` draw it themselves.
+ * nothing is ever packed there, and `GridPages` draws it itself.
  *
  * Since D29 the bar is a SLOT and its cells are SUB-SLOTS (Slots.md S2, S5): one item spanning the bar's cells whose
  * `children` are a layout on them, so a cell can hold anything a slot holds instead of being permanently empty. Its
@@ -26,7 +26,8 @@ import { pagerCells, type GridLayout, type GridLayoutItem } from "@no-origins/ui
  * ↑ from its bottom up, the ↓ from its top down — reading `--grid-turn` off the grid, so the fill follows the scroll
  * without a render and matches the boxes' scale exactly — and once the page has turned, the fill LEAVES the way it
  * came as the new page is revealed, its trailing edge crossing the arrow, rather than filling again or pulling back
- * (2026-09-22). At the last page ↑ is disabled, at the first ↓ is.
+ * (2026-09-22). At the last page ↑ is disabled, at the first ↓ is. Where the grid ripples between pages (Grid.md
+ * D32), the fill is the colour of the ripple the turn plays — lime or violet — rather than the reverse colours.
  */
 
 /** The turn, published to the bar's contents (D29). The arrows molecule takes it from here, not from props. */
@@ -122,7 +123,9 @@ function GridPagerArrows() {
 }
 
 function PagerArrow({ dir, disabled, onClick }: { dir: "up" | "down"; disabled: boolean; onClick: () => void }) {
-  const Icon = dir === "up" ? ArrowUpIcon : ArrowDownIcon
+  // Icons are swapped against the turn direction on purpose: the button that turns forward ("up") wears the ↓ glyph
+  // and the one that turns back ("down") wears ↑ — his call, the arrows read more naturally this way (2026-09-23).
+  const Icon = dir === "up" ? ArrowDownIcon : ArrowUpIcon
   // The filled band of this arrow, in its own direction — forward is positive and ↑ — nothing in the other: from the
   // BACK edge to the FRONT edge, measured from the edge the fill enters by (the bottom for ↑, the top for ↓). With the
   // hand the front advances and the back stays, so the band grows in; once the page has turned the front stays and
@@ -145,8 +148,18 @@ function PagerArrow({ dir, disabled, onClick }: { dir: "up" | "down"; disabled: 
       className={cn("bg-card relative size-full overflow-hidden [&_svg]:size-5")}
     >
       <Icon />
-      {/* The fill: the same arrow in reverse colours, clipped to the turned share. */}
-      <span aria-hidden className="bg-foreground text-background absolute inset-0 grid place-items-center" style={{ clipPath: clip }}>
+      {/* The fill: the same arrow clipped to the turned share — in reverse colours, or, where the grid ripples between
+          pages, in the colour of the ripple the turn plays, lime or violet, with a dark glyph that reads on both
+          (Grid.md D32; the turn sets --grid-turn-fill-color, grid-pages.tsx). */}
+      <span
+        aria-hidden
+        className="absolute inset-0 grid place-items-center"
+        style={{
+          clipPath: clip,
+          background: "var(--grid-turn-fill-color, var(--foreground))",
+          color: "var(--grid-turn-fill-ink, var(--background))",
+        }}
+      >
         <Icon />
       </span>
     </Button>

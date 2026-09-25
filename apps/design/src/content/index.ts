@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { GridBreakpoint, Responsive } from "@no-origins/ui/components/grid";
-import type { GridLayout, GridLayoutItem, GridShape, SlotFill } from "@no-origins/ui/lib/grid-layout";
+import type { GridLayoutItem, GridShape, SlotFill } from "@no-origins/ui/lib/grid-layout";
 
 /** The field a page is being arranged for: the live counts and the breakpoint that supplied the cell (Grid.md D12). */
 export type ShowcaseField = GridShape & { bp: GridBreakpoint };
@@ -19,8 +19,6 @@ export type SpecimenItem = {
   span: Responsive<Span>;
   /** The slot's fill (Slots.md S3), or `none` — the item IS the component, unwrapped (a Card is already a box). */
   variant?: SlotFill | "none";
-  /** False for page furniture — a header, a footnote — that the composer's palette should not offer. */
-  palette?: boolean;
   render: (placed: GridLayoutItem) => ReactNode;
 };
 
@@ -28,10 +26,9 @@ export type SpecimenItem = {
 export type SpecimenSection = { id: string; items: SpecimenItem[] };
 
 /**
- * What a showcase page is made of, as data the composer can read (Grid.md D17): its sections of specimens with their
- * spans, the box variant they default to, and — once the composer has been over it and its export pasted back (D20)
- * — the authored layout, which then wins over arranging the spans. The page is ARRANGED on the field it is shown on,
- * the portfolio's way (Portfolio.md P2, `src/lib/arrange.ts`), since 2026-09-22.
+ * What a showcase page is made of: its sections of specimens with their spans and the box variant they default to.
+ * The page is ARRANGED on the field it is shown on, the portfolio's way (Portfolio.md P2, `src/lib/arrange.ts`),
+ * since 2026-09-22.
  */
 export type PageContent = {
   title: string;
@@ -42,13 +39,7 @@ export type PageContent = {
    * tile a narrower measure — the overview's three cards divide 12 and not 16. Never wider than the default.
    */
   band?: Partial<Record<GridBreakpoint, number>>;
-  layout?: GridLayout;
 };
-
-/** Every specimen on a page, in reading order, across its sections. */
-export function itemsOf(content: PageContent): SpecimenItem[] {
-  return content.sections.flatMap((section) => section.items);
-}
 
 /** The specimen with this id, on any of the page's sections. */
 export function findItem(content: PageContent, id: string): SpecimenItem | undefined {
@@ -58,10 +49,3 @@ export function findItem(content: PageContent, id: string): SpecimenItem | undef
   }
   return undefined;
 }
-
-/** Every page the composer can open, by route. Loaded lazily so the composer does not pull all three in at once. */
-export const PAGES: Record<string, { title: string; load: () => Promise<PageContent> }> = {
-  "/": { title: "Overview", load: () => import("./overview").then((m) => m.OVERVIEW) },
-  "/atoms": { title: "Atoms", load: () => import("./atoms").then((m) => m.ATOMS) },
-  "/molecules": { title: "Molecules", load: () => import("./molecules").then((m) => m.MOLECULES) },
-};

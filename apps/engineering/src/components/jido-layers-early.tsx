@@ -4,7 +4,7 @@ import { ArrowRightIcon } from "lucide-react";
 
 import { Badge } from "@no-origins/ui/components/badge";
 import { Button } from "@no-origins/ui/components/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@no-origins/ui/components/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@no-origins/ui/components/card";
 import {
   Table,
   TableBody,
@@ -16,14 +16,6 @@ import {
 import { cn } from "@no-origins/ui/lib/utils";
 
 import { STAIR } from "@/lib/jido-meta";
-
-function CodeBlock({ children }: { children: string }) {
-  return (
-    <pre className="bg-foreground text-background overflow-x-auto rounded-none border p-4 font-mono text-xs leading-relaxed whitespace-pre">
-      <code>{children}</code>
-    </pre>
-  );
-}
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (

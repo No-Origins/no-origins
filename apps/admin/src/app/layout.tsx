@@ -12,7 +12,7 @@ const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   title: { default: "No Origins — Admin", template: "%s — No Origins Admin" },
-  description: "The control surface: quests, composed on the grid.",
+  description: "The control surface, on the grid.",
   // Nothing here is for anyone but the people on the allowlist.
   robots: { index: false, follow: false },
 };

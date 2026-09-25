@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Inter, Montserrat } from "next/font/google";
+import { Anton, Geist_Mono, Inter, Montserrat } from "next/font/google";
 import { ThemeProvider } from "@no-origins/ui/components/theme-provider";
 import { cn } from "@no-origins/ui/lib/utils";
 import { profile } from "@/content/resume";
@@ -9,6 +9,10 @@ import "./globals.css";
 const fontSans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const fontHeading = Montserrat({ subsets: ["latin"], variable: "--font-heading" });
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
+// --font-display is the app's own: an ultra-bold condensed grotesque (Anton) for the avatar's "HEY!" island and, since
+// 2026-09-25, the tagline over the profile card. The design system reads sans/heading/mono; this one is the host's,
+// used nowhere the package can see.
+const fontDisplay = Anton({ subsets: ["latin"], weight: "400", variable: "--font-display" });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://hiddenstack.no-origins.com"),
@@ -32,7 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("h-full antialiased font-sans", fontSans.variable, fontHeading.variable, fontMono.variable)}
+      className={cn("h-full antialiased font-sans", fontSans.variable, fontHeading.variable, fontMono.variable, fontDisplay.variable)}
     >
       <body className="min-h-full">
         <ThemeProvider>{children}</ThemeProvider>

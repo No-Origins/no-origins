@@ -15,7 +15,7 @@ import { useThemeFlipRegistry, type ThemeFlipper } from "@no-origins/ui/componen
  * own padding is one gutter, so the edge of the screen is one more grid line (D15). When a layout holds more than the
  * field can, the surplus goes to another PAGE (grid-pages.tsx) — never off the edge.
  *
- * The grid is always its box: the viewport, or the frame inside `/grid` (D11). There is no `fill`, because nothing
+ * The grid is always its box: the viewport (D11). There is no `fill`, because nothing
  * ever holds a grid as a block in a page — "everything will always be on the grid once we are out of the grid
  * editor" — and no `pad`, because the pad IS the gutter.
  */
@@ -36,6 +36,19 @@ export const GRID_BREAKPOINTS: Record<GridBreakpoint, number> = {
 export const BREAKPOINT_ORDER: GridBreakpoint[] = ["base", "sm", "md", "lg", "xl"]
 
 /**
+ * Each breakpoint's reference box — Grid-v1.md §4's `Reference box` column, verbatim. A breakpoint is a RANGE, so
+ * these are starting points, not the only sizes a page meets: since v2 every width in between is a different field
+ * (D12). A page that has to lay itself out before the grid has measured its box assumes one of these.
+ */
+export const GRID_REFERENCE_BOX: Record<GridBreakpoint, { width: number; height: number }> = {
+  base: { width: 390, height: 844 },
+  sm: { width: 640, height: 960 },
+  md: { width: 768, height: 1024 },
+  lg: { width: 1024, height: 768 },
+  xl: { width: 1440, height: 900 },
+}
+
+/**
  * The spacing scale the gutter draws from (Grid.md §3). A breakpoint's gap is one of these, never a free number; a
  * box's own inset draws from the same five so the space between boxes and the space inside them read as one family.
  * 4px steps because that is the base of the Tailwind spacing the apps lay out with; 0 is on it on purpose — cells
@@ -43,7 +56,6 @@ export const BREAKPOINT_ORDER: GridBreakpoint[] = ["base", "sm", "md", "lg", "xl
  * is a size, not a spacing, and its own decision (D13).
  */
 export const GRID_SPACING = [0, 4, 8, 12, 16] as const
-export type GridSpacing = (typeof GRID_SPACING)[number]
 
 /**
  * The pager bar's width in cells when a breakpoint does not name one (Grid.md D27, D29): four cells then ↑ ↓. It
@@ -61,17 +73,6 @@ export const PAGER_CELLS = 6
 export type GridSpec = { cell: number; gap: number; pager?: number }
 export type GridConfig = Partial<Record<GridBreakpoint, GridSpec>>
 
-/** The cell stepper's range on `/grid`: below 16 a cell holds nothing; 200 is a cap against a runaway click. */
-export const MIN_CELL = 16
-export const MAX_CELL = 200
-
-/**
- * The pager stepper's range in the composer, and its step — even, because the bar is (D29). Two is the arrows alone;
- * 16 is a cap against a runaway click, not a decision. A number this wide only exists on a field wide enough for it.
- */
-export const MIN_PAGER = 2
-export const MAX_PAGER = 16
-export const PAGER_STEP = 2
 
 /**
  * The brick — DECIDED, Grid.md D13, 2026-09-21. One gutter everywhere so the field has one texture and one edge
@@ -116,11 +117,6 @@ export type GridMetrics = GridField & {
   /** The box the grid was given. */
   boxW: number
   boxH: number
-  /**
-   * How much a GridFrame around the grid has shrunk it to fit on screen: 1 outside a frame or in one that fits.
-   * Layout px times `scale` is screen px. Pointer maths has to divide by it (Grid.md D11).
-   */
-  scale: number
 }
 
 export function breakpointFor(size: number): GridBreakpoint {
@@ -165,8 +161,7 @@ export function countFor(span: number, cell: number, gap: number) {
 /**
  * The field a box of this size gets (D12). Width picks the breakpoint, the breakpoint supplies the cell and gap
  * (D13), and both axes are then simply how many cells fit. A phone on its side gets more columns than rows with no
- * rule for it — v1's transposition fell out. There is no way to name a breakpoint outright: the box decides, and a
- * tool that wants to see another size gives the grid a box of that size — a GridFrame (grid-frame.tsx, D11).
+ * rule for it — v1's transposition fell out. There is no way to name a breakpoint outright: the box decides (D11).
  */
 export function resolveField(config: GridConfig, width: number, height: number): GridField {
   const spec = specFor(config, breakpointFor(width))
@@ -202,33 +197,34 @@ export function useGridMetrics() {
   return React.useContext(GridContext)
 }
 
-/**
- * What a GridFrame tells the grid inside it: that it is framed, and by how much the frame has been scaled down to
- * fit. Defined here rather than in grid-frame.tsx so the grid reads it without importing the frame.
- */
-export type GridFrameState = { scale: number }
-export const GridFrameContext = React.createContext<GridFrameState | null>(null)
-
-/** The frame around the nearest Grid, or null when the grid stands on its own. */
-export function useGridFrame() {
-  return React.useContext(GridFrameContext)
-}
-
 export type GridProps = Omit<React.ComponentProps<"div">, "children"> & {
   children?: React.ReactNode
-  config?: GridConfig
   /** Draw the cells behind the items. */
   overlay?: boolean
-  /** Number the columns and rows along the edges. Implies the overlay. */
-  rulers?: boolean
+  /**
+   * Open by drawing the grid in, and hold the drawing while the page loads (Grid.md D31). Played once per document
+   * load, by the grid that asks for it; never under reduced motion.
+   */
+  intro?: boolean
+  /**
+   * Run the intro's drawing through the field, lines only, when `page` changes (Grid.md D32): up from the bottom when it
+   * grows, down from the top when it shrinks. Never under reduced motion.
+   */
+  ripple?: boolean
+  /** The page on the field, for `ripple`. `GridPages` passes it; a grid without pages has no use for it. */
+  page?: number
   onMetrics?: (metrics: GridMetrics) => void
 }
 
+/** The grid reads the decided numbers (D13) and nothing else: no prop overrides a breakpoint's `cell · gap`. */
+const config = DEFAULT_GRID_CONFIG
+
 function Grid({
   children,
-  config = DEFAULT_GRID_CONFIG,
   overlay = false,
-  rulers = false,
+  intro: introProp = false,
+  ripple = false,
+  page,
   onMetrics,
   className,
   style,
@@ -246,8 +242,6 @@ function Grid({
     },
     [refProp],
   )
-  const frame = useGridFrame()
-  const scale = frame?.scale ?? 1
   const [box, setBox] = React.useState<{ w: number; h: number } | null>(null)
 
   React.useLayoutEffect(() => {
@@ -263,9 +257,6 @@ function Grid({
     return () => ro.disconnect()
   }, [])
 
-  // Rulers are drawn ON the field — the numbers sit at the centre of the top row's and left column's cells (Grid.md
-  // D24) — so they take no space and showing them changes nothing about the count. They used to reserve a 24px strip
-  // on every side, and toggling them re-counted the field and repacked the layout.
   const metrics = React.useMemo<GridMetrics | null>(() => {
     if (!box || box.w <= 0 || box.h <= 0) return null
     const field = resolveField(config, box.w, box.h)
@@ -276,15 +267,18 @@ function Grid({
       gridH: cell * rows + gap * (rows - 1),
       boxW: box.w,
       boxH: box.h,
-      scale,
     }
-  }, [box, config, scale])
+  }, [box])
 
   React.useEffect(() => {
     if (metrics) onMetrics?.(metrics)
   }, [metrics, onMetrics])
 
-  const showOverlay = overlay || rulers
+  const lines = useGridLines()
+  const intro = useGridIntro(introProp, metrics, ref, lines)
+  useGridRipple(ripple && !intro.on, metrics, page, lines, ref)
+  const lit = intro.on || ripple
+
   // The box's padding is the gutter (D15) — before the field is measured it is the breakpoint's gap by width alone,
   // which is what it will be once measured too. Whatever the count leaves over is centred by the flex box (D14).
   const gap = metrics?.gap ?? specFor(config, breakpointFor(box?.w ?? 0)).gap
@@ -294,10 +288,13 @@ function Grid({
       ref={setRef}
       data-slot="grid"
       data-breakpoint={metrics?.bp}
-      // The grid is always its box: the frame's viewport inside a GridFrame, the screen otherwise. A className may
-      // give it another height when there is chrome above (`h-[calc(100dvh-3.5rem)]`), never a width.
-      className={cn("relative flex items-center justify-center", frame ? "h-full w-full" : "h-dvh w-full", className)}
-      style={{ padding: `${gap}px`, ...style }}
+      // While the intro runs (D31) — "drawing", then "arriving" as page 1 turns in: the page's boxes and the pager are
+      // held back by globals.css until it hands over, and nothing turns a page.
+      data-intro={intro.on ? intro.phase : undefined}
+      // The grid is always its box: the screen. A className may give it another height when there is chrome above
+      // (`h-[calc(100dvh-3.5rem)]`), never a width.
+      className={cn("relative flex items-center justify-center h-dvh w-full", className)}
+      style={{ padding: `${gap}px`, ...rippleStyle(lit), ...style }}
       {...props}
     >
       {metrics ? (
@@ -307,7 +304,8 @@ function Grid({
             className="relative"
             style={{ width: metrics.gridW, height: metrics.gridH }}
           >
-            {showOverlay ? <GridOverlay rulers={rulers} /> : null}
+            {overlay ? <GridOverlay /> : null}
+            {lit ? <GridRippleLines cols={metrics.cols} rows={metrics.rows} cell={metrics.cell} gap={metrics.gap} layers={lines.layers} /> : null}
             <div
               data-slot="grid-tracks"
               className="relative grid"
@@ -320,13 +318,376 @@ function Grid({
               {children}
             </div>
           </div>
-          {/* The theme's flip (D28) — the outermost grid on the page takes the switch; a framed grid leaves it alone. */}
-          {frame ? null : <GridThemeFlip />}
+          {/* The theme's flip (D28) — the outermost grid on the page takes the switch. */}
+          <GridThemeFlip />
         </GridContext.Provider>
       ) : null}
+      {intro.on ? <GridIntroCover metrics={metrics} plan={intro.plan} /> : null}
     </div>
   )
 }
+
+// ── the intro (Grid-v2.md D31, 2026-09-24) ───────────────────────────────────────────────────────────────────────
+
+/**
+ * His numbers, from the settings he sent back from the motion study: a front that rises from the bottom with a cone
+ * for its edge — the centre leads, the sides trail by INTRO_DEPTH steps, the point in the middle — each step
+ * INTRO_STEP_MS, every cell a cut. A line is lit the moment it is drawn and fades back to its usual colour over
+ * INTRO_FADE_MS, after INTRO_FADE_HOLD_MS. While the page loads the drawing goes again straight away (INTRO_GAP_MS),
+ * lines only, lime and violet turn about. The step was 30ms in his settings and is 15ms since 2026-09-25 — "Increase
+ * the speed of the ripple" — for the intro and the ripple between pages alike (D32).
+ */
+const INTRO_STEP_MS = 15
+const INTRO_DEPTH = 12
+const INTRO_POINT = 0.5
+const INTRO_FADE_HOLD_MS = 0
+const INTRO_FADE_MS = 500
+const INTRO_GAP_MS = 0
+/** Each pass's colour, turn about: the first is lime. The tokens are globals.css's `--lime` and `--violet`. */
+const INTRO_LINES = ["lime", "violet"] as const
+/**
+ * Mine, tune by looking: page 1's reveal, from its bottom edge upward; and the longest the drawing waits for the page
+ * before handing over anyway, so a slow network never leaves anyone on a loader (D31, open item 3).
+ */
+const INTRO_REVEAL_MS = 420
+const INTRO_MAX_WAIT_MS = 3000
+
+/**
+ * Once per document load (D31, open item 5 — mine): a navigation that mounts another grid does not play it again; a
+ * reload does. Set only in the browser, so the server's render always carries the cover.
+ */
+let introPlayed = false
+
+/** Where a pass starts: the bottom (the intro, a turn forward) or the top (a turn back, D32). */
+type PassFrom = "bottom" | "top"
+
+/**
+ * When a pass reaches each cell, in ms from the pass's start, row-major; and how long the pass is. `along` counts rows
+ * from the edge the pass starts at; the cone adds up to INTRO_DEPTH steps with the distance from the point. The first
+ * cell to be drawn is drawn at 0. Counts are even (D26), so the two centre columns tie and the point is symmetric.
+ */
+function ripplePlan(cols: number, rows: number, from: PassFrom = "bottom") {
+  const delays = new Float64Array(cols * rows)
+  const reach = Math.max(INTRO_POINT, 1 - INTRO_POINT) || 1
+  let min = Infinity
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const across = cols > 1 ? c / (cols - 1) : INTRO_POINT
+      const along = from === "bottom" ? rows - 1 - r : r
+      const d = along + INTRO_DEPTH * Math.min(1, Math.abs(across - INTRO_POINT) / reach)
+      delays[r * cols + c] = d
+      min = Math.min(min, d)
+    }
+  }
+  let span = 0
+  for (let i = 0; i < delays.length; i++) {
+    delays[i] = (delays[i]! - min) * INTRO_STEP_MS
+    span = Math.max(span, delays[i]!)
+  }
+  // The cells in the order the pass reaches them, for handing each its animation just before its turn.
+  const order = Array.from({ length: delays.length }, (_, i) => i).sort((a, b) => delays[a]! - delays[b]!)
+  return { delays, span, order }
+}
+
+/**
+ * How far ahead of its turn a cell is handed its animation. Handing all of them out at the start of a pass made every
+ * cell a new compositor layer in one frame — the frame that dropped when a page turned (measured 2026-09-25); handed
+ * out a few frames ahead, the layers are made a few at a time across the pass and are ready when they are due.
+ */
+const LINES_LOOKAHEAD_MS = 64
+
+/**
+ * Ready is the fonts, the images already on the field and the window's load — so page 1 arrives finished and the
+ * drawing hides the font swap — or INTRO_MAX_WAIT_MS, whichever is first (D31, open item 4 — mine).
+ */
+function pageReady(root: HTMLElement | null): Promise<void> {
+  const loaded = document.readyState === "complete" ? Promise.resolve() : new Promise<void>((done) => window.addEventListener("load", () => done(), { once: true }))
+  const fonts = document.fonts ? document.fonts.ready.then(() => undefined) : Promise.resolve()
+  const images = Array.from(root?.querySelectorAll("img") ?? []).map((img) => (img.complete ? Promise.resolve() : img.decode().catch(() => undefined)))
+  const cap = new Promise<void>((done) => window.setTimeout(done, INTRO_MAX_WAIT_MS))
+  return Promise.race([Promise.all([loaded, fonts, ...images]).then(() => undefined), cap])
+}
+
+type IntroPhase = "off" | "drawing" | "arriving"
+type RipplePlan = ReturnType<typeof ripplePlan>
+
+/**
+ * The lit lines, shared by the intro and the ripple between pages (D31, D32): the two layers, and `play`, which runs
+ * one pass on the next colour — lime, violet, lime, turn about, counted across the intro and every turn after it. A
+ * pass restarts every cell's fade with the cell's delay, handing each cell its animation just before its turn
+ * (LINES_LOOKAHEAD_MS); a CSS animation restarts only when its name changes, so each layer turns between two identical
+ * keyframes. `late` starts the pass part-way, for a timer that fired after the pass was due. The fades themselves run
+ * on the compositor; the only per-frame work here is handing out the next few cells.
+ */
+function useGridLines() {
+  const layers = React.useRef<(HTMLDivElement | null)[]>([])
+  const passes = React.useRef(0)
+  const uses = React.useRef(INTRO_LINES.map(() => 0))
+  const handing = React.useRef(INTRO_LINES.map(() => 0))
+  React.useEffect(() => () => handing.current.forEach((raf) => window.cancelAnimationFrame(raf)), [])
+  return React.useMemo(
+    () => ({
+      layers,
+      /** The colour the next pass will play in. `atOnce` hands every cell out now rather than just ahead of its turn. */
+      next: () => INTRO_LINES[passes.current % INTRO_LINES.length]!,
+      play(plan: RipplePlan, late = 0, atOnce = false) {
+        const layer = passes.current % INTRO_LINES.length
+        passes.current++
+        const name = `grid-intro-lit-${uses.current[layer]! % 2 ? "b" : "a"}`
+        uses.current[layer]!++
+        window.cancelAnimationFrame(handing.current[layer]!)
+        const cells = layers.current[layer]?.children
+        if (!cells) return
+        // The pass's zero, and the cells handed out so far. Each cell gets its fade LINES_LOOKAHEAD_MS before it is
+        // due, with the delay that is left then — negative if the frame came late, so it starts part-way and the
+        // front stays where the clock says.
+        const zero = performance.now() - late
+        let next = 0
+        const hand = () => {
+          const now = performance.now() - zero
+          while (next < plan.order.length && (atOnce || plan.delays[plan.order[next]!]! <= now + LINES_LOOKAHEAD_MS)) {
+            const i = plan.order[next++]!
+            const cell = cells[i] as HTMLElement | undefined
+            if (!cell) continue
+            cell.style.animationName = name
+            cell.style.animationDelay = `${plan.delays[i]! + INTRO_FADE_HOLD_MS - now}ms`
+          }
+          if (next < plan.order.length) handing.current[layer] = window.requestAnimationFrame(hand)
+        }
+        hand()
+      },
+    }),
+    [],
+  )
+}
+type GridLines = ReturnType<typeof useGridLines>
+
+/**
+ * The intro's clock — and it is not a frame loop. It ran as one at first, a writer per frame setting every lit
+ * line's opacity, and it lagged (his report, 2026-09-24): each write repainted the two glowing layers, and a glow is
+ * a blur, so every frame re-rasterised two field-sized blurs at the screen's density — two seconds of raster work in a
+ * 1.2-second intro, on the main thread's busiest second, the page's own load. So every cell is now a CSS animation,
+ * scheduled once per pass with its own delay: a tile's lift and a line's fade are opacity, which the compositor runs
+ * on its own thread, so nothing repaints per frame and a busy main thread cannot stall them. What is left here is a
+ * timer per pass: when a pass ends, the page is either ready — page 1 turns in — or the next pass is played.
+ */
+function useGridIntro(enabled: boolean, metrics: GridMetrics | null, rootRef: React.RefObject<HTMLDivElement | null>, lines: GridLines) {
+  // The same on the server and in the browser's first render, so hydration matches; reduced motion is taken off in
+  // the layout effect, before the first measured frame paints, and globals.css hides the server's cover for it.
+  const [phase, setPhase] = React.useState<IntroPhase>(() => (enabled && !introPlayed ? "drawing" : "off"))
+  const on = phase !== "off"
+  const startedOn = React.useRef<GridMetrics | null>(null)
+  const startedAt = React.useRef(0)
+  const cols = metrics?.cols ?? 0
+  const rows = metrics?.rows ?? 0
+  const plan = React.useMemo<RipplePlan | null>(() => (on && cols && rows ? ripplePlan(cols, rows) : null), [on, cols, rows])
+
+  React.useLayoutEffect(() => {
+    if (!on) return
+    if (!enabled || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      introPlayed = true
+      setPhase("off")
+      return
+    }
+    if (!metrics || !plan) return
+    // A new box mid-intro — a phone's bar sliding away, a window resized — hands straight over rather than redrawing
+    // on a field the drawing did not start on. The same box again is React re-running the effect (strict mode): the
+    // first pass is already playing (the DOM kept it), so it is not played twice and the clock keeps its start.
+    if (startedOn.current && startedOn.current !== metrics) {
+      setPhase("off")
+      return
+    }
+    if (!startedOn.current) {
+      startedOn.current = metrics
+      startedAt.current = performance.now()
+      introPlayed = true
+      // The first pass, in this frame and all at once: the cover's tiles were given the same delays by the render that
+      // mounted them, and the lines keep time with them on the compositor. Handed out a few frames ahead instead, as
+      // later passes are, the lines would wait on the main thread in the page's load, its busiest second, and start
+      // part-faded behind the tiles; the frame this costs is the mounting one, under the cover, before anything moves.
+      lines.play(plan, 0, true)
+    }
+
+    let ready = false
+    pageReady(rootRef.current).then(() => {
+      ready = true
+    })
+    const t0 = startedAt.current
+    let passStart = 0
+    let timer = 0
+    const after = (at: number, run: () => void) => {
+      timer = window.setTimeout(run, Math.max(0, at - (performance.now() - t0)))
+    }
+    const endOfPass = () => {
+      const passEnd = passStart + plan.span
+      if (ready) {
+        // Page 1 turns in with the fade (globals.css animates it off `data-intro="arriving"`), and the intro is over
+        // when the last line has faded and the page is in.
+        setPhase("arriving")
+        after(passEnd + INTRO_FADE_HOLD_MS + Math.max(INTRO_FADE_MS, INTRO_REVEAL_MS), () => setPhase("off"))
+        return
+      }
+      // Another pass, lines only, in the other colour — started part-way if this timer fired late, so the front stays
+      // where the clock says it is.
+      passStart = passEnd + INTRO_GAP_MS
+      lines.play(plan, performance.now() - t0 - passStart)
+      after(passStart + plan.span, endOfPass)
+    }
+    after(plan.span, endOfPass)
+    return () => window.clearTimeout(timer)
+  }, [on, enabled, metrics, plan, rootRef, lines])
+
+  return { phase, on, plan }
+}
+
+/**
+ * The ripple between pages (D32): when the page on the field changes, one pass of the intro's drawing runs through
+ * the field, lines only — up from the bottom when the turn is forward, as the next page's boxes arrive from their
+ * bottom edge, and down from the top when it is back. It starts at the change, as the new page comes in, not while
+ * the hand is still scrolling, because a scroll let go short of the turn settles back and turns nothing.
+ */
+function useGridRipple(
+  enabled: boolean,
+  metrics: GridMetrics | null,
+  page: number | undefined,
+  lines: GridLines,
+  rootRef: React.RefObject<HTMLDivElement | null>,
+) {
+  const shown = React.useRef(page)
+  const cols = metrics?.cols ?? 0
+  const rows = metrics?.rows ?? 0
+  const plans = React.useMemo(
+    () => (enabled && cols && rows ? { forward: ripplePlan(cols, rows, "bottom"), back: ripplePlan(cols, rows, "top") } : null),
+    [enabled, cols, rows],
+  )
+  // The field the last page change was seen on. A new field is a resize, and a resize that packs fewer pages clamps the
+  // page with no turn: that change is recorded, not played.
+  const planned = React.useRef(plans)
+  React.useLayoutEffect(() => {
+    const was = shown.current
+    shown.current = page
+    const resized = planned.current !== plans
+    planned.current = plans
+    if (!plans || resized || page === undefined || was === undefined || page === was) return
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    // One frame after the change, not in it: the frame the page changes is the frame its boxes mount, and restarting
+    // every cell's animation in that frame too was the frame that dropped (measured 2026-09-25). A frame's delay
+    // cannot be seen at the front's pace.
+    const plan = page > was ? plans.forward : plans.back
+    const raf = window.requestAnimationFrame(() => {
+      lines.play(plan)
+      if (rootRef.current) rootRef.current.dataset.rippleNext = lines.next()
+    })
+    return () => window.cancelAnimationFrame(raf)
+  }, [page, plans, lines, rootRef])
+  // Which colour the next pass will be, on the grid, for the pager's arrows to fill in (grid-pager.tsx): the arrow a
+  // turn fills is the colour of the ripple that turn plays. Only while the ripple is on and can play; otherwise the
+  // arrows keep their own fill.
+  React.useLayoutEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+    if (plans && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) root.dataset.rippleNext = lines.next()
+    else delete root.dataset.rippleNext
+  }, [plans, lines, rootRef])
+}
+
+/**
+ * The numbers as CSS, set once on the grid while the lines are mounted; globals.css times the animations with them.
+ */
+function rippleStyle(on: boolean): React.CSSProperties | undefined {
+  if (!on) return undefined
+  return {
+    "--grid-intro-fade": `${INTRO_FADE_MS}ms`,
+    "--grid-intro-reveal": `${INTRO_REVEAL_MS}ms`,
+    "--grid-intro-hold": `${INTRO_FADE_HOLD_MS}ms`,
+  } as React.CSSProperties
+}
+
+/**
+ * The empty screen the drawing starts from: the visitor's own background on light, black on dark
+ * (`--grid-intro-from`, globals.css). Before the field is measured — the server's render included — it is one sheet;
+ * after, one tile per cell, each the cell and half the gutter round it and the outer ones running to the box's edge,
+ * so the tiles cover the box exactly and a tile's going reveals its cell and its share of the gutter together. Each
+ * tile lifts at its cell's time by a CSS animation (globals.css) whose delay is set here, at mount — the frame the
+ * intro starts. Neighbours overlap by a pixel so no seam shows between two that are still up.
+ */
+const GridIntroCover = React.memo(function GridIntroCover({ metrics, plan }: { metrics: GridMetrics | null; plan: RipplePlan | null }) {
+  const base = "pointer-events-none absolute inset-0 z-30 motion-reduce:hidden"
+  if (!metrics || !plan) return <div data-slot="grid-intro-cover" aria-hidden className={base} style={{ background: "var(--grid-intro-from)" }} />
+  const { cols, rows, cell, gap, boxW, boxH, gridW, gridH } = metrics
+  const gx = (boxW - gridW) / 2
+  const gy = (boxH - gridH) / 2
+  const span = (i: number, n: number, origin: number, end: number) => {
+    const at = origin + i * (cell + gap)
+    const from = i === 0 ? 0 : at - gap / 2 - 0.5
+    const to = i === n - 1 ? end : at + cell + gap / 2 + 0.5
+    return [from, to - from] as const
+  }
+  const tiles: React.ReactNode[] = []
+  for (let r = 0; r < rows; r++) {
+    const [top, height] = span(r, rows, gy, boxH)
+    for (let c = 0; c < cols; c++) {
+      const [left, width] = span(c, cols, gx, boxW)
+      const i = r * cols + c
+      tiles.push(<div key={i} className="absolute" style={{ left, top, width, height, animationDelay: `${plan.delays[i]}ms` }} />)
+    }
+  }
+  return (
+    <div data-slot="grid-intro-cover" data-measured="" aria-hidden className={base}>
+      {tiles}
+    </div>
+  )
+})
+
+/**
+ * The lit lines: the overlay's own cells and dashes again, in lime and in violet, each cell glowing in its layer's
+ * colour (globals.css) — for the intro (D31) and for the ripple between pages (D32). Drawing the same cells with the
+ * same border means a line fading back is only a change of colour over the overlay beneath it, never a second dash
+ * pattern. The glow is a blur, kept on his word as the one exception to the no-glass rule of 2026-09-16: on a line,
+ * while it is lit. Every cell rests at opacity 0 and each pass is played on it by `useGridLines`. The glow is on each
+ * cell, not on the layer: on the layer it was one field-sized blur the compositor redid every frame over the fading
+ * cells; on a cell it is painted once into the cell's own layer, and a frame only changes an opacity.
+ */
+const GridRippleLines = React.memo(function GridRippleLines({
+  cols,
+  rows,
+  cell,
+  gap,
+  layers,
+}: {
+  cols: number
+  rows: number
+  cell: number
+  gap: number
+  layers: React.RefObject<(HTMLDivElement | null)[]>
+}) {
+  const cells = Array.from({ length: cols * rows })
+  return (
+    <>
+      {INTRO_LINES.map((line, l) => (
+        <div
+          key={line}
+          ref={(el) => {
+            layers.current[l] = el
+          }}
+          data-slot="grid-intro-lines"
+          data-line={line}
+          aria-hidden
+          className="pointer-events-none absolute inset-0 grid"
+          style={{ gridTemplateColumns: `repeat(${cols}, ${cell}px)`, gridTemplateRows: `repeat(${rows}, ${cell}px)`, gap }}
+        >
+          {cells.map((_, i) => (
+            // The outer box fades (its own layer while it animates); the inner is the dashed box and its glow, which
+            // is painted into that layer once rather than blurred again every frame.
+            <div key={i}>
+              <div className="size-full border border-dashed" />
+            </div>
+          ))}
+        </div>
+      ))}
+    </>
+  )
+})
 
 /**
  * The sheet's fall, in seconds — the one beat, down over the field. Mine; `FLIP_TEMPO` stretches it (1 is the
@@ -487,7 +848,7 @@ function GridThemeFlip() {
 }
 
 /** The cells, drawn behind the items. Reads the metrics from context, so it is only valid inside a Grid. */
-function GridOverlay({ rulers = false, className }: { rulers?: boolean; className?: string }) {
+function GridOverlay({ className }: { className?: string }) {
   const m = useGridMetrics()
   if (!m) return null
   const cells = Array.from({ length: m.cols * m.rows })
@@ -506,29 +867,6 @@ function GridOverlay({ rulers = false, className }: { rulers?: boolean; classNam
           <div key={i} className="border-border/70 border border-dashed" />
         ))}
       </div>
-      {rulers ? (
-        // Over the cells (D24): column numbers down the centre of the top row, row numbers down the centre of the left
-        // column. The top-left cell is 1 both ways and shows it once.
-        <div
-          className="text-muted-foreground/70 absolute inset-0 grid font-mono text-[10px]"
-          style={{
-            gridTemplateColumns: `repeat(${m.cols}, ${m.cell}px)`,
-            gridTemplateRows: `repeat(${m.rows}, ${m.cell}px)`,
-            gap: m.gap,
-          }}
-        >
-          {Array.from({ length: m.cols }, (_, i) => (
-            <span key={`c${i}`} className="flex items-center justify-center" style={{ gridColumn: i + 1, gridRow: 1 }}>
-              {i + 1}
-            </span>
-          ))}
-          {Array.from({ length: m.rows - 1 }, (_, i) => (
-            <span key={`r${i}`} className="flex items-center justify-center" style={{ gridColumn: 1, gridRow: i + 2 }}>
-              {i + 2}
-            </span>
-          ))}
-        </div>
-      ) : null}
     </div>
   )
 }

@@ -2,24 +2,10 @@
 
 import * as React from "react"
 import { cn } from "cn"
-import { isSlotItem, Slot, SlotContent } from "@no-origins/ui/components/slot"
-import {
-  Grid,
-  GridItem,
-  DEFAULT_GRID_CONFIG,
-  useGridMetrics,
-  type GridConfig,
-  type GridMetrics,
-} from "@no-origins/ui/components/grid"
+import { isSlotItem, SlotContent } from "@no-origins/ui/components/slot"
+import { Grid, GridItem, type GridMetrics } from "@no-origins/ui/components/grid"
 import { GridPager } from "@no-origins/ui/components/grid-pager"
-import {
-  rectIsValid,
-  resolvePages,
-  type GridLayout,
-  type GridLayoutItem,
-  type GridRect,
-  type ResolvedPages,
-} from "@no-origins/ui/lib/grid-layout"
+import { resolvePages, type GridLayout, type GridLayoutItem } from "@no-origins/ui/lib/grid-layout"
 
 /**
  * A layout, one page at a time.
@@ -31,10 +17,10 @@ import {
  * the same share. When the scroll is complete the page turns and the next page's boxes are revealed from their
  * bottom edge upward. Scrolling down is the same in reverse, with the ↓. Let go short of the turn and the
  * boxes settle back; past half way and the turn completes on its own. A click on the pager's arrow, ← →, or a
- * host's toolbar play the same turn over time. Only the boxes move — the field, the rulers and the pager stay where
+ * host's toolbar play the same turn over time. Only the boxes move — the field and the pager stay where
  * they are, because they are the room and the boxes are the furniture.
  *
- * The progress lives in `--grid-turn` on the grid, written per frame without a render: each box's clip and the
+ * The progress lives in `--grid-turn` on the grid's tracks, written per frame without a render: each box's clip and the
  * pager's fill are CSS functions of it. **Only the box's visible height changes** (D27): the box is CLIPPED, never
  * scaled, so the content inside keeps its exact size and position and nothing is squeezed or narrowed. Scaling in Y
  * squashed the glyphs and scaling uniformly changed the width; both were sent back, 2026-09-21.
@@ -82,7 +68,7 @@ export type PageTurn = {
   turning: boolean
   /** Goes on the Grid: the progress is written here. */
   rootRef: React.RefObject<HTMLDivElement | null>
-  /** Wheel and touch — the hand turning the page. Every grid takes them, the composer's included. */
+  /** Wheel and touch — the hand turning the page. */
   handlers: Pick<React.ComponentProps<"div">, "onWheel" | "onTouchStart" | "onTouchMove" | "onTouchEnd" | "onTouchCancel">
 }
 
@@ -112,9 +98,18 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
   onPageRef.current = onPage
   const range = Math.max(1, (metrics?.gridH ?? 0) * RANGE_OF_FIELD)
 
+  // The turn's values are written on the grid's TRACKS, not its root: the page's boxes and the pager's arrows are the
+  // only readers, and custom properties inherit, so a write on the root restyled every element in the grid every frame
+  // of a turn — the overlay's cells and, since D32, the ripple's line layers (three times the style work, and dropped
+  // frames, measured 2026-09-25). The root keeps the defaults (globals.css), which the tracks override.
+  const target = React.useCallback(
+    () => rootRef.current?.querySelector<HTMLElement>(':scope [data-slot="grid-tracks"]') ?? rootRef.current,
+    [],
+  )
+
   const write = React.useCallback((p: number) => {
     progress.current = p
-    const el = rootRef.current
+    const el = target()
     if (!el) return
     el.style.setProperty("--grid-turn", String(p))
     el.style.setProperty("--grid-turn-abs", String(Math.abs(p)))
@@ -127,13 +122,28 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
     const inward = phaseRef.current === "in"
     el.style.setProperty("--grid-turn-fill-front", String(inward ? dirRef.current : p))
     el.style.setProperty("--grid-turn-fill-back", String(inward ? p : 0))
-  }, [])
+  }, [target])
 
   const setPhase = React.useCallback((phase: TurnPhase, dir: 1 | -1) => {
+    const from = phaseRef.current
     phaseRef.current = phase
     dirRef.current = dir
-    const el = rootRef.current
+    const el = target()
     if (el) {
+      // The arrow fills in the colour of the ripple this turn will play (Grid.md D32, his pick, 2026-09-25), read off
+      // the grid as the turn starts and held until it ends: the pass is played as the page changes, and the colour
+      // after it is the other one, so reading it live would turn the fill's colour as it leaves. No ripple on the
+      // grid, and the arrows keep their own fill.
+      if (from === "idle" && phase !== "idle") {
+        const next = rootRef.current?.dataset.rippleNext
+        if (next) {
+          el.style.setProperty("--grid-turn-fill-color", `var(--${next})`)
+          el.style.setProperty("--grid-turn-fill-ink", "var(--grid-ripple-ink)")
+        } else {
+          el.style.removeProperty("--grid-turn-fill-color")
+          el.style.removeProperty("--grid-turn-fill-ink")
+        }
+      }
       // Out falls from 1, in rises from 0 — set with the progress so no frame sees one without the other. The box
       // is anchored to one edge and clipped from the other, so the motion runs in the direction of travel: forward,
       // a box keeps its top and loses its bottom on the way out, and the next page is revealed from its bottom edge
@@ -146,7 +156,7 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
       el.style.setProperty("--grid-turn-hide-bottom", anchorBottom ? "0" : "1")
     }
     setTurn({ phase, dir })
-  }, [])
+  }, [target])
 
   const stop = React.useCallback(() => {
     if (raf.current) window.cancelAnimationFrame(raf.current)
@@ -239,6 +249,8 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
     (deltaPx: number) => {
       const phase = phaseRef.current
       if (phase === "out" || phase === "in" || count <= 1) return false
+      // Nothing turns while the grid is still drawing itself (Grid.md D31): page 1 has not arrived yet.
+      if (rootRef.current?.hasAttribute("data-intro")) return false
       let p = Math.max(-1, Math.min(1, progress.current + deltaPx / range))
       // Nothing before the first page or after the last: the progress stops at 0 in that direction.
       if (shownRef.current <= 0) p = Math.max(0, p)
@@ -341,264 +353,36 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
 
 // ── the surface ──────────────────────────────────────────────────────────────────────────────────────────────
 
-type Handle = { id: string; hx: -1 | 0 | 1; hy: -1 | 0 | 1; className: string; cursor: string }
+export type RenderGridItem = (item: GridLayoutItem) => React.ReactNode
 
-const HANDLES: Handle[] = [
-  { id: "nw", hx: -1, hy: -1, className: "-top-1 -left-1", cursor: "nwse-resize" },
-  { id: "n", hx: 0, hy: -1, className: "-top-1 left-1/2 -translate-x-1/2", cursor: "ns-resize" },
-  { id: "ne", hx: 1, hy: -1, className: "-top-1 -right-1", cursor: "nesw-resize" },
-  { id: "e", hx: 1, hy: 0, className: "top-1/2 -right-1 -translate-y-1/2", cursor: "ew-resize" },
-  { id: "se", hx: 1, hy: 1, className: "-right-1 -bottom-1", cursor: "nwse-resize" },
-  { id: "s", hx: 0, hy: 1, className: "-bottom-1 left-1/2 -translate-x-1/2", cursor: "ns-resize" },
-  { id: "sw", hx: -1, hy: 1, className: "-bottom-1 -left-1", cursor: "nesw-resize" },
-  { id: "w", hx: -1, hy: 0, className: "top-1/2 -left-1 -translate-y-1/2", cursor: "ew-resize" },
-]
-
-type Drag =
-  | { kind: "move"; id: string; x: number; y: number; origin: GridRect }
-  | { kind: "resize"; id: string; x: number; y: number; origin: GridRect; hx: -1 | 0 | 1; hy: -1 | 0 | 1 }
-
-export type GridEditing = {
-  selected: string | null
-  onSelect: (id: string | null) => void
-  onCommit: (items: GridLayoutItem[]) => void
-  /** Cells nothing may be placed on — the pager's. */
-  reserved: readonly GridRect[]
-  /**
-   * Present when a box may be dropped INTO another (Slots.md §4): a move that would land on another box is not
-   * refused but offered to the host, with the cell under the pointer relative to the target. Return false to refuse
-   * this particular target, and the ghost stays red.
-   */
-  onDropInto?: (itemId: string, targetId: string, cell: { col: number; row: number }) => boolean
-  /** Whether a target can take a drop at all — a slot with a component in it cannot, say. */
-  canDropInto?: (targetId: string) => boolean
-  /** Double-click on a box — the host's way in to a slot's children (Slots.md §4). */
-  onDoubleClick?: (id: string) => void
-}
-
-export type RenderGridItem = (item: GridLayoutItem, state: { selected: boolean }) => React.ReactNode
-
-export type GridPageSurfaceProps = {
+type GridPageSurfaceProps = {
   items: GridLayoutItem[]
   turn?: TurnState
   renderItem?: RenderGridItem
-  /** Present when the boxes can be dragged and resized; absent for a read-only surface. */
-  editing?: GridEditing
-}
-
-/**
- * What an item shows when the host gives no `renderItem`: a slot's content (Slots.md) when it is one, else the
- * editor's tile — the label and the coordinates. Selection is a ring around either.
- */
-function DefaultItem({ item, selected }: { item: GridLayoutItem; selected: boolean }) {
-  if (isSlotItem(item)) {
-    return (
-      <div className={cn("relative h-full w-full", selected && "ring-foreground ring-2")}>
-        <SlotContent item={item} />
-      </div>
-    )
-  }
-  return (
-    <Slot fill="card" inset={8} className={cn("place-items-center text-center", selected && "border-foreground ring-ring/40 ring-2")}>
-      <span className="flex flex-col items-center gap-1">
-        <span className="text-xs font-semibold tracking-wide uppercase">{item.label ?? item.id}</span>
-        <span className="text-muted-foreground font-mono text-[10px]">
-          {item.col},{item.row} · {item.colSpan}×{item.rowSpan}
-        </span>
-      </span>
-    </Slot>
-  )
 }
 
 /**
  * One page's boxes as grid children. A fragment on purpose — anything that wrapped them in an element would put a
- * box between the grid and its items and the placement would stop working.
- *
- * With `editing`, a box drags to move and its eight handles drag to resize. Every gesture snaps to whole cells and
- * is REFUSED rather than reflowed when it would leave the field, land on another box or on a pager cell — the ghost
- * turns red and the box stays where it was.
+ * box between the grid and its items and the placement would stop working. With no `renderItem`, a slot item draws
+ * its own content (Slots.md); anything else draws nothing.
  */
-function GridPageSurface({ items, turn, renderItem, editing }: GridPageSurfaceProps) {
-  const m = useGridMetrics()
-  const [drag, setDrag] = React.useState<Drag | null>(null)
-  const [ghost, setGhost] = React.useState<{ rect: GridRect; valid: boolean; into?: { id: string; cell: { col: number; row: number } } } | null>(null)
-
-  /** The cell under the pointer, from the field's own box. Null off the field. */
-  const cellUnder = (event: React.PointerEvent) => {
-    if (!m) return null
-    const tracks = (event.currentTarget as HTMLElement).closest('[data-slot="grid-tracks"]')
-    if (!tracks) return null
-    const box = tracks.getBoundingClientRect()
-    const col = Math.floor((event.clientX - box.left) / stepX) + 1
-    const row = Math.floor((event.clientY - box.top) / stepY) + 1
-    if (col < 1 || row < 1 || col > m.cols || row > m.rows) return null
-    return { col, row }
-  }
-
-  // One cell's step in SCREEN px. Pointer deltas arrive in screen px; inside a scaled GridFrame (Grid.md D11) the
-  // cell is drawn smaller than it is laid out, so the step it is measured against has to shrink with it. The cell is
-  // square, so one step serves both axes.
-  const scale = m?.scale ?? 1
-  const step = ((m?.cell ?? 0) + (m?.gap ?? 0)) * scale
-  const stepX = step
-  const stepY = step
-
-  const rectFor = React.useCallback(
-    (d: Drag, dx: number, dy: number): GridRect => {
-      const dCols = stepX > 0 ? Math.round(dx / stepX) : 0
-      const dRows = stepY > 0 ? Math.round(dy / stepY) : 0
-      const o = d.origin
-      if (d.kind === "move") return { ...o, col: o.col + dCols, row: o.row + dRows }
-
-      let { col, row, colSpan, rowSpan } = o
-      if (d.hx === 1) colSpan = o.colSpan + dCols
-      if (d.hx === -1) {
-        col = o.col + dCols
-        colSpan = o.colSpan - dCols
-      }
-      if (d.hy === 1) rowSpan = o.rowSpan + dRows
-      if (d.hy === -1) {
-        row = o.row + dRows
-        rowSpan = o.rowSpan - dRows
-      }
-      // A box never collapses: the edge being dragged stops at one cell rather than inverting.
-      if (colSpan < 1) {
-        colSpan = 1
-        if (d.hx === -1) col = o.col + o.colSpan - 1
-      }
-      if (rowSpan < 1) {
-        rowSpan = 1
-        if (d.hy === -1) row = o.row + o.rowSpan - 1
-      }
-      return { col, row, colSpan, rowSpan }
-    },
-    [stepX, stepY],
-  )
-
-  const begin = (event: React.PointerEvent, item: GridLayoutItem, handle?: Handle) => {
-    if (!editing) return
-    event.preventDefault()
-    event.stopPropagation()
-    ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)
-    editing.onSelect(item.id)
-    const origin: GridRect = { col: item.col, row: item.row, colSpan: item.colSpan, rowSpan: item.rowSpan }
-    setDrag(
-      handle
-        ? { kind: "resize", id: item.id, x: event.clientX, y: event.clientY, origin, hx: handle.hx, hy: handle.hy }
-        : { kind: "move", id: item.id, x: event.clientX, y: event.clientY, origin },
-    )
-    setGhost({ rect: origin, valid: true })
-  }
-
-  const move = (event: React.PointerEvent) => {
-    if (!drag || !m || !editing) return
-    // A handle is a child of its box, so without this the box's own handler runs on the same event and the
-    // gesture is applied — and committed — twice.
-    event.stopPropagation()
-    const rect = rectFor(drag, event.clientX - drag.x, event.clientY - drag.y)
-    const others = items.filter((i) => i.id !== drag.id)
-    const valid = rectIsValid(rect, others, m.cols, m.rows, editing.reserved)
-    // Not valid as a move — but the pointer may be over a box that takes drops: then the ghost is that box.
-    if (!valid && drag.kind === "move" && editing.onDropInto) {
-      const cell = cellUnder(event)
-      const target = cell && others.find((o) => o.col <= cell.col && cell.col < o.col + o.colSpan && o.row <= cell.row && cell.row < o.row + o.rowSpan)
-      if (target && (editing.canDropInto?.(target.id) ?? true)) {
-        setGhost({
-          rect: { col: target.col, row: target.row, colSpan: target.colSpan, rowSpan: target.rowSpan },
-          valid: true,
-          into: { id: target.id, cell: { col: cell.col - target.col + 1, row: cell.row - target.row + 1 } },
-        })
-        return
-      }
-    }
-    setGhost({ rect, valid })
-  }
-
-  const end = (event: React.PointerEvent) => {
-    if (!drag || !m || !editing) return
-    event.stopPropagation()
-    const rect = rectFor(drag, event.clientX - drag.x, event.clientY - drag.y)
-    const o = drag.origin
-    const moved = rect.col !== o.col || rect.row !== o.row || rect.colSpan !== o.colSpan || rect.rowSpan !== o.rowSpan
-    const others = items.filter((i) => i.id !== drag.id)
-    if (ghost?.into && editing.onDropInto) {
-      editing.onDropInto(drag.id, ghost.into.id, ghost.into.cell)
-    } else if (moved && rectIsValid(rect, others, m.cols, m.rows, editing.reserved)) {
-      // A click that went nowhere is a selection, not an edit: committing it would detach a derived breakpoint and
-      // put a no-op on the undo stack.
-      editing.onCommit(items.map((i) => (i.id === drag.id ? { ...i, ...rect } : i)))
-    }
-    setDrag(null)
-    setGhost(null)
-  }
-
+function GridPageSurface({ items, turn, renderItem }: GridPageSurfaceProps) {
   const turning = turn && turn.phase !== "idle"
-
   return (
     <>
-      {items.map((item) => {
-        const isSelected = editing?.selected === item.id
-        const isDragging = drag?.id === item.id
-        return (
-          <GridItem
-            key={item.id}
-            col={item.col}
-            row={item.row}
-            colSpan={item.colSpan}
-            rowSpan={item.rowSpan}
-            data-selected={isSelected || undefined}
-            data-turn={turning ? turn.phase : undefined}
-            className={cn(
-              "relative touch-none select-none",
-              isDragging && "opacity-40",
-              editing && "cursor-grab active:cursor-grabbing",
-            )}
-            onPointerDown={editing ? (event) => begin(event, item) : undefined}
-            onPointerMove={editing ? move : undefined}
-            onPointerUp={editing ? end : undefined}
-            onPointerCancel={editing ? end : undefined}
-            onDoubleClick={
-              editing?.onDoubleClick
-                ? (event) => {
-                    event.stopPropagation()
-                    editing.onDoubleClick!(item.id)
-                  }
-                : undefined
-            }
-          >
-            {renderItem ? renderItem(item, { selected: isSelected }) : <DefaultItem item={item} selected={isSelected} />}
-
-            {isSelected && editing
-              ? HANDLES.map((handle) => (
-                  <span
-                    key={handle.id}
-                    role="presentation"
-                    className={cn("bg-background border-foreground absolute z-20 size-2 border touch-none", handle.className)}
-                    style={{ cursor: handle.cursor }}
-                    onPointerDown={(event) => begin(event, item, handle)}
-                    onPointerMove={move}
-                    onPointerUp={end}
-                    onPointerCancel={end}
-                  />
-                ))
-              : null}
-          </GridItem>
-        )
-      })}
-
-      {ghost ? (
+      {items.map((item) => (
         <GridItem
-          col={ghost.rect.col}
-          row={ghost.rect.row}
-          colSpan={ghost.rect.colSpan}
-          rowSpan={ghost.rect.rowSpan}
-          aria-hidden
-          className={cn(
-            "pointer-events-none z-10 border-2 border-dashed",
-            ghost.into ? "border-foreground bg-foreground/10" : ghost.valid ? "border-foreground bg-foreground/5" : "border-destructive bg-destructive/10",
-          )}
-        />
-      ) : null}
+          key={item.id}
+          col={item.col}
+          row={item.row}
+          colSpan={item.colSpan}
+          rowSpan={item.rowSpan}
+          data-turn={turning ? turn.phase : undefined}
+          className="relative touch-none select-none"
+        >
+          {renderItem ? renderItem(item) : isSlotItem(item) ? <SlotContent item={item} /> : null}
+        </GridItem>
+      ))}
     </>
   )
 }
@@ -608,34 +392,34 @@ function GridPageSurface({ items, turn, renderItem, editing }: GridPageSurfacePr
 export type GridPagesProps = {
   layout: GridLayout
   renderItem?: RenderGridItem
-  config?: GridConfig
   overlay?: boolean
-  rulers?: boolean
   /** Controlled page; omit to let the pager manage it. */
   page?: number
   defaultPage?: number
   onPageChange?: (page: number) => void
   /** ← and → turn the page while nothing is focused that wants the keys. The wheel, a finger and the pager's arrows always do. */
   keyboard?: boolean
+  /** Open by drawing the grid in, holding the drawing while the page loads (Grid.md D31). */
+  intro?: boolean
+  /** Run the intro's drawing through the field as the page turns: up going forward, down going back (Grid.md D32). */
+  ripple?: boolean
   className?: string
   onMetrics?: (metrics: GridMetrics) => void
-  onResolved?: (resolved: ResolvedPages) => void
 }
 
-/** The read-only grid an app renders a layout with. The editor is this plus the tools. */
+/** The grid an app renders a layout with. */
 function GridPages({
   layout,
   renderItem,
-  config = DEFAULT_GRID_CONFIG,
   overlay,
-  rulers,
   page: pageProp,
   defaultPage = 0,
   onPageChange,
   keyboard = true,
+  intro,
+  ripple,
   className,
   onMetrics,
-  onResolved,
 }: GridPagesProps) {
   const [metrics, setMetrics] = React.useState<GridMetrics | null>(null)
   const handleMetrics = React.useCallback(
@@ -646,12 +430,9 @@ function GridPages({
     [onMetrics],
   )
 
-  const resolved = React.useMemo(() => (metrics ? resolvePages(layout, metrics) : null), [layout, metrics])
-  React.useEffect(() => {
-    if (resolved) onResolved?.(resolved)
-  }, [resolved, onResolved])
+  const pages = React.useMemo(() => (metrics ? resolvePages(layout, metrics) : null), [layout, metrics])
 
-  const count = resolved?.pages.length ?? 1
+  const count = pages?.length ?? 1
   const [pageState, setPageState] = React.useState(defaultPage)
   const page = Math.min(pageProp ?? pageState, count - 1)
   const setPage = React.useCallback(
@@ -670,30 +451,42 @@ function GridPages({
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
       if (target && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))) return
+      if (rootRef.current?.hasAttribute("data-intro")) return
       if (event.key === "ArrowRight") setPage(page + 1)
       else if (event.key === "ArrowLeft") setPage(page - 1)
     }
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
-  }, [keyboard, page, setPage])
+  }, [keyboard, page, setPage, rootRef])
 
-  const items = resolved?.pages[Math.min(shown, count - 1)]?.items ?? []
+  const items = pages?.[Math.min(shown, count - 1)]?.items ?? []
 
   return (
     <Grid
       ref={rootRef}
-      config={config}
       overlay={overlay}
-      rulers={rulers}
+      intro={intro}
+      ripple={ripple}
+      page={Math.min(shown, count - 1)}
       onMetrics={handleMetrics}
       // touch-none: a finger on the field drives the turn, and the browser must not pan or refresh under it.
       className={cn("touch-none", className)}
       {...handlers}
     >
       <GridPageSurface items={items} turn={turn} renderItem={renderItem} />
-      <GridPager page={Math.min(shown, count - 1)} count={count} onTurn={(dir) => setPage(page + dir)} bar={layout.bar} />
+      {/* The arrows wait for the intro like the wheel, the finger and the keys (D31): hidden by its cover, they can still
+          take focus, and a turn under the cover would hand over to the wrong page. */}
+      <GridPager
+        page={Math.min(shown, count - 1)}
+        count={count}
+        onTurn={(dir) => {
+          if (rootRef.current?.hasAttribute("data-intro")) return
+          setPage(page + dir)
+        }}
+        bar={layout.bar}
+      />
     </Grid>
   )
 }
 
-export { GridPages, GridPageSurface }
+export { GridPages }
