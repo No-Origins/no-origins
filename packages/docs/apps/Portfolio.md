@@ -257,7 +257,10 @@ both worth keeping in mind whenever a card loses a row of content:
 gsap for better animations?"* — yes, with a line drawn. The turn (Grid.md D27) keeps its own per-frame writer and its
 `clip-path`: it is **one proportion, no wave** by his own rule, and every box plus the pager's arrow fill reads the
 same CSS variable, which is what makes them one motion. Replacing that with a tween library would buy nothing and put
-a dependency in the frame loop. GSAP's place is the content: what a card does when it appears.
+a dependency in the frame loop. GSAP's place is the content: what a card does when it appears. *(Since Grid.md D37,
+2026-09-25, the boxes no longer follow the hand: the per-frame writer fills only the pager's arrow, and the ripple
+washes the boxes away with one `clip-path` animation each, stepped at its own times. Still CSS and the platform's own
+animations, still no tween library.)*
 
 The first of those is the **bars, which grow when their page arrives** — *"in stack page and Beyond page, when the
 components progress in the progress bars should animate the fill."* `Progress` takes `animate` and a `delay` in ms;
@@ -321,6 +324,13 @@ once. **The cursor is the pointer** over the whole company, mark and name — *"
 day — so a company says it can be clicked before a click does anything: nothing is focusable or clickable yet, and
 what a click opens is the next thing to decide.
 
+**P14 — The pager is numbered.** *2026-09-25: "In the portfolio, let's put the arrow buttons at the first and last
+items of the navbar. And in between, let's fill that with page numbers."* The portfolio's bar is Grid.md D36's
+`numberedPagerBar`: back (↑) on the first cell, forward (↓) on the last, and page numbers on the four cells between.
+The site has more pages than that (five on a desktop, seven on a laptop, six on a tablet, eight on a phone), so the
+four are a window that holds the current page second and slides against the ends; pressing a number turns straight
+to it. The bar is built on the field's own bar width, which the renderer reads off the grid with the rest of the field.
+
 ## 3. Where it lives
 
 | Thing | Where |
@@ -329,7 +339,7 @@ what a click opens is the next thing to decide.
 | The packer — top row, pager row, band, sections as hard breaks (P2, P3, P8) | `apps/portfolio/src/lib/arrange.ts` |
 | The sections and every span (P7, P8) | `apps/portfolio/src/content/site.tsx` |
 | The facts (P6) | `apps/portfolio/src/content/resume.ts` |
-| The grid renderer (P2) | `apps/portfolio/src/components/portfolio-pages.tsx` |
+| The grid renderer (P2), and the numbered bar it hands the grid (P14) | `apps/portfolio/src/components/portfolio-pages.tsx` |
 | The profile card (P4, P5) | `apps/portfolio/src/components/profile-card.tsx` |
 | The section header, the stack, bars, note, education, hobbies and contact cards (P7) | `apps/portfolio/src/components/cards.tsx` |
 | A company on the Work screen, mark and name (P12), and its hover band (P13) | `CompanyMark`, `BAND` and `drawBand` in `apps/portfolio/src/components/cards.tsx` |

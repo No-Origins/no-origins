@@ -105,7 +105,7 @@ export function ChipGroupsCard({ title, groups }: { title: string; groups: { gro
  * The bars GROW into place, one after the next — his call, 2026-09-21. `GridPages` only mounts the page it shows, so
  * a card's first render is the moment its page arrives: the growth needs no visibility test, it is simply what the
  * card does when it appears, and it happens again every time the page is turned back to. `BARS_AFTER` holds it until
- * the turn's in-phase is done (`TURN_MS` is 160), so the fills read as the card settling rather than as a second
+ * the page has faded in (the turn's in-phase, `TURN_MS`, 160), so the fills read as the card settling rather than as a second
  * motion competing with the turn; `BARS_STEP` is the stagger down the rows.
  */
 const BARS_AFTER = 180;

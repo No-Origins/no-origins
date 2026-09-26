@@ -16,6 +16,9 @@ one a screen** (Portfolio.md P7): the profile card, then Work, Stack, Beyond and
 `lg` and `xl` only — on a phone and a tablet the content takes it (P3, `TOP_ROWS`) — and the pager on the bottom row
 (Grid.md D27 — the arrangement leaves that row alone). Nothing scrolls; the next screen is the next page,
 turned by the scroll, the pager's ↑ ↓ or ← →. With one page both arrows are disabled and the scroll does nothing.
+The bar is numbered (P14, Grid.md D36): back on its first cell, forward on its last, and page numbers between —
+four cells for five to eight pages, so they are a sliding window, and a number turns straight to its page.
+`node e2e/.mcp/pager-numbers.mjs <outdir> [dark]` (gitignored) presses through it and prints what the bar shows.
 
 - **The site is data in `src/content/`.** `site.tsx` exports the `PortfolioPage`: sections of items, each item an id,
   a **span per breakpoint** and a render function. `resume.ts` is every fact from the résumé, in his voice (P6) — a
@@ -32,7 +35,9 @@ turned by the scroll, the pager's ↑ ↓ or ← →. With one page both arrows 
 - **`PortfolioPages`** (`src/components/portfolio-pages.tsx`) is the renderer: a `GridPages` that runs `arrange` on
   whatever field the grid reports, so every coordinate is honoured as written. It opens with the grid's `intro`
   (Grid.md D31): the grid draws itself in, loops while the page loads, and page 1 turns in after; and `ripple` (D32):
-  every turn after runs the same drawing through the field.
+  every turn after runs the same drawing through the field, washing the page away as it crosses, before the next
+  fades in (D37); and `cursor` (D34): the pointer is a lime ring that fills
+  while pressed, and the cell under it turns its dashes lime.
 - **The cards** (`profile-card.tsx`, `cards.tsx`, `logo.tsx`) are app-specific islands composed from `Card`,
   `Avatar`, `Text`, `Badge`, `Button`, `Progress` and `Slot` — nothing hand-rolled. Each reads its own size off the
   grid and gets denser as the slot shrinks (P5); a slot clips, so a card that is cut off is in a slot that is too

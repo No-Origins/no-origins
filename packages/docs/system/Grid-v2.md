@@ -346,7 +346,10 @@ I just want to fill that variant so that it masks the lines behind the component
 The `background` fill is the theme's background token, so in the light theme it is the page's white and in the dark
 theme its near-black — invisible as a surface, which is the point; it is a mask. `muted` is `0.97` light / `0.269`
 dark and reads as a surface in both. (`card` and `background` are the same colour in the light theme, which is why a
-card-coloured fill could not be the "filled" variant.)
+card-coloured fill could not be the "filled" variant.) *Amended 2026-09-25: they are the same colour in the dark theme
+too — "the cards currently have gray background color … change it to the color that is in the viewport background.
+And then add border to the cards." `--card` is `0.145` on dark, and `Card` draws a `border` where it drew a
+`ring-1`; a `card` fill is now the `background` fill with a hairline.*
 
 **D22 — Derivation is mobile-first.** *2026-09-21, his ask: "whenever a design is done at a lower breakpoint, that
 should be adapted automatically to higher breakpoints. But I should still be able to design each breakpoint."* A
@@ -429,10 +432,15 @@ top." The arrow now has two values, `--grid-turn-fill-front` and `--grid-turn-fi
 hand, the back advances after the turn. Found with
 it: a trackpad's momentum tail kept arriving after the turn and started a second turn that relaxed back, a wobble after
 every turn — the wheel is now muted through the turn and until it has been quiet for 160ms (`MUTE_MS`), so the hand
-pauses and scrolls again to turn twice. And the reveal's first frame had a negative progress, because a frame's
+pauses and scrolls again to turn twice. *(Replaced 2026-09-25 by D35: only the tail is dropped, and a hand that goes on
+scrolling goes on turning.)* And the reveal's first frame had a negative progress, because a frame's
 timestamp can predate the tween that scheduled it; the arrow blinked full → empty → draining. The tween's clock is
 clamped at zero.* Scrolling
 down is the mirror: boxes lose height from the top, the next page is revealed from its top down, the ↓ fills.
+
+*(Replaced 2026-09-25 by D37: the boxes no longer follow the hand at all. A committed turn is washed away by the
+ripple, cell by cell, and the next page fades in; the clip below is gone from the turn, and only the intro's reveal
+(D31) keeps it. The rule under it — never distort what a box holds — stands.)*
 
 **Only the box's height changes, and the box is CLIPPED rather than scaled — settled 2026-09-21 after two wrong
 builds.** *"Only the components container height should change without squeezing the content inside it"*, and **no
@@ -732,7 +740,9 @@ the lines' colours, the keyframes that lift a tile and fade a line, and the clip
 page while `data-intro` is set. The review sweep waits for the intro to hand over before it takes a screenshot
 (`e2e/review.spec.ts`). There is no frame loop at all — the compositor runs the drawing, D28's lesson taken one step
 further. The lines are the overlay's own cells and dashes drawn again in lime and violet, so a line fading back is
-only a change of colour, never a second dash pattern.
+only a change of colour, never a second dash pattern. *(Replaced 2026-09-25 by D38: 216 animations at once cost the load
+as much as the frame loop had, and later passes handed out from the main thread went missing when it was busy. The
+drawing is painted now, by one painter in a worker, and the cover is the grid's own colour while the intro runs.)*
 
 **D32 — The ripple plays between pages.** *2026-09-25: "Now, lets add this ripple between pages too."* Built the same
 day.
@@ -770,7 +780,8 @@ before the ripple and two with it. Three changes, each measured:
   from the main thread in the page's load — its busiest second — would start part-faded behind them. The frame that
   costs is the mounting one, under the cover, before anything moves.
 
-After all three, no frame dropped at the page change in any run. *(The intro dropped none either while its first pass
+After all three, no frame dropped at the page change in any run. *(All three went with D38, 2026-09-25: the ripple is
+painted by the field's painter, in a worker, and a busy main thread no longer stalls it.)* *(The intro dropped none either while its first pass
 was handed out ahead too; handed out at once again, it can drop the mounting frame, which nobody sees.)*
 
 *The arrows fill in the ripple's colour — the same day, his pick.* *"Match the ripple color with the ripple in the Nav
@@ -790,9 +801,12 @@ holds between its out and its in: once the last page's boxes are gone, **the rip
 the next page is put on the field only when the pass has crossed it** (`rippleSpan`, about 345ms on an 18 × 12
 desktop and 220ms on a phone, plus the frame the pass starts on); then it rises in, as the lines fade. The hold is
 the out-phase's, so nothing turns and the wheel stays muted through it, and the arrow stays full in the pass's colour
-until the page comes. Because the page mounts after the hold, what its cards do on arriving (the portfolio's bars) is
+until the page comes. *(Amended the same night by D35: the hold is a phase of its own, `hold`, the hand's travel
+through it turns on to the next page with another pass, and the page comes only when the pass has crossed and the hand
+has stopped. Amended again by D37: there is no out-phase, the ripple starts as the turn commits and washes the last
+page away as it crosses, and the hold is that wash.)* Because the page mounts after the hold, what its cards do on arriving (the portfolio's bars) is
 still seen. A turn is now about 660ms on a desktop, where it was 320; a grid without the ripple, and reduced motion,
-do not hold.
+do not hold. *(Since D37 a grid without the ripple holds too, for the wash; reduced motion still does not.)*
 
 **D33 — A field is never fewer than six columns; below that the cell gives way. And the cone keeps its angle.**
 *2026-09-25, looking at the deployment on his phone: "only having four cells on the mobile feels pretty off … minimum
@@ -813,14 +827,203 @@ on** (`INTRO_CONE_COLS`, a 1440 desktop's eighteen), and a narrower field keeps 
 and a half steps on a phone's six columns, never deeper than twelve. Both the intro and the ripple draw from the same
 plan, so both changed; a desktop is exactly as it was.
 
+**D34 — The pointer is a lime ring, and the cell under it is lit.** *2026-09-25: "let's make the cursor transparent
+line bordered circle and it should fill when clicked. Every cell on the grid should turn its border to line. Whenever
+the cursor is on it."* Asked whether "line" meant the colour or a solid line, his pick was both — a solid lime line —
+and **amended the same day to the dashes: "instead of full border, I think we should still have it dashed border for
+cells when cursor is over them. Like what we have as default for cells."** So "line" was lime. `cursor` on `Grid` or `GridPages`; the portfolio has it. The ring is 24px across (mine),
+a 2px lime line on nothing, filled lime while a button is held, and it is the pointer: the system's cursor is hidden
+over the whole field, a link's hand included (globals.css). The cell the pointer is on draws its own dashes in lime,
+exactly over the overlay's — the same box and border, as the ripple's lines are drawn — at once; a cell it leaves fades back over the intro's 500ms (`INTRO_FADE_MS`),
+as a drawn line does in D31, so a moving pointer leaves a short trail. The cell is found from the field's numbers,
+not by hit-testing: the gutter lights nothing, and a cell under a card is lit where the card hides it. No glow — the
+intro's is the one blur kept. A mouse or a pen only (`(hover: hover) and (pointer: fine)`); a phone keeps its own.
+Nothing goes through React state: a move writes one transform, and at most two attributes when it crosses a cell. *(Since D38 the lit cell is painted by the field's painter: a move sends one message when it crosses
+a cell, and the cells are no longer elements.)*
+**Known cost:** lime on the light theme's white is about 1.3 : 1, so the ring and the lit dashes are faint there — said
+before the pick, and taken.
+
+*Amended the same night — the ring is the system's cursor, drawn from an image.* *"When the cursor is over the avatar,
+it jitters."* The ring had been a div the page moved on every pointer move, and each move cost the main thread a
+whole-page layerize — 60ms of it per 60 moves on an M-series Mac, several times that on a Windows laptop — and the ring
+trailed the hand by at least a frame, more whenever the page was busy. Over the avatar, whose own dashed ring is right
+under it, that is the likeliest jitter; nothing on the face itself changed from frame to frame in any headless run (the
+screencast was compared frame by frame, at 1×, 1.25×, 1.5× and 2×, on a whole and a half-pixel field). So the ring is now
+`cursor: url(…)` in globals.css — the same 24px ring, the same 2px lime line, the same fill while pressed (`:active`) —
+drawn by the system where the hand is, costing the page nothing: 2ms of layerize per 60 moves. The colour is `--lime`
+baked in as sRGB, 206 238 56, since an image cannot read a custom property; a 2x image comes through `image-set`. The
+press fills at once rather than over 100ms. The lit cell still follows the pointer from the page, and writes only when
+it crosses a cell. Found with it: the ripple's line cells kept their finished fades in effect (`animation-fill-mode:
+forwards`) — 432 animations after one turn — which made any change on the page 40% dearer to layerize; the fades end
+where the cells rest, at 0, so they no longer fill. **If the face still jitters, it is not the ring, and the next thing
+to look at is its hover scale** (`hover:scale-105` in `profile-card.tsx`), which grows the face as the ring's centre
+crosses its edge.
+
+**D35 — A hand that goes on scrolling goes on turning, and the page comes when it stops.** *2026-09-25, on a Windows
+laptop: "scroll is not smooth enough … it feels like I have to wait … only after the ripple is gone and only after the
+cards are rendered, only then I'm able to go to the next page … if I'm continuously slow scrolling, we can just continue
+the ripple without loading or rendering the cards."* Amends D27 and D32.
+
+*What was wrong, measured* (`e2e/.mcp/scroll-perf.mjs`, a production build, scripted wheel input). A mouse rolled
+steadily — a notch every 180ms, 22 notches, seven pages of travel — turned **no page**: a notch is a third of a page, the
+turn let go after 100ms of quiet, and the boxes fell back between every two notches. A fast spin, or a trackpad moved
+slowly and steadily, turned **one page and then nothing**: D27's mute held while the wheel kept coming, so a hand that
+did not stop could never turn a second page. And a notch was drawn in one frame, a jump of a third of a page. No frame
+ran long and there was no long task, at full speed or at a quarter of it — the turn was slow because it ignored the hand,
+not because the page was heavy.
+
+*The rule now.* **Only a fling's tail is ignored; the hand never is.** Each wheel event is read against the stream
+(`readWheel`, grid-pages.tsx): a tail is a run of five falls in the size of the events, because a fling's momentum only
+ever shrinks; anything else — a push after a pause, the other way, an event that rises, a steady roll of notches — is the
+hand. After a turn the tail is dropped until the hand pushes again, which is D27's fix for the wobble kept, without
+muting the hand. **Through the hold the hand keeps turning:** its travel while the field is empty counts towards the next
+page, and a page of it turns on — the ripple plays again, the arrow stays full in the new pass's colour, and nothing is
+put on the field. Passes follow each other no closer than half a crossing, however fast the wheel spins, and never run
+past the first page or the last. **The page comes when the pass has crossed and the hand has stopped** — quiet for 100ms
+on a trackpad, 260ms after a notch, whose next notch can be that far off. What the hand had not finished a page with is
+dropped; there is nothing on the field to settle back. The stroke that turned the page counts for at most half a page
+more at the hold, so one flick is one page, as before. A notch's jump is followed over 40ms, not drawn in a frame; a
+finger is not smoothed. A turn renders no card any more: the phase is an attribute on the tracks, not a prop on each box.
+
+*After, the same probe.* The steady mouse roll and the spin both run through every page and land on the last; one notch
+settles back; three quick ones turn one page; a slow steady trackpad runs through the pages and one that stops lands a
+tenth of a second after the hand; a Mac flick, and a hard one with two seconds of momentum and coalesced frames, turn
+exactly one page and nothing after it. The classifier was tuned first on randomised streams — jittery hands at 1–30px,
+flings decaying at 0.94–0.985 a frame at 60 and 120Hz with coalesced and skipped frames, notches, a swipe interrupting a
+fling — until a hand lost none of its travel and no fling read as the hand again after it was known.
+
+*Mine, his to change.* The numbers: five falls for a tail, 120ms for a new gesture, 260ms for a notch's quiet, 40ms of
+follow, half a crossing between passes, half a page of follow-through. **Still his:** whether one notch should be a
+page. D27's third of the field makes it a third, and a steady roll turns a page every three notches.
+
+**D36 — A bar may number its pages: an arrow at each end, the page numbers between.** *2026-09-25: "In the portfolio,
+let's put the arrow buttons at the first and last items of the navbar. And in between, let's fill that with page
+numbers."* Amends D29. The portfolio's bar is this one (Portfolio.md P14); D27's default is unchanged, so the showcase
+and the admin draw what they drew.
+
+*The parts.* D29's pair is split, not replaced: `pager-arrow` is one arrow on one cell, `dir` `up` (forward) or `down`
+(back), and `pager-page` is one page number on one cell. Both are registry entries, read the turn from context like
+the pair, and belong in the bar for the pair's reason — an ordinary slot is washed away by the turn (D37). `numberedPagerBar`
+(`grid-pager.tsx`) writes the bar from its width: back on the first cell, forward on the last, a number on every cell
+between; two cells wide, it is the two arrows. **Back is on the left** so the numbers read up from it, and each arrow
+keeps its glyph from the pair (D27, 2026-09-23): the first cell wears ↑ and the last ↓.
+
+*More pages than cells.* A six-cell bar has four numbers, and the portfolio has five pages on a desktop and eight on a
+phone. The numbers are a run of consecutive pages holding the current one second, one back and the rest ahead, slid
+against the first page and the last (`pagerWindow`), so the marked cell stays put while the labels move under it.
+With fewer pages than cells the spare cells are D27's empty `card` cells. *Mine, his to change:* the window, and
+widening the bar instead, which is a number in the config (D29).
+
+*Which page is marked.* The one the field is turning to (`coming`), not the one on it: through the wash (D37) a hand still
+scrolling turns on a page a pass (D35), and the mark runs ahead with it. It is filled in the reverse colours, the
+Button's `default`, and carries `aria-current="page"`. A press turns straight to its page: one turn and one ripple,
+however far it is. `GridPages` hands the bar `go` beside `turn` for it, and like the arrows it waits for the intro
+(D31).
+
+**D37 — The turn does not shrink the boxes: the ripple washes the page away, and the next page fades in.**
+*2026-09-25: "when we are scrolling, right now the cards will shrink and then there's a ripple and then once the ripple
+ends, the cards open up. There's a lot of spacing and waiting time in between that … let's not shrink the cards … let
+the ripple wash away the cards and then let the new page … render" — and "not just in portfolio, I want this as part of
+the design system."* Amends D27, D32 and D35.
+
+*What it replaces.* Since D27 the hand's scroll clipped every box from its bottom edge and the next page was revealed
+from its bottom edge, and since D32's amendment the ripple's hold sat between the two: a shrink (160ms, after however
+long the hand took), a wait on an empty field (about 360ms on a desktop), and a grow (160ms). Three beats, the middle
+one empty.
+
+*The rule now.*
+
+- **The boxes do not follow the hand.** The scroll fills the pager's arrow and nothing else; let go short of half way
+  and the fill settles back. D35's reading of the hand is unchanged: a page of travel, or a let-go past half, commits.
+- **A committed turn starts the ripple at once, and the ripple washes the page away.** Every box is cut away cell by
+  cell as the pass's front reaches each of its cells, at the pass's own times and from the same plan the lines are
+  drawn from, so where the front crosses a card the card is gone and the line lit under it shows. Forward from the
+  bottom, back from the top, the cone (D31, D33) included. What the front has not reached is untouched: nothing is
+  squeezed, scaled or moved, so D27's rule against distorting the content holds for the wash too.
+- **The next page comes when the pass has crossed** — and, D35, the hand has stopped — **and fades in** over 160ms
+  (`TURN_MS`), opacity only, as the arrow's fill leaves the way it came. A hand still scrolling turns on through the
+  emptied field, a pass a page, as before.
+- **Every `GridPages` turns this way**, with the ripple's lines or without them: `ripple` draws the lines, and the wash
+  is the turn. The showcase and the admin, which have no ripple, wash too — their boxes are cut by the same front,
+  with nothing lit under it.
+
+*How.* One `clip-path` animation a box (`washAway`, grid.tsx): a staircase polygon that steps each time the front
+crosses one of the box's cells — a cut, like every cell of the intro — so nothing is written per frame. A cut lies in
+the middle of the gutter inside the box, where the intro's tiles meet; the sides the front has not touched keep D27's
+8px bleed, so a card's shadow stays until the front takes it. The wash starts in the frame the lines' pass starts, on
+the timeline's time, so the two keep step. The phases are `idle · drive · relax · wash · in` — `out` and `hold` are
+gone, `wash` is both — still `data-turn` on the tracks, and the fade is a CSS animation off `data-turn="in"`. The fill's
+two values moved from the tracks to the pager's bar: the boxes no longer read them, and a value written every frame
+restyles everything under the element it is written on.
+
+*Measured* (`e2e/.mcp/wash-frames.mjs`, `scroll-perf.mjs`, the dev server, 1440 × 900). The next page is on the field
+about 350ms after the turn commits, where it was about 520, and the turn is over about 530ms after it commits, where
+it was about 680. Every D35 scenario lands as it did: a slow roll and a spin run to the last page, one notch settles
+back, a flick turns one page, a trackpad that stops lands a tenth of a second after it.
+
+*Mine, his to change.* The fade — "render" could as well be a cut, the whole page at once, which is one CSS rule; the
+cut in the middle of the gutter; the showcase washing without lines rather than being given the ripple; and the page
+waiting for the whole pass rather than for the last box to be cut. The pass's last cells, the top corners going
+forward, are often empty, so that is up to another 150ms on a desktop; D32's amendment asked for the ripple to end
+first, and it does. **Unchanged:** the intro still reveals page 1 from its bottom edge (D31) — that is the intro's own,
+not a turn's.
+
+**D38 — The field is painted, not built from cells: one painter, in a worker.** *2026-09-25, of the intro: "the
+ripples are not still efficient … The moment the page loads, the ripple is not smooth. Like it feels like there is a
+lag. Like it starts, but then it disappears in the middle and then shows up in the end … I would also look at the logic
+behind the ripple."* Amends D31, D32 and D34; the look of each is unchanged.
+
+*What was wrong, measured* (`e2e/.mcp/intro-lag.mjs`, `intro-cost.mjs`, `intro-block.mjs`: cold loads of the production
+build, Chromium and WebKit — Safari's engine, the browser on his Mac). The field was about 1,300 elements: a div per
+cell for the overlay, two per cell for each of the two line colours, one per cell for the cursor, and a tile per cell
+for the cover. A pass was 216 CSS animations started at once — 216 new compositor layers in one frame, in the page's
+busiest second — and every pass after the intro's first, and every ripple between pages, was handed out cell by cell
+from a frame loop on the main thread (D32's lookahead). So:
+
+- **The lines cost the load itself.** In WebKit, with the lines on the page the intro lost 200–400ms of the main
+  thread's frames; with them hidden, about 100. Half of that was the elements just being there, half their animations.
+- **A busy main thread made the front go missing.** A cell handed out late either never showed or came in part-faded:
+  the front stopped in the middle and came back at the end — his report, reproduced by blocking the main thread for
+  250ms mid-pass.
+- **WebKit ran the cover's lift on the main thread.** Blocked mid-intro, the black tiles froze over the field for the
+  whole block and then jumped.
+
+*The rule now.* **What the grid draws on its field is painted, by one painter, on its own clock** (`lib/grid-field.ts`):
+the overlay's dashes and the intro's reveal on one canvas the size of the box, the lit lines and the pointer's cell on
+another over the field, both under the page's boxes. Where the browser can hand a canvas to a worker — Chrome, Firefox,
+Safari 16.4 and later — the painter runs in one, so **nothing the page does on its main thread can stall it**; elsewhere
+it runs on the main thread with the same code. A pass is one message: the plan's per-cell delays (`ripplePlan`, the same
+plan the wash cuts by, D37) and the moment it starts; the painter keeps time itself. The cover is no longer elements
+either: **while the intro runs the grid wears the cover's colour** (`[data-intro]`, globals.css, from the server's first
+paint), and the painter paints each tile back in the page's own colour as the front reaches it, its dashes with it, and
+lets a line's glow show only on tiles already revealed, as the cover over them did.
+
+*After, the same probes.* The page has about 150 elements where it had about 1,450. In the intro, WebKit loses about 115ms
+of frames (it lost 200–400) and Chromium at a quarter of its speed about 75 (it lost 170–290); what is left is the page's
+own hydration. **Blocked for 250ms mid-pass, both engines go on drawing the front**, the intro's and a page turn's
+alike, with the cover lifting in step. A lit cell painted beside the old CSS one matches it: the same dashes, the same
+four glows. Every D35 scroll scenario lands as it did.
+
+*What it does not cover.* The wash (D37) is a clip animation on each box, and Chromium runs those on the main thread: a
+block mid-turn holds the cut where it is until the block ends. The main thread is idle through a turn — the next page
+mounts after the pass — so it has not been seen; if it is, the boxes' cut is the next thing to move to the painter.
+
+*Mine, his to change.* The dashes are drawn as the engines draw a 1px dashed border — 3px dashes, each side a run that
+starts and ends on a dash with its gaps evened out; WebKit's looked exactly so, Chromium's gaps were a little uneven. The
+first pass starts 48ms ahead of the frame that asks for it (`INTRO_LEAD_MS`), room for the worker to start, under the
+cover.
+
 ---
 
 ## 9. Where it lives
 
 Field, config and the reference boxes (`GRID_REFERENCE_BOX`) in `grid.tsx`, the model in `grid-layout.ts`, pages
-and the turn in `grid-pages.tsx`, the pager in `grid-pager.tsx` (D27, D29) with its arrows the registry's one entry
-(`registry.tsx`), the theme flip in `grid.tsx` with `theme-provider.tsx` (D28), the intro and the ripple between pages in `grid.tsx` with
-their CSS in `globals.css` (D31, D32), the slot in `slot.tsx`. All of it
+and the turn in `grid-pages.tsx`, the pager in `grid-pager.tsx` (D27, D29) with its parts the registry's entries —
+the arrows as a pair, and one arrow or one page number a cell for the numbered bar (`registry.tsx`, D36), the theme flip in `grid.tsx` with `theme-provider.tsx` (D28), the intro and the ripple between pages in `grid.tsx` with
+their CSS in `globals.css` (D31, D32), the cursor in `grid.tsx` and its image in `globals.css` (D34), the hand and its fling's tail in `grid-pages.tsx`
+(D35), the wash in `grid.tsx` (`washAway`), played by the turn in `grid-pages.tsx` and faded in by `globals.css` (D37),
+the field's paint — the overlay's dashes, the lines, the pointer's cell and the intro's reveal — in `lib/grid-field.ts`,
+started and fed by `useGridField` in `grid.tsx` (D38), the slot in `slot.tsx`. All of it
 renders; none of it edits (D30). The pages it carries are data: the showcase's in `apps/design/src/content/`,
 arranged by `apps/design/src/lib/arrange.ts`, and the portfolio's in `apps/portfolio/src/content/`, arranged by
 `apps/portfolio/src/lib/arrange.ts`. *Until 2026-09-23 the tools were in `grid-editor.tsx`, the frame in

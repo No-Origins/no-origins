@@ -5,6 +5,7 @@ import gsap from "gsap"
 import { cn } from "cn"
 
 import { useThemeFlipRegistry, type ThemeFlipper } from "@no-origins/ui/components/theme-provider"
+import { FIELD_PAD, startFieldPainter, type FieldColours, type FieldMessage, type FieldPainter, type FieldRgba } from "@no-origins/ui/lib/grid-field"
 
 /**
  * The base layout (Grid.md — v2 since 2026-09-21).
@@ -233,6 +234,11 @@ export type GridProps = Omit<React.ComponentProps<"div">, "children"> & {
   ripple?: boolean
   /** The page on the field, for `ripple`. `GridPages` passes it; a grid without pages has no use for it. */
   page?: number
+  /**
+   * Draw the pointer as a lime ring that fills while it is pressed, and light the cell under it: its dashes in lime
+   * (Grid.md D34). A mouse or a pen only: nothing changes on touch.
+   */
+  cursor?: boolean
   onMetrics?: (metrics: GridMetrics) => void
 }
 
@@ -245,6 +251,7 @@ function Grid({
   intro: introProp = false,
   ripple = false,
   page,
+  cursor: cursorProp = false,
   onMetrics,
   className,
   style,
@@ -294,10 +301,12 @@ function Grid({
     if (metrics) onMetrics?.(metrics)
   }, [metrics, onMetrics])
 
-  const lines = useGridLines()
-  const intro = useGridIntro(introProp, metrics, ref, lines)
-  useGridRipple(ripple && !intro.on, metrics, page, lines, ref)
-  const lit = intro.on || ripple
+  // The field's paint (D38) — the overlay's dashes, the lit lines and the pointer's cell, on canvases one painter
+  // draws — first, so its effects have run before the intro, the ripple and the cursor ask anything of it.
+  const { field, on: painted } = useGridField(overlay || introProp || ripple || cursorProp, metrics, ref, overlay)
+  const intro = useGridIntro(introProp, metrics, ref, field)
+  useGridRipple(ripple && !intro.on, metrics, page, field, ref)
+  const cursor = useGridCursor(cursorProp, metrics, ref, field)
 
   // The box's padding is the gutter (D15) — before the field is measured it is the breakpoint's gap by width alone,
   // which is what it will be once measured too. Whatever the count leaves over is centred by the flex box (D14).
@@ -311,12 +320,17 @@ function Grid({
       // While the intro runs (D31) — "drawing", then "arriving" as page 1 turns in: the page's boxes and the pager are
       // held back by globals.css until it hands over, and nothing turns a page.
       data-intro={intro.on ? intro.phase : undefined}
+      // The ring is the pointer (D34): globals.css draws the system's cursor as the lime ring over the whole grid.
+      data-cursor={cursor.on ? "" : undefined}
       // The grid is always its box: the screen. A className may give it another height when there is chrome above
       // (`h-[calc(100dvh-3.5rem)]`), never a width.
       className={cn("relative flex items-center justify-center h-dvh w-full", className)}
-      style={{ padding: `${gap}px`, ...rippleStyle(lit), ...style }}
+      style={{ padding: `${gap}px`, ...introStyle(intro.on), ...style }}
       {...props}
     >
+      {/* The field's paint (D38) — its dashes, lit lines and the intro's reveal — over the whole box and under the
+          page's boxes; the painter puts its canvases here. */}
+      {painted ? <div ref={field.host} data-slot="grid-field" aria-hidden className="pointer-events-none absolute inset-0" /> : null}
       {metrics ? (
         <GridContext.Provider value={metrics}>
           <div
@@ -324,8 +338,6 @@ function Grid({
             className="relative"
             style={{ width: metrics.gridW, height: metrics.gridH }}
           >
-            {overlay ? <GridOverlay /> : null}
-            {lit ? <GridRippleLines cols={metrics.cols} rows={metrics.rows} cell={metrics.cell} gap={metrics.gap} layers={lines.layers} /> : null}
             <div
               data-slot="grid-tracks"
               className="relative grid"
@@ -342,7 +354,6 @@ function Grid({
           <GridThemeFlip />
         </GridContext.Provider>
       ) : null}
-      {intro.on ? <GridIntroCover metrics={metrics} plan={intro.plan} /> : null}
     </div>
   )
 }
@@ -381,7 +392,7 @@ const INTRO_MAX_WAIT_MS = 3000
 
 /**
  * How long a ripple takes to cross a field of this many cells, in ms: from the first cell it draws to the last (D32).
- * A page turn holds the next page back this long, so the ripple runs through an empty field and the page comes up
+ * A page turn holds the next page back this long, so the ripple washes the last page away (D37) and the page comes up
  * after it (his, 2026-09-25: "it would be great if the ripple ends and then the components come up on the grid").
  */
 export function rippleSpan(cols: number, rows: number) {
@@ -429,13 +440,6 @@ function ripplePlan(cols: number, rows: number, from: PassFrom = "bottom") {
 }
 
 /**
- * How far ahead of its turn a cell is handed its animation. Handing all of them out at the start of a pass made every
- * cell a new compositor layer in one frame — the frame that dropped when a page turned (measured 2026-09-25); handed
- * out a few frames ahead, the layers are made a few at a time across the pass and are ready when they are due.
- */
-const LINES_LOOKAHEAD_MS = 64
-
-/**
  * Ready is the fonts, the images already on the field and the window's load — so page 1 arrives finished and the
  * drawing hides the font swap — or INTRO_MAX_WAIT_MS, whichever is first (D31, open item 4 — mine).
  */
@@ -451,66 +455,208 @@ type IntroPhase = "off" | "drawing" | "arriving"
 type RipplePlan = ReturnType<typeof ripplePlan>
 
 /**
- * The lit lines, shared by the intro and the ripple between pages (D31, D32): the two layers, and `play`, which runs
- * one pass on the next colour — lime, violet, lime, turn about, counted across the intro and every turn after it. A
- * pass restarts every cell's fade with the cell's delay, handing each cell its animation just before its turn
- * (LINES_LOOKAHEAD_MS); a CSS animation restarts only when its name changes, so each layer turns between two identical
- * keyframes. `late` starts the pass part-way, for a timer that fired after the pass was due. The fades themselves run
- * on the compositor; the only per-frame work here is handing out the next few cells.
+ * The first pass of the intro starts this far ahead of the frame that asks for it, in ms: the painter may be starting
+ * its worker in that same frame (D38). Until then the grid wears the cover's colour, so the wait is under the cover.
  */
-function useGridLines() {
-  const layers = React.useRef<(HTMLDivElement | null)[]>([])
+const INTRO_LEAD_MS = 48
+
+/**
+ * The field's paint (Grid-v2.md D38, 2026-09-25): the overlay's dashes, the lines the intro and the ripple light, and
+ * the pointer's cell — on two canvases one painter draws (`lib/grid-field.ts`), in a worker wherever the browser can
+ * hand it a canvas. They were about 1,300 elements, and a pass was 216 CSS animations started at once and handed out
+ * from the main thread; in WebKit that alone cost the intro 100–250ms of frames, and a busy main thread made cells miss
+ * their turn (his report: the ripple "starts, but then it disappears in the middle and then shows up in the end").
+ *
+ * The grid tells the painter the field, the theme's colours and when each pass starts, as the plan's delays and a
+ * moment on the shared clock; the painter keeps time itself. `play` counts the colours turn about — lime, violet —
+ * across the intro and every turn after it, and `next` says which the next pass will be. Passes still running are kept
+ * and sent again to a painter that starts over (React's strict mode runs every effect twice), so none is lost.
+ */
+function useGridField(enabled: boolean, metrics: GridMetrics | null, rootRef: React.RefObject<HTMLDivElement | null>, overlay: boolean) {
+  const on = enabled && !!metrics
+  const host = React.useRef<HTMLDivElement>(null)
+  const painter = React.useRef<FieldPainter | null>(null)
+  const canvases = React.useRef<{ field: HTMLCanvasElement; lines: HTMLCanvasElement } | null>(null)
   const passes = React.useRef(0)
-  const uses = React.useRef(INTRO_LINES.map(() => 0))
-  const handing = React.useRef(INTRO_LINES.map(() => 0))
-  React.useEffect(() => () => handing.current.forEach((raf) => window.cancelAnimationFrame(raf)), [])
-  return React.useMemo(
+  const live = React.useRef<Extract<FieldMessage, { type: "pass" | "reveal" }>[]>([])
+  const dpr = useDevicePixelRatio()
+
+  React.useLayoutEffect(() => {
+    const el = host.current
+    if (!on || !el) return
+    const make = (slot: string) => {
+      const cv = document.createElement("canvas")
+      cv.dataset.slot = slot
+      cv.setAttribute("aria-hidden", "true")
+      cv.style.position = "absolute"
+      cv.style.pointerEvents = "none"
+      return cv
+    }
+    const cvs = { field: make("grid-field-dashes"), lines: make("grid-field-lines") }
+    el.append(cvs.field, cvs.lines)
+    canvases.current = cvs
+    const p = startFieldPainter(cvs, { fade: INTRO_FADE_MS, pad: FIELD_PAD })
+    painter.current = p
+    // Where it paints, for anyone looking: "worker", or "main" where a canvas cannot be handed over.
+    el.dataset.painter = p.where
+    const now = performance.timeOrigin + performance.now()
+    // A reveal stays until the intro is over; a pass until it has faded.
+    live.current = live.current.filter((m) => m.type === "reveal" || m.zero + m.span + INTRO_FADE_MS > now)
+    for (const m of live.current) p.post(m)
+    return () => {
+      p.stop()
+      painter.current = null
+      canvases.current = null
+      cvs.field.remove()
+      cvs.lines.remove()
+    }
+  }, [on])
+
+  // The field: the canvases' place and size here, their pixels in the painter.
+  React.useLayoutEffect(() => {
+    const p = painter.current
+    const cvs = canvases.current
+    if (!on || !p || !cvs || !metrics) return
+    const { cols, rows, cell, gap, gridW, gridH, boxW, boxH } = metrics
+    // The field sits centred in the box (D14), a gutter from each edge at least (D15).
+    const fx = (boxW - gridW) / 2
+    const fy = (boxH - gridH) / 2
+    const place = (cv: HTMLCanvasElement, left: number, top: number, width: number, height: number) => {
+      cv.style.left = `${left}px`
+      cv.style.top = `${top}px`
+      cv.style.width = `${width}px`
+      cv.style.height = `${height}px`
+    }
+    place(cvs.field, 0, 0, boxW, boxH)
+    place(cvs.lines, fx - FIELD_PAD, fy - FIELD_PAD, gridW + 2 * FIELD_PAD, gridH + 2 * FIELD_PAD)
+    p.post({ type: "geometry", geometry: { cols, rows, cell, gap, gridW, gridH, boxW, boxH, fx, fy, dpr } })
+  }, [on, metrics, dpr])
+
+  // The theme's colours, read off the grid, and again whenever the theme changes (next-themes writes the root's class).
+  React.useLayoutEffect(() => {
+    const p = painter.current
+    const root = rootRef.current
+    if (!on || !p || !root) return
+    let last = ""
+    const send = () => {
+      const colours = readFieldColours(root)
+      const key = JSON.stringify(colours)
+      if (key === last) return
+      last = key
+      p.post({ type: "colours", colours })
+    }
+    send()
+    const watch = new MutationObserver(send)
+    watch.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "style", "data-theme"] })
+    return () => watch.disconnect()
+  }, [on, rootRef])
+
+  React.useLayoutEffect(() => {
+    if (on) painter.current?.post({ type: "overlay", on: overlay })
+  }, [on, overlay])
+
+  const field = React.useMemo(
     () => ({
-      layers,
-      /** The colour the next pass will play in. `atOnce` hands every cell out now rather than just ahead of its turn. */
+      /** Where the painter's canvases go: over the field, under the page's boxes. */
+      host,
+      /** The colour the next pass will play in. */
       next: () => INTRO_LINES[passes.current % INTRO_LINES.length]!,
-      play(plan: RipplePlan, late = 0, atOnce = false) {
+      /** One pass of `plan`, on the next colour, starting at `zero` (ms, the page's clock — `performance.now()`). */
+      play(plan: RipplePlan, zero: number) {
         const layer = passes.current % INTRO_LINES.length
         passes.current++
-        const name = `grid-intro-lit-${uses.current[layer]! % 2 ? "b" : "a"}`
-        uses.current[layer]!++
-        window.cancelAnimationFrame(handing.current[layer]!)
-        const cells = layers.current[layer]?.children
-        if (!cells) return
-        // The pass's zero, and the cells handed out so far. Each cell gets its fade LINES_LOOKAHEAD_MS before it is
-        // due, with the delay that is left then — negative if the frame came late, so it starts part-way and the
-        // front stays where the clock says.
-        const zero = performance.now() - late
-        let next = 0
-        const hand = () => {
-          const now = performance.now() - zero
-          while (next < plan.order.length && (atOnce || plan.delays[plan.order[next]!]! <= now + LINES_LOOKAHEAD_MS)) {
-            const i = plan.order[next++]!
-            const cell = cells[i] as HTMLElement | undefined
-            if (!cell) continue
-            cell.style.animationName = name
-            cell.style.animationDelay = `${plan.delays[i]! + INTRO_FADE_HOLD_MS - now}ms`
-          }
-          if (next < plan.order.length) handing.current[layer] = window.requestAnimationFrame(hand)
+        const m = { type: "pass", layer, delays: plan.delays, span: plan.span, zero: performance.timeOrigin + zero } as const
+        const now = performance.timeOrigin + performance.now()
+        live.current = [...live.current.filter((l) => l.type === "reveal" || l.zero + l.span + INTRO_FADE_MS > now), m]
+        painter.current?.post(m)
+      },
+      /**
+       * The intro's reveal: the box, tile by tile, back from the cover's colour to the page's, and each cell's dashes, on
+       * the painter's clock from `zero` (ms, `performance.now()`). Null when the intro is over.
+       */
+      reveal(plan: RipplePlan | null, zero = 0) {
+        live.current = live.current.filter((l) => l.type !== "reveal")
+        if (!plan) {
+          painter.current?.post({ type: "reveal" })
+          return
         }
-        hand()
+        const m = { type: "reveal", delays: plan.delays, span: plan.span, zero: performance.timeOrigin + zero } as const
+        live.current.push(m)
+        painter.current?.post(m)
+      },
+      /** The pointer's cell, −1 for none: lit at once, and the one it leaves fades back (D34). */
+      cursor(cell: number) {
+        const fade = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : INTRO_FADE_MS
+        painter.current?.post({ type: "cursor", cell, at: performance.timeOrigin + performance.now(), fade })
       },
     }),
     [],
   )
+  return { field, on }
 }
-type GridLines = ReturnType<typeof useGridLines>
+type FieldHandle = ReturnType<typeof useGridField>["field"]
+
+/** The screen's density, and again when it changes — a window dragged to another screen, or the page zoomed. */
+function useDevicePixelRatio() {
+  const [dpr, setDpr] = React.useState(() => (typeof window === "undefined" ? 1 : window.devicePixelRatio || 1))
+  React.useEffect(() => {
+    let query: MediaQueryList | null = null
+    const read = () => {
+      query?.removeEventListener("change", read)
+      setDpr(window.devicePixelRatio || 1)
+      query = window.matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`)
+      query.addEventListener("change", read)
+    }
+    read()
+    return () => query?.removeEventListener("change", read)
+  }, [])
+  return dpr
+}
 
 /**
- * The intro's clock — and it is not a frame loop. It ran as one at first, a writer per frame setting every lit
- * line's opacity, and it lagged (his report, 2026-09-24): each write repainted the two glowing layers, and a glow is
- * a blur, so every frame re-rasterised two field-sized blurs at the screen's density — two seconds of raster work in a
- * 1.2-second intro, on the main thread's busiest second, the page's own load. So every cell is now a CSS animation,
- * scheduled once per pass with its own delay: a tile's lift and a line's fade are opacity, which the compositor runs
- * on its own thread, so nothing repaints per frame and a busy main thread cannot stall them. What is left here is a
- * timer per pass: when a pass ends, the page is either ready — page 1 turns in — or the next pass is played.
+ * The painter's colours, from the theme's tokens as the grid resolves them: the overlay's dashes are `--border` at 70%
+ * (its `border-border/70`), the lines `--lime` and `--violet`, the glow `--grid-intro-glow`, and what the intro reveals
+ * the page's own `--background`. A canvas takes any colour
+ * CSS can write, and a pixel of one turns each into plain RGBA to send.
  */
-function useGridIntro(enabled: boolean, metrics: GridMetrics | null, rootRef: React.RefObject<HTMLDivElement | null>, lines: GridLines) {
+let colourProbe: CanvasRenderingContext2D | null = null
+function readFieldColours(root: HTMLElement): FieldColours {
+  const style = getComputedStyle(root)
+  colourProbe ??= Object.assign(document.createElement("canvas"), { width: 1, height: 1 }).getContext("2d", { willReadFrequently: true })
+  const rgba = (token: string, alpha = 1): FieldRgba => {
+    const ctx = colourProbe
+    if (!ctx) return [0, 0, 0, 0]
+    ctx.clearRect(0, 0, 1, 1)
+    ctx.fillStyle = "rgba(0, 0, 0, 0)"
+    ctx.fillStyle = style.getPropertyValue(token).trim() || "rgba(0, 0, 0, 0)"
+    ctx.fillRect(0, 0, 1, 1)
+    const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data
+    return [r!, g!, b!, (a! / 255) * alpha]
+  }
+  return {
+    dash: rgba("--border", 0.7),
+    lines: INTRO_LINES.map((line) => rgba(`--${line}`)),
+    glow: parseFloat(style.getPropertyValue("--grid-intro-glow")) || 16,
+    cursor: rgba("--lime"),
+    ground: rgba("--background"),
+  }
+}
+
+/**
+ * The intro's clock, and nothing here runs per frame. It ran as a frame loop at first, a writer per frame setting every
+ * lit line's opacity, and it lagged (his report, 2026-09-24): every write re-rasterised the glowing layers on the main
+ * thread's busiest second, the page's own load. Then every cell was a CSS animation (D31), which cost as much in
+ * another way — 216 layers made at once, and later passes handed out from the main thread (D38). Now a pass is one
+ * message to the field's painter with the moment it starts — the reveal of the box, tile by tile, on the same moment —
+ * and what is left here is a timer per pass: when a pass ends, the page is either ready — page 1 turns in — or the next pass is
+ * played.
+ */
+function useGridIntro(
+  enabled: boolean,
+  metrics: GridMetrics | null,
+  rootRef: React.RefObject<HTMLDivElement | null>,
+  field: FieldHandle,
+) {
   // The same on the server and in the browser's first render, so hydration matches; reduced motion is taken off in
   // the layout effect, before the first measured frame paints, and globals.css hides the server's cover for it.
   const [phase, setPhase] = React.useState<IntroPhase>(() => (enabled && !introPlayed ? "drawing" : "off"))
@@ -538,13 +684,12 @@ function useGridIntro(enabled: boolean, metrics: GridMetrics | null, rootRef: Re
     }
     if (!startedOn.current) {
       startedOn.current = metrics
-      startedAt.current = performance.now()
+      // A moment just ahead (INTRO_LEAD_MS), for the reveal and the lines alike: one clock, the painter's.
+      const zero = performance.now() + INTRO_LEAD_MS
+      startedAt.current = zero
       introPlayed = true
-      // The first pass, in this frame and all at once: the cover's tiles were given the same delays by the render that
-      // mounted them, and the lines keep time with them on the compositor. Handed out a few frames ahead instead, as
-      // later passes are, the lines would wait on the main thread in the page's load, its busiest second, and start
-      // part-faded behind the tiles; the frame this costs is the mounting one, under the cover, before anything moves.
-      lines.play(plan, 0, true)
+      field.reveal(plan, zero)
+      field.play(plan, zero)
     }
 
     let ready = false
@@ -566,30 +711,40 @@ function useGridIntro(enabled: boolean, metrics: GridMetrics | null, rootRef: Re
         after(passEnd + INTRO_FADE_HOLD_MS + Math.max(INTRO_FADE_MS, INTRO_REVEAL_MS), () => setPhase("off"))
         return
       }
-      // Another pass, lines only, in the other colour — started part-way if this timer fired late, so the front stays
-      // where the clock says it is.
+      // Another pass, lines only, in the other colour, on the moment it is due — the painter starts it part-way if this
+      // timer fired late, so the front stays where the clock says it is.
       passStart = passEnd + INTRO_GAP_MS
-      lines.play(plan, performance.now() - t0 - passStart)
+      field.play(plan, t0 + passStart)
       after(passStart + plan.span, endOfPass)
     }
     after(plan.span, endOfPass)
     return () => window.clearTimeout(timer)
-  }, [on, enabled, metrics, plan, rootRef, lines])
+  }, [on, enabled, metrics, plan, rootRef, field])
+
+  // Over: the grid has its own colour again (the attribute is gone from this commit), so the painter may stop painting
+  // the reveal's tiles the next time it paints the field. It does not repaint for it — a canvas cleared before the grid
+  // lost the cover's colour would flash that colour for a frame.
+  const wasOn = React.useRef(on)
+  React.useLayoutEffect(() => {
+    if (wasOn.current && !on) field.reveal(null)
+    wasOn.current = on
+  }, [on, field])
 
   return { phase, on, plan }
 }
 
 /**
  * The ripple between pages (D32): when the page on the field changes, one pass of the intro's drawing runs through
- * the field, lines only — up from the bottom when the turn is forward, as the next page's boxes arrive from their
- * bottom edge, and down from the top when it is back. It starts at the change, as the new page comes in, not while
- * the hand is still scrolling, because a scroll let go short of the turn settles back and turns nothing.
+ * the field, lines only — up from the bottom when the turn is forward, and down from the top when it is back. It
+ * starts at the change — since D37 the moment a turn commits, with the last page still on the field for the pass to
+ * wash away (`washAway`, which the turn plays in the same frame) — not while the hand is still scrolling, because a
+ * scroll let go short of the turn settles back and turns nothing.
  */
 function useGridRipple(
   enabled: boolean,
   metrics: GridMetrics | null,
   page: number | undefined,
-  lines: GridLines,
+  field: FieldHandle,
   rootRef: React.RefObject<HTMLDivElement | null>,
 ) {
   const shown = React.useRef(page)
@@ -609,124 +764,197 @@ function useGridRipple(
     planned.current = plans
     if (!plans || resized || page === undefined || was === undefined || page === was) return
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
-    // One frame after the change, not in it: the frame the page changes is the frame its boxes mount, and restarting
-    // every cell's animation in that frame too was the frame that dropped (measured 2026-09-25). A frame's delay
-    // cannot be seen at the front's pace.
+    // One frame after the change, on that frame's own time, which a wash started in the same frame starts on too
+    // (`washAway`, D37): the lines and the cut keep step.
     const plan = page > was ? plans.forward : plans.back
     const raf = window.requestAnimationFrame(() => {
-      lines.play(plan)
-      if (rootRef.current) rootRef.current.dataset.rippleNext = lines.next()
+      const at = document.timeline.currentTime
+      field.play(plan, typeof at === "number" ? at : performance.now())
+      if (rootRef.current) rootRef.current.dataset.rippleNext = field.next()
     })
     return () => window.cancelAnimationFrame(raf)
-  }, [page, plans, lines, rootRef])
+  }, [page, plans, field, rootRef])
   // Which colour the next pass will be, on the grid, for the pager's arrows to fill in (grid-pager.tsx): the arrow a
   // turn fills is the colour of the ripple that turn plays. Only while the ripple is on and can play; otherwise the
   // arrows keep their own fill.
   React.useLayoutEffect(() => {
     const root = rootRef.current
     if (!root) return
-    if (plans && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) root.dataset.rippleNext = lines.next()
+    if (plans && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) root.dataset.rippleNext = field.next()
     else delete root.dataset.rippleNext
-  }, [plans, lines, rootRef])
+  }, [plans, field, rootRef])
 }
 
 /**
- * The numbers as CSS, set once on the grid while the lines are mounted; globals.css times the animations with them.
+ * How far past the box a cut the front has not reached yet lies, in px: room for a card's shadow inside the 12px gutter,
+ * so a card keeps it on every side the front has not touched (the bleed D27's clip had).
  */
-function rippleStyle(on: boolean): React.CSSProperties | undefined {
+const WASH_BLEED = 8
+
+/**
+ * The ripple washes the page away (Grid-v2.md D37, 2026-09-25, his: "let's not shrink the cards … let the ripple wash
+ * away the cards and then let the new page … render"). Every box on the field is cut away cell by cell as the pass's
+ * front reaches each of its cells, at the pass's own times from the same plan as the lines, so where the front crosses
+ * a card the card is gone and the line lit under it shows. Up from the bottom going forward, down from the top going
+ * back. What the front has not reached yet is untouched: nothing in the box moves or is squeezed.
+ *
+ * Each box is ONE animation of its `clip-path`, a staircase polygon that steps each time the front crosses one of its
+ * cells — a cut, like every cell of the intro — so nothing is written per frame. A cut lies in the middle of the gutter
+ * inside the box, where the intro's tiles meet (D31). It starts on the timeline's current time, which in an animation frame
+ * is the frame's own, as the lines' pass does when it is played in the same frame (`useGridRipple`), so the two keep
+ * step. The animations fill forwards: the boxes stay washed until the page is taken off the field. The caller cancels
+ * them if the same page comes back instead.
+ */
+export function washAway(tracks: HTMLElement, m: GridMetrics, dir: 1 | -1): Animation[] {
+  const { cols, rows, cell, gap } = m
+  const plan = ripplePlan(cols, rows, dir === 1 ? "bottom" : "top")
+  const pitch = cell + gap
+  const b = WASH_BLEED
+  const washing: Animation[] = []
+  for (const el of tracks.querySelectorAll<HTMLElement>(':scope > [data-slot="grid-item"]:not([data-pager])')) {
+    // The box's cells, read off where the grid put it: the tracks are its offset parent, and a box spans whole cells.
+    const w = el.offsetWidth
+    const h = el.offsetHeight
+    const c0 = Math.round(el.offsetLeft / pitch)
+    const r0 = Math.round(el.offsetTop / pitch)
+    const cs = Math.max(1, Math.round((w + gap) / pitch))
+    const rs = Math.max(1, Math.round((h + gap) / pitch))
+    // When the front reaches each cell, column by column. Down a column the times only grow away from the edge the
+    // pass starts at, so what is washed of a column is always one run from that edge.
+    const at: number[][] = []
+    const times = new Set<number>()
+    for (let j = 0; j < cs; j++) {
+      const column: number[] = []
+      for (let i = 0; i < rs; i++) {
+        const t = plan.delays[Math.min(rows - 1, r0 + i) * cols + Math.min(cols - 1, c0 + j)]!
+        column.push(t)
+        times.add(t)
+      }
+      at.push(column)
+    }
+    // The edge the front comes from moves; the other stays where it is, `still`. A column is its cells and half the
+    // gutter each side of them; the outer ones run out to the bleed.
+    const still = dir === 1 ? -b : h + b
+    const left = (j: number) => (j === 0 ? -b : j * pitch - gap / 2)
+    const right = (j: number) => (j === cs - 1 ? w + b : j * pitch + cell + gap / 2)
+    const edge = (washed: number) => {
+      if (washed === 0) return dir === 1 ? h + b : -b
+      if (washed === rs) return still
+      return dir === 1 ? (rs - washed) * pitch - gap / 2 : washed * pitch - gap / 2
+    }
+    const polygon = (by: number) => {
+      const points = [`${-b}px ${still}px`, `${w + b}px ${still}px`]
+      for (let j = cs - 1; j >= 0; j--) {
+        const y = edge(at[j]!.filter((t) => t <= by).length)
+        points.push(`${right(j)}px ${y}px`, `${left(j)}px ${y}px`)
+      }
+      return `polygon(${points.join(", ")})`
+    }
+    const steps = [...times].sort((x, y) => x - y)
+    const end = steps[steps.length - 1]!
+    const frames: Keyframe[] = []
+    if (steps[0]! > 0) frames.push({ offset: 0, clipPath: polygon(-1), easing: "step-end" })
+    for (const t of steps) frames.push({ offset: end > 0 ? t / end : 0, clipPath: polygon(t), easing: "step-end" })
+    if (frames.length === 1) frames.push({ ...frames[0]!, offset: 1 })
+    const wash = el.animate(frames, { duration: Math.max(1, end), fill: "forwards" })
+    wash.startTime = document.timeline.currentTime
+    washing.push(wash)
+  }
+  return washing
+}
+
+/**
+ * The intro's numbers as CSS, set on the grid while it runs; globals.css times page 1's reveal with them.
+ */
+function introStyle(on: boolean): React.CSSProperties | undefined {
   if (!on) return undefined
   return {
-    "--grid-intro-fade": `${INTRO_FADE_MS}ms`,
     "--grid-intro-reveal": `${INTRO_REVEAL_MS}ms`,
     "--grid-intro-hold": `${INTRO_FADE_HOLD_MS}ms`,
   } as React.CSSProperties
 }
 
-/**
- * The empty screen the drawing starts from: the visitor's own background on light, black on dark
- * (`--grid-intro-from`, globals.css). Before the field is measured — the server's render included — it is one sheet;
- * after, one tile per cell, each the cell and half the gutter round it and the outer ones running to the box's edge,
- * so the tiles cover the box exactly and a tile's going reveals its cell and its share of the gutter together. Each
- * tile lifts at its cell's time by a CSS animation (globals.css) whose delay is set here, at mount — the frame the
- * intro starts. Neighbours overlap by a pixel so no seam shows between two that are still up.
- */
-const GridIntroCover = React.memo(function GridIntroCover({ metrics, plan }: { metrics: GridMetrics | null; plan: RipplePlan | null }) {
-  const base = "pointer-events-none absolute inset-0 z-30 motion-reduce:hidden"
-  if (!metrics || !plan) return <div data-slot="grid-intro-cover" aria-hidden className={base} style={{ background: "var(--grid-intro-from)" }} />
-  const { cols, rows, cell, gap, boxW, boxH, gridW, gridH } = metrics
-  const gx = (boxW - gridW) / 2
-  const gy = (boxH - gridH) / 2
-  const span = (i: number, n: number, origin: number, end: number) => {
-    const at = origin + i * (cell + gap)
-    const from = i === 0 ? 0 : at - gap / 2 - 0.5
-    const to = i === n - 1 ? end : at + cell + gap / 2 + 0.5
-    return [from, to - from] as const
-  }
-  const tiles: React.ReactNode[] = []
-  for (let r = 0; r < rows; r++) {
-    const [top, height] = span(r, rows, gy, boxH)
-    for (let c = 0; c < cols; c++) {
-      const [left, width] = span(c, cols, gx, boxW)
-      const i = r * cols + c
-      tiles.push(<div key={i} className="absolute" style={{ left, top, width, height, animationDelay: `${plan.delays[i]}ms` }} />)
-    }
-  }
-  return (
-    <div data-slot="grid-intro-cover" data-measured="" aria-hidden className={base}>
-      {tiles}
-    </div>
-  )
-})
+// ── the cursor (Grid-v2.md D34, 2026-09-25) ──────────────────────────────────────────────────────────────────────
 
 /**
- * The lit lines: the overlay's own cells and dashes again, in lime and in violet, each cell glowing in its layer's
- * colour (globals.css) — for the intro (D31) and for the ripple between pages (D32). Drawing the same cells with the
- * same border means a line fading back is only a change of colour over the overlay beneath it, never a second dash
- * pattern. The glow is a blur, kept on his word as the one exception to the no-glass rule of 2026-09-16: on a line,
- * while it is lit. Every cell rests at opacity 0 and each pass is played on it by `useGridLines`. The glow is on each
- * cell, not on the layer: on the layer it was one field-sized blur the compositor redid every frame over the fading
- * cells; on a cell it is painted once into the cell's own layer, and a frame only changes an opacity.
+ * His ask: "make the cursor transparent line bordered circle and it should fill when clicked. Every cell on the grid
+ * should turn its border to line. Whenever the cursor is on it." Asked, "line" was lime. A solid line for an afternoon,
+ * then the cell's own dashes (his, the same day: "we should still have it dashed border for cells when cursor is over
+ * them. Like what we have as default for cells").
+ * A cell the pointer leaves fades back over the intro's own INTRO_FADE_MS, the way a line the intro drew does (D31); the
+ * one it is on is lit at once.
+ *
+ * The ring is the system's cursor, drawn from an image (globals.css), since the evening it was built. It was a div the
+ * page moved on every pointer move, and each move cost the main thread a whole-page layerize — about 1ms on an
+ * M-series Mac, several on a slower laptop (measured 2026-09-25, looking into his report of a jitter over the avatar)
+ * — and it trailed the hand by at least a frame, more whenever the page was busy. An image cursor is drawn by the
+ * system, where the hand is, and costs the page nothing.
  */
-const GridRippleLines = React.memo(function GridRippleLines({
-  cols,
-  rows,
-  cell,
-  gap,
-  layers,
-}: {
-  cols: number
-  rows: number
-  cell: number
-  gap: number
-  layers: React.RefObject<(HTMLDivElement | null)[]>
-}) {
-  const cells = Array.from({ length: cols * rows })
-  return (
-    <>
-      {INTRO_LINES.map((line, l) => (
-        <div
-          key={line}
-          ref={(el) => {
-            layers.current[l] = el
-          }}
-          data-slot="grid-intro-lines"
-          data-line={line}
-          aria-hidden
-          className="pointer-events-none absolute inset-0 grid"
-          style={{ gridTemplateColumns: `repeat(${cols}, ${cell}px)`, gridTemplateRows: `repeat(${rows}, ${cell}px)`, gap }}
-        >
-          {cells.map((_, i) => (
-            // The outer box fades (its own layer while it animates); the inner is the dashed box and its glow, which
-            // is painted into that layer once rather than blurred again every frame.
-            <div key={i}>
-              <div className="size-full border border-dashed" />
-            </div>
-          ))}
-        </div>
-      ))}
-    </>
-  )
-})
+
+/**
+ * The pointer's cell, lit — sent straight to the field's painter from the pointer's events, never through React state:
+ * a move costs a subtraction and a division, and one message when it crosses into another cell. The painter draws the
+ * cell's dashes in lime, over the lines and under the page's boxes (D38). The cell is found from the field's numbers,
+ * not by hit-testing, so it lights under a card as well (where the card hides it) and the gutter between two cells
+ * lights nothing. Only where the device can hover with a fine pointer; a touch on a hybrid screen is ignored.
+ */
+function useGridCursor(enabled: boolean, metrics: GridMetrics | null, rootRef: React.RefObject<HTMLDivElement | null>, field: FieldHandle) {
+  const [fine, setFine] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!enabled) return
+    const query = window.matchMedia("(hover: hover) and (pointer: fine)")
+    const read = () => setFine(query.matches)
+    read()
+    query.addEventListener("change", read)
+    return () => query.removeEventListener("change", read)
+  }, [enabled])
+
+  const on = enabled && fine
+
+  React.useEffect(() => {
+    const root = rootRef.current
+    if (!on || !metrics || !root) return
+    const { cols, cell, gap, gridW, gridH } = metrics
+    const pitch = cell + gap
+    // The field's corner on the screen. The grid never scrolls and a turn moves no box, so it only changes with the
+    // box — which is new metrics, and this effect again — or with the page around it, which entering it re-reads.
+    let left = 0
+    let top = 0
+    const measure = () => {
+      const rect = root.querySelector(':scope > [data-slot="grid-box"]')?.getBoundingClientRect()
+      if (rect) ({ left, top } = rect)
+    }
+    measure()
+    let lit = -1
+    const light = (i: number) => {
+      if (i === lit) return
+      lit = i
+      field.cursor(i)
+    }
+    const move = (event: PointerEvent) => {
+      if (event.pointerType === "touch") return
+      const x = event.clientX - left
+      const y = event.clientY - top
+      const col = Math.floor(x / pitch)
+      const row = Math.floor(y / pitch)
+      const inCell = x >= 0 && y >= 0 && x < gridW && y < gridH && x - col * pitch < cell && y - row * pitch < cell
+      light(inCell ? row * cols + col : -1)
+    }
+    const leave = () => light(-1)
+    root.addEventListener("pointerenter", measure)
+    root.addEventListener("pointermove", move)
+    root.addEventListener("pointerleave", leave)
+    return () => {
+      root.removeEventListener("pointerenter", measure)
+      root.removeEventListener("pointermove", move)
+      root.removeEventListener("pointerleave", leave)
+      light(-1)
+    }
+  }, [on, metrics, rootRef, field])
+
+  return { on }
+}
 
 /**
  * The sheet's fall, in seconds — the one beat, down over the field. Mine; `FLIP_TEMPO` stretches it (1 is the
@@ -886,30 +1114,6 @@ function GridThemeFlip() {
   )
 }
 
-/** The cells, drawn behind the items. Reads the metrics from context, so it is only valid inside a Grid. */
-function GridOverlay({ className }: { className?: string }) {
-  const m = useGridMetrics()
-  if (!m) return null
-  const cells = Array.from({ length: m.cols * m.rows })
-
-  return (
-    <div data-slot="grid-overlay" className={cn("pointer-events-none absolute inset-0", className)} aria-hidden>
-      <div
-        className="grid h-full w-full"
-        style={{
-          gridTemplateColumns: `repeat(${m.cols}, ${m.cell}px)`,
-          gridTemplateRows: `repeat(${m.rows}, ${m.cell}px)`,
-          gap: m.gap,
-        }}
-      >
-        {cells.map((_, i) => (
-          <div key={i} className="border-border/70 border border-dashed" />
-        ))}
-      </div>
-    </div>
-  )
-}
-
 export type GridItemProps = React.ComponentProps<"div"> & {
   col?: Responsive<number>
   row?: Responsive<number>
@@ -944,4 +1148,4 @@ function GridItem({ col, row, colSpan, rowSpan, className, style, ...props }: Gr
   )
 }
 
-export { Grid, GridItem, GridOverlay }
+export { Grid, GridItem }
