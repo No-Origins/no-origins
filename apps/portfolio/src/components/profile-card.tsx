@@ -94,14 +94,12 @@ export function ProfileCard({ colSpan, rowSpan }: { colSpan: number; rowSpan: nu
   const short = height < 180;
   const face = narrow ? "size-16" : height - 40 >= 96 ? "size-24" : "size-22";
 
-  // A ring round the face in the HEY's two colours (his, 2026-09-24): lime 70%, violet 25%, and the 5% left as two
-  // equal gaps where they meet. Violet is the lower-right quarter, 3 o'clock to 6, and lime the rest — the split turned
-  // 45° off the vertical, as he had the two halves before he set the shares. One dashed circle per colour in an SVG
-  // inside the Avatar, 3px clear of its edge, so the box the overlay measures is still the face's. The stroke is the
-  // design system's `--stroke-accent` (3px — his, after a pass at 5), and everything is laid out from it in CSS: the
-  // SVG is the ring's centre line (the face, the 3px clearance and half a stroke each side), the circle is 50% of it,
-  // and `pathLength` makes the dashes hundredths of the circle at any size. They start at 3 o'clock and run clockwise.
-  // The focus outline sits 3px outside the ring.
+  // A ring round the face: one unbroken circle of line in lime (his, 2026-09-25 — "we don't need a violet there"; it
+  // was lime 70% and violet 25% with two gaps, 2026-09-24). A circle in an SVG inside the Avatar, 3px clear of its
+  // edge, so the box the overlay measures is still the face's. The stroke is the design system's `--stroke-accent`
+  // (3px — his, after a pass at 5), and everything is laid out from it in CSS: the SVG is the ring's centre line (the
+  // face, the 3px clearance and half a stroke each side) and the circle is 50% of it. The focus outline sits 3px
+  // outside the ring.
 
   // The face is page 1's one image that the intro cannot see: Radix's AvatarImage renders no <img> until it has loaded,
   // so there is nothing in the field for the intro's wait (Grid.md D31) to hold for. Preloaded from the head, it is
@@ -139,8 +137,7 @@ export function ProfileCard({ colSpan, rowSpan }: { colSpan: number; rowSpan: nu
             aria-hidden="true"
             className="pointer-events-none absolute top-[calc(-3px_-_var(--stroke-accent)_/_2)] left-[calc(-3px_-_var(--stroke-accent)_/_2)] size-[calc(100%_+_6px_+_var(--stroke-accent))] overflow-visible fill-none stroke-(length:--stroke-accent)"
           >
-            <circle cx="50%" cy="50%" r="50%" pathLength={100} className="stroke-violet" strokeDasharray="25 75" />
-            <circle cx="50%" cy="50%" r="50%" pathLength={100} className="stroke-lime" strokeDasharray="70 30" strokeDashoffset={-27.5} />
+            <circle cx="50%" cy="50%" r="50%" className="stroke-lime" />
           </svg>
         </Avatar>
         <div className="min-w-0">

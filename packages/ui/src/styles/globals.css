@@ -74,7 +74,9 @@
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  /* The card is the page's own colour, as it already was on light (his, 2026-09-25: the grey card goes "to the colour
+     that is in the viewport background"); its edge is the border `Card` draws, not a lighter fill. shadcn's was 0.205. */
+  --card: oklch(0.145 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
@@ -163,54 +165,55 @@
   }
 }
 
-/* ── the grid's page turn (grid-pages.tsx, Grid.md D27) ───────────────────────────────────────────────────
-   Turning a page is a progress from 0 to 1 that the wheel, a finger or a click drives; it is written per frame to
-   --grid-turn on the grid's tracks (signed: + forward, − back) with its magnitude in --grid-turn-abs; the defaults
-   below sit on the grid. What changes is the
-   box's VISIBLE HEIGHT and nothing else — his rule, 2026-09-21: "only the components container height should change
-   without squeezing the content inside it", and no horizontal scaling. So the box is CLIPPED, never scaled: the
-   content inside keeps its exact size and position and is progressively cut off, which is the only way a container
-   can lose height without re-laying-out or distorting what it holds. (It was scaleY first, which squashed the
-   glyphs, and then a uniform scale, which changed the width — both sent back.)
+/* ── the grid's page turn (grid-pages.tsx, Grid.md D27, D37) ──────────────────────────────────────────────
+   Turning a page is a progress from 0 to 1 that the wheel, a finger or a click drives, and the pager's arrow fills
+   with it: the front and back edge of its fill are written on the pager's bar (signed: + forward, − back), and the
+   defaults below sit on the grid. The front advances with the hand; once the page has turned the back advances
+   instead, so the fill leaves the way it came.
 
-   --grid-turn-base / --grid-turn-sign give the VISIBLE share: out falls from 1 (base 1, sign −1), in rises from 0
-   (base 0, sign +1). The hidden share is the rest, taken off the edge the box is NOT anchored to, so the motion runs
-   in the direction of travel: forward, a box keeps its top and loses its bottom, and the next page's boxes are
-   revealed from their bottom edge upward. The pager's arrows read the same progress for their fill, so fill and
-   height are one proportion. Reduced motion: no clip — the page still turns, at once. */
+   The boxes do NOT follow the hand (D37, 2026-09-25, his: "let's not shrink the cards"). They were clipped from their
+   bottom edge as the hand scrolled, and the next page revealed from its bottom edge, since D27 — and with the ripple's
+   hold between the two (D32) that was a shrink, a wait and a grow. Now a committed turn is washed away by the ripple,
+   one clip animation a box that cuts it cell by cell as the pass's front crosses it (grid.tsx, `washAway`), and the
+   next page is put on the field when the pass has crossed and FADES in — opacity only, nothing squeezed, nothing
+   grown — over the in-phase's own length. The pager is a box on the tracks too, and it stays. Reduced motion: no
+   wash and no fade — the page swaps at once. */
 [data-slot="grid"] {
-  --grid-turn: 0;
-  --grid-turn-abs: 0;
-  /* The pager's arrow reads these, not --grid-turn: the front and back edge of its fill. The front advances with the
-     hand; once the page has turned the back advances instead, so the fill leaves the way it came. */
   --grid-turn-fill-front: 0;
   --grid-turn-fill-back: 0;
-  --grid-turn-base: 1;
-  --grid-turn-sign: -1;
-  --grid-turn-hide-top: 0;
-  --grid-turn-hide-bottom: 1;
+  --grid-turn-fade: 160ms;
 }
-[data-slot="grid-item"][data-turn] {
-  /* The share of the box that is gone: 1 − visible. */
-  --grid-turn-gone: calc(1 - (var(--grid-turn-base) + var(--grid-turn-sign) * var(--grid-turn-abs)));
-  /* A clip removes everything the box paints, and a card's hairline (`ring-1`) and shadow are box-shadows painted
-     OUTSIDE its border box — so a clip flush with the box took them off every side (his report, 2026-09-21). The
-     three sides that are not moving therefore bleed 8px past the box, room for a 1px ring and a 3px blur inside the
-     12px gutter, and keep both. The moving edge starts the same 8px outside and sweeps in to 100%, so the shadow on
-     that side fades with the cut rather than vanishing on the first frame; at the cut itself there is no ring, and
-     cannot be — see Grid.md D27. Per edge: hide × gone × (100% + bleed) − bleed, which is −bleed when the edge is
-     fixed or the turn has not begun, and exactly 100% when the box is gone. */
-  --grid-turn-bleed: 8px;
-  clip-path: inset(
-    calc(var(--grid-turn-hide-top) * var(--grid-turn-gone) * (100% + var(--grid-turn-bleed)) - var(--grid-turn-bleed))
-    calc(-1 * var(--grid-turn-bleed))
-    calc(var(--grid-turn-hide-bottom) * var(--grid-turn-gone) * (100% + var(--grid-turn-bleed)) - var(--grid-turn-bleed))
-    calc(-1 * var(--grid-turn-bleed))
-  );
-  will-change: clip-path;
+/* No fill: the fade ends at opacity 1, where the box rests. */
+@keyframes grid-turn-in { from { opacity: 0; } }
+[data-slot="grid-tracks"][data-turn="in"] > [data-slot="grid-item"]:not([data-pager]) {
+  animation: grid-turn-in var(--grid-turn-fade) cubic-bezier(0.33, 1, 0.68, 1);
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-slot="grid-item"][data-turn] { clip-path: none; }
+  [data-slot="grid-tracks"][data-turn="in"] > [data-slot="grid-item"]:not([data-pager]) { animation: none; }
+}
+
+/* The grid's own pointer (grid.tsx, Grid.md D34): a 24px ring, a 2px lime line on nothing, filled lime while pressed —
+   the system's cursor, drawn from an image, over the whole field: a link's hand and a button's included, because the
+   ring is the pointer. The system draws it where the hand is, so it never trails and costs the page nothing; it was a
+   div moved on every pointer move until the evening it was built, which cost a whole-page layerize a move and lagged.
+   The colour is `--lime` as sRGB (206 238 56, his), because an image cannot read a custom property; the 2x image is the
+   same drawing at twice the pixels, and a browser without `image-set` for cursors takes the first line. The hotspot is
+   the centre. The grid only sets `data-cursor` where the device hovers with a fine pointer, so a phone keeps its own. */
+[data-slot="grid"][data-cursor],
+[data-slot="grid"][data-cursor] * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%23ceee38' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
+  cursor: image-set(
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%23ceee38' stroke-width='2'/%3E%3C/svg%3E") 1x,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%23ceee38' stroke-width='2'/%3E%3C/svg%3E") 2x
+    ) 12 12, auto;
+}
+[data-slot="grid"][data-cursor]:active,
+[data-slot="grid"][data-cursor]:active * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23ceee38' stroke='%23ceee38' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
+  cursor: image-set(
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23ceee38' stroke='%23ceee38' stroke-width='2'/%3E%3C/svg%3E") 1x,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23ceee38' stroke='%23ceee38' stroke-width='2'/%3E%3C/svg%3E") 2x
+    ) 12 12, auto;
 }
 
 /* ── the grid's intro (grid.tsx, Grid.md D31) ─────────────────────────────────────────────────────────────────
@@ -231,43 +234,20 @@
   --grid-intro-from: oklch(0 0 0);
   --grid-intro-glow: 12px;
 }
-[data-slot="grid-intro-lines"][data-line="lime"] { --grid-intro-line: var(--lime); }
-[data-slot="grid-intro-lines"][data-line="violet"] { --grid-intro-line: var(--violet); }
-/* The glow sits on each cell's dashed box, inside the box that fades, so it is painted into that box's layer and a
-   frame changes only an opacity (on the whole layer it was a field-sized blur redone every frame, D31). It is a
-   box-shadow, outside and in, not a drop-shadow filter: every pass rebuilds each cell's layer, and a filter was
-   rasterised per cell — 216 at once, a dropped frame on every page turn (D32) — where a box-shadow's blur is cached
-   and reused across identical cells. It glows the outline rather than each dash, which at this blur reads the same;
-   the strengths were matched to the filter by eye. */
-[data-slot="grid-intro-lines"] > div > div {
-  border-color: var(--grid-intro-line);
-  box-shadow:
-    0 0 calc(var(--grid-intro-glow) / 3) color-mix(in oklch, var(--grid-intro-line) 12%, transparent),
-    0 0 var(--grid-intro-glow) color-mix(in oklch, var(--grid-intro-line) 30%, transparent),
-    inset 0 0 calc(var(--grid-intro-glow) / 3) color-mix(in oklch, var(--grid-intro-line) 12%, transparent),
-    inset 0 0 var(--grid-intro-glow) color-mix(in oklch, var(--grid-intro-line) 30%, transparent);
-}
-/* Every cell moves by a CSS animation whose delay grid.tsx sets — a tile's lift, a line's fade — and both are
-   opacity, so the compositor runs them off the main thread and nothing repaints per frame. They were written per
-   frame at first, and every write re-rasterised the two glowing layers: it lagged (his report, 2026-09-24). A line
-   is lit (opacity 1) the moment its animation starts and fades to nothing; between passes it rests at 0. Each layer
-   turns between two identical keyframes, because an animation restarts only when its name changes. */
-@keyframes grid-intro-lift { to { opacity: 0; } }
-@keyframes grid-intro-lit-a { from { opacity: 1; } to { opacity: 0; } }
-@keyframes grid-intro-lit-b { from { opacity: 1; } to { opacity: 0; } }
-[data-slot="grid-intro-cover"] > div {
+/* Everything the intro draws is painted on canvases since D38 (lib/grid-field.ts), which read the tokens above and the
+   theme's own: the dashes `--border` at 70%, the lines `--lime` and `--violet`, the glow `--grid-intro-glow`. The cover
+   is only this: while the intro runs — from the server's first paint, before any script — the grid wears the cover's
+   colour, and the painter paints each tile back in the page's own `--background` as the front reaches it. It was 216
+   tiles lifted one by one until D38, which froze in WebKit whenever the page's own loading held the main thread. */
+[data-slot="grid"][data-intro] {
   background: var(--grid-intro-from);
-  animation: grid-intro-lift 1ms linear forwards;
 }
-[data-slot="grid-intro-lines"] > div {
-  opacity: 0;
-  animation-duration: var(--grid-intro-fade);
-  animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
-  animation-fill-mode: forwards;
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="grid"][data-intro] { background: none; }
 }
 /* Page 1 and the pager wait while the grid is drawn, then are revealed from their bottom edge upward as the last
-   lines fade — the page turn's own "in" (D27), with its 8px bleed so a card's ring and shadow are not cut. Only the
-   field's own boxes: a slot's sub-slots are inside a box that is already clipped. */
+   lines fade — what the page turn's "in" was until D37 — with an 8px bleed so a card's ring and shadow are not cut.
+   Only the field's own boxes: a slot's sub-slots are inside a box that is already clipped. */
 @keyframes grid-intro-in {
   from { clip-path: inset(calc(100% + 8px) -8px -8px -8px); }
   to { clip-path: inset(-8px -8px -8px -8px); }

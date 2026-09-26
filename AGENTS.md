@@ -5,7 +5,7 @@ redirects to it), `design` (design.no-origins.com, the showcase, :3001), `admin`
 surface, :3002) and `engineering` (engineering.no-origins.com, the engineering publish library, :3003), all
 Next.js 16; the shared design
 system is `packages/ui` (`@no-origins/ui`, **2.0.0** since 2026-09-16), consumed from source. Each app has its own
-CLAUDE.md / AGENTS.md; read them before editing app code.
+AGENTS.md / AGENTS.md; read them before editing app code.
 
 `packages/docs` (`@no-origins/docs`) is the knowledge base — every document that decides something, grouped into
 `brand/`, `system/`, `apps/` and `archive/`. It builds and exports nothing. `packages/docs/README.md` is the index
@@ -38,8 +38,8 @@ organisms, templates, the registry, the blob, the patterns, the CSS layers — w
   `:root` / `.dark` tokens and the `@theme inline` map. Every app imports exactly this and nothing else.
 - **`cn`** from the `cn` package, re-exported at `@no-origins/ui/lib/utils`.
 - **`gsap`** for motion, since 2026-09-21 — his ask. It animates what is **inside** a box (`Progress`'s `animate`
-  prop grows the fill; Portfolio.md P11); the grid's page turn keeps its own per-frame writer for the pager's arrow
-  (Grid.md D27) and washes the boxes with one `clip-path` animation each (D37). See `packages/ui/CLAUDE.md` rule 7.
+  prop grows the fill; Portfolio.md P11); the grid's page turn keeps its own per-frame writer and `clip-path`, because
+  that is one proportion shared by every box and the pager's arrow (Grid.md D27). See `packages/ui/AGENTS.md` rule 7.
 
 Import a component by its own path — `@no-origins/ui/components/button` — never from a package root; there is no
 barrel and there should not be one. Add components with the CLI, from `packages/ui`, never by hand:
@@ -107,7 +107,7 @@ rules in short, each one his:
   from the spacing scale, `alignX`/`alignY`. **No margin** — the gutter is the margin. Every slot fills its span and
   **clips**: nothing on the grid scrolls, so a component that is cut off is in a slot that is too small. A layout item
   carries `slot`, `component` and `children` (a `GridLayout` on the slot's cells), and `SlotContent` renders any of
-  them with no custom `renderItem`. A Card in a slot gets `transparent`, inset 0, stretch, so its own border shows.
+  them with no custom `renderItem`. A Card in a slot gets `transparent`, inset 0, stretch, so its own ring shows.
 - **Boxes are placed by coordinate**, 1-based like CSS grid lines.
 - **Overflow goes to another PAGE, never off the edge (D5).** A layout is pages. **The pager is a navbar on the bottom
   row (D27, 2026-09-21)**: 1×1 cells at the bottom centre of every field, on every page — by default four empty
@@ -116,27 +116,18 @@ rules in short, each one his:
   room above the row. **The bar is a slot and its cells are sub-slots (D29, 2026-09-23)**: its width is a number per
   breakpoint in the config beside `cell · gap`, even and never below two, and the ↑ ↓ pair is one registry molecule
   placed in the bar rather than hardwired to the last two cells — it takes the turn from context, not from props, and
-  belongs in the bar only, because an ordinary slot is washed away by the turn. **The bar is the layout's, one per layout** (`layout.bar`), never a page's — it is drawn on
+  belongs in the bar only, because an ordinary slot is clipped by the turn. **The bar is the layout's, one per layout** (`layout.bar`), never a page's — it is drawn on
   every page, so contents that changed between pages would move the arrows under the hand. A bar may leave the arrows
   out and nothing stops it; the default keeps them in the last two cells. **The scroll turns the page, and scrolling UP is forward — the hand's up: fingers moving up
   the trackpad or the screen, a positive `deltaY`, never negated** (↑ is the next page, ↓ the one
-  before): a turn is a progress from 0 to 1 that the wheel or a finger drives (a third of the field is one page), and
-  **only the arrow follows the hand** — it fills by that share; let go short of half way and it settles back. **The
-  boxes do not shrink (D37, 2026-09-25, his: "let's not shrink the cards")**: when the turn commits, the ripple starts
-  at once and **washes the page away** — every box is cut cell by cell as the pass's front reaches each of its cells,
-  one `clip-path` animation a box (`washAway`, `grid.tsx`), the same plan and the same frame as the lines — and once the
-  pass has crossed, the next page is put on the field and **fades in** over `TURN_MS` (160ms), opacity only. Every
-  `GridPages` turns this way; `ripple` only draws the lines. Nothing in a box is ever squeezed, scaled or re-laid-out:
-  D27's clip-by-height went for the wash, and scaling (in Y, then uniformly) was sent back on 2026-09-21 — do not
-  reintroduce a transform or a shrink here. **A hand that goes on scrolling goes on turning (D35, 2026-09-25)**: only a fling's
-  decaying tail is ignored after a turn, never the hand (`readWheel`), a notch glides rather than jumps, and the turn
-  renders no card — the phase is `data-turn` on the tracks (`idle · drive · relax · wash · in`), the arrow's fill on
-  the bar. The arrows and ← → play the same turn; the flip is gone. The field and the pager never move. What the bar's
-  empty cells hold is now a layout question, not an open one (D29). **A bar may number its pages (D36, 2026-09-25)**:
-  `numberedPagerBar` puts back (↑) on the first cell, forward (↓) on the last and a page number on every cell
-  between, from the registry's `pager-arrow` and `pager-page`. With more pages than cells the numbers are a window
-  holding the current page second, and a number turns straight to its page. The portfolio's bar is this one
-  (Portfolio.md P14); D27's is still the default.
+  before): a turn is a progress from 0 to 1 that the wheel or a finger drives (a third of the field is one page);
+  every box **loses height from its bottom edge, keeping its top**, by exactly the share the arrow fills — one
+  proportion, no wave — and at 1 the next page's boxes are revealed from their bottom edge upward. **Only the height
+  changes, and the box is CLIPPED, never scaled** (D27): the content inside keeps its exact size and position, so
+  nothing is squeezed, narrowed or re-laid-out. Scaling in Y squashed the glyphs and scaling uniformly changed the
+  width; both were sent back on 2026-09-21. Do not reintroduce a transform here. Let go short of
+  half way and it settles back. The arrows and ← → play the same turn over time; the flip is gone. The field and the pager never move. What the bar's
+  empty cells hold is now a layout question, not an open one (D29).
 - **The theme falls over the field as a sheet of paint (D28, 2026-09-22).** Toggling light/dark — `d`, or the
   showcase's button, both through `useThemeToggle` — is one beat on the outermost grid: one sheet in the NEW theme's
   colours, plain — no cells drawn on it — with a sharp, moving wave of two to five uneven crests for its bottom and
@@ -150,30 +141,20 @@ rules in short, each one his:
   it is drawn and fades back over 500ms, glowing 16px on light and 12px on dark: **the one blur the system keeps**, on
   a line, for the length of the intro. While the page loads (fonts, window load, images on
   the field, 3 s at most) the drawing goes again at once, lines only, lime and violet turn about; then page 1 and the
-  pager are revealed from their bottom edge upward (the turn's "in" until D37; the intro keeps it). Once per document load, none under reduced
-  motion, and nothing turns a page meanwhile. **The field is painted (D38, 2026-09-25)**: the overlay's dashes, the
-  lit lines, the pointer's cell and the intro's reveal are two canvases drawn by one painter (`lib/grid-field.ts`) — in a
-  worker where the browser can hand it a canvas, so the page's own loading on the main thread cannot stall it — and the
-  cover is the grid's own colour while `data-intro` is on, which the painter paints back tile by tile. A pass is one
-  message: the plan's delays and the moment it starts. They were ~1,300 elements and 216 CSS animations a pass, handed
-  out from the main thread, and the front went missing whenever it was busy (his report). `gridFieldPainter` must stay
-  self-contained — the worker runs it from its own source text. `useGridIntro` is a timer per pass; the numbers are
-  `INTRO_*` in `grid.tsx`, his except the reveal and the wait.
-- **The same ripple plays between pages (D32, 2026-09-25).** `ripple` on `GridPages`; the portfolio has it. When a
-  turn commits, one lines-only pass runs through the field, washing the last page away as it goes (D37), and **the next
-  page comes up only once it has crossed and the hand has stopped** (the turn holds for `rippleSpan`; D35: a hand still
-  scrolling turns on through the emptied field, a pass a page, and no card is rendered until it stops). The pass runs up from the bottom going forward, down from the top
+  pager are revealed from their bottom edge upward, the turn's own "in". Once per document load, none under reduced
+  motion, and nothing turns a page meanwhile. **No frame loop**: every tile and line is a CSS opacity animation with
+  its cell's delay, run by the compositor, handed to each cell just before its turn (the intro's first pass all at once,
+  in step with the tiles); the glow is a box-shadow on each
+  cell (its blur is cached across cells), never a filter on a whole layer — a per-frame writer with a layer-wide blur
+  lagged (2 s of raster in a 1.2 s intro). `useGridIntro` is a timer per pass; the numbers are `INTRO_*` in
+  `grid.tsx`, his except the reveal and the wait.
+- **The same ripple plays between pages (D32, 2026-09-25).** `ripple` on `GridPages`; the portfolio has it. When the
+  last page's boxes have gone, one lines-only pass runs through the empty field, and **the next page comes up only once
+  it has crossed** (the turn holds for `rippleSpan`). The pass runs up from the bottom going forward, down from the top
   going back, lime and violet counting on from the intro, and **the pager's arrow fills in that turn's ripple colour**
-  (his pick), read off the grid's `data-ripple-next` as the turn starts and held until it ends. The pass is painted by
-  the field's painter (D38). **The turn's custom
-  properties are written on the pager's bar, not the grid's root or tracks**: they inherit, and on the root they
-  restyled every element in the grid every frame of a turn; on the tracks, every box (until D37).
-- **The pointer is a lime ring, and the cell under it is lit (D34, 2026-09-25).** `cursor` on `Grid` or `GridPages`;
-  the portfolio has it. A 24px ring with a lime line, filled lime while pressed — **the system's cursor drawn from an image**
-  (globals.css), never a div moved on every pointer move: that cost a whole-page layerize a move and trailed the hand. The cell the pointer is on turns its **dashes** lime (the default dashes, not a solid line — his, the same day)
-  and fades back over 500ms when left;
-  the gutter lights nothing. Found from the field's numbers and sent to the field's painter (D38), never React state.
-  Mouse and pen only; a phone keeps its own.
+  (his pick), read off the grid's `data-ripple-next` as the turn starts and held until it ends. **The turn's custom
+  properties are written on the grid's tracks, not its root**: they inherit, and on the root they restyled every
+  element in the grid every frame of a turn.
 - **Nothing forces a breakpoint (D11).** `resolveField` takes a width and a height and nothing else; no grid
   component takes a `breakpoint` prop. To see another size, give the grid a box of that size — a browser window, a
   device in the review sweep. `GRID_REFERENCE_BOX` (`grid.tsx`) is each breakpoint's reference size, which a page
@@ -192,7 +173,7 @@ rules in short, each one his:
 
 **Organisms and templates do not exist yet.** They get designed on top of this layer, not ported from 1.0. **The
 showcase itself is on the grid** since 2026-09-21 and **arranged the portfolio's way** since 2026-09-22
-(`apps/design/CLAUDE.md`, Portfolio.md P2, P7, P8): every reading page is a `GridPages` of sections whose specimens
+(`apps/design/AGENTS.md`, Portfolio.md P2, P7, P8): every reading page is a `GridPages` of sections whose specimens
 carry a span per breakpoint, packed into a centred band above the pager's row, the block centred in the room; no page
 in the workspace scrolls. **A page is content data**: sections of items, each with a span per breakpoint and a render
 function, arranged on the field it is shown on. To change a page, change its data. There is no design mode, no
@@ -205,7 +186,7 @@ composer and nothing is edited in place.
 builds with no Supabase keys, since its clients are made per request; it stays out of the **review sweep** because
 every route is behind auth and needs a running Supabase, which `pnpm review` does not boot. **Quests are gone**
 (Admin.md §0.7, 2026-09-23): the admin is sign-in, a home of three cards and `/settings`. **The portfolio was rebuilt on
-the grid on 2026-09-21** (Portfolio.md, `apps/portfolio/CLAUDE.md`): one route, the first screen. Its 1.0 pages, parked
+the grid on 2026-09-21** (Portfolio.md, `apps/portfolio/AGENTS.md`): one route, the first screen. Its 1.0 pages, parked
 in `.legacy/`, were deleted on 2026-09-23 — git history keeps them.
 
 ## Deploying
@@ -268,7 +249,7 @@ vercel --prod                                                   # portfolio
 VERCEL_ORG_ID=$VERCEL_ORG_ID VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_DESIGN vercel --prod # design; _ADMIN, _ENGINEERING
 ```
 
-`.vercelignore` at the repo root keeps `e2e/`, `supabase/`, `services/`, `.claude/` and `.private/` out of the upload; its repo-root entries are
+`.vercelignore` at the repo root keeps `e2e/`, `supabase/`, `services/`, `.Codex/` and `.private/` out of the upload; its repo-root entries are
 anchored with a leading slash on purpose, because an unanchored `supabase` would also drop
 `apps/admin/src/lib/supabase/`.
 
@@ -294,4 +275,4 @@ Add new routes to the app's list in `e2e/review.spec.ts` when you add pages. Scr
 gitignored.
 
 **The admin is not in the sweep.** Every one of its routes is behind auth and needs a running Supabase, which
-`pnpm review` does not boot. Review it by signing in and looking — see `apps/admin/CLAUDE.md`.
+`pnpm review` does not boot. Review it by signing in and looking — see `apps/admin/AGENTS.md`.

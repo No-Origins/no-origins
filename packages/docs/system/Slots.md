@@ -87,11 +87,14 @@ a slot by hand: the palette and its drops (S1), the inspector and its editable p
 palette's source (S6), and all of §4 — Add, drop-into, the Slot inspector, focus by dimming, double-click in,
 entering a slot, Export. Withdraws S4 and §4 whole, and S1 and S6 in part.
 
-The registry keeps `Placed` and one entry, the pager's arrows (`pager-arrows`, Grid-v2.md D29). An entry is a `kind`
+The registry keeps `Placed` and one entry, the pager's arrows (`pager-arrows`, Grid-v2.md D29). *Since 2026-09-25
+three: the pair, and one arrow (`pager-arrow`) and one page number (`pager-page`) a cell, for the numbered bar
+(Grid-v2.md D36).* An entry is a `kind`
 and a lazy view — no name, group, span, props or defaults, which were the palette's and the inspector's. What stands
 is the model: a layout item carries `slot`, `component` and `children` (S1's first half, S2, S3, S5), `SlotContent`
 renders any of them with no custom `renderItem`, and the pager's bar is still a slot whose cells are sub-slots (D29).
-A slot is written in code, as a layout item; today the one that is written is the bar (`defaultPagerBar`).
+A slot is written in code, as a layout item; today the one that is written is the bar (`defaultPagerBar`, and the
+portfolio's `numberedPagerBar`).
 `SlotInset` now derives from `GRID_SPACING` rather than repeating its five steps, so the inset and the gutter draw
 from one list (S3).
 
@@ -122,7 +125,7 @@ question for when one is needed.
 
 **The pager's arrows** join as one entry, span 2 × 1 (Grid-v2.md D29). It is the first registered component that
 reads the grid rather than only its props — the turn comes from context, not from the inspector. It is offered inside
-the pager's bar only, and the reason is the turn, not the wiring: an ordinary slot is clipped as the page turns, so an
+the pager's bar only, and the reason is the turn, not the wiring: an ordinary slot is washed away as the page turns (Grid-v2.md D37; clipped until then), so an
 arrow placed on a page would cut itself away under the finger pressing it and then leave with the page. What a
 floating turner would cost is written in D29.
 

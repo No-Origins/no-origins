@@ -6,7 +6,7 @@ import { cn } from "cn"
 
 import { Button } from "@no-origins/ui/components/button"
 import { GridItem, useGridMetrics } from "@no-origins/ui/components/grid"
-import { SlotContent } from "@no-origins/ui/components/slot"
+import { Slot, SlotContent } from "@no-origins/ui/components/slot"
 import { pagerCells, type GridLayout, type GridLayoutItem } from "@no-origins/ui/lib/grid-layout"
 
 /**
@@ -23,26 +23,38 @@ import { pagerCells, type GridLayout, type GridLayoutItem } from "@no-origins/ui
  * The arrows are the scroll's buttons, and ↑ IS FORWARD: scrolling up goes to the next page (his rule, D27), so ↑
  * turns forward and ↓ back. Turning a page is a progress from 0 to 1 (grid-pages.tsx): the wheel or a finger drives
  * it by hand, a click on an arrow plays it. Whichever way, the arrow being turned towards FILLS in proportion — the
- * ↑ from its bottom up, the ↓ from its top down — reading `--grid-turn` off the grid, so the fill follows the scroll
- * without a render and matches the boxes' scale exactly — and once the page has turned, the fill LEAVES the way it
- * came as the new page is revealed, its trailing edge crossing the arrow, rather than filling again or pulling back
+ * ↑ from its bottom up, the ↓ from its top down — reading the fill's two edges off the bar, where the turn writes them,
+ * so the fill follows the scroll without a render; it is the one thing on the field that does, since the boxes stay
+ * whole until the ripple washes them away (Grid.md D37) — and once the page has turned, the fill LEAVES the way it came
+ * as the new page fades in, its trailing edge crossing the arrow, rather than filling again or pulling back
  * (2026-09-22). At the last page ↑ is disabled, at the first ↓ is. Where the grid ripples between pages (Grid.md
  * D32), the fill is the colour of the ripple the turn plays — lime or violet — rather than the reverse colours.
+ *
+ * Since D36 (2026-09-25) a bar may number its pages instead: `numberedPagerBar` puts one arrow on each end cell and a
+ * page number on every cell between, the arrows split into one registry entry a cell (`pager-arrow`) and the numbers
+ * one a cell too (`pager-page`), sliding to keep the page in view when there are more pages than cells.
  */
 
-/** The turn, published to the bar's contents (D29). The arrows molecule takes it from here, not from props. */
+/** The turn, published to the bar's contents (D29). The arrows and the page numbers take it from here, not from props. */
 export type GridTurnState = {
   page: number
+  /**
+   * The page the field is turning to: `page` at rest, and the next page from the moment the last page's boxes have gone
+   * — through the ripple's hold, where a hand still scrolling moves it on a page a pass (D32, D35).
+   */
+  coming: number
   count: number
   turn: (dir: 1 | -1) => void
+  /** Turn straight to `page`: one turn and one ripple, however far it is (D36). */
+  go: (page: number) => void
 }
 
 const GridTurnContext = React.createContext<GridTurnState | null>(null)
 
 /**
  * The turn of the pager the caller sits in. Null outside a bar — which is why the arrows molecule is offered in the
- * bar only (D29): elsewhere on the field there is a turn to drive, but an ordinary slot is clipped as the page turns
- * and leaves with it, so the control would cut itself away under the finger pressing it.
+ * bar only (D29): elsewhere on the field there is a turn to drive, but an ordinary slot is washed away as the page
+ * turns (D37) and leaves with it, so the control would cut itself away under the finger pressing it.
  */
 export function useGridTurn() {
   return React.useContext(GridTurnContext)
@@ -51,9 +63,13 @@ export function useGridTurn() {
 export type GridPagerProps = {
   /** The page on the field. */
   page: number
+  /** The page the field is turning to; `page` when omitted. */
+  coming?: number
   count: number
   /** Turn one page forward (1) or back (-1). */
   onTurn: (dir: 1 | -1) => void
+  /** Turn straight to a page. */
+  onGo: (page: number) => void
   /** What the bar holds, on its own cells. Omit for D27's bar: empty `card` cells, then the arrows. */
   bar?: GridLayout
 }
@@ -83,9 +99,48 @@ export function defaultPagerBar(width: number): GridLayout {
   return { authored: { base: [{ id: "pager-bar", items }] }, shapes: { base: { cols: width, rows: 1 } } }
 }
 
-function GridPager({ page, count, onTurn, bar }: GridPagerProps) {
+/**
+ * The numbered bar (Grid.md D36, 2026-09-25; the portfolio's, Portfolio.md P14): the arrow that turns back on the first
+ * cell, the arrow that turns forward on the last, and a page number on every cell between. Two cells wide it is just
+ * the two arrows. Built from the width, like D27's.
+ */
+export function numberedPagerBar(width: number): GridLayout {
+  const cell = (id: string, col: number, component: GridLayoutItem["component"]): GridLayoutItem => ({
+    id,
+    col,
+    row: 1,
+    colSpan: 1,
+    rowSpan: 1,
+    slot: { fill: "transparent", inset: 0 },
+    component,
+  })
+  const items: GridLayoutItem[] = []
+  if (width >= 2) {
+    const numbers = width - 2
+    items.push(cell("pager-back", 1, { kind: "pager-arrow", props: { dir: "down" } }))
+    for (let at = 0; at < numbers; at++) items.push(cell(`pager-page-${at}`, at + 2, { kind: "pager-page", props: { at, of: numbers } }))
+    items.push(cell("pager-forward", width, { kind: "pager-arrow", props: { dir: "up" } }))
+  }
+  return { authored: { base: [{ id: "pager-bar", items }] }, shapes: { base: { cols: width, rows: 1 } } }
+}
+
+/**
+ * Which pages `cells` number cells show (D36): every page when they fit, else a run of `cells` pages holding `page`
+ * second — one page back, the rest ahead — slid against the first page and the last.
+ */
+export function pagerWindow(page: number, count: number, cells: number): number[] {
+  const n = Math.max(0, Math.min(cells, count))
+  const start = Math.max(0, Math.min(page - 1, count - n))
+  return Array.from({ length: n }, (_, i) => start + i)
+}
+
+/** Memoised: the turn renders its grid at every phase, and the bar has nothing to redraw until the page or count moves. */
+const GridPager = React.memo(function GridPager({ page, coming = page, count, onTurn, onGo, bar }: GridPagerProps) {
   const m = useGridMetrics()
-  const turn = React.useMemo<GridTurnState>(() => ({ page, count, turn: onTurn }), [page, count, onTurn])
+  const turn = React.useMemo<GridTurnState>(
+    () => ({ page, coming, count, turn: onTurn, go: onGo }),
+    [page, coming, count, onTurn, onGo],
+  )
 
   const rect = m ? pagerCells(page, count, m.cols, m.rows, m.pager)[0] : undefined
   // The bar is authored on its own width, so the sub-slots resolve verbatim rather than being packed (D25).
@@ -102,7 +157,7 @@ function GridPager({ page, count, onTurn, bar }: GridPagerProps) {
       </GridItem>
     </GridTurnContext.Provider>
   )
-}
+})
 
 /**
  * The ↑ ↓ pair — one molecule on two cells (D29), registered so it is placed in the bar rather than drawn by it. It
@@ -119,6 +174,47 @@ function GridPagerArrows() {
       <PagerArrow dir="up" disabled={state.page >= state.count - 1} onClick={() => state.turn(1)} />
       <PagerArrow dir="down" disabled={state.page <= 0} onClick={() => state.turn(-1)} />
     </div>
+  )
+}
+
+/**
+ * One arrow on one cell — the pair split (D36), so a bar can put the arrow that turns back on its first cell and the one
+ * that turns forward on its last. `up` is forward, as everywhere in the pager (D27); the glyphs are swapped as they are
+ * in the pair.
+ */
+function GridPagerArrow({ dir }: { dir: "up" | "down" }) {
+  const state = useGridTurn()
+  if (!state) return null
+  return dir === "up" ? (
+    <PagerArrow dir="up" disabled={state.page >= state.count - 1} onClick={() => state.turn(1)} />
+  ) : (
+    <PagerArrow dir="down" disabled={state.page <= 0} onClick={() => state.turn(-1)} />
+  )
+}
+
+/**
+ * One page number on one cell (D36): the `at`-th of the `of` pages `pagerWindow` shows. It marks the page the field is
+ * turning to rather than the one on it, so a hand turning on through the empty field sees the number run ahead of it
+ * (D35); a press turns straight to its page. A cell with no page — a layout with fewer pages than cells — is an empty
+ * `card` cell, like D27's.
+ */
+function GridPagerPage({ at, of }: { at: number; of: number }) {
+  const state = useGridTurn()
+  if (!state) return null
+  const page = pagerWindow(state.coming, state.count, of)[at]
+  if (page === undefined) return <Slot fill="card" />
+  const current = page === state.coming
+  return (
+    <Button
+      variant={current ? "default" : "outline"}
+      size="icon"
+      aria-label={`Page ${page + 1}`}
+      aria-current={current ? "page" : undefined}
+      onClick={() => state.go(page)}
+      className={cn("size-full text-sm tracking-normal tabular-nums", !current && "bg-card")}
+    >
+      {page + 1}
+    </Button>
   )
 }
 
@@ -166,4 +262,4 @@ function PagerArrow({ dir, disabled, onClick }: { dir: "up" | "down"; disabled: 
   )
 }
 
-export { GridPager, GridPagerArrows }
+export { GridPager, GridPagerArrow, GridPagerArrows, GridPagerPage }
