@@ -1137,6 +1137,12 @@ The prior P15/P16 composition is retained in source but is not mounted by this p
 screening summaries in `screening.ts`, and composition in `recruiter-view.tsx` and `screening-cards.tsx`.
 Review uses `REVIEW_PORT_OFFSET=100 pnpm review` to isolate branch servers from the original checkout.
 
+The first refinement keeps the profile column on the grid's own units: Résumé and the single mailto/copy address
+share one row; education and Hyderabad share the next. GitHub, X, Instagram, LinkedIn and Discord each occupy one
+whole cell, followed by theme and, where the field has room, Read profile. LinkedIn and Discord remain honest
+non-links until their URLs exist. The six screening skills stay visible and All skills opens the complete grouped
+stack without leaving the quick view.
+
 - **The rest of the résumé.** Work, the case studies, interests, philosophy (Brand.md §9) — each a page or a run of
   slots after the first screen, designed in the composer and pasted back (Grid.md D20). *Since 2026-09-23 (Grid.md
   D30) there is no composer: each is a section in `site.tsx`, arranged like the rest (P2, P7).*

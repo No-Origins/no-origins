@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ArrowUpRightIcon, BookOpenIcon, BriefcaseBusinessIcon, CheckIcon, CodeXmlIcon, CopyIcon, FolderGit2Icon, GraduationCapIcon, MailIcon, MoonIcon, PaletteIcon, SunIcon, type LucideIcon } from "lucide-react";
-import { siGithub, siInstagram, siLanggraph, siNextdotjs, siPostgresql, siPython, siReact, siTypescript, siX, type SimpleIcon } from "simple-icons";
+import { ArrowUpRightIcon, BookOpenIcon, BriefcaseBusinessIcon, CheckIcon, CodeXmlIcon, CopyIcon, FolderGit2Icon, GraduationCapIcon, MapPinIcon, MoonIcon, PaletteIcon, SunIcon, type LucideIcon } from "lucide-react";
+import { siDiscord, siGithub, siInstagram, siLanggraph, siNextdotjs, siPostgresql, siPython, siReact, siTypescript, siX, type SimpleIcon } from "simple-icons";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@no-origins/ui/components/avatar";
 import { Button } from "@no-origins/ui/components/button";
 import { Card, CardContent } from "@no-origins/ui/components/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@no-origins/ui/components/dialog";
 import { useGridMetrics } from "@no-origins/ui/components/grid";
+import { ScrollArea } from "@no-origins/ui/components/scroll-area";
 import { Slot } from "@no-origins/ui/components/slot";
 import { Text } from "@no-origins/ui/components/text";
 import { useThemeToggle } from "@no-origins/ui/components/theme-provider";
@@ -15,7 +17,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@no-or
 import { cn } from "@no-origins/ui/lib/utils";
 
 import { CompanyLogo } from "@/components/logo";
-import { EDUCATION, LINKS, profile, PROJECTS } from "@/content/resume";
+import { EDUCATION, LINKS, profile, PROJECTS, STACK } from "@/content/resume";
 import { SCREENING, SCREENING_WORK } from "@/content/screening";
 
 export const RESUME_URL = LINKS.find((link) => link.id === "resume")!.href!;
@@ -68,23 +70,18 @@ export function Introduction({ compact = false }: { compact?: boolean }) {
   );
 }
 
-export function ContactActions() {
+function ResumeAction({ width }: { width?: number }) {
   return (
-    <div className="grid h-full grid-cols-2 gap-3">
-      <Button asChild className={cn("h-full min-h-11", actionType, FOCUS)}>
+      <Button asChild className={cn("h-full min-h-11 shrink-0", actionType, FOCUS)} style={width ? { width } : undefined}>
         <a href={RESUME_URL} target="_blank" rel="noreferrer" aria-label="Résumé (PDF, opens in a new tab)">
           <Text as="span" className="text-primary-foreground">Résumé</Text><ArrowUpRightIcon aria-hidden />
         </a>
       </Button>
-      <Button asChild variant="outline" className={cn("h-full min-h-11 bg-card", actionType, FOCUS)}>
-        <a href={`mailto:${profile.email}`}><MailIcon aria-hidden /><Text as="span">Email</Text></a>
-      </Button>
-    </div>
   );
 }
 
-export function EmailAddress() {
-  const address = useRef<HTMLSpanElement>(null);
+export function EmailAddress({ className }: { className?: string }) {
+  const address = useRef<HTMLAnchorElement>(null);
   const [status, setStatus] = useState("");
   const [copied, setCopied] = useState(false);
   useEffect(() => {
@@ -104,13 +101,15 @@ export function EmailAddress() {
     }
   };
   return (
-    <Card size="sm" className="h-full min-h-11 justify-center gap-0 py-0" data-fit-check>
-      <CardContent className="flex items-center justify-between gap-2 px-4">
-        <span ref={address} className="min-w-0 select-all"><Text as="span" className="break-all">{profile.email}</Text></span>
+    <Card size="sm" className={cn("h-full min-h-11 min-w-0 justify-center gap-0 py-0", className)} data-fit-check>
+      <CardContent className="flex items-center justify-between gap-2 px-3">
+        <a ref={address} href={`mailto:${profile.email}`} className={cn("min-w-0 select-all", FOCUS)}>
+          <Text as="span" role="caption" tone="foreground" className="break-all">{profile.email}</Text>
+        </a>
         <TooltipProvider>
           <Tooltip open={status ? true : undefined}>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-lg" className={cn("shrink-0", FOCUS)} aria-label={status && copied ? "Email address copied" : `Copy ${profile.email}`} onClick={copy}>
+              <Button variant="ghost" size="icon-sm" className={cn("shrink-0", FOCUS)} aria-label={status && copied ? "Email address copied" : `Copy ${profile.email}`} onClick={copy}>
                 {status && copied ? <CheckIcon aria-hidden /> : <CopyIcon aria-hidden />}
               </Button>
             </TooltipTrigger>
@@ -123,9 +122,16 @@ export function EmailAddress() {
   );
 }
 
-export function Education() {
+export function ProfileContactRow() {
+  const metrics = useGridMetrics();
+  const cell = metrics?.cell ?? 60;
+  const gap = metrics?.gap ?? 12;
+  return <div className="flex h-full min-w-0" style={{ gap }}><ResumeAction width={cell * 2 + gap} /><EmailAddress className="flex-1" /></div>;
+}
+
+export function Education({ className }: { className?: string }) {
   return (
-    <Card size="sm" className="h-full justify-center gap-0 px-4 py-1" data-fit-check>
+    <Card size="sm" className={cn("h-full min-w-0 justify-center gap-0 px-4 py-1", className)} data-fit-check>
       <div className="flex items-center justify-center gap-2">
         <GraduationCapIcon aria-hidden className="size-5 shrink-0" />
         <div>
@@ -137,40 +143,79 @@ export function Education() {
   );
 }
 
-const socialMarks: Record<string, SimpleIcon> = { github: siGithub, x: siX, instagram: siInstagram };
+export function ProfileFacts() {
+  const metrics = useGridMetrics();
+  const cell = metrics?.cell ?? 60;
+  const gap = metrics?.gap ?? 12;
+  const locationWidth = cell * 2 + gap;
+  return <div className="flex h-full min-w-0" style={{ gap }}>
+    <Education className="flex-1" />
+    <Card size="sm" className="h-full shrink-0 justify-center gap-1 px-3 py-1" style={{ width: locationWidth }} data-fit-check>
+      <div className="flex items-center justify-center gap-2">{locationWidth >= 130 ? <MapPinIcon aria-hidden className="size-5 shrink-0" /> : null}<Text as="span">{profile.city}</Text></div>
+    </Card>
+  </div>;
+}
+
+const LINKEDIN = { path: "M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" };
+const socialMarks: Record<string, Pick<SimpleIcon, "path">> = { github: siGithub, x: siX, instagram: siInstagram, linkedin: LINKEDIN, discord: siDiscord };
+const socialOrder = ["github", "x", "instagram", "linkedin", "discord"];
 
 export function ThemeButton() {
   const toggle = useThemeToggle();
   return (
-    <Button variant="outline" size="icon-lg" className={cn("shrink-0 bg-card", FOCUS)} onClick={toggle} aria-label="Toggle light and dark theme">
+    <Button variant="ghost" className={cn("size-full shrink-0 p-0", FOCUS)} onClick={toggle} aria-label="Toggle light and dark theme">
       <SunIcon aria-hidden className="hidden dark:block" /><MoonIcon aria-hidden className="dark:hidden" />
     </Button>
   );
 }
 
-export function ProfileFooter({ onRead, reading = false }: { onRead?: () => void; reading?: boolean }) {
+export function ProfileUtilities({ onRead, reading = false }: { onRead?: () => void; reading?: boolean }) {
+  const metrics = useGridMetrics();
+  const cell = metrics?.cell ?? 60;
+  const gap = metrics?.gap ?? 12;
+  const socials = socialOrder.flatMap((id) => {
+    const link = LINKS.find((item) => item.id === id);
+    const mark = link ? socialMarks[link.id] : undefined;
+    return link && mark ? [{ link, mark }] : [];
+  });
   return (
-    <div className="flex h-full flex-wrap items-center justify-center gap-3">
+    <div className="flex h-full flex-wrap content-start justify-center" style={{ gap }}>
       <TooltipProvider>
-        {LINKS.filter((link) => link.href && socialMarks[link.id]).map((link) => (
+        {socials.map(({ link, mark }) => (
           <Tooltip key={link.id}>
             <TooltipTrigger asChild>
-              <Button asChild variant="outline" size="icon-lg" className={cn("bg-card", FOCUS)}>
-                <a href={link.href} target="_blank" rel="noreferrer" aria-label={link.label}>
-                  <svg aria-hidden viewBox="0 0 24 24" className="size-5 fill-current"><path d={socialMarks[link.id].path} /></svg>
-                </a>
-              </Button>
+              <Card size="sm" className="shrink-0 justify-center p-0" style={{ width: cell, height: cell }} data-social-cell={link.id}>
+                {link.href ? <Button asChild variant="ghost" className={cn("size-full p-0", FOCUS)}><a href={link.href} target="_blank" rel="noreferrer" aria-label={link.label}><svg aria-hidden viewBox="0 0 24 24" className="size-5 fill-current"><path d={mark.path} /></svg></a></Button>
+                  : <span role="img" aria-label={`${link.label} — link coming soon`} className="flex size-full items-center justify-center"><svg aria-hidden viewBox="0 0 24 24" className="size-5 fill-current"><path d={mark.path} /></svg></span>}
+              </Card>
             </TooltipTrigger>
-            <TooltipContent>{link.label}</TooltipContent>
+            <TooltipContent>{link.href ? link.label : `${link.label} — link coming soon`}</TooltipContent>
           </Tooltip>
         ))}
       </TooltipProvider>
-      {onRead && <Button variant="outline" className={cn("h-11 bg-card px-4", actionType, FOCUS)} onClick={onRead}>
+      {onRead && <Button variant="outline" className={cn("shrink-0 bg-card px-4", actionType, FOCUS)} style={{ width: cell * 2 + gap, height: cell }} onClick={onRead}>
         <BookOpenIcon aria-hidden /><Text as="span" role="caption" tone="foreground">{reading ? "Quick view" : "Read profile"}</Text>
       </Button>}
-      <ThemeButton />
+      <Card size="sm" className="shrink-0 justify-center p-0" style={{ width: cell, height: cell }}><ThemeButton /></Card>
     </div>
   );
+}
+
+export function AllSkillsDialog({ className }: { className?: string }) {
+  return <Dialog>
+    <DialogTrigger asChild><Button variant="outline" className={cn("h-full w-full bg-card", actionType, FOCUS, className)}><CodeXmlIcon aria-hidden /><Text as="span">All skills</Text></Button></DialogTrigger>
+    <DialogContent className="max-h-[calc(100dvh-2rem)] sm:max-w-2xl">
+      <DialogHeader>
+        <DialogTitle asChild><Text as="h2" role="heading">Technical skills</Text></DialogTitle>
+        <DialogDescription asChild><Text>Languages, frameworks, infrastructure and agent tools I have worked with.</Text></DialogDescription>
+      </DialogHeader>
+      <ScrollArea className="max-h-[min(65dvh,36rem)] pe-3">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {STACK.map((group) => <Card key={group.group} size="sm" className="gap-2 px-5 py-4"><Text as="h3">{group.group}</Text><Text role="caption">{group.items.join(" · ")}</Text></Card>)}
+        </div>
+      </ScrollArea>
+    </DialogContent>
+  </Dialog>;
 }
 
 export function WorkRow({ index, full = false }: { index: number; full?: boolean }) {

@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@no-origins/ui/compone
 import { Text } from "@no-origins/ui/components/text";
 import { cn } from "@no-origins/ui/lib/utils";
 
-import { ContactActions, Education, EmailAddress, FOCUS, Identity, Interest, Introduction, Learning, ProfileFooter, ProjectCard, SECTION_ICONS, SectionLabel, SkillCard, UnfinishedProject, WorkRow } from "@/components/screening-cards";
+import { AllSkillsDialog, FOCUS, Identity, Interest, Introduction, Learning, ProfileContactRow, ProfileFacts, ProfileUtilities, ProjectCard, SECTION_ICONS, SectionLabel, SkillCard, UnfinishedProject, WorkRow } from "@/components/screening-cards";
 import { HOBBIES, profile, STACK } from "@/content/resume";
 import { SCREENING, SCREENING_WORK } from "@/content/screening";
 
@@ -102,10 +102,9 @@ function ScreeningField({ onRead, onFitFailure }: { onRead: () => void; onFitFai
     <>
       <Box name="identity" col={start} row={top} cols={profileCols} rows={2}><Identity /></Box>
       <Box name="summary" col={start} row={top + 2} cols={profileCols} rows={compact ? 1 : 2}><Introduction compact={compact} /></Box>
-      <Box name="actions" col={start} row={top + (compact ? 3 : 4)} cols={profileCols}><ContactActions /></Box>
-      <Box name="email" col={start} row={top + (compact ? 4 : 5)} cols={profileCols}><EmailAddress /></Box>
-      {!compact && <Box name="education" col={start} row={top + 6} cols={profileCols}><Education /></Box>}
-      <Box name="profile-tools" col={start} row={top + (compact ? height - 1 : 7)} cols={profileCols}><ProfileFooter onRead={onRead} /></Box>
+      <Box name="contact" col={start} row={top + (compact ? 3 : 4)} cols={profileCols}><ProfileContactRow /></Box>
+      <Box name="facts" col={start} row={top + (compact ? 4 : 5)} cols={profileCols}><ProfileFacts /></Box>
+      <Box name="profile-tools" col={start} row={top + (compact ? 5 : 6)} cols={profileCols} rows={compact ? 1 : 2}><ProfileUtilities onRead={compact ? undefined : onRead} /></Box>
 
       {three ? <>
         <Box col={second} row={top} cols={sideCols}><SectionLabel icon={SECTION_ICONS.work}>Work</SectionLabel></Box>
@@ -119,13 +118,14 @@ function ScreeningField({ onRead, onFitFailure }: { onRead: () => void; onFitFai
           return <Box key={name} col={third + (index % 2 ? left : 0)} row={top + 1 + Math.floor(index / 2)} cols={index % 2 ? sideCols - left : left}><SkillCard name={name} /></Box>;
         })}
         <Box col={third} row={top + 4} cols={sideCols}><Learning /></Box>
+        <Box col={third} row={top + 5} cols={sideCols}><AllSkillsDialog /></Box>
         <Box col={third} row={top + 6} cols={sideCols}><SectionLabel icon={SECTION_ICONS.interests}>Beyond code</SectionLabel></Box>
         <Box col={third} row={top + 7} cols={Math.floor(sideCols / 2)}><Interest>Sketching</Interest></Box>
         <Box col={third + Math.floor(sideCols / 2)} row={top + 7} cols={Math.ceil(sideCols / 2)}><Interest>UI/UX in Figma</Interest></Box>
         <Box col={third} row={top + 8} cols={sideCols}><Interest>Video editing in DaVinci Resolve</Interest></Box>
         <Box col={third} row={top + 9} cols={sideCols}><Interest>Ukulele</Interest></Box>
       </> : (
-        <Box name="sections" col={compact ? start : second} row={compact ? top + 5 : top} cols={compact ? profileCols : sideCols} rows={panelRows}>
+        <Box name="sections" col={compact ? start : second} row={compact ? top + 6 : top} cols={compact ? profileCols : sideCols} rows={panelRows}>
           <CompactSections rows={panelRows} onRead={onRead} />
         </Box>
       )}
@@ -164,7 +164,7 @@ function CompactSections({ rows, onRead }: { rows: number; onRead: () => void })
           <Text>TypeScript · React · Next.js</Text>
           <Text>Postgres · Python · LangGraph</Text>
           <Text role="caption">Learning: Elixir, Rust</Text>
-          <Button variant="outline" className={cn("h-11 w-full font-normal tracking-normal normal-case", FOCUS)} onClick={onRead}><Text as="span" role="caption" tone="foreground">All skills and interests</Text></Button>
+          <AllSkillsDialog className="h-11" />
         </Card>
       </TabsContent>
     </Tabs>
@@ -177,9 +177,9 @@ function ReadingProfile({ onQuick }: { onQuick?: () => void }) {
     <div className="mx-auto flex max-w-3xl flex-col gap-3 p-3 sm:p-6" data-reading-profile>
       <Identity reading />
       <Introduction />
-      <ContactActions />
-      <EmailAddress />
-      <ProfileFooter onRead={onQuick} reading />
+      <ProfileContactRow />
+      <ProfileFacts />
+      <ProfileUtilities onRead={onQuick} reading />
       <div className="mt-3"><SectionLabel icon={SECTION_ICONS.work}>Work</SectionLabel></div>
       {SCREENING_WORK.map((work, index) => <WorkRow key={work.id} index={index} full />)}
       <div className="mt-3"><SectionLabel icon={SECTION_ICONS.projects}>Projects</SectionLabel></div>
@@ -190,12 +190,10 @@ function ReadingProfile({ onQuick }: { onQuick?: () => void }) {
       </Card>
       <SectionLabel icon={SECTION_ICONS.interests}>Beyond code</SectionLabel>
       <Card size="sm" className="gap-2 px-5">{HOBBIES.map((hobby) => <Text key={hobby}>{hobby}</Text>)}</Card>
-      <Education />
       <Card size="sm" className="gap-3 px-5">
         <Text as="h2" role="heading">A little more about me</Text>
         {profile.story.map((paragraph) => <Text key={paragraph}>{paragraph}</Text>)}
       </Card>
-      <ContactActions />
     </div>
   );
 }
