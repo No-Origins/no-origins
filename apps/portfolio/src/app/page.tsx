@@ -1,9 +1,6 @@
-"use client";
+import { RecruiterView } from "@/components/recruiter-view";
 
-import { PortfolioPages } from "@/components/portfolio-pages";
-import { SITE } from "@/content/site";
-
-// A client component, like every page on the grid: GridPages measures its box in the browser.
+// Portfolio.md P17: the recruiter's screening page; the accessible reading composition is rendered on the server.
 export default function Home() {
-  return <PortfolioPages page={SITE} />;
+  return <RecruiterView />;
 }

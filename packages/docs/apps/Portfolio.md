@@ -1116,6 +1116,27 @@ and at the moments given after it, prints each box's `--box-active` at each, and
 
 ## 4. Open
 
+### P17 — Recruiter quick view (2026-09-27, preview)
+
+The approved UX review is implemented as a separate recruiter screening preview. This page is for HR and readers
+with many portfolios to assess; it is not the full future portfolio. The persona study's approximately 7.2 seconds
+is a design constraint supplied by Bhargav, not a general claim about recruiters.
+
+`RecruiterView` replaces the first-fit composition at `/`. The actual measured field decides between three columns
+and compact Work / Projects / Skills tabs. Identity, role, experience, résumé and email lead; each company carries
+a contribution summary. Only real project links have outbound affordances. Unpublished work says so. Skill names
+remain visible, and learning is distinct. Neutral ink replaces lime text; lime remains the primary action fill.
+
+The screening view omits the intro and wake delays and uses ordinary DOM keyboard order. Copy email reports success
+or a selectable-address fallback. A visible Read profile action provides the complete history, skills and biography.
+For widths below 360px, heights below 640px, enlarged root text or overflowing card content, that reading composition
+is automatic. **It scrolls normally**: this approved accessibility alternative is an exception to the viewport grid's
+no-scroll rule, scoped to this page; the grid and other apps are unchanged. It is also server-rendered before sizing.
+
+The prior P15/P16 composition is retained in source but is not mounted by this preview. Facts stay in `resume.ts`,
+screening summaries in `screening.ts`, and composition in `recruiter-view.tsx` and `screening-cards.tsx`.
+Review uses `REVIEW_PORT_OFFSET=100 pnpm review` to isolate branch servers from the original checkout.
+
 - **The rest of the résumé.** Work, the case studies, interests, philosophy (Brand.md §9) — each a page or a run of
   slots after the first screen, designed in the composer and pasted back (Grid.md D20). *Since 2026-09-23 (Grid.md
   D30) there is no composer: each is a section in `site.tsx`, arranged like the rest (P2, P7).*

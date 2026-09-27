@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const port = (defaultPort: number) => defaultPort + Number(process.env.REVIEW_PORT_OFFSET || 0);
+
 // Visual review loop for the workspace apps.
 // `pnpm review` boots THREE dev servers (or reuses ones already running) — the portfolio on :3000, the design
 // showcase on :3001 and engineering on :3003 — sweeps every route in e2e/review.spec.ts on desktop + mobile viewports
@@ -18,7 +20,7 @@ export default defineConfig({
     ["html", { open: "never", outputFolder: "playwright-report" }],
   ],
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: `http://localhost:${port(3000)}`,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
@@ -44,20 +46,20 @@ export default defineConfig({
   // Three apps are booted (the admin is not: every route of it is behind auth and needs a running Supabase).
   webServer: [
     {
-      command: "pnpm --filter portfolio dev",
-      url: "http://localhost:3000",
+      command: `pnpm --filter portfolio dev --port ${port(3000)}`,
+      url: `http://localhost:${port(3000)}`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
     {
-      command: "pnpm --filter design dev",
-      url: "http://localhost:3001",
+      command: `pnpm --filter design dev --port ${port(3001)}`,
+      url: `http://localhost:${port(3001)}`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
     {
-      command: "pnpm --filter engineering dev",
-      url: "http://localhost:3003",
+      command: `pnpm --filter engineering dev --port ${port(3003)}`,
+      url: `http://localhost:${port(3003)}`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

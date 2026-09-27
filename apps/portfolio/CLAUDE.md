@@ -11,6 +11,13 @@ pnpm --filter portfolio dev                # :3000 (design :3001, admin :3002)
 
 ## The shape
 
+**Recruiter preview (Portfolio.md P17):** `/` now mounts `RecruiterView`. This branch implements the approved
+screening review for hurried recruiters. Its measured grid keeps contact actions first, uses tabs on compact
+fields, and offers a complete reading composition. That composition may scroll: it is the deliberate accessibility
+exception for narrow/short fields and enlarged text. There is no intro hold, staged wake, spatial arrow-key focus,
+or pagination in this view. The previous composition below is historical on this branch. Facts remain in
+`resume.ts`; concise evidence lives in `screening.ts`; shared components and tokens remain authoritative.
+
 Rebuilt from nothing on 2026-09-21, on the grid. There is one route, `/`, and since 2026-09-27 it is **one page**
 (Portfolio.md P15, his: "We don't need multiple pages in portfolio now. Remove pagination navbar"): the first screen,
 and the pieces of the pages that went — Beyond and Say hello — in the profile's column since 2026-09-27 (they were in
