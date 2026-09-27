@@ -5,8 +5,11 @@ import { ArrowDownIcon, ArrowUpIcon } from "lucide-react"
 import { cn } from "cn"
 
 import { Button } from "@no-origins/ui/components/button"
-import { GridItem, useGridMetrics } from "@no-origins/ui/components/grid"
+import { GRID_SPACING, GridItem, useGridMetrics } from "@no-origins/ui/components/grid"
 import { Slot, SlotContent } from "@no-origins/ui/components/slot"
+import { Text } from "@no-origins/ui/components/text"
+import { useCellMotion } from "@no-origins/ui/hooks/use-cell-motion"
+import { flowSpots, stateOf, type CellFlow, type CellFrame, type CellState } from "@no-origins/ui/lib/cell-motion"
 import { pagerCells, type GridLayout, type GridLayoutItem } from "@no-origins/ui/lib/grid-layout"
 
 /**
@@ -25,27 +28,30 @@ import { pagerCells, type GridLayout, type GridLayoutItem } from "@no-origins/ui
  * it by hand, a click on an arrow plays it. Whichever way, the arrow being turned towards FILLS in proportion — the
  * ↑ from its bottom up, the ↓ from its top down — reading the fill's two edges off the bar, where the turn writes them,
  * so the fill follows the scroll without a render; it is the one thing on the field that does, since the boxes stay
- * whole until the ripple washes them away (Grid.md D37) — and once the page has turned, the fill LEAVES the way it came
- * as the new page fades in, its trailing edge crossing the arrow, rather than filling again or pulling back
- * (2026-09-22). At the last page ↑ is disabled, at the first ↓ is. Where the grid ripples between pages (Grid.md
- * D32), the fill is the colour of the ripple the turn plays — lime or violet — rather than the reverse colours.
+ * whole until the turn commits and the page fades away (Grid.md D37, D48) — and once the page has turned, the fill
+ * LEAVES the way it came as the new page arrives, its trailing edge crossing the arrow, rather than filling again or
+ * pulling back (2026-09-22). At the last page ↑ is disabled, at the first ↓ is. It filled in the colour of the ripple
+ * the turn played, lime or violet (D32), until the loader replaced the ripple (D48).
  *
- * Since D36 (2026-09-25) a bar may number its pages instead: `numberedPagerBar` puts one arrow on each end cell and a
- * page number on every cell between, the arrows split into one registry entry a cell (`pager-arrow`) and the numbers
- * one a cell too (`pager-page`), sliding to keep the page in view when there are more pages than cells.
+ * Since D36 (2026-09-25) a bar may number its pages instead: `numberedPagerBar` puts one arrow on each end cell and the
+ * pages between, the arrows split into one registry entry a cell (`pager-arrow`). Since D46 (2026-09-27) the page the
+ * field is on grows to two cells to show its number and title, beside the pages before and after it, and since D47 (the
+ * same day) the pages are one block (`pager-pages`) that plays movement (Motion.md M9) as the page changes.
  */
 
 /** The turn, published to the bar's contents (D29). The arrows and the page numbers take it from here, not from props. */
 export type GridTurnState = {
   page: number
   /**
-   * The page the field is turning to: `page` at rest, and the next page from the moment the last page's boxes have gone
-   * — through the ripple's hold, where a hand still scrolling moves it on a page a pass (D32, D35).
+   * The page the field is turning to: `page` at rest, and the next page from the moment the turn commits — through the
+   * hold while the last page fades away, where a hand still scrolling moves it on a page a step (D35, D48).
    */
   coming: number
   count: number
+  /** Each page's title, for the numbered bar (D46); undefined for a page with none. */
+  titles: readonly (string | undefined)[]
   turn: (dir: 1 | -1) => void
-  /** Turn straight to `page`: one turn and one ripple, however far it is (D36). */
+  /** Turn straight to `page`: one turn, however far it is (D36). */
   go: (page: number) => void
 }
 
@@ -66,6 +72,8 @@ export type GridPagerProps = {
   /** The page the field is turning to; `page` when omitted. */
   coming?: number
   count: number
+  /** Each page's title (D46). */
+  titles?: readonly (string | undefined)[]
   /** Turn one page forward (1) or back (-1). */
   onTurn: (dir: 1 | -1) => void
   /** Turn straight to a page. */
@@ -100,46 +108,51 @@ export function defaultPagerBar(width: number): GridLayout {
 }
 
 /**
- * The numbered bar (Grid.md D36, 2026-09-25; the portfolio's, Portfolio.md P14): the arrow that turns back on the first
- * cell, the arrow that turns forward on the last, and a page number on every cell between. Two cells wide it is just
- * the two arrows. Built from the width, like D27's.
+ * The numbered bar (Grid.md D36, 2026-09-25; D46, D47, 2026-09-27): the arrow that turns back on the first cell, the
+ * arrow that turns forward on the last, and between them the pages, one block (`pager-pages`) in which the page the
+ * field is on is grown to two cells with its number and title. Two cells wide it is just the two arrows. Built from the
+ * width, like D27's.
  */
 export function numberedPagerBar(width: number): GridLayout {
-  const cell = (id: string, col: number, component: GridLayoutItem["component"]): GridLayoutItem => ({
+  const cell = (id: string, col: number, colSpan: number, component: GridLayoutItem["component"]): GridLayoutItem => ({
     id,
     col,
     row: 1,
-    colSpan: 1,
+    colSpan,
     rowSpan: 1,
     slot: { fill: "transparent", inset: 0 },
     component,
   })
   const items: GridLayoutItem[] = []
   if (width >= 2) {
-    const numbers = width - 2
-    items.push(cell("pager-back", 1, { kind: "pager-arrow", props: { dir: "down" } }))
-    for (let at = 0; at < numbers; at++) items.push(cell(`pager-page-${at}`, at + 2, { kind: "pager-page", props: { at, of: numbers } }))
-    items.push(cell("pager-forward", width, { kind: "pager-arrow", props: { dir: "up" } }))
+    items.push(cell("pager-back", 1, 1, { kind: "pager-arrow", props: { dir: "down" } }))
+    if (width >= 4) items.push(cell("pager-pages", 2, width - 2, { kind: "pager-pages", props: { cells: width - 2 } }))
+    items.push(cell("pager-forward", width, 1, { kind: "pager-arrow", props: { dir: "up" } }))
   }
   return { authored: { base: [{ id: "pager-bar", items }] }, shapes: { base: { cols: width, rows: 1 } } }
 }
 
 /**
- * Which pages `cells` number cells show (D36): every page when they fit, else a run of `cells` pages holding `page`
- * second — one page back, the rest ahead — slid against the first page and the last.
+ * The first page `cells` cells show with the page on the field grown to two (D47): as many pages as fit, `cells − 1`,
+ * holding the page at the middle of them, slid against the first page and the last. On six cells, which leave four
+ * between the arrows, the first page stands on the bar's second cell, a page with pages either side on its middle two,
+ * and the last page on its fourth and fifth.
  */
-export function pagerWindow(page: number, count: number, cells: number): number[] {
-  const n = Math.max(0, Math.min(cells, count))
-  const start = Math.max(0, Math.min(page - 1, count - n))
-  return Array.from({ length: n }, (_, i) => start + i)
+export function pagerStart(page: number, count: number, cells: number): number {
+  const shown = Math.max(1, cells - 1)
+  const hold = Math.floor((shown - 1) / 2)
+  return Math.max(0, Math.min(page - hold, count - shown))
 }
 
+const NO_TITLES: readonly (string | undefined)[] = []
+const NO_SMALL: readonly boolean[] = []
+
 /** Memoised: the turn renders its grid at every phase, and the bar has nothing to redraw until the page or count moves. */
-const GridPager = React.memo(function GridPager({ page, coming = page, count, onTurn, onGo, bar }: GridPagerProps) {
+const GridPager = React.memo(function GridPager({ page, coming = page, count, titles = NO_TITLES, onTurn, onGo, bar }: GridPagerProps) {
   const m = useGridMetrics()
   const turn = React.useMemo<GridTurnState>(
-    () => ({ page, coming, count, turn: onTurn, go: onGo }),
-    [page, coming, count, onTurn, onGo],
+    () => ({ page, coming, count, titles, turn: onTurn, go: onGo }),
+    [page, coming, count, titles, onTurn, onGo],
   )
 
   const rect = m ? pagerCells(page, count, m.cols, m.rows, m.pager)[0] : undefined
@@ -192,31 +205,191 @@ function GridPagerArrow({ dir }: { dir: "up" | "down" }) {
   )
 }
 
+/** From the first cell's centre, where the number stands, to where the title starts: a step of the spacing scale. */
+const TITLE_AFTER = GRID_SPACING[3]
+/** The air after a title, inside the pill's round end. */
+const TITLE_PAD = GRID_SPACING[3]
+
 /**
- * One page number on one cell (D36): the `at`-th of the `of` pages `pagerWindow` shows. It marks the page the field is
- * turning to rather than the one on it, so a hand turning on through the empty field sees the number run ahead of it
- * (D35); a press turns straight to its page. A cell with no page — a layout with fewer pages than cells — is an empty
- * `card` cell, like D27's.
+ * The numbered bar's pages (D46, D47): one block on the cells between the arrows, playing movement (Motion.md M9), his,
+ * the motion the portfolio's tech column plays. Every page is a one-cell element — a ring with its number on it — on one
+ * line, and the page the field is turning to is grown to two cells, its title riding after its number. When the page
+ * changes, the one that was grown shrinks, the new one grows, and the numbers between travel a cell, shrinking into the
+ * border and growing out of it; rings never slide, they hand over (`cellMotionFrame`). The block shows `cells − 1`
+ * pages and slides along the line to hold the page (`pagerStart`), so pages that leave it hand over to cells outside the
+ * block, which clips them. It follows the page the field is turning to, so a hand turning on moves it again from where
+ * it stands (D35). Under reduced motion it jumps.
  */
-function GridPagerPage({ at, of }: { at: number; of: number }) {
+function GridPagerPages({ cells }: { cells: number }) {
+  const m = useGridMetrics()
   const state = useGridTurn()
-  if (!state) return null
-  const page = pagerWindow(state.coming, state.count, of)[at]
-  if (page === undefined) return <Slot fill="card" />
-  const current = page === state.coming
+  const cell = m?.cell ?? 60
+  const gap = m?.gap ?? 12
+  const count = state?.count ?? 0
+  const active = state ? Math.min(state.coming, count - 1) : null
+
+  const block = React.useRef<HTMLDivElement>(null)
+  const rings = React.useRef<(HTMLButtonElement | null)[]>([])
+  const ghosts = React.useRef<(HTMLDivElement | null)[]>([])
+  const numbers = React.useRef<(HTMLElement | null)[]>([])
+  const titles = React.useRef<(HTMLElement | null)[]>([])
+
+  // One line long enough that nothing wraps; which pages show is a shift along it.
+  const flow = React.useMemo<CellFlow>(() => ({ axis: "row", line: count + 2 }), [count])
+  const statesFor = React.useCallback(
+    (which: number | null): CellState[] => {
+      const shift = pagerStart(which ?? 0, count, cells) * (cell + gap)
+      return flowSpots(count, which, flow.line).map((spot) => {
+        const at = stateOf(spot, flow, cell, gap)
+        return { ...at, l: at.l - shift, r: at.r - shift, x: at.x - shift }
+      })
+    },
+    [count, cells, flow, cell, gap],
+  )
+
+  const paint = React.useCallback((frames: CellFrame[]) => {
+    frames.forEach((f, i) => {
+      const ring = rings.current[i]
+      const ghost = ghosts.current[i]
+      const number = numbers.current[i]
+      const title = titles.current[i]
+      if (!ring || !ghost || !number || !title) return
+      place(ring, f)
+      ring.style.opacity = String(f.opacity)
+      // Through custom properties, so the Button's own focus border and a hover on a page not grown still win.
+      ring.style.setProperty("--page-fill", towards("var(--primary)", "var(--card)", f.lit))
+      ring.style.setProperty("--page-line", towards("var(--primary)", "var(--border)", f.lit))
+      if (f.ghost) {
+        place(ghost, f.ghost)
+        ghost.style.opacity = String(f.ghost.opacity)
+        ghost.style.backgroundColor = towards("var(--primary)", "var(--card)", f.ghost.lit)
+        ghost.style.borderColor = towards("var(--primary)", "var(--border)", f.ghost.lit)
+        ghost.style.visibility = "visible"
+      } else ghost.style.visibility = "hidden"
+      number.style.transform = `translate(${f.x}px, ${f.y}px) translate(-50%, -50%) scale(${f.scale})`
+      number.style.color = towards("var(--primary-foreground)", "var(--foreground)", f.lit)
+      // The title rides a step after its number, inside the ring (less its pixel of border), which clips it as it grows.
+      title.style.opacity = String(f.lit)
+      title.style.transform = `translateX(${f.x - f.l - 1 + TITLE_AFTER}px)`
+    })
+  }, [])
+
+  useCellMotion({ block, states: statesFor, active, flow, cell, gap, paint })
+
+  // A title too wide for its two cells steps down a role, as the showcase's section header does on a narrow slot: a
+  // phone's cell is derived (Grid.md D33), and "Movement" was cut there. Measured in the numbers' font — always body —
+  // at the title's weight, and again when the fonts arrive.
+  const titleWidth = 2 * cell + gap - cell / 2 - TITLE_AFTER - TITLE_PAD
+  const pageTitles = state?.titles ?? NO_TITLES
+  const [small, setSmall] = React.useState<readonly boolean[]>(NO_SMALL)
+  React.useLayoutEffect(() => {
+    const probe = numbers.current[0]
+    const ctx = document.createElement("canvas").getContext("2d")
+    if (!probe || !ctx) return
+    let live = true
+    const measure = () => {
+      if (!live) return
+      const font = getComputedStyle(probe)
+      ctx.font = `400 ${font.fontSize} ${font.fontFamily}`
+      const next = Array.from({ length: count }, (_, i) => Math.ceil(ctx.measureText(pageTitles[i] ?? "Page").width) > titleWidth)
+      setSmall((was) => (was.length === next.length && was.every((v, i) => v === next[i]) ? was : next))
+    }
+    measure()
+    void document.fonts.ready.then(measure)
+    return () => {
+      live = false
+    }
+  }, [count, pageTitles, titleWidth])
+
+  if (!state || active === null) return null
+  const start = pagerStart(active, count, cells)
+  const shown = Math.max(1, cells - 1)
+  // Where each page stands for the first frame; the motion writes over it from then on.
+  const rest = statesFor(active)
+  const pitch = cell + gap
+
   return (
-    <Button
-      variant={current ? "default" : "outline"}
-      size="icon"
-      aria-label={`Page ${page + 1}`}
-      aria-current={current ? "page" : undefined}
-      onClick={() => state.go(page)}
-      className={cn("size-full text-sm tracking-normal tabular-nums", !current && "bg-card")}
-    >
-      {page + 1}
-    </Button>
+    <div ref={block} role="group" aria-label="Pages" className="relative size-full">
+      {/* Fewer pages than the block holds: the cells past them are D27's empty `card` cells. */}
+      {Array.from({ length: Math.max(0, cells - count - 1) }, (_, k) => {
+        const col = count + 1 + k
+        return <Slot key={`empty-${col}`} fill="card" className="absolute" style={{ left: col * pitch, top: 0, width: cell, height: cell }} />
+      })}
+      {rest.map((at, i) => {
+        const current = i === active
+        const title = state.titles[i]
+        return (
+          <Button
+            key={i}
+            ref={(el) => void (rings.current[i] = el)}
+            variant="outline"
+            aria-label={current ? `Page ${i + 1} of ${count}${title ? `: ${title}` : ""}` : `Page ${i + 1}${title ? `: ${title}` : ""}`}
+            aria-current={current ? "page" : undefined}
+            // A page the block has slid past is clipped away, and is no stop.
+            inert={i < start || i >= start + shown}
+            onClick={() => state.go(i)}
+            // The motion writes the box, the fill and the line every frame, so nothing here may transition them.
+            className="absolute h-auto min-w-0 overflow-hidden border-(--page-line) bg-(--page-fill) p-0 font-normal tracking-normal normal-case transition-none aria-[current=page]:hover:bg-(--page-fill)"
+            style={{ ...boxOf(at), "--page-fill": towards("var(--primary)", "var(--card)", at.lit), "--page-line": towards("var(--primary)", "var(--border)", at.lit) } as React.CSSProperties}
+          >
+            <span
+              ref={(el) => void (titles.current[i] = el)}
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 left-0 flex items-center"
+              style={{ opacity: at.lit, transform: `translateX(${at.x - at.l - 1 + TITLE_AFTER}px)` }}
+            >
+              <Text
+                as="span"
+                role={small[i] ? "caption" : "body"}
+                className="text-primary-foreground truncate whitespace-nowrap"
+                style={{ maxWidth: titleWidth }}
+              >
+                {title ?? "Page"}
+              </Text>
+            </span>
+          </Button>
+        )
+      })}
+      {/* A ring's old cells go out OVER the new ring coming in: the pill stays lime while a page hands it on as the block
+          slides, where under it the new ring's own light, still coming up, showed through pale. */}
+      {rest.map((_, i) => (
+        <div
+          key={`ghost-${i}`}
+          ref={(el) => void (ghosts.current[i] = el)}
+          aria-hidden
+          className="pointer-events-none absolute rounded-lg border"
+          style={{ visibility: "hidden" }}
+        />
+      ))}
+      {rest.map((at, i) => (
+        <Text
+          key={`number-${i}`}
+          as="span"
+          ref={(el: HTMLElement | null) => void (numbers.current[i] = el)}
+          aria-hidden
+          className="pointer-events-none absolute top-0 left-0 font-semibold whitespace-nowrap tabular-nums"
+          style={{ transform: `translate(${at.x}px, ${at.y}px) translate(-50%, -50%)`, color: towards("var(--primary-foreground)", "var(--foreground)", at.lit) }}
+        >
+          {i + 1}
+        </Text>
+      ))}
+    </div>
   )
 }
+
+type Box = { l: number; t: number; r: number; b: number }
+const boxOf = (box: Box) => ({ left: box.l, top: box.t, width: box.r - box.l, height: box.b - box.t })
+
+function place(el: HTMLElement, box: Box) {
+  el.style.left = `${box.l}px`
+  el.style.top = `${box.t}px`
+  el.style.width = `${box.r - box.l}px`
+  el.style.height = `${box.b - box.t}px`
+}
+
+/** `to` as far as a page is the one grown, over `from`: mixed, never translucent. */
+const towards = (to: string, from: string, lit: number) =>
+  lit <= 0 ? from : lit >= 1 ? to : `color-mix(in oklch, ${to} ${lit * 100}%, ${from})`
 
 function PagerArrow({ dir, disabled, onClick }: { dir: "up" | "down"; disabled: boolean; onClick: () => void }) {
   // Icons are swapped against the turn direction on purpose: the button that turns forward ("up") wears the ↓ glyph
@@ -244,17 +417,12 @@ function PagerArrow({ dir, disabled, onClick }: { dir: "up" | "down"; disabled: 
       className={cn("bg-card relative size-full overflow-hidden [&_svg]:size-5")}
     >
       <Icon />
-      {/* The fill: the same arrow clipped to the turned share — in reverse colours, or, where the grid ripples between
-          pages, in the colour of the ripple the turn plays, lime or violet, with a dark glyph that reads on both
-          (Grid.md D32; the turn sets --grid-turn-fill-color, grid-pages.tsx). */}
+      {/* The fill: the same arrow clipped to the turned share, in reverse colours. Where the grid rippled between pages
+          it took the ripple's colour, lime or violet (Grid.md D32), until the loader replaced the ripple (D48). */}
       <span
         aria-hidden
         className="absolute inset-0 grid place-items-center"
-        style={{
-          clipPath: clip,
-          background: "var(--grid-turn-fill-color, var(--foreground))",
-          color: "var(--grid-turn-fill-ink, var(--background))",
-        }}
+        style={{ clipPath: clip, background: "var(--foreground)", color: "var(--background)" }}
       >
         <Icon />
       </span>
@@ -262,4 +430,4 @@ function PagerArrow({ dir, disabled, onClick }: { dir: "up" | "down"; disabled: 
   )
 }
 
-export { GridPager, GridPagerArrow, GridPagerArrows, GridPagerPage }
+export { GridPager, GridPagerArrow, GridPagerArrows, GridPagerPages }

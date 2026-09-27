@@ -42,7 +42,15 @@ export type GridLayoutItem = {
 
 export type GridRect = Pick<GridLayoutItem, "col" | "row" | "colSpan" | "rowSpan">
 
-export type GridPage = { id: string; items: GridLayoutItem[] }
+export type GridPage = {
+  id: string
+  /**
+   * What the page is called: the numbered bar shows it on the page's own cells (Grid.md D46, 2026-09-27). A page packed
+   * into several on a smaller field gives each of them its title.
+   */
+  title?: string
+  items: GridLayoutItem[]
+}
 
 /** A field's counts — the only thing a set of coordinates depends on. */
 export type GridShape = { cols: number; rows: number }
@@ -264,8 +272,8 @@ export function derivePages(sourcePages: readonly GridPage[], cols: number, rows
   for (const page of sourcePages) {
     // A page that fits is kept as authored and centred (D25); only a page that does not fit is packed.
     const kept = centredOnField(page.items, cols, rows, pager)
-    if (kept) out.push({ id: page.id, items: kept })
-    else out.push(...packSourcePage(page.items, cols, rows, out.length, page.id, pager))
+    if (kept) out.push({ ...page, items: kept })
+    else out.push(...packSourcePage(page.items, cols, rows, out.length, page.id, pager).map((packed) => ({ ...packed, title: page.title })))
   }
   // (Until D23 the true last page was re-packed here without its › corner. There is no corner now, and re-packing
   // undid D25's centring of a kept page.)

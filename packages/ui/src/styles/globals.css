@@ -23,18 +23,23 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
+  /* The accents (his, 2026-09-27, set in the portfolio's accent jig, `?jig`): the primary is lime and the secondary
+     violet, where shadcn's were neutral greys, in both themes, each with its own ink; the grey of hover and of being
+     active (`--muted`) is lime at 14% over the page, and a menu's highlighted item (`--accent`) lime at 4% over the
+     popover. Mixed, never translucent: nothing see-through goes over the grid. shadcn's neutral values are what the
+     jig's "Neutral" puts back. */
+  --primary: var(--lime);
+  --primary-foreground: var(--lime-foreground);
+  --secondary: var(--violet);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: color-mix(in oklch, var(--lime) 14%, var(--background));
   --muted-foreground: oklch(0.556 0 0);
   /* Text that is there to be found rather than read (his, 2026-09-25: "in a very subtle way … reduce the opacity") —
      the portfolio's tagline over the profile card was the first. A flat grey a step past muted, not the foreground at
      an alpha: nothing translucent goes over the grid (no glass, 2026-09-16), and a glyph at an alpha shows the grid's
      lines through it. Type.md T3. */
   --faint-foreground: oklch(0.8 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: color-mix(in oklch, var(--lime) 4%, var(--popover));
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
@@ -45,7 +50,6 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -60,8 +64,8 @@
   --lime: oklch(0.896 0.196 119.552);
   --violet: oklch(0.619 0.208 294.842);
   /* Ink on lime (his, 2026-09-25: an icon on a lime band "doesn't have much contrast"): the dark the pager's arrow
-     already wears on its lime fill (`--grid-ripple-ink`, D32), one value in both themes — lime is light in both, so the
-     dark theme's white on it is 1.3 : 1 and this is 15 : 1. */
+     wore on the ripple's lime fill (D32, until D48), one value in both themes — lime is light in both, so the dark
+     theme's white on it is 1.3 : 1 and this is 15 : 1. */
   --lime-foreground: oklch(0.145 0 0);
   /* The first width token (his, 2026-09-24): the stroke of an accent ring — the portfolio's lime-and-violet ring round
      the avatar was the first. Every other width in the system is a Tailwind step written where it is used (1px
@@ -69,6 +73,116 @@
      colour's stroke, so this has no utility of its own: read it as `var(--stroke-accent)`. One value in both themes.
      3px — his, the same day, back from a 5px pass. */
   --stroke-accent: 3px;
+}
+
+/* The corner (Grid.md D39, 2026-09-26, his: "change the design system from zero border radius to hundred percent
+   border radius, I mean like circular design") is ONE radius, half the grid's cell, on every box. A box's radius
+   can never exceed half its shorter side — the browser scales the corners down to fit — so one number makes a 1×1
+   a circle, a box one cell tall a pill, and a bigger box a rectangle whose every corner is a quarter of one cell's
+   circle: the same curve as the field's cells (D40). It was 0 from the rebuild of 2026-09-16 to here.
+
+   The cell is the grid's, so the grid writes its own on its root (`--grid-cell`, grid.tsx) and everything on it
+   takes the exact number. Anything outside a grid — a dialog or a menu in a portal, an app with no grid — takes the
+   cell the viewport would get: 72px (`DEFAULT_GRID_CONFIG`, D13), the width shared by six cells and seven 12px
+   gutters on a box too narrow for six of those (D33), and 60px from `lg`. Change a number there, change it here. */
+:root {
+  --grid-cell: min(72px, calc((100vw - 84px) / 6));
+  --radius: calc(var(--grid-cell) / 2);
+}
+
+@media (width >=64rem) {
+  :root {
+    --grid-cell: 60px;
+  }
+}
+
+/* A custom property's var() resolves where it is declared: the grid re-declares the radius so its own cell is read. */
+[data-slot="grid"] {
+  --radius: calc(var(--grid-cell) / 2);
+}
+
+/* ── motion (Motion.md, 2026-09-27) ───────────────────────────────────────────────────────────────────────────
+   Every number a component moves by, one family a group, named for what the motion is FOR (M4). The value here is
+   the decision; the motion studio (apps/motion) plays the motion with a family's tokens overridden on its stage, and a
+   pick he sends back is written here (M7). The first five families are the values the components already had —
+   shadcn's, Tailwind's, tw-animate's and, for grow, mine — lifted out of twelve class strings so they can be tuned at
+   all; none of them is his yet. Movement and loading are his. Durations in ms; eases are CSS easings, which `lib/motion.ts` turns
+   into functions for GSAP. One set in both themes. */
+:root {
+  /* surface — something arrives over the page and leaves: dialogs, menus, popovers, tooltips, selects. */
+  --motion-surface-in: 100ms;
+  --motion-surface-out: 100ms;
+  --motion-surface-ease-in: ease;
+  --motion-surface-ease-out: ease;
+  /* The scale it grows from and shrinks to, and how far it slides from its anchor. */
+  --motion-surface-scale: 0.95;
+  --motion-surface-shift: 0.5rem;
+  /* panel — a panel slides in from an edge: the sheet, and the drawer's scrim. */
+  --motion-panel-in: 200ms;
+  --motion-panel-out: 200ms;
+  --motion-panel-ease-in: ease-in-out;
+  --motion-panel-ease-out: ease-in-out;
+  --motion-panel-shift: 2.5rem;
+  /* state — a control changes in place: hover, press, checked. Every `transition-*` without a duration of its own. */
+  --motion-state: 150ms;
+  --motion-state-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  /* disclose — content opens in place: accordion, collapsible. */
+  --motion-disclose: 200ms;
+  --motion-disclose-ease: ease-out;
+  /* grow — a value grows into place, and then moves to the next one: Progress's `animate` (GSAP). power3.out. */
+  --motion-grow: 900ms;
+  --motion-grow-change: 400ms;
+  --motion-grow-ease: cubic-bezier(0.215, 0.61, 0.355, 1);
+  /* move — one-cell elements move on the grid when one grows (M9, `lib/cell-motion.ts`): his, 2026-09-27, the settings
+     he sent back from the studio, verbatim. Only the dots travel; the rings stay on their cells. Stagger is between one
+     element and the next, outward; wrap is how a dot that changes lines goes (overflow · travel · fade); dot min is
+     its scale at a border — 0, it vanishes crossing one; dot from, how far out it starts shrinking; dot lag, against
+     the cells, as a share of the move — negative, the dot sets off before they change. */
+  --motion-move-duration: 400ms;
+  --motion-move-stagger: 20ms;
+  --motion-move-wrap: overflow;
+  --motion-move-ring-ease: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --motion-move-dot-ease: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --motion-move-dot-min: 0;
+  --motion-move-dot-from: 0;
+  --motion-move-dot-lag: -0.1;
+  /* load — how a page loads (M10, `lib/load-motion.ts`): his, 2026-09-27, the settings he sent back from the studio,
+     verbatim. The page stands folded at the centre, one dashed lime ring a section, turning; when it is ready every
+     ring is pressed to 0.5 at once (a constant, his), goes straight to its section in one move of MOVEMENT's dot (the
+     move tokens above: its curve, its duration, its size — none of its own) and all land at once, and are released
+     into plain borders that open, each from its section's top-left corner. Turn is how the rings turn (spin · gears ·
+     chase · relay) — chase since his note the same night, "the turn style that I chose is chase", spin in the settings
+     he sent; lap, once round, speed only; press, the press and the release, each; open, smooth or by whole cells; duration, the opening; reveal, the
+     last share of the opening the section comes in over — 1, the whole of it. */
+  --motion-load-turn: chase;
+  --motion-load-lap: 6000ms;
+  --motion-load-press: 200ms;
+  --motion-load-open: smooth;
+  --motion-load-duration: 1200ms;
+  --motion-load-reveal: 1;
+}
+
+/* A surface's timing, in and out: tw-animate's `animate-in` and `animate-out` run on `--tw-duration` and `--tw-ease`.
+   One class where a surface had `duration-100`, so the in and out can differ without four classes in every string.
+   The closed selectors are shadcn's `data-closed` variant: Radix's `data-state` and Base UI's `data-closed`. */
+@utility motion-surface {
+  --tw-duration: var(--motion-surface-in);
+  --tw-ease: var(--motion-surface-ease-in);
+
+  &:where([data-state="closed"], [data-closed]:not([data-closed="false"])) {
+    --tw-duration: var(--motion-surface-out);
+    --tw-ease: var(--motion-surface-ease-out);
+  }
+}
+
+@utility motion-panel {
+  --tw-duration: var(--motion-panel-in);
+  --tw-ease: var(--motion-panel-ease-in);
+
+  &:where([data-state="closed"], [data-closed]:not([data-closed="false"])) {
+    --tw-duration: var(--motion-panel-out);
+    --tw-ease: var(--motion-panel-ease-out);
+  }
 }
 
 .dark {
@@ -80,14 +194,15 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  /* The accents, as on light (2026-09-27): the same expressions, over the dark page and popover. */
+  --primary: var(--lime);
+  --primary-foreground: var(--lime-foreground);
+  --secondary: var(--violet);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
+  --muted: color-mix(in oklch, var(--lime) 14%, var(--background));
   --muted-foreground: oklch(0.708 0 0);
   --faint-foreground: oklch(0.42 0 0);
-  --accent: oklch(0.269 0 0);
+  --accent: color-mix(in oklch, var(--lime) 4%, var(--popover));
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
@@ -154,12 +269,21 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: var(--font-sans);
   --font-heading: var(--font-heading);
+  /* Motion (Motion.md M3): Tailwind's `transition-*` default and tw-animate's disclosures read the tokens, inline, so
+     a token overridden on a subtree — the studio's stage — reaches every element under it. */
+  --default-transition-duration: var(--motion-state);
+  --default-transition-timing-function: var(--motion-state-ease);
+  --animate-accordion-down: accordion-down var(--tw-animation-duration, var(--tw-duration, var(--motion-disclose))) var(--tw-ease, var(--motion-disclose-ease)) var(--tw-animation-delay, 0s) var(--tw-animation-iteration-count, 1) var(--tw-animation-direction, normal) var(--tw-animation-fill-mode, none);
+  --animate-accordion-up: accordion-up var(--tw-animation-duration, var(--tw-duration, var(--motion-disclose))) var(--tw-ease, var(--motion-disclose-ease)) var(--tw-animation-delay, 0s) var(--tw-animation-iteration-count, 1) var(--tw-animation-direction, normal) var(--tw-animation-fill-mode, none);
+  --animate-collapsible-down: collapsible-down var(--tw-animation-duration, var(--tw-duration, var(--motion-disclose))) var(--tw-ease, var(--motion-disclose-ease)) var(--tw-animation-delay, 0s) var(--tw-animation-iteration-count, 1) var(--tw-animation-direction, normal) var(--tw-animation-fill-mode, none);
+  --animate-collapsible-up: collapsible-up var(--tw-animation-duration, var(--tw-duration, var(--motion-disclose))) var(--tw-ease, var(--motion-disclose-ease)) var(--tw-animation-delay, 0s) var(--tw-animation-iteration-count, 1) var(--tw-animation-direction, normal) var(--tw-animation-fill-mode, none);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -171,90 +295,100 @@
    defaults below sit on the grid. The front advances with the hand; once the page has turned the back advances
    instead, so the fill leaves the way it came.
 
-   The boxes do NOT follow the hand (D37, 2026-09-25, his: "let's not shrink the cards"). They were clipped from their
-   bottom edge as the hand scrolled, and the next page revealed from its bottom edge, since D27 — and with the ripple's
-   hold between the two (D32) that was a shrink, a wait and a grow. Now a committed turn is washed away by the ripple,
-   one clip animation a box that cuts it cell by cell as the pass's front crosses it (grid.tsx, `washAway`), and the
-   next page is put on the field when the pass has crossed and FADES in — opacity only, nothing squeezed, nothing
-   grown — over the in-phase's own length. The pager is a box on the tracks too, and it stays. Reduced motion: no
-   wash and no fade — the page swaps at once. */
+   The boxes do NOT follow the hand (D37, 2026-09-25, his: "let's not shrink the cards"). A committed turn FADES the
+   page away — opacity only, nothing squeezed, nothing grown — over the wash's own length, and the next page is put on
+   the field and LOADED by the grid's loader (D48, 2026-09-27: a square of dashed rings on the field's centre, each
+   going to one of its boxes and opening into it; grid.tsx, `data-loading` below). Until D48 the ripple washed the page
+   away, one clip animation a box cut cell by cell as its front crossed it (D32, D37), and the next page faded in. It
+   still fades back in when the hand brings the turn back to the page it left, which has nothing to load. The pager
+   is a box on the tracks too, and it stays. Reduced motion: no fade and no loader — the page swaps at once. */
 [data-slot="grid"] {
   --grid-turn-fill-front: 0;
   --grid-turn-fill-back: 0;
   --grid-turn-fade: 160ms;
 }
+
 /* No fill: the fade ends at opacity 1, where the box rests. */
-@keyframes grid-turn-in { from { opacity: 0; } }
-[data-slot="grid-tracks"][data-turn="in"] > [data-slot="grid-item"]:not([data-pager]) {
-  animation: grid-turn-in var(--grid-turn-fade) cubic-bezier(0.33, 1, 0.68, 1);
-}
-@media (prefers-reduced-motion: reduce) {
-  [data-slot="grid-tracks"][data-turn="in"] > [data-slot="grid-item"]:not([data-pager]) { animation: none; }
+@keyframes grid-turn-in {
+  from {
+    opacity: 0;
+  }
 }
 
-/* The grid's own pointer (grid.tsx, Grid.md D34): a 24px ring, a 2px lime line on nothing, filled lime while pressed —
+/* Filled forwards: the page stays gone until it is taken off the field, or comes back and fades in. */
+@keyframes grid-turn-out {
+  to {
+    opacity: 0;
+  }
+}
+
+[data-slot="grid-tracks"][data-turn="wash"]>[data-slot="grid-item"]:not([data-pager]) {
+  animation: grid-turn-out var(--grid-turn-fade) cubic-bezier(0.32, 0, 0.67, 0) forwards;
+}
+
+[data-slot="grid"]:not([data-loading]) [data-slot="grid-tracks"][data-turn="in"]>[data-slot="grid-item"]:not([data-pager]) {
+  animation: grid-turn-in var(--grid-turn-fade) cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="grid-tracks"][data-turn]>[data-slot="grid-item"]:not([data-pager]) {
+    animation: none;
+  }
+}
+
+/* The grid's own pointer (grid.tsx, Grid.md D34, D43): a 24px ring, a 2px violet line on nothing, filled violet while pressed —
    the system's cursor, drawn from an image, over the whole field: a link's hand and a button's included, because the
    ring is the pointer. The system draws it where the hand is, so it never trails and costs the page nothing; it was a
    div moved on every pointer move until the evening it was built, which cost a whole-page layerize a move and lagged.
-   The colour is `--lime` as sRGB (206 238 56, his), because an image cannot read a custom property; the 2x image is the
+   The colour is `--violet` as sRGB (146 98 243, his, D43; lime until then), because an image cannot read a custom property; the 2x image is the
    same drawing at twice the pixels, and a browser without `image-set` for cursors takes the first line. The hotspot is
    the centre. The grid only sets `data-cursor` where the device hovers with a fine pointer, so a phone keeps its own. */
 [data-slot="grid"][data-cursor],
 [data-slot="grid"][data-cursor] * {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%23ceee38' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
-  cursor: image-set(
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%23ceee38' stroke-width='2'/%3E%3C/svg%3E") 1x,
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%23ceee38' stroke-width='2'/%3E%3C/svg%3E") 2x
-    ) 12 12, auto;
-}
-[data-slot="grid"][data-cursor]:active,
-[data-slot="grid"][data-cursor]:active * {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23ceee38' stroke='%23ceee38' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
-  cursor: image-set(
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23ceee38' stroke='%23ceee38' stroke-width='2'/%3E%3C/svg%3E") 1x,
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23ceee38' stroke='%23ceee38' stroke-width='2'/%3E%3C/svg%3E") 2x
-    ) 12 12, auto;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
+  cursor: image-set(url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 1x,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 2x) 12 12, auto;
 }
 
-/* ── the grid's intro (grid.tsx, Grid.md D31) ─────────────────────────────────────────────────────────────────
-   The grid opens by drawing itself: a front rises from the bottom with a cone for its edge, and each line it draws is
-   lit — lime, then violet on the next pass while the page is still loading — and fades back to its usual colour.
-   What it starts from is the visitor's own background on light and black on dark (his picks, 2026-09-24): on light
-   the cover is invisible and only hides the lines; on dark it is the black the drawing lifts. The glow is 16px on
-   light and 12px on dark, and it is the one blur the system keeps since the no-glass rule of 2026-09-16 — on a line,
-   for the length of the intro. */
-[data-slot="grid"] {
-  --grid-intro-from: var(--background);
-  --grid-intro-glow: 16px;
-  /* The glyph on a pager arrow filled in the ripple's colour (D32): dark on lime and on violet alike, in both themes
-     — about 16:1 on lime and 5:1 on violet. */
-  --grid-ripple-ink: oklch(0.145 0 0);
+[data-slot="grid"][data-cursor]:active,
+[data-slot="grid"][data-cursor]:active * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%239262f3' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
+  cursor: image-set(url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%239262f3' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 1x,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%239262f3' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 2x) 12 12, auto;
 }
-.dark [data-slot="grid"] {
-  --grid-intro-from: oklch(0 0 0);
-  --grid-intro-glow: 12px;
-}
-/* Everything the intro draws is painted on canvases since D38 (lib/grid-field.ts), which read the tokens above and the
-   theme's own: the dashes `--border` at 70%, the lines `--lime` and `--violet`, the glow `--grid-intro-glow`. The cover
-   is only this: while the intro runs — from the server's first paint, before any script — the grid wears the cover's
-   colour, and the painter paints each tile back in the page's own `--background` as the front reaches it. It was 216
-   tiles lifted one by one until D38, which froze in WebKit whenever the page's own loading held the main thread. */
-[data-slot="grid"][data-intro] {
-  background: var(--grid-intro-from);
-}
-@media (prefers-reduced-motion: reduce) {
-  [data-slot="grid"][data-intro] { background: none; }
-}
-/* Page 1 and the pager wait while the grid is drawn, then are revealed from their bottom edge upward as the last
-   lines fade — what the page turn's "in" was until D37 — with an 8px bleed so a card's ring and shadow are not cut.
-   Only the field's own boxes: a slot's sub-slots are inside a box that is already clipped. */
-@keyframes grid-intro-in {
-  from { clip-path: inset(calc(100% + 8px) -8px -8px -8px); }
-  to { clip-path: inset(-8px -8px -8px -8px); }
-}
-[data-slot="grid"][data-intro] [data-slot="grid-tracks"] > [data-slot="grid-item"] {
+
+/* ── loading a page (grid.tsx, Grid.md D31, D48) ───────────────────────────────────────────────────────────────
+   A page on the field loads with the loader (D48, 2026-09-27, his: "remove the ripple effect intro and page transitions
+   and replace with the current loaders that we created"): a square of dashed lime rings on the field's centre, one a
+   box, each going to its box and opening into it (loading, Motion.md M10). The document's first page loads so
+   (`data-intro`, from the server's first paint, before any script), and so does every page a turn puts on the field.
+   While it loads (`data-loading`) the page's own boxes are held back here, and the loader writes each box's clip over
+   this one as it opens it — `none` once it is in. Only the field's own boxes: a slot's sub-slots are inside a box that
+   is already clipped.
+
+   Until D48 the grid opened by drawing itself — a front rising from the bottom, the tip of a circle for its edge
+   (D44), its lines lit lime and violet and glowing — over a cover in the visitor's own colour, black on dark, and drew
+   itself again while the page loaded (D31); then page 1 came up from its bottom edge. */
+[data-slot="grid"][data-loading] [data-slot="grid-tracks"]>[data-slot="grid-item"]:not([data-pager]) {
   clip-path: inset(calc(100% + 8px) -8px -8px -8px);
 }
-[data-slot="grid"][data-intro="arriving"] [data-slot="grid-tracks"] > [data-slot="grid-item"] {
-  animation: grid-intro-in var(--grid-intro-reveal) cubic-bezier(0.33, 1, 0.68, 1) var(--grid-intro-hold) both;
+
+/* The pager waits for page 1 too, and is revealed from its bottom edge upward as page 1 opens, with an 8px bleed so a
+   card's ring and shadow are not cut: D31's reveal, kept for the pager alone. */
+@keyframes grid-intro-in {
+  from {
+    clip-path: inset(calc(100% + 8px) -8px -8px -8px);
+  }
+
+  to {
+    clip-path: inset(-8px -8px -8px -8px);
+  }
+}
+
+[data-slot="grid"][data-intro] [data-slot="grid-tracks"]>[data-slot="grid-item"][data-pager] {
+  clip-path: inset(calc(100% + 8px) -8px -8px -8px);
+}
+
+[data-slot="grid"][data-intro="opening"] [data-slot="grid-tracks"]>[data-slot="grid-item"][data-pager] {
+  animation: grid-intro-in var(--grid-intro-reveal) cubic-bezier(0.33, 1, 0.68, 1) both;
 }

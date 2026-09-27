@@ -614,7 +614,7 @@ and the showcase are arranged by code on the live field (Portfolio.md P2, P8) �
 authored pages per breakpoint, with their shapes, derived mobile-first and kept where they fit (D18's model, D22,
 D25): `resolvePages`, `derivePages`, `layout.shapes` and `LEGACY_SHAPES` stay, because a layout written in code still
 resolves — the admin's home is one — and the pager's bar is a layout on its own cells (D29). The pager and the turn
-(D27, D29): the arrows, ← →, the wheel and a finger; the composer's ‹ › in D23 and D27 went with it. The theme's sheet
+(D27, D29): the arrows, ← → (and ↑ ↓ since D42), the wheel and a finger; the composer's ‹ › in D23 and D27 went with it. The theme's sheet
 (D28). And no design mode, nothing edited in place: D16's refusal outlives the tool it was said about.
 
 *What the grid is now.* `Grid` draws the field, and `GridPages` and `GridPager` render a `GridLayout` on it; nothing
@@ -659,7 +659,9 @@ sent back with *"proceed with building"* are this rule, verbatim.
   cut — no turn, no fade. *(30ms in his settings; halved the next day, for the intro and D32 alike: "Increase the
   speed of the ripple.")* A cell's time is its row counted up from the bottom, plus twelve steps times its distance
   from the centre as a share of the half-width; counts are even (D26), so the two centre columns tie and the point is
-  symmetric. A pass is about 0.33 s on a 1440 × 900 desktop (18 × 12) and 0.22 s on a phone (4 × 8).
+  symmetric. A pass is about 0.33 s on a 1440 × 900 desktop (18 × 12) and 0.22 s on a phone (4 × 8). *(Amended by
+  D44, 2026-09-27: the cone is now the frame, and the edge the tip of the circle fitted in it; a pass is 0.23 s on
+  that desktop.)*
 - **Each line is lit as it is drawn, and glows.** A cell's dashed border lights the moment its tile goes and fades
   straight back to its usual colour over 500ms, with no hold, so the front leaves a trail that dies behind it. The glow
   is 16px on light and 12px on dark.
@@ -671,9 +673,11 @@ sent back with *"proceed with building"* are this rule, verbatim.
   rises through it again — and **lime and violet turn about, pass by pass**: the first is lime, a second violet, a
   third lime. *(Round 2 had the five hold, then loop, while the page loaded; he took it out: "let's remove the waiting
   what we have now".)*
+  *(Replaced by D48, 2026-09-27: the grid no longer draws itself in, and the loader waits instead.)*
 - **Page 1 turns in with the fade.** As the last pass ends, page 1's boxes and the pager are revealed from their
   bottom edge upward — the page turn's own "in" (D27), with its bleed — while the last lines fade. Until then nothing
-  turns a page: the wheel, a finger and ← → wait for the intro.
+  turns a page: the wheel, a finger and ← → wait for the intro. *(Amended by D48, 2026-09-27: page 1 opens out of the
+  loader's rings; only the pager still comes up from its bottom edge.)*
 
 *Whose numbers.* The bottom, the cone, its twelve steps and its centred point, the step (30ms, then 15ms), the cut, lines only, no
 gap between passes, lime and violet each pass, the 12px and 16px glow, the 500ms fade with no hold, page 1 with the
@@ -746,6 +750,7 @@ drawing is painted now, by one painter in a worker, and the cover is the grid's 
 
 **D32 — The ripple plays between pages.** *2026-09-25: "Now, lets add this ripple between pages too."* Built the same
 day.
+*(Replaced by D48, 2026-09-27: a turn now fades the page away and loads the next with the loader.)*
 
 *What it is.* When the page on the field changes, one pass of the intro's drawing (D31) runs through the field, lines
 only: the field stays drawn and the lit front rises through it. **Forward, it rises from the bottom**, the way the next
@@ -753,7 +758,8 @@ page's boxes arrive from their bottom edge (D27); **back, it comes down from the
 the intro's numbers: the cone twelve steps deep with its point in the middle, 15ms a step, a cut per cell, each line
 fading over 500ms, the glow. **Lime and violet keep turning about**, counted on from the intro. It starts at the change,
 as the new page comes in, and not while the hand is scrolling, because a scroll let go short of the turn settles back
-and turns nothing. It is `ripple` on `GridPages` (on `Grid`, with `page`); the portfolio has it. Under reduced motion
+and turns nothing. It is `ripple` on `GridPages` (on `Grid`, with `page`); the portfolio had it until it became one page
+(Portfolio.md P15, 2026-09-27). Under reduced motion
 there is none.
 
 *Mine, his to change.* Starting at the change rather than with the hand; the direction following the turn; the colour
@@ -837,7 +843,8 @@ over the whole field, a link's hand included (globals.css). The cell the pointer
 exactly over the overlay's — the same box and border, as the ripple's lines are drawn — at once; a cell it leaves fades back over the intro's 500ms (`INTRO_FADE_MS`),
 as a drawn line does in D31, so a moving pointer leaves a short trail. The cell is found from the field's numbers,
 not by hit-testing: the gutter lights nothing, and a cell under a card is lit where the card hides it. No glow — the
-intro's is the one blur kept. A mouse or a pen only (`(hover: hover) and (pointer: fine)`); a phone keeps its own.
+intro's is the one blur kept. *(D41 made the cells round a moving pointer glow on 2026-09-26 and was withdrawn the
+same day: this stands as written.)* A mouse or a pen only (`(hover: hover) and (pointer: fine)`); a phone keeps its own.
 Nothing goes through React state: a move writes one transform, and at most two attributes when it crosses a cell. *(Since D38 the lit cell is painted by the field's painter: a move sends one message when it crosses
 a cell, and the cells are no longer elements.)*
 **Known cost:** lime on the light theme's white is about 1.3 : 1, so the ring and the lit dashes are faint there — said
@@ -898,7 +905,8 @@ page. D27's third of the field makes it a third, and a steady roll turns a page 
 
 **D36 — A bar may number its pages: an arrow at each end, the page numbers between.** *2026-09-25: "In the portfolio,
 let's put the arrow buttons at the first and last items of the navbar. And in between, let's fill that with page
-numbers."* Amends D29. The portfolio's bar is this one (Portfolio.md P14); D27's default is unchanged, so the showcase
+numbers."* Amends D29. The portfolio's bar was this one (Portfolio.md P14) until the portfolio became one page on a
+`Grid`, with no bar (P15, 2026-09-27); nothing draws a numbered bar now. D27's default is unchanged, so the showcase
 and the admin draw what they drew.
 
 *The parts.* D29's pair is split, not replaced: `pager-arrow` is one arrow on one cell, `dir` `up` (forward) or `down`
@@ -912,7 +920,9 @@ keeps its glyph from the pair (D27, 2026-09-23): the first cell wears ↑ and th
 phone. The numbers are a run of consecutive pages holding the current one second, one back and the rest ahead, slid
 against the first page and the last (`pagerWindow`), so the marked cell stays put while the labels move under it.
 With fewer pages than cells the spare cells are D27's empty `card` cells. *Mine, his to change:* the window, and
-widening the bar instead, which is a number in the config (D29).
+widening the bar instead, which is a number in the config (D29). **The window withdrawn 2026-09-27 (D46):** the
+middle two cells are the page on the field with its title, and the cells beside them number the page before it and the
+page after it.
 
 *Which page is marked.* The one the field is turning to (`coming`), not the one on it: through the wash (D37) a hand still
 scrolling turns on a page a pass (D35), and the mark runs ahead with it. It is filled in the reverse colours, the
@@ -925,6 +935,7 @@ however far it is. `GridPages` hands the bar `go` beside `turn` for it, and like
 ends, the cards open up. There's a lot of spacing and waiting time in between that … let's not shrink the cards … let
 the ripple wash away the cards and then let the new page … render" — and "not just in portfolio, I want this as part of
 the design system."* Amends D27, D32 and D35.
+*(The wash is replaced by D48, 2026-09-27: the page fades away and the next is loaded. Still nothing is squeezed.)*
 
 *What it replaces.* Since D27 the hand's scroll clipped every box from its bottom edge and the next page was revealed
 from its bottom edge, and since D32's amendment the ripple's hold sat between the two: a shrink (160ms, after however
@@ -1013,17 +1024,395 @@ starts and ends on a dash with its gaps evened out; WebKit's looked exactly so, 
 first pass starts 48ms ahead of the frame that asks for it (`INTRO_LEAD_MS`), room for the worker to start, under the
 cover.
 
+*Amended 2026-09-27: the reveal's tiles are cleared when it ends.* The painter paints each tile back in the page's
+`--background` as the front reaches it, and when the reveal was over it painted nothing again, since the tiles looked
+the same as the page. They are opaque: the portfolio drew its tagline behind the grid (Portfolio.md P4) and the tiles
+hid it. The reveal's end now paints the field again, rings on a clear canvas.
+
+**D39 — The corner is one cell's circle: the system has one radius, half the cell.** *2026-09-26: "Now the goal is
+to change the design system from zero border radius to hundred percent border radius I mean like circular design."*
+Asked how round a box bigger than one cell should be, he picked half a cell over a pill for every box and over
+rounding the controls alone. Replaces `--radius: 0`, the rebuild's value since 2026-09-16.
+
+*The rule.* **One radius on every box, half the grid's cell** (`--radius`, globals.css; `rounded-lg` in a component,
+which is `var(--radius)`). A browser shrinks a box's corners to fit its shorter side, so the one number does the rest:
+
+- **a circle** where a box is a cell or less on both sides: a 1×1 slot, the pager's cells, an icon button, a checkbox,
+  a radio, the slider's thumb, an avatar, a chart's swatch;
+- **a pill** where it is a cell or less on one side: a button, a badge, a key, a tab, a switch, a menu's item, a
+  one-line alert, a slot one cell tall;
+- **a quarter of one cell's circle at each corner** of anything bigger: a card, a dialog, a menu, a popover, a slot of
+  two by two or more. It is the curve of the field's cells (D40) and of every 1×1, so there is one curve on the page.
+
+*Why not the others.* A pill for every box turns a tall one's top and bottom into half-circles, and a menu, a dialog or
+a card loses its first and last lines to them — a slot fills its span and clips (Slots.md), so there is nowhere for
+the content to move. Round controls alone put pills in square boxes: two shapes.
+
+*The number.* The cell is the grid's, so `Grid` writes its measured cell on its root (`--grid-cell`) and globals.css
+declares the radius there again — a custom property's `var()` is resolved where it is declared — so on the grid it is
+exact: 30px on a 60 cell, 36 on a 72, 25.5 on a 390 phone's 51 (D33). Off the grid — a dialog or a menu in a portal,
+an app with no grid — the stylesheet reckons the cell the viewport would get from D13's and D33's numbers. Change
+those, change it too.
+
+*Where it does not apply.*
+
+- **Lines are not boxes.** The underline fields — Input, Textarea, the Select and NativeSelect triggers, InputGroup,
+  InputOTP's slots, the Combobox's chips field — keep a straight rule: a bottom border on a rounded box bends into a
+  bowl. So do separators, table rows and a tab's underline.
+- **A `transparent` slot is not rounded.** It has no edge to see, and a round clip would only cut what it holds at the
+  corners. What it holds rounds itself.
+- **A turned square stays square**: the tooltip's and the navigation menu's arrow tips.
+- **Joined things round their outer ends only**: a ButtonGroup, a ToggleGroup with no spacing, a calendar's range —
+  its middle days stay square so the run reads as one. Sheets and drawers round the edge that is not on the screen's.
+- **The alert's accent is its start border, 2px**, where radix-sera drew a straight bar over a square edge; on a pill
+  the bar ran off the curve, and the border follows it.
+
+*Mine, his to change.* `rounded-lg` as the one utility; the transparent slot left square; the underline fields left
+straight; the alert's border; checkboxes as circles (a tick in a circle, beside a radio's dot).
+
+*An exception, his, 2026-09-27: a fill inside a box that meets a straight line.* The portfolio's work tabs fill the
+active and the hovered mark's room between the dividers, and at the full radius the fill's ends curved away from the
+dividers ("they don't align with the dividers"). So those fills take **4px** — a step of the spacing scale — on every
+corner that is on a divider, and the box's own radius only on the corners on its border (Portfolio.md P4). Boxes keep
+the one radius.
+
+**D40 — A cell is a circle.** *2026-09-26, the same conversation: asked whether the field's painted cells should
+become circles too, he picked "Cells become circles".* Amends D31, D34, D37 and D38; D9's cell stays square — the
+circle is drawn in it.
+
+*The rule.*
+
+- **Every cell's dashes are a ring**: the circle through the middle of the cell's outermost pixel ring, where its 1px
+  border ran, in 3px dashes evened out round it — D38's rule for a side, taken round the circle — with a dash centred
+  at the top. The overlay, the lines the intro and the ripple light, and the pointer's cell (D34) all draw it, and a
+  lit ring's glow is cast by its circle, so it glows round.
+- **The pointer lights a cell only inside its circle.** The corners of its square light nothing, as the gutter does not.
+- **The front cuts a circle, then the tile: the lace.** What the front reaches first is the cell's disc — half a pitch
+  across, so neighbouring discs touch in the middle of the gutter — and `LACE_MS` later (90ms, six steps) the rest of
+  its tile. In the intro the cover lifts so; in a turn the wash (D37) punches a round hole in a box wherever the front
+  reaches one of its cells, and clears the webbing between the holes a moment later. The front leaves a band of round
+  holes behind it and then nothing. Circles cannot tile a box: with no second cut the webbing would stay, and with it
+  at once a hole would show for one frame and not be seen.
+- **The turn holds for the whole wash** — the ripple's crossing and the lace after its last cell (`washSpan`) — so the
+  next page comes 90ms later than it did.
+
+*How.* The painter strokes arcs with a dash pattern where it filled 1px rects, casts the sprites' shadows off a disc,
+and keeps a state per cell for the reveal — covered, disc, tile — painting a tile over its disc and its ring again on
+top. The wash's clip is a `path()`, even-odd: D37's staircase of tiles gone, with a circle taken out of it for each
+cell whose disc is cut and whose tile is not.
+
+*Looked at* (`e2e/.mcp/wash-frames.mjs`, `intro-dark.mjs`, `ring-cursor.mjs`, the dev server, 1440 × 900). Mid-turn,
+the profile card has round holes where the front has reached it and fragments of its name in the webbing between
+them, and whole tiles gone a row behind. On dark, the intro lifts the black a disc at a time with its lime ring, and
+the tiles follow. With the pointer on a cell's centre, the ring lights lime; with it in the square's corner, none does.
+
+*Mine, his to change.* `LACE_MS`; the disc half a pitch rather than the ring's own size; the intro's tiles following
+the discs rather than the cover staying black between them until the page arrives; the pointer's round hit test.
+
+**D41 — The pointer glows, and the glow goes out when it rests.** *2026-09-26: "let's add some glow radius around the
+cursor. The circles in the certain radius of the cursor should glow while moving. And when the cursor is resting, the
+glow should slowly turn off."* Amends D34, which had "no glow — the intro's is the one blur kept": the intro's glow is
+now the one blur kept, **on a line, for the length of the intro and while the pointer moves**, never on a surface.
+
+**Withdrawn 2026-09-26, the same day.** His: *"I did not like the glow effect, or like the circles cells glowing when
+around the cursor. Let's remove that glowing effect."* Nothing glows round the pointer; D34 stands as it was — the
+pointer's own cell lit, no glow — and the intro's is again the one blur kept, for the length of the intro. The code went
+with it: `CURSOR_GLOW` in `grid.tsx`, the painter's `glow` message and the pointer's sprite in `lib/grid-field.ts`. What
+follows is the record.
+
+*The rule, as it was.*
+
+- **Every cell whose centre is within three pitches of the pointer glows** as a line the intro draws does: the ring in
+  lime and its glow, cast by its circle (D40) — the intro's own sprite, in the pointer's colour. How much a cell glows
+  goes smoothly from full at the pointer to nothing at the edge (`(1 − d²/R²)²`), so a cell comes up and goes out as the
+  pointer nears and leaves it, and the glow reaches two cells out in every direction.
+- **It comes up while the pointer moves and goes out once it rests.** A move brings the glow up over 240ms; 120ms
+  without a move is rest; at rest it goes out over 1.5s, slow at first and slow at the end (smoothstep), where it is. A
+  move before it is out picks it up from there. There is no trail: the glow is round the pointer, and a cell left
+  behind goes out because it is further away.
+- **It follows the hand anywhere over the grid**: over a cell, the gutter, the margin, and under a box, where the box
+  hides it, as the lit cell (D34) is. It is drawn under the pointer's own lit ring, which is lit either way and at rest
+  is all that is left.
+- **Only while the intro has revealed the cells**, as the lines: nothing lights the cover's colour ahead of the front.
+- **None under reduced motion.** A glow that follows the hand and dies away is motion; the lit cell stays.
+- A mouse or a pen only, as D34.
+
+*How.* The pointer's move sends its position to the field's painter as well as the cell it crosses into: one message a
+move, no DOM write (D38). The painter keeps the level as a straight run from where it was, up or down, and switches
+down 120ms after the last move, so it is the same on any frame rate; it paints while the level is above nothing and
+stops when it is out. Each frame it stamps the pointer's sprite at `level × nearness` on the cells in the radius — about
+twenty-five on a desktop.
+
+*Looked at* (`e2e/.mcp/cursor-glow.mjs`, the dev server, 1440 × 900, both themes). A sweep along the third row leaves
+the glow centred on the pointer's cell, two cells out; 300ms after it stops it is still bright, by a second it is
+faint, and by two there is only the lit ring. Lime on the light theme's white is faint, as D34 said of the lit cell.
+
+*Mine, his to change.* The radius of three pitches; 240ms up, 120ms to rest, 1.5s out; the smoothstep; the falloff; the
+intro's glow and blur rather than one of the glow's own; off under reduced motion. The numbers are `CURSOR_GLOW` in
+`grid.tsx`.
+
+**D42 — ↑ ↓ on the keyboard press the arrows that wear them.** *2026-09-26: "Also map the up and down arrow with
+keys."* Amends D27. The pager's arrows wear their glyphs against the hand's direction (his, 2026-09-23,
+`grid-pager.tsx`): forward wears ↓ and back wears ↑. So the ↓ key turns forward and ↑ back, the button with that
+glyph, and the key plays the same turn as a click. ← → are as they were. A key that a focused component has already
+taken is left to it: a menu, a select, a slider and a radio group all move on ↑ ↓, and a component that handles a key
+marks it so. A key held with a modifier is left alone too, and so is one in a field, as before. On the first page ↑
+does nothing, as the arrow is disabled there.
+
+*Mine, his to change.* Following the glyph rather than the wheel: a scroll up of the hand is forward (D27), so ↑ as
+forward would match the wheel and not the button. Leaving modified keys alone.
+
+**D43 — The ring is violet.** *2026-09-26: "change the cursor color to violet."* Amends D34. The pointer's ring — its
+2px line, and its fill while a button is held — is `--violet` where it was `--lime`, baked into the image in
+globals.css as sRGB 146 98 243 (`#9262f3`), for the same reason as before: an image cannot read a custom property.
+Nothing else about the ring changes: 24px, the centre its hotspot, the system's cursor, mouse and pen only. D34's known
+cost goes with it: violet is about 4 : 1 on the light theme's white, where lime was 1.3 : 1, so the ring is no longer
+faint there.
+
+**Amended the same day: the lit cell is violet too.** *"Change the cell color also to violet when hover."* The cell
+under the pointer lights its dashes — its ring, since D40 — in `--violet` where it was `--lime`, so the ring and the cell
+it is over are one colour. It is the painter's `cursor` colour, which `readFieldColours` (`grid.tsx`) reads off the
+theme; nothing else about the lit cell changes — lit at once, faded back over 500ms when left, none in the gutter or a
+square's corners, mouse and pen only. It was lime for the morning because "the cursor" was read as the ring alone.
+Violet is about 4 : 1 on the light theme's white, so the lit cell is no longer faint there either. The intro's and the
+ripple's lines still turn lime and violet about (D31, D32).
+
+**D44 — The front's edge is the tip of a circle.** *2026-09-27: "instead of diamond shaped ripple let's make it a
+curve since we have circles now … like tip of a circle."* Amends D31 and D33. The front the intro, the ripple and the
+wash all run on (`ripplePlan`, `grid.tsx`) had a cone for its edge: the sides trailed the point in straight lines, so
+a pass was a V rising with a V of fading lines behind it, a diamond. The edge is now an arc of a circle, and the point
+is its tip.
+*(Replaced by D48, 2026-09-27: the grid no longer draws itself in.)*
+
+*Which circle.* D31's cone stays, as the frame the circle is fitted in: the edge is the circle tangent to the cone's
+sides where they meet the field's sides, its centre on the point's column. So the front still leaves the field at the
+cone's angle (his twelve steps over a desktop's half-width, D33's same angle on a narrower field, twelve steps on a
+wider one), and the point is rounded all the way across. For a cone of slope `m` over a half-width `h`, in cells, the
+radius is `h · √(1 + 1/m²)`, and a cell's time is its row plus `R − √(R² − x²)` steps, `x` its distance from the point
+in cells. Cells are square (D9), so it is a circle on the screen as well as in cells. Nothing else changes: the step
+(15ms), the cut, the lace (D40), the colours, the fade, and the direction — up going forward, down going back, the tip
+leading either way.
+
+*What it does to the numbers.* No circle can trail its sides twelve steps over eight and a half columns; a half-circle
+trails by its radius, and that is as far as a circle goes. So the sides trail less: 4.4 steps on a 1440 desktop's
+eighteen columns (a radius of 10.4 cells), 1.3 on a phone's six and 5 on a 1920's twenty-six. The pass is shorter by as
+much: 231ms across an 18 × 12 desktop where it was 345, and 184ms across a 390 phone's 6 × 12 where it was 218. The
+turn's hold (`washSpan`) is shorter by the same amount. `INTRO_DEPTH` and `INTRO_CONE_COLS` keep their names and their
+meaning, the cone the circle is fitted in, so a deeper cone is still how to get a rounder and slower front.
+
+*Mine, his to change.* The choice of circle, tangent to the cone at the field's sides, was mine: it keeps every number
+he tuned and the angle he saw the front leave the field at. These were the others. A circle through the cone's point
+and its corners cannot be drawn, because it is too deep. A half-circle as wide as the field drops the outer columns
+behind all at once. A fixed radius in cells lies flat on a phone and runs out on a field wider than itself.
+
+**D45 — Tab and the arrows move focus in reading order.** *2026-09-27, on the portfolio: "Right after I reloaded the
+page, I clicked on tab and the focus straight away goes to @hiddenstack in the tagline … Ideally, I expected it to
+start with avatar, to Radise, and then … navigate me between other work companies … tab and up down left right
+buttons should move focus from left to right and top to bottom."* Amends D42. The browser tabs in document order, and
+on the grid that is not the screen's: a page's boxes come in the order they were packed, the side columns after the
+block they stand beside, and what is drawn behind the field before all of it. `useReadingFocus(scope)`
+(`hooks/use-reading-focus.ts`) puts the keys in reading order over what can take focus inside `scope`:
+
+- **Tab** is the next stop, left to right along a line and then the next line down, and Shift+Tab the one before;
+  from nothing focused, the first or the last. Past either end the browser takes it on from the scope's first or last
+  stop in the document, so focus leaves the page rather than being held on it.
+- **← →** are the stop before and after, as Tab goes, and **↑ ↓** the line above and below, at the stop nearest
+  across. A line is the stops whose top is above the middle of the line's first, so a stop set down in its box — the
+  avatar in its card — reads with the row it stands in.
+- **The arrows are a game controller's: they never turn the page.** *Amended the same night: "The arrow buttons are
+  still acting on changing pages. I asked to make it like a game controller."* It had kept D42 while nothing was
+  focused — after a load, after a turn took the focused box away, after Esc — so the same key turned the page one
+  moment and moved focus the next. Now from nothing focused any arrow lights the first stop, and at the edges they
+  stop. A page that uses this sets `keyboard={false}` on its `GridPages`, which turns the grid's keys off: it turns by
+  the scroll, a finger and the pager, whose cells are stops, so Enter on ↓ or on a number turns from the keyboard. A
+  key pressed while the grid turns (`data-turn` wash or in) is dropped, as a game drops input through a transition:
+  the page going away is still on the field, and a stop found on it took focus with it when it went. Esc, which gave
+  the arrows back to the turn, went.
+- A control that moves on the arrows keeps them — a field, a select, a slider, a menu, a radio group (their ARIA
+  roles) — and a key with Ctrl, Alt or ⌘, or already taken, is left alone. A stop is what the browser would tab
+  to and can be seen: not disabled, not inert, not under `aria-hidden`, not transparent — so the tagline's handle, at
+  opacity 0 on page 2, is not one.
+
+It runs in the capture phase, ahead of a component's own keys, so a roving group — the Tabs' ← → — moves in reading
+order with the rest of the page; the portfolio's work column makes every company a stop (Portfolio.md P4). The page
+opts in: the portfolio calls it on the box that holds the backdrop and the grid, and nothing else does yet.
+
+*Mine, his to change.* The arrows' meaning — ← → along the order and ↑ ↓ between lines, rather than both along it or
+all four by nearest box — the first stop from nothing focused, the stop at the edges, the key dropped through a turn,
+and leaving the page past the ends rather than going round.
+
+**D46 — The numbered bar holds the page on its middle two cells, with its title, and the pages before and after beside
+it.** *2026-09-27: "since we have at most of six cells right now, I think the arrows will remain where they are. If
+it's pages in between, then previous page will be on the second one. Next page will be on the fifth one. And three and
+four cells should be occupied by the active page with the page title."* Amends D36. The motion studio draws the one
+numbered bar now (Motion.md M5), so this is where it shows. D27's default does not change, so the showcase and the
+admin draw what they drew.
+
+*The six cells.* Back is on the first cell and forward on the last, as D36 left them, each with its glyph (↑ first, ↓
+last). The second cell is the page before the one on the field and the fifth is the page after, each showing its number,
+and a press turns to it. The third and fourth are one box across both cells and the gutter between them. It is the page
+on the field with its title, filled in the Button's `default` as D36's marked number was, and it carries
+`aria-current="page"`. Like D36's mark, it is the page the field is turning to, so a hand that goes on turning sees the
+title and both numbers run ahead of it (D35). On the first page the second cell is an empty `card` cell, like D36's
+spare cells, and on the last page the fifth is. The arrow beside it is disabled.
+
+*The title belongs to the page.* A `GridPage` has an optional `title` beside its `id`. A page packed into several on a
+smaller field gives each of them its title (`derivePages`), so all three of the studio's narrow Movement pages say
+Movement. `GridPages` passes the titles to the bar along with the turn. A title too long for two cells is cut with an
+ellipsis and never wrapped.
+
+*The parts.* `pager-page` is now the page `offset` away from the one on the field, not a place in a window.
+`pager-title` is the title on two cells. It is a registry entry like the others, and bar-only for D29's reason.
+`pagerWindow` is gone along with D36's window. *Both parts went the same day (D47): the pages are one block.*
+
+*Mine, his to change.* His rule is for six cells. On a wider even bar, `numberedPagerBar` keeps the page on the middle
+two cells and fills outward: pages further back on the left, further ahead on the right. Eight cells show two pages
+each side, four show only the arrows and the title, and two show only the arrows. Also mine: an untitled page reads
+"Page 3", and the title shows without its number because the numbers either side imply it. The title box is a Button
+that does nothing on press, as D36's marked number was, so it stays a Tab stop (D45) and a screen reader hears "Page 2
+of 6: Movement". **Amended the same day (D47):** the page is not always on the middle two cells, its number is in the
+box with its title, and the pages move by movement.
+
+**D47 — The bar's pages move by movement, and the page stands where the pages around it leave room.** *2026-09-27, on
+D46: "for the first one let's start on the second cell only and also the number should be mentioned in the cell … the
+number should follow the movement motion that we created and then once we move from first page to second page then it
+can go to the center and then for the last page it will move to the fourth column."* Amends D46.
+
+*Where the page stands.* On six cells, the first page is on the second and third cells, with the next two pages on the
+fourth and fifth. A page with pages on both sides is on the middle two, as in D46. The last page is on the fourth and
+fifth, with the two before it on the second and third. The four cells between the arrows show three pages and slide to
+keep the current page in the middle of them, stopping at the first page and the last (`pagerStart`). No cell between
+the arrows is empty unless the layout has fewer than three pages.
+
+*The number is in the box.* The box reads "2 Movement": the page's number on its first cell, where it stood as a
+one-cell page, then the title.
+
+*It moves by movement* (Motion.md M9). The pages are one block across the cells between the arrows (`pager-pages`). It
+plays through `useCellMotion` on the `--motion-move-*` tokens, the same hook and model as the portfolio's tech column.
+Every page is a one-cell element, a ring with its number on it, and they stand on one line. The page the field is
+turning to grows to two cells, and its title rides after the number and fades in with the ring. When the page changes,
+the box it leaves shrinks and the new one grows. The numbers travel, shrinking into each border and growing out of it,
+and the rings hand over rather than slide.
+
+- From the first page to the second nothing slides: the first box gives back its second cell, and the second page grows
+  into the middle.
+- From a middle page on, the block slides a cell as well. The number coming in travels two cells into the box, and the
+  one going out travels one cell left. The pages at the ends hand over to cells outside the block, which clips them.
+- The box stays lime throughout, because the old ring going out is drawn over the new one coming in.
+- It follows the page the field is turning to, so a hand that keeps turning turns it round from where it stands (D35).
+- Under reduced motion it jumps, as every component does.
+
+*A title that does not fit* in two cells steps down a role, from body to caption, the way the showcase's section header
+does in a narrow slot. It is measured in the numbers' font. On a desktop "Movement" fits at body size. On a phone,
+whose cell is derived (D33), it drops to caption.
+
+*Mine, his to change.* With two pages, which is the studio on a desktop, the second page takes the middle, not the
+fourth and fifth cells. It is both the second page and the last, and I read it as the second. That keeps the box on
+the field's centre line and moves only by edges; the cell after it is D27's empty `card` cell. Also mine: the number is
+semibold and the title regular.
+
+**D48 — The loader loads every page, and the ripple is gone.** *2026-09-27: "ripple is not the loading state that I
+want" (Motion.md M10); then, with his settings picked in the motion studio, "Proceed"; then, having seen it on the
+portfolio: "Let's remove the ripple effect intro and page transitions and uh, replace with the current loaders that we
+created … I don't like the loader cells to be distributed randomly. I want them to be distributed between same number
+of columns and rows."* Replaces D31's drawing, D32, D37's wash and D44. D31's wait for the page, and its reveal of the
+pager, stay.
+
+*What it is.*
+
+- **A page on the field is loaded by the loader.** This is loading, his motion (M10), on the page's own boxes, the
+  field's and not the pager's. **A section may be several boxes** (his, the same night, of the portfolio's ten: "Instead
+  of 10 loading cells, let's have 6. One for each section"): boxes that carry the same `data-load-section` share one
+  ring, which opens over the rectangle round them all, each box shown where the ring has reached it. A box without one
+  is its own section. The portfolio's six are the profile (its card, facts, links and note), the work, the projects,
+  the degree, the technical skills and the art skills (`load` on an item in `site.tsx`).
+  - While the page loads, a square of dashed lime rings stands on the field's centre, one ring a box. It is as many
+    columns wide as rows tall, the fewest that hold them all, filled in reading order, with a row that is not full
+    centred under the rest. The rings turn (his spin, once round every 6s).
+  - When the page is ready, every ring is pressed to 0.5 at once.
+  - Each goes straight to its box's nearest cell in one move of movement's dot, and all land together.
+  - Each goes to its box's TOP-LEFT cell, and the box opens out from that corner, rightward and down (his, the same
+    night: "let's always move them to the top left corner of any component"; the nearest of its four corners before,
+    "it should open up only from the corners", and its nearest cell before that).
+  - All are released into the plain border a box wears.
+  - Each box opens out to its edges, shown inside its ring, and the border fades as the box comes in.
+  - The turn is his chase since the same night ("the turn style that I chose is chase"): a closed ring goes round the
+    square, once round every 6s.
+  - Ten boxes stand as rows of 3, 3, 3 and 1 (his, the same night: "Instead of 4, 4, 2 for the first loaders, try 3, 3,
+    3, 1"), and seven as 3, 3 and 1: as many rows as the smallest square that holds them, as few columns as fill them.
+- **The intro is page 1's load.** It is held back from the server's first paint. The loader turns until the page is
+  ready: D31's ready, the fonts, the window's load and the images on the field, 3s at most. **It turns for 2s at the
+  least** (`INTRO_MIN_MS`, his, the same night: "add two seconds of artificial load, if there is not throttle"). It
+  opens two frames after that, so a page arranged on the measured field has its boxes in the DOM. The pager is held too, and comes up from
+  its bottom edge as page 1 opens (D31's reveal, kept for it). Nothing turns a page until page 1 is in. Once per
+  document load, never under reduced motion. The grid no longer draws itself in, and there is no cover: the field's
+  dashes and the rings are on the page's own colour from the start.
+- **A turn loads the page it puts on the field only when there is something to load.** When the turn commits, the
+  page fades away over the turn's 160ms (`TURN_MS`, opacity only, D37's rule that nothing is squeezed). Then the next
+  page is put on the field. If its boxes have images still to come, it loads: the loader turns until they are in, 3s
+  at most, and opens. Otherwise it shows at once and fades in over the same 160ms (his, the same night: "when all the
+  pages are uh, either pre-rendered or already loaded and cached which doesn't need any extra loading can directly
+  render the page rather than showing any loading"). Every page `GridPages` holds is rendered from its layout, and
+  no paged grid has images today, so today no turn shows the loader. A hand that goes on scrolling still goes on
+  turning through the emptied field (D35), a page a step, and the page it stops on is the one that loads. A turn the
+  hand brings back to the page it left has nothing to load, and fades back in. Every `GridPages` turns this way, the
+  showcase's and the admin's included: the wash was the turn for them too.
+- **What went.**
+  - D31's drawing: a front rising from the bottom, every cell a cut, and its lines lit lime and violet, glowing.
+  - D31's cover, and the drawing going again while the page loaded.
+  - D44's circle-tipped front.
+  - D32's ripple between pages, and the pager's arrow filling in the ripple's colour.
+  - D37's wash, the page cut away cell by cell as the front crossed it.
+  - The `ripple` prop, `washAway`, `washSpan` and `rippleSpan`.
+- **The painter paints less.** The field's painter (D38) now paints the overlay's dashes and the pointer's cell. Its
+  passes, its reveal and its lines canvas are still in `lib/grid-field.ts`, but nothing sends it a pass or a reveal.
+
+*Measured* (`e2e/.mcp/intro-loader.mjs`, `e2e/.mcp/turn-loader.mjs`, local, 2026-09-27):
+- **The portfolio at 1440 × 900:** ten rings stand at 0.39s, the page is ready at once, and the intro ends at 2.4s.
+- **The studio, turning to page 2:** the fade takes 0.2s, seven rings stand, and the page is in at 2.3s.
+- **The showcase, turning with ↓:** eight rings, in at 2.25s.
+- **The studio's specimen:** 55 runs of its rules probe, five presets on eleven layouts, with no two rings
+  overlapping and none seen on more than two cells.
+
+*Mine, his to change.*
+- The page fading away over 160ms as a turn commits.
+- The two frames' wait before page 1 opens.
+- The border's fade (M10).
+- A square's row that is not full centred.
+- The boxes are read off the tracks where the grid put them, whenever the grid renders or a box comes or goes.
+
+*Open.*
+- Once round in 6s, a chase round ten rings hands on every 0.6s, so the intro's 2s show about three steps.
+- A turn to a page with images to fetch is written but no page exercises it yet.
+- Without the cover, what a page draws behind the grid shows while page 1 loads: the portfolio's tagline stands under
+  the turning rings before anything else is in.
+- The rings can stand a moment before the field's dashes come, which the worker paints (the cover hid that).
+- The rings are painted from the main thread, on the GSAP ticker the studio uses, not by the field's painter in its
+  worker (D38). A busy main thread can make a slow spin stutter. There are ten of them, not the ~1,300 elements D38
+  moved.
+- The painter's unused passes and reveal are to come out of `lib/grid-field.ts`.
+
+*Where it lives.* `useGridLoad` (the intro, and a change of `page`) and `GridLoader` (the rings and the boxes) in
+grid.tsx. They play through `useLoadMotion`, with `paintLoadRing` and `paintLoadSection` (`hooks/use-load-motion.ts`),
+the painters the motion studio's stage uses, so what is tuned there is what the page does. The square is
+`loaderLayout` (`lib/load-motion.ts`). `GridPages` passes the page on the field as `page`; globals.css holds a loading
+page's boxes (`data-loading`), the pager while the intro runs, and fades a turning page away (`data-turn="wash"`).
+
 ---
 
 ## 9. Where it lives
 
 Field, config and the reference boxes (`GRID_REFERENCE_BOX`) in `grid.tsx`, the model in `grid-layout.ts`, pages
 and the turn in `grid-pages.tsx`, the pager in `grid-pager.tsx` (D27, D29) with its parts the registry's entries —
-the arrows as a pair, and one arrow or one page number a cell for the numbered bar (`registry.tsx`, D36), the theme flip in `grid.tsx` with `theme-provider.tsx` (D28), the intro and the ripple between pages in `grid.tsx` with
+the arrows as a pair, and one arrow or one page number a cell for the numbered bar (`registry.tsx`, D36) with the
+pages between the arrows as one block that plays movement (D46, D47) — each page's `title` on `GridPage` in
+`grid-layout.ts` — the theme flip in `grid.tsx` with `theme-provider.tsx` (D28), the intro and the ripple between pages in `grid.tsx` with
 their CSS in `globals.css` (D31, D32), the cursor in `grid.tsx` and its image in `globals.css` (D34), the hand and its fling's tail in `grid-pages.tsx`
 (D35), the wash in `grid.tsx` (`washAway`), played by the turn in `grid-pages.tsx` and faded in by `globals.css` (D37),
 the field's paint — the overlay's dashes, the lines, the pointer's cell and the intro's reveal — in `lib/grid-field.ts`,
-started and fed by `useGridField` in `grid.tsx` (D38), the slot in `slot.tsx`. All of it
+started and fed by `useGridField` in `grid.tsx` (D38), its rings and the lace in the same two files (D40), the one
+radius in `globals.css`, read off the cell `Grid` writes on its root (D39), the keys' focus order in
+`hooks/use-reading-focus.ts` (D45), the slot in `slot.tsx`. All of it
 renders; none of it edits (D30). The pages it carries are data: the showcase's in `apps/design/src/content/`,
 arranged by `apps/design/src/lib/arrange.ts`, and the portfolio's in `apps/portfolio/src/content/`, arranged by
 `apps/portfolio/src/lib/arrange.ts`. *Until 2026-09-23 the tools were in `grid-editor.tsx`, the frame in

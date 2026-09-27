@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cn } from "cn"
 import { isSlotItem, SlotContent } from "@no-origins/ui/components/slot"
-import { Grid, GridItem, rippleSpan, washAway, type GridMetrics } from "@no-origins/ui/components/grid"
+import { Grid, GridItem, type GridMetrics } from "@no-origins/ui/components/grid"
 import { GridPager } from "@no-origins/ui/components/grid-pager"
 import { resolvePages, type GridLayout, type GridLayoutItem } from "@no-origins/ui/lib/grid-layout"
 
@@ -15,20 +15,23 @@ import { resolvePages, type GridLayout, type GridLayoutItem } from "@no-origins/
  * wheel rolled towards you. As it moves the ↑ fills from its bottom up; scrolling down, the ↓ from its top down. The
  * boxes do not follow the hand (D37, 2026-09-25, his: "let's not shrink the cards"): until the turn commits they stay
  * whole. Let go short of half way and the fill settles back; past it, or a whole page of travel, and the turn commits:
- * the ripple starts at once and WASHES the page away — every box is cut away cell by cell as the pass's front crosses
- * it (`washAway`, grid.tsx) — and when the pass has crossed the field the next page is put on it and fades in. A hand
- * that goes on scrolling goes on turning (D35): through the field the ripple has emptied it turns on, a pass a page,
- * and the page it stops on is put on the field when it stops; only the decaying tail of a trackpad's fling is ignored.
- * A click on the pager's arrow, ← →, or a host's toolbar play the same turn. The field and the pager never move.
+ * the page fades away over TURN_MS, and the next page is put on the field and LOADED — the grid's loader, a square of
+ * dashed rings on the field's centre, each going to one of its boxes and opening into it (Grid.md D48, his, 2026-09-27:
+ * "remove the ripple effect intro and page transitions and replace with the current loaders"). Until D48 a ripple ran
+ * through the field and washed the page away, box by box, cell by cell (D32, D37). A hand that goes on scrolling goes
+ * on turning (D35): through the emptied field it turns on, a page a step, and the page it stops on is put on the field
+ * when it stops; only the decaying tail of a trackpad's fling is ignored. A click on the pager's arrow, ← →, or a host's
+ * toolbar play the same turn. The field and the pager never move.
  *
  * Nothing here renders per frame. The hand's progress is two custom properties on the pager's bar, the only thing that
- * reads them; the phase is `data-turn` on the grid's tracks; the wash is one clip animation a box.
+ * reads them; the phase is `data-turn` on the grid's tracks, which globals.css fades the page away off.
  */
 
-/** The fill finishing, and the next page fading in, in ms. Short: the turn is snappy. */
+/**
+ * The fill finishing, and the page fading away as the turn commits, in ms; and the page fading back in when the hand
+ * brings the turn back to it. Short: the turn is snappy. A page put on the field loads with the grid's loader (D48).
+ */
 export const TURN_MS = 160
-/** The frame between a page being set and its ripple starting (grid.tsx, `useGridRipple`). */
-const RIPPLE_START_MS = 16
 /** Settling back after the hand lets go. */
 const RELAX_MS = 120
 /** No wheel event for this long is the hand letting go — a trackpad's, which sends an event every frame. */
@@ -52,14 +55,14 @@ const RANGE_OF_FIELD = 1 / 3
  */
 const FOLLOW_MS = 40
 /**
- * While the ripple crosses the field, the hand's travel turns the next page too (2026-09-25, his: "if I'm continuously
- * slow scrolling, we can just continue the ripple without rendering the cards"). Passes follow each other no closer
- * than this share of a crossing, however fast the wheel spins, so each is seen starting.
+ * While the page fades away, the hand's travel turns the next page too (2026-09-25, his: "if I'm continuously slow
+ * scrolling, we can just continue the ripple without rendering the cards" — the ripple went with D48, the turning on
+ * stayed). Steps follow each other no closer than this share of the hold, however fast the wheel spins.
  */
 const STEP_MIN_SHARE = 0.5
 /**
  * The stroke that turned the page goes on after it — a hard flick's own travel was nearly two pages before the fingers
- * lifted (measured on a synthetic flick, 2026-09-25) — and what it does in the first TURN_MS of the wash, while the
+ * lifted (measured on a synthetic flick, 2026-09-25) — and what it does in the first TURN_MS after it commits, while the
  * arrow is still filling, counts for at most this share of a page. So one stroke turns one page, and a hand that means
  * more keeps going through the emptied field.
  */
@@ -130,9 +133,11 @@ function readWheel(t: WheelTrace, now: number, px: number): WheelKind {
 // ── the turn ─────────────────────────────────────────────────────────────────────────────────────────────────
 
 /**
- * `wash` is the turn from the moment it commits until the next page is put on the field: the ripple crosses the field
- * and washes the last page away (D32, D37). The hand may go on turning pages through it, a pass each, and the page is
- * put on the field only when the pass has crossed and the hand has stopped. `in` is that page fading in.
+ * `wash` is the turn from the moment it commits until the next page is put on the field: the last page fades away
+ * (globals.css, off `data-turn="wash"`; the ripple washed it away until D48, and the name stayed). The hand may go on
+ * turning pages through it, and the page is put on the field only when the hold is over and the hand has stopped. `in`
+ * is that page arriving: the grid loads it (D48), or, when the hand brought the turn back to the page it left, it fades
+ * back in.
  */
 export type TurnPhase = "idle" | "drive" | "relax" | "wash" | "in"
 export type TurnState = { phase: TurnPhase; dir: 1 | -1 }
@@ -159,8 +164,8 @@ export type PageTurn = {
   shown: number
   /**
    * The page the field is turning to: `shown` at rest, and the next page from the moment the turn commits — through the
-   * wash, while the ripple runs — until it is shown. The ripple plays on this (D32); while the hand keeps turning
-   * through the wash, it moves on a page a pass.
+   * wash — until it is shown. The pager's bar moves to it at once; while the hand keeps turning through the wash, it
+   * moves on a page a step.
    */
   coming: number
   turn: TurnState
@@ -178,11 +183,10 @@ type TurnInputs = {
   gridH: number
   /** Scroll travel, in px, for one page. */
   range: number
-  /** How long a committed turn holds the next page back: the pass's crossing, which washes the last page away (D37). 0 under reduced motion. */
+  /** How long a committed turn holds the next page back: the last page fading away (TURN_MS). 0 under reduced motion. */
   hold: number
   reduce: boolean
   measured: boolean
-  /** The field, for the wash to find each box's cells on. */
   metrics: GridMetrics | null
   onPage?: (page: number) => void
 }
@@ -225,14 +229,10 @@ function createTurn(
   /** When the pass on the field began, and until when the hand's travel is still the stroke that committed the turn. */
   let passAt = 0
   let followUntil = 0
-  /** The next page is set on the field and the fade waits for React to have put it in the DOM. */
+  /** The next page is set on the field and the arrival waits for React to have put it in the DOM. */
   let waitingIn = false
-  /** A turn has committed and its wash waits for the ripple's frame (`washFrom`); the boxes' clip animations once it has started. */
-  let washDue = false
-  let washRaf = 0
-  let washing: Animation[] = []
 
-  // The phase goes on the grid's TRACKS — globals.css fades the next page in off it — and the hand's progress on the
+  // The phase goes on the grid's TRACKS — globals.css fades the page away off it — and the hand's progress on the
   // pager's BAR, the one thing that reads it. Custom properties inherit, so a value written every frame restyles
   // everything under the element it is written on: on the grid's root it restyled every element in the grid, the
   // overlay's cells and the ripple's line layers (three times the style work, and dropped frames, measured
@@ -264,31 +264,15 @@ function createTurn(
     el.style.setProperty("--grid-turn-fill-back", String(inward ? p : 0))
   }
 
-  // The arrow fills in the colour of the ripple this turn will play (Grid.md D32, his pick, 2026-09-25), read off the
-  // grid as the turn starts — and again at each page the hand turns through the wash, since each plays a pass — and
-  // held until it ends: the colour after a pass is the other one, so reading it live would turn the fill's colour as it
-  // leaves. No ripple on the grid, and the arrows keep their own fill.
-  const fillColour = () => {
-    const el = barEl()
-    if (!el) return
-    const next = root.current?.dataset.rippleNext
-    if (next) {
-      el.style.setProperty("--grid-turn-fill-color", `var(--${next})`)
-      el.style.setProperty("--grid-turn-fill-ink", "var(--grid-ripple-ink)")
-    } else {
-      el.style.removeProperty("--grid-turn-fill-color")
-      el.style.removeProperty("--grid-turn-fill-ink")
-    }
-  }
+  // The arrow filled in the colour of the ripple the turn would play (D32) until D48 took the ripple out: it keeps its
+  // own fill.
 
   const setPhase = (next: TurnPhase, d: 1 | -1) => {
     const from = phase
     const changed = from !== next || d !== dir
     phase = next
     dir = d
-    if (from === "idle" && next !== "idle") fillColour()
-    // An attribute on the tracks rather than a prop on each box, so a phase costs no render of the cards on the page,
-    // and a page mounted as it fades in fades from its first frame.
+    // An attribute on the tracks rather than a prop on each box, so a phase costs no render of the cards on the page.
     const el = tracksEl()
     if (el) {
       if (next === "idle") delete el.dataset.turn
@@ -309,15 +293,6 @@ function createTurn(
     settle = 0
     window.clearTimeout(holdTimer)
     holdTimer = 0
-  }
-
-  /** Take the wash's clips off: the page it cut away has left the DOM, or it is the page coming back. */
-  const unwash = () => {
-    window.cancelAnimationFrame(washRaf)
-    washRaf = 0
-    washDue = false
-    for (const wash of washing) wash.cancel()
-    washing = []
   }
 
   /** Show `p`, turning the fill round when the hand crosses from one direction to the other. */
@@ -378,12 +353,12 @@ function createTurn(
     if (coming >= count - 1) ahead = Math.min(0, ahead)
   }
 
-  /** React has put the next page in the DOM: it fades in (globals.css, off `data-turn="in"`) as the arrow's fill leaves. */
+  /**
+   * React has put the next page in the DOM: the grid loads it (D48) as the arrow's fill leaves — or, when the hand came
+   * back to the page it left, it fades back in (globals.css, off `data-turn="in"`).
+   */
   const reveal = () => {
     waitingIn = false
-    // The washed boxes left the DOM with their page — unless the hand came back to the page it left, and these are
-    // they: uncut, they fade in like any page arriving.
-    unwash()
     const d = dir
     tween(1, inputs.current.reduce ? 0 : TURN_MS, easeOut, d, () => {
       setPhase("idle", d)
@@ -402,7 +377,7 @@ function createTurn(
   }
 
   /**
-   * The pass has crossed and the hand has stopped: put the page on the field and fade it in. Whatever travel the hand
+   * The hold is over and the hand has stopped: put the page on the field, for the grid to load. Whatever travel the hand
    * had not finished a page with is dropped — it has let go, and there is nothing on the field to settle back.
    */
   const arrive = (next: number, d: 1 | -1) => {
@@ -411,17 +386,17 @@ function createTurn(
     shown = next
     setPhase("in", d)
     write(0)
-    // The fade starts once the page is in the DOM (`committed`, from a layout effect): started before, its first frame
-    // could show the page that was leaving.
+    // The arrival starts once the page is in the DOM (`committed`, from a layout effect): started before, its first
+    // frame could show the page that was leaving.
     waitingIn = true
     react.setShown(next)
     if (committed === next) reveal()
   }
 
   /**
-   * The field is washing: arrive, turn a page more, or wait. A page more when the hand has travelled one since the pass
-   * began, and the pass is at least STEP_MIN_SHARE across; arrive when the pass has crossed and the hand has been
-   * quiet for its settle (with no hold, at once — the hand's travel then starts the next turn once this page is in).
+   * The field is washing: arrive, turn a page more, or wait. A page more when the hand has travelled one since the step
+   * began, and the hold is at least STEP_MIN_SHARE through; arrive when the hold is over and the hand has been quiet
+   * for its settle (with no hold, at once — the hand's travel then starts the next turn once this page is in).
    */
   const check = () => {
     window.clearTimeout(holdTimer)
@@ -442,14 +417,13 @@ function createTurn(
   }
 
   /**
-   * Turn on to `next` without putting anything on the field: the ripple plays for it, and the wash starts again. The
-   * first pass has already cut the last page away, or is still finishing it; this one has nothing left to wash.
+   * Turn on to `next` without putting anything on the field: the pager's bar moves on, and the hold starts again. The
+   * last page has already faded away, or is still fading.
    */
   const step = (next: number) => {
     const d: 1 | -1 = next > coming ? 1 : -1
     ahead = 0
     pending = 0
-    fillColour()
     setPhase("wash", d)
     write(d)
     coming = next
@@ -461,8 +435,8 @@ function createTurn(
   }
 
   /**
-   * Commit a turn from wherever the hand had it (D37): the ripple starts and washes the page away, the arrow fills the
-   * rest of the way, and the next page comes when the pass has crossed. `carry` is travel past the turn, in pages.
+   * Commit a turn from wherever the hand had it: the page fades away, the arrow fills the rest of the way, and the next
+   * page comes when the hold is over, to load (D48). `carry` is travel past the turn, in pages.
    */
   const complete = (next: number, d: 1 | -1, carry = 0) => {
     // From the hand, the fill is already moving: ease out of it. From rest, ease in.
@@ -478,8 +452,7 @@ function createTurn(
     goal = d
     passAt = performance.now()
     followUntil = passAt + TURN_MS
-    // Under reduced motion there is no hold and no wash: the page is swapped at once.
-    washDue = inputs.current.hold > 0
+    // Under reduced motion there is no hold: the page is swapped at once, and the grid does not load it.
     react.setComing(next)
     const ms = inputs.current.reduce ? 0 : Math.max(0, TURN_MS * (1 - Math.abs(progress)))
     tween(1, ms, fromHand ? easeOut : easeIn, d, () => {})
@@ -611,7 +584,7 @@ function createTurn(
 
   /**
    * A change of `page` from outside — ← →, an arrow, a host's toolbar — plays the turn; through the wash it turns on
-   * with it, a pass. A request that arrives while the next page is fading in waits for the field to be idle; the caller
+   * with it, a step. A request that arrives while the next page is arriving waits for the field to be idle; the caller
    * asks again when the phase settles.
    */
   const request = (page: number) => {
@@ -639,33 +612,11 @@ function createTurn(
     if (waitingIn && page === shown && phase === "in") reveal()
   }
 
-  /**
-   * React has the page coming in the DOM, and the grid has asked for its ripple the frame after (grid.tsx,
-   * `useGridRipple`, a layout effect of the child, so it ran just before this): a committed turn's wash takes the same
-   * frame, and every box's cell is cut as its line is lit.
-   */
-  const washFrom = () => {
-    if (!washDue) return
-    washDue = false
-    const d = dir
-    washRaf = window.requestAnimationFrame(() => {
-      washRaf = 0
-      const el = tracksEl()
-      const { metrics } = inputs.current
-      if (!el || !metrics || phase !== "wash") return
-      washing = washAway(el, metrics, d)
-    })
-  }
-
   return {
     handlers: { onWheel, onTouchStart, onTouchMove, onTouchEnd, onTouchCancel: onTouchEnd },
     request,
     commit,
-    washFrom,
-    dispose: () => {
-      stop()
-      unwash()
-    },
+    dispose: stop,
   }
 }
 
@@ -673,8 +624,8 @@ function createTurn(
  * Drive the turn. `page` is where the caller wants to be; `shown` is the page on the field. A change of `page` plays
  * the turn — the wash, then the in-phase; the wheel or a finger fills the arrow by hand and, when the turn commits,
  * turns the page itself and tells the caller through `onPage`. `hold` is how long the wash holds the next page back —
- * the pass's crossing (D32, D37) — and the next page is only put on the field after it, and after the hand has stopped:
- * a hand still scrolling turns on through the emptied field, a page a pass.
+ * the last page fading away — and the next page is only put on the field after it, and after the hand has stopped: a
+ * hand still scrolling turns on through the emptied field, a page a step.
  */
 export function usePageTurn(page: number, count: number, metrics: GridMetrics | null, onPage?: (page: number) => void, hold = 0): PageTurn {
   const [shown, setShown] = React.useState(page)
@@ -699,10 +650,8 @@ export function usePageTurn(page: number, count: number, metrics: GridMetrics | 
   if (!engine.current) engine.current = createTurn(page, rootRef, inputs, { setShown, setComing, setTurn })
   const t = engine.current
 
-  // The fade waits for the next page to be in the DOM; a layout effect runs before that frame is painted.
+  // The arrival waits for the next page to be in the DOM; a layout effect runs before that frame is painted.
   React.useLayoutEffect(() => t.commit(shown), [t, shown])
-  // The wash starts in the ripple's frame, once the page coming is set.
-  React.useLayoutEffect(() => t.washFrom(), [t, coming])
   // A request that arrived mid-turn is asked again whenever the phase moves on.
   React.useEffect(() => t.request(page), [t, page, turn.phase, metrics])
   React.useEffect(() => () => t.dispose(), [t])
@@ -725,9 +674,9 @@ type GridPageSurfaceProps = {
  * box between the grid and its items and the placement would stop working. With no `renderItem`, a slot item draws
  * its own content (Slots.md); anything else draws nothing.
  *
- * Memoised, and the turn is not a prop: the phase is an attribute on the tracks (globals.css fades the next page in off
- * it) and the wash an animation on each box (grid.tsx), so a turn starting, washing or ending renders no card. It
- * rendered every card on the page at each phase — the first wheel event of every turn among them.
+ * Memoised, and the turn is not a prop: the phase is an attribute on the tracks (globals.css fades the page away off
+ * it) and the loader paints each box (grid.tsx), so a turn starting, washing or ending renders no card. It rendered
+ * every card on the page at each phase — the first wheel event of every turn among them.
  */
 const GridPageSurface = React.memo(function GridPageSurface({ items, renderItem }: GridPageSurfaceProps) {
   return (
@@ -753,14 +702,9 @@ export type GridPagesProps = {
   onPageChange?: (page: number) => void
   /** ← and → turn the page while nothing is focused that wants the keys. The wheel, a finger and the pager's arrows always do. */
   keyboard?: boolean
-  /** Open by drawing the grid in, holding the drawing while the page loads (Grid.md D31). */
+  /** Load page 1 with the loader, turning while the page loads (Grid.md D31, D48). Every other page loads with it anyway. */
   intro?: boolean
-  /**
-   * Run the intro's drawing through the field as the page turns: up going forward, down going back (Grid.md D32). The
-   * pass washes the page away either way (D37); this draws its lines.
-   */
-  ripple?: boolean
-  /** The pointer is a lime ring that fills while pressed, and the cell under it is lit (Grid.md D34). */
+  /** The pointer is a violet ring that fills while pressed, and the cell under it is lit (Grid.md D34, D43). */
   cursor?: boolean
   className?: string
   onMetrics?: (metrics: GridMetrics) => void
@@ -778,7 +722,6 @@ function GridPages({
   onPageChange,
   keyboard = true,
   intro,
-  ripple,
   cursor,
   className,
   onMetrics,
@@ -795,6 +738,8 @@ function GridPages({
   const pages = React.useMemo(() => (metrics ? resolvePages(layout, metrics) : null), [layout, metrics])
 
   const count = pages?.length ?? 1
+  // What the numbered bar calls each page (D46), memoised with the pages so the memoised bar is not redrawn every frame.
+  const titles = React.useMemo(() => pages?.map((p) => p.title), [pages])
   const [pageState, setPageState] = React.useState(defaultPage)
   const page = Math.min(pageProp ?? pageState, count - 1)
   const setPage = React.useCallback(
@@ -806,13 +751,12 @@ function GridPages({
     [count, onPageChange],
   )
 
-  // A turn holds the next page back while the pass crosses the field and washes the last page away (D32, D37) — and a
-  // frame more, since the pass starts the frame after the page it plays for is set (grid.tsx, `useGridRipple`). With
-  // the ripple's lines or without them: the wash is the turn.
-  const hold = React.useMemo(() => (metrics ? rippleSpan(metrics.cols, metrics.rows) + RIPPLE_START_MS : 0), [metrics])
+  // A turn holds the next page back while the last one fades away; then the grid loads it (D48). It held it while a
+  // ripple crossed the field and washed the page away until D48 (D32, D37).
+  const hold = metrics ? TURN_MS : 0
   const { shown, coming, rootRef, handlers } = usePageTurn(page, metrics ? count : 1, metrics, setPage, hold)
-  // The arrows wait for the intro like the wheel, the finger and the keys (D31): hidden by its cover, they can still
-  // take focus, and a turn under the cover would hand over to the wrong page.
+  // The arrows wait for the intro like the wheel, the finger and the keys (D31): held back, they can still take focus,
+  // and a turn before page 1 is in would hand over to the wrong page.
   const onTurn = React.useCallback(
     (dir: 1 | -1) => {
       if (rootRef.current?.hasAttribute("data-intro")) return
@@ -829,14 +773,21 @@ function GridPages({
     [rootRef, setPage],
   )
 
+  // The keys turn as the pager's arrows do: ↓ presses the arrow that wears ↓, forward, and ↑ the one that wears ↑,
+  // back (their glyphs are swapped against the hand's direction, grid-pager.tsx) — his, 2026-09-26: "map the up and
+  // down arrow with keys". ← → as before. A key a focused component has already taken — a menu, a select, a slider,
+  // a radio group all use ↑ ↓ — is theirs, and so is one held with a modifier.
   React.useEffect(() => {
     if (!keyboard) return
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
       const target = event.target as HTMLElement | null
       if (target && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))) return
       if (rootRef.current?.hasAttribute("data-intro")) return
-      if (event.key === "ArrowRight") setPage(page + 1)
-      else if (event.key === "ArrowLeft") setPage(page - 1)
+      const dir = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 0
+      if (!dir) return
+      event.preventDefault()
+      setPage(page + dir)
     }
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
@@ -849,14 +800,13 @@ function GridPages({
       ref={rootRef}
       overlay={overlay}
       intro={intro}
-      ripple={ripple}
       cursor={cursor}
-      // The ripple plays for the page the field is turning to, as soon as the turn commits (`coming`).
-      page={Math.min(coming, count - 1)}
+      // The page on the field: the grid loads each new one (D48).
+      page={Math.min(shown, count - 1)}
       onMetrics={handleMetrics}
       // touch-none: a finger on the field drives the turn, and the browser must not pan or refresh under it.
       className={cn("touch-none", className)}
-      // How long the next page takes to fade in (globals.css), the in-phase's own length.
+      // How long the page takes to fade away (globals.css), the wash's own length.
       style={TURN_STYLE}
       {...handlers}
     >
@@ -865,6 +815,7 @@ function GridPages({
         page={Math.min(shown, count - 1)}
         coming={Math.min(coming, count - 1)}
         count={count}
+        titles={titles}
         onTurn={onTurn}
         onGo={onGo}
         bar={layout.bar}

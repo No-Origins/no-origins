@@ -17,6 +17,11 @@
  * it from its own source text (`workerSource`). What it needs arrives in messages: the field, the colours, the timing
  * of each pass as the per-cell delays the main thread's plan computed (grid.tsx, `ripplePlan`), so the lines, the
  * cover and the wash (D37) share one plan and one clock — the epoch in ms (`timeOrigin + now`), the same in a worker.
+ *
+ * A cell is a circle (D40, 2026-09-26): its dashes run round the circle inside its square, and what the front reaches
+ * first is that circle — the intro uncovers a disc, then, `lace` ms later, the rest of the cell's tile, so the front
+ * leaves a lace of round holes behind it, as the wash does (grid.tsx, `washAway`). A circle cannot tile the box, and
+ * the second step is what leaves nothing of the cover behind.
  */
 
 /** How far the lines' canvas runs past the field on every side, in px: room for the glow, 16px on light (D31). */
@@ -47,14 +52,15 @@ export type FieldColours = {
   lines: FieldRgba[]
   /** The glow's blur, in px: `--grid-intro-glow`. */
   glow: number
-  /** The pointer's cell (D34): `--lime`. */
+  /** The pointer's cell (D34, D43): `--violet`. */
   cursor: FieldRgba
   /** The page's own colour, `--background`: what the intro reveals, tile by tile, over the grid's cover colour. */
   ground: FieldRgba
 }
 
 export type FieldMessage =
-  | { type: "init"; field: unknown; lines: unknown; fade: number; pad: number }
+  /** `lace`: how long a cell's round cut stands before the rest of its tile goes (D40). */
+  | { type: "init"; field: unknown; lines: unknown; fade: number; pad: number; lace: number }
   | { type: "geometry"; geometry: FieldGeometry }
   | { type: "colours"; colours: FieldColours }
   | { type: "overlay"; on: boolean }
@@ -62,9 +68,10 @@ export type FieldMessage =
   | { type: "pass"; layer: number; delays: Float64Array; span: number; zero: number }
   /**
    * The intro's reveal (D31): while it runs the grid wears the cover's colour (`--grid-intro-from`, globals.css), and at
-   * `zero + delays[i]` each cell's tile is painted back in the page's own colour and its dashes drawn — the cover
-   * lifting, on the painter's clock, with nothing from the main thread in the way. `delays` omitted: the intro is over
-   * and the grid has its own colour again, so what was painted for it need not be any more.
+   * `zero + delays[i]` each cell's disc is painted back in the page's own colour and its dashes drawn, and `lace` ms
+   * later the rest of its tile (D40) — the cover lifting, on the painter's clock, with nothing from the main thread in
+   * the way. `delays` omitted: the intro is over and the grid has its own colour again, so what was painted for it need
+   * not be any more.
    */
   | { type: "reveal"; delays?: Float64Array; span?: number; zero?: number }
   /** The pointer's cell, −1 for none; the one it leaves fades over `fade` ms from `at`. */
@@ -110,6 +117,7 @@ export function gridFieldPainter(scope: PainterScope) {
 
   let fade = 500
   let pad = 32
+  let lace = 0
   let g: FieldGeometry | null = null
   let colours: FieldColours | null = null
   let overlay = false
@@ -121,6 +129,7 @@ export function gridFieldPainter(scope: PainterScope) {
   let cursor = -1
   let cursorFade = 500
   let fading: { cell: number; at: number }[] = []
+  /** `shown`, a cell at a time: 0 still under the cover, 1 its disc uncovered, 2 its whole tile. */
   let reveal: { delays: Float64Array; span: number; zero: number; shown: Uint8Array; done: boolean } | null = null
   let scheduled = false
   let stopped = false
@@ -135,26 +144,35 @@ export function gridFieldPainter(scope: PainterScope) {
   }
 
   /**
-   * One cell's dashes, added to the current path in device px: the box's outermost pixel ring in 3px dashes, each side
-   * its own run that starts and ends on a dash with the gaps evened out to fit — as the engines draw a 1px `dashed`
-   * border, so the field looks as it did when it was drawn by CSS. Every edge snapped to a device pixel.
+   * One cell's ring, added to the current path in device px (D40): the circle through the middle of the cell's
+   * outermost pixel ring, where a 1px border would have run, starting half a dash before the top so a dash is centred
+   * there. Stroked with `strokeRings`. Until D40 it was the square's own 3px dashes, as the engines draw a `dashed`
+   * border, each edge snapped to a device pixel; a circle has no pixel to snap to and is drawn antialiased.
    */
-  const dashes = (ctx: Ctx, x: number, y: number, s: number) => {
+  const ring = (ctx: Ctx, x: number, y: number, s: number) => {
     const dpr = g!.dpr
-    const px = (v: number) => Math.round(v * dpr)
-    const n = Math.max(2, Math.round((s + 3) / 6))
-    const step = (s - 3) / (n - 1)
-    for (let i = 0; i < n; i++) {
-      const a = i * step
-      const x0 = px(x + a)
-      const x1 = px(x + a + 3)
-      const y0 = px(y + a)
-      const y1 = px(y + a + 3)
-      ctx.rect(x0, px(y), x1 - x0, px(y + 1) - px(y))
-      ctx.rect(x0, px(y + s - 1), x1 - x0, px(y + s) - px(y + s - 1))
-      ctx.rect(px(x), y0, px(x + 1) - px(x), y1 - y0)
-      ctx.rect(px(x + s - 1), y0, px(x + s) - px(x + s - 1), y1 - y0)
-    }
+    const r = (s / 2 - 0.5) * dpr
+    const cx = (x + s / 2) * dpr
+    const cy = (y + s / 2) * dpr
+    const start = -Math.PI / 2 - (1.5 * dpr) / r
+    ctx.moveTo(cx + r * Math.cos(start), cy + r * Math.sin(start))
+    ctx.arc(cx, cy, r, start, start + 2 * Math.PI)
+  }
+  /**
+   * Stroke the rings on the current path, 1px, in 3px dashes — as many round the circle as a 6px pitch gives, the gaps
+   * evened out so the last closes on the first, the square's rule for each of its sides. Every cell is one size, so one
+   * pattern serves the lot, and a pattern starts again with each ring.
+   */
+  const strokeRings = (ctx: Ctx, colour: FieldRgba) => {
+    const dpr = g!.dpr
+    const c = 2 * Math.PI * (g!.cell / 2 - 0.5) * dpr
+    const n = Math.max(4, Math.round(c / (6 * dpr)))
+    ctx.save()
+    ctx.lineWidth = dpr
+    ctx.setLineDash([3 * dpr, c / n - 3 * dpr])
+    ctx.strokeStyle = rgba(colour)
+    ctx.stroke()
+    ctx.restore()
   }
 
   /**
@@ -172,29 +190,46 @@ export function gridFieldPainter(scope: PainterScope) {
     const y0 = px(edge(r, rows, fy, boxH))
     return [x0, y0, px(edge(c + 1, cols, fx, boxW)) - x0, px(edge(r + 1, rows, fy, boxH)) - y0] as const
   }
+  /**
+   * A cell's disc in the box, in device px — centre and radius: the circle the front uncovers first (D40), half a pitch
+   * across so neighbouring discs touch in the middle of the gutter, and inside the cell's tile.
+   */
+  const disc = (i: number) => {
+    const { cols, cell, gap, fx, fy, dpr } = g!
+    const pitch = cell + gap
+    return [(fx + (i % cols) * pitch + cell / 2) * dpr, (fy + Math.floor(i / cols) * pitch + cell / 2) * dpr, (pitch / 2) * dpr] as const
+  }
+  const addDisc = (ctx: Ctx, cx: number, cy: number, r: number) => {
+    ctx.moveTo(cx + r, cy)
+    ctx.arc(cx, cy, r, 0, 2 * Math.PI)
+  }
   /** The reveal's cells on this field, or none: a reveal made for another field (the box changed under it) shows all. */
   const shownCells = () => (reveal && g && reveal.shown.length === g.cols * g.rows ? reveal.shown : null)
 
-  /** Paint these cells: their tiles in the page's colour while the intro is on, and their dashes if the overlay is. */
-  const paintCells = (ctx: Ctx, cells: number[]) => {
-    if (!g || !colours || !cells.length) return
+  /**
+   * Paint these cells: while the intro is on, the discs of `discs` and the tiles of `tiles` in the page's colour; then
+   * all their rings, if the overlay is on. A tile covers its own ring, so a ring is drawn again after its tile, and
+   * neither a disc nor a tile reaches another cell's ring.
+   */
+  const paintCells = (ctx: Ctx, discs: number[], tiles: number[] = []) => {
+    if (!g || !colours || (!discs.length && !tiles.length)) return
     const pitch = g.cell + g.gap
     if (reveal) {
       ctx.beginPath()
-      for (const i of cells) ctx.rect(...tile(i))
+      for (const i of discs) addDisc(ctx, ...disc(i))
+      for (const i of tiles) ctx.rect(...tile(i))
       ctx.fillStyle = rgba(colours.ground)
       ctx.fill()
     }
     if (!overlay) return
     ctx.beginPath()
-    for (const i of cells) dashes(ctx, g.fx + (i % g.cols) * pitch, g.fy + Math.floor(i / g.cols) * pitch, g.cell)
-    ctx.fillStyle = rgba(colours.dash)
-    ctx.fill()
+    for (const i of [...discs, ...tiles]) ring(ctx, g.fx + (i % g.cols) * pitch, g.fy + Math.floor(i / g.cols) * pitch, g.cell)
+    strokeRings(ctx, colours.dash)
   }
 
   /**
-   * The field's canvas, whole — the box: every cell's dashes at rest, when the field, the colours or the overlay change;
-   * while the intro is on, only the cells it has revealed, the rest as their moment comes (`paintReveal`).
+   * The field's canvas, whole — the box: every cell's ring at rest, when the field, the colours or the overlay change;
+   * while the intro is on, only what it has revealed, the rest as its moment comes (`paintReveal`).
    */
   const paintField = () => {
     if (!fieldCv || !g) return
@@ -203,37 +238,49 @@ export function gridFieldPainter(scope: PainterScope) {
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.clearRect(0, 0, fieldCv.width, fieldCv.height)
     const shown = shownCells()
-    const cells: number[] = []
-    for (let i = 0; i < g.cols * g.rows; i++) if (!shown || shown[i]) cells.push(i)
-    paintCells(ctx, cells)
+    const discs: number[] = []
+    const tiles: number[] = []
+    for (let i = 0; i < g.cols * g.rows; i++) {
+      if (!shown) discs.push(i)
+      else if (shown[i] === 2) tiles.push(i)
+      else if (shown[i] === 1) discs.push(i)
+    }
+    paintCells(ctx, discs, tiles)
   }
 
-  /** The intro's reveal, this frame: every cell whose moment has come since the last. True until the last. */
+  /** The intro's reveal, this frame: every disc and every tile whose moment has come since the last. True until the last. */
   const paintReveal = (now: number) => {
     if (!reveal || reveal.done) return false
     const t = now - reveal.zero
     const shown = shownCells()
     if (fieldCv && shown) {
-      const cells: number[] = []
+      const discs: number[] = []
+      const tiles: number[] = []
       for (let i = 0; i < shown.length; i++) {
-        if (shown[i] || reveal.delays[i]! > t) continue
-        shown[i] = 1
-        cells.push(i)
+        const at = reveal.delays[i]!
+        if (shown[i]! < 2 && at + lace <= t) {
+          shown[i] = 2
+          tiles.push(i)
+        } else if (shown[i] === 0 && at <= t) {
+          shown[i] = 1
+          discs.push(i)
+        }
       }
       const ctx = ctxOf(fieldCv)
       ctx.setTransform(1, 0, 0, 1, 0, 0)
-      paintCells(ctx, cells)
+      paintCells(ctx, discs, tiles)
     }
-    if (t <= reveal.span) return true
+    if (t <= reveal.span + lace) return true
     reveal.done = true
     return false
   }
 
   /**
    * One lit cell per line colour, painted once and stamped wherever the cell is lit: the glow as the cell's box-shadows
-   * had it (globals.css until D38) — outside the box, 1/3 of the blur at 12% and the whole blur at 30%, and the same two
-   * inside it — and the dashes in the line's colour on top. A shadow is cast by a shape thrown off the sprite, so only
-   * the shadow lands on it; the outer ones are clipped to outside the box and the inset ones to inside its border.
+   * had it (globals.css until D38) — outside the cell, 1/3 of the blur at 12% and the whole blur at 30%, and the same two
+   * inside it — and the ring in the line's colour on top. Since D40 the cell the glow is cast by is its circle, so it
+   * glows round, as a ring does. A shadow is cast by a shape thrown off the sprite, so only the shadow lands on it; the
+   * outer ones are clipped to outside the circle and the inset ones to inside its line.
    */
   const makeSprites = () => {
     if (!g || !colours) return
@@ -242,9 +289,9 @@ export function gridFieldPainter(scope: PainterScope) {
     spritesFor = key
     const dpr = g.dpr
     const S = Math.round((g.cell + 2 * pad) * dpr)
-    const o = Math.round(pad * dpr)
-    const s = Math.round(g.cell * dpr)
-    const b = Math.round(dpr)
+    const r = (g.cell / 2) * dpr
+    const c = pad * dpr + r
+    const b = dpr
     const OFF = S * 3
     sprites = colours.lines.map((line) => {
       const sprite = scope.canvas(S, S) as HTMLCanvasElement
@@ -252,10 +299,10 @@ export function gridFieldPainter(scope: PainterScope) {
       const shadow = (blur: number, alpha: number, inset: boolean) => {
         ctx.save()
         ctx.beginPath()
-        if (inset) ctx.rect(o + b, o + b, s - 2 * b, s - 2 * b)
+        if (inset) addDisc(ctx, c, c, r - b)
         else {
           ctx.rect(0, 0, S, S)
-          ctx.rect(o, o, s, s)
+          addDisc(ctx, c, c, r)
         }
         ctx.clip(inset ? "nonzero" : "evenodd")
         ctx.shadowColor = rgba(line, alpha)
@@ -265,23 +312,22 @@ export function gridFieldPainter(scope: PainterScope) {
         ctx.beginPath()
         if (inset) {
           ctx.rect(-OFF - S, -S, 3 * S, 3 * S)
-          ctx.rect(o + b - OFF, o + b, s - 2 * b, s - 2 * b)
+          addDisc(ctx, c - OFF, c, r - b)
           ctx.fill("evenodd")
         } else {
-          ctx.rect(o - OFF, o, s, s)
+          addDisc(ctx, c - OFF, c, r)
           ctx.fill()
         }
         ctx.restore()
       }
-      // The first shadow in a CSS list is on top, so they go down in reverse: outer, then inset, then the dashes.
+      // The first shadow in a CSS list is on top, so they go down in reverse: outer, then inset, then the ring.
       shadow(colours!.glow, 0.3, false)
       shadow(colours!.glow / 3, 0.12, false)
       shadow(colours!.glow, 0.3, true)
       shadow(colours!.glow / 3, 0.12, true)
       ctx.beginPath()
-      dashes(ctx, pad, pad, g!.cell)
-      ctx.fillStyle = rgba(line)
-      ctx.fill()
+      ring(ctx, pad, pad, g!.cell)
+      strokeRings(ctx, line)
       return sprite
     })
   }
@@ -298,8 +344,8 @@ export function gridFieldPainter(scope: PainterScope) {
     const { cols, rows, dpr } = g
     const pitch = g.cell + g.gap
     let busy = false
-    // While the intro reveals the box, a line and its glow show only on the tiles already revealed, as they did when
-    // the cover was over them: nothing lights the cover's colour ahead of the front.
+    // While the intro reveals the box, a line and its glow show only on the discs and tiles already revealed, as they
+    // did when the cover was over them: nothing lights the cover's colour ahead of the front.
     const shown = reveal && !reveal.done ? shownCells() : null
     ctx.save()
     if (shown) {
@@ -307,9 +353,13 @@ export function gridFieldPainter(scope: PainterScope) {
       const oy = Math.round((g.fy - pad) * dpr)
       ctx.beginPath()
       for (let i = 0; i < shown.length; i++) {
-        if (!shown[i]) continue
-        const [x, y, w, h] = tile(i)
-        ctx.rect(x - ox, y - oy, w, h)
+        if (shown[i] === 2) {
+          const [x, y, w, h] = tile(i)
+          ctx.rect(x - ox, y - oy, w, h)
+        } else if (shown[i] === 1) {
+          const [cx, cy, r] = disc(i)
+          addDisc(ctx, cx - ox, cy - oy, r)
+        }
       }
       ctx.clip()
     }
@@ -344,12 +394,9 @@ export function gridFieldPainter(scope: PainterScope) {
     // The pointer's cell over the lines, lit at once, and the ones it left fading back.
     const at = (cell: number, alpha: number) => {
       ctx.globalAlpha = alpha
-      ctx.setTransform(1, 0, 0, 1, Math.round(pad * dpr), Math.round(pad * dpr))
       ctx.beginPath()
-      dashes(ctx, (cell % cols) * pitch, Math.floor(cell / cols) * pitch, g!.cell)
-      ctx.fillStyle = rgba(colours!.cursor)
-      ctx.fill()
-      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ring(ctx, pad + (cell % cols) * pitch, pad + Math.floor(cell / cols) * pitch, g!.cell)
+      strokeRings(ctx, colours!.cursor)
     }
     fading = fading.filter((f) => now - f.at < cursorFade)
     for (const f of fading) {
@@ -381,6 +428,7 @@ export function gridFieldPainter(scope: PainterScope) {
         linesCv = m.lines as HTMLCanvasElement
         fade = m.fade
         pad = m.pad
+        lace = m.lace
         break
       case "geometry":
         g = m.geometry
@@ -398,10 +446,13 @@ export function gridFieldPainter(scope: PainterScope) {
         passes[m.layer]?.push({ delays: m.delays, span: m.span, zero: m.zero })
         break
       case "reveal":
-        // Over: nothing is painted again for it — the grid is back in its own colour, the same as the tiles'.
+        // Over: the field is painted again without its tiles, the rings on a clear canvas. The tiles are the page's own
+        // colour, so the grid looks the same, but they are opaque: left on, they hid whatever an app draws behind the
+        // grid (the portfolio's tagline, 2026-09-27).
         if (!m.delays || m.span === undefined || m.zero === undefined) {
           if (reveal) reveal.done = true
           reveal = null
+          paintField()
           break
         }
         reveal = { delays: m.delays, span: m.span, zero: m.zero, shown: new Uint8Array(m.delays.length), done: false }
@@ -443,7 +494,10 @@ export type FieldPainter = {
  * Start a painter on two fresh canvases. In a worker when the browser can hand it the canvases — Chrome, Firefox,
  * Safari 16.4+ — so its frames are its own; else, or if the worker cannot start, on the main thread with the same code.
  */
-export function startFieldPainter(canvases: { field: HTMLCanvasElement; lines: HTMLCanvasElement }, init: { fade: number; pad: number }): FieldPainter {
+export function startFieldPainter(
+  canvases: { field: HTMLCanvasElement; lines: HTMLCanvasElement },
+  init: { fade: number; pad: number; lace: number },
+): FieldPainter {
   const canHand =
     typeof Worker !== "undefined" &&
     typeof OffscreenCanvas !== "undefined" &&

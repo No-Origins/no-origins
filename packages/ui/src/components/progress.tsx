@@ -5,6 +5,8 @@ import { cn } from "cn"
 import gsap from "gsap"
 import { Progress as ProgressPrimitive } from "radix-ui"
 
+import { motionEase, motionMs } from "@no-origins/ui/lib/motion"
+
 /**
  * Diverges from shadcn's copy (packages/ui/CLAUDE.md rule 6): `animate` makes the indicator GROW into place instead
  * of appearing already full, tweened with GSAP — his call, 2026-09-21, for the bars on the Stack and Beyond screens.
@@ -17,6 +19,11 @@ import { Progress as ProgressPrimitive } from "radix-ui"
  * `delay` is MILLISECONDS, like every other duration in this system; GSAP's own unit is seconds and the conversion
  * happens here. The transition class is dropped while GSAP drives, because a CSS transition on a property something
  * else writes every frame fights it.
+ *
+ * Its numbers are the grow family's tokens (Motion.md M4, 2026-09-27), read off the indicator when a growth starts, so
+ * the motion studio's stage can retune them: `--motion-grow` for the first growth, `--motion-grow-change` for a move
+ * to a new value, one curve for both (`--motion-grow-ease`; the change was power2.out until then). The fallbacks are
+ * globals.css's values.
  */
 function Progress({
   className,
@@ -47,12 +54,13 @@ function Progress({
     // browser has already resolved to pixels — so the inline `translateX(-100%)` below arrives as x = −width px, and
     // an `xPercent` tween lands on top of it: every bar sat exactly 100% too far left (measured, 2026-09-21).
     // Pinning x to 0 makes xPercent the whole of the translation.
+    const ease = motionEase(el, "--motion-grow-ease")
     const tween = grown.current
-      ? gsap.to(el, { xPercent: to, x: 0, duration: 0.4, ease: "power2.out", overwrite: "auto" })
+      ? gsap.to(el, { xPercent: to, x: 0, duration: motionMs(el, "--motion-grow-change", 400) / 1000, ease, overwrite: "auto" })
       : gsap.fromTo(
           el,
           { xPercent: -100, x: 0 },
-          { xPercent: to, x: 0, duration: 0.9, delay: delay / 1000, ease: "power3.out", overwrite: "auto" },
+          { xPercent: to, x: 0, duration: motionMs(el, "--motion-grow", 900) / 1000, delay: delay / 1000, ease, overwrite: "auto" },
         )
     grown.current = true
     return () => {
@@ -64,7 +72,7 @@ function Progress({
     <ProgressPrimitive.Root
       data-slot="progress"
       className={cn(
-        "relative flex h-0.5 w-full items-center overflow-x-hidden rounded-none bg-muted",
+        "relative flex h-0.5 w-full items-center overflow-x-hidden rounded-lg bg-muted",
         className
       )}
       {...props}
