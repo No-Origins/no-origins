@@ -18,13 +18,18 @@ import { resolveSubSlots, type GridLayoutItem, type SlotAlign, type SlotFill, ty
  * A slot fills its cell span exactly and CLIPS — nothing on the grid scrolls (Grid.md D3) — so a component that does
  * not fit is in a slot that is too small. A component that is already a box (a Card) is placed with `fill:
  * transparent`, `inset: 0` and `stretch`, so the slot is invisible around it and the card's own border shows.
+ *
+ * A surface is round (Grid.md D39): the system's one radius, half a cell, so a 1×1 is a circle, a slot one cell tall
+ * a pill, and every bigger one a box with a cell's curve at each corner; it clips to that curve. A `transparent` slot
+ * is not rounded — it has no edge to see, and a round clip would only cut what it holds at the corners; what it
+ * holds rounds itself.
  */
 
 const SURFACE: Record<SlotFill, string> = {
   transparent: "",
-  background: "bg-background",
-  muted: "bg-muted",
-  card: "bg-card border-border border",
+  background: "rounded-lg bg-background",
+  muted: "rounded-lg bg-muted",
+  card: "rounded-lg bg-card border-border border",
 }
 
 /** A fill's inset when none is set. */

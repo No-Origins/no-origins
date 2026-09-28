@@ -57,7 +57,7 @@ function MapLayer({
               role="listitem"
               onClick={() => onJump(layerIndex)}
               className={cn(
-                "border-border bg-card hover:bg-accent flex w-full items-stretch border text-start transition-transform",
+                "border-border bg-card hover:bg-accent flex w-full items-stretch overflow-hidden rounded-lg border text-start transition-transform",
                 "md:ms-[calc(var(--stair)*1.5rem)]",
                 isCurrent && "bg-accent shadow-[4px_4px_0_0_var(--foreground)]",
                 isVisited && !isCurrent && "bg-muted",
@@ -98,7 +98,7 @@ function Layer1() {
           { n: "03", title: "Pure core + OTP shell.", body: "Decision logic stays testable; the GenServer owns effects." },
           { n: "04", title: "AI is optional.", body: "Strategies plug into the same cmd/2 contract when you need LLMs." },
         ].map((item) => (
-          <li key={item.n} className="border-border bg-card flex gap-3 border px-4 py-3 text-sm">
+          <li key={item.n} className="border-border bg-card flex gap-3 rounded-lg border px-4 py-3 text-sm">
             <span className="font-heading shrink-0 text-base font-bold">{item.n}</span>
             <span>
               <strong>{item.title}</strong> {item.body}

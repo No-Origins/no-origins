@@ -439,7 +439,7 @@ export const MOLECULES: PageContent = {
         span: CARD(6),
         render: () => (
           <Specimen name="Calendar" note="A month, and the day you picked in it.">
-            <Calendar mode="single" defaultMonth={new Date(2026, 8, 1)} className="rounded-none border" />
+            <Calendar mode="single" defaultMonth={new Date(2026, 8, 1)} className="rounded-lg border" />
           </Specimen>
         ),
       },

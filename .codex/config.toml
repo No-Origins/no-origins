@@ -9,3 +9,9 @@ args = [
     "--output-dir",
     "e2e/.mcp",
 ]
+
+[mcp_servers.playwright.tools.browser_navigate]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_run_code_unsafe]
+approval_mode = "approve"

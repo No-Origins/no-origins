@@ -95,7 +95,7 @@ export function JidoTour() {
                 aria-selected={i === index}
                 onClick={() => goTo(i)}
                 className={cn(
-                  "border-foreground size-2.5 border",
+                  "border-foreground size-2.5 rounded-lg border",
                   i === index && "bg-foreground",
                   visited.has(i) && i !== index && "bg-muted-foreground/40",
                   !visited.has(i) && i !== index && "bg-transparent",

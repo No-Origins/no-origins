@@ -55,6 +55,11 @@ padding; the gap between sub-slots is the gutter, already decided per breakpoint
 Alignment is of the **component** within the slot. `stretch` makes it fill the slot; anything else lets it take its
 own size and places it. A slot holding sub-slots ignores alignment: its children are placed by coordinate.
 
+*Since 2026-09-26 (Grid-v2.md D39)* the three surfaces — `background`, `muted`, `card` — are **round**: the system's
+one radius, half a cell, so a 1×1 surface is a circle, one a cell tall a pill, and a bigger one has a cell's curve at
+each corner, and the slot clips to it. `transparent` is not rounded and is no token: it has no edge to see, and a round
+clip would only cut its contents at the corners. There is still no radius token — one radius is the rule.
+
 **S4 — A component has default props, and a few of them are editable.** *Recommended and accepted.* The registry
 (§3) gives every component a default span and default props, and the composer's inspector shows the props that change
 what you see — text, a variant, a placeholder — one field each. It grows as components get used; it does not start as a
@@ -89,12 +94,13 @@ entering a slot, Export. Withdraws S4 and §4 whole, and S1 and S6 in part.
 
 The registry keeps `Placed` and one entry, the pager's arrows (`pager-arrows`, Grid-v2.md D29). *Since 2026-09-25
 three: the pair, and one arrow (`pager-arrow`) and one page number (`pager-page`) a cell, for the numbered bar
-(Grid-v2.md D36).* An entry is a `kind`
+(Grid-v2.md D36). Since 2026-09-27 the page numbers are one entry across the cells between the arrows, the pages
+(`pager-pages`, D46, D47).* An entry is a `kind`
 and a lazy view — no name, group, span, props or defaults, which were the palette's and the inspector's. What stands
 is the model: a layout item carries `slot`, `component` and `children` (S1's first half, S2, S3, S5), `SlotContent`
 renders any of them with no custom `renderItem`, and the pager's bar is still a slot whose cells are sub-slots (D29).
-A slot is written in code, as a layout item; today the one that is written is the bar (`defaultPagerBar`, and the
-portfolio's `numberedPagerBar`).
+A slot is written in code, as a layout item; today the one that is written is the bar (`defaultPagerBar`, and
+`numberedPagerBar`, the portfolio's until P15 and the motion studio's now).
 `SlotInset` now derives from `GRID_SPACING` rather than repeating its five steps, so the inset and the gutter draw
 from one list (S3).
 

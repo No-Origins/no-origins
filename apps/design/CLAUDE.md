@@ -14,7 +14,7 @@ pnpm --filter design dev                 # :3001 (portfolio :3000, admin :3002)
 Three routes, rebuilt 2026-09-16 when the design system was replaced with shadcn/ui, **put on the grid on
 2026-09-21** — his rule: "the grid is the viewport", so no page here scrolls — and **arranged the portfolio's way on
 2026-09-22** — his ask: "similar to how portfolio is designed, update the design app too." Every page is a `GridPages`
-of boxes; overflow goes to the next page, turned by the scroll, the pager's ↑ ↓ on the bottom row, or ← → (Grid.md
+of boxes; overflow goes to the next page, turned by the scroll, the pager's ↑ ↓ on the bottom row, or the keys ↑ ↓ ← → (D42; Grid.md
 D27 — a finger turns it on a phone). The fourth route, `/composer`, was removed on 2026-09-23 with the Compose button
 on every page (Grid-v2.md D30): his words, "remove the Composer feature completely and all the dead code".
 

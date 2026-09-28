@@ -5,6 +5,7 @@ import { cn } from "cn"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { Button } from "@no-origins/ui/components/button"
+import { usePortalContainer } from "@no-origins/ui/components/portal"
 import { XIcon } from "lucide-react"
 
 function Dialog({
@@ -22,7 +23,8 @@ function DialogTrigger({
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
+  // Motion.md M8: into the nearest PortalContainer (the motion studio's stage), else the body; a `container` prop wins.
+  return <DialogPrimitive.Portal data-slot="dialog-portal" container={usePortalContainer()} {...props} />
 }
 
 function DialogClose({
@@ -39,7 +41,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/20 duration-100 supports-backdrop-filter:backdrop-blur-sm data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 isolate z-50 bg-black/20 motion-surface supports-backdrop-filter:backdrop-blur-sm data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
@@ -61,7 +63,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 start-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 rtl:translate-x-1/2 -translate-y-1/2 gap-6 rounded-none bg-popover p-6 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "fixed top-1/2 start-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 rtl:translate-x-1/2 -translate-y-1/2 gap-6 rounded-lg bg-popover p-6 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 motion-surface outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-(--motion-surface-scale) data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-(--motion-surface-scale)",
           className
         )}
         {...props}
