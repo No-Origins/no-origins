@@ -72,7 +72,7 @@ function FeatureCard({ item }: { item: GridLayoutItem }) {
   const inner = (
     <div
       className={cn(
-        "bg-card group hover:border-foreground focus-visible:ring-ring flex h-full w-full flex-col justify-between border p-5 transition-colors outline-none focus-visible:ring-2",
+        "bg-card group hover:border-foreground focus-visible:ring-ring flex h-full w-full flex-col justify-between rounded-lg border p-5 transition-colors outline-none focus-visible:ring-2",
         feature.soon && "opacity-70",
       )}
     >

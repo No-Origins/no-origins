@@ -14,7 +14,7 @@ import { cn } from "@no-origins/ui/lib/utils";
 
 function CodeBlock({ children }: { children: string }) {
   return (
-    <pre className="bg-foreground text-background overflow-x-auto rounded-none border p-4 font-mono text-xs leading-relaxed whitespace-pre">
+    <pre className="bg-foreground text-background overflow-x-auto rounded-lg border p-4 font-mono text-xs leading-relaxed whitespace-pre">
       <code>{children}</code>
     </pre>
   );

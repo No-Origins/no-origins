@@ -5,7 +5,15 @@ import gsap from "gsap"
 import { cn } from "cn"
 
 import { useThemeFlipRegistry, type ThemeFlipper } from "@no-origins/ui/components/theme-provider"
-import { FIELD_PAD, startFieldPainter, type FieldColours, type FieldMessage, type FieldPainter, type FieldRgba } from "@no-origins/ui/lib/grid-field"
+import { paintLoadRing, paintLoadSection, useLoadMotion } from "@no-origins/ui/hooks/use-load-motion"
+import type { LoadBox, LoadFrame } from "@no-origins/ui/lib/load-motion"
+import {
+  FIELD_PAD,
+  startFieldPainter,
+  type FieldColours,
+  type FieldPainter,
+  type FieldRgba,
+} from "@no-origins/ui/lib/grid-field"
 
 /**
  * The base layout (Grid.md — v2 since 2026-09-21).
@@ -223,20 +231,19 @@ export type GridProps = Omit<React.ComponentProps<"div">, "children"> & {
   /** Draw the cells behind the items. */
   overlay?: boolean
   /**
-   * Open by drawing the grid in, and hold the drawing while the page loads (Grid.md D31). Played once per document
-   * load, by the grid that asks for it; never under reduced motion.
+   * Load page 1 with the loader (Grid.md D31, D48): a square of dashed lime rings on the field's centre, one a box,
+   * turning while the page loads, then each ring going to its box and opening into it — loading, his motion (Motion.md
+   * M10). Played once per document load, by the grid that asks for it; never under reduced motion.
    */
   intro?: boolean
   /**
-   * Run the intro's drawing through the field, lines only, when `page` changes (Grid.md D32): up from the bottom when it
-   * grows, down from the top when it shrinks. Never under reduced motion.
+   * The page on the field. `GridPages` passes it, and a change loads the new page with the loader (D48); a grid without
+   * pages has no use for it. Never under reduced motion.
    */
-  ripple?: boolean
-  /** The page on the field, for `ripple`. `GridPages` passes it; a grid without pages has no use for it. */
   page?: number
   /**
-   * Draw the pointer as a lime ring that fills while it is pressed, and light the cell under it: its dashes in lime
-   * (Grid.md D34). A mouse or a pen only: nothing changes on touch.
+   * Draw the pointer as a violet ring that fills while it is pressed, and light the cell under it: its dashes in violet
+   * (Grid.md D34, D43). A mouse or a pen only: nothing changes on touch.
    */
   cursor?: boolean
   onMetrics?: (metrics: GridMetrics) => void
@@ -249,7 +256,6 @@ function Grid({
   children,
   overlay = false,
   intro: introProp = false,
-  ripple = false,
   page,
   cursor: cursorProp = false,
   onMetrics,
@@ -301,11 +307,10 @@ function Grid({
     if (metrics) onMetrics?.(metrics)
   }, [metrics, onMetrics])
 
-  // The field's paint (D38) — the overlay's dashes, the lit lines and the pointer's cell, on canvases one painter
-  // draws — first, so its effects have run before the intro, the ripple and the cursor ask anything of it.
-  const { field, on: painted } = useGridField(overlay || introProp || ripple || cursorProp, metrics, ref, overlay)
-  const intro = useGridIntro(introProp, metrics, ref, field)
-  useGridRipple(ripple && !intro.on, metrics, page, field, ref)
+  // The field's paint (D38) — the overlay's dashes and the pointer's cell, on canvases one painter draws — first, so
+  // its effects have run before the cursor asks anything of it.
+  const { field, on: painted } = useGridField(overlay || cursorProp, metrics, ref, overlay)
+  const { load, finish } = useGridLoad(introProp, metrics, page, ref)
   const cursor = useGridCursor(cursorProp, metrics, ref, field)
 
   // The box's padding is the gutter (D15) — before the field is measured it is the breakpoint's gap by width alone,
@@ -317,20 +322,27 @@ function Grid({
       ref={setRef}
       data-slot="grid"
       data-breakpoint={metrics?.bp}
-      // While the intro runs (D31) — "drawing", then "arriving" as page 1 turns in: the page's boxes and the pager are
-      // held back by globals.css until it hands over, and nothing turns a page.
-      data-intro={intro.on ? intro.phase : undefined}
-      // The ring is the pointer (D34): globals.css draws the system's cursor as the lime ring over the whole grid.
+      // While a page loads (D48) — "loading" as the loader turns, then "opening" as the page's boxes open out of it:
+      // they are held back by globals.css, and then by the loader, until it is over. The intro is the first page's
+      // load: meanwhile the pager is held too, and comes up from its bottom edge as page 1 opens, and nothing turns a page.
+      data-loading={load?.phase}
+      data-intro={load?.intro ? load.phase : undefined}
+      // The ring is the pointer (D34): globals.css draws the system's cursor as the violet ring (D43) over the whole grid.
       data-cursor={cursor.on ? "" : undefined}
       // The grid is always its box: the screen. A className may give it another height when there is chrome above
       // (`h-[calc(100dvh-3.5rem)]`), never a width.
       className={cn("relative flex items-center justify-center h-dvh w-full", className)}
-      style={{ padding: `${gap}px`, ...introStyle(intro.on), ...style }}
+      // The cell, for the system's one radius (D39, globals.css): half of it is every corner on the grid. Before the
+      // box is measured the stylesheet's own reckoning of it from the viewport stands in.
+      style={{ padding: `${gap}px`, ...(metrics ? { "--grid-cell": `${metrics.cell}px` } : null), ...introStyle(!!load?.intro), ...style } as React.CSSProperties}
       {...props}
     >
-      {/* The field's paint (D38) — its dashes, lit lines and the intro's reveal — over the whole box and under the
-          page's boxes; the painter puts its canvases here. */}
-      {painted ? <div ref={field.host} data-slot="grid-field" aria-hidden className="pointer-events-none absolute inset-0" /> : null}
+      {/* The field's paint (D38) — its dashes and the pointer's cell — over the whole box and under the page's boxes;
+          the painter puts its canvases here. Clipped to the box: the lines' canvas runs FIELD_PAD past the field, further
+          than the margin wherever the count leaves little over, and unclipped it scrolled the page — the scrollbars took
+          the box's width, the field re-counted, they went, and round again until React gave up (his report, 2026-09-26:
+          the inspector docked on the right). */}
+      {painted ? <div ref={field.host} data-slot="grid-field" aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden" /> : null}
       {metrics ? (
         <GridContext.Provider value={metrics}>
           <div
@@ -349,6 +361,8 @@ function Grid({
             >
               {children}
             </div>
+            {/* The loader (D48): over the page's boxes, on the field's cells, for as long as the page loads. */}
+            {load ? <GridLoader key={load.key} metrics={metrics} ready={load.phase === "opening"} onIn={() => finish(load.key)} /> : null}
           </div>
           {/* The theme's flip (D28) — the outermost grid on the page takes the switch. */}
           <GridThemeFlip />
@@ -358,127 +372,70 @@ function Grid({
   )
 }
 
-// ── the intro (Grid-v2.md D31, 2026-09-24) ───────────────────────────────────────────────────────────────────────
+// ── loading: the intro and every page change (Grid-v2.md D48, 2026-09-27) ───────────────────────────────────────────
 
 /**
- * His numbers, from the settings he sent back from the motion study: a front that rises from the bottom with a cone
- * for its edge — the centre leads, the sides trail by INTRO_DEPTH steps, the point in the middle — each step
- * INTRO_STEP_MS, every cell a cut. A line is lit the moment it is drawn and fades back to its usual colour over
- * INTRO_FADE_MS, after INTRO_FADE_HOLD_MS. While the page loads the drawing goes again straight away (INTRO_GAP_MS),
- * lines only, lime and violet turn about. The step was 30ms in his settings and is 15ms since 2026-09-25 — "Increase
- * the speed of the ripple" — for the intro and the ripple between pages alike (D32).
+ * How long a lit cell takes to fade back, in ms: the pointer's cell when the pointer leaves it (D34). It was the intro's
+ * lines' fade (D31), his 500ms, until the drawing went (D48).
  */
-const INTRO_STEP_MS = 15
-const INTRO_DEPTH = 12
+const LIT_FADE_MS = 500
 /**
- * The field the cone was tuned on: a 1440 desktop, eighteen columns. INTRO_DEPTH is how far its sides trail THERE; on a
- * narrower field the cone keeps that angle and is shallower, never deeper (his, 2026-09-25: on a phone "the ripple
- * completes the middle two columns and then there is a ripple on the left and right columns" — twelve steps of trail
- * across a half-width of two columns, on a field eight rows tall, was a spike, not a front).
+ * The field's painter still takes the lace (grid-field.ts, D40): the gap between a cell's disc and its tile in the
+ * intro's reveal. Nothing sends it a reveal or a pass since D48, so it cuts nothing.
  */
-const INTRO_CONE_COLS = 18
-const INTRO_POINT = 0.5
-const INTRO_FADE_HOLD_MS = 0
-const INTRO_FADE_MS = 500
-const INTRO_GAP_MS = 0
-/** Each pass's colour, turn about: the first is lime. The tokens are globals.css's `--lime` and `--violet`. */
-const INTRO_LINES = ["lime", "violet"] as const
+const LACE_MS = 90
 /**
- * Mine, tune by looking: page 1's reveal, from its bottom edge upward; and the longest the drawing waits for the page
- * before handing over anyway, so a slow network never leaves anyone on a loader (D31, open item 3).
+ * Mine, tune by looking: the pager's reveal, from its bottom edge upward, as page 1 opens; and the longest the loader
+ * waits for the page before opening anyway, so a slow network never leaves anyone on a loader (D31, open item 3).
  */
 const INTRO_REVEAL_MS = 420
 const INTRO_MAX_WAIT_MS = 3000
-
 /**
- * How long a ripple takes to cross a field of this many cells, in ms: from the first cell it draws to the last (D32).
- * A page turn holds the next page back this long, so the ripple washes the last page away (D37) and the page comes up
- * after it (his, 2026-09-25: "it would be great if the ripple ends and then the components come up on the grid").
+ * His (2026-09-27): the least the loader turns on the document's first load, in ms — "add two seconds of artificial
+ * load, if there is not throttle". A page that takes longer to be ready waits for itself, up to INTRO_MAX_WAIT_MS.
  */
-export function rippleSpan(cols: number, rows: number) {
-  return cols > 0 && rows > 0 ? ripplePlan(cols, rows).span : 0
-}
+const INTRO_MIN_MS = 2000
 
 /**
  * Once per document load (D31, open item 5 — mine): a navigation that mounts another grid does not play it again; a
- * reload does. Set only in the browser, so the server's render always carries the cover.
+ * reload does. Set only in the browser, so the server's render always holds page 1 back.
  */
 let introPlayed = false
 
-/** Where a pass starts: the bottom (the intro, a turn forward) or the top (a turn back, D32). */
-type PassFrom = "bottom" | "top"
-
 /**
- * When a pass reaches each cell, in ms from the pass's start, row-major; and how long the pass is. `along` counts rows
- * from the edge the pass starts at; the cone adds up to `depth` steps with the distance from the point — INTRO_DEPTH
- * on a field as wide as INTRO_CONE_COLS or wider, and in proportion on a narrower one, so the edge keeps its angle.
- * The first cell to be drawn is drawn at 0. Counts are even (D26), so the two centre columns tie and the point is
- * symmetric.
- */
-function ripplePlan(cols: number, rows: number, from: PassFrom = "bottom") {
-  const delays = new Float64Array(cols * rows)
-  const reach = Math.max(INTRO_POINT, 1 - INTRO_POINT) || 1
-  const depth = INTRO_DEPTH * Math.min(1, Math.max(0, cols - 1) / (INTRO_CONE_COLS - 1))
-  let min = Infinity
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const across = cols > 1 ? c / (cols - 1) : INTRO_POINT
-      const along = from === "bottom" ? rows - 1 - r : r
-      const d = along + depth * Math.min(1, Math.abs(across - INTRO_POINT) / reach)
-      delays[r * cols + c] = d
-      min = Math.min(min, d)
-    }
-  }
-  let span = 0
-  for (let i = 0; i < delays.length; i++) {
-    delays[i] = (delays[i]! - min) * INTRO_STEP_MS
-    span = Math.max(span, delays[i]!)
-  }
-  // The cells in the order the pass reaches them, for handing each its animation just before its turn.
-  const order = Array.from({ length: delays.length }, (_, i) => i).sort((a, b) => delays[a]! - delays[b]!)
-  return { delays, span, order }
-}
-
-/**
- * Ready is the fonts, the images already on the field and the window's load — so page 1 arrives finished and the
- * drawing hides the font swap — or INTRO_MAX_WAIT_MS, whichever is first (D31, open item 4 — mine).
+ * Ready is the fonts, the images already on the field and the window's load — so page 1 arrives finished and the loader
+ * hides the font swap — or INTRO_MAX_WAIT_MS, whichever is first (D31, open item 4 — mine).
  */
 function pageReady(root: HTMLElement | null): Promise<void> {
   const loaded = document.readyState === "complete" ? Promise.resolve() : new Promise<void>((done) => window.addEventListener("load", () => done(), { once: true }))
   const fonts = document.fonts ? document.fonts.ready.then(() => undefined) : Promise.resolve()
-  const images = Array.from(root?.querySelectorAll("img") ?? []).map((img) => (img.complete ? Promise.resolve() : img.decode().catch(() => undefined)))
   const cap = new Promise<void>((done) => window.setTimeout(done, INTRO_MAX_WAIT_MS))
-  return Promise.race([Promise.all([loaded, fonts, ...images]).then(() => undefined), cap])
+  return Promise.race([Promise.all([loaded, fonts, imagesReady(pendingImages(root))]).then(() => undefined), cap])
 }
 
-type IntroPhase = "off" | "drawing" | "arriving"
-type RipplePlan = ReturnType<typeof ripplePlan>
+/** The images on the page's own boxes still to come: none, and a page needs no loading. */
+function pendingImages(root: ParentNode | null): HTMLImageElement[] {
+  return Array.from(root?.querySelectorAll<HTMLImageElement>('[data-slot="grid-item"]:not([data-pager]) img') ?? []).filter((img) => !img.complete)
+}
+
+function imagesReady(images: HTMLImageElement[]): Promise<void> {
+  return Promise.all(images.map((img) => img.decode().catch(() => undefined))).then(() => undefined)
+}
+
+/** A page being loaded onto the field: which (`key`), whether it is the document's first (the intro), and how far it is. */
+type Load = { key: number; intro: boolean; phase: "loading" | "opening" }
 
 /**
- * The first pass of the intro starts this far ahead of the frame that asks for it, in ms: the painter may be starting
- * its worker in that same frame (D38). Until then the grid wears the cover's colour, so the wait is under the cover.
- */
-const INTRO_LEAD_MS = 48
-
-/**
- * The field's paint (Grid-v2.md D38, 2026-09-25): the overlay's dashes, the lines the intro and the ripple light, and
- * the pointer's cell — on two canvases one painter draws (`lib/grid-field.ts`), in a worker wherever the browser can
- * hand it a canvas. They were about 1,300 elements, and a pass was 216 CSS animations started at once and handed out
- * from the main thread; in WebKit that alone cost the intro 100–250ms of frames, and a busy main thread made cells miss
- * their turn (his report: the ripple "starts, but then it disappears in the middle and then shows up in the end").
- *
- * The grid tells the painter the field, the theme's colours and when each pass starts, as the plan's delays and a
- * moment on the shared clock; the painter keeps time itself. `play` counts the colours turn about — lime, violet —
- * across the intro and every turn after it, and `next` says which the next pass will be. Passes still running are kept
- * and sent again to a painter that starts over (React's strict mode runs every effect twice), so none is lost.
+ * The field's paint (Grid-v2.md D38, 2026-09-25): the overlay's dashes and the pointer's cell, on canvases one painter
+ * draws (`lib/grid-field.ts`), in a worker wherever the browser can hand it a canvas. They were about 1,300 elements;
+ * the intro's passes and the ripple between pages were painted here too, until D48 took them out. The grid tells the
+ * painter the field, the theme's colours and the pointer's cell; the painter keeps time itself.
  */
 function useGridField(enabled: boolean, metrics: GridMetrics | null, rootRef: React.RefObject<HTMLDivElement | null>, overlay: boolean) {
   const on = enabled && !!metrics
   const host = React.useRef<HTMLDivElement>(null)
   const painter = React.useRef<FieldPainter | null>(null)
   const canvases = React.useRef<{ field: HTMLCanvasElement; lines: HTMLCanvasElement } | null>(null)
-  const passes = React.useRef(0)
-  const live = React.useRef<Extract<FieldMessage, { type: "pass" | "reveal" }>[]>([])
   const dpr = useDevicePixelRatio()
 
   React.useLayoutEffect(() => {
@@ -495,14 +452,10 @@ function useGridField(enabled: boolean, metrics: GridMetrics | null, rootRef: Re
     const cvs = { field: make("grid-field-dashes"), lines: make("grid-field-lines") }
     el.append(cvs.field, cvs.lines)
     canvases.current = cvs
-    const p = startFieldPainter(cvs, { fade: INTRO_FADE_MS, pad: FIELD_PAD })
+    const p = startFieldPainter(cvs, { fade: LIT_FADE_MS, pad: FIELD_PAD, lace: LACE_MS })
     painter.current = p
     // Where it paints, for anyone looking: "worker", or "main" where a canvas cannot be handed over.
     el.dataset.painter = p.where
-    const now = performance.timeOrigin + performance.now()
-    // A reveal stays until the intro is over; a pass until it has faded.
-    live.current = live.current.filter((m) => m.type === "reveal" || m.zero + m.span + INTRO_FADE_MS > now)
-    for (const m of live.current) p.post(m)
     return () => {
       p.stop()
       painter.current = null
@@ -559,34 +512,9 @@ function useGridField(enabled: boolean, metrics: GridMetrics | null, rootRef: Re
     () => ({
       /** Where the painter's canvases go: over the field, under the page's boxes. */
       host,
-      /** The colour the next pass will play in. */
-      next: () => INTRO_LINES[passes.current % INTRO_LINES.length]!,
-      /** One pass of `plan`, on the next colour, starting at `zero` (ms, the page's clock — `performance.now()`). */
-      play(plan: RipplePlan, zero: number) {
-        const layer = passes.current % INTRO_LINES.length
-        passes.current++
-        const m = { type: "pass", layer, delays: plan.delays, span: plan.span, zero: performance.timeOrigin + zero } as const
-        const now = performance.timeOrigin + performance.now()
-        live.current = [...live.current.filter((l) => l.type === "reveal" || l.zero + l.span + INTRO_FADE_MS > now), m]
-        painter.current?.post(m)
-      },
-      /**
-       * The intro's reveal: the box, tile by tile, back from the cover's colour to the page's, and each cell's dashes, on
-       * the painter's clock from `zero` (ms, `performance.now()`). Null when the intro is over.
-       */
-      reveal(plan: RipplePlan | null, zero = 0) {
-        live.current = live.current.filter((l) => l.type !== "reveal")
-        if (!plan) {
-          painter.current?.post({ type: "reveal" })
-          return
-        }
-        const m = { type: "reveal", delays: plan.delays, span: plan.span, zero: performance.timeOrigin + zero } as const
-        live.current.push(m)
-        painter.current?.post(m)
-      },
       /** The pointer's cell, −1 for none: lit at once, and the one it leaves fades back (D34). */
       cursor(cell: number) {
-        const fade = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : INTRO_FADE_MS
+        const fade = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : LIT_FADE_MS
         painter.current?.post({ type: "cursor", cell, at: performance.timeOrigin + performance.now(), fade })
       },
     }),
@@ -615,9 +543,9 @@ function useDevicePixelRatio() {
 
 /**
  * The painter's colours, from the theme's tokens as the grid resolves them: the overlay's dashes are `--border` at 70%
- * (its `border-border/70`), the lines `--lime` and `--violet`, the glow `--grid-intro-glow`, and what the intro reveals
- * the page's own `--background`. A canvas takes any colour
- * CSS can write, and a pixel of one turns each into plain RGBA to send.
+ * (its `border-border/70`), the pointer's cell `--violet` (D43), and the page's own `--background`. The lines (`--lime`,
+ * `--violet`) and their glow are what the painter drew the intro's passes in; it still takes them. A canvas takes any
+ * colour CSS can write, and a pixel of one turns each into plain RGBA to send.
  */
 let colourProbe: CanvasRenderingContext2D | null = null
 function readFieldColours(root: HTMLElement): FieldColours {
@@ -635,243 +563,247 @@ function readFieldColours(root: HTMLElement): FieldColours {
   }
   return {
     dash: rgba("--border", 0.7),
-    lines: INTRO_LINES.map((line) => rgba(`--${line}`)),
-    glow: parseFloat(style.getPropertyValue("--grid-intro-glow")) || 16,
-    cursor: rgba("--lime"),
+    lines: [rgba("--lime"), rgba("--violet")],
+    glow: 0,
+    cursor: rgba("--violet"),
     ground: rgba("--background"),
   }
 }
 
 /**
- * The intro's clock, and nothing here runs per frame. It ran as a frame loop at first, a writer per frame setting every
- * lit line's opacity, and it lagged (his report, 2026-09-24): every write re-rasterised the glowing layers on the main
- * thread's busiest second, the page's own load. Then every cell was a CSS animation (D31), which cost as much in
- * another way — 216 layers made at once, and later passes handed out from the main thread (D38). Now a pass is one
- * message to the field's painter with the moment it starts — the reveal of the box, tile by tile, on the same moment —
- * and what is left here is a timer per pass: when a pass ends, the page is either ready — page 1 turns in — or the next pass is
- * played.
+ * Loading a page onto the field (Grid-v2.md D48, 2026-09-27, his: "remove the ripple effect intro and page transitions
+ * and replace with the current loaders that we created"). Two moments load a page, and both play the loader
+ * (`GridLoader`, loading, Motion.md M10):
+ *
+ * - **The intro** (`intro`, D31): the document's first page. Held back from the server's render on; the loader turns on
+ *   the field until the page is ready — the fonts, the window's load and the images on the field, INTRO_MAX_WAIT_MS at
+ *   most — and for INTRO_MIN_MS at the least, and then opens it. Once per document load, never under reduced motion. Until D48 the grid drew itself in
+ *   first, a front rising from the bottom (D31, D44), and drew itself again, pass after pass, while the page loaded.
+ * - **A page change** (`page`, which `GridPages` passes as the turn puts a page on the field), when the page has images
+ *   still to come: the loader turns until they are in and opens it. A page with nothing to load shows at once. Until D48
+ *   a ripple ran through the field instead (D32) and washed the last page away (D37).
+ *
+ * A new box mid-intro — a phone's bar sliding away, a window resized — hands straight over rather than loading on a
+ * field it did not start on.
  */
-function useGridIntro(
-  enabled: boolean,
-  metrics: GridMetrics | null,
-  rootRef: React.RefObject<HTMLDivElement | null>,
-  field: FieldHandle,
-) {
+function useGridLoad(enabled: boolean, metrics: GridMetrics | null, page: number | undefined, rootRef: React.RefObject<HTMLDivElement | null>) {
   // The same on the server and in the browser's first render, so hydration matches; reduced motion is taken off in
-  // the layout effect, before the first measured frame paints, and globals.css hides the server's cover for it.
-  const [phase, setPhase] = React.useState<IntroPhase>(() => (enabled && !introPlayed ? "drawing" : "off"))
-  const on = phase !== "off"
+  // the layout effect, before the first measured frame paints.
+  const [load, setLoad] = React.useState<Load | null>(() => (enabled && !introPlayed ? { key: 0, intro: true, phase: "loading" } : null))
   const startedOn = React.useRef<GridMetrics | null>(null)
-  const startedAt = React.useRef(0)
-  const cols = metrics?.cols ?? 0
-  const rows = metrics?.rows ?? 0
-  const plan = React.useMemo<RipplePlan | null>(() => (on && cols && rows ? ripplePlan(cols, rows) : null), [on, cols, rows])
+  const keys = React.useRef(0)
+  const intro = load?.intro ? load : null
 
   React.useLayoutEffect(() => {
-    if (!on) return
+    if (!intro) return
     if (!enabled || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       introPlayed = true
-      setPhase("off")
+      setLoad(null)
       return
     }
-    if (!metrics || !plan) return
-    // A new box mid-intro — a phone's bar sliding away, a window resized — hands straight over rather than redrawing
-    // on a field the drawing did not start on. The same box again is React re-running the effect (strict mode): the
-    // first pass is already playing (the DOM kept it), so it is not played twice and the clock keeps its start.
+    if (!metrics || intro.phase !== "loading") return
     if (startedOn.current && startedOn.current !== metrics) {
-      setPhase("off")
+      setLoad(null)
       return
     }
-    if (!startedOn.current) {
-      startedOn.current = metrics
-      // A moment just ahead (INTRO_LEAD_MS), for the reveal and the lines alike: one clock, the painter's.
-      const zero = performance.now() + INTRO_LEAD_MS
-      startedAt.current = zero
-      introPlayed = true
-      field.reveal(plan, zero)
-      field.play(plan, zero)
-    }
-
-    let ready = false
-    pageReady(rootRef.current).then(() => {
-      ready = true
+    startedOn.current = metrics
+    introPlayed = true
+    // Two frames after the page is ready — and INTRO_MIN_MS at the least — so a page arranged on the measured field has
+    // its boxes in the DOM for the loader to find: `PortfolioPages` mounts them the render after the grid reports its
+    // field.
+    let live = true
+    let raf = 0
+    const least = new Promise<void>((done) => window.setTimeout(done, INTRO_MIN_MS))
+    Promise.all([pageReady(rootRef.current), least]).then(() => {
+      raf = window.requestAnimationFrame(() => {
+        raf = window.requestAnimationFrame(() => {
+          if (live) setLoad((l) => (l?.key === intro.key && l.phase === "loading" ? { ...l, phase: "opening" } : l))
+        })
+      })
     })
-    const t0 = startedAt.current
-    let passStart = 0
-    let timer = 0
-    const after = (at: number, run: () => void) => {
-      timer = window.setTimeout(run, Math.max(0, at - (performance.now() - t0)))
+    return () => {
+      live = false
+      window.cancelAnimationFrame(raf)
     }
-    const endOfPass = () => {
-      const passEnd = passStart + plan.span
-      if (ready) {
-        // Page 1 turns in with the fade (globals.css animates it off `data-intro="arriving"`), and the intro is over
-        // when the last line has faded and the page is in.
-        setPhase("arriving")
-        after(passEnd + INTRO_FADE_HOLD_MS + Math.max(INTRO_FADE_MS, INTRO_REVEAL_MS), () => setPhase("off"))
-        return
-      }
-      // Another pass, lines only, in the other colour, on the moment it is due — the painter starts it part-way if this
-      // timer fired late, so the front stays where the clock says it is.
-      passStart = passEnd + INTRO_GAP_MS
-      field.play(plan, t0 + passStart)
-      after(passStart + plan.span, endOfPass)
-    }
-    after(plan.span, endOfPass)
-    return () => window.clearTimeout(timer)
-  }, [on, enabled, metrics, plan, rootRef, field])
+  }, [intro, enabled, metrics, rootRef])
 
-  // Over: the grid has its own colour again (the attribute is gone from this commit), so the painter may stop painting
-  // the reveal's tiles the next time it paints the field. It does not repaint for it — a canvas cleared before the grid
-  // lost the cover's colour would flash that colour for a frame.
-  const wasOn = React.useRef(on)
-  React.useLayoutEffect(() => {
-    if (wasOn.current && !on) field.reveal(null)
-    wasOn.current = on
-  }, [on, field])
-
-  return { phase, on, plan }
-}
-
-/**
- * The ripple between pages (D32): when the page on the field changes, one pass of the intro's drawing runs through
- * the field, lines only — up from the bottom when the turn is forward, and down from the top when it is back. It
- * starts at the change — since D37 the moment a turn commits, with the last page still on the field for the pass to
- * wash away (`washAway`, which the turn plays in the same frame) — not while the hand is still scrolling, because a
- * scroll let go short of the turn settles back and turns nothing.
- */
-function useGridRipple(
-  enabled: boolean,
-  metrics: GridMetrics | null,
-  page: number | undefined,
-  field: FieldHandle,
-  rootRef: React.RefObject<HTMLDivElement | null>,
-) {
+  // A page change loads the page now on the field if it has anything still to load — its images — in the commit that
+  // put it there: a layout effect's update renders again before the frame is painted, so the page is held from its
+  // first frame. The loader turns until they are in, INTRO_MAX_WAIT_MS at most, and opens. A page with nothing to load
+  // — every page `GridPages` holds is rendered from its layout, and its images once fetched are cached — shows at once
+  // and fades in (his, 2026-09-27: "when all the pages are uh, either pre-rendered or already loaded and cached which
+  // doesn't need any extra loading can directly render the page rather than showing any loading").
+  // Keyed on whether the field is measured, not on its metrics: a resize or a turned phone mid-load re-measures, and
+  // re-running here would end the load's wait and find no page change to start another, the rings turning for good.
+  const measured = metrics !== null
   const shown = React.useRef(page)
-  const cols = metrics?.cols ?? 0
-  const rows = metrics?.rows ?? 0
-  const plans = React.useMemo(
-    () => (enabled && cols && rows ? { forward: ripplePlan(cols, rows, "bottom"), back: ripplePlan(cols, rows, "top") } : null),
-    [enabled, cols, rows],
-  )
-  // The field the last page change was seen on. A new field is a resize, and a resize that packs fewer pages clamps the
-  // page with no turn: that change is recorded, not played.
-  const planned = React.useRef(plans)
   React.useLayoutEffect(() => {
     const was = shown.current
     shown.current = page
-    const resized = planned.current !== plans
-    planned.current = plans
-    if (!plans || resized || page === undefined || was === undefined || page === was) return
+    if (page === undefined || was === undefined || page === was || !measured) return
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
-    // One frame after the change, on that frame's own time, which a wash started in the same frame starts on too
-    // (`washAway`, D37): the lines and the cut keep step.
-    const plan = page > was ? plans.forward : plans.back
-    const raf = window.requestAnimationFrame(() => {
-      const at = document.timeline.currentTime
-      field.play(plan, typeof at === "number" ? at : performance.now())
-      if (rootRef.current) rootRef.current.dataset.rippleNext = field.next()
+    const pending = pendingImages(rootRef.current)
+    // Nothing to load: shown at once, and a turn's load still running for the page before is over with it.
+    if (!pending.length) {
+      setLoad((l) => (l && !l.intro ? null : l))
+      return
+    }
+    const key = ++keys.current
+    setLoad((l) => (l?.intro ? l : { key, intro: false, phase: "loading" }))
+    let live = true
+    const cap = new Promise<void>((done) => window.setTimeout(done, INTRO_MAX_WAIT_MS))
+    Promise.race([imagesReady(pending), cap]).then(() => {
+      if (live) setLoad((l) => (l?.key === key && l.phase === "loading" ? { ...l, phase: "opening" } : l))
     })
-    return () => window.cancelAnimationFrame(raf)
-  }, [page, plans, field, rootRef])
-  // Which colour the next pass will be, on the grid, for the pager's arrows to fill in (grid-pager.tsx): the arrow a
-  // turn fills is the colour of the ripple that turn plays. Only while the ripple is on and can play; otherwise the
-  // arrows keep their own fill.
-  React.useLayoutEffect(() => {
-    const root = rootRef.current
-    if (!root) return
-    if (plans && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) root.dataset.rippleNext = field.next()
-    else delete root.dataset.rippleNext
-  }, [plans, field, rootRef])
+    return () => {
+      live = false
+    }
+  }, [page, measured, rootRef])
+
+  const finish = React.useCallback((key: number) => setLoad((l) => (l?.key === key ? null : l)), [])
+  return { load, finish }
 }
 
 /**
- * How far past the box a cut the front has not reached yet lies, in px: room for a card's shadow inside the 12px gutter,
- * so a card keeps it on every side the front has not touched (the bleed D27's clip had).
- */
-const WASH_BLEED = 8
-
-/**
- * The ripple washes the page away (Grid-v2.md D37, 2026-09-25, his: "let's not shrink the cards … let the ripple wash
- * away the cards and then let the new page … render"). Every box on the field is cut away cell by cell as the pass's
- * front reaches each of its cells, at the pass's own times from the same plan as the lines, so where the front crosses
- * a card the card is gone and the line lit under it shows. Up from the bottom going forward, down from the top going
- * back. What the front has not reached yet is untouched: nothing in the box moves or is squeezed.
+ * The loader (Grid-v2.md D48, 2026-09-27; Motion.md M10, his motion) on the page being loaded: its boxes — the field's
+ * own, not the pager's — as a square of dashed lime rings on the field's centre, one a box, never wider than tall
+ * (`loaderLayout`), in reading order, turning while the page loads. Once it is `ready` every ring is pressed at once,
+ * its dashes closing into a full circle as it shrinks, goes straight to its box's top-left cell as movement's dot does and lands with the rest, is released into the plain border a box wears, and
+ * opens out to the box's edges, the box shown inside it and the border fading as it comes. `useLoadMotion` plays it, the
+ * hook the motion studio plays it through, on the `--motion-load-*` and `--motion-move-*` tokens, with its painters.
  *
- * Each box is ONE animation of its `clip-path`, a staircase polygon that steps each time the front crosses one of its
- * cells — a cut, like every cell of the intro — so nothing is written per frame. A cut lies in the middle of the gutter
- * inside the box, where the intro's tiles meet (D31). It starts on the timeline's current time, which in an animation frame
- * is the frame's own, as the lines' pass does when it is played in the same frame (`useGridRipple`), so the two keep
- * step. The animations fill forwards: the boxes stay washed until the page is taken off the field. The caller cancels
- * them if the same page comes back instead.
+ * The boxes are read off the tracks where the grid put them (their offset parent), whenever the grid renders or a box
+ * comes or goes: a page arranged once the field is measured mounts its boxes a frame or two after the grid. **Boxes that
+ * carry the same `data-load-section` are one section** (his, 2026-09-27, on the portfolio: "Instead of 10 loading
+ * cells, let's have 6. One for each section"): one ring, which opens over the rectangle round them all, each box shown
+ * where the ring has reached it. A box without one is a section of its own. **An element inside a box that carries
+ * `data-load-box` is a section of its own** (his, 2026-09-28, on the portfolio: "I want all the cards to have one
+ * circle … everything"): a box with any is no section itself, and each piece of it — a card, a button, a label, a mark
+ * — is one ring, opening over its own edges; pieces of one box with the same value are one (a mark drawn in two
+ * layers), and a piece not laid out (in a tab not shown) is none. Each is held back by globals.css (`data-loading`)
+ * until the loader paints it, then clipped to its ring until it is in; `clip-path: none` holds it open over the hold
+ * until the load is over, and what the loader wrote comes off with it. What a box of pieces holds outside them is
+ * hidden until the load is over.
  */
-export function washAway(tracks: HTMLElement, m: GridMetrics, dir: 1 | -1): Animation[] {
-  const { cols, rows, cell, gap } = m
-  const plan = ripplePlan(cols, rows, dir === 1 ? "bottom" : "top")
-  const pitch = cell + gap
-  const b = WASH_BLEED
-  const washing: Animation[] = []
-  for (const el of tracks.querySelectorAll<HTMLElement>(':scope > [data-slot="grid-item"]:not([data-pager])')) {
-    // The box's cells, read off where the grid put it: the tracks are its offset parent, and a box spans whole cells.
-    const w = el.offsetWidth
-    const h = el.offsetHeight
-    const c0 = Math.round(el.offsetLeft / pitch)
-    const r0 = Math.round(el.offsetTop / pitch)
-    const cs = Math.max(1, Math.round((w + gap) / pitch))
-    const rs = Math.max(1, Math.round((h + gap) / pitch))
-    // When the front reaches each cell, column by column. Down a column the times only grow away from the edge the
-    // pass starts at, so what is washed of a column is always one run from that edge.
-    const at: number[][] = []
-    const times = new Set<number>()
-    for (let j = 0; j < cs; j++) {
-      const column: number[] = []
-      for (let i = 0; i < rs; i++) {
-        const t = plan.delays[Math.min(rows - 1, r0 + i) * cols + Math.min(cols - 1, c0 + j)]!
-        column.push(t)
-        times.add(t)
+function GridLoader({ metrics, ready, onIn }: { metrics: GridMetrics; ready: boolean; onIn: () => void }) {
+  const { cols, rows, cell, gap } = metrics
+  const layer = React.useRef<HTMLDivElement>(null)
+  const rings = React.useRef<(SVGSVGElement | null)[]>([])
+  /** Each section's boxes, where the grid put them, in the order of `targets`. */
+  const sections = React.useRef<{ el: HTMLElement; box: LoadBox }[][]>([])
+  const [targets, setTargets] = React.useState<LoadBox[]>([])
+
+  React.useLayoutEffect(() => {
+    const tracks = layer.current?.parentElement?.querySelector<HTMLElement>(':scope > [data-slot="grid-tracks"]')
+    if (!tracks) return
+    const read = () => {
+      const grouped = new Map<string, { el: HTMLElement; box: LoadBox }[]>()
+      const add = (key: string, el: HTMLElement, box: LoadBox) => grouped.set(key, [...(grouped.get(key) ?? []), { el, box }])
+      tracks.querySelectorAll<HTMLElement>(':scope > [data-slot="grid-item"]:not([data-pager])').forEach((el, i) => {
+        const box = { l: el.offsetLeft, t: el.offsetTop, r: el.offsetLeft + el.offsetWidth, b: el.offsetTop + el.offsetHeight }
+        const pieces = el.querySelectorAll<HTMLElement>("[data-load-box]")
+        if (!pieces.length) return add(el.dataset.loadSection || `#${i}`, el, box)
+        // A box of pieces: each is a section of its own, where it stands in the box — one not laid out (a tab not
+        // shown) is none — and pieces that share a value are one.
+        const at = el.getBoundingClientRect()
+        pieces.forEach((piece, k) => {
+          if (piece.parentElement?.closest("[data-load-box]")) return
+          const r = piece.getBoundingClientRect()
+          if (!r.width || !r.height) return
+          const l = box.l + r.left - at.left
+          const t = box.t + r.top - at.top
+          // Bare (`data-load-box`, which React writes as "true") it is a piece alone; a name groups it.
+          const name = piece.dataset.loadBox
+          add(`#${i}/${name && name !== "true" ? name : `#${k}`}`, piece, { l, t, r: l + r.width, b: t + r.height })
+        })
+      })
+      // Each section's box is the rectangle round its boxes.
+      const found = [...grouped.values()]
+        .map((members) => ({
+          members,
+          box: {
+            l: Math.min(...members.map((m) => m.box.l)),
+            t: Math.min(...members.map((m) => m.box.t)),
+            r: Math.max(...members.map((m) => m.box.r)),
+            b: Math.max(...members.map((m) => m.box.b)),
+          },
+        }))
+        .sort((a, b) => a.box.t - b.box.t || a.box.l - b.box.l)
+      // What was written on a piece the loader no longer has comes off it, so it is not left clipped.
+      const kept = new Set(found.flatMap((f) => f.members.map((m) => m.el)))
+      for (const { el } of sections.current.flat()) {
+        if (kept.has(el)) continue
+        el.style.clipPath = ""
+        el.style.opacity = ""
       }
-      at.push(column)
+      sections.current = found.map((f) => f.members)
+      setTargets((prev) =>
+        prev.length === found.length && prev.every((p, i) => Object.entries(found[i]!.box).every(([k, v]) => Math.abs(p[k as keyof LoadBox] - v) < 0.5))
+          ? prev
+          : found.map((f) => f.box),
+      )
     }
-    // The edge the front comes from moves; the other stays where it is, `still`. A column is its cells and half the
-    // gutter each side of them; the outer ones run out to the bleed.
-    const still = dir === 1 ? -b : h + b
-    const left = (j: number) => (j === 0 ? -b : j * pitch - gap / 2)
-    const right = (j: number) => (j === cs - 1 ? w + b : j * pitch + cell + gap / 2)
-    const edge = (washed: number) => {
-      if (washed === 0) return dir === 1 ? h + b : -b
-      if (washed === rs) return still
-      return dir === 1 ? (rs - washed) * pitch - gap / 2 : washed * pitch - gap / 2
-    }
-    const polygon = (by: number) => {
-      const points = [`${-b}px ${still}px`, `${w + b}px ${still}px`]
-      for (let j = cs - 1; j >= 0; j--) {
-        const y = edge(at[j]!.filter((t) => t <= by).length)
-        points.push(`${right(j)}px ${y}px`, `${left(j)}px ${y}px`)
+    read()
+    // The boxes coming and going, and the pieces in them: a box lays its pieces out a render or two after it mounts.
+    const watch = new MutationObserver(read)
+    watch.observe(tracks, { childList: true, subtree: true })
+    return () => watch.disconnect()
+  })
+
+  // What the loader wrote on the boxes comes off with it.
+  React.useLayoutEffect(
+    () => () => {
+      for (const { el } of sections.current.flat()) {
+        el.style.clipPath = ""
+        el.style.opacity = ""
       }
-      return `polygon(${points.join(", ")})`
-    }
-    const steps = [...times].sort((x, y) => x - y)
-    const end = steps[steps.length - 1]!
-    const frames: Keyframe[] = []
-    if (steps[0]! > 0) frames.push({ offset: 0, clipPath: polygon(-1), easing: "step-end" })
-    for (const t of steps) frames.push({ offset: end > 0 ? t / end : 0, clipPath: polygon(t), easing: "step-end" })
-    if (frames.length === 1) frames.push({ ...frames[0]!, offset: 1 })
-    const wash = el.animate(frames, { duration: Math.max(1, end), fill: "forwards" })
-    wash.startTime = document.timeline.currentTime
-    washing.push(wash)
-  }
-  return washing
+    },
+    [],
+  )
+
+  const paint = React.useCallback(
+    (frames: LoadFrame[]) => {
+      frames.forEach((f, j) => {
+        paintLoadRing(rings.current[j] ?? null, f, cell)
+        // Every box of the section, shown where its ring has reached it — clipped to the ring's box in its own terms.
+        for (const { el, box } of sections.current[j] ?? []) {
+          paintLoadSection(el, f, box, cell)
+          // In, and held open over globals.css's hold until the load is over.
+          if (!el.style.clipPath) el.style.clipPath = "none"
+        }
+      })
+    },
+    [cell],
+  )
+
+  // It loads from its first frame and opens from the next render at the earliest: mounted ready, the hook would take
+  // the page for one that was never loading, and put it in at once — a turn's page, which is ready from the start.
+  const [armed, setArmed] = React.useState(false)
+  React.useLayoutEffect(() => setArmed(true), [])
+  useLoadMotion({ block: layer, cols, rows, targets, cell, gap, ready: ready && armed, paint, onIn })
+
+  return (
+    // Clipped to the field: a page of more sections than the field has cells stands a row past it (`loaderLayout`),
+    // and unclipped that row would scroll the page and re-count the field under the load.
+    <div ref={layer} data-slot="grid-loader" aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {targets.map((_, j) => (
+        <svg
+          key={j}
+          ref={(el) => void (rings.current[j] = el)}
+          className="absolute top-0 left-0 origin-center overflow-visible"
+          style={{ visibility: "hidden" }}
+        >
+          <rect x={0.5} y={0.5} fill="none" strokeWidth={1} className="stroke-lime" />
+        </svg>
+      ))}
+    </div>
+  )
 }
 
-/**
- * The intro's numbers as CSS, set on the grid while it runs; globals.css times page 1's reveal with them.
- */
+/** The intro's numbers as CSS, set on the grid while it runs; globals.css times the pager's reveal with them. */
 function introStyle(on: boolean): React.CSSProperties | undefined {
   if (!on) return undefined
-  return {
-    "--grid-intro-reveal": `${INTRO_REVEAL_MS}ms`,
-    "--grid-intro-hold": `${INTRO_FADE_HOLD_MS}ms`,
-  } as React.CSSProperties
+  return { "--grid-intro-reveal": `${INTRO_REVEAL_MS}ms` } as React.CSSProperties
 }
 
 // ── the cursor (Grid-v2.md D34, 2026-09-25) ──────────────────────────────────────────────────────────────────────
@@ -880,9 +812,9 @@ function introStyle(on: boolean): React.CSSProperties | undefined {
  * His ask: "make the cursor transparent line bordered circle and it should fill when clicked. Every cell on the grid
  * should turn its border to line. Whenever the cursor is on it." Asked, "line" was lime. A solid line for an afternoon,
  * then the cell's own dashes (his, the same day: "we should still have it dashed border for cells when cursor is over
- * them. Like what we have as default for cells").
- * A cell the pointer leaves fades back over the intro's own INTRO_FADE_MS, the way a line the intro drew does (D31); the
- * one it is on is lit at once.
+ * them. Like what we have as default for cells"). Violet since D43 (2026-09-26), the ring's colour and then the cell's.
+ * A cell the pointer leaves fades back over LIT_FADE_MS, the way a line the intro drew did (D31); the one it is on is
+ * lit at once.
  *
  * The ring is the system's cursor, drawn from an image (globals.css), since the evening it was built. It was a div the
  * page moved on every pointer move, and each move cost the main thread a whole-page layerize — about 1ms on an
@@ -893,10 +825,12 @@ function introStyle(on: boolean): React.CSSProperties | undefined {
 
 /**
  * The pointer's cell, lit — sent straight to the field's painter from the pointer's events, never through React state:
- * a move costs a subtraction and a division, and one message when it crosses into another cell. The painter draws the
- * cell's dashes in lime, over the lines and under the page's boxes (D38). The cell is found from the field's numbers,
- * not by hit-testing, so it lights under a card as well (where the card hides it) and the gutter between two cells
- * lights nothing. Only where the device can hover with a fine pointer; a touch on a hybrid screen is ignored.
+ * a move costs a subtraction and a division, and one message when it crosses into another cell. It never touches the
+ * page: the painter has the field's numbers, paints in a worker, and draws the cell's ring in violet, over the lines and
+ * under the page's boxes (D38, D40). The cell is found from the field's numbers,
+ * not by hit-testing, so it lights under a card as well (where the card hides it); the gutter between two cells lights
+ * nothing, and since D40 nor do the corners of a cell's square outside its circle. Only where the device can hover with
+ * a fine pointer; a touch on a hybrid screen is ignored.
  */
 function useGridCursor(enabled: boolean, metrics: GridMetrics | null, rootRef: React.RefObject<HTMLDivElement | null>, field: FieldHandle) {
   const [fine, setFine] = React.useState(false)
@@ -938,8 +872,14 @@ function useGridCursor(enabled: boolean, metrics: GridMetrics | null, rootRef: R
       const y = event.clientY - top
       const col = Math.floor(x / pitch)
       const row = Math.floor(y / pitch)
-      const inCell = x >= 0 && y >= 0 && x < gridW && y < gridH && x - col * pitch < cell && y - row * pitch < cell
-      light(inCell ? row * cols + col : -1)
+      // In the cell's circle (D40): the corners of its square light nothing, as the gutter does not.
+      const dx = x - col * pitch - cell / 2
+      const dy = y - row * pitch - cell / 2
+      const inCell = x >= 0 && y >= 0 && x < gridW && y < gridH && dx * dx + dy * dy < (cell / 2) * (cell / 2)
+      // A page may still the pointer's cell while `data-cursor-still` is on the grid: the portfolio's card in focus
+      // (Portfolio.md P18), whose blur over the field would smear a lit cell and be redrawn whole for every frame of its
+      // fade (Motion.md M13). The ring is still the pointer.
+      light(inCell && !root.hasAttribute("data-cursor-still") ? row * cols + col : -1)
     }
     const leave = () => light(-1)
     root.addEventListener("pointerenter", measure)

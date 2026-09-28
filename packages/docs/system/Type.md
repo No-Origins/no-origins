@@ -58,6 +58,8 @@ the portfolio's own display face (Portfolio.md P4), still faint.
 small text font."* It is `text-lime`, the `--lime` token his HEY! introduced, one value in both themes — so it is
 **1.3 : 1 on the light background** and 15 : 1 on the dark. The first use is a `caption` that is also a thing to press
 (Portfolio.md P4), which is the only use it should have until the light-theme contrast is decided.
+*Since 2026-09-26 it is also, from his mock, the portfolio's role line (a `label`, not pressed) and its *Résumé* link (a
+`body`), Portfolio.md P4, so the light-theme contrast is now three pieces of text.*
 
 ## 3. Open
 

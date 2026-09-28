@@ -14,19 +14,38 @@ export const COMPANIES = {
 } satisfies Record<string, Company>;
 
 export const profile = {
-  name: "Bhargav Reddy V",
+  name: "Bhargav",
   handle: "hiddenstack",
-  role: "Sr Full Stack Developer",
+  // His words on the first screen (his mock, 2026-09-26). The Radise role in `ROLES` says "Senior" too, where it kept
+  // the résumé's "Sr" (his, 2026-09-27: "instead of SR, write senior").
+  role: "Senior Full Stack Developer",
   company: COMPANIES.radise,
   location: "Hyderabad, India",
-  years: "6+ years",
   blurb:
     "I build editors, design systems and agent tools. Six years across four startups: the Fambase front end at Terribly Tiny Tales, the Neptune editor at Hashnode, RAG and agent applications at Dataflix, and now the platform team and the agent harness behind Sia at Radise. No Origins is where I keep what I make.",
-  // The two lines under the card (his, 2026-09-25; Portfolio.md P4): a figure or a mark on one cell, and what it says
-  // beside it. The figure is the résumé's "6+ years"; the Charminar is his picture of Hyderabad, from `hyderabad.png`
-  // in his Downloads, its white made transparent so it goes straight on the cell.
-  shipping: { figure: "6+", line: "years shipping products from 0 → 1" },
-  city: { name: "Hyderabad", mark: "/hyderabad.png" },
+  // A fact under the card (his mock, 2026-09-26; Portfolio.md P4). The figure is the résumé's "6+ years"; the words
+  // after it are his. Not on the page since 2026-09-27, when his row under the note became Résumé, Email and GitHub.
+  years: { figure: "6+ Years", line: "Building Products" },
+  // Where he is, beside the degree under the links (2026-09-27).
+  city: "Hyderabad",
+  // Not from the résumé: his words for the note under the profile, a paragraph each (2026-09-27, his: "I want to replace
+  // the what I am after content with the following"). As he wrote them, "sooo" and all; only the spelling is mended
+  // ("I've love", "keep track off", "over night", "optinionated", "mutiple", "deciplines").
+  story: [
+    "I worked as a full stack developer for over 6 years now.",
+    "I love building systems and interfaces as part of process.",
+    "In all these years, I shipped 3 products and sooo many features, that I can't keep track of, into production.",
+    "I've led teams from optimising and securing platforms, migrating age old stacks to the modern web stack and also to building new opinionated agentic harnesses.",
+    "From the times of piled up incomplete personal projects to shipping multiple features overnight, I've realised it's important to stay curious, be optimistic and keep experimenting.",
+    "And now, I'm looking forward to the exciting roles that emerge at the intersection of multiple disciplines.",
+  ],
+  // Not from the résumé: the note broken down into statements, a card each on the first screen (2026-09-28, his: "I
+  // want to break down that large piece about me into small statements. So let's not remove the about me card yet").
+  // As he said them; "Love be in" was heard as "Love being in".
+  statements: {
+    roles: "Love being in new roles that are shaping up at the intersection of disciplines.",
+    ai: "Today, AI shortens the path from idea to execution, creating more room for exploration and experimentation.",
+  },
   // Not from the résumé: his tagline, for the first screen, 2026-09-25 (Portfolio.md P4). A sentence a line.
   tagline: ["Start with curiosity.", "Let the stack overflow."],
   avatar: { src: "/avatar.png", alt: "Bhargav, drawn: round glasses, a black tee, arms crossed, smiling." },
@@ -37,20 +56,27 @@ export const profile = {
     { src: "/avatar-flame.webp", alt: "Bhargav, drawn: round shades, a black jacket with flames, arms crossed." },
   ],
   initials: "BR",
+  // His address on the first screen, with a button that copies it (2026-09-27, his: "replace Email button with card
+  // containing my email hiddenstack@no-origins.com and copy button to copy email to clipboard").
+  email: "hiddenstack@no-origins.com",
 };
 
-export type Link = { id: "github" | "linkedin" | "email" | "resume" | "discord" | "x" | "instagram"; label: string; href?: string };
+export type Link = { id: "github" | "linkedin" | "email" | "resume" | "discord" | "x" | "instagram" | "youtube"; label: string; href?: string };
 
 export const LINKS: Link[] = [
-  { id: "email", label: "Email", href: "mailto:hiddenstack@icloud.com" },
+  { id: "email", label: "Email", href: `mailto:${profile.email}` },
   { id: "github", label: "GitHub", href: "https://github.com/bhargavAtgithub" },
-  // The résumé links a LinkedIn profile but does not print the URL; fill it and the button appears.
+  // The résumé links a LinkedIn profile but does not print the URL; fill it and its mark in the row becomes a link.
   { id: "linkedin", label: "LinkedIn" },
-  // His, for the row of cells on the first screen (Portfolio.md P4, 2026-09-25). The URLs are his to give: until then
-  // each cell shows its mark and goes nowhere.
+  // His, for the row of marks under the degree (Portfolio.md P4, 2026-09-27; a row of cells on the first screen
+  // 2026-09-25 to 26). X and Instagram are @hiddenstack (his, 2026-09-27); Discord's URL, and LinkedIn's above, are his
+  // to give ("we'll add the URLs later") — until then the row draws their marks with no link.
   { id: "discord", label: "Discord" },
-  { id: "x", label: "X" },
-  { id: "instagram", label: "Instagram" },
+  { id: "x", label: "X", href: "https://x.com/hiddenstack" },
+  { id: "instagram", label: "Instagram", href: "https://www.instagram.com/hiddenstack" },
+  // His, for the content section with X and Instagram (2026-09-28: "also add YouTube"). The URL is his to give; until
+  // then its mark stands with no link, as LinkedIn's and Discord's do.
+  { id: "youtube", label: "YouTube" },
   // The résumé itself, as the download Brand.md §11 decision 5 asked for.
   { id: "resume", label: "Résumé", href: "/bhargav-reddy-v.pdf" },
 ];
@@ -71,7 +97,7 @@ export const ROLES: Role[] = [
   {
     id: "radise",
     company: COMPANIES.radise,
-    title: "Sr Full Stack Developer",
+    title: "Senior Full Stack Developer",
     from: "Mar 2025",
     to: "Present",
     location: "Hyderabad",
@@ -86,7 +112,8 @@ export const ROLES: Role[] = [
   {
     id: "dataflix",
     company: COMPANIES.dataflix,
-    title: "Software Development Engineer",
+    // His, 2026-09-27: "in Dataflix it has to be SDE 2, two in Roman"; the résumé has no level.
+    title: "Software Development Engineer II",
     from: "Oct 2023",
     to: "Feb 2025",
     location: "Hyderabad",
@@ -157,22 +184,36 @@ export const HOBBIES = ["Sketching", "UI/UX in Figma", "Video editing in DaVinci
 
 export const EDUCATION = {
   degree: "B.Tech in Computer Science (Hons.)",
+  // What the degree's pill says (his, 2026-09-27: "remove B.Tech in and put in only computer science honors").
+  subject: "Computer Science (Hons.)",
   school: "Lovely Professional University",
+  // What the degree's pill says under it (his, 2026-09-27: "add LPU and years").
+  short: "LPU",
   place: "Jalandhar, Punjab",
   from: "2017",
   to: "2021",
 };
 
-export const PROJECTS: { name: string; line: string; state: string; href?: string }[] = [
+/**
+ * A project. `short` is its card's line and `action` the words on its way out, the recruiter quick view's
+ * (2026-09-28): the card has two rows for a project that is out and one for one that is not, and `line` is longer
+ * than either holds. One with no `href` says it is not published yet.
+ */
+export type Project = { name: string; line: string; short?: string; action?: string; state?: string; href?: string };
+
+export const PROJECTS: Project[] = [
   {
     name: "Agents Society",
     line: "A cloud-based, self-governed and self-improving agent harness. Not here yet; this is where it will live.",
+    short: "An agent harness I’m building.",
     state: "in progress",
   },
   {
     name: "No Origins",
     line: "This site, its design system and the tools around it, built as blocks over time, in the open.",
-    state: "you are here",
+    short: "This site, its design system and the tools around it. Built in the open.",
+    action: "Explore the system",
+    // No state (his, 2026-09-27: "remove 'you are here'"): the pill is the way out, to the showcase in a new tab.
     href: "https://design.no-origins.com",
   },
 ];

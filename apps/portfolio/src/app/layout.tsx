@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Anton, Geist_Mono, Inter, Montserrat } from "next/font/google";
 import { ThemeProvider } from "@no-origins/ui/components/theme-provider";
 import { cn } from "@no-origins/ui/lib/utils";
+import { Jig } from "@/components/jig";
 import { profile } from "@/content/resume";
 import "./globals.css";
 
@@ -39,7 +40,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={cn("h-full antialiased font-sans", fontSans.variable, fontHeading.variable, fontMono.variable, fontDisplay.variable)}
     >
       <body className="min-h-full">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+          {/* The accent jig, dev only and only on ?jig (2026-09-27): kept, to be showcased later in experiments. */}
+          {process.env.NODE_ENV === "development" ? <Jig /> : null}
+        </ThemeProvider>
       </body>
     </html>
   );
