@@ -4,7 +4,6 @@ import * as React from "react";
 
 import { countFor, DEFAULT_GRID_CONFIG, Grid, GRID_REFERENCE_BOX, GridItem, specFor } from "@no-origins/ui/components/grid";
 import { useReadingFocus } from "@no-origins/ui/hooks/use-reading-focus";
-import { useFocusMotion, type FocusCards, type FocusTarget } from "@no-origins/ui/hooks/use-focus-motion";
 import type { GridLayoutItem } from "@no-origins/ui/lib/grid-layout";
 
 import type { PortfolioField, PortfolioPage } from "@/content";
@@ -63,7 +62,7 @@ type WakeTiming = { delay: number; duration: number };
  * from the avatar's centre at an even pace, over the whole page in WAKE_MS. A box starts to brighten when the front
  * reaches its nearest point and is fully active when the front has passed its farthest, evenly in between, so every
  * box the front is over is part way at once and the wake has no steps. Read off the boxes where the grid put them,
- * once the load is over; with no avatar on the field it starts at the field's top-left corner.
+ * as soon as they are on the field; with no avatar on the field it starts at the field's top-left corner.
  */
 function wakeFront(grid: HTMLElement): Map<string, WakeTiming> {
   const tracks = grid.querySelector<HTMLElement>('[data-slot="grid-tracks"]');
@@ -84,119 +83,6 @@ function wakeFront(grid: HTMLElement): Map<string, WakeTiming> {
   return new Map(reach.map(({ id, near, far }) => [id, { delay: (near / farthest) * WAKE_MS, duration: ((far - near) / farthest) * WAKE_MS }]));
 }
 
-/**
- * The card in focus (P18) wears `data-focused`: its border goes to the secondary colour, the violet, over the state's
- * time (a `transition-*` with no duration is `--motion-state`). It wears `data-focus-lift` while it stands over the
- * blur's layers, which are z-10 over the page and under the grid's theme flip (z-20), and keeps it until the blur has
- * gone, so it is never blurred itself. Every card on the field carries the transition, so its border goes back the
- * same way.
- */
-const FOCUS_CARDS =
-  "[&_[data-slot=grid-tracks]_[data-slot=card]]:transition-[border-color] [&_[data-slot=grid-tracks]_[data-slot=card]]:motion-reduce:transition-none [&_[data-focus-lift]]:relative [&_[data-focus-lift]]:z-11 [&_[data-focused]]:border-secondary";
-
-/**
- * The card under the pointer (P18, his, 2026-09-28: "When a cursor is on a card, the card border should transition to
- * secondary color … everything on the page should blur out"): the innermost `Card` on the field the pointer is over, a
- * mouse's or a pen's, never a finger's, once the page is awake. **The blur is the system's focus motion** (Motion.md
- * M13, his, the same day: "I want the blurring to start from the card with less intensity and then increase the
- * intensity in a circular fashion from the card"), played on the screen by `useFocusMotion`: least at the card and
- * rising in rings out from it, coming in as a ripple from the card, holding across a gutter, gliding to the next card
- * and fading when the pointer has left them all — by his tokens in globals.css (the same evening, round 1's Tide,
- * tuned, picked in the motion studio), none of them copied here. The cards are marked on themselves, not in React state, because every card on the page is
- * drawn by another component; the hook says which is focused and which stands over the blur. It starts with the card
- * the pointer is already resting on, and lets go when the field changes, since the arrangement may put other cards
- * under the pointer.
- */
-function CardFocus({ grid, on, field, pitch }: { grid: React.RefObject<HTMLDivElement | null>; on: boolean; field: PortfolioField | null; pitch: number }) {
-  const surface = React.useRef<HTMLDivElement>(null);
-  const [target, setTarget] = React.useState<FocusTarget | null>(null);
-  // Every piece the pointer has been on — a card, or a group's cards — by a key of its own, while it is on the page.
-  const pieces = React.useRef(new Map<string, HTMLElement[]>());
-  const keys = React.useRef(new WeakMap<Element, string>());
-  const seq = React.useRef(0);
-  const onCards = React.useCallback(
-    ({ focused, lifted }: FocusCards) => {
-      for (const [key, cards] of pieces.current) {
-        for (const el of cards) {
-          el.toggleAttribute("data-focused", key === focused);
-          el.toggleAttribute("data-focus-lift", key === lifted);
-        }
-        if (key !== focused && key !== lifted && !cards.some((el) => el.isConnected)) pieces.current.delete(key);
-      }
-      // While a card is in focus the pointer lights no cell (Grid.md D34): under the blur a lit cell is a violet smear,
-      // and every frame of its fade redraws all the blur's layers — the flicker he saw moving between cards.
-      grid.current?.toggleAttribute("data-cursor-still", focused !== null || lifted !== null);
-    },
-    [grid],
-  );
-  const { layers } = useFocusMotion({ surface, target, pitch, onCards });
-
-  React.useEffect(() => {
-    const el = grid.current;
-    if (!el || !on) return;
-    /**
-     * The piece under the pointer: **a component made of several cards is one** (his, 2026-09-28: "Radis and the title
-     * are the same component … the blur should act accordingly") — the nearest `data-focus-group` round the pointer,
-     * a work row's mark and pill, the profile's avatar and name, is in focus whole, the gap between its cards included;
-     * otherwise the card the pointer is on. Its box is the one round its cards, on the screen, which the layers cover.
-     */
-    const pieceAt = (at: EventTarget | null): FocusTarget | null => {
-      if (!(at instanceof Element)) return null;
-      const group = at.closest<HTMLElement>('[data-slot="grid-tracks"] [data-focus-group]');
-      const card = at.closest<HTMLElement>('[data-slot="grid-tracks"] [data-slot="card"]');
-      const owner = group ?? card;
-      if (!owner) return null;
-      const cards = group ? [...group.querySelectorAll<HTMLElement>('[data-slot="card"]')] : [card!];
-      if (!cards.length) return null;
-      let key = keys.current.get(owner);
-      if (!key) {
-        key = String(seq.current++);
-        keys.current.set(owner, key);
-      }
-      pieces.current.set(key, cards);
-      const rects = cards.map((c) => c.getBoundingClientRect());
-      return {
-        key,
-        box: {
-          l: Math.min(...rects.map((r) => r.left)),
-          t: Math.min(...rects.map((r) => r.top)),
-          r: Math.max(...rects.map((r) => r.right)),
-          b: Math.max(...rects.map((r) => r.bottom)),
-        },
-      };
-    };
-    const aim = (at: EventTarget | null) => {
-      const next = pieceAt(at);
-      setTarget((prev) => (next && prev?.key === next.key ? prev : next));
-    };
-    const over = (e: PointerEvent) => {
-      if (e.pointerType !== "touch") aim(e.target);
-    };
-    const leave = () => setTarget(null);
-    if (window.matchMedia("(hover: hover)").matches) aim([...el.querySelectorAll(":hover")].pop() ?? null);
-    el.addEventListener("pointerover", over);
-    el.addEventListener("pointerleave", leave);
-    window.addEventListener("blur", leave);
-    return () => {
-      el.removeEventListener("pointerover", over);
-      el.removeEventListener("pointerleave", leave);
-      window.removeEventListener("blur", leave);
-      setTarget(null);
-    };
-  }, [grid, on, field]);
-
-  // The blur's surface: over the whole screen and under the card, which stands over it. It only shows and hides: an
-  // opacity, a filter or a mask on it would make it the layers' backdrop root, and they would blur nothing. Its own
-  // component, so a change of focus renders this and not the page.
-  return (
-    <div ref={surface} aria-hidden className="pointer-events-none fixed inset-0 z-10" style={{ visibility: "hidden" }}>
-      {layers.map((style, i) => (
-        <div key={i} className="absolute inset-0" style={style} />
-      ))}
-    </div>
-  );
-}
-
 /** The field assumed before the grid has measured itself: the xl reference box, bare — the portfolio has no chrome above the grid. */
 const XL = GRID_REFERENCE_BOX.xl;
 const XL_SPEC = specFor(DEFAULT_GRID_CONFIG, "xl");
@@ -212,18 +98,16 @@ const FIRST_FIELD: PortfolioField = {
  * turn it — the scroll and a finger do nothing, and the arrow keys only ever moved focus (Grid.md D45). The grid is the
  * viewport (Grid.md D3, D11) and nothing here scrolls. The page is arranged on the field the grid reports, so every
  * coordinate is honoured as written: the first screen as it was, and the pieces of the pages that went in the room it
- * leaves (`arrange`). It opens with the grid's intro (Grid.md D31): the grid draws itself in, and the page comes up
- * once it has loaded. The pointer is the grid's violet ring, and the cell under it lights (D34, D43).
+ * leaves (`arrange`). It opens with the grid's intro (Grid.md D50, P23, his, 2026-09-30): the agent stands in the
+ * avatar's ring (`data-intro-agent`, profile-card.tsx), breathes, hops in place, and the field wakes ring by ring from
+ * it; then it fades away and the page comes in. The pointer is the grid's violet ring, and the cell under it lights
+ * (D34, D43).
  *
  * **The page wakes from the avatar** (P16, amended — his, 2026-09-27: "once all the components render, lets
- * everything get activated", and then "the activation is smooth and starts from the avatar"): every box stands
- * inactive, faded into the page, until the grid's load is over, and then a front grows from the avatar's centre over
- * the page and each box brightens as it crosses it (`wakeFront`). They stay active: the pointer and the focus change
- * nothing in that.
- *
- * **The card under the pointer is in focus** (P18, his, 2026-09-28): once the page is awake, its border goes violet
- * and everything else on the screen blurs, least at the card and more in rings out from it (`CardFocus`, Motion.md
- * M13).
+ * everything get activated", and then "the activation is smooth and starts from the avatar"): every box comes onto
+ * the field inactive, faded into the page, and as the intro's agent gives way to the page a front grows from the
+ * avatar's centre over it, each box brightening as it crosses it (`wakeFront`). They stay active: the pointer and the
+ * focus change nothing in that.
  */
 export function PortfolioPages({ page }: { page: PortfolioPage }) {
   const [field, setField] = React.useState<PortfolioField | null>(null);
@@ -237,36 +121,44 @@ export function PortfolioPages({ page }: { page: PortfolioPage }) {
   // comes first in the document and last on the screen.
   const scope = React.useRef<HTMLDivElement>(null);
   useReadingFocus(scope);
-  // Awake (P16) once the boxes are on the measured field and the grid is loading nothing: the intro's loader has
-  // opened the last of them (Grid.md D48, `data-loading` comes off the grid), or there was no intro to play — reduced
-  // motion, where a layout effect has them active before their first paint rather than a frame faded. Each box's
-  // timing comes in the same render as its `--box-active`, so the front is what the transition runs on.
+  // The grid's intro (Grid.md D50), as its root carries it: "agent" while the agent plays and the page is held back,
+  // "reveal" as the page comes in, over `--grid-intro-reveal`. The tagline behind the grid is held with the boxes, so it
+  // carries the same. Assumed held until the grid says otherwise, so it never shows a frame early.
   const grid = React.useRef<HTMLDivElement>(null);
+  const [intro, setIntro] = React.useState<{ phase: string | null; reveal: string }>({ phase: "agent", reveal: "" });
+  React.useLayoutEffect(() => {
+    const el = grid.current;
+    if (!el) return;
+    const read = () => setIntro({ phase: el.getAttribute("data-intro"), reveal: el.style.getPropertyValue("--grid-intro-reveal") });
+    read();
+    const watch = new MutationObserver(read);
+    watch.observe(el, { attributes: true, attributeFilter: ["data-intro"] });
+    return () => watch.disconnect();
+  }, []);
+  // Awake (P16) once the boxes are on the measured field and the agent has given way to them: they have been laid out
+  // inactive — `wakeFront` reads them where the grid put them — and the front sets off as they come in. Each box's
+  // timing comes in the same render as its `--box-active`, so the front is what the transition runs on. Under reduced
+  // motion there is no intro, and the switch is instant.
   const [wake, setWake] = React.useState<Map<string, WakeTiming> | null>(null);
   React.useLayoutEffect(() => {
     const el = grid.current;
-    if (!field || wake || !el) return;
-    const loaded = () => {
-      if (!el.hasAttribute("data-loading")) setWake(wakeFront(el));
-    };
-    loaded();
-    const watch = new MutationObserver(loaded);
-    watch.observe(el, { attributes: true, attributeFilter: ["data-loading"] });
-    return () => watch.disconnect();
-  }, [field, wake]);
+    if (field && !wake && el && intro.phase !== "agent") setWake(wakeFront(el));
+  }, [field, wake, intro.phase]);
   React.useEffect(registerActive, []);
 
   return (
-    <div ref={scope} className={`relative ${FOCUS_CARDS}`} style={PAGE_TOKENS}>
+    <div ref={scope} className="relative" style={PAGE_TOKENS}>
       {/* Before the grid, so the field's dashes and its boxes are drawn over it. Nothing in it takes the pointer but
           what asks for it (the tagline's handle). It carries the field's cell and gutter, so what it holds can be laid
           out on the cells it covers. */}
       {backdrop && frame ? (
         <div
           className="pointer-events-none absolute"
+          data-intro-held={intro.phase ?? undefined}
           style={
             {
               ...place(backdrop, frame),
+              "--grid-intro-reveal": intro.reveal || undefined,
               "--grid-cell": `${frame.cell}px`,
               "--grid-gap": `${frame.gap}px`,
             } as React.CSSProperties
@@ -318,8 +210,6 @@ export function PortfolioPages({ page }: { page: PortfolioPage }) {
             })
           : null}
       </Grid>
-      {/* The blur round the card in focus (P18, Motion.md M13). */}
-      <CardFocus grid={grid} on={!!wake} field={field} pitch={frame ? frame.cell + frame.gap : 72} />
     </div>
   );
 }

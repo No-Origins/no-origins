@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { agentFrame, agentNumber, agentPose, type AgentPose } from "@no-origins/ui/lib/agent-motion";
 
 import { Card, CardContent } from "@no-origins/ui/components/card";
 import { GRID_SPACING, useGridMetrics } from "@no-origins/ui/components/grid";
 import { PortalContainer } from "@no-origins/ui/components/portal";
+import { Slider } from "@no-origins/ui/components/slider";
 import { Slot } from "@no-origins/ui/components/slot";
 import { Text } from "@no-origins/ui/components/text";
 import { useCellEnter, useCellMotion } from "@no-origins/ui/hooks/use-cell-motion";
@@ -16,12 +16,16 @@ import {
   type CellAxis, type CellEnterFrame, type CellFlow, type CellFrame,
 } from "@no-origins/ui/lib/cell-motion";
 import { findFreeRect, readingOrder, rectIsValid, rectsOverlap, usedBlock, type GridRect } from "@no-origins/ui/lib/grid-layout";
+import { GRIP_HELD, GRIP_REST, GRIP_RING, gripAt, gripFrame, paintGrip, readGripMotion } from "@no-origins/ui/lib/grip-motion";
+import { springFollow } from "@no-origins/ui/lib/spring";
 import { loadFrame, loadPlan, loadSettled, loadTotal, readLoadMotion, type LoadBox, type LoadFrame } from "@no-origins/ui/lib/load-motion";
 import { cn } from "@no-origins/ui/lib/utils";
 
 import { FAMILIES, type Family, type Token } from "@/content/families";
 import { FocusStage } from "@/components/focus-stage";
 import { ModeStage } from "@/components/mode-stage";
+import { MotionsStage, SphereStage } from "@/components/sphere-stage";
+import { StepStage } from "@/components/step-stage";
 import { holdPhase, useStudio, type Phase } from "@/components/studio-context";
 import { tokenCss } from "@/lib/tokens";
 
@@ -374,7 +378,7 @@ function LoadStage({ family, cols, rows }: StageProps) {
 
   const paint = React.useCallback(
     (frames: LoadFrame[]) => {
-      // The package's painters, the ones the grid's intro paints with (Grid.md D48): the ring, and the card inside it.
+      // The package's painters, which the grid's loader painted with until no page loaded (Grid.md D49): the ring, and the card inside it.
       frames.forEach((f, j) => {
         paintLoadRing(rings.current[j] ?? null, f, cell);
         const target = targets[j];
@@ -560,75 +564,137 @@ function EnterStage({ family, cols, rows }: StageProps) {
   );
 }
 
-/** Abstract character geometry on the motion bench; controls remain system components (Motion.md M12). */
-function AgentStage({ family, cols, rows }: StageProps) {
-  const studio = useStudio();
-  const metrics = useGridMetrics();
-  const cell = metrics?.cell ?? 60;
-  const gap = metrics?.gap ?? 12;
-  const width = cols * (cell + gap) - gap;
-  const height = rows * (cell + gap) - gap;
-  const centerX = Math.floor((cols - 2) / 2) * (cell + gap) + (2 * cell + gap) / 2;
-  const centerY = Math.floor((rows - 1) / 2) * (cell + gap) + cell / 2;
-  const tuning = JSON.stringify(studio.values(family));
-  const values = React.useMemo(() => JSON.parse(tuning) as Record<string, string | number>, [tuning]);
-  const n = (key: string, fallback: number) => agentNumber(values, key, fallback);
+// ── the grip (Motion.md M16) ──────────────────────────────────────────────────────────────────────────────────
 
-  const body = React.useRef<SVGGElement>(null);
-  const eyes = React.useRef<SVGGElement>(null);
-  const eyeLeft = React.useRef<SVGCircleElement>(null);
-  const eyeRight = React.useRef<SVGCircleElement>(null);
+/** How long the timeline's hand takes to drag the grip specimen's head out and back, ms before the tempo. */
+const GRIP_DRAG = 1200;
+
+/**
+ * The grip's specimen, his brief (2026-09-30): the system's own `Slider`, its head merged into the bar at rest and
+ * detaching into the cursor when it is held. The block's Columns are the sliders' length in cells and its Rows how many,
+ * one a row on the field's own rows, every second a range; each bar stands in the middle of its row. Live, it is the
+ * real component reading the stage's tokens (the bar's `--slider-height` too): press a head, or press the bar and drag.
+ * On the timeline a play is detaching, a drag two cells along the bar and back — so the fluid body follows both ways —
+ * holding and merging, a rest after it on a loop, painted on the first head of each slider from the package's
+ * `gripAt`, `gripFrame` and `springFollow` — the frames `useGripMotion` plays — with the cursor drawn over the head as a
+ * ring of its own, since a play has no hand. While the timeline holds the stage the sliders take no pointer.
+ */
+function GripStage({ family, cols, rows }: StageProps) {
+  const studio = useStudio();
+  const m = useGridMetrics();
+  const cell = m?.cell ?? 60;
+  const gap = m?.gap ?? 12;
+  const pitch = cell + gap;
+  const set = studio.blockOf(family);
+  const across = Math.max(2, Math.min(set.columns, cols));
+  const down = Math.max(1, Math.min(set.rows, rows));
+  const tuning = `${JSON.stringify(studio.values(family))}·${studio.tempo}`;
+  const { hold, setHold, loop } = studio;
   const held = useHeld(family);
-  const { tempo, hold, setHold } = studio;
-  const duration = n("duration", 700) * tempo;
-  const bodyW = 2 * cell + gap;
-  const bodyH = cell;
-  const returning = n("return", 700) * tempo;
-  const delay = n("delay", 0) * tempo;
-  const colour = values["--motion-agent-colour"] ?? "violet";
-  const fill = colour === "neutral" ? "var(--foreground)" : `var(--${colour})`;
-  const ink = colour === "neutral" ? "var(--background)" : colour === "lime" ? "var(--primary-foreground)" : "var(--secondary-foreground)";
-  const paint = React.useCallback((pose: AgentPose) => {
-    body.current?.setAttribute("transform", `translate(${centerX + pose.x*cell} ${centerY + pose.y*cell}) rotate(${pose.rotate})`);
-    const num = (key: string, fallback: number) => agentNumber(values,key,fallback);
-    [eyeLeft.current, eyeRight.current].forEach((eye, i) => {
-      if (!eye) return;
-      const side = i === 0 ? "left" : "right";
-      const r = cell*num(`${side}-size`,.16)/2 * (1+(num(`${side}-grow`,1)-1)*pose.q) * (i===0 ? pose.leftBlink : pose.rightBlink);
-      const x = cell*(num(`${side}-x`,i===0 ? -.5 : .5)+num(`${side}-dx`,0)*pose.q);
-      const y = cell*(num(`${side}-y`,0)+num(`${side}-dy`,0)*pose.q);
-      // Keep the complete circle inside the capsule, even at extreme controls.
-      const safeR = Math.max(0,Math.min(r,cell/2));
-      const safeY = Math.max(-cell/2+safeR,Math.min(cell/2-safeR,y));
-      const maxX = (bodyW-cell)/2 + Math.sqrt(Math.max(0,(cell/2-safeR)**2-safeY**2));
-      eye.setAttribute("cx", String(Math.max(-maxX,Math.min(maxX,x))));
-      eye.setAttribute("cy", String(safeY));
-      eye.setAttribute("r", String(safeR));
-    });
-  }, [centerX, centerY, cell, bodyW, values]);
-  const build = React.useCallback(() => ({
-    phases: [{label: "delay",ms: delay}, { label: "outward", ms: duration }, holdPhase(hold, setHold), { label: "return", ms: returning }],
-    paint: (t: number) => paint(agentFrame(values, t, duration, hold, returning, delay)),
-  }), [delay, duration, returning, hold, setHold, paint, values]);
+  const block = React.useRef<HTMLDivElement>(null);
+  const rings = React.useRef<(HTMLDivElement | null)[]>([]);
+
+  // Each slider's first head, with its track.
+  const parts = React.useCallback(
+    () =>
+      [...(block.current?.querySelectorAll<HTMLElement>('[data-slot="slider"]') ?? [])].flatMap((s) => {
+        const track = s.querySelector<HTMLElement>('[data-slot="slider-track"]');
+        const head = s.querySelector<HTMLElement>('[data-slot="slider-thumb"]');
+        return track && head ? [{ track, head }] : [];
+      }),
+    [],
+  );
+  // When the timeline lets go, the sliders are their own again.
+  React.useEffect(() => {
+    if (held) return;
+    parts().forEach(({ track, head }) => paintGrip(track, head, 0, null));
+    rings.current.forEach((r) => void (r && (r.style.opacity = "0")));
+  }, [held, parts, down]);
+
+  const build = React.useCallback((): Track | null => {
+    const el = block.current;
+    if (!el) return null;
+    const motion = readGripMotion(el);
+    const first = parts()[0]?.track;
+    const style = first ? getComputedStyle(first) : null;
+    const bar = parseFloat(style?.getPropertyValue("--slider-bar") ?? "") || 24;
+    const shape = { bar, gap: parseFloat(style?.getPropertyValue("--slider-gap") ?? "") || 0, size: Math.min(GRIP_RING - 4, motion.size) };
+    // The hand drags the head two cells along the bar and back, so the body's follow shows both ways, then lets go.
+    const drag = GRIP_DRAG * studio.tempo;
+    const reach = 2 * pitch;
+    const merge = Math.max(motion.out, motion.follow.response * 1.2);
+    const phases: Phase[] = [
+      { label: "detach", ms: motion.in },
+      { label: "drag", ms: drag },
+      holdPhase(hold, setHold),
+      { label: "merge", ms: merge },
+    ];
+    if (loop) phases.push({ label: "rest", ms: REST });
+    const letGo = motion.in + drag + hold;
+    const hand = (t: number) => (t <= motion.in || t >= motion.in + drag ? 0 : reach * Math.sin((Math.PI * (t - motion.in)) / drag));
+    const state = (t: number) => (t < letGo ? (t < motion.in ? gripAt(motion, GRIP_REST, true, t) : GRIP_HELD) : gripAt(motion, GRIP_HELD, false, t - letGo));
+    return {
+      phases,
+      paint: (t) => {
+        const s = state(t);
+        const x = hand(t);
+        // The body chases where the head is: the hand's move, as far as the head has gone into it.
+        const flow = springFollow(0, (u) => hand(u) * state(u).head, t, motion.follow);
+        const frame = gripFrame(s, shape, { x, y: 0, along: x }, motion, flow);
+        const origin = el.getBoundingClientRect();
+        parts().forEach(({ track, head }, i) => {
+          paintGrip(track, head, 0, frame);
+          const ring = rings.current[i];
+          if (!ring) return;
+          const slot = (head.parentElement ?? head).getBoundingClientRect();
+          ring.style.left = `${slot.left + slot.width / 2 + x - origin.left}px`;
+          ring.style.top = `${slot.top + slot.height / 2 - origin.top}px`;
+          ring.style.opacity = "1";
+        });
+      },
+    };
+    // `tuning` says when to read the motion off the block again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tuning, hold, setHold, loop, parts, down, pitch]);
   useTrack(family, build, held);
-  React.useLayoutEffect(() => {
-    if (!held) paint(agentPose(values, 1));
-  }, [held, paint, values]);
-  return <div className="absolute inset-0" style={{ width, height }}>
-    <svg data-agent-preview role="img" aria-label="Personal agent animation" viewBox={`0 0 ${width} ${height}`} width={width} height={height} className="absolute inset-0">
-      <g ref={body} opacity={n("opacity",1)}>
-        <rect x={-bodyW / 2} y={-bodyH / 2} width={bodyW} height={bodyH} rx={bodyH / 2} fill={fill} />
-        <g ref={eyes} fill={ink}><circle ref={eyeLeft} /><circle ref={eyeRight} /></g>
-      </g>
-    </svg>
-  </div>;
+
+  const offCol = Math.floor((cols - across) / 2);
+  const offRow = Math.floor((rows - down) / 2);
+
+  return (
+    <div
+      ref={block}
+      data-block
+      className={cn("absolute", held && "pointer-events-none")}
+      style={{ left: offCol * pitch, top: offRow * pitch, width: across * pitch - gap, height: down * pitch - gap }}
+    >
+      {Array.from({ length: down }, (_, i) => (
+        <div key={i} className="absolute inset-x-0 flex items-center" style={{ top: i * pitch, height: cell }}>
+          <Slider defaultValue={i % 2 ? [25, 70] : [40]} max={100} step={1} aria-label={i % 2 ? `Range ${i + 1}` : `Value ${i + 1}`} />
+        </div>
+      ))}
+      {/* The cursor on the timeline: the grid's pointer, a 24px ring with a 2px violet line (Grid.md D34, D43). */}
+      {Array.from({ length: down }, (_, i) => (
+        <div
+          key={`ring-${i}`}
+          ref={(r) => void (rings.current[i] = r)}
+          aria-hidden
+          className="pointer-events-none absolute size-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-secondary"
+          style={{ opacity: 0 }}
+        />
+      ))}
+    </div>
+  );
 }
 
 const STAGES: Record<Family["id"], (props: StageProps) => React.ReactNode> = {
-  agent: (p) => <AgentStage {...p} />,
+  grip: (p) => <GripStage {...p} />,
+  step: (p) => <StepStage {...p} />,
   move: (p) => <MoveStage {...p} />,
   load: (p) => <LoadStage {...p} />,
   enter: (p) => <EnterStage {...p} />,
   focus: (p) => <FocusStage {...p} />,
   mode: (p) => <ModeStage {...p} />,
+  sphere: (p) => <SphereStage {...p} />,
+  motions: (p) => <MotionsStage {...p} />,
 };

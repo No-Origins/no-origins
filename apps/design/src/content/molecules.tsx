@@ -37,6 +37,7 @@ import {
   AttachmentGroup,
   AttachmentTitle,
 } from "@no-origins/ui/components/attachment";
+import { Agent } from "@no-origins/ui/components/agent";
 import { Avatar, AvatarFallback } from "@no-origins/ui/components/avatar";
 import { Badge } from "@no-origins/ui/components/badge";
 import {
@@ -246,6 +247,7 @@ import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-g
 import { Tooltip, TooltipContent, TooltipTrigger } from "@no-origins/ui/components/tooltip";
 
 import type { Responsive } from "@no-origins/ui/components/grid";
+import { readSphereMotion, sphereFrame, sphereStill, type SphereMotion } from "@no-origins/ui/lib/sphere-motion";
 import { cn } from "@no-origins/ui/lib/utils";
 
 import { band, onPhone, SectionHeader, Specimen } from "@/components/specimen";
@@ -274,6 +276,29 @@ const CARD = (rows: number): Responsive<Span> => ({
 });
 
 /**
+ * The agent, still (Motion.md M17, Character-Studio.md C3): one frame of its model sitting in a nest, the way the
+ * character studio shows it. Its tokens are read off the drawing, and none is set here, so it is the version on the
+ * motion studio's bench.
+ */
+function StillAgent({ size }: { size: number }) {
+  const root = React.useRef<SVGSVGElement>(null);
+  const [motion, setMotion] = React.useState<SphereMotion | null>(null);
+  React.useLayoutEffect(() => {
+    if (root.current) setMotion(readSphereMotion(root.current));
+  }, []);
+  const frame = React.useMemo(
+    () => (motion ? sphereFrame(sphereStill(motion, { cell: size, gap: 0 }, { col: 0, row: 0 }), 0) : null),
+    [motion, size],
+  );
+  return (
+    <svg ref={root} role="img" aria-label="The agent, sitting in its nest" width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <circle cx={size / 2} cy={size / 2} r={size / 2 - 0.5} fill="var(--muted)" stroke="var(--lime)" strokeWidth={1} />
+      <Agent frame={frame} look={motion} />
+    </svg>
+  );
+}
+
+/**
  * Every specimen, in reading order, with its size in cells — the one design decision each one carries now that the
  * page is a field (Grid.md D1) rather than a column. A box that clips its content is too small; make it bigger here.
  */
@@ -288,7 +313,7 @@ export const MOLECULES: PageContent = {
         id: "header",
         span: band(1),
         variant: "none",
-        render: (placed) => <SectionHeader index="02" label="Molecules · 42 components" title="Atoms with a job to do" cols={placed.colSpan} />,
+        render: (placed) => <SectionHeader index="02" label="Molecules · 44 components" title="Atoms with a job to do" cols={placed.colSpan} />,
       },
       {
         id: "Accordion",
@@ -298,13 +323,22 @@ export const MOLECULES: PageContent = {
             <Accordion type="single" collapsible className="w-full max-w-lg">
               <AccordionItem value="a">
                 <AccordionTrigger>What is in the package?</AccordionTrigger>
-                <AccordionContent>Sixty-one components, the theme, and the `cn` helper. Nothing else.</AccordionContent>
+                <AccordionContent>Sixty-two components, the theme, and the `cn` helper. Nothing else.</AccordionContent>
               </AccordionItem>
               <AccordionItem value="b">
                 <AccordionTrigger>Who consumes it?</AccordionTrigger>
                 <AccordionContent>The portfolio, the showcase and the admin — from source, never from a build.</AccordionContent>
               </AccordionItem>
             </Accordion>
+          </Specimen>
+        ),
+      },
+      {
+        id: "Agent",
+        span: CARD(4),
+        render: () => (
+          <Specimen name="Agent" note="The agent, drawn from one frame of its model: the motion studio moves it, the character studio shows it still.">
+            <StillAgent size={160} />
           </Specimen>
         ),
       },
@@ -410,7 +444,7 @@ export const MOLECULES: PageContent = {
                 <BubbleContent>Rebuild the design system on shadcn.</BubbleContent>
               </Bubble>
               <Bubble>
-                <BubbleContent>Sixty-one components installed. Take a look.</BubbleContent>
+                <BubbleContent>Sixty-two components installed. Take a look.</BubbleContent>
               </Bubble>
             </BubbleGroup>
           </Specimen>
@@ -1013,20 +1047,24 @@ export const MOLECULES: PageContent = {
         id: "Select",
         span: CARD(3),
         render: () => (
-          <Specimen name="Select" note="A dropdown that is ours rather than the platform's.">
-            <Select defaultValue="design">
-              <SelectTrigger className="w-56">
-                <SelectValue placeholder="Pick a block" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Blocks</SelectLabel>
-                  <SelectItem value="portfolio">Portfolio</SelectItem>
-                  <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+          <Specimen name="Select" note="A dropdown that is ours rather than the platform's — outlined, or lime for the one choice a screen is about.">
+            <div className="flex flex-wrap items-center gap-3">
+              {(["outline", "primary"] as const).map((variant) => (
+                <Select key={variant} defaultValue="design">
+                  <SelectTrigger variant={variant} className="w-44" aria-label={`Block, ${variant}`}>
+                    <SelectValue placeholder="Pick a block" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Blocks</SelectLabel>
+                      <SelectItem value="portfolio">Portfolio</SelectItem>
+                      <SelectItem value="design">Design</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              ))}
+            </div>
           </Specimen>
         ),
       },
@@ -1155,7 +1193,7 @@ export const MOLECULES: PageContent = {
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
               <TabsContent value="overview" className="pt-4 text-sm">
-                Three apps, one package, sixty-one components.
+                Three apps, one package, sixty-two components.
               </TabsContent>
               <TabsContent value="routes" className="pt-4 text-sm">
                 <code className="font-mono text-xs">/ · /atoms · /molecules</code>

@@ -50,14 +50,12 @@ export function ProfileWork({ cols, rows, lead }: { cols: number; rows: number; 
       ) : null}
       <ol ref={list} aria-label="Where I have worked" className="flex flex-col" style={{ gap }}>
         {shown.map((role) => (
-          // One company is one piece — its mark and its pill — so it is in focus as one (Portfolio.md P18, his, 2026-09-28:
-          // "Radis and the title are the same component … the blur should act accordingly").
-          <li key={role.id} data-focus-group className="flex flex-none" style={{ gap, height: cell }}>
+          <li key={role.id} className="flex flex-none" style={{ gap, height: cell }}>
             <FactCard className="flex-none" style={{ width: cell }}>
               <CompanyLogo company={role.company} style={{ height: mark, width: "auto", maxWidth: mark * 1.5 }} />
             </FactCard>
             {/* Left-aligned (his, 2026-09-28: "make the company names also left aligned"), as the projects' cards are. */}
-            <Card data-load-box size="sm" className="min-h-0 min-w-0 flex-1 justify-center gap-0 py-0" style={{ paddingInline: PAD }}>
+            <Card size="sm" className="min-h-0 min-w-0 flex-1 justify-center gap-0 py-0" style={{ paddingInline: PAD }}>
               <Text as="span" className="truncate">
                 {role.title}
               </Text>

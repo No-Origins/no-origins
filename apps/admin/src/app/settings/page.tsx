@@ -3,7 +3,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@no-origins/ui/components/card";
 import { Button } from "@no-origins/ui/components/button";
 import { Badge } from "@no-origins/ui/components/badge";
-import { currentProfile } from "@/lib/supabase/server";
+import { currentProfile } from "@no-origins/auth/server";
 import { SetPassword } from "@/components/set-password";
 import { Passkeys } from "@/components/passkeys";
 

@@ -196,8 +196,6 @@ export function ProfileTech({ cols, rows, lead }: { cols: number; rows: number; 
           <Toggle
             key={tech.name}
             ref={(el) => void (rings.current[i] = el)}
-            // A mark is its toggle and its mark's drawing, one loader ring (Grid.md D48).
-            data-load-box={tech.name}
             aria-label={tech.name}
             pressed={picked === i}
             onPressedChange={(on) => setPicked(on ? i : null)}
@@ -221,7 +219,6 @@ export function ProfileTech({ cols, rows, lead }: { cols: number; rows: number; 
           <svg
             key={`mark-${tech.name}`}
             ref={(el) => void (dots.current[i] = el)}
-            data-load-box={tech.name}
             aria-hidden
             viewBox="0 0 24 24"
             className="pointer-events-none absolute top-0 left-0 fill-current text-foreground"

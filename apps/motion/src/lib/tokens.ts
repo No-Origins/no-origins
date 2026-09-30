@@ -32,6 +32,10 @@ export function parseToken(token: Token, raw: string): Value | null {
       const n = Number(value);
       return Number.isFinite(n) ? n : null;
     }
+    case "px": {
+      const m = /^(-?[\d.]+)px$/.exec(value);
+      return m ? Number(m[1]) : null;
+    }
     case "choice":
       return token.choices?.some((c) => c.value === value) ? value : null;
   }
@@ -45,6 +49,8 @@ export function tokenCss(token: Token, value: Value, tempo = 1): string {
     case "scale":
     case "share":
       return `${Number(value)}`;
+    case "px":
+      return `${Number(value)}px`;
     case "ease":
     case "choice":
       return String(value);
@@ -66,6 +72,8 @@ export function tokenLabel(token: Token, value: Value): string {
       const pct = Math.round(Number(value) * 100);
       return (token.min ?? 0) < 0 && pct > 0 ? `+${pct}%` : `${pct}%`;
     }
+    case "px":
+      return `${Number(Number(value).toFixed(2))}px`;
     case "ease":
       return EASES.find((e) => e.value === value)?.label ?? String(value);
     case "choice":

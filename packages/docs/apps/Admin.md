@@ -572,6 +572,14 @@ Deny by default on every table. One policy shape: `auth.uid() IN (SELECT id FROM
 
 OAuth is still absent by choice — a third-party identity provider is another membership surface to reason about, and the allowlist plus these three doors already covers the one owner.
 
+**One sign-in for every app — 2026-09-30.** His, putting the motion studio behind the login: *"let's use the same auth because it should be same across no origins later we will define roles and stuff but right now I'm the only one who's logging in."* Asked, he chose one shared package, one session, and the gate open only on a development server with no keys.
+
+- **The auth is a package**, `packages/auth` (`@no-origins/auth`), consumed from source like `@no-origins/ui`: the two clients (`server`, `client`), the gate (`proxy`, `authGate`), the callback and the sign-out (`routes`), the passkey check (`webauthn`), the login card (`login-card`, named by the app it signs in to) and the sign-in screen (`sign-in`). The admin's own copies of all of them are gone; the admin and the motion studio each keep a `proxy.ts`, a `/sign-in` page and the two `/auth` routes, one line each.
+- **One session.** The session cookie is written for `.no-origins.com` (`sessionCookieOptions`), so signing in on either app signs in on both, and signing out of one signs out of both. Locally every app is on `localhost`, where a cookie is shared across ports anyway. The same project, the same allowlist, the same three doors. Every subdomain's requests carry the cookie; the portfolio and the showcase read nothing from it and still hold no database key.
+- **`proxy.ts`, not `middleware.ts`.** Next 16 renamed the file convention; the admin's gate moved with it.
+- **Without keys**, the gate refuses in production, a 503 that names the missing values — a deploy that lost its keys is a closed door. On a development server an app may ask to open without them: the motion studio does, so CI's visual review and its specs, which run with no database, still see it. The admin does not; every route in it reads the database.
+- **Roles are later** (his). `profiles.role` and `noo_is()` are there for them.
+
 ---
 
 ## 9. Publishing

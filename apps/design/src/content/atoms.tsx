@@ -197,11 +197,12 @@ export const ATOMS: PageContent = {
       },
       {
         id: "Slider",
-        span: half(2),
+        span: half(3),
         render: () => (
-          <Specimen name="Slider" note="One value or a range, on a track.">
+          <Specimen name="Slider" note="One value or a range, on a track; with marks, a dot over each step that ticks as the value lands.">
             <Slider defaultValue={[40]} max={100} step={1} className="w-72" />
             <Slider defaultValue={[20, 70]} max={100} step={1} className="w-72" />
+            <Slider defaultValue={[2]} min={1} max={5} step={1} marks className="w-72" aria-label="Marked" />
           </Specimen>
         ),
       },

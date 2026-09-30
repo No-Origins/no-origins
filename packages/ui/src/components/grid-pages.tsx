@@ -15,10 +15,10 @@ import { resolvePages, type GridLayout, type GridLayoutItem } from "@no-origins/
  * wheel rolled towards you. As it moves the ↑ fills from its bottom up; scrolling down, the ↓ from its top down. The
  * boxes do not follow the hand (D37, 2026-09-25, his: "let's not shrink the cards"): until the turn commits they stay
  * whole. Let go short of half way and the fill settles back; past it, or a whole page of travel, and the turn commits:
- * the page fades away over TURN_MS, and the next page is put on the field and LOADED — the grid's loader, a square of
- * dashed rings on the field's centre, each going to one of its boxes and opening into it (Grid.md D48, his, 2026-09-27:
- * "remove the ripple effect intro and page transitions and replace with the current loaders"). Until D48 a ripple ran
- * through the field and washed the page away, box by box, cell by cell (D32, D37). A hand that goes on scrolling goes
+ * the page fades away over TURN_MS, and the next page is put on the field and fades in over the same (Grid.md D49,
+ * 2026-09-30, his: "remove all the current loaders … let the components load quickly"). From D48 the grid's loader
+ * brought a page with images still to come in out of its rings, and until D48 a ripple ran through the field and washed
+ * the page away, box by box, cell by cell (D32, D37). A hand that goes on scrolling goes
  * on turning (D35): through the emptied field it turns on, a page a step, and the page it stops on is put on the field
  * when it stops; only the decaying tail of a trackpad's fling is ignored. A click on the pager's arrow, ← →, or a host's
  * toolbar play the same turn. The field and the pager never move.
@@ -29,7 +29,7 @@ import { resolvePages, type GridLayout, type GridLayoutItem } from "@no-origins/
 
 /**
  * The fill finishing, and the page fading away as the turn commits, in ms; and the page fading back in when the hand
- * brings the turn back to it. Short: the turn is snappy. A page put on the field loads with the grid's loader (D48).
+ * brings the turn back to it, and the next page fading in. Short: the turn is snappy.
  */
 export const TURN_MS = 160
 /** Settling back after the hand lets go. */
@@ -136,8 +136,7 @@ function readWheel(t: WheelTrace, now: number, px: number): WheelKind {
  * `wash` is the turn from the moment it commits until the next page is put on the field: the last page fades away
  * (globals.css, off `data-turn="wash"`; the ripple washed it away until D48, and the name stayed). The hand may go on
  * turning pages through it, and the page is put on the field only when the hold is over and the hand has stopped. `in`
- * is that page arriving: the grid loads it (D48), or, when the hand brought the turn back to the page it left, it fades
- * back in.
+ * is that page arriving: it fades in (D49), as the page the hand brought the turn back to fades back in.
  */
 export type TurnPhase = "idle" | "drive" | "relax" | "wash" | "in"
 export type TurnState = { phase: TurnPhase; dir: 1 | -1 }
@@ -354,8 +353,8 @@ function createTurn(
   }
 
   /**
-   * React has put the next page in the DOM: the grid loads it (D48) as the arrow's fill leaves — or, when the hand came
-   * back to the page it left, it fades back in (globals.css, off `data-turn="in"`).
+   * React has put the next page in the DOM: it fades in as the arrow's fill leaves (globals.css, off `data-turn="in"`,
+   * D49), the page the hand came back to as well.
    */
   const reveal = () => {
     waitingIn = false
@@ -377,7 +376,7 @@ function createTurn(
   }
 
   /**
-   * The hold is over and the hand has stopped: put the page on the field, for the grid to load. Whatever travel the hand
+   * The hold is over and the hand has stopped: put the page on the field. Whatever travel the hand
    * had not finished a page with is dropped — it has let go, and there is nothing on the field to settle back.
    */
   const arrive = (next: number, d: 1 | -1) => {
@@ -436,7 +435,7 @@ function createTurn(
 
   /**
    * Commit a turn from wherever the hand had it: the page fades away, the arrow fills the rest of the way, and the next
-   * page comes when the hold is over, to load (D48). `carry` is travel past the turn, in pages.
+   * page comes when the hold is over. `carry` is travel past the turn, in pages.
    */
   const complete = (next: number, d: 1 | -1, carry = 0) => {
     // From the hand, the fill is already moving: ease out of it. From rest, ease in.
@@ -452,7 +451,7 @@ function createTurn(
     goal = d
     passAt = performance.now()
     followUntil = passAt + TURN_MS
-    // Under reduced motion there is no hold: the page is swapped at once, and the grid does not load it.
+    // Under reduced motion there is no hold: the page is swapped at once.
     react.setComing(next)
     const ms = inputs.current.reduce ? 0 : Math.max(0, TURN_MS * (1 - Math.abs(progress)))
     tween(1, ms, fromHand ? easeOut : easeIn, d, () => {})
@@ -488,8 +487,6 @@ function createTurn(
   function drive(px: number, smooth: boolean) {
     const { count, range } = inputs.current
     if (phase === "wash" || phase === "in" || count <= 1) return false
-    // Nothing turns while the grid is still drawing itself (Grid.md D31): page 1 has not arrived yet.
-    if (root.current?.hasAttribute("data-intro")) return false
     const raw = (phase === "drive" ? goal : progress) + px / range
     let g = clampUnit(raw)
     // Nothing before the first page or after the last: the turn stops at 0 in that direction.
@@ -674,8 +671,8 @@ type GridPageSurfaceProps = {
  * box between the grid and its items and the placement would stop working. With no `renderItem`, a slot item draws
  * its own content (Slots.md); anything else draws nothing.
  *
- * Memoised, and the turn is not a prop: the phase is an attribute on the tracks (globals.css fades the page away off
- * it) and the loader paints each box (grid.tsx), so a turn starting, washing or ending renders no card. It rendered
+ * Memoised, and the turn is not a prop: the phase is an attribute on the tracks, which globals.css fades the page away
+ * and in off, so a turn starting, washing or ending renders no card. It rendered
  * every card on the page at each phase — the first wheel event of every turn among them.
  */
 const GridPageSurface = React.memo(function GridPageSurface({ items, renderItem }: GridPageSurfaceProps) {
@@ -702,8 +699,6 @@ export type GridPagesProps = {
   onPageChange?: (page: number) => void
   /** ← and → turn the page while nothing is focused that wants the keys. The wheel, a finger and the pager's arrows always do. */
   keyboard?: boolean
-  /** Load page 1 with the loader, turning while the page loads (Grid.md D31, D48). Every other page loads with it anyway. */
-  intro?: boolean
   /** The pointer is a violet ring that fills while pressed, and the cell under it is lit (Grid.md D34, D43). */
   cursor?: boolean
   className?: string
@@ -721,7 +716,6 @@ function GridPages({
   defaultPage = 0,
   onPageChange,
   keyboard = true,
-  intro,
   cursor,
   className,
   onMetrics,
@@ -751,27 +745,13 @@ function GridPages({
     [count, onPageChange],
   )
 
-  // A turn holds the next page back while the last one fades away; then the grid loads it (D48). It held it while a
-  // ripple crossed the field and washed the page away until D48 (D32, D37).
+  // A turn holds the next page back while the last one fades away; then it fades in (D49). It held it while a ripple
+  // crossed the field and washed the page away until D48 (D32, D37).
   const hold = metrics ? TURN_MS : 0
   const { shown, coming, rootRef, handlers } = usePageTurn(page, metrics ? count : 1, metrics, setPage, hold)
-  // The arrows wait for the intro like the wheel, the finger and the keys (D31): held back, they can still take focus,
-  // and a turn before page 1 is in would hand over to the wrong page.
-  const onTurn = React.useCallback(
-    (dir: 1 | -1) => {
-      if (rootRef.current?.hasAttribute("data-intro")) return
-      setPage(page + dir)
-    },
-    [rootRef, setPage, page],
-  )
-  // A page number in the bar (D36) turns straight to its page, and waits for the intro the same way.
-  const onGo = React.useCallback(
-    (next: number) => {
-      if (rootRef.current?.hasAttribute("data-intro")) return
-      setPage(next)
-    },
-    [rootRef, setPage],
-  )
+  const onTurn = React.useCallback((dir: 1 | -1) => setPage(page + dir), [setPage, page])
+  // A page number in the bar (D36) turns straight to its page.
+  const onGo = setPage
 
   // The keys turn as the pager's arrows do: ↓ presses the arrow that wears ↓, forward, and ↑ the one that wears ↑,
   // back (their glyphs are swapped against the hand's direction, grid-pager.tsx) — his, 2026-09-26: "map the up and
@@ -783,7 +763,6 @@ function GridPages({
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
       const target = event.target as HTMLElement | null
       if (target && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))) return
-      if (rootRef.current?.hasAttribute("data-intro")) return
       const dir = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 0
       if (!dir) return
       event.preventDefault()
@@ -791,7 +770,7 @@ function GridPages({
     }
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
-  }, [keyboard, page, setPage, rootRef])
+  }, [keyboard, page, setPage])
 
   const items = pages?.[Math.min(shown, count - 1)]?.items ?? []
 
@@ -799,10 +778,7 @@ function GridPages({
     <Grid
       ref={rootRef}
       overlay={overlay}
-      intro={intro}
       cursor={cursor}
-      // The page on the field: the grid loads each new one (D48).
-      page={Math.min(shown, count - 1)}
       onMetrics={handleMetrics}
       // touch-none: a finger on the field drives the turn, and the browser must not pan or refresh under it.
       className={cn("touch-none", className)}

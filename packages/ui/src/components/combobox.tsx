@@ -219,6 +219,8 @@ function ComboboxSeparator({
   )
 }
 
+// Diverged from sera (2026-09-29, his): the chips field is the outlined pill `Input` is, not an underline; with chips
+// in it the first sits concentric with the pill's start.
 function ComboboxChips({
   className,
   ...props
@@ -228,7 +230,7 @@ function ComboboxChips({
     <ComboboxPrimitive.Chips
       data-slot="combobox-chips"
       className={cn(
-        "flex min-h-10 flex-wrap items-center gap-1.5 rounded-none border border-transparent border-b-input bg-transparent bg-clip-padding px-0 py-1.5 text-sm transition-[color,border-color] focus-within:border-b-ring has-aria-invalid:border-b-destructive has-data-[slot=combobox-chip]:px-0 dark:has-aria-invalid:border-b-destructive/50",
+        "flex min-h-10 flex-wrap items-center gap-1.5 rounded-lg border border-border bg-transparent bg-clip-padding px-4 py-1.5 text-sm transition-[color,border-color,box-shadow] focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30 has-aria-invalid:border-destructive has-aria-invalid:ring-2 has-aria-invalid:ring-destructive/20 has-data-[slot=combobox-chip]:ps-2 dark:has-aria-invalid:border-destructive/50 dark:has-aria-invalid:ring-destructive/40",
         className
       )}
       {...props}

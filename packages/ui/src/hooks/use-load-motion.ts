@@ -39,7 +39,7 @@ type LoadMotionOptions = {
    * else holds the cells still while it loads and puts the sections in at once when it is ready (Motion.md §5).
    */
   always?: boolean
-  /** Called once the last section is in, after `ready` — the grid's intro ends there (Grid.md D48). */
+  /** Called once the last section is in, after `ready` — the grid's load ended there, until the grid stopped loading (Grid.md D49). */
   onIn?: () => void
 }
 
@@ -174,7 +174,7 @@ const lineColour = (lime: number) =>
   lime >= 1 ? "var(--lime)" : lime <= 0 ? "var(--border)" : `color-mix(in oklch, var(--lime) ${lime * 100}%, var(--border))`
 
 /**
- * The painter for a ring drawn as an SVG holding one `rect` (the motion studio's stage, the grid's intro), px from the
+ * The painter for a ring drawn as an SVG holding one `rect` (the motion studio's stage; the grid's loader until D49), px from the
  * block's first cell: its box, its corner (a cell's circle), its dashes — how far round and how closed — how lit, its
  * line's colour, and how big it is drawn in its box, about the box's centre, so its dashes keep their count while it is
  * pressed or drowns. `shown` 0 hides it whatever the frame says — the grid's rings come up as the drawing reaches them.

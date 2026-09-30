@@ -6,8 +6,8 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@n
 import { Alert, AlertDescription, AlertTitle } from "@no-origins/ui/components/alert";
 import { Spinner } from "@no-origins/ui/components/spinner";
 import { KeyRound, Trash2 } from "lucide-react";
-import { supabaseBrowser } from "@/lib/supabase/client";
-import { useWebAuthn } from "@/lib/webauthn";
+import { supabaseBrowser } from "@no-origins/auth/client";
+import { useWebAuthn } from "@no-origins/auth/webauthn";
 
 type Passkey = { id: string; friendly_name?: string; created_at: string; last_used_at?: string };
 

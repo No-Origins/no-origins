@@ -25,7 +25,7 @@ function Command({
     <CommandPrimitive
       data-slot="command"
       className={cn(
-        "flex size-full flex-col overflow-hidden bg-popover text-popover-foreground",
+        "flex size-full flex-col overflow-hidden rounded-lg bg-popover text-popover-foreground",
         className
       )}
       {...props}
@@ -66,13 +66,15 @@ function CommandInput({
   className,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Input>) {
+  // Diverged from sera (2026-09-29, his): the InputGroup's outlined pill, not a line under the field — two steps in, so
+  // its round end stays clear of the box's corner.
   return (
-    <div data-slot="command-input-wrapper" className="p-1">
-      <InputGroup className="border-transparent border-b-input bg-transparent px-3">
+    <div data-slot="command-input-wrapper" className="p-2">
+      <InputGroup>
         <CommandPrimitive.Input
           data-slot="command-input"
           className={cn(
-            "w-full px-2 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+            "w-full ps-2 pe-4 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
             className
           )}
           {...props}

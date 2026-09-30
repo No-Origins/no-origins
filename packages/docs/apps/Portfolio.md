@@ -1238,8 +1238,11 @@ mixed. The change eases through one registered number a box, `--box-active`, whi
 `--vertical-focus`). `node e2e/.mcp/page-wake.mjs <outdir> [w] [h] [scheme] [ms…]` shoots the page as the load ends
 and at the moments given after it, prints each box's `--box-active` at each, and hovers a box to show nothing changes.
 
-**P18 — The card under the pointer is in focus; the rest of the page blurs round it, more the farther out.** (It
-blurred toward the screen's edges until the amendment below, the same day.) *2026-09-28:
+**P18 — The card under the pointer is in focus; the rest of the page blurs round it, more the farther out.**
+*Withdrawn 2026-09-30 with P20 (P21): the page has no card focus and no blur. The motion stays on the studio's page 5,
+Hyper focus (Motion.md M13).* (It
+blurred toward the screen's edges until the amendment below, the same day. *Since 2026-09-29 it is **hyper focus**,
+one of the page's two modes (P20): it plays only while hyper focus is on, not whenever the pointer is on a card.*) *2026-09-28:
 "When a cursor is on a card, the card border should transition to secondary color and … everything on the page
 should blur out with intensity increasing as it goes towards the edges of the screen."* (P17 is the recruiter quick
 view, on its own branch.) Once the page is awake (P16), the card the pointer is on is in focus: the innermost `Card`
@@ -1288,7 +1291,14 @@ default"*):
 - a 1500ms ripple in, eight cells soft, with no crest;
 - a 250ms hold, an 800ms fade out, and a 500ms glide, all cubic in-out.
 
-The values are in globals.css, so a later pick reaches the page with no edit here. Until his pick, the page played
+**His second pick, 2026-09-29: round 2's C Unroll, tuned** (Motion.md M13), which the page plays since:
+- 1px next to the card, and nothing more for one cell;
+- then rising on ease-in to 16px over 21 cells, in ten rings, measured from the circle through its corners;
+- the cloth fading in over 80ms, not drawn out, so its 50% pull and twelve-cell hem play no part, with no fold;
+- the card lifting over it in 300ms, with no shadow;
+- a 120ms hold, a 400ms fade out, and an 80ms glide, all cubic in-out.
+
+The values are in globals.css, so a later pick reaches the page with no edit here. Until his first pick, the page played
 round 1's A: 18px eight cells out, a 700ms ripple with a crest, clearing outward. The card keeps `data-focus-lift`, standing
 over the layers, until the blur has gone, so it is never blurred itself. `data-focused` (the violet border) comes off as
 the blur starts to go.
@@ -1317,7 +1327,16 @@ flicker while changing from one to another."*
 focused, lifted and still. `focus-flicker.mjs` records every frame across the same walk and prints each region's
 brightness and sharpness.
 
-**P19 — Every card loads out of a ring of its own.** *2026-09-28: "for the loading circles, in portfolio, I want all
+**And the blur is a cloth (the same night, Motion.md M13).** *"I want to consider that as a cloth, a blurring cloth,
+not as a ripple … the cloth should reach every corner of the viewport."* Nothing changed here: the page plays the
+package's hook. The field is his, as above. It now lies on a cloth drawn out from under the card, each edge to its
+container's (here the screen), so every corner is reached at once, where a ripple's circle reached the far corner last. The card lifts over
+it. His numbers are kept, and the ripple's front is the cloth's hem. The cloth's own new tokens (pull, lift, shadow)
+are not his yet, and the shadow is off, so the page looks as it did but for the cloth.
+
+**P19 — Every card loads out of a ring of its own.**
+*Withdrawn 2026-09-30 (P22): no page loads with the loader, and `data-load-box` came off every piece.*
+*2026-09-28: "for the loading circles, in portfolio, I want all
 the cards to have one circle. I mean I want the avatar, the name card, the text cards, the email, the button, all the
 circles, all the social media circles, all the content … Everything … should have a circle."* This replaces his six of
 2026-09-27 ("let's have 6. One for each section"). Every piece on the page carries `data-load-box`, and the grid's
@@ -1335,6 +1354,95 @@ loader gives each one a ring that opens over its own edges (Grid.md D48, amended
 - **How to add one.** A new card is a ring once its root element carries `data-load-box`. Without the mark, a card in a
   box of pieces stays hidden until the load is over, then comes in at once.
 
+**P20 — Two modes: focus mode and hyper focus.** *Withdrawn 2026-09-30, both modes (P21). They stay in the
+motion studio as pages 5 and 6 (Motion.md M13, M14).* *2026-09-29: "Now add two modes in the portfolio. One is focus mode,
+and the other one is hyper focus. For the focus mode, let's add the focus motion and hyper focus will have the page
+five focus … even in motion let's change the names accordingly."* The page has two modes, one on at a time, or
+neither. Each has a toggle.
+
+- **Focus mode** is one vertical at a time: the motion studio's page 6 (Motion.md M14). A panel rises out of the page
+  over the vertical, its whole border there from the start (his, 2026-09-29: "without that border animation"; it was
+  drawn from the middle of its top down both sides first until then). A cloth of blur covers the rest of the
+  page, the field's lines included, full at the screen's edges. The profile's column is vertical 1, the work and the
+  projects 2, and the skills and the content 3. The verticals' cells come up beside the toggles, one a vertical, the
+  one in focus grown to two with its title (Profile, Work, Skills), moving by movement (M9). A press on a cell, or on
+  any box of another vertical, takes the focus there: **the vertical left plays its steps backward — its cloth goes,
+  its panel sinks back into the page — as that one comes into focus, both from the same moment** (his, 2026-09-29: "Instead of sliding the focus container, we should just unfocus while refocusing on
+  the next one"; the panel slid there until then). That press never reaches what is under the cloth, so a blurred
+  link does not open. It plays by his `--motion-mode-*` tokens in globals.css (2026-09-29, M14's A As described,
+  tuned, its draw taken out the same day): a quick 90ms rise 80px out through 800px with a -3° swing and a 16px margin, and a
+  cloth from 2px at the panel rising on expo out to 7px, under a 60% veil of the page's colour, swelling in over 250ms
+  and out over 1000ms. Until then it was the studio's preset A.
+- **Hyper focus** is P18: the card under a mouse or a pen in focus, its border violet, the page blurring round it
+  (M13), by his tokens in globals.css (his second pick, 2026-09-29, C Unroll, tuned: a fade in over 80ms, 1px at the
+  card rising to 16px). Until this rule it played whenever the pointer was on a card.
+- **The toggles** are a row at the foot of the profile's column (`ModeControls`, `modes.tsx`): Focus mode, then Hyper
+  focus, a cell each, violet while on, a system `ToggleGroup` of one choice, pressed again to turn off. While focus
+  mode is on, the verticals' cells stand to their left. Escape turns either mode off. The row stands over both cloths,
+  so a mode can always be turned off.
+- **Where the row goes.** It is a section of its own after the first screen (`modes` in `site.tsx`), so it takes the
+  room the first screen leaves and never a row from it (P15). That room is the profile column's foot where the columns
+  stand beside it: row 12 at 1440 × 900 and at 1920 × 1080. It is on a pointer's fields only (`only`, lg and xl).
+  Focus mode is offered only where the verticals stand side by side (`verticalsOf`).
+- **The names in the studio.** Page 5 is Hyper focus and page 6 Focus mode. The tokens keep their names:
+  `--motion-focus-*` is hyper focus's and `--motion-mode-*` focus mode's.
+- **Mine, his to change.** The row's place and order; the icons (lucide's Focus and Crosshair); the verticals' titles;
+  no mode on at first, so hyper focus is now opt-in; and a press on another vertical taking the focus there rather than
+  pressing what is there.
+- **Open.** A field with no room left in the profile's column has no row, and so no mode, including hyper focus, which
+  it had until now: 1280 × 720 and 1024 × 768 among them. And the verticals fill the field's height, so the lift
+  carries the panel's edges past the screen's: about 18px at 1440 × 900 at preset A's values. At his (2026-09-29: 80px
+  out through 800px, a 16px margin) the profile's panel goes about 37px past the top, so its top line is not seen, and
+  the work's, which spans the field's height, past the top and the bottom both: only its sides are seen once it is up.
+  The studio's stage had a row of room above and below.
+- **Checks.** `node e2e/.mcp/portfolio-modes.mjs <out> [WxH] [theme]` turns focus mode on, presses the second
+  vertical's cell and a box of the third, presses Escape, then turns hyper focus on over a card, printing the row, the
+  lifted vertical and the grid's still, and shooting each.
+
+**P21 — No modes on the portfolio.** *2026-09-30: "Let's remove both focus modes from the portfolio. We can have it the
+motion studio but I did not like it in the portfolio."* P20's two modes are off the page, and P18's card focus with
+them.
+
+- **What went.** The modes' row (`modes.tsx`, the `modes` section in `site.tsx`, and `only` on `PortfolioItem`, which
+  only the row used). Focus mode's panel and cloth (`FocusModeLayer`, `data-vertical` and `verticalsOf`). Hyper focus:
+  `CardFocus`, the violet border on a card under the pointer (`data-focused`, `data-focus-lift`), and the groups
+  (`data-focus-group` on a work row and on the profile's avatar and name).
+- **What stays.** The motions are the system's: `lib/focus-motion.ts`, `lib/mode-motion.ts` and their hooks, the
+  `--motion-focus-*` and `--motion-mode-*` tokens in globals.css, both as he picked them, and the studio's pages 5
+  and 6. A later page can play them again with no new motion work.
+- **What that gives back.** The page has no blur again, so the no-glass rule holds on it with no exception. Nothing on
+  the page sets the grid's `data-cursor-still` (Grid.md D34) any more. The row's room at the foot of the profile's
+  column is free.
+
+**P22 — No loader.** *2026-09-30: "I want to remove all the current uh, loaders that we have. I did not like it. So,
+uh, currently, just remove it and uh, let the components load quickly."* The page no longer opens out of the grid's
+loader (Grid.md D49): no intro, no rings, and no 2s of artificial load.
+
+- **What it does now.** The page is on the field as soon as the grid has measured it, 0.39s after navigation on a local
+  server at 1440 × 900. D48's intro ended at 4.3s.
+- **What went.** `intro` on the page's `Grid`, and `data-load-box` on every card, label row, button, mark and tab bar
+  (P19).
+- **What stays.** The wake (P16) plays as soon as the boxes are laid out: they come onto the field inactive and brighten
+  from the avatar over 1200ms. It had waited for the load to end. The avatar is still preloaded from the head, so the
+  face comes in with the page.
+- **Open.** His "currently" leaves the next first load open. Until he names one, the page has none. *He named one the
+  same day (P23).*
+
+**P23 — The agent opens the page.** *2026-09-30: "Here is the intro loader that I want. Uh, we created agent character. So now what should happen is that uh, take
+the avatar. It should uh, breathe for like one, two seconds. And then it should jump within the same cell and create a
+ripple activations of cells. Like, I mean, each cell in circles around the agent circle should activate. One circle by
+one circle from center to the borders of the layout, and then the agent disappears and the card should render
+smoothly."* Version 1 (Grid.md D50).
+
+- **What plays.** The grid's intro, with the avatar's lime ring as the agent's circle (`data-intro-agent` on the ring's
+  SVG, whose box's inscribed circle is the ring's own line). The agent breathes in it for 2s and hops in place. As it
+  lands, the field's cells light violet ring by ring from the ring out to the field's edges. Then it fades, and the
+  cards come in over 500ms where the agent was.
+- **What waits for it.** The wake (P16) sets off as the cards come in, where it set off at once under P22. The tagline
+  behind the grid is held with the cards (`data-intro-held`) and comes in with them.
+- **Mine, his to change.** Reading "take the avatar" as standing the agent in the avatar's ring, so that his face
+  appears where the agent was. Keeping the wake on top of the reveal.
+
 ## 3. Where it lives
 
 | Thing | Where |
@@ -1343,7 +1451,7 @@ loader gives each one a ring that opens over its own edges (Grid.md D48, amended
 | The packer — top row, band, the first screen, and the room it leaves (P2, P3, P8, P15) | `apps/portfolio/src/lib/arrange.ts` |
 | The sections and every span (P7, P8) | `apps/portfolio/src/content/site.tsx` |
 | The facts (P6) | `apps/portfolio/src/content/resume.ts` |
-| The grid renderer (P2), one page on a `Grid` (P15), the page waking from the avatar (P16), and the card in focus with the blur round it (P18) | `apps/portfolio/src/components/portfolio-pages.tsx`; the blur's motion is `packages/ui/src/lib/focus-motion.ts` and `hooks/use-focus-motion.ts` (Motion.md M13) |
+| The grid renderer (P2), one page on a `Grid` (P15), and the page waking from the avatar (P16) | `apps/portfolio/src/components/portfolio-pages.tsx` |
 | The first screen's centre: the profile card, the tagline, the résumé with Email, the degree with the city, and the social marks (P4, P5) | `apps/portfolio/src/components/profile-card.tsx` |
 | The work column: the label's cell, then a mark and a pill for each company (P4) | `apps/portfolio/src/components/profile-work.tsx` |
 | The tech stack, a mark a cell, under the projects (P4) | `apps/portfolio/src/components/profile-tech.tsx` |

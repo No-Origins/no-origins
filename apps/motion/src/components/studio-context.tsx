@@ -19,7 +19,13 @@ export type Tempo = 1 | 2 | 5 | 10;
  * A part of a play, named — "grow", "hold", "expand" — and how long it takes in real ms, slowed by the tempo. A part
  * whose length is a setting of the play rather than motion carries `drag`, and is set by dragging it on the timeline.
  */
-export type Phase = { label: string; ms: number; drag?: PhaseDrag };
+export type Phase = {
+  label: string;
+  ms: number;
+  drag?: PhaseDrag;
+  /** What the part is, in a line, shown as its title on the timeline. */
+  note?: string;
+};
 
 /**
  * How a phase that is a setting is dragged on the timeline (his, 2026-09-27: "Hold should also be a hold and drag on
@@ -64,6 +70,8 @@ export type Transport = {
   seek: (t: number) => void;
   /** A stage leaving (a page turned): its play is over. */
   release: (family: FamilyId) => void;
+  /** Let go of the frame held, keeping the play: the stage is its own again (Motion.md M19, a row let go of). */
+  live: () => void;
   setLoop: (loop: boolean) => void;
 };
 
@@ -127,15 +135,21 @@ function createTransport(): Transport {
       halt();
       emit(LIVE);
     },
+    live: () => {
+      halt();
+      if (state.mode !== "live") emit({ mode: "live" });
+    },
     setLoop: (on) => void (loop = on),
   };
 }
 export const TEMPOS: readonly Tempo[] = [1, 2, 5, 10];
 
-export type AgentPreset = { id: string; name: string; values: Values; hold: number; tempo: Tempo; loop: boolean };
-
 type Saved = {
-  agentPresets: AgentPreset[];
+  /**
+   * A family's own data, which is neither tokens nor an option: a family built from states keeps them here. Each family
+   * says what it keeps; the studio only stores it.
+   */
+  data: Partial<Record<FamilyId, unknown>>;
   values: Partial<Record<FamilyId, Values>>;
   /** The preset each family's values were last set from. */
   from: Partial<Record<FamilyId, PresetId>>;
@@ -151,7 +165,7 @@ const KEY = "no-origins:motion";
 export type Option = string | number | boolean;
 type Widen<T> = T extends string ? string : T extends number ? number : boolean;
 type Options = Record<string, Option>;
-const EMPTY: Saved = { agentPresets: [], values: {}, from: {}, options: {}, tempo: 1, loop: false, hold: 900 };
+const EMPTY: Saved = { data: {}, values: {}, from: {}, options: {}, tempo: 1, loop: false, hold: 900 };
 
 function load(): Saved {
   if (typeof window === "undefined") return EMPTY;
@@ -164,10 +178,9 @@ function load(): Saved {
 }
 
 type Studio = {
-  agentPresets: AgentPreset[];
-  saveAgentPreset: (family: Family, name: string, id?: string) => string;
-  loadAgentPreset: (family: Family, id: string) => void;
-  deleteAgentPreset: (id: string) => void;
+  /** A family's own data, as it last set it; undefined until it has. */
+  dataOf: (family: FamilyId) => unknown;
+  setData: (family: FamilyId, fn: (data: unknown) => unknown) => void;
   /** The decided values, off the page's root; null until the browser has them. */
   decided: Record<FamilyId, Values> | null;
   values: (family: Family) => Values;
@@ -239,18 +252,8 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
       return (typeof value === typeof fallback ? value : fallback) as Widen<T>;
     };
     return {
-      agentPresets: saved.agentPresets,
-      saveAgentPreset: (family, name, id) => {
-        const key = id ?? crypto.randomUUID();
-        const preset = { id: key, name: name.trim(), values: {...valuesOf(family)}, hold: saved.hold, tempo: saved.tempo, loop: saved.loop };
-        update(s => ({...s, agentPresets: [...s.agentPresets.filter(p => p.id !== key), preset]}));
-        return key;
-      },
-      loadAgentPreset: (family, id) => {
-        const p = saved.agentPresets.find(p => p.id === id);
-        if (p) update(s => ({...s, values: {...s.values, [family.id]: {...p.values}}, hold: p.hold, tempo: p.tempo, loop: p.loop}));
-      },
-      deleteAgentPreset: id => update(s => ({...s, agentPresets: s.agentPresets.filter(p => p.id !== id)})),
+      dataOf: (family) => saved.data[family],
+      setData: (family, fn) => update((s) => ({ ...s, data: { ...s.data, [family]: fn(s.data[family]) } })),
       decided,
       values: valuesOf,
       setValue: (family, token, value) =>

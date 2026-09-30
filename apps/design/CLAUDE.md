@@ -46,7 +46,7 @@ What "the portfolio's way" means here (Portfolio.md P2, P5, P7, P8, and `apps/po
 - `/` — what the system is and which layers exist: one section on a 12-column band — the intro, the two layer
   cards side by side (six columns each, one to a row on a phone), the notes.
 - `/atoms` — the 18 indivisible components, one section, each in a **card** slot.
-- `/molecules` — the 39 that compose them, one section, **each on the molecule card** — his call, 2026-09-22, when
+- `/molecules` — the 44 that compose them, one section, **each on the molecule card** — his call, 2026-09-22, when
   three widths read as scattered: "a Responsive card that takes full width in small screens and maybe around 8 cols
   in large." `CARD(rows)` in `molecules.tsx` is one width — the band on a phone and a tablet, two to a row from `lg`
   up, eight columns on `xl` — in a **card** slot like the atoms; only the rows differ, so the page is two columns of

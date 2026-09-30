@@ -4,7 +4,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@no-origins/ui/
 import { Input } from "@no-origins/ui/components/input";
 import { Button } from "@no-origins/ui/components/button";
 import { Alert, AlertDescription, AlertTitle } from "@no-origins/ui/components/alert";
-import { supabaseBrowser } from "@/lib/supabase/client";
+import { supabaseBrowser } from "@no-origins/auth/client";
 
 /**
  * Set (or change) the account password, while signed in.

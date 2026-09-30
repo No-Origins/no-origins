@@ -89,7 +89,7 @@ export function ProfileProjects({ cols, rows, lead }: { cols: number; rows: numb
  */
 function ProjectCard({ project, image, fill }: { project: Project; image: number; fill: string }) {
   return (
-    <Card data-load-box size="sm" className="h-full min-w-0 flex-row items-center gap-3 py-0" style={{ padding: INSET }}>
+    <Card size="sm" className="h-full min-w-0 flex-row items-center gap-3 py-0" style={{ padding: INSET }}>
       <div
         aria-hidden
         data-project-image

@@ -19,11 +19,10 @@ nothing that turns: the scroll and a finger do nothing, and the arrow keys move 
 D45). The first screen is three columns (P4, 2026-09-26), in this order since 2026-09-27: who he is — the avatar and
 the name, his words, Email · Résumé (2026-09-28), then GitHub's mark, the degree and Hyderabad (his order, the same day; GitHub
 since 2026-09-28), then the marks of LinkedIn and Discord (his, the same day: "put that row under education row") — the work and
-the projects, then the technical skills and the art skills. **It loads a card at a time** (Portfolio.md P19,
-2026-09-28, his: "I want all the cards to have one circle"): every card, label row, button and mark — and a tech
-mark's toggle and drawing, which share a name — carries `data-load-box`, and each is its own loader ring (Grid.md D48),
-37 at 1440 × 900 and 18 on a phone. A new card needs the mark on its root, or it waits hidden until the load is over.
-It loaded as six sections until then (`load` on an item, gone). The columns hold the case studies under the projects ("Work In Progress", 2026-09-27), and the content
+the projects, then the technical skills and the art skills. **It has no loader** (Portfolio.md P22, Grid.md D49,
+2026-09-30, his: "remove all the current loaders … let the components load quickly"): the page is on the field as soon
+as the grid has measured it. It loaded a card at a time out of dashed rings (P19, `data-load-box`), and as six sections
+before that, until then. The columns hold the case studies under the projects ("Work In Progress", 2026-09-27), and the content
 under the art skills, a row of air over it — the marks of X, Instagram and YouTube since 2026-09-28 (his: "move
 Instagram X to content section, remove work in progress and also add YouTube"; `CONTENT` in `site.tsx`), where it was the
 same pill (`comingSoon`). The socials were a section
@@ -75,37 +74,26 @@ note and no columns.
   page of its own.
 - **`PortfolioPages`** (`src/components/portfolio-pages.tsx`) is the renderer: a `Grid` — not a `GridPages`, so no
   bar and no turn (P15) — that runs `arrange` on whatever field the grid reports, so every coordinate is honoured as
-  written. It opens with the grid's `intro` (Grid.md D31, D48): the grid's loader, his loading motion — a square of
-  dashed lime rings on the field's centre, one a card (P19), a closed ring chasing round it for 2s at the least and until the
-  page is ready, then each going to its card's top-left cell and opening from it; and `cursor` (D34, D43): the pointer is a violet ring that fills while pressed, and the cell under it
-  turns its dashes violet. The grid drew itself in and looped while the page loaded until D48; the ripple (D32) went
-  first, with the turns it played between. `node e2e/.mcp/intro-loader.mjs <out> [WxH] [scheme] [ms…]` logs the
-  intro's phases and the rings, and shoots the page at the moments given. **The page wakes from the avatar** (P16,
+  written. It opens with the grid's `intro` (Grid.md D50, P23, 2026-09-30, version 1): the agent in the avatar's ring
+  (`data-intro-agent`, profile-card.tsx) breathes, hops in place, and the field lights violet ring by ring from it;
+  then it fades and the cards come in, the tagline behind the grid with them (`data-intro-held`). `node
+  e2e/.mcp/agent-intro.mjs <out> [w] [h] [scheme] [ms…]` shoots it and logs its phase. D49 had taken the loader off
+  (P22), where it had turned for 2s at the least (D48, P19), and the grid drew itself in before that (D31). It takes `cursor`
+  (D34, D43): the pointer is a violet ring that fills while pressed, and the cell under it turns its dashes violet.
+  `node e2e/.mcp/no-loader.mjs <url> <out> [w] [h] [scheme]` times the first box, checks nothing of the loader is on
+  the page, and shoots it as the wake crosses it. **The page wakes from the avatar** (P16,
   amended twice on 2026-09-27, his: "once all the components render, lets everything get activated", then "the
   activation is smooth and starts from the avatar"): every box is inactive, its colour tokens mixed into the page
-  keeping 40%, until the grid's load is over (`data-loading` comes off the grid). Then a front grows from the avatar's
+  keeping 40%, until the intro's agent gives way to the cards (it waited for the grid's load to end until D49). Then a front grows from the avatar's
   centre over the page in `WAKE_MS` (1200), and each box brightens linearly from when the front reaches its nearest
   point until it has passed its farthest (`wakeFront`, a delay and a duration a box), at every size. They stay active;
   the pointer and the focus change nothing in the wake (they chose the vertical in focus until then). No blur and no opacity on a box, since the
-  dashes would show through. `node e2e/.mcp/page-wake.mjs <outdir> [w] [h] [scheme] [ms…]` checks it. **The card
-  under the pointer is in focus** (P18, 2026-09-28, his: "the card border should transition to secondary color and …
-  everything on the page should blur out", then, the same day, "start from the card with less intensity and then
-  increase the intensity in a circular fashion from the card"): once the page is awake, the innermost `Card` on the
-  field under a mouse or a pen wears `data-focused` (its border violet over `--motion-state`) and `data-focus-lift`
-  (lifted `z-11` over the blur until the blur has gone). **The blur is the system's focus motion** (Motion.md M13),
-  played on a `fixed inset-0 z-10` surface by the package's `useFocusMotion` (`CardFocus` here, its own component
-  so a change of focus renders only it). **One component is one focus**: an element marked `data-focus-group` (a work
-  row's `<li>`, the mark and the pill; `ProfileCard`'s wrapper, the avatar and the name) is focused, lifted and violet
-  whole, and the field stands on the box round its cards. A card reached from another is lifted only once the field has
-  glided to it, and while anything is in focus the grid is `data-cursor-still` (no lit cell under the blur, Grid.md
-  D34). It is a field of
-  rings on the card's centre, least next to it and rising outward, coming in as a ripple, holding across a gutter,
-  gliding card to card and fading out. It is designed on the motion studio's page 5, and its `--motion-focus-*`
-  tokens are his in globals.css (2026-09-28, round 1's Tide, tuned: 1px and a clear ring four cells wide, then ease-in to
-  22px over ten, a 1500ms ripple, an 800ms fade, a 500ms glide). It is the one blur anywhere
-  since D48, his ask. Never put an opacity, a filter, a mask or `contain: paint` on anything round the layers: it
-  becomes their backdrop root and they blur nothing. `node e2e/.mcp/card-focus.mjs <outdir> [w] [h] [scheme]
-  [cards…]` checks it.
+  dashes would show through. `node e2e/.mcp/page-wake.mjs <outdir> [w] [h] [scheme] [ms…]` checks it. **No modes and no
+  blur** (P21, 2026-09-30, his: "remove both focus modes from the portfolio … I did not like it in the portfolio"):
+  the card under the pointer in focus with the page blurring round it (P18, hyper focus) and focus mode's panel and
+  cloth (P20) went, with their row (`modes.tsx`), `CardFocus`, `data-focus-group`, `data-vertical` and `only`. Their
+  motions stay the system's (`useFocusMotion`, `useModeMotion`, the `--motion-focus-*` and `--motion-mode-*` tokens) and
+  play on the motion studio's pages 5 and 6.
 - **The pieces that were in the room** (P15, P4, `cards.tsx`): What I am after is a `NoteCard` under the avatar and the
   name since 2026-09-27 (his: "the about me text should be just below the avatar and name row") — his six paragraphs
   (`profile.story`), with no heading and no state, centred down the card, letting paragraphs go from the one before
@@ -179,8 +167,8 @@ note and no columns.
   on a tablet) when the logo strip left it.
 - **`BarsCard`'s bars grew when their page arrived** (P11), with GSAP, through `Progress`'s `animate` and `delay`
   props, because `GridPages` mounted only the page it showed. It is not on the page since P15 (the languages are a
-  pill); on a `Grid` a card mounts while the intro holds page 1 back, so a card that animates on arriving needs to
-  wait for the intro to hand over first.
+  pill); on a `Grid` a card mounts as soon as the field is measured (no intro holds it since D49), so a card that
+  animates on arriving can start when it mounts.
 - **The shell is the theme and the fonts.** `layout.tsx` has no nav, footer or container: every page takes the whole
   viewport. Every page is a client component — the `Grid` measures its box in the browser.
 

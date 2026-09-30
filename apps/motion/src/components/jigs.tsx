@@ -1,22 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { ArrowDown, ArrowRight, ChevronDown, GripVertical, Pause, Play as PlayIcon, Repeat, SkipBack } from "lucide-react";
+import { ArrowDown, ArrowRight, GripVertical, Pause, Play as PlayIcon, RotateCcw } from "lucide-react";
 
 import { Button } from "@no-origins/ui/components/button";
 import { Card, CardContent, CardHeader } from "@no-origins/ui/components/card";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger,
-} from "@no-origins/ui/components/dropdown-menu";
-import { Input } from "@no-origins/ui/components/input";
 import { Label } from "@no-origins/ui/components/label";
 import { Separator } from "@no-origins/ui/components/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@no-origins/ui/components/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@no-origins/ui/components/select";
 import { Slider } from "@no-origins/ui/components/slider";
 import { Slot } from "@no-origins/ui/components/slot";
 import { Switch } from "@no-origins/ui/components/switch";
 import { Text } from "@no-origins/ui/components/text";
-import { Toggle } from "@no-origins/ui/components/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-group";
 import { cn } from "@no-origins/ui/lib/utils";
 
@@ -47,10 +42,10 @@ import { settingsText, tokenLabel } from "@/lib/tokens";
  */
 
 /** A jig: a card filling its slot, a label for a head. */
-function Jig({ title, note, children, action }: { title: string; note?: string; children: React.ReactNode; action?: React.ReactNode }) {
+export function Jig({ title, note, children, action, fit = false }: { title: string; note?: string; children: React.ReactNode; action?: React.ReactNode; fit?: boolean }) {
   return (
-    <Slot fill="transparent" inset={0}>
-      <Card size="sm" className="h-full min-h-0 gap-3 shadow-none">
+    <Slot fill="transparent" inset={0} className={fit ? "h-auto" : undefined}>
+      <Card size="sm" className={cn("min-h-0 gap-3 shadow-none", fit ? "h-auto" : "h-full")}>
         <CardHeader className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 flex-col gap-0.5">
             <Text role="label" as="h2">{title}</Text>
@@ -69,11 +64,11 @@ function Jig({ title, note, children, action }: { title: string; note?: string; 
  * a band that fills its row — a grid stretches every control to its row, as tall as its tallest, and the band takes
  * the rest and centres the control in it — and is never shorter than a slider's 20.
  */
-function Control({ label, value, touches, className, children }: { label: string; value?: string; touches?: string; className?: string; children: React.ReactNode }) {
+export function Control({ label, value, touches, className, children }: { label: string; value?: string; touches?: string; className?: string; children: React.ReactNode }) {
   return (
     <div className={cn("flex min-w-0 flex-col gap-2", className)}>
       <div className="flex min-w-0 flex-col">
-        <div className="flex min-w-0 items-baseline gap-2">
+        <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
           <Label>{label}</Label>
           {value ? <Text role="mono" as="span" className="shrink-0">{value}</Text> : null}
         </div>
@@ -85,7 +80,7 @@ function Control({ label, value, touches, className, children }: { label: string
 }
 
 /** Controls two to a row, 12 apart down and 24 across; a control marked `col-span-2` takes the row. */
-function Controls({ children }: { children: React.ReactNode }) {
+export function Controls({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-2 gap-x-6 gap-y-3">{children}</div>;
 }
 
@@ -118,17 +113,31 @@ const lengthOf = (phases: readonly Phase[]) => phases.reduce((sum, p) => sum + p
  * stage holds there — and the time so far; then Loop and Tempo. Under the slider, the play's phases (`Phases`), where a
  * phase that is a setting is dragged. It reads the transport every frame; nothing else on the page does.
  *
- * Two lines where the row is wide enough: the buttons, the slider, Loop and Tempo, and under them the phases and the
- * time, so the slider and the phases take the width. Narrower — a phone's stage — the buttons, the time, Loop and Tempo
- * take a line of their own over the slider, and the layout gives the timeline two rows.
+ * **Drawn as his player** (2026-09-29, his: "I like … the player control designs … place it in the right half, under
+ * preview"): ↺ in an outline circle and play or pause in a lime one, the time, the slider with a violet thumb over the
+ * phases, each a pill with its name and its ms, the one the playhead is in lime, and a violet line from the thumb down
+ * through them; Loop a switch, Tempo a select. The slider and the phases are one axis: the phases stand a thumb's
+ * half in from the slider's ends, where its centre is at the play's start and end, so the line crosses each phase at
+ * the moment the thumb is at. Since 2026-09-30 the slider is the system's thick bar and the thumb its square head, the
+ * bar's height (his), so the half is half `--slider-height` (4px since his second tuning of the grip; 8 at his pick, 12 before) and the line starts at
+ * the bar's middle, behind the head. Both are reckoned from the token, never a number, so a new height moves them too.
+ *
+ * Docked — the studio's transport, a half field wide and two rows tall — the buttons, the time, Loop and Tempo are the
+ * first line, and the slider and the phases the second, from under the time to the end. Undocked — a
+ * concept study's one-row slot — it is his mock's one line: the buttons, the time, the slider over its phases, Loop and
+ * Tempo. Narrower than 26rem either way — a phone — the buttons, the time, Loop and Tempo take the first line, the
+ * slider and the phases the second.
  *
  * While a phase is dragged the timeline keeps the scale it had when the phase was pressed, so its end stays with the
  * pointer and what it pushes past the end is cut off; it fits the play again on letting go.
+ *
+ * A family with more to say about how its play runs hands its own controls in as `extra`, drawn beside Loop and Tempo.
  */
-export function Timeline({ family }: { family: Family }) {
+export function Timeline({ family, extra, dock = false }: { family: Family; extra?: React.ReactNode; dock?: boolean }) {
   const { transport, play, loop, setLoop, tempo, setTempo } = useStudio();
   const state = React.useSyncExternalStore(transport.subscribe, transport.get, transport.get);
   const [frozen, setFrozen] = React.useState<number | null>(null);
+  const loopId = React.useId();
   const mine = state.family === family.id;
   const phases = mine ? state.phases : [];
   const total = lengthOf(phases);
@@ -137,69 +146,85 @@ export function Timeline({ family }: { family: Family }) {
   const playing = mine && state.mode === "playing";
   const held = mine && state.mode !== "live";
   const current = held ? Math.max(0, phases.findIndex((_, i) => t < lengthOf(phases.slice(0, i + 1)))) : -1;
-  // The slider and the phases share the second column; on a phone each spans a line of its own.
-  const line = "@min-[26rem]:col-span-1 @min-[26rem]:col-start-2";
+  const at = Math.min(t, span) / Math.max(span, 1);
   return (
     <Slot fill="transparent" alignY="center">
-      <div className="@container w-full">
-        {/* The third column has a fixed width, so the slider does not shift as the time's digits change. */}
-        <div className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 @min-[26rem]:grid-cols-[auto_minmax(0,1fr)_7.5rem]">
-          <div className="col-start-1 row-start-1 flex gap-1">
-            <Button size="icon-xs" variant="outline" aria-label="Play from the start" onClick={play}>
-              <SkipBack />
+      <div className="@container/timeline w-full">
+        <div
+          className={cn(
+            "grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1.5",
+            !dock && "@min-[26rem]:grid-cols-[auto_auto_minmax(0,1fr)_auto] @min-[26rem]:items-start",
+          )}
+        >
+          <div className="col-start-1 row-start-1 flex items-center gap-2">
+            <Button size={dock ? "icon-sm" : "icon-xs"} variant="outline" aria-label="Play from the start" onClick={play}>
+              <RotateCcw />
             </Button>
             <Button
-              size="icon-xs"
-              variant="outline"
+              size={dock ? "icon-lg" : "icon-sm"}
+              className={cn(dock && "@max-[26rem]:size-9")}
               aria-label={playing ? "Pause" : "Play from the playhead"}
               onClick={() => (playing ? transport.pause() : transport.play())}
             >
-              {playing ? <Pause /> : <PlayIcon />}
+              {playing ? <Pause className="size-4 fill-current" /> : <PlayIcon className="size-4 fill-current" />}
             </Button>
           </div>
-          <Slider
-            className={cn("col-span-3 row-start-2 @min-[26rem]:row-start-1", line)}
-            min={0}
-            max={Math.max(1, span)}
-            step={1}
-            value={[Math.min(t, span)]}
-            onValueChange={([v]) => v !== undefined && transport.seek(v)}
-            aria-label="Timeline"
-          />
-          <Text role="mono" as="span" align="end" className="col-start-2 row-start-1 whitespace-nowrap @min-[26rem]:col-start-3 @min-[26rem]:row-start-2">
-            {Math.round(t)} / {Math.round(total)}ms
+          <Text role="body" as="span" className={cn("col-start-2 row-start-1 whitespace-nowrap tabular-nums", !dock && "@min-[26rem]:flex @min-[26rem]:h-9 @min-[26rem]:items-center")}>
+            {Math.round(t)} / {Math.round(total)} ms
           </Text>
-          <div className="col-start-3 row-start-1 flex justify-end gap-1">
-            {/* A toggle and a button as tall as the play buttons, so the row is one height. */}
-            <Toggle variant="outline" size="sm" className="h-7 min-w-7 px-0" pressed={loop} onPressedChange={setLoop} aria-label="Loop">
-              <Repeat className="size-3" />
-            </Toggle>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="xs" variant="outline" aria-label={`Tempo, ${tempo}×`}>
-                  {tempo}×
-                  <ChevronDown data-icon="inline-end" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-36">
-                <DropdownMenuLabel>Tempo</DropdownMenuLabel>
-                <DropdownMenuRadioGroup value={String(tempo)} onValueChange={(v) => setTempo(Number(v) as Tempo)}>
+          <div className={cn("col-start-3 row-start-1 flex items-center justify-end gap-3", !dock && "@min-[26rem]:col-start-4 @min-[26rem]:h-9")}>
+            {extra}
+            <div className="flex items-center gap-2">
+              <Switch id={loopId} checked={loop} onCheckedChange={setLoop} aria-label="Loop" />
+              <Label htmlFor={loopId} className="@max-[26rem]:sr-only">Loop</Label>
+            </div>
+            <Select value={String(tempo)} onValueChange={(v) => setTempo(Number(v) as Tempo)}>
+              <SelectTrigger size="sm" aria-label={`Tempo, ${tempo}×`}>
+                <SelectValue>{tempo}×</SelectValue>
+              </SelectTrigger>
+              <SelectContent position="popper" align="end">
+                <SelectGroup>
+                  <SelectLabel>Tempo</SelectLabel>
                   {TEMPOS.map((n) => (
-                    <DropdownMenuRadioItem key={n} value={String(n)}>
+                    <SelectItem key={n} value={String(n)}>
                       {n === 1 ? "1× real time" : `${n}× slower`}
-                    </DropdownMenuRadioItem>
+                    </SelectItem>
                   ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
-          <Phases
-            phases={phases}
-            current={current}
-            span={span}
-            onGrip={setFrozen}
-            className={cn("col-span-3 row-start-3 @min-[26rem]:row-start-2", line)}
-          />
+          {/* The axis: the slider over the phases, and the playhead through both. */}
+          <div
+            className={cn(
+              "relative col-span-3 row-start-2 flex min-w-0 flex-col",
+              // Docked, the transport's two rows hold the bar with the phases its head's gap under it.
+              dock
+                ? "gap-0.5 @min-[26rem]:col-span-2 @min-[26rem]:col-start-2"
+                : "gap-1.5 @min-[26rem]:col-span-1 @min-[26rem]:col-start-3 @min-[26rem]:row-start-1 @min-[26rem]:pt-1.5",
+            )}
+          >
+            <Slider
+              className="relative z-20 **:data-[slot=slider-thumb]:bg-secondary! **:data-[slot=slider-thumb]:ring-secondary/30!"
+              min={0}
+              max={Math.max(1, span)}
+              step={1}
+              value={[Math.min(t, span)]}
+              onValueChange={([v]) => v !== undefined && transport.seek(v)}
+              aria-label="Timeline"
+            />
+            {held ? (
+              <span
+                aria-hidden
+                className={cn(
+                  "pointer-events-none absolute top-[calc(var(--slider-height)/2)] bottom-0 z-10 w-0.5 -translate-x-1/2 bg-secondary",
+                  !dock && "@min-[26rem]:top-[calc(0.375rem+var(--slider-height)/2)]",
+                )}
+                style={{ left: `calc(${at} * (100% - var(--slider-height)) + var(--slider-height) / 2)` }}
+              />
+            ) : null}
+            <Phases phases={phases} current={current} span={span} onGrip={setFrozen} tall={dock} className="mx-[calc(var(--slider-height)/2)]" />
+          </div>
         </div>
       </div>
     </Slot>
@@ -207,8 +232,10 @@ export function Timeline({ family }: { family: Family }) {
 }
 
 /**
- * The play's phases under the slider, each as long as it lasts and labelled with its ms, the one the playhead is in
- * brighter. **A phase that is a setting of the play is dragged** (his, 2026-09-27: "Hold should also be a hold and drag
+ * The play's phases under the slider, each as long as it lasts: a pill with its name and its ms, the one the playhead
+ * is in lime (the muted tint), the rest the slider's grey. Each pill stands 2px in from its share on each side, so the
+ * gaps between them do not bend the axis the playhead reads. Tall, docked, the name stands over the ms; otherwise they
+ * share a line. **A phase that is a setting of the play is dragged** (his, 2026-09-27: "Hold should also be a hold and drag
  * on the time line"): the hold on every motion, and loading's page time on loading's. It wears a grip at its end; press
  * it anywhere and drag, right to lengthen it, left to shorten it. The timeline holds its scale for the drag (`onGrip`),
  * so the phase's end moves with the pointer, a step at a time. From the keyboard the arrows move it a step, Page Up
@@ -224,12 +251,14 @@ function Phases({
   current,
   span,
   onGrip,
+  tall = false,
   className,
 }: {
   phases: readonly Phase[];
   current: number;
   span: number;
   onGrip: (span: number | null) => void;
+  tall?: boolean;
   className?: string;
 }) {
   const strip = React.useRef<HTMLDivElement>(null);
@@ -279,44 +308,67 @@ function Phases({
   };
 
   return (
-    <div ref={strip} className={cn("flex min-w-0 overflow-hidden", className)}>
+    <div ref={strip} className={cn("flex min-w-0 overflow-hidden", tall ? "h-7 @min-[26rem]:h-9" : "h-6", className)}>
       {phases.map((phase, i) => {
-        const cell = "flex min-w-0 shrink-0 items-center border-s ps-1.5 first:border-s-0 first:ps-0";
+        const on = i === current || i === dragging;
         const style = { flexBasis: `${(phase.ms / Math.max(span, 1)) * 100}%` };
+        // Each pill is a container, so what does not fit it gives way: on one line the ms goes first, stacked only when
+        // the pill is thinner than its ms, and the grip where it would sit on the text; a pill thinner still loses its
+        // inset and sets its name a size down, so a hold between long phases still says so.
+        const pill = cn(
+          "@container/phase relative flex h-full min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-lg px-0.5 transition-colors",
+          tall && "@min-[26rem]:flex-col @min-[26rem]:gap-0",
+          on ? "bg-muted" : "bg-input/50",
+        );
         const label = (
-          <Text role="caption" tone={i === current || i === dragging ? "foreground" : "muted"} className="truncate">
-            {phase.label} {Math.round(phase.ms)}ms
-          </Text>
+          <>
+            <Text role="body" as="span" className="max-w-full truncate px-1 @max-[3.5rem]/phase:px-0 @max-[3.5rem]/phase:text-xs">{phase.label.charAt(0).toUpperCase() + phase.label.slice(1)}</Text>
+            <Text
+              role="caption"
+              as="span"
+              className={cn(
+                "max-w-full shrink-0 truncate px-1 tabular-nums",
+                tall ? "@max-[3rem]/phase:hidden @max-[26rem]/timeline:@max-[6.5rem]/phase:hidden" : "@max-[6.5rem]/phase:hidden",
+              )}
+            >
+              {Math.round(phase.ms)} ms
+            </Text>
+          </>
         );
         if (!phase.drag) {
           return (
-            <div key={i} className={cell} style={style}>
-              {label}
+            <div key={i} className="flex min-w-0 shrink-0 px-0.5" style={style}>
+              <div className={pill} title={phase.note} data-phase={phase.label}>{label}</div>
             </div>
           );
         }
         const value = Math.round(phase.ms / phase.drag.scale);
         return (
-          <div
-            key={i}
-            role="slider"
-            tabIndex={0}
-            aria-label={phase.label}
-            aria-orientation="horizontal"
-            aria-valuemin={phase.drag.min}
-            aria-valuemax={phase.drag.max}
-            aria-valuenow={value}
-            aria-valuetext={`${value}ms`}
-            className={cn(cell, "group gap-1 rounded-lg outline-none select-none touch-none focus-visible:ring-2 focus-visible:ring-ring/30")}
-            style={style}
-            onPointerDown={onPointerDown(i)}
-            onPointerMove={onPointerMove}
-            onPointerUp={release}
-            onPointerCancel={release}
-            onKeyDown={onKeyDown(i)}
-          >
-            {label}
-            <GripVertical aria-hidden className={cn("ms-auto size-3 shrink-0 group-hover:text-foreground", i === dragging ? "text-foreground" : "text-muted-foreground")} />
+          <div key={i} className="flex min-w-0 shrink-0 px-0.5" style={style}>
+            <div
+              role="slider"
+              tabIndex={0}
+              aria-label={phase.label}
+              aria-orientation="horizontal"
+              aria-valuemin={phase.drag.min}
+              aria-valuemax={phase.drag.max}
+              aria-valuenow={value}
+              aria-valuetext={`${value}ms`}
+              title={phase.note}
+              data-phase={phase.label}
+              className={cn(pill, "group outline-none select-none touch-none focus-visible:ring-2 focus-visible:ring-ring/30")}
+              onPointerDown={onPointerDown(i)}
+              onPointerMove={onPointerMove}
+              onPointerUp={release}
+              onPointerCancel={release}
+              onKeyDown={onKeyDown(i)}
+            >
+              {label}
+              <GripVertical
+                aria-hidden
+                className={cn("absolute end-1.5 top-1/2 size-3 -translate-y-1/2 group-hover:text-foreground @max-[5.5rem]/phase:hidden", i === dragging ? "text-foreground" : "text-muted-foreground")}
+              />
+            </div>
           </div>
         );
       })}
@@ -333,32 +385,29 @@ function Phases({
  * block, loading's page is laid in it. The family's own options follow, past a separator. How a play runs is the
  * timeline's.
  */
-export function Specimen({ family }: { family: Family }) {
+export function Specimen({ family, title = "Specimen", compact = false }: { family: Family; title?: string; compact?: boolean }) {
   const studio = useStudio();
   const block = studio.blockOf(family);
   return (
-    <Jig title="Specimen" note={family.hint}>
-      {family.id === "agent" ? <Text role="caption">Body · 2 cells wide × 1 cell high</Text> : <Controls>
+    <Jig title={title} note={compact ? undefined : family.hint} fit={compact}>
+      <Controls>
         <Control label="Columns" value={String(block.columns)}>
           <Slider min={1} max={family.block.max} step={1} value={[block.columns]} onValueChange={([v]) => v && studio.setOption(family, "columns", v)} aria-label="Columns" />
         </Control>
         <Control label="Rows" value={String(block.rows)}>
           <Slider min={1} max={family.block.max} step={1} value={[block.rows]} onValueChange={([v]) => v && studio.setOption(family, "rows", v)} aria-label="Rows" />
         </Control>
-      </Controls>}
+      </Controls>
       <Separator />
-      {SPECIMEN[family.id]({ family })}
+      {SPECIMEN[family.id]?.({ family })}
     </Jig>
   );
 }
 
-/** A family's own specimen options, after the block — not motion, so never in the settings. */
-function AgentOptions() {
- return <Text role="body">Define a start pose, an end pose, and the path between them. Eyes have independent controls. Hold, loop and speed are on the timeline.</Text>;
-}
-
-const SPECIMEN: Record<Family["id"], (props: { family: Family }) => React.ReactNode> = {
-  agent: () => <AgentOptions />,
+/**
+ * A family's own specimen options, after the block — not motion, so never in the settings.
+ */
+const SPECIMEN: Partial<Record<Family["id"], (props: { family: Family }) => React.ReactNode>> = {
   move: (p) => <MoveOptions {...p} />,
   load: (p) => <LoadOptions {...p} />,
   // Enter and exit's elements flow the same way: the order they come in, and which way `through` passes.
@@ -459,8 +508,8 @@ function FocusOptions({ family }: { family: Family }) {
 }
 
 /**
- * Focus mode's own options (Motion.md M14): which vertical a play on the timeline starts on — it slides on to the other
- * two in order — and whether the cloth's rings are drawn over the page, each with the blur it reaches.
+ * Focus mode's own options (Motion.md M14): which vertical a play on the timeline starts on — it switches on to the
+ * other two in order — and whether the cloth's rings are drawn over the page, each with the blur it reaches.
  */
 function ModeOptions({ family }: { family: Family }) {
   const studio = useStudio();
@@ -482,7 +531,6 @@ function ModeOptions({ family }: { family: Family }) {
 
 export function Presets({ family }: { family: Family }) {
   const studio = useStudio();
-  if (family.id === "agent") return <AgentPresets family={family} />;
   const matched = studio.presetOf(family);
   const shown = family.presets.find((p) => p.id === (matched ?? studio.fromOf(family))) ?? family.presets[0]!;
   return (
@@ -511,41 +559,19 @@ export function Presets({ family }: { family: Family }) {
   );
 }
 
-function AgentPresets({ family }: { family: Family }) {
- const studio = useStudio();
- const [selected, setSelected] = React.useState("");
- const [name, setName] = React.useState("");
- const [message, setMessage] = React.useState("");
- const valid = name.trim().length > 0;
- return <Jig title="Your presets" note="Save the movement you design.">
-  <Select value={selected} onValueChange={id => { const p=studio.agentPresets.find(p=>p.id===id)!; setSelected(id); setName(p.name); studio.loadAgentPreset(family,id); setMessage("Loaded"); }}>
-   <SelectTrigger aria-label="Your presets"><SelectValue placeholder="Choose a saved preset" /></SelectTrigger>
-   <SelectContent>{studio.agentPresets.map(p=><SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent>
-  </Select>
-  <Input aria-label="Preset name" placeholder="Name your movement" value={name} maxLength={80} onChange={e=>setName(e.target.value)} />
-  <div className="flex flex-wrap gap-2">
-   <Button size="sm" disabled={!valid} onClick={()=>{setSelected(studio.saveAgentPreset(family,name));setMessage("Saved as a new preset");}}>Save new</Button>
-   <Button size="sm" variant="outline" disabled={!selected || !valid} onClick={()=>{studio.saveAgentPreset(family,name,selected);setMessage("Preset updated");}}>Update</Button>
-   <Button size="sm" variant="ghost" disabled={!selected} onClick={()=>{studio.deleteAgentPreset(selected);setSelected("");setMessage("Preset deleted");}}>Delete</Button>
-  </div>
-  <Text role="caption">Includes all controls, hold, loop and speed. Stored in this browser.</Text>
-  <Text role="caption" aria-live="polite">{message || "No suggested personalities. Start with your own."}</Text>
- </Jig>;
-}
-
 // ── the tokens ────────────────────────────────────────────────────────────────────────────────────────────────
 
 export function Tokens({ family }: { family: Family }) {
   const studio = useStudio();
   const values = studio.values(family);
-  // A family whose tokens are grouped shows one group at a time, picked from a select: the agent's, and focus's.
+  // A family whose tokens are grouped shows one group at a time, picked from a select: focus's, and focus mode's.
   const groups = [...new Set(family.tokens.flatMap((t) => (t.group ? [t.group] : [])))];
   const savedGroup = studio.optionOf(family, "jig", groups[0] ?? "");
   const group = groups.includes(savedGroup) ? savedGroup : groups[0];
   return (
-    <Jig title={family.id === "agent" ? "Design" : "Tokens"}>
+    <Jig title="Tokens">
       {groups.length ? <Select value={group} onValueChange={(v) => studio.setOption(family, "jig", v)}>
-        <SelectTrigger size="sm" className="w-full" aria-label={family.id === "agent" ? "Design group" : "Token group"}><SelectValue /></SelectTrigger>
+        <SelectTrigger size="sm" className="w-full" aria-label="Token group"><SelectValue /></SelectTrigger>
         <SelectContent>{groups.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent>
       </Select> : null}
       {/* Two columns: a token marked half sits beside its pair, an in beside its out; any other takes the row. */}
@@ -623,20 +649,15 @@ export function Settings({ family }: { family: Family }) {
   const from = family.presets.find((p) => p.id === (matched ?? studio.fromOf(family))) ?? family.presets[0]!;
   const css = settingsText(family, studio.values(family), studio.decided?.[family.id] ?? {}, `${from.id} ${from.name}${matched ? "" : ", tuned"}`);
   // A grouped family's block is longer than the jig: it shows the group on the tokens' jig, and Copy takes every group.
-  const groups = family.id === "agent" ? [] : [...new Set(family.tokens.flatMap((t) => (t.group ? [t.group] : [])))];
+  const groups = [...new Set(family.tokens.flatMap((t) => (t.group ? [t.group] : [])))];
   const savedGroup = studio.optionOf(family, "jig", groups[0] ?? "");
   const group = groups.includes(savedGroup) ? savedGroup : groups[0];
   const shownCss = group
     ? css.split("\n").filter((line, i) => i === 0 || family.tokens.some((t) => t.group === group && line.startsWith(`${t.name}:`))).join("\n")
     : css;
-  const text = family.id === "agent" ? JSON.stringify({
-    character: "Personal guide", temperament: "Energetic and expressive",
-    tempo: studio.tempo, loop: studio.loop, presets: studio.agentPresets,
-    block: { columns: 2, rows: 1 }, hold: studio.hold, values: studio.values(family),
-  }, null, 2) : css;
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(css);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1500);
     } catch {}
@@ -651,14 +672,8 @@ export function Settings({ family }: { family: Family }) {
         </div>
       }
     >
-      {family.id === "agent" ? <>
-        <Text role="body">Energetic · expressive</Text>
-        <Text role="caption">Saved in this browser. Copy includes all controls, your presets and playback settings.</Text>
-        <Text role="caption">Reset clears the current design to a blank pose. Your saved presets stay.</Text>
-      </> : <>
-        <Text role="mono" as="pre" className="whitespace-pre-wrap">{shownCss}</Text>
-        {group ? <Text role="caption">{group} shown. Copy takes all {family.tokens.length}.</Text> : null}
-      </>}
+      <Text role="mono" as="pre" className="whitespace-pre-wrap">{shownCss}</Text>
+      {group ? <Text role="caption">{group} shown. Copy takes all {family.tokens.length}.</Text> : null}
     </Jig>
   );
 }
