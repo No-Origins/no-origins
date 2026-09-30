@@ -116,8 +116,7 @@ const PROJECT_LIST: Record<string, Span> = {
  * 2026-09-27: "let's also add another section: case studies. It's something in which there is not content/work yet, so
  * we can put 'Work In Progress' for it"). The content under the art skills was one too (his, the same day: "Add another
  * section for content - same as coming soon from case studies") until it took the marks (`CONTENT`), and the socials,
- * under the content, until they became the profile column's row of marks the same day. Its label and its pill are a
- * loader ring each, as every card is (Grid.md D48, 2026-09-28).
+ * under the content, until they became the profile column's row of marks the same day.
  */
 const WIP = "Work In Progress";
 const WIP_PILL = pill(3, 2, 3);

@@ -81,7 +81,7 @@ a page, because there is one bar for every page of a layout.
 
 **S6 — The registry lives in the package, and loads lazily.** *Recommended and accepted.* It belongs to the design
 system, so the admin's composer reads the same list as the showcase's. Each entry loads its component on first
-render, so a page that renders an exported layout with one `Input` in it does not pull all sixty components.
+render, so a page that renders an exported layout with one `Input` in it does not pull all sixty-two components.
 **Amended 2026-09-23 (S7).** Still in the package and still lazy; it is no longer a palette's source — neither
 composer exists — and it holds one entry, the pager's arrows.
 

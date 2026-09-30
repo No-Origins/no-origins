@@ -4,56 +4,70 @@ import { easing, motionMs, motionNumber } from "@no-origins/ui/lib/motion"
 
 /**
  * Focus (Motion.md M13, his, 2026-09-28), pure: a card in focus, and the page blurring round it — "the blurring to
- * start from the card with less intensity and then increase the intensity in a circular fashion from the card". The
- * blur is a field of rings on the card's centre, least at the card and rising outward; it comes in and goes out as a
- * motion, a ripple spreading from the card by default.
+ * start from the card with less intensity and then increase the intensity in a circular fashion from the card".
  *
- * It is drawn as layers over a surface (the screen, the studio's stage), each a `backdrop-filter` blur of what is under
- * it — the layers before it included, so they compound — masked to its ring (`focusLayerStyles`). What moves is a few
- * custom properties on the surface (`paintFocus`): the centre, the card's own radius, the ripple's front and the
- * clearing front behind it, the blur's strength and its opacity. The card in focus stands over the layers; that is the
+ * **The blur is a cloth, not a ripple** (his, the same night: "I want to consider that as a cloth, a blurring cloth,
+ * not as a ripple … the cloth should reach every corner of the viewport"). It is attached to the card, least blurred
+ * next to it and thicker out from it (the field, `focusRings`), and it is drawn out from under the card: each of its
+ * four edges goes out to the surface's, so its corners run straight to the surface's corners and all four arrive
+ * together (`pull` 1), or its edges go at one speed and the nearest lands first (`pull` 0). The card is lifted over
+ * it, its shadow on the cloth coming up as it lifts.
+ *
+ * It is drawn as layers over a surface (the screen), each a `backdrop-filter` blur of what is under it — the layers
+ * before it included, so they compound — masked to its ring of the field and to the cloth's four edges
+ * (`focusLayerStyles`). What moves is a few custom properties on the surface (`paintFocus`): the card's box, the
+ * cloth's edges, the blur's strength and opacity, and the lift. The card in focus stands over the layers; that is the
  * caller's.
  *
- * The tokens are his since 2026-09-28 (globals.css, `--motion-focus-*`), and every fallback here is the same value.
+ * The numbers are his since 2026-09-28, and his second pick since 2026-09-29 (globals.css, `--motion-focus-*`); every
+ * fallback here is the same value.
  */
 
-export type FocusWay = "ripple" | "swell" | "fade"
-export type FocusExit = "clear" | "recede" | "ebb" | "fade"
+export type FocusWay = "spread" | "swell" | "fade"
+export type FocusExit = "withdraw" | "ebb" | "fade"
 export type FocusShift = "glide" | "jump"
-export type FocusFrom = "corners" | "centre"
+export type FocusFrom = "edges" | "corners" | "centre"
 
-export const FOCUS_WAYS: readonly FocusWay[] = ["ripple", "swell", "fade"]
-export const FOCUS_EXITS: readonly FocusExit[] = ["clear", "recede", "ebb", "fade"]
+export const FOCUS_WAYS: readonly FocusWay[] = ["spread", "swell", "fade"]
+export const FOCUS_EXITS: readonly FocusExit[] = ["withdraw", "ebb", "fade"]
 export const FOCUS_SHIFTS: readonly FocusShift[] = ["glide", "jump"]
-export const FOCUS_FROMS: readonly FocusFrom[] = ["corners", "centre"]
+export const FOCUS_FROMS: readonly FocusFrom[] = ["edges", "corners", "centre"]
 
 /** The motion, read off an element (`readFocusMotion`). Distances in cells, blurs in px, times in ms. */
 export type FocusMotion = {
+  /** The card coming up over the cloth, and its curve. */
+  liftMs: number
+  liftEase: (t: number) => number
+  /** The shadow it casts on the cloth once up, px (its offset is half of it), and how dark, 0 to 1. */
+  shadow: number
+  shade: number
   /** The blur at the card, and at the end of the reach and beyond. */
   near: number
   far: number
-  /** A clear ring round the card before the blur starts to rise, and how far it rises over. */
+  /** A clear margin round the card before the blur starts to rise, and how far it rises over. */
   clear: number
   reach: number
   /** How it rises across the reach, as an easing of the way out. */
   rise: (t: number) => number
   /** How many rings draw the rise. */
   rings: number
-  /** Where the rings are measured from: the circle through the card's corners, or its centre. */
+  /** Where the rings are measured from: the card's edges, the circle through its corners, or its centre. */
   from: FocusFrom
-  /** How the blur comes in: a front spreading from the card, the whole field growing, or a fade. */
+  /** How the cloth comes: drawn out from under the card to every corner, swelling everywhere at once, or a fade. */
   way: FocusWay
   inMs: number
   inEase: (t: number) => number
-  /** The ripple's leading edge: how wide the band is where it goes from nothing to all. */
-  front: number
-  /** An extra blur riding the front, px: the ripple's crest. */
-  crest: number
-  /** How it goes: clearing outward from the card, receding into it, ebbing everywhere at once, or a fade. */
+  /** How the edges share the way out: 1, each at its own speed so every corner arrives at once; 0, all at one. */
+  pull: number
+  /** The cloth's soft edge, cells: how far in from its edge it takes to be all there. 0 is a crisp edge. */
+  hem: number
+  /** An extra blur along the hem, px: the cloth's edge folded over. */
+  fold: number
+  /** How it goes: drawn back under the card, thinning everywhere at once, or a fade. */
   exit: FocusExit
   outMs: number
   outEase: (t: number) => number
-  /** From one card to the next: the field glides over, or jumps. */
+  /** From one card to the next: the cloth glides over, or jumps. */
   shift: FocusShift
   glideMs: number
   glideEase: (t: number) => number
@@ -62,33 +76,41 @@ export type FocusMotion = {
 }
 
 /**
- * His pick (2026-09-28, "C Tide, tuned"), the values globals.css has: what every token falls back to where it is unset,
- * as `readLoadMotion`'s do. A slow ripple from the card, 1px next to it and sharp in all but that for four cells, then
- * rising on ease-in to 22px over ten; a 250ms hold, an 800ms fade out, a 500ms glide, every curve cubic in-out.
+ * The values globals.css has, what every token falls back to where it is unset, as `readLoadMotion`'s do. His pick
+ * (2026-09-29, "C Unroll, tuned", replacing round 1's Tide): 1px next to the card, sharp in all but that for a cell, then
+ * rising on ease-in to 16px over 21 cells in ten rings, measured from the circle through its corners; the cloth fades
+ * in over 80ms (so its pull and twelve-cell hem play no part), no fold; the card lifts in 300ms with no shadow; a 120ms
+ * hold, a 400ms fade out, an 80ms glide, every curve cubic in-out.
  */
 export const FOCUS_START = {
+  lift: 300,
+  liftEase: "cubic-bezier(0.65, 0, 0.35, 1)",
+  shadow: 0,
+  shade: 0.16,
   near: 1,
-  far: 22,
-  clear: 4,
-  reach: 10,
+  far: 16,
+  clear: 1,
+  reach: 21,
   rise: "ease-in",
   rings: 10,
   from: "corners" as FocusFrom,
-  way: "ripple" as FocusWay,
-  in: 1500,
+  way: "fade" as FocusWay,
+  in: 80,
   inEase: "cubic-bezier(0.65, 0, 0.35, 1)",
-  front: 8,
-  crest: 0,
+  pull: 0.5,
+  hem: 12,
+  fold: 0,
   exit: "fade" as FocusExit,
-  out: 800,
+  out: 400,
   outEase: "cubic-bezier(0.65, 0, 0.35, 1)",
   shift: "glide" as FocusShift,
-  glide: 500,
+  glide: 80,
   glideEase: "cubic-bezier(0.65, 0, 0.35, 1)",
-  hold: 250,
+  hold: 120,
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
+const clamp01 = (t: number) => clamp(t, 0, 1)
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
 /** A choice token off `el`, or `fallback` where it is unset or not one of `list`. */
@@ -104,6 +126,10 @@ const easeOr = (el: Element, token: `--motion-${string}`, fallback: string) =>
 export function readFocusMotion(el: Element): FocusMotion {
   const s = FOCUS_START
   return {
+    liftMs: motionMs(el, "--motion-focus-lift", s.lift),
+    liftEase: easeOr(el, "--motion-focus-lift-ease", s.liftEase),
+    shadow: Math.max(0, motionNumber(el, "--motion-focus-shadow", s.shadow)),
+    shade: clamp01(motionNumber(el, "--motion-focus-shade", s.shade)),
     near: Math.max(0, motionNumber(el, "--motion-focus-near", s.near)),
     far: Math.max(0, motionNumber(el, "--motion-focus-far", s.far)),
     clear: Math.max(0, motionNumber(el, "--motion-focus-clear", s.clear)),
@@ -114,8 +140,9 @@ export function readFocusMotion(el: Element): FocusMotion {
     way: choice(el, "--motion-focus-way", FOCUS_WAYS, s.way),
     inMs: motionMs(el, "--motion-focus-in", s.in),
     inEase: easeOr(el, "--motion-focus-in-ease", s.inEase),
-    front: Math.max(0.1, motionNumber(el, "--motion-focus-front", s.front)),
-    crest: Math.max(0, motionNumber(el, "--motion-focus-crest", s.crest)),
+    pull: clamp01(motionNumber(el, "--motion-focus-pull", s.pull)),
+    hem: Math.max(0, motionNumber(el, "--motion-focus-hem", s.hem)),
+    fold: Math.max(0, motionNumber(el, "--motion-focus-fold", s.fold)),
     exit: choice(el, "--motion-focus-exit", FOCUS_EXITS, s.exit),
     outMs: motionMs(el, "--motion-focus-out", s.out),
     outEase: easeOr(el, "--motion-focus-out-ease", s.outEase),
@@ -131,7 +158,7 @@ export function readFocusMotion(el: Element): FocusMotion {
 /**
  * One ring of the field: the blur its layer adds (`blur`), the blur the field has reached at its outer edge once the
  * layers under it are counted (`level`), and where it fades in, from nothing at `from` to all of it at `to`, px out
- * from the card's own radius. The first, the blur at the card, has no ring: it is everywhere the front has been.
+ * from the card. The first, the blur at the card, has no ring: it is everywhere the cloth is.
  */
 export type FocusRing = { blur: number; level: number; from: number | null; to: number | null }
 
@@ -160,55 +187,118 @@ export function focusRings(m: Pick<FocusMotion, "near" | "far" | "clear" | "reac
   return rings
 }
 
-const AT = "circle at var(--focus-x) var(--focus-y)"
-/** Shown inside the ripple's front, fading out across its leading edge `w` wide. */
-const outer = (w: number) => `radial-gradient(${AT}, #000 calc(var(--focus-f) - ${w}px), transparent var(--focus-f))`
-/** Hidden inside the clearing front, fading in across its edge. */
-const inner = (w: number) => `radial-gradient(${AT}, transparent var(--focus-g), #000 calc(var(--focus-g) + ${w}px))`
+/** A ring measured from a circle: nothing inside `from` px out from it, all of it past `to`. */
+const circle = (from: number, to: number) =>
+  `radial-gradient(circle at var(--focus-x) var(--focus-y), transparent calc(var(--focus-r0) + ${from.toFixed(1)}px), #000 calc(var(--focus-r0) + ${to.toFixed(1)}px))`
 
-/**
- * The layers that draw the field, as styles for elements that each cover the surface: one a ring, and a last one
- * for the crest riding the front. Every one is masked to where the ripple has been and the clearing has not, and
- * reads the moving numbers off the surface (`paintFocus`). Never put an opacity, a filter, a mask or paint containment
- * on anything round them: it becomes their backdrop root, and they blur only what is inside it — nothing, or a stage
- * without the field's dashes under it (Chrome counts `contain: paint`).
- */
-export function focusLayerStyles(m: FocusMotion, pitch: number): CSSProperties[] {
-  const w = m.front * pitch
-  const blur = (px: number) => `blur(calc(${px.toFixed(2)}px * var(--focus-swell)))`
-  // Only the fronts the motion moves: a mask is redrawn on every layer every frame the field moves, so one the motion
-  // never moves is work for nothing. The ripple's front moves on a ripple in, a recede out and under a crest; the
-  // clearing front only on a clear out.
-  const clearing = m.exit === "clear" ? [inner(w)] : []
-  const fronts = [...(m.way === "ripple" || m.exit === "recede" || m.crest > 0 ? [outer(w)] : []), ...clearing]
-  const layer = (px: number, masks: string[]): CSSProperties => ({
-    backdropFilter: blur(px),
-    WebkitBackdropFilter: blur(px),
-    ...(masks.length ? { maskImage: masks.join(", "), maskComposite: "intersect" } : null),
-    opacity: "var(--focus-opacity)",
-  })
-  const rings = focusRings(m, pitch).map((ring) =>
-    layer(
-      ring.blur,
-      ring.from === null || ring.to === null
-        ? fronts
-        : [`radial-gradient(${AT}, transparent calc(var(--focus-r0) + ${ring.from}px), #000 calc(var(--focus-r0) + ${ring.to}px))`, ...fronts],
-    ),
-  )
-  if (m.crest <= 0) return rings
-  const crest = `radial-gradient(${AT}, transparent calc(var(--focus-f) - ${w}px), #000 calc(var(--focus-f) - ${w / 2}px), transparent var(--focus-f))`
-  return [...rings, layer(m.crest, [crest, ...clearing])]
+/** A ring measured from the card's edges: what lies farther than it from the card's box, by four half-planes. */
+const edges = (from: number, to: number) => {
+  const f = from.toFixed(1)
+  const t = to.toFixed(1)
+  return [
+    `linear-gradient(to right, #000 calc(var(--focus-l) - ${t}px), transparent calc(var(--focus-l) - ${f}px))`,
+    `linear-gradient(to left, #000 calc(100% - var(--focus-r) - ${t}px), transparent calc(100% - var(--focus-r) - ${f}px))`,
+    `linear-gradient(to bottom, #000 calc(var(--focus-t) - ${t}px), transparent calc(var(--focus-t) - ${f}px))`,
+    `linear-gradient(to top, #000 calc(100% - var(--focus-b) - ${t}px), transparent calc(100% - var(--focus-b) - ${f}px))`,
+  ]
 }
 
-// ── where, and how far in ────────────────────────────────────────────────────────────────────────────────────────
+/** Inside the cloth's four edges, fading in across `w` px from each: the hem. 0 is a crisp edge. */
+const within = (w: number) => {
+  const h = w.toFixed(1)
+  return [
+    `linear-gradient(to right, transparent var(--cloth-l), #000 calc(var(--cloth-l) + ${h}px))`,
+    `linear-gradient(to left, transparent calc(100% - var(--cloth-r)), #000 calc(100% - var(--cloth-r) + ${h}px))`,
+    `linear-gradient(to bottom, transparent var(--cloth-t), #000 calc(var(--cloth-t) + ${h}px))`,
+    `linear-gradient(to top, transparent calc(100% - var(--cloth-b)), #000 calc(100% - var(--cloth-b) + ${h}px))`,
+  ]
+}
+
+/** Within `to` px of the cloth's edges, fading out from `from`: a band along the inside of its hem, for the fold. */
+const along = (from: number, to: number) => {
+  const f = from.toFixed(1)
+  const t = to.toFixed(1)
+  return [
+    `linear-gradient(to right, #000 calc(var(--cloth-l) + ${f}px), transparent calc(var(--cloth-l) + ${t}px))`,
+    `linear-gradient(to left, #000 calc(100% - var(--cloth-r) + ${f}px), transparent calc(100% - var(--cloth-r) + ${t}px))`,
+    `linear-gradient(to bottom, #000 calc(var(--cloth-t) + ${f}px), transparent calc(var(--cloth-t) + ${t}px))`,
+    `linear-gradient(to top, #000 calc(100% - var(--cloth-b) + ${f}px), transparent calc(100% - var(--cloth-b) + ${t}px))`,
+  ]
+}
+
+/**
+ * A mask that is every one of `all` and any one of `any`. Mask layers composite in turn from the last up, each with the
+ * ones under it, so the `any` go last, added to each other, and the `all` over them, each intersected with the rest.
+ */
+function masked(all: string[], any: string[]): CSSProperties | null {
+  const images = [...all, ...any]
+  if (!images.length) return null
+  const ops = [...all.map(() => "intersect"), ...any.map(() => "add")]
+  // The last layer composites with nothing, which an intersect would empty.
+  ops[ops.length - 1] = "add"
+  return { maskImage: images.join(", "), maskComposite: ops.join(", "), maskRepeat: "no-repeat", maskSize: "100% 100%" }
+}
+
+/**
+ * The layers that draw the cloth, as styles for elements that each cover the surface: one a ring of the field, masked
+ * to it and to the cloth's four edges, a last one for the fold along the hem, and the card's shadow (`focusShadow`).
+ * They read the moving numbers off the surface (`paintFocus`). Never put an opacity, a filter, a mask or paint
+ * containment on anything round them: it becomes their backdrop root, and they blur only what is inside it — nothing,
+ * or a stage without the field's dashes under it (Chrome counts `contain: paint`). Nor a `mix-blend-mode` anywhere in
+ * the stacking context round them that is not isolated below it: to blend it, Chrome isolates that context, which
+ * makes it their backdrop root too (measured 2026-09-29: the Avatar's ring, now `isolate`, kept the field sharp
+ * whenever a card other than the avatar was in focus).
+ */
+export function focusLayerStyles(m: FocusMotion, pitch: number): CSSProperties[] {
+  const blur = (px: number) => `blur(calc(${px.toFixed(2)}px * var(--focus-swell)))`
+  const hem = m.hem * pitch
+  // Only an edge the motion moves: a mask is redrawn on every layer every frame the cloth moves, so edges that stay past
+  // the surface are work for nothing. They move when the cloth is drawn out, or drawn back.
+  const moves = m.way === "spread" || m.exit === "withdraw"
+  const cloth = moves ? within(hem) : []
+  const layer = (px: number, all: string[], any: string[]): CSSProperties => ({
+    backdropFilter: blur(px),
+    WebkitBackdropFilter: blur(px),
+    ...masked(all, any),
+    opacity: "var(--focus-opacity)",
+  })
+  const layers = focusRings(m, pitch).map((ring) =>
+    layer(ring.blur, cloth, ring.from === null || ring.to === null ? [] : m.from === "edges" ? edges(ring.from, ring.to) : [circle(ring.from, ring.to)]),
+  )
+  if (moves && m.fold > 0) {
+    // The fold: up across the first half of the hem, down across the second — a cell wide on a crisp one.
+    const band = hem > 0 ? hem : pitch
+    layers.push(layer(m.fold, within(hem / 2), along(band / 2, band)))
+  }
+  const shadow = focusShadow(m)
+  return shadow ? [...layers, shadow] : layers
+}
+
+/**
+ * The card's shadow on the cloth, as a layer's style: a box as the card's, casting `shadow` px down it as far as the
+ * card is lifted, never inside it — the card stands over it there. Black at any theme: a light one would be a glow.
+ */
+export function focusShadow(m: FocusMotion): CSSProperties | null {
+  if (m.shadow <= 0 || m.shade <= 0) return null
+  const k = "var(--focus-lift)"
+  return {
+    left: "var(--focus-l)",
+    top: "var(--focus-t)",
+    width: "calc(var(--focus-r) - var(--focus-l))",
+    height: "calc(var(--focus-b) - var(--focus-t))",
+    borderRadius: "var(--radius)",
+    boxShadow: `0 calc(${(m.shadow / 2).toFixed(1)}px * ${k}) calc(${m.shadow.toFixed(1)}px * ${k}) color-mix(in oklch, #000 calc(${(m.shade * 100).toFixed(0)}% * ${k}), transparent)`,
+    opacity: "var(--focus-opacity)",
+  }
+}
+
+// ── where, and how far out ───────────────────────────────────────────────────────────────────────────────────────
 
 /** A box on the surface, px from its top-left. */
 export type FocusBox = { l: number; t: number; r: number; b: number }
 
-/** Where the field stands: the card's centre, and the radius its rings are measured from. */
-export type FocusPlace = { x: number; y: number; r0: number }
-
-export function focusPlace(box: FocusBox, from: FocusFrom): FocusPlace {
+/** Where a ring measured from a circle is centred, and the radius it is measured from. */
+export function focusCentre(box: FocusBox, from: FocusFrom) {
   return {
     x: (box.l + box.r) / 2,
     y: (box.t + box.b) / 2,
@@ -216,61 +306,60 @@ export function focusPlace(box: FocusBox, from: FocusFrom): FocusPlace {
   }
 }
 
-/** How far a surface `w` × `h` reaches from a place: to its farthest corner. */
-export const focusReach = (p: FocusPlace, w: number, h: number) => Math.hypot(Math.max(p.x, w - p.x), Math.max(p.y, h - p.y))
-
-export const placeBetween = (a: FocusPlace, b: FocusPlace, t: number): FocusPlace => ({ x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), r0: lerp(a.r0, b.r0, t) })
+/** The cloth on its way from one card to the next: the box it is attached to. */
+export const placeBetween = (a: FocusBox, b: FocusBox, t: number): FocusBox => ({ l: lerp(a.l, b.l, t), t: lerp(a.t, b.t, t), r: lerp(a.r, b.r, t), b: lerp(a.b, b.b, t) })
 
 /**
- * How far in the blur is: the ripple's front (`f`) and the clearing front behind it (`g`), px from the centre — the
- * field is shown between the two — and its strength (`swell`, 0 to 1, the blurs scaled) and its opacity.
+ * The cloth's four edges `c` of the way out, px on a surface `w` × `h`: from the card's box to the surface's, less the
+ * hem outside it so it is all there to the corners. Each edge has its own way to go; with `pull` at 1 each goes at its
+ * own speed and all four arrive together, so every corner of the cloth reaches its corner at once; at 0 all go at the
+ * farthest one's speed, and the nearest lands first.
  */
-export type FocusLevel = { f: number; g: number; swell: number; opacity: number }
+export function clothEdges(m: Pick<FocusMotion, "pull" | "hem">, box: FocusBox, c: number, w: number, h: number, pitch: number): FocusBox {
+  const out = m.hem * pitch
+  const d = { l: Math.max(0, box.l + out), t: Math.max(0, box.t + out), r: Math.max(0, w + out - box.r), b: Math.max(0, h + out - box.b) }
+  const far = Math.max(1, d.l, d.t, d.r, d.b)
+  const k = clamp01(c)
+  /** How far along an edge is: it arrives at `lerp(its share of the farthest, 1, pull)` of the way. */
+  const at = (way: number) => {
+    const arrives = lerp(way / far, 1, m.pull)
+    return arrives <= 0 ? 1 : clamp01(k / arrives)
+  }
+  return { l: box.l - d.l * at(d.l), t: box.t - d.t * at(d.t), r: box.r + d.r * at(d.r), b: box.b + d.b * at(d.b) }
+}
 
-/** A front past any surface. */
-export const FOCUS_FAR = 100000
+/**
+ * How far out the cloth is: how far drawn out from under the card (`c`, 0 to 1), its strength (`swell`, 0 to 1, the
+ * blurs scaled) and its opacity.
+ */
+export type FocusLevel = { c: number; swell: number; opacity: number }
 
-/** All in: the fronts past every edge. */
-export const FOCUS_ON: FocusLevel = { f: FOCUS_FAR, g: -FOCUS_FAR, swell: 1, opacity: 1 }
+/** All out. */
+export const FOCUS_ON: FocusLevel = { c: 1, swell: 1, opacity: 1 }
 
 export const levelBetween = (a: FocusLevel, b: FocusLevel, t: number): FocusLevel => ({
-  f: lerp(a.f, b.f, t),
-  g: lerp(a.g, b.g, t),
+  c: lerp(a.c, b.c, t),
   swell: lerp(a.swell, b.swell, t),
   opacity: lerp(a.opacity, b.opacity, t),
 })
 
-/**
- * A level as a motion can start from it: fronts past the surface brought to just past its farthest corner, `reach`,
- * which looks the same — so a front that moves sets off at once rather than crossing nothing first.
- */
-export const levelFrom = (l: FocusLevel, reach: number, w: number): FocusLevel => ({ ...l, f: Math.min(l.f, reach + w), g: Math.max(l.g, -w) })
-
-/** All in, as a motion ends: the front just past the farthest corner. */
-export const levelIn = (reach: number, w: number): FocusLevel => ({ f: reach + w, g: -w, swell: 1, opacity: 1 })
-
-/** Where a focus comes in from, by its way in: the front at the card's centre, the blur at nothing, or unseen. */
-export function levelEntering(m: FocusMotion, w: number): FocusLevel {
+/** Where a focus comes in from, by its way in: the cloth under the card, all out at no strength, or unseen. */
+export function levelEntering(m: Pick<FocusMotion, "way">): FocusLevel {
   switch (m.way) {
-    case "ripple":
-      return { f: 0, g: -w, swell: 1, opacity: 1 }
+    case "spread":
+      return { c: 0, swell: 1, opacity: 1 }
     case "swell":
-      return { f: FOCUS_FAR, g: -w, swell: 0, opacity: 1 }
+      return { c: 1, swell: 0, opacity: 1 }
     case "fade":
-      return { f: FOCUS_FAR, g: -w, swell: 1, opacity: 0 }
+      return { c: 1, swell: 1, opacity: 0 }
   }
 }
 
-/**
- * Where a focus goes, from `from`, by its way out: clearing outward from the card past the farthest corner, the front
- * receding into the card's centre, the blur ebbing to nothing everywhere at once, or fading.
- */
-export function levelLeaving(m: FocusMotion, from: FocusLevel, reach: number, w: number): FocusLevel {
+/** Where a focus goes, from `from`, by its way out: drawn back under the card, thinned to nothing, or faded. */
+export function levelLeaving(m: Pick<FocusMotion, "exit">, from: FocusLevel): FocusLevel {
   switch (m.exit) {
-    case "clear":
-      return { ...from, g: reach + w }
-    case "recede":
-      return { ...from, f: 0 }
+    case "withdraw":
+      return { ...from, c: 0 }
     case "ebb":
       return { ...from, swell: 0 }
     case "fade":
@@ -278,16 +367,34 @@ export function levelLeaving(m: FocusMotion, from: FocusLevel, reach: number, w:
   }
 }
 
+/** A moment of the focus: the box the cloth is attached to, how far out it is, how far the card is lifted, and whether it shows. */
+export type FocusFrame = { box: FocusBox; level: FocusLevel; lift: number; shown: boolean }
+
+/** An edge past any surface. */
+const FAR = 100000
+
 /** Writes a frame onto the surface: the custom properties its layers read, and whether it shows at all. */
-export function paintFocus(surface: HTMLElement | null, place: FocusPlace, level: FocusLevel, shown: boolean) {
+export function paintFocus(surface: HTMLElement | null, m: FocusMotion, frame: FocusFrame, pitch: number) {
   if (!surface) return
   const s = surface.style
-  s.setProperty("--focus-x", `${place.x.toFixed(1)}px`)
-  s.setProperty("--focus-y", `${place.y.toFixed(1)}px`)
-  s.setProperty("--focus-r0", `${place.r0.toFixed(1)}px`)
-  s.setProperty("--focus-f", `${level.f.toFixed(1)}px`)
-  s.setProperty("--focus-g", `${level.g.toFixed(1)}px`)
+  const { box, level } = frame
+  const px = (v: number) => `${v.toFixed(1)}px`
+  const at = focusCentre(box, m.from)
+  // All out, the cloth is past every edge, whatever size the surface has come to since.
+  const cloth = level.c >= 1 ? { l: -FAR, t: -FAR, r: FAR, b: FAR } : clothEdges(m, box, level.c, surface.clientWidth, surface.clientHeight, pitch)
+  s.setProperty("--focus-l", px(box.l))
+  s.setProperty("--focus-t", px(box.t))
+  s.setProperty("--focus-r", px(box.r))
+  s.setProperty("--focus-b", px(box.b))
+  s.setProperty("--focus-x", px(at.x))
+  s.setProperty("--focus-y", px(at.y))
+  s.setProperty("--focus-r0", px(at.r0))
+  s.setProperty("--cloth-l", px(cloth.l))
+  s.setProperty("--cloth-t", px(cloth.t))
+  s.setProperty("--cloth-r", px(cloth.r))
+  s.setProperty("--cloth-b", px(cloth.b))
   s.setProperty("--focus-swell", level.swell.toFixed(3))
   s.setProperty("--focus-opacity", level.opacity.toFixed(3))
-  s.visibility = shown ? "visible" : "hidden"
+  s.setProperty("--focus-lift", clamp01(frame.lift).toFixed(3))
+  s.visibility = frame.shown ? "visible" : "hidden"
 }

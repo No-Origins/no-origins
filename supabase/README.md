@@ -2,6 +2,14 @@
 
 One project, `no-origins`: Postgres + Auth + Storage.
 
+> **One sign-in for every app — 2026-09-30 (Admin.md §8.4, amended).** The motion studio signs in through this
+> project too, with the admin's allowlist and the same session (`packages/auth`, the cookie written for
+> `.no-origins.com`). `config.toml` lists its callback on :3004 among the redirect URLs and its origin among the
+> passkey origins; a running local stack takes them on its next `supabase stop` / `start`. **On the hosted project
+> both are dashboard steps, and his:** add `https://motion.no-origins.com/**` to Auth → URL Configuration → Redirect
+> URLs, and `https://motion.no-origins.com` to the passkey origins, with the relying party ID `no-origins.com` so one
+> passkey opens both. A passkey registered under another relying party ID does not carry over.
+
 > **Quests removed — 2026-09-23 (Admin.md §0.7).** *"remove showcase /composes,
 > admin's too and also quests feature."* `…_drop_quests.sql` drops `quests` (its
 > four policies and both triggers go with it by `cascade`),
@@ -43,6 +51,7 @@ One project, `no-origins`: Postgres + Auth + Storage.
 | `migrations/…_storage.sql` | The two buckets of §8.2 and their policies |
 | `migrations/…_quests.sql` | **The reset (§0.5):** drops the document/editor/products era, keeps identity, adds `quests` (+ its `rev` trigger and RLS) *(its `quests` dropped by `…_drop_quests.sql`)* |
 | `migrations/…_drop_quests.sql` | **Quests removed (§0.7):** drops `quests`, `noo_touch_quest_layout()` and `noo_quest_status`; identity untouched. **Drops data** on any database that has quest rows. |
+| `migrations/…_studio_versions.sql` | **The studios' drafts and versions (Motion.md M20, Character-Studio.md C6, 2026-09-30):** `studio_items` (a character, a motion or an uploaded drawing), `studio_drafts` (one per item, `rev` bumped by the database when `data` changes), `studio_versions` (numbered max + 1 per item, named, frozen: no update or delete for any role, truncate revoked), `studio_publish()` (the draft as he saw it, refused on a stale `rev`), owner-only RLS, and the agent's version 12 stored whole as its first. Adds only; drops nothing. |
 
 ## Running it locally
 
@@ -74,6 +83,41 @@ row exists **nobody can sign in at all** — including you. That is the design
 magic link to attach to.
 
 ## What was verified, and how
+
+**The studios' drafts and versions (2026-09-30), against the local stack.** Run first inside a transaction and rolled
+back, then applied with `supabase migration up --local` (the allowlist row kept). Checked:
+
+- the seed is character "Agent" with version 12, "his settings", current, held whole (32 body values, 6 face slots),
+  and its draft equal to it at `rev` 0;
+- the owner, through RLS: a draft write on the right `rev` moves it 0 → 1, a stale one moves 0 rows, the same data
+  keeps the `rev`; `studio_publish` makes 13 (its name trimmed) and makes it current; a stale `rev`, a repeated name in
+  any case and an empty one are refused; going back to 12 moves the pointer and renumbers nothing;
+- frozen: the owner's update or delete of a version touches 0 rows, and the trigger refuses them for a superuser;
+  truncate is refused; only an item's first version may name its number; an item with versions cannot be deleted;
+- shapes: a motion needs a character and that character must be one; a drawing needs a slot; one name can be used in
+  two slots but not twice in one; an item cannot show another item's version or change its kind;
+- a stranger (signed in, not on the allowlist) and `anon` see 0 rows and cannot insert.
+
+**Not pushed to the hosted project**, like the two migrations before it: that is his step (`supabase db push`).
+Before that push, regenerate its seed from the package (`resolveCharacter({ body: {}, face: {} })`,
+`@no-origins/ui/lib/agent-body`) if a default has moved: three face defaults did the same night (brow height and
+colour, symbol colour), and the seed and the local version 12 were brought up to them. `config.toml` lists the
+character studio's callback (:3005) and passkey origin beside the motion studio's; a running stack takes them on its
+next `supabase stop` / `start`. On the hosted project both are his dashboard steps, with
+`https://character.no-origins.com`.
+
+Its seed now holds four versions of the agent: 12, "his settings"; 13, "Version 13, tuned" (his settings block of
+the same night, "This becomes the rest state of the motion": 12 with Come back 1000 ms); 14, "Version 13, tuned,
+tuned" (his next block: 13 with Come back 500 ms and Spread 0.05); and 15, "his version 14, as it looks" (Spread 0.11
+once the whole slider was made live on slime), current, the draft starting from it — `resolveCharacter({ body: {},
+face: {} })` as the package stood. The agent's item is named **Bali** since he named it (2026-09-30). **And five more characters** (Agents.md A2, Character-Studio.md C13): Kino, Zaza,
+Oru, Mira and Lola — the Maker, Scout, Keeper, Editor and Muse — each an item with a draft and a version 1, "Version 1", its whole look, numbered 1 by hand
+(an item's first version may name its number). Replayed from scratch inside a rolled-back transaction each time, and
+every row added to the local database by hand, since the migration was already applied there.
+
+The character studio then saved against it (`e2e/.mcp/character-save.mjs`): a draft written on each change, a
+publish (13), a repeated name refused, a going back to 12, and a draft saved elsewhere first refused with "Load it".
+The test version was removed afterwards with the frozen trigger disabled — locally, and only for that row.
 
 **Quests removed (2026-09-23), against the local stack after `…_drop_quests.sql`:**
 

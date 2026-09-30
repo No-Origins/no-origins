@@ -113,7 +113,8 @@ so the portalled surfaces inherit them.
   confusing"*). Everything in a jig is 12px apart down: its head and its content, one control and the next. Two
   controls side by side are 24px apart, so each reads as its own. A control is always the same three parts: its label
   with its value right after it, a one-line caption where it has one, and then, 8px below, the control. The control
-  sits in a band as tall as the tallest control in its row (36px for a toggle group or a select, 20px for a slider),
+  sits in a band as tall as the tallest control in its row (36px for a toggle group or a select, 20px for a slider — its bar is 8px since his second tuning of the grip, M16,
+  16px at his pick and 24px before it that day, Grid-v2.md D39, 2026-09-30),
   centred, so a slider beside a select stands level with it. A jig's groups are split by a separator: on the
   specimen's jig, the block's Columns and Rows above the family's own options. *Before, the gaps were 8px in one jig and 12px in another, a slider sat right under its
   label while a select floated lower, values sat at the far edge where they read as the next control's, and captions
@@ -480,6 +481,12 @@ stage, on the tokens above. The ten rings on the portfolio's desktop stand as 3,
 after load on a local server. The same night the fold became the square (above), and the border began to fade as the
 section comes in (above), both first seen there.
 
+**Off every page, 2026-09-30.** *"I want to remove all the current uh, loaders that we have. I did not like it. So, uh,
+currently, just remove it and uh, let the components load quickly."* No page loads with it (Grid.md D49): the intro, a
+turn's load, `useGridLoad`, `GridLoader` and the `data-load-*` marks are gone, and a page is shown as soon as the grid
+has measured it. The motion is kept whole: `lib/load-motion.ts`, `useLoadMotion`, its painters, its tokens as he
+picked them, and this page of the studio, where it still plays.
+
 **M11 — The third is enter and exit, movement's first primitive.** *2026-09-27, the next morning: "in movement of
 motion when there is only one cell I would want to play with enter and exit so maybe we can make that as first
 primitive of movement".* On one cell, movement has nothing to move: a line one cell long has no room to grow
@@ -531,7 +538,11 @@ The jig groups are **Body** (colour, opacity), **Start pose** and **End pose** (
 
 **Your presets** saves named snapshots of all values plus hold, loop and tempo, supports load, update/rename and deletion, and persists in the browser. Save new makes a distinct copy; Update replaces the selected snapshot explicitly. Reset clears the draft without deleting presets. Copy exports the draft, playback settings and named presets. This is local authoring, with no runtime or portfolio integration.
 
-**M13 — The fifth is focus: a card in focus, the page blurring round it.** *2026-09-28, his, after seeing the
+**M13 — The fifth is focus: a card in focus, the page blurring round it.** (*Named **hyper focus** on 2026-09-29,
+his: "hyper focus will have the page five focus … even in motion let's change the names accordingly": the portfolio
+plays it as one of its two modes, Portfolio.md P20. The studio's page 5 says Hyper focus; the family's id and its
+`--motion-focus-*` tokens keep their name. **Off the portfolio since 2026-09-30** (Portfolio.md P21, his: "remove both
+focus modes from the portfolio. We can have it the motion studio"): it plays on page 5 only, and stays decided.*) *2026-09-28, his, after seeing the
 portfolio's first version (Portfolio.md P18): "the context of the component that I'm hovering on is lost … if I hover
 on my name, my avatar is also blurred out. I want the blurring to start from the card with less intensity and then
 increase the intensity in a circular fashion from the card … give me this effect with jigs in motion … I should be
@@ -540,8 +551,8 @@ is the effect that it brings."* The first version blurred the screen from its ce
 card by the edge had its neighbours blurred the most.
 
 Focus is page 5. It is a model in the package, like loading: `lib/focus-motion.ts` (pure) and
-`hooks/use-focus-motion.ts` (`useFocusMotion`, one GSAP ticker while anything moves). The portfolio plays it through the
-same hook, so what is tuned here is what the portfolio does.
+`hooks/use-focus-motion.ts` (`useFocusMotion`, one GSAP ticker while anything moves). The portfolio played it through the
+same hook until 2026-09-30 (Portfolio.md P21), so what was tuned here was what the portfolio did.
 
 **The field.** The blur is a field of rings on the card's centre. It is least next to the card (`near`) and rises to
 `far` over the reach (`reach`, in cells), along the rise's curve (`rise`, an easing of the way out). The rings are
@@ -614,7 +625,95 @@ no clearing front. The five presets of round 1, as they were:
 
 Each preset's reason and risk are in `content/focus.ts`.
 
-**M14 — The sixth is focus mode: one vertical at a time, under a panel, with a cloth over the rest.** *2026-09-28,
+**Amended the same night: the blur is a cloth, not a ripple.** *His, hovering the avatar: "the blur sheet reaches
+the bottom right corner … I want to consider that as a cloth, a blurring cloth, not as a ripple. So change the jig
+controls based on that, and the cloth should reach every corner of the viewport. So I need controls about the lift,
+about the intensity, about the cloth controls and all."* The ripple's circle is gone from the model. What replaced it:
+
+- **The cloth.** The field is unchanged: the rings and their blurs, measured from the card. What changed is where it
+  shows. The field now lies on a cloth: a rectangle attached to the card's box and drawn out from under it (`spread`,
+  "Drawn out" on the jig). Each of its four edges goes out to the screen's matching edge, and past it by the hem, so
+  its corners run straight to the screen's corners.
+  - **Pull** is how the edges share the way. At 100% each goes at its own speed, and all four arrive together: every
+    corner of the cloth reaches its corner at once. At 0 they all go at the farthest one's speed, so the nearest edge
+    lands first and the far corner last. That is the sheet he saw going to the bottom right.
+  - The **hem** is the cloth's edge, in cells: soft across that width, crisp at 0. It is the ripple's front, renamed.
+  - The **fold** is an extra blur along the hem. It is the crest, renamed.
+  - It can still **swell** or **fade** in instead of being drawn out.
+  - The four edges are four gradients on each layer's mask (`clothEdges`, `focusLayerStyles`), never a clip, which
+    Chromium mishandles under a `backdrop-filter` (M14).
+- **Measured from** has a third choice, **its edges**: the rings are measured from the card's box, square-cornered as
+  focus mode's are. The circle through its corners and its centre stay.
+- **The lift.** The card in focus comes up over the cloth over `lift` on `lift-ease`, and casts a **shadow** on it (px,
+  its offset half of that) of a **shade** (how dark). The shadow is a box drawn on the cloth's surface under the card,
+  black in either theme, because a light one would be a glow. The card itself is never moved or scaled. Gliding to
+  another card, the card left drops at once and the next lifts once the cloth has come. The lift goes down with the
+  cloth as it goes.
+- **The way out** is **drawn back** under the card (the spread reversed), where it was clear outward and recede inward.
+  **Ebb** and **fade** stay.
+- **Every corner of its container.** *His, after: "I did not mean the actual complete viewport … I meant the
+  container, whatever the container we are putting it in."* The cloth's edges go to the corners of the surface it
+  covers, whatever that is. On the portfolio that is the screen. In the studio it is the stage, clipped by its slot,
+  and the jigs round it stay sharp. For one play the studio's surface was the whole screen, jigs and all, and he sent
+  that back.
+
+Twenty-four tokens in four groups, one on the jig at a time:
+- **Cloth**: way in, in, in ease, pull, hem, fold;
+- **Intensity**: at the card, far, clear, reach, rise, rings, measured from;
+- **Lift**: lift, lift ease, shadow, shade;
+- **Release**: way out, out, out ease, hold, next card, glide, glide ease.
+
+`--motion-focus-front` and `--motion-focus-crest` are now `-hem` and `-fold`. `--motion-focus-way` is
+`spread · swell · fade`, and `--motion-focus-exit` is `withdraw · ebb · fade`.
+
+**Today keeps every number of his pick**: the field, the 1500ms in, the eight-cell hem that was his front, no fold, the
+hold, the fade out, the glide, cubic in-out. The one value that changed is the way in, `spread` where it was
+`ripple`, as he asked. The new tokens are mine, not his yet:
+- pull 100%, since he asked for every corner;
+- a 300ms lift;
+- no shadow, so the portfolio looks as it did but for the cloth.
+
+The portfolio plays it, since it is the package's hook. An eight-cell hem is wider than half the cloth for most of its
+way out, so Today's cloth thickens in late rather than showing an edge. B shows one.
+
+Round 2, the cloth (round 1's four are above):
+- **B Sheet**: no hem, so a crisp edge; every corner at once in 900ms on expo out, measured from its edges; a 24px
+  shadow; drawn back on the way out.
+- **C Unroll**: pull 0, the nearest edge first and the far corner last; a four-cell hem with an 8px fold; round rings;
+  a fade.
+- **D Drape**: a twelve-cell hem, 2000ms on the iOS sheet's curve, pull 60%, 26px measured from its edges; a slow,
+  deep lift; an ebb.
+- **E Swell**: no travel, the cloth swelling over every corner in 500ms; the baseline.
+
+*What is mine, his to change:*
+- the reading of "lift" as the card coming up over the cloth, drawn as a shadow, rather than the card coming towards
+  the eye (his note on focus mode, M14: the components "have to remain at the level that they are at");
+- the cloth as a rectangle with square corners, which is what four gradients draw.
+
+`node e2e/.mcp/focus-cloth-seek.mjs <out> [preset] [theme] [WxH] [card] [ms…]` starts the play on a card and seeks it
+to the moments given, printing the cloth's four edges and the lift. `focus-cloth.mjs` hovers the avatar, and
+`portfolio-cloth.mjs` does the same on the portfolio.
+
+**Decided again, 2026-09-29: round 2's C Unroll, tuned.** He sent back the settings from the studio, *"Update the
+Default hyperfocus values to the following"*, headed "Hyper focus — C Unroll, tuned". They are in globals.css verbatim,
+and `FOCUS_START` is the same values. From Unroll he kept the circle through the corners, ten rings, ease-in, no fold,
+the fade out and the glide. He changed the rest:
+- the way in is a **fade** over 80ms, where Unroll drew the cloth out over 1400ms. Nothing is drawn out, so the cloth
+  has no edges to move, and its pull (50%) and hem (twelve cells) are kept but play no part until a way in or out moves
+  it (`focusLayerStyles` leaves the edges out);
+- 1px next to the card and a clear ring **one cell** wide, then rising to **16px** over **21 cells**, more than most
+  screens, so the far blur is seldom reached and the field stays near its middle;
+- the card lifts in **300ms** on cubic in-out with **no shadow**, where Unroll had 400ms and 16px;
+- a **120ms** hold, a **400ms** fade out and an **80ms** glide, every curve cubic in-out.
+
+So hyper focus is now quick: the cloth is there within five frames of reaching a card and gone half a second after
+leaving the last one. Preset A, "Today", is this; B–E are round 2 as they were. The Today it replaced, round 1's C
+Tide, tuned, as a cloth, is recorded above. The portfolio plays it with no edit, since it reads the tokens.
+
+**M14 — The sixth is focus mode: one vertical at a time, under a panel, with a cloth over the rest.** (*On the
+portfolio from 2026-09-29 as its focus mode, the other being hyper focus (M13), Portfolio.md P20. **Decided the same
+day**, his "A As described, tuned", below: its tokens are in globals.css. **Off the portfolio since 2026-09-30** with
+hyper focus (Portfolio.md P21): it plays on page 6 only, and stays decided.*) *2026-09-28,
 his, the same evening: "The portfolio has already a lot of information on it … the idea of having that page is to
 quickly have a glance so that anyone can decide the value of the portfolio within seven seconds. So I want to provide
 an option called focus mode where it can stay in the bottom right. Once we turn it on there should be an overlay on
@@ -626,52 +725,176 @@ cells … once we move from one vertical to another, the focus component should 
 add this to the motion application so that I can control using the jigs and then decide the settings."*
 
 Page 6 of the studio. The motion is the package's: `lib/mode-motion.ts` (pure) and `hooks/use-mode-motion.ts`
-(`useModeMotion`, one GSAP ticker), so the portfolio will play the same thing once he picks. It is on the bench only.
-The portfolio does not have it yet.
+(`useModeMotion`, one GSAP ticker), so what was tuned here was what the portfolio played (P20, 2026-09-29 until P21 took it off, 2026-09-30).
 
 - **The panel.** A see-through frame in the secondary colour, the vertical's box plus a margin, lifted towards the eye
   through a perspective, swinging about its horizontal axis on the way (none at rest, all of the tilt half way, so
-  nothing jumps as it sets off or lands), with a flat shadow that grows as it lifts. The vertical's own cards come out
-  with it, by the same transform about the panel's centre, and stand over the cloth.
+  nothing jumps as it sets off or lands), with a flat shadow that grows as it lifts. **Only the panel lifts** (his, the
+  same night: "the components that are in the focus mode should not scale. They have to remain at the level that they
+  are at"). The vertical's own cards are never moved, scaled or swung. They keep their place and their size on the
+  page under the panel, and they stand over the cloth, under the panel. Until then they came out with it, by the
+  same transform about the panel's centre, which made them 4% larger at A's depth and 12% at C's.
+- **The panel rises straight out of the page, its whole line there** (his, 2026-09-29: *"Let's redesign. Instead of
+  border start from top and all, let's just have the option to border to rise from the viewport directly with out
+  that border animation"*, and, of a switch, *"the vertical in focus will repeat the steps backward and the other will
+  get into focus"*). The way in is two steps: the panel rises to its depth over `lift` on `lift-ease`, and the stagger
+  after it sets off, the cloth comes (`modeOnAt`). The way out is the same steps backward: the cloth goes over `out`
+  on `out-ease`, and the stagger after it the panel sinks back into the page on the rise's time and curve
+  (`modeOffAt`), by its own time and curve, the **drop**, since his ask the same day. The panel shows while it is off
+  the page. The line is **fine** on the page and grows to the
+  **border** as the panel rises (the square of the rise, so it stays fine for most of the way). `--motion-mode-draw`
+  and `-draw-ease` and the arc-length cut of the line went, and `modePanelParts` with them; the rest of this bullet is
+  the record of the draw, 700ms on cubic in-out at his numbers.
+  *Before*, the same day: **the line was drawn, then the panel lifted.** *His, the night before: "Let's remove the peeling effect … I want the
+  border of the focus panel to start from the top and then go down to the bottom … and then slowly rising up, so we
+  can completely remove the peeling features and its jigs."* The panel's line sets off from the middle of its top and
+  runs both ways round it at once, down the two sides and round the bottom corners, the two ends meeting at the middle
+  of its bottom (**draw**, on its **draw ease**, by length along the line, so the top, the sides and the bottom each
+  take their share of the time). Then the panel lifts off the page whole, to its depth. The two are parts on one clock
+  (`modePanelParts`), and going back plays them mirrored: the panel comes down, then its line runs back up to the top.
+  The line is **fine** on the page and grows to the **border** as the panel lifts (the square of the lift, so it
+  stays fine for most of the way). A box's border cannot be drawn part way, so the panel is an outline (`modeShape`):
+  each point of its rounded rectangle is swung by the tilt, lifted, and projected through the perspective from the
+  panel's own centre, and `paintModePanel` draws it as SVG, the line a band filled inside the outline, as a border
+  runs inside its box. Its shadow is cut out where the panel is, as a box-shadow never paints inside its box, and is
+  **the line's own colour** (his, the same night: "the shadow should be derived from the border"): the panel's
+  `currentColor`, the secondary, mixed 12% to 22% as it lifts. *Before*, it was the page's foreground, white on the
+  dark theme.
+  *Before*, the same night, it came off the page like a sticker (his: "starting from the bottom, it should come up like
+  a sticker that is stuck on the surface"): a front crossed it from an edge or a bottom corner, the panel curling up
+  behind it at an angle to a ceiling and running flat there, lifting off whole with part of the peel still to go, and
+  letting its curl go as it rose, with its line only where it had come off the page. Ten tokens in a **Peel** group
+  (from, peel, peel ease, angle, height, curl, release, keep, let go, let go ease) played it. All of it went on his
+  note, the model's bending and the jig's group with it.
+- **The panel is over everything, and the cloth is attached to it.** *His, the same night, of a frame early in the
+  peel: "While peeling, the cloth is not attached to the panel … the panel should ideally be over the components and
+  also cloth attached to it, but I see that the panel is still below the component and then after the animation is
+  completed it's coming up."* The panel stands over everything on the page, the vertical it holds too, and under only
+  the switcher and Focus. The cloth's hole is the panel as seen, no wider than it lying flat at its lift, so the cloth
+  meets the line all round, and a part the tilt swings nearer than that passes over the cloth. The hole cannot be the
+  outline itself. Clipping each layer to it with `clip-path: path()` was tried first, and Chromium then drops a
+  `backdrop-filter` layer's `mask-image`, blurring everything to the far blur and blacking out narrow edges. It does
+  this under any `path()` or `polygon()` clip, even a plain rounded rectangle written as a path. Only `inset()` and a
+  plain rectangle keep the masks (measured 2026-09-28).
 - **The cloth.** Focus's field (M13, `focusRings`), measured from the panel's edges instead of a circle round a card:
-  each ring's layer is masked to what lies farther than its ring from the hole's rectangle, by four gradients. It comes
+  each ring's layer is masked to what lies farther than its ring from the hole's rectangle, by four gradients. **It
+  covers its whole container, full at its edges** (his, 2026-09-29: "the blur is not being applied on the grid, it is
+  only being applied on the components … I expected cloth to work as the full container … that should be full
+  overlay"). On each side of the panel the rise is spread over the reach or over what is left to the container's edge,
+  whichever is less (`modeRingEdges`), so every edge of the container is at the far blur. *Before*, the reach was ten
+  cells on every side, more than the stage has, and the field next to the panel was at a pixel or two, too little to
+  take its dashes while the cards' text beside them went soft. And his note found a fault in the system: the Avatar's
+  ring blends (`mix-blend-darken`, `-lighten`), and Chrome isolates the nearest stacking context to blend it (here the
+  stage, which layout containment makes one), which made the stage the cloth's backdrop root and left the grid's field
+  under it sharp whenever the profile was not lifted over the cloth: after any slide, and on page 5 whenever a card
+  other than the avatar was in focus. The Avatar is `isolate` since (avatar.tsx), so the ring blends with its own
+  picture only. It comes
   and goes by its way: **unfurl**, rolled out from the panel to the far corner (a rounded rectangle, the system's
   corner, clipping the layers) and rolled back into it; **swell**, strengthening everywhere at once; or **fade**. Coming
-  in, the cloth sets off the stagger after the panel; going, the panel goes down the stagger after the cloth, so the
-  panel is up whenever the cloth is out. A **veil** of the page's colour can be laid over it.
-- **The slide.** The panel slides from vertical to vertical, and the hole goes with it, so what it passes over is
-  sharp on the way, a lens. The vertical left goes back down as the next comes up, and the next stands over the cloth
-  once the panel has arrived. The panel can **dip** on the way, down towards the page and back out.
+  in, the cloth sets off the stagger after the panel starts to rise; going, the panel sinks the stagger after the
+  cloth, so the panel is up whenever the cloth is out. A **veil** of the page's colour can be laid over it.
+- **The switch: the one left unfocuses as the next focuses** (his, 2026-09-29: *"Instead of sliding the focus
+  container, we should just unfocus while refocusing on the next one. For example, if moving from 1 to 2, both 1
+  unfocusing and 2 focusing should start at a time."*). Every vertical has a panel and a cloth of its own. Moving
+  from one to another, the one left plays its way in backward (its cloth thins, then its panel sinks back into the
+  page) and the next its way in (its panel rises, then its cloth comes), both from the same moment, each on
+  its own clock (`modeOffAt`, `modeOnAt`), so the switch is over when the longer is (`modeSwitchMs`). The two cloths
+  lie one over the other, and where both are out their blurs compound. The one left goes under the cloths at once,
+  its own cloth's hole keeping it sharp while the next one's comes over it; the next stands over the cloths once the
+  one left is all gone. A vertical pressed again while it is going comes back from where it stands. Neither moves.
+  *Before*, the panel slid from vertical to vertical and the hole went with it, a lens, over `slide` on `slide-ease`,
+  sinking by `dip` on the way; his were 500ms, cubic in-out, no dip. The three tokens and the jig's **Slide** group
+  went with it, as the peel's did.
 - **The cells.** Bottom centre, one a vertical, the one in focus grown to two with its title: the numbered pager's shape
   (Grid.md D47), playing movement (M9) at its decided values as the vertical changes. They come up with the panel.
-  Focus, the toggle, is on the bottom-right cell, violet when on. A card of another vertical, pressed, moves the focus
+  Focus, the toggle, is on the bottom-right cell, violet when on. **Both are on the bottom row** (his, the same night:
+  "Move the one, two, three options to the bottom row. It's obstructing the view"): the stage's last row, never the
+  row right under the verticals where the stage has room below them. A card of another vertical, pressed, moves the focus
   there too. Both stand over the cloth.
 
-Twenty-three tokens in four groups, one on the tokens' jig at a time: **Panel** (lift, lift ease, depth, perspective,
-tilt, shadow, margin), **Cloth** (at the panel, far, clear, reach, rise, rings, veil), **Roll** (way, in, in ease,
-out, out ease, stagger) and **Slide** (slide, slide ease, dip). None is in globals.css, so preset A carries the brief's
-values. The specimen is the portfolio's first screen as three verticals of system Cards (the profile, the work, the
-projects), a cell of room round them so the panel's margin stays on the stage. Its jig says which vertical a play
-starts on and whether the rings are drawn. On the timeline a play is on, hold, a slide, hold, a slide, hold, off.
+Twenty-four tokens in five groups, one on the tokens' jig at a time: **Lift** (lift, lift ease, drop, drop ease),
+**Panel** (depth, perspective, tilt, shadow, margin), **Line** (border, fine), **Cloth** (at the panel, far, clear,
+reach, rise, rings, veil) and **Roll** (way, in, in ease, out, out ease, stagger). A switch has none of its own: it is
+the way out and the way in.
+`--motion-mode-border` is the panel's line, 2px as it was, 0 to 8 (his ask, the same night: "I also
+need a panel border width control"), the line once the panel is up; `--motion-mode-border-fine`, 0.5px, the line on
+the page (E keeps 2px throughout, as the baseline). It runs inside the panel's box, as a border's does, and the shadow
+is cut out under all of it. **The drop is timed on its own** (his, 2026-09-29: *"In Focus Mode, I need controls to
+control the lift and drop timings"*): `--motion-mode-drop` and `-drop-ease` are the panel going back into the page,
+where the lift's pair had timed both ways; they start at the lift's values, 90ms on ease-out, so nothing changed until
+he tunes them, and a preset that names no drop drops as it lifts. When the drop starts is still the stagger after the
+cloth sets off going, the same token that times the cloth after the lift. All twenty-four are in globals.css since his
+pick (2026-09-29, below), so preset A is
+"Today". The specimen is the portfolio's first screen as three verticals of system Cards (the profile, the work, the
+projects), **each three columns wide with two columns between them** (his, 2026-09-29: *"focus mode should have 2
+columns beween gap between one vertical and each vertical should have 3 columns"*; they were two wide with one
+between, where the block had room), and a row of room over and under them. The block's Columns start at fifteen, the
+thirteen and a column of margin either side for the panel. Where the stage is narrower the verticals keep their three
+and the air goes first: the preview is nine columns at 1440 × 900 (M15's right half), so there they stand side by
+side, and thirteen at 1920 × 1080, where the air is his but there is no margin and the outer panels' lines are cut at
+the stage's edge; from 2560 wide all of it fits. Its jig says which vertical a play
+starts on and whether the rings are drawn. On the timeline a play is on, hold, a switch, hold, a switch, hold, off.
 
 *What is mine, his to change.* The presets, the four gradients' square-cornered falloff (a ring's corners are
 Chebyshev distance, not rounded), the violet frame, the cells' movement, and a press on a card as a second way across.
+The panel showing only while it is off the page, so it is there from the first frame of the rise and gone as it
+lands; the way out taking the cloth's own out time and the rise's curve, not the way in's times played in reverse; and
+the shadow, whose offset and blur grow with the lift and no further; and the drop starting at the lift's values. The line stays 2px however near it comes.
 
-- **A As described**: his brief read literally. 48px out through 1200px on the iOS sheet in 520ms, a 6° swing, a 40px
-  shadow, a margin of 8. The cloth is today's focus field with no clear margin, "from the edges": 1px rising on
-  ease-in to 22px over ten cells in ten rings, unfurling in 1500ms and rolling back in 800ms, cubic in-out, 120ms after
-  the panel. A 500ms slide that stays out.
-- **B Lens**: barely lifted, no swing, a quick unfurl on expo out; a fast slide.
-- **C Sheet**: 96px out through a near 900px, a 14° swing and an overshoot; the cloth swells; the slide dips most of
-  the way down.
-- **D Drape**: a veil of 25% over a slow unfurl, a cell of clear margin, a slight dip. The veil is translucent, which
-  the no-glass rule forbids outside his exception: it is here for him to see and refuse.
-- **E Flat**: no 3D and no roll, the frame in the state's time and a fade; the baseline.
+Round 1, as it was (A is "Today" since his pick, below; the slides went with the slide):
+- **A As described**: his brief read literally. Its line is drawn from the top in 700ms on cubic in-out, then it
+  lifts 48px out through 1200px on the iOS sheet in 520ms, a 6° swing, a 40px shadow, a margin of 8. The cloth is
+  today's focus field with no clear margin, "from the edges": 1px rising on ease-in to 22px over ten cells in ten
+  rings, unfurling in 1500ms from 120ms after the lift sets off, and rolling back in 800ms, 120ms before the panel
+  comes down, cubic in-out. A 500ms slide that stays out.
+- **B Lens**: the line snapped round in 280ms on expo out; barely lifted, no swing, a quick unfurl on expo out; a fast
+  slide.
+- **C Sheet**: the line drawn in 800ms on ease-in, slow off the top; then 96px out through a near 900px, a 14° swing
+  and an overshoot; the cloth swells; the slide dips most of the way down.
+- **D Drape**: a slow line, 1100ms on ease-out; a veil of 25% over a slow unfurl, a cell of clear margin, a slight dip.
+  The veil is translucent, which the no-glass rule forbids outside his exception: it is here for him to see and refuse.
+- **E Flat**: no 3D and no roll, the frame drawn in the state's time and a fade; the baseline.
+
+(Until his note the presets differed in their peel too: A from the bottom round a 72px curl at 20°, B a crease, C the
+bottom-right corner at 36° round 160px, D a 240px roll. The peel's values went with it.)
+
+**Decided, 2026-09-29: A As described, tuned.** He sent back the settings from the studio with hyper focus's, *"and
+focus mode to the following"*, headed "Focus mode — A As described, tuned". They are in globals.css verbatim, and
+`MODE_START` is the same values. From As described he kept the line (drawn in 700ms on cubic in-out, 0.5px on the
+page, 2px once up), the 40px shadow, no clear margin, the 120ms stagger and the 500ms slide that stays out (the slide
+and then the draw went the same day, above; the line's widths stay). He changed the rest:
+- **the panel**: a quick lift, **90ms on ease-out**, where A took 520ms on the iOS sheet; **80px** out through a near
+  **800px** perspective, where A was 48 through 1200, so it stands about 11% larger than the vertical it frames; a
+  swing of **-3°**, the other way round and half A's; and a **16px** margin, the most the jig has, where A had 8;
+- **the cloth**: **2px** at the panel rising on **expo out** to **7px** over at most **sixteen** cells in **seven**
+  rings, where A rose on ease-in to 22px over ten in ten. Expo out puts most of the rise next to the panel, so the
+  cloth is nearly all at its 7px a cell or two out: a light, even blur rather than one thickening outward;
+- **a veil of 60%** of the page's colour over it, the most the jig has, where A had none. The veil is a translucent
+  wash, which the no-glass rule of 2026-09-16 forbids; this is his pick, so it is his second exception to it, beside
+  hyper focus's blur;
+- **the roll**: it **swells** in over **250ms** on ease-in and thins out over **1000ms** on cubic in-out, where A
+  unfurled over 1500ms and rolled back over 800ms. A swell has no edge, so the rounded clip of the unfurl is not
+  drawn.
+
+Preset A, "Today", is this; B–E are round 1's other four as they were. The portfolio plays it with no edit, since it
+reads the tokens.
+
+*A switch no longer clears the page.* While the line was drawn, the one left's cloth was nearly gone (about 2%) by
+the time the next one's set off after its 700ms line and the stagger, so for about a fifth of a second the page was
+nearly sharp. With the draw gone the next cloth sets off 120ms in and is out by 370ms, while the one left's is still
+at nine tenths, so there is always a cloth over the rest of the page (measured on the portfolio at 1440 × 900).
 
 Each preset's reason and risk are in `content/mode.ts`. `node e2e/.mcp/motion-mode.mjs <out> [presets] [theme] [WxH]`
-turns to the page, presses Focus, the second and third cells and Focus again, printing the hole, the cloth's edge and
-which vertical is lifted, and shoots each; `motion-mode-play.mjs <out> [preset] [theme] [WxH] [ms…]` shows the rings
-and shoots a play from the start at the moments given.
+turns to the page, presses Focus, the second and third cells and Focus again, printing each cloth (shown, its swell,
+its hole) and which vertical is lifted, and shoots each; `motion-mode-play.mjs <out> [preset] [theme] [WxH] [ms…]` shows the rings
+and shoots a play from the start at the moments given. (`motion-mode-draw.mjs` shot the draw, which is gone.)
+`motion-mode-still.mjs <out> [presets]` fails if a card's box moves by more than half a pixel through the rise and a
+switch;
+`motion-mode-line-jig.mjs <out.png>` shoots the Line group on the jig, and `motion-mode-lift-jig.mjs <out.png>` the
+Lift group's two pages (the studio has no pages since M15: they pick the family from the nav's select). On the portfolio, `modes-switch.mjs <out> [WxH]
+[theme] [ms…]` samples every vertical's cloth and panel each frame through a switch and a press back part way, and
+`modes-tokens.mjs` prints both families' tokens as the page computes them; `modes-drop.mjs [--motion-mode-drop=1200ms …]`
+overrides tokens and prints how long the panel stays up after the mode goes off.
 
 ## 4. The presets, round 1
 
@@ -731,6 +954,1117 @@ The component families' round 1, withdrawn from the bench with them (M9) and kep
 - **Grow.** A *Today*: 900 / 400, power3 out. B *Quick*. C *Reveal*: slow, in-out. D *Spring*: the bar overshoots its
   value. E *Meter*: linear, mechanical.
 
+## M15 — The studio workbench (2026-09-29)
+
+Bhargav approved the generated layout and asked to implement it with the current work: *"all of them put on the grid
+because that's our primary layer"*; navigation and the heading take the left half and the preview grows one row up.
+This supersedes M5's three-column studio and its family pager, not the grid or any motion's behavior.
+
+The main route is one `Grid`. The first row's left half is the motion-family selector and theme toggle; the second
+is the family heading, preset selector, reset and copy. Four jig slots fill the left half below them. The right half
+is a transparent stage, starting on the heading's row, one row above the jigs. The bottom two rows are the shared
+transport across the entire field. All boxes use whole cells and the field's gutter; there is no independent preview
+grid. Intro loading and the system cursor stay. The family selector replaces the numbered pager and accidental
+wheel-driven family changes. There are still only the six named motions.
+
+The jig titles and controls come from the family's real tokens. Movement is Timing, Scene, Shape and Easing; the
+mockup's illustrative settings do not add motion parameters. Numeric inputs and sliders edit the same value, bounded
+and snapped to the token's range and step. Longer groups page within their slot; grouped families let each token jig
+choose a group, so Cloth, Intensity, Lift and Release all remain accessible. Presets and settings are actions in the
+heading, not permanent tall side panels. Copy includes every token, even those on another jig page.
+
+The Agent retains its chart, inspector, saved charts, settings, undo, recording and takes. Its left half shows one
+of its four jigs at a time, selected in the heading; the stage and transport stay. On narrower fields a workspace
+selector switches between Preview and the jigs without unmounting the real stage, so edits, recordings and a paused
+playhead survive the switch. A shorter wide field shows one selectable jig beside the preview instead of squeezing
+four cards. The older `/concepts/*` studies remain separate comparisons.
+
+`layout.ts` derives the boxes from the measured field; `studio.tsx` composes them; `studio-jigs.tsx` composes the
+system controls. No new primitive, stylesheet, motion token or copied motion model was introduced.
+
+**Amended the same day, his** (*"I like the dropdowns in the image and the player control designs … place it in the
+right half, under preview"*, then *"let's make the layout more functional and aesthetic"*). **The transport is the
+preview's**: the bottom two rows of the right half, under the stage, and the jigs take the left half to the bottom.
+It is drawn as his player: ↺ in an outline circle and play or pause in a lime one, the time, then Loop (a switch) and
+Tempo (a select) on the first line; on the second, a lime slider with a violet thumb over the play's phases, each a
+pill with its name and ms, the one the playhead is in the lime tint, and a violet line from the thumb down through
+them. The slider and the phases are one axis — the phases stand a thumb's half in from the slider's ends — so the
+line crosses each phase at the moment the thumb is at. A phase that is a setting still drags. A pill too thin for its
+text lets the ms go first, then its grip, then sets its name a size down. Undocked, in a concept study's one-row slot,
+it is his mock's one line. **The head is boxes of its own**, none inside another: the first row is the studio's name on
+a lime bar, the theme toggle at its round end, and the family select a pill of three cells at the left half's far end;
+the second is the heading, Reset and Copy a cell each — the cell's own circle — and the preset select under the
+family's, three cells (the agent's jig select there). Each stands on the page's colour, which masks the field's lines,
+and only the controls draw an edge. The bar is a surface slot in `--primary`: Slot's four fills (Grid-v2.md D21) have
+none of lime, and a fifth is his call. On a narrow field the head is the field's width, the preset shares the third
+row with the chooser, and a bar under four cells gives its toggle to the heading's row. The system's selects became
+his dropdowns the same day: outlined pills with the chevron inside, `primary` filled lime.
+
+**Control-room revision, 2026-09-30.** Bhargav asked to repair the layout, use the design system, and borrow from the
+portfolio while keeping the studio a control room and experiments lab. The implementation now separates a five-cell
+instrument column from the transparent stage with one column of air. The studio bar anchors the instruments;
+family, preset and the two circular actions share the toolbar over the stage. The stage's player stays directly
+beneath it. At twelve rows, the instrument column has a token jig above Scene, rather than four equally weighted
+cards. Every token group is selectable, with controls paged to the slot's available height. Agent retains its own
+four views. Shorter desktop fields keep the stage beside one selectable jig; medium widths put preset and actions
+on a second toolbar row. Narrow fields retain the workspace selector and mounted stage. The composition uses the
+existing system components and tokens; no motion behavior or decided value changes. Focus mode's specimen leaves
+out its explanatory note when fewer than two rows remain, rather than clipping it into a single cell.
+
+**Compact pass, later on 2026-09-30.** His: "Make it more compact and functional." The wide workspace now uses one
+header row, no empty divider column, and a seven-cell instrument rail. Movement and Loading show their controls
+together in two columns; larger sets page by the available height, and grouped families retain their group selector.
+The Scene panel takes four rows, without repeating the specimen hint. The stage starts directly beneath the toolbar.
+Medium widths retain the narrower rail and a selectable jig. The phone header takes two rows: Studio and family,
+then workspace, preset and the two circular actions. Theme stays in Studio's bar. This returns one row to the phone
+workspace without shrinking the grid's cells or its touch targets.
+
+**Content-sized surfaces, same day.** His correction: "There are elements that are taking full widths and heights
+even if it's not necessary." The token and Scene cards now size to their contents and stack with the standard gap
+inside the instrument slot. Reserved rows bound pagination, not card height; the Scene card follows the actual token
+card instead of starting at a fixed row. Other jig cards also stop stretching to fill the field. The desktop studio
+bar is four cells, family and preset selectors three each, and Reset and Copy one each, leaving the unused toolbar
+cells unfilled. The stage and transport retain their allocated workspace.
+
+## M16 — The seventh is the grip: the slider's head detaches into the cursor (2026-09-30)
+
+*His, the morning after the slider became a bar (Grid-v2.md D39): "Let's try a motion for this slider."* A motion he
+named, so it is on the bench (M9), page 7, after focus mode. It has had two briefs the same day.
+
+**The brief now** (his, the second): *"We'll keep everything rounded, so including the head. But let's merge both head
+and body. But when I click, the cursor doesn't need to fill: the head should detach and fit into the cursor."*
+
+- **The shape is the component's.** At rest the slider is a 24px pill (16px at his pick, 8px since his second tuning, below) with its head merged into it: a circle the
+  bar's height over the join of the lime and the grey, so the lime ends in the head (D39, withdrawn square). No gaps.
+- **Held, two parts move.** **The bar** opens round the head: its two sides draw back to stand 2px clear of the
+  cursor's ring (half the bar and the gap from the head's centre) and round their ends. **The head** shrinks to its size
+  in the cursor, a 16px dot 2px clear inside the ring's line, and goes to the cursor's centre. **The cursor stays a
+  ring** while a head is held (Grid-v2.md D43, amended). Let go, the head comes back to its place at the value and
+  grows, and the bar closes over it.
+- **The head follows the hand while held.** Along the bar it stays on the bar; across it, it follows the cursor
+  anywhere over the bar, so a press off the bar's middle still puts it in the ring. The bar's opening moves with it, so
+  a stepped slider's head is smooth under the hand and lands on its step when let go. *Mine:* the clamp to the bar.
+- **Held is the pointer's, and the head it holds.** A press on a head holds it; a press on the bar holds the head
+  nearest the press, the one radix moves there. The slider marks it `data-held` from the press to the release (or a
+  lost capture), and follows the value if a range's head is dragged past the other. The keyboard never holds a head.
+- **Played from script, modelled in the package.** `lib/grip-motion.ts` is the motion as a function of time
+  (`readGripMotion`, `gripAt`, `gripFrame`, `paintGrip`); `hooks/use-grip-motion.ts` (`useGripMotion`) plays it on the
+  slider, one frame loop from the hold to the end of the let go, writing the head's move and scale on the head and
+  where each side stands on the track (`--slider-shift-<i>`, `--slider-hole-<i>`, `--slider-round-<i>`, which the
+  segments read). A hold let go half way goes back from where it is. Under reduced motion both ways take no time.
+- **The tokens, `--motion-grip-*`**, in globals.css since his pick (below; until then preset A carried them), and
+  the model falls back to the same (`GRIP_START`): `-in` and `-out` (ms), `-in-ease` and `-out-ease`, `-size` (the head's side in
+  the cursor, px; the ring is clear inside 20) and `-lead` (−0.6 to 0.6: + the bar opens first and closes last, − the
+  head goes first).
+- **The specimen** is the system's `Slider` on the stage's rows: Columns are the sliders' length in cells, Rows how
+  many, every second a range. Live, it is pressed by hand. On the timeline a play is detach, hold and merge, a rest
+  after it on a loop, painted on the first head of each slider, with the cursor drawn over it as a ring of its own.
+- **The presets, round 2**, each a different mechanism. A *As described*: both parts at once, 200ms each way on cubic
+  out, a 16px head. B *Part*: the bar first, lead +0.4. C *Lift*: the head first, lead −0.4. D *Snug*: a 20px head
+  filling the ring, on an overshoot. E *Snap*: timing, 80ms in and 420ms out, a 12px head.
+
+**The body flows** (his, the third brief, the same night, after the segments: *"Let's not have segments, I did not
+like it. But instead of segments, let's make the body more fluid. I mean, give me the controls. And then the head
+should be circular, and, as previously said, it should just fit into the cursor like previously."*). The head is the
+grip's, as above. The body follows it:
+
+- **On a spring.** Where the bar's two sides meet under the head at rest, or part round it held, chases the head on
+  a spring of a response and a bounce (`lib/spring.ts`, solved in closed form): a quick drag leaves the lime behind and
+  it pours after the head, a bouncy one overshoots and comes back, and a jump of the value by the keyboard flows the
+  lime to it. Every head has one, held or not, whenever its value moves.
+- **The ends round when they leave the head**, as well as when the bar opens, so an end left behind is a pill's end,
+  never a square one; and **a moving end stretches** its cap along the bar with its speed (an elliptical corner).
+- **The bar's height is a control**, `--slider-height` (the smooth slider's `--slider-bar` reads it; 8px since his
+  second tuning, in globals.css, 16px at his pick, 24px until then): the
+  half height he asked for with the segments is preset B's. The ring the head goes into stays the cursor's 24px.
+- **The tokens now**, in two groups on the jig. **Head**: Detach and Merge (`-in`, `-out`, and their eases) and Size.
+  **Body**: Height (`--slider-height`), Bar lead, Follow (`--motion-grip-follow`, ms) and Follow bounce, and Stretch
+  (`--motion-grip-stretch`). In globals.css since his pick, below; `GRIP_START` is the same.
+- **The presets, round 3**, each a different body. A *As described*: a soft follow, 320ms at 0.2, a little stretch, the
+  bar 24px. B *Thin*: the same at 12px. C *Liquid*: a slow, bouncy follow, 700ms at 0.45, and a long stretch. D
+  *Tight*: 140ms, no bounce, no stretch, the rigid baseline. E *Elastic*: springs everywhere, a 20px head on an
+  overshoot, the body at 0.6.
+- **On the timeline** a play is detach, a drag of two cells along the bar and back (the body following both ways,
+  `springFollow`), hold, and merge.
+
+**Decided, 2026-09-30: A As described, tuned.** He sent back the settings from the studio, *"The following should be
+the values for sliders now"*, headed "Grip — A As described, tuned". They are in globals.css verbatim, the bar's
+`--slider-height` with them, and `GRIP_START` and the slider's own fallback are the same values, so every `Slider` in
+every app plays it. The studio's preset A is "Today", read off the page. He changed every token of A's:
+- **the bar is 16px**, two thirds of the cursor's ring, where A had the ring's 24. Held, the ring stands 4px proud of
+  it on each side; at rest the head is a 16px circle;
+- **the bar leads, as far as it can**: a lead of **0.6**, the jig's most, where A moved both parts together, so each
+  moves for 40% of its way. Taking hold, the bar opens and the head goes into the cursor after it, **260ms** in all;
+  letting go, the head comes back first and the bar closes over it, **180ms**. A took 200ms each way;
+- **an overshoot both ways**, `cubic-bezier(0.34, 1.56, 0.64, 1)` (E's), where A was cubic out;
+- **the head in the cursor is 12px**, 4px clear inside the ring's line, where A's 16 was 2px clear;
+- **the body follows on a quicker, bouncier spring**: **180ms** at **0.4**, where A was 320ms at 0.2, with a stretch of
+  **0.6**, where A had 0.4.
+
+**Tuned again, the same night: A Today, tuned.** He sent back the settings once more, *"I have updated the slider
+settings a little more"*, headed "Grip — A Today, tuned", and they replaced the pick in globals.css verbatim, with
+`GRIP_START` and the slider's fallback. From his pick:
+- **the bar is 8px**, a third of the cursor's ring, where the pick had 16 — the jig's least. Held, the ring stands 8px
+  proud of it on each side; at rest the head is an 8px circle;
+- **taking hold takes no time**: **0ms**, where the pick took 260ms, so the head is in the cursor as it is pressed and
+  only letting go is seen;
+- **the head leads**, a lead of **−0.5**, where the pick's bar led at 0.6: letting go, the bar closes and the head comes
+  back after it, each for half of **240ms** (the pick's 180);
+- **cubic out both ways**, `cubic-bezier(0.215, 0.61, 0.355, 1)`, where the pick overshot;
+- **the head in the cursor is 8px**, the bar's own size, so held it neither grows nor shrinks, where the pick's was 12;
+- **the body's bounce is 0.2**, where the pick's was 0.4; its 180ms and its stretch of 0.6 stay.
+The Steps (M21) play with it: at 8px the marks' 6px dots are nearly the bar's height, which is for him to judge there.
+
+**Round 1, the first brief** (his: *"Let's make it a square, and the body also to become sharp … when the cursor …
+held the head, the square should turn into sphere"*). The slider went square and sharp, and a held head's corners
+rounded into a circle by a CSS transition on its radius, size and turn: A *As described*, the corners only; B *Pop*,
+a quarter bigger on an overshoot; C *Roll*, a quarter turn; D *Pinch*, three quarters; E *Snap*, 60ms in, 420ms out.
+The pressed cursor, a filled disc the head's size, hid it; his second brief kept the ring and put the head in it.
+
+## M17 — The eighth is a character: a sphere that dives from cell to cell, now jumping nest to nest (2026-09-30)
+
+*His, the same night: "I have a new idea. And that is character and motion studio item. I imagine is an energetic and
+calm, 3D sphere that travels by diving from one cell to another. It should follow our design principles from motion
+and design system. I want that in motion studio so that I can design its character and motion."* A motion he named, so
+it is on the bench (M9), the eighth, family `sphere`, after the grip.
+
+- **Designed version by version, like the agent** (his, the same night, of the agent: *"you give me phase one, I will
+  try on that … then you can create version two"*). It has no presets: the head says which version where the preset
+  select stands, Reset goes back to it, and Copy hands his tuning back for the next one. None of its tokens is in
+  globals.css, so the version's values are carried by the family and by the package's `SPHERE_START`, the same.
+
+**Version 12, the same night, is the current one: his settings.** His, sending them back from version 11: *"the
+following are the settings that I have currently fixed upon for the agent, so let's use that and we'll continue our
+state machines from there."* They are version 12's start, verbatim, in the family and in `SPHERE_START`: a violet slime
+head three fifths of a cell across, shaded 0.75; a short limp tail (length 0.8, taper, stiffness, swing and stretch all
+0); a jump of one column and six rows, crouching 60ms, a squat of 0.25, 0.95 of a cell over the higher nest, 550ms in the
+air; no bounce, squash, give, sway or spread, a jiggle of 20ms at 40ms; touching down 30° up its near side, keeping all
+of its speed along the bowl (slippery 1, with its jump), energy 0.53, at rest 1.2s after it lands, squeezing 0.4;
+breathing every 4s, 0.1 deep; eyes 0.24 of the head across, 0.45 apart, 0.3 up, looking 0.8 of its radius, a look lead
+of 1000ms, a blink of 170ms every 3.6s, squinting 0.6. They are the base the state machines start from (M19, M20). Not
+in globals.css: nothing outside the studio plays the agent yet, and a character's settings go to its next version (M12,
+the amendment of 2026-09-30); M7's move into the stylesheet waits for a page that plays it.
+
+**The agent is drawn by the design system**, since later that night (his approval, given to the character studio's
+session). It is drawn by `@no-origins/ui/components/agent`, which draws one `SphereFrame`: the tail, the body, its lit
+side, and the eyes inside a face layer (`data-agent-face`) within the body's clip, where the face parts of M20 will go.
+The stage keeps the nests, the courses, the timeline and the blink's clock, and hands each frame to the agent's
+`paint`. The character studio draws the same component still. Before, it had its own copy, which had drifted and drew
+no eyes.
+
+**Version 13, the same night: the face's parts** (M20's face version 1, his *"yes for both"*). Version 12 with the
+parts added and every one left off, so it looks as version 12 did until a Style is picked. Each part is a jig group,
+and its jigs come from the package's declaration (`lib/agent-face`), not a list written in the studio:
+
+- **Pupils:** None, the solid eyes of version 11. **Dot**: a `deep` pupil in a `light` eye, which Look X and Y move
+  inside it. **Shine**: a `light` catchlight on a `deep` eye, which stays where the light is as the eye looks.
+- **Upper lids:** **Plain** cuts the eye, as before. **Heavy** lays a band of the body over its top with a `deep` edge,
+  never higher than 0.3 of the way down, so it hoods the eye even wide open. Both have an Open (how open at rest; a
+  blink shuts from there, onto the lower lid wherever it is), a Slant (+ the inner ends down) and a Curve. The blink and
+  the squint are theirs now.
+- **Lower lids:** None, or **Plain**, rising from below with a Raise, a Slant and a Curve (+ arched up).
+- **Brows:** **Line** (a round stroke), **Arch** (a crescent) and **Bushy** (thick at the inner end, tufted), each with
+  a height over the eye, an angle from the inner end, an arch, a length, a thickness and a colour. They sit over the eye
+  whatever the head does, since only their height is squashed with it, and they ride a little of the look.
+- **Symbols**, played rather than worn: the cross of anger, a sweat drop, a Zzz, a sparkle and a question mark, drawn
+  by the head where At says, in the agent's paint, and not cut to it.
+- **Look X and Y** go on the Eyes group.
+
+*Mine*, from looking at it:
+- The heavy lid's hood exists because a heavy lid wide open drew nothing.
+- The brows' height counts from the top of the eye, since measured from its middle they rode off the top of a settled
+  head.
+- The symbol's colour is the paint, because the ink is white on violet and a Zzz in it vanished on the light page.
+
+Colours are named (`deep` is the paint most of the way to black) and flat. A pair set apart on its right side (one brow
+raised) is drawn from `--motion-sphere-<id>-right`, but no jig sets it yet; that comes with the rows (M19 on the agent).
+
+**Version 13, tuned, the same night: his settings** (sent back in the character studio's session,
+headed *"Agent — Version 13, tuned"*: *"This becomes the rest state of the motion. So, in character studio also, let's
+use the rest phase motion."*). All 65 of its values are version 13's but one, **Come back, 1000ms** where it was 1200.
+It is `SPHERE_START` and the family's start, and it is **the agent's version 13 in the database**, the character every
+motion's rows sit on (M20). It keeps the number 13, although his tuned settings would have been the next version until
+now (M12's amendment). The database numbers versions from here: the studio's untuned 13 was never published, so his
+publish is 13. **The character studio plays its rest** (his "rest phase motion"): the agent breathing and blinking
+live, sitting in its cell.
+
+**Version 14, the same night: his settings**, sent back headed *"Agent — Version 13, tuned,
+tuned"*. Two of its 65 values move:
+- **Come back** is 500ms, where it was 1000: it comes to rest from a landing in half a second.
+- **Spread** is 0.05, where it was 0: it settles a little into its nest. As slime, that is 0.13 of its height.
+
+It is `SPHERE_START` and the family's start, and the next of the agent's versions in the database.
+
+**Shapes, colours and textures, the same night** (his, asked in the character studio; Character-Studio.md C10, drawn
+by that studio's session in the package):
+- A head can be the sphere or a solid: a cube, a pyramid, a hemisphere, a cylinder, a hexagonal prism, or a cone.
+- There are five more paints, scoped to the agent (`--agent-*`, not the system's palette), and a surface texture.
+
+All of it is look, and it defaults to the sphere and no texture, so version 14 draws as it did (diffed over 380
+frames). A solid moves on the sphere's course, and its face sits on its front. **The motion studio's body jigs now come
+from the declaration as well** (`AGENT_BODY`, as the face's already did), so the Head group has Shape and there is a
+Surface group; the studio has 69 settings.
+
+*Found by the character studio's session and mended here:* a settled head's face rode the course's centre, which sinks
+into the bowl as the head spreads, so at a high Spread (0.4 on slime) the eyes sank below the puddle and were cut by
+the bowl. The face now never sits lower than a little under the middle of the puddle drawn. At version 14's spread
+that moves nothing you can see (0.6px on a 200px cell).
+
+**Version 15, the same night, is the current one: version 14 as it looks, with the whole of Spread alive on slime**
+(asked whether it should be, his *"Yes"*). On slime, Spread did nothing past about 0.35, and not only because of a cap
+(0.9, which slime's 2.6 times reached at 0.35). At that rate the puddle had filled the bowl by 0.3: its top moved
+12.7px from 0.05 to 0.2 and 1px from 0.3 to 0.6, on a 200px cell. So:
+- **Slime spreads at 1.2 where it spread at 2.6.** Its puddle now settles across the whole slider: its top moves from
+  84 to 103, still moving between 0.5 and 0.6.
+- **His Spread is 0.11,** which at the new rate is version 14's 0.05 at the old: the same settle, to a tenth of a pixel.
+- **How far a spread sinks is eased into its limit (0.95), not cut at it.** Nothing a version has set reaches the ease.
+
+Version 14, stored with Spread 0.05, draws a little less settled under this code, as a version made with an earlier
+package can (M20). Version 15 is the look he chose.
+
+*Flagged:* his look lead is 1000ms, but a look turns no earlier than the crouch starts, and his crouch is 60ms, so it
+acts as 60ms. A look that sets off well before the jump is the eyes moving on their own time, apart from the body's —
+which is what a state's rows would give it (M19): an Eyes row starting a second before a Body row's jump.
+
+**Version 11, the same night: the sphere is the agent, and it has eyes.** His: *"we'll remove agent
+and the sphere will become the agent. And agent can have eyes."* Asked, he chose: this session to do it, after the
+session building versions 1–10 stopped; the pill agent deleted (M12, below); the sphere keeping its own jump player for
+now, not the states' timeline (M19), since its motion is a simulation that rows of values cannot yet say; and new eyes,
+a version 1 of them, rather than the pill's.
+
+- **It is the agent.** The family is shown as **Agent**, *Your personal guide*; it keeps its id, `sphere`, and its
+  `--motion-sphere-*` tokens, as hyper focus and focus mode kept `focus` and `mode` when they were renamed.
+- **Two eyes on its face**, circles the size they are set whatever the head does, in the ink of its paint (dark on
+  lime, light on violet), cut to its outline. **They ride the head as it is drawn**: moved with its centre, flattened
+  and widened with its squash and its puddle in the nest, stretched along its way in the air, leaning and squeezing
+  with its jelly in the bowl, as its outline does (`leaned`, `squeezed`).
+- **They look where it is going** (`aimOf`): turning to the nest it goes to from `look-lead` before it leaps (never
+  before its crouch starts), then along the way it flies — up as it rises, down as it falls, round the bowl as it
+  slides — and back to straight ahead as it slows and settles.
+- **Lids**, as the pill's were since his note of 2026-09-29 (a blink is lids closing, not an eye scaling): the upper
+  lid does most and sags a little as it comes down. They blink on a clock of their own (the play's on the timeline,
+  live's while it is live) and **squint shut as a landing hits**, easing open as its jiggle dies (`impact` on the
+  course).
+- **The Eyes group, eight tokens**: Size, Spacing, Height, Look, Look lead, Blink every, Blink, Squint. **38 tokens.**
+  Version 11's are mine: a quarter of the head across, a little under half of it apart, a tenth over its middle;
+  looking 0.28 of its radius (at a third the eye nearest the next nest went half past the head's edge in the crouch),
+  turning 160ms before the leap; a blink of 170ms every 3.6s; 80% shut on landing. *Flagged:* the head is a third of
+  a cell, so the eyes are small, about 5px across on a desktop's cell.
+- The model is the package's: `SphereFrame.eyes`, `eyesOf`, `blinkShut`, `aimOf`, `lidsOf` in `lib/sphere-motion.ts`;
+  `sphereFrame(course, t, blinkAt)`. The stage paints them (`data-sphere-eye`). `e2e/agent.spec.ts` checks the
+  version, the Eyes group, both eyes on the head, and the turn toward the next nest in the crouch.
+
+**Version 10, the same night: slippery and soft, with energy and time.** His, on version 9: *"I
+kept the slippery to maximum one, and when it falls into the other cell, it slides, but then it hits the wall on the
+side, and then slowly reaches back to the center. … if the slippery is maximum, it should be almost like fluid level
+slippery, and the body should also not be so stiff that it hits the wall and then bounces back … it should just fall,
+slide and like get squeezed in the direction like with real physics and then slide back based on a slippery tool … I
+should define energy levels … if the energy is high, it falls, it slips, and it comes back … immediately … smoothly,
+but again, that can be defined by time."* At a high slippery, version 9 ran up past the bowl's side, fell off it and
+hit the wall; and its rocking was a pendulum's, slow in a small bowl. So:
+
+- **Sliding, it never leaves the bowl.** Past 65° up its side the bowl is a soft wall: it squishes into it, pressed
+  back harder the further in and losing its speed there, and comes back down — it does not fly off and knock.
+- **`-squeeze`**: it squeezes along its way — squished into the wall as far as it has gone into it, and braking as far
+  as its jelly leans — shorter along its way and fuller across it, what that pushes past the nest laid on the ring, so
+  it flattens against the side. Scaled by its body's squash (a ball hardly, slime more).
+- **`-energy`** replaced `-weight`: how lively it is in the bowl, the bowl's pull a quarter to four times the leap's
+  gravity. **`-come-back`** replaced `-rocking`: how long, ms, from landing to rest; it is damped so a fiftieth of its
+  swing is left by then. Together they say how it comes back: lively and long, it rocks; lazy or short, it glides back
+  once.
+- **30 tokens.** Version 10's numbers: slippery 60%, half energy, at rest 1.4s after landing, squeeze 35%. At slippery
+  1 it runs 70–85° up the far side into the wall, squishes and comes back.
+
+**Body is a material (the same night, his: *"I don't see any difference between jelly ball and slime"*).** Until then
+`-body` set only how deep it sat for a squash and how smooth its outline was — a pixel or two at the spread it
+starts with — and the three moved alike. Now **jelly moves by the numbers as they are set, and a ball and slime scale
+them** (`MATERIAL` in the package):
+
+| | squash, crouch | spread | wobble, its speed | stretch | sway | slippery | bounce |
+|---|---|---|---|---|---|---|---|
+| **Ball** | 0.35 | 0.3 | 0.5, 0.6 | 0.3 | 0.3 | 1.3 | 1.3 |
+| **Jelly** | 1 | 1 | 1, 1 | 1 | 1 | 1 | 1 |
+| **Slime** | 1.5 | 2.6 | 2.2, 2 | 2 | 1.6 | 0.6 | 0.35 |
+
+A ball sits nearly round, jiggles quick and small, stays round in the air and rolls further and higher; slime pools,
+comes in drawn out, splats flat, sticks, and **oozes back** from a squash and a lean where jelly wobbles past (its
+squash decays without the swing; its lean's spring is past critical damping). It sinks for a squash 0.5 of jelly
+(ball) or 1.4 (slime), and its outline is smoothed 0, 3 or 7 times. The jig shows the values as set; the body scales
+them.
+
+**Version 9, the same night: it falls in and slides.** His, on version 8: *"you definitely get a
+great job but … the sphere falls into the other circle and then it sticks to the place that it falls in and then only
+the body feels like it is trying to slide but … in the real world the ball … because it's flying and it's like it's
+softy and it is slippery it will fall and then it will slide and then slowly come back to its motion so I need
+controls for that."* Version 8 cut its speed round the bowl, the moment it landed, to what `-slide` asked — far under
+the leap's — so it braked where it fell and only its jelly's lean went on. So:
+
+- **It touches down on the bowl where `-land-at` says** (degrees from the bottom; − on the side it comes from, + the far
+  side, 40° up the near side to start with); the leap is aimed there, its centre on the circle its bottom runs on.
+- **It keeps `-slippery` of its speed along the bowl** at every impact (1 all of it, 0 it sticks), going the way
+  `-slide-way` says, so its fall onto the near side turns into a slide down through the bottom and up the far side.
+  The jelly takes the change in its speed as a push.
+- **`-weight`**: its gravity in the bowl against the leap's; lighter rocks back more slowly.
+- `-slide` (degrees) went: where it lands and how slippery it is say it now.
+- **The bowl is small against the leap's speed**: keeping much of it carries it right round the inside of the ring (at
+  75%, with a lighter weight, it looped the ring once). Version 9 starts at 40% and a weight of 1, which carries it
+  about 50° up the far side on a jump of three columns and one row, 27° to 51° on others, and it starts with no bounce
+  — it falls and slides. At 0.7 of the cell across, a head nearly fills its nest and is thrown round it; its lean is
+  held under two thirds of its height, softly.
+- **The tail starts a little under the head** (0.8 of it) and thins, so a short tail by the head reads as a tail, not a
+  second ball. **30 tokens.**
+
+**Version 8, the same night: a landing that carries on.** His, on version 7: *"I like what we have
+now. But I am unable to feel complete because when it's landing … the bounce is either too stiff or … it feels like it
+just came there and got stuck. Instead of … continuation of the motion, I mean, it might just if it's coming from left
+to right, it might fall into the right circle and then slide over in the clockwise direction which can be the control
+and also body could like squeeze a little and then come back like a jelly action I don't have that control."* Version
+7 dropped straight onto the bottom, bounced up and down in place and stopped. So:
+
+- **The landing is a ball in a bowl**, simulated at a fixed step (half a ms) from the moment it lands, under the leap's
+  gravity, and sampled, so any moment on the timeline is the same frame however it is reached. Its centre runs on a
+  circle the nest's less its own radius.
+- **It keeps its way.** It arrives with the leap's fall and a speed round the bowl, and each impact with the curve
+  bounces it off as long as it has bounces left (`-bounces`; the first `-first` of the leap high, each after
+  `-bounciness` of the one before), still moving round — so a bounce lands it higher up the side. Then it slides.
+- **The Slide group.** `-slide`, degrees: the speed round the bowl it lands with is what would carry it that far up
+  the far side. `-slide-way`: with its jump (the way it was going), clockwise or anticlockwise as you see it. `-rocking`:
+  it rocks back and forth, a pendulum, each rock a share of the one before, and comes to rest at the bottom. `-sway`: its
+  jelly leans against every push — the landing's change of speed, the bowl turning it — on the wobble's spring
+  (`-wobble`, `-wobble-speed`), and wobbles back; the lean is its outline moved along the bowl's floor as far as it
+  stands above where it sits.
+- **Sitting spreads as far as it is on the bowl**, so it spreads as it slides and rounds as it bounces; every impact
+  squashes it and dips the nest as hard as it hit.
+- **The phases** are crouch · leap · land (the landing until it is still) · settle. **29 tokens**: version 7's and the
+  Slide group's four. Version 8's numbers: one bounce, 30° with its jump, rocking at 45%, a sway of 35%.
+
+**Version 7, the same night: a body that settles, and what it is made of.** His, on version 6,
+with a violet sphere, its size and its spread turned up: *"I have completely increased the spread and it became some
+random shape instead of a slime … I also need control on the type of the body because there's no smoothness to it right
+now … it is not even resting inside the circle on the surface it just got extended outside for some reason."* Version
+6's sitting head was a dome with a flat base: a straight base in a round nest stands out past the ring, and at a high
+spread the flattening squared it off into points. So:
+
+- **It settles into its nest as into a bowl.** Sitting, its outline is a circle cut by the nest's circle: what would
+  be outside the nest is laid on the ring, so its underside follows the ring's curve and it cannot leave the nest. **It
+  keeps its size as it spreads**: its circle grows until what is inside the nest is as much as the head, so more spread
+  is a wider, flatter puddle along the bottom of the bowl. Its edge is smoothed. Only the nest its centre is in, low
+  down, is a floor: passing through a ring's line higher up, as it leaves and arrives, it is not caught.
+- **`-body`, what it is made of** (Head group): **Ball** barely settles for a squash (0.35 of it) and keeps a crisp
+  edge; **Jelly** settles as far as it squashes and softens its edge; **Slime** settles deep (1.6 times) and pools, its
+  edge softest. Version 7 starts as jelly.
+- **In a nest, its tail is cut to the nest's circle**, the page's opening: what swings outside it as it settles is behind
+  the page. Jumping, it is not cut. So outside a nest the tail is seen only in the air, as he asked of version 5.
+- **25 tokens**: version 6's and `-body`. The spread's control now reads "how far it settles into the nest".
+
+**Version 6, the same night: sitting in its nest, seen from the side.** His, on version 5:
+*"right now this feels like the head is not properly resting on the circle … it should properly rest on the bottom of
+the circle. As if it's sitting there and then it's spread a little … because it is where the pressure is applied … And
+then instead of showing the tail outside of the circle, it should be behind the screen. So it's only visible when it's
+jumping."* So:
+
+- **Seen from the side, down the screen is down.** A nest is the cell's circle and its floor is the circle's bottom: it
+  sits inside, on the bottom of the ring. Version 5 looked down on the page, a little from the side (`-view`), and sat
+  it on the page in the middle of the cell.
+- **Sitting, it spreads** (`-spread`, with the breath spreading it a little more and back): the head is a dome, round
+  on top and wide, its underside flattened where its weight presses, flatter the more it is squashed — in the crouch
+  and on landing too. Stretched tall springing back, or at speed, it is a pill as before.
+- **The tail is behind the screen while it sits**: it points straight back into the page, and only what is in front of
+  the page is drawn, cut where it goes through. As it leaps, the springs pull the tail out behind it and it trails; as
+  it settles they pull it back in, and it goes. `-curl` went with the curl.
+- **One gravity.** The arc rises over the higher of its two nests by `-height` and falls into the lower, and a rise and
+  a fall under one gravity take as long as the square roots of their heights, so where the peak falls is no longer a
+  setting (`-peak` went); the bounces and the tail's droop fall under the same gravity, down the screen.
+- **The nest dips** under each landing and the push of leaving, and springs back (`-give`), and it sits on it as it
+  does. There is no shadow: seen from the side, how high it is, is seen.
+- **24 tokens**: Head (`-size`, `-paint`, `-shade`), Tail (`-length`, `-taper`, `-stiffness`, `-swing`, `-stretch`),
+  Jump (`-columns`, `-rows`, `-crouch`, `-squat`, `-height`, `-hang`), Bounce (`-bounces`, `-first`, `-bounciness`,
+  `-squash`, `-wobble`, `-wobble-speed`, `-give`) and Rest (`-spread`, `-breath`, `-breath-depth`). Version 6's
+  numbers are version 5's, with a spread of 15%, a crouch squashing a third, a landing squash of 35% and a nest giving
+  6%.
+
+**Version 5, the same night: nest to nest.** His, on version 4: *"I had a better idea. Instead of
+making the character float, I think we should see it like jumping from nest to nest … instead of jumping in like water,
+it can be like jumping into that circle and then resting on that circle. So we can also control how it bounces,
+rests."* Still his fish — a sphere head and a rubbery tail, one outline with one shade band (version 4) — but the cells
+are nests now, not water: nothing goes under the page, and no cell opens.
+
+- **It rests in its nest**, sitting on it, its tail curled round it (`-curl`), breathing slowly (`-breath`,
+  `-breath-depth`).
+- **A jump**: it crouches, squashing down, drawing back and turning to face the way it goes (`-crouch`, `-squat`; a
+  crouch of 0 leaps from where it sits); leaps on version 3's arc (`-height`, `-hang`, `-peak`), from the middle of its
+  nest to the middle of the next; lands with a squash (`-squash`) and bounces there **under the leap's own gravity** —
+  each bounce's height a share of the leap's, then of the bounce before (`-bounces`, `-first`, `-bounciness`), and each
+  as long in the air as that height takes to fall — squashing again on each landing, as hard as its fall was high;
+  jiggles, flat to tall and back, dying away (`-wobble`, `-wobble-speed`); and **the nest gives** under each landing and
+  under the push of leaving, springing back (`-give`). Then it sits.
+- **The tail is a spring chain**, no longer laid on the head's path (a bounce in place goes nowhere a path could lay a
+  tail on): twelve pieces following the head, each held its length from the one before, pulled toward a shape —
+  curled in the nest at rest, straight behind the head in the air — by `-stiffness`, straightened while it moves so it
+  never folds, swinging on after the head stops for as long as `-swing` says, drooping under the leap's gravity and
+  lying on the nest's floor. It steps at a fixed 240 a second from the start of the jump, so any moment on the timeline
+  is the same frame however it is reached.
+- **The phases** are crouch · leap · bounce · settle (the jiggle and the swing dying out), then the hold, sitting in the
+  nest it reached, and the jump back. A part it goes without (no crouch, no bounces) is not drawn.
+- **The tokens, 26 in five groups.** **Head**: `-size`, `-paint`, `-shade`. **Tail**: `-length`, `-taper`,
+  `-stiffness`, `-swing`, `-stretch`. **Jump**: `-columns`, `-rows`, `-crouch`, `-squat`, `-height`, `-hang`, `-peak`,
+  `-view`. **Bounce**: `-bounces`, `-first`, `-bounciness`, `-squash`, `-wobble`, `-wobble-speed`, `-give`. **Rest**:
+  `-curl`, `-breath`, `-breath-depth`. Version 4's water — `-circle`, `-lap`, `-build`, `-dip`, `-dive`, `-depth`,
+  `-settle` — and its wiggle — `-wiggle`, `-beat`, `-waves`, `-whip`, `-whip-time` — are gone: the tail's life is its
+  springs now.
+- **Version 5's numbers are mine**: version 4's head and tail; a 220ms crouch squashing a quarter; the leap as before;
+  two bounces, a third of the leap's height and then 45% of that, a 30% squash, a jiggle every 160ms dying over 180ms,
+  a nest that gives 12%; a tail at 60% stiffness swinging a little; curled halfway round, a breath every 3.2s of 4%.
+- **The model is the package's**: `sphereCourse` and `sphereStill` are the head (where, how squashed, which way it
+  faces, how lit and how pressed each nest is), `sphereSpine` the tail's springs, `sphereFrame` the drawing.
+
+**Version 4, the same night: version 3's fish as one body.** His, on version 3: *"currently the
+head and tail … looks a little like two different parts attached together there is no smoothness to it and … there is
+a lot of wiggle to the tail maybe I can have wiggle control."* Version 3 drew the head as a shaded disc laid over a flat
+tube, a seam between them, and its tail's sway, a build-up that more than doubled it and the whip added up with no one
+control. So:
+
+- **One outline.** Head and tail are the envelope of a chain of discs down the body, the head the first of them, each
+  disc hulled to the next by their outer tangents; every hull turns the same way, so filled nonzero they are one smooth
+  shape, with no hole where the body curls on itself. The tail swells out of the head full and tapers (a smoothstep, so
+  the outline leaves the head with no corner). At speed the head stretches as a disc a little ahead of it in the chain.
+- **One shade.** The body is filled in its dark colour, and its lit side over it: each disc moved toward the light a
+  third of its own radius, cut to the outline. What that leaves is one flat band down the whole far side, as thin at
+  the tail as the tail is. The head's own crescent is gone.
+- **Wiggle is a group of its own**: `-wiggle` (how much the tail wiggles as it swims, 0 none), its speed (`-beat`, one
+  wiggle there and back) and `-waves`, and the whip at the water apart from it (`-whip`, `-whip-time`). The build-up now
+  adds 80% to the wiggle, not 120%. Version 4 starts at a wiggle of 15% of the head every 900ms and a whip of 30% over
+  350ms — about half of version 3's, and slower.
+- **A tail laid on a slow swim.** Laying the tail back along the head's path, it steps back by about half a piece at the
+  speed the head is going, so a slow swim round the cell is laid as far back as a fast leap; version 3 looked back a
+  fixed time and ran out of path at rest, standing the rest of the tail straight out.
+- **A little smaller, to fit its cell**: a head a third of the cell and a tail 1.8 heads long, where version 3's fish was
+  as long as its pond is wide and curled right round it.
+- **The groups are six, each a part of the fish**, the same 25 tokens: **Head** (`-size`, `-paint`, `-shade`), **Tail**
+  (`-length`, `-taper`, `-bend`, `-stretch`), **Wiggle** (`-wiggle`, `-beat`, `-waves`, `-whip`, `-whip-time`), **Swim**
+  (`-circle`, `-lap`, `-build`, `-dip`), **Jump** (`-columns`, `-rows`, `-height`, `-hang`, `-peak`, `-view`) and **Dive**
+  (`-dive`, `-depth`, `-settle`). Version 3's `-wag`, `-flick` and `-flick-time` are `-wiggle`, `-whip` and `-whip-time`.
+
+**Version 3, a fish, the same night.** His, on version 2: *"I did not like any of the controls for
+the sphere … I imagine that sphere like a head and a tail which is a little fluidy rubbery body and jumps like a fish …
+I want the controls where I can … configure the motion to jump like a fish because right now when I am trying to
+configure gather or … landing while … dropping … they are just simply coming up straight … and going down straight …
+instead of that … fluid … realistic jumpy feeling so I wanted to rethink and … give me better controls."* Versions 1
+and 2 moved it only toward you and away, which seen from in front is straight up and straight down, and every part was
+a separate straight move on its own curve. So:
+
+- **A head and a tail.** The head is the sphere. The tail is a rubbery body behind it: laid back along the path the
+  head took (`-bend` 1; 0 stands it straight behind the head), longer the faster it goes (`-stretch`), thinning to its
+  tip (`-taper`), swaying side to side in a wave that runs down it (the swim: `-wag`, `-beat`, `-waves`), and whipping
+  as it leaves the water and as it goes back in (`-flick`, dying away over `-flick-time`).
+- **The cells are water.** Its cell is its pond: at rest it swims round in it at the surface (`-circle`, `-lap`), its
+  tail curling after it: the calm. A leap is a fish's: it swims faster and dips to gather speed (`-build`, `-dip`; a
+  build-up of 0 leaps from where it swims), leaps out of its pond, dives into the cell it reaches, glides under
+  (`-dive`, `-depth`) and comes back up to swim round there (`-settle`). Under the page it is seen only through its two
+  cells, and only they are open (M9's rule for the dot, kept).
+- **One smooth path.** The head's way is a curve with no corner in it: each part hands the next its speed and its
+  heading (cubic Hermites, their hand-over speeds held to what each part's way can take, so none loops back). The leap
+  is a thrown thing's: across at one speed, up and down on two half parabolas meeting at the peak (`-height`, `-hang`,
+  `-peak`, early or late).
+- **Seen a little from the side** (`-view`): how high it is shows as rising up the screen, so the arc is seen as an
+  arc, and its flat shadow stays on the page under it. 0 is straight on, as the page is; version 3 starts at 0.6.
+  *Mine*: nothing else on the grid is seen from the side, which is why it is a control.
+- **Its tokens were 25 in five groups**: Head, Tail, Swim (with `-wag`), Jump and Water (with `-flick` and
+  `-flick-time`); version 4 regrouped them into six. There are no ease tokens: the curve is the
+  path's, not a timing function's. The head's three and the jump's Columns and Rows are not motion; they are on the jig
+  because he asked to design its character, and where it jumps, there.
+- **The model is the package's**, `lib/sphere-motion.ts`, pure: `sphereCourse` is the head's path through a leap,
+  defined for every moment before, during and after it (`sphereStill` for a fish that stays); `sphereSpine` lays the
+  body on it; `sphereFrame` draws it — the head as a disc with its crescent, the tail as a tube, split where it crosses
+  the water, the shadow, the open cells. The studio's stage, `components/sphere-stage.tsx`, paints it as SVG. The
+  timeline plays the leap (build · leap · dive · settle, the build not drawn at 0), the hold swimming round the cell it
+  reached, and the leap back; live, a click on a cell sends it there.
+- **Version 3's numbers are mine**: a head 40% of the cell, a tail two and a half heads long, its tip 15% of the head,
+  following 90% of the path, a third longer again at speed; a sway of 35% of the head every 700ms, 0.8 of a wave down
+  the tail; swimming round 60% of the way to its ring, a lap in five seconds; three columns and one row, a cell and a
+  fifth high, 520ms in the air, peaking at 45%, seen at 0.6; a 420ms build-up dipping 0.3 of a cell, a 380ms dive half
+  a cell deep, a 900ms settle, a whip of 60% of the head dying away over 400ms.
+
+**Version 2** (the same night) split a jump into a start (a wind-up that was a switch, None · Gather: draw back, hop,
+squeeze; then leaving on its own time, curve and stretch), the way between (under the page or over it) and a drop
+(arriving on its own time, curve and stretch, overshooting, settling, and a landing that was a switch, None · Squash),
+and put the jump's Columns and Rows on the jig, 32 tokens. **Version 1** had one wind-up that was always there, one
+stretch, lines round the sphere that showed it roll, and a jump from the last cell clicked. Both floated the sphere
+over its cell, and both moved it only toward you and away; version 3 keeps their flat drawing (the disc, the crescent,
+the flat shadow, the cells opening as irises in a lime ring) and their Columns and Rows, and nothing of their motion.
+
+Open, his to say: whether the nest should look like a nest (it is the cell's ring and tint today); whether the tail
+should show a little as it sits; whether
+"combination" meant a diagonal, as built, or two jumps in a row; whether it is the agent's
+next body (M12) or a character of its own; whether it wants eyes; whether the view from the side stays. Flagged: on
+the dark theme a black shadow barely shows, and on the light theme the lime ring is about 1.3 : 1 on white (§5 item
+11). Nothing plays it outside the studio, and adopting it on a page waits for his word.
+
+## M18 — The segmented slider, withdrawn (2026-09-30)
+
+*His, the same night: "We will have segments for the slider, and each segment represents … percentages … separated by
+space … reduce the height … to half … I should be able to control the space, the radius, the tail radius and the end
+radius and the head radius … a little spring control."* Built as `Slider variant="segmented"` and a ninth page: a
+12px row of segments, one a value, the head the segment at the value, his five radii and the space as `--slider-*`
+tokens, and the head and the body each on a spring (presets A *As described*, B *Stiff*, C *Bouncy*, D *Trail*, E
+*Keys*). **Withdrawn within the hour** (his: *"let's not have segments, I did not like it"*): the variant, its page and
+its model are gone. What he kept from it went into the grip (M16): the springs, as the body's follow, and the half
+height, as a control and preset B.
+
+## M19 — The player is his timeline: a state a tab, its parts configured and locked, states stacked by priority (2026-09-30)
+
+*His, the same night, in two notes. The first: "instead of predefined player and its segments like settle, hold, back,
+reset, rest sort of things I would want to have first control the like like select a starting time, select an end
+time, and maybe either it could be in milliseconds or seconds, or maybe minutes … So once I decide that, then I can
+create one state where between this time frame to this time frame, this motion happens. And so that I can attach
+multiple independent motions into one state machine."* Asked three things, he answered: **on every bench**; **the
+motion fills its span**; and a state plays **on an event too**, not only at a time.
+
+*The second, taking the agent as the example: "I should be able to select which component of the agent will be
+configured. And then once I configure, I can lock it. So that configuration can have its own state like start and end.
+And then I can select another component set another timeline and then configure it. Maybe for the body … And then play
+it. And then save it. And then maybe I can open another tab within the agent. Save the previous tab, we shall name it.
+And in the other tab, I can again configure differently. So, like that, I can try many configurations. And maybe
+sometimes I can also attach motions from different tabs. So, may be we can call each tab a state. And then I might be
+able to attach multiple states. I can also overlap states. So, the preferences drives from top to bottom. The higher,
+the more preference."* Asked three more, he answered: an attached state is **linked**; the agent's parts are **Body and
+Eyes** (*"Agent has Body and Eyes only. We might add more parts later. But for now since we have these two, controls
+should be provided for them"*); and where states overlap **both play**, the higher winning only where both change the
+same thing.
+
+It replaces M6's phases: each bench's fixed list (movement's grow · hold · back · rest, the sphere's gather · dive ·
+rise · settle · hold · back, focus's in · hold · next · out), of which only the hold, and loading's page time, could be
+dragged. ↺, play and pause, the slider and its playhead, Loop and Tempo stay as M6 and M15 have them. **Built on the
+agent, 2026-09-30** (below, after the rules).
+
+- **A tab is a state.** Each bench's states are tabs over its timeline. He names a state when he saves it, opens
+  another tab to try a different configuration, and keeps as many as he likes. *The first note's "state", one motion
+  over a span, is a row inside a state now.*
+- **A bench has parts.** The agent has two, **Body** (its size, and its movement: move X, Y and Z, turn about X, Y and
+  Z, and the ease) and **Eyes** (the eyes' size, spacing and height, the lids and their blinks, and the look in X and Y
+  with its ease). Its controls are organised by the two, in place of the five groups of M12's version 1, and more
+  parts come later. Every other bench names its parts when it gets the timeline. *Mine:* a bench with one motion has
+  one part, its motion.
+- **A row is a part, configured and locked.** He picks a part, sets it on its controls, gives it a start and an end,
+  and locks it. Once it is locked the controls cannot change it, so the next part is configured on a row of its own
+  without disturbing it. He unlocks a row to edit it. A row keeps only the values he moved off the part's rest (the
+  version's values) and leaves the others to the rows under it.
+- **The window comes first.** Each state has a start and an end, typed in one unit for its whole timeline: **ms · s ·
+  min**. Every time on the timeline is typed and read in it, and the ruler counts in it. Underneath, everything is ms.
+  *Mine:* seconds and minutes are for long plays, like an idle over a minute. A UI motion is read in ms.
+- **A row's motion fills its span** (his first answer). The part sets off from wherever it stands at the row's start
+  and reaches the row's values at its end, so the span is the row's time. Stretch 0–400ms to 0–800ms and it takes twice
+  as long. So the agent's Time controls and the eyes' Lead are gone: an Eyes row starting before a Body row is the
+  lead. A motion made of parts, like the sphere's trip or movement's stagger across the block, scales them together.
+  Where a bench's motion ships as a duration token (movement, loading …), the span is sent as that token. *Open:*
+  which row's span it is when two rows of one part differ.
+- **A state attaches other states, linked** (his answer). An attached state is a row too, its span where it plays.
+  Edit its tab and every state that holds it plays the edit. A state cannot attach itself, or a state that holds it.
+- **Top to bottom is priority** (his rule). A state's rows stand one over another, its own and the attached alike, and
+  he moves them up and down. Where rows overlap in time, **both play**: a higher row turning the body and a lower one
+  making it jump give a body that turns and jumps. Only where both change the same value at the same moment does the
+  higher row's value show. *Mine:* when the higher row ends while the lower is still in its span, the lower takes that
+  value from where it stands, over what is left of its span, so nothing jumps.
+- **A gap is a hold.** Outside every span a part stays where the last row left it. So hold, rest and "back" stop being
+  parts of a play: the hold every play had (`HOLD`, `holdPhase`) and each bench's rest on a loop are gone, and back is
+  a row he places.
+- **An event plays a state** (his first answer, *"Events too"*). Each state says which event plays it. Every bench has
+  **start**, which ↺ and Play fire and a page's ready would fire. A bench whose specimen answers the pointer adds
+  **enter**, **leave**, **press**, **release** and **click**, where its stage answers them today: movement's hover,
+  focus's card, the grip's press and drag, the sphere's click, focus mode's cells. Play plays the tab in front. **Live,
+  the stage answers the real events by playing their states**, so a bench's live hover is a state, not code of its own.
+  The agent's harness events (`run.*`, M12's statechart) wait for his word, as the statechart does.
+- **An event in the middle of a play** (*mine*): the state it plays starts at once, and the rest of the one playing is
+  dropped. Each part sets off from wherever it stands, not from its first frame, so nothing jumps, and it still takes
+  its row's whole span. Whether the span should shrink by the share already done is his to say when he sees it.
+- **Version 1 is today's play, written as a state**, so nothing a bench does now is lost the day it lands: the agent's
+  there · hold · back is a Body row there, an Eyes row setting off before it, and the Body row back after the hold.
+  Each bench is translated the same way, and his tuning is the next version (M12's amendment of 2026-09-30).
+- **Built from the system.** The states are the system's `Tabs`. A row is a `Slider` with two thumbs, its range the
+  span, on the timeline's axis, with its start and end as `Input`s beside it. The part, the event and the unit are
+  `Select`s, the lock a `Toggle`, and adding, removing and moving a row up or down are `Button`s. That retires the phase
+  grip, the one control M6 composed in the app (§5 item 13), if he agrees. *Mine:* where the rows are edited, on the
+  player under the stage or on a jig of their own beside it, is version 1's layout for him to react to.
+- **Where it lives.** In the browser with every other setting (`no-origins:motion`). Copy adds the states, as data,
+  after the CSS lines. A state is not a token: it says when the parts move, and the tokens say how. Whether a component
+  in the package will play a state one day, so that a hover on the portfolio is written here and not in code, is open.
+
+**Built on the agent the same night** (his: *"Okay. Proceed."*), as the pill agent's **version 2** — deleted with the pill
+later that night (M12's last amendment): the bench below stayed in the studio with no family on it until the agent's
+motions (M20, the same night) were built on it. The other benches keep
+M6's phases until each has named its parts. What is built, and where it went a different way from the rules above:
+
+- **The model is the package's**, `lib/motion-states.ts`, pure: `flattenState` lays a state's rows out in its own time
+  (an attached state's rows in its place, its window stretched onto the row's span); `stateValuesAt` gives every value
+  at any moment, walked from one row's edge to the next, so a play is seekable and an event can start `from` where
+  everything stands; `canAttach` keeps loops out. `lib/agent-rig.ts` adds the agent's rest (`AGENT_RIG_REST`: version
+  1's shape, standing where it rests) and `agentRigOf`, the agent a state's values make. The blink's clock
+  (`AGENT_RIG_DISCRETE`) is not eased between rows: a row sets it the moment it takes charge.
+- **A row keeps the values set on it**, not the values off the rest as written above: a row that brings the body back
+  sets Move X to 0, which is the rest, and has to keep it. So every control on a row shows what is underneath, dimmed,
+  until it is moved; moved, it is set on that row, and a ✕ under it takes it off again.
+- **Copy is the states alone**, as data, headed with the version (`/* Agent — Version 2 states, tuned */`). The
+  agent's values live in its rows, so it has no CSS lines to send.
+- **The bench.** On a wide field the instruments are the **States** card (the tabs; new, copy and delete; the name,
+  what plays it and the window, its start, end and unit) over the **Row** card (the row selected: its start, end,
+  ease and lock, Higher, Lower and Remove, and its part's controls, paged to the room). The player under the stage
+  stands taller for it (as many rows of the field as leave the stage three, two to five) and holds a lane a row under
+  the playhead: its name at its head, pressed to select it and again to let go, its span a two-headed slider on the
+  playhead's axis, and the violet line through them all. Under the lanes, a row for each part and **Attach**. On a
+  phone the lanes are a Rows card under the States, and selecting a row turns to its controls.
+- **Selecting a row holds the stage at the row's end**, the playhead there, so what it sets is seen while it is
+  configured; letting it go gives the stage back, live.
+- **A new row** starts at the playhead, 400ms long or what is left of the window, above the row selected, so it wins
+  where they meet; nothing is set on it until a control moves. **A new state** is an empty tab over the same window,
+  played by the start. **Reset** puts the tab in front back to the version's state, keeping its name and every other
+  state. **Saving is as he goes**, in the browser: there is no Save button. *Flagged:* he said "save it"; if he wants
+  saving to be a step of its own, it is his to say.
+- **Live, the agent answers the pointer on itself.** The state the start plays runs once when the bench opens. An
+  enter fires again when the agent moves back under a pointer that has not moved, since the pointer enters it again.
+
+## M20 — Motion for any component: typed properties, versions, and the studio behind the sign-in (2026-09-30)
+
+*His, the same night, after the agent's states: "I don't think what I'm trying to say was only specific to agent. The
+thing is, we need to have defined set of rules and controls and boundaries … for any component that there is based on
+the properties of that component I should be able to define the motion and then maybe all of that can be saved as
+version in the database so that I can experiment a lot and then even when I'm not working with you an agent I can still
+work on that from anywhere … we have to rethink everything from the beginning and the current use cases."* Then, of
+what he meant by dynamic: *"we can have discussions and decide what properties will a component have and then we can
+design a configuration based on what value is it and what is the type of that value. And any other necessary meta …
+because there might be different types of values we should be able to cater to them so that it can scale so every time
+that I save something I should be able to publish that as a version and yes let's … lock the motion studio behind
+authentication let's use the same auth because it should be same across no origins later we will define roles."*
+
+**Built the same night: the studio is behind the sign-in** (Admin.md §8.4, amended). The admin's sign-in became a
+package, `@no-origins/auth`; the studio's `proxy.ts` calls its gate, `/sign-in` is its login card, and the session is
+the admin's, one for every app (asked, he chose one package, one session, and open only locally). On a development
+server with no Supabase keys the studio opens without a login, so the review sweep and CI still see it; production
+never opens without them. Its Vercel project, its two variables and the hosted redirect URL are his steps
+(CLAUDE.md, Deploying; supabase/README.md). Nothing in the studio reads a table yet.
+
+**To design next, not built: the property model.** What he described, as I read it:
+
+- **A component's properties are decided with him**, one component at a time: which of its values move.
+- **Each property is a type and its meta.** The type says what the value is — a number in a unit, a duration, an ease,
+  a colour, a choice, a switch, a vector in X, Y and Z, and whatever a later component needs — which control edits it,
+  how it is checked, and how it moves between two values. The meta is the rest: its range and step, its default, its
+  label, what it touches, which part of the component it belongs to. A new kind of value is a new type, added once,
+  that every component can use: that is how it scales. The studio's `Token` kinds (`ms`, `ease`, `scale`, `share`,
+  `choice`, `px`) and M19's parts are the first, partial version of both.
+- **Motion is defined against those properties**: the states of M19, reading a component's declaration where the
+  agent's rows read its two parts written in code.
+- **Every save can be published as a version**, kept in the database, so he can experiment and come back to it from
+  anywhere, without an agent.
+
+What the design has to answer before any table exists: the types to start with, taken from the eight motions on the
+bench; what a declaration holds, and where it lives (in the package beside its component, or in the database); what a
+version is (a component's whole configuration, or one state), whether a published one is fixed (Admin.md R1: an integer
+with a required label) and what a draft is between two publishes; how a published version reaches a component on a
+page — a token in globals.css as M7 has it today, or read from the database, which the portfolio's rule (*the page is
+static, a component may be live*) constrains; and who may publish, once there are roles. The next step is that
+document, written from the current use cases.
+
+**His model of a motion, the same night**, once version 12 (his settings) was the agent's base (*"let's use that and
+we'll continue our state machines from there"*). Dictated, so the transcript's "ice" is eyes, and the bracket is my
+reading: *"first I might define only movement of eyes while it's sitting idle so I don't need to put any settings for
+the body so I can have one is angry one is patient one is curious one is calm one is sleeping one is distracted like
+that I mean I should be able to add name to that motion and then I will just check the checkbox and then I will see
+[the] eyes and then maybe sometime later I will define movement maybe from one cell to another so I might just pick a
+time frame to the movement and then maybe I'll just put some eye motion in the row above the body motion … So a motion
+will have master timeline and then maybe if I want to like add a motion which is 0.5 seconds of eyes and then the body
+movement might take for three seconds and then maybe I want to put this eyes motion somewhere in between 0.5 and one
+second so only those properties that I change of the eyes will merge with the properties that I set in that motion so
+now that full thing will become one motion."* As I read it:
+
+- **A motion has a name and a master timeline.** Angry, Patient, Curious, Calm, Sleeping and Distracted are six
+  motions, with his names, and he makes as many more as he likes. This is M19's tab under his word for it, and its
+  window is the master timeline.
+- **A motion ticks the parts it moves.** Each of the component's parts has a checkbox; on the agent they are Body and
+  Eyes. A ticked part shows its controls. A part left unticked is not touched by the motion. So an idle motion of the
+  eyes sets nothing on the body, which sits in its nest as the agent's version has it, breathing.
+- **A row sets only what he changes** (M19 as built). Everything else comes from the rows under it, and under all of
+  them from the agent's version.
+- **A motion goes into another motion as a row, at its own length.** His 0.5s of eyes, put into a 3s move from one
+  cell to another, is a row from 0.5 to 1s. It is linked (M19): edit Curious, and every motion that holds it plays the
+  edit.
+- **The row above wins only on what both set** (M19's rule). With the eyes' row over the body's, from 0.5 to 1s the
+  eyes do what Curious sets. Anything Curious leaves unset, they do as the move has them: looking where it goes, and
+  blinking.
+- **The whole is one motion.** It has a name, and it can go into other motions in turn.
+
+```
+Hop and wonder         0 ──── 0.5 ─── 1.0 ──────────────────── 3.0 s
+  Curious   (eyes)            ███████
+  Hop       (body)     ███████████████████████████████████████
+```
+
+*Mine:*
+
+- **M19's bench is most of it.** What changes:
+  - the part checkboxes;
+  - a placed motion's row starts at the motion's own length (M19 stretched a state onto whatever span it was dropped
+    on; dragging an edge still stretches it, and it plays slower);
+  - the bench says **motion** where it says state;
+  - the agent's Body is the sphere's hop, not the pill's move and turn in X, Y and Z.
+
+  The build is that bench on the agent, once the eyes' properties below are his.
+- **"State machine" is kept for what plays the motions:** the events that move the agent from one motion to another
+  (a click, or a minute with nothing happening). M19's events are the first of them. The rest wait until he names them.
+- **What M20 versions is a motion,** such as Curious, version 3. Each motion sits on the agent's own version, which is
+  12 today. *Open,* with the rest of versioning.
+- *Open:* a Body row that is the hop, given 3s. M19 scales all of a motion's parts together, so the hop would play in
+  slow motion. The other reading keeps the leap at its speed and gives the rest of the span to landing and rest. This
+  can wait until he places one.
+
+**What his six need from the eyes.** Version 11's eight eye properties build the eyes (size, spacing and height) and
+play them through a hop: they look where it goes, turn early by the look lead, blink, and squint on landing. None of
+them can make the eyes angry or asleep. *Proposed:* four more, for him to confirm.
+
+| Property | Type | Range | What it is |
+|---|---|---|---|
+| Look X | number | −1 left … 1 right | where they look, as a share of how far an eye can travel on the head |
+| Look Y | number | −1 down … 1 up | the same, up and down |
+| Open | share | 0 shut … 1 wide | how open the lids are at rest; a blink still shuts them from there |
+| Slant | number | −1 sad … 1 angry | the upper lids' tilt: inner ends down is angry, outer ends down is sad |
+
+Look X and Y add to the look where it goes, so a hop still looks ahead unless a row sets Look to 0. Here are his six in
+these properties, as a first guess for him to tune, not as settings:
+
+| Motion | Its eyes |
+|---|---|
+| Angry | Slant 0.8, Open 0.6, looking straight out, blinking every 6s |
+| Patient | Open 0.8, looking straight out, a slow blink every 5s |
+| Curious | Open 1, Look X from −0.6 to 0.6 and back, on two rows |
+| Calm | Open 0.55, Slant −0.2, a slow blink every 4s |
+| Sleeping | Open 0, no blink |
+| Distracted | Look X 0.8 and Y 0.3, glancing back to the centre and away again |
+
+**His answers, the same night:**
+
+- **More parts than the eyes.** *"I still need more parts … currently I'm thinking pupils, lower lids, upper lids,
+  brows, mustache, pimples, hair. I mean I want to have this like an asset library, I'm not sure what we can do here."*
+  So the four properties above are not the eyes' whole set: the face is made of parts, taken from a library (below).
+- **A motion played on its own stops on its last frame** and holds it: *"for now we will stop on its last frame."*
+- **A hop keeps its speed:** *"No, currently let's keep its speed."* Given a longer span, it leaps at its own speed,
+  and the rest of the span goes to landing and rest. *Mine:* a hop's span cannot be dragged shorter than its leap.
+
+**The face is parts from a library.** This is *proposed*, not his yet:
+
+- **It lives in the character studio.** That studio is appearance, and C1 lists accessories among it
+  (Character-Studio.md). There he picks what the agent wears and how it looks; the motion studio moves what it wears.
+- **A library is slots, and each slot has styles.** The slots are upper lids, lower lids, pupils, brows, mustache,
+  hair, and marks (the pimples). A style is one way of drawing a slot: Brows could be a Line, an Arch or Bushy. The
+  agent wears one style in a slot, or none.
+- **Each style has its own settings, typed** (M20's property model). Brows · Arch, for example, has thickness, length,
+  arch, height, angle and colour. The motion studio shows every part the agent wears next to Body as a checkbox, and
+  offers that part's settings as the controls a row can set.
+- **A style is drawn in code from its settings**, as the eyes are. That way it bends with the head as the head
+  squashes, stretches, leans and squeezes, every number on it can ease in a motion, and its colour stays flat. A
+  drawing made in a design tool and uploaded could only move, turn, grow and fade as a whole. Uploaded drawings can come
+  later, for things that do not bend with the head, such as a hat.
+- **The eyes' parts come first:** pupils, upper and lower lids, and brows, because his six moods are made of them. The
+  four properties above move onto those parts: Look X and Y to the pupils, Open and Slant to the upper lids. Mustache,
+  hair and marks come after. *Mine:* hair can swing on the tail's spring as the agent hops.
+
+**His answers on the library, the same night:**
+
+- **Both kinds of style.** *"I haven't drawn paths myself in any design tool. I never tried them, but I might. So I
+  think we should have option for both. I mean, if we have to upload, what is that we need? Or will the uploaded model
+  just directly go into the code?"* So a slot's styles come in two kinds: drawn in code from settings, or drawings he
+  uploads (below).
+- **The eyes' parts come first** (*"Okay, sure"*): upper lids, lower lids, pupils and brows.
+- **Marks are the textures that faces in animation wear** (*"I meant some texture that are usually used on face and
+  animated characters, you might have better idea"*). He meant neither pimples nor dimples as such.
+- **No mouth:** *"no I'm not giving any mouth to the agent."*
+
+**An uploaded style.** This is *proposed*:
+
+- **What he needs to make one:** an SVG, drawn in any tool on a template the studio gives for each slot. The template
+  shows the head, the eye line, and the box the part sits in. The upload checks four rules:
+  - flat fills only, with no gradient and no blur (the system's rules);
+  - shapes only, with no picture inside;
+  - one side of a pair, because the other side is its mirror;
+  - colours by layer name: a shape in a layer named `ink`, `paint` or `light` wears the agent's colour of that name,
+    and any other shape keeps its own colour.
+- **Where it goes: not into the code.** It is cleaned down to its shapes and kept in the database's storage as a
+  version. In the library it stands as a style of its slot, next to the styles drawn in code, and the agent draws it
+  from there. A page that shows the agent carries the published version with it when the page is published (*the page
+  is static*); it is never fetched at a visit.
+- **What it can do:** follow the head, squashing and stretching with it as a whole; change colour; and move, turn, grow
+  and fade in a motion. **What it cannot do** is change its own shape, the way a brow drawn in code arches further. For
+  that he uploads one drawing per pose, a calm brow and an angry one, and a motion switches between them. If the second
+  pose is made by moving the first one's points rather than by drawing it again, the motion can blend one into the
+  other. *(This corrects my earlier note: an uploaded style does not have to slide over a squashing head.)*
+
+**The types to start with** (the first of M20's questions). *Proposed:*
+
+| Type | What it is | Between two values in a motion |
+|---|---|---|
+| number | a value in a range, with a step and a unit: a share of the head or of the eye, −1 … 1, px | eases |
+| angle | degrees | eases |
+| duration | ms, or s and min (M19's units) | eases |
+| colour | one of the agent's named colours (paint, ink, light) or one of the palette's | switches at the row's start |
+| choice | one of a list, such as a slot's style | switches |
+| switch | on or off | switches |
+| drawing | an uploaded drawing, by version | switches |
+
+Every property carries the same meta: its label, its part, what it touches, its range and step, and its default (the
+version's value).
+
+**The face, version 1.** *Agreed* (his, the same night, of these parts and of the symbols below: *"yes for both"*):
+the first four parts, drawn in code. Each pair is mirrored until he
+unmirrors it; after that, left and right are set apart, which is what gives one raised brow.
+
+| Part | Styles | Settings |
+|---|---|---|
+| Eyes (today's) | none | Size, Spacing and Height; **Look X** and **Look Y** (−1 … 1): with a pupil, the pupil moves inside the eye, and without one the eye moves on the face; Look ahead and Look lead, as today |
+| Pupils | **None**: the eye is solid ink, as today · **Dot**: the eye is light, with an ink pupil in it · **Shine**: solid ink, with a light catchlight that stays put as the eye looks | Size (a share of the eye), Shine size, Shine angle |
+| Upper lids | **Plain**: cuts the eye, as today · **Heavy**: a band of the body over the top of the eye, with an ink line on its edge | Open (0 shut … 1 wide), Slant (−1 sad … 1 angry), Curve, Blink every, Blink, Squint on landing |
+| Lower lids | **None**: as today · **Plain**: rises from below and cuts the eye | Raise (0 … 1), Slant, Curve (up gives the ^ ^ of a content face) |
+| Brows | **Line** · **Arch** · **Bushy** | Height above the eye, Angle (−40° … 40°; the inner end down is angry), Arch, Length, Thickness, Colour |
+
+His six in these parts, as a first guess and not as settings:
+
+| Motion | Its face |
+|---|---|
+| Angry | brows low and angled 30° in; upper lids Slant 0.8, Open 0.6 |
+| Patient | brows level; upper lids Open 0.75, a slow blink every 5s |
+| Curious | brows up, one higher than the other; upper lids Open 1; looking left, then right |
+| Calm | upper lids Open 0.55; lower lids Raise 0.25, curved up |
+| Sleeping | upper lids Open 0; lower lids Raise 0.2; brows low and slack |
+| Distracted | brows level; looking up and to the side, a glance back, then away again |
+
+**Marks come after the four.** *Mine*, since he left the textures to me. They are flat, like every colour in the
+system, so there is no soft-edged blush:
+
+- **Blush:** a flat oval under each eye, or three short strokes (///), in a colour of its own.
+- **Freckles:** a scatter of dots across the cheeks.
+- **Symbols that pop up by the head in a mood,** drawn the way manga draws them: the cross of anger for Angry, a sweat
+  drop, a Zzz rising for Sleeping, a sparkle, a question mark for Curious. **A slot of their own** (his *yes*), played
+  by motions rather than worn: a row shows a symbol over its span.
+
+Mustache and hair come after marks.
+
+**Versions and publishing.** *Agreed* (his, the same night, given in the character studio's session: *"I agree to your
+split. And yes, a published motion should freeze. And any new change will lead to new publish. Each publish should be
+treated as a version."*). It answers the questions M20 left open above, and follows the admin's rules wherever they
+already decide (Admin.md §6.4, §7, R1 to R3). A change never alters a published version: it is saved in the draft, and
+the next publish makes the next version.
+
+- **Three things get versions.**
+  - A **character**: what the agent looks like, meaning its body, the parts it wears and their settings. It is edited
+    in the character studio.
+  - A **motion**, such as Curious or Hop and wonder: its timeline and its rows. It is edited here.
+  - An **uploaded drawing**.
+
+  A motion is made on a character's parts, so it plays on any version of that character. A row for a part the
+  character does not wear does nothing.
+- **What a component can have stays in code; what he chooses goes in the database.** The declaration lives in the
+  package, beside the drawing that uses it, because the two change and ship together. It covers the parts, their
+  styles, and each setting's type, range and default. The values he picks, a look or a motion, are data. Every
+  uploaded drawing has the same declaration: where it sits, its turn, its size, and colour by layer.
+- **A draft saves as he goes, in the database.** There is one draft per character and per motion, so the studio opens
+  where he left off on any device. If two devices write at once, the later write is refused rather than merged, and
+  the studio says so (Admin.md §6.4's `rev`). M19's bench saves in the browser today; that moves into the draft.
+- **Publishing makes a version: a number and a name he types** (Admin.md R1), such as `13 — angry brows`. An empty or
+  repeated name is refused.
+  - A version never changes and is never deleted. Going back to an older one makes it the current version, and nothing
+    is renumbered.
+  - Each version records the package version it was made with (Admin.md §7), because a style drawn in code can change
+    underneath it.
+- **The agent's numbering carries on.** Version 12, his settings, is stored as the agent's first version and keeps
+  its number, so the next publish is 13.
+- **A published motion is frozen, along with the versions of the motions it holds.** In a draft, a placed motion is
+  linked (M19): edit Curious, and every draft that holds it plays the edit. Once Hop and wonder is published, it keeps
+  the Curious it was published with; publishing it again takes the newer one (his *yes*).
+- **A page gets a version when the page is built, never when someone visits it** (*the page is static*).
+  - Publishing writes the version to the public `publish` bucket at a fixed address (Admin.md §8.2).
+  - It then asks every page that shows that character to rebuild (Admin.md R2, the revalidate).
+  - It reads the live page back to check the new version is the one showing.
+
+  No page shows the agent yet, so this waits for the first one.
+- **The design system's own motions stay in code** (Admin.md R3). The loader, the slider's grip, hyper focus and focus
+  mode are played by every page in every app, so their settings still reach globals.css the way M7 describes: Copy,
+  then a commit. The database is for characters and their motions, which are his to make and change from anywhere
+  (his: *"I agree to your split"*).
+- **He is the one who publishes,** since he is the only person the sign-in lets in. Roles come later (Admin.md
+  §8.3's owner, editor and viewer).
+- **The tables follow once this is agreed:** characters, motions, their drafts and versions, and drawings, with the
+  drawings' files in storage. RLS denies everything except the signed-in owner (Admin.md §8.3).
+
+**Built the same night, in two sessions** (the split his *"I agree to your split"* approved: the character studio's
+session builds the library and the upload; this one draws the parts and their motion):
+
+- **The declaration**, in the package, pure:
+  - `lib/properties`: the types, their meta, `set` (look or motion), and `checkValue`.
+  - `lib/agent-face`: the slots, their styles and settings, and `FaceLook`.
+  - `lib/agent-body`: the body's groups; `CharacterLook = { body, face }`, `checkCharacter`, `resolveCharacter`; and
+    `sphereMotionOf`, the agent a look makes.
+
+  Ids are unique across body and face (65), so a row keys any value by its id alone.
+- **A look is kept whole** (mine, from the review of the tables). A draft is saved with every value, and a version is
+  frozen with every value, not only the ones moved off a default. A default that changes in code later must not change
+  what a published version looks like (Admin.md §7, the reason for the theme snapshot). A key missing from a look read
+  back is a setting declared since it was saved, and takes its default.
+- **The tables** are the character studio session's migration, reviewed here and applied to the local stack only
+  (`supabase/migrations/20260930090000_studio_versions.sql`, supabase/README.md). One shape serves all three kinds:
+  - `studio_items`, each with one draft (`studio_drafts`, whose `rev` refuses a stale write).
+  - `studio_versions`, numbered max + 1 per item with a label that is never empty and never repeated, frozen by
+    trigger, and made current as it is published (`studio_publish`).
+  - The agent is seeded with version 12, its look whole.
+
+  Pushing it to the hosted project is his step.
+- **The face's parts are drawn** (M17, version 13), and the motion studio's jigs for them are built from the
+  declaration.
+- **Uploaded styles**, the same night:
+  - **The character studio's session** built the library, the upload and its checks (Character-Studio.md). The
+    template for a slot is drawn from the package's `faceAnchors` and has Guides the cleaner maps back from.
+  - **This session** built the drawing: `DrawingData` and `checkDrawing` in `lib/agent-face`, and the `Agent`'s
+    `drawings`, each drawing placed on its slot's anchor, a pair's right part mirrored, colours from `lib/agent-colours`.
+  - **Checked end to end** against the local database: a brow drawn moved and scaled on its template cleans back to the
+    same paths, and sits exactly where the template's cross was, mirrored.
+  - A symbol can be uploaded as far as the package goes, but the library shows only worn slots, so nothing picks one
+    yet.
+- **Not built yet:** unmirroring a pair.
+
+**The agent's motions, built the same night** (asked whether to start the timeline, his *"Yes"*). M19's bench is on
+the agent as a family of its own, **Agent motions**, beside the Agent page (`content/agent-motions.ts`). It sits beside
+the page rather than in its place, so the Agent page's jigs, where he tunes and sends back its versions, stay as they
+are.
+- **A motion is a tab:** a name, a window, and the parts it ticks. The parts are the agent's own: Body, and each slot of
+  its face (Eyes, Pupils, Upper lids, Lower lids, Brows, Symbols), each part's controls those of its declaration.
+  - A row can be added only for a ticked part.
+  - A part unticked is not touched by the motion. Its rows are kept and dimmed, and not played: `flattenState` leaves
+    them out (`MotionState.parts`).
+- **Every row stands on the agent as the Agent page has it tuned** (`FamilyMachine.restFrom`). A row changes only what
+  is moved on it, and a control shows the tuned value, dimmed, until it is.
+- **A Body row that sets Columns or Rows is a hop** that many cells from wherever the agent sits. It starts with the row
+  and flies at its own speed (his: *"keep its speed"*); the rest of the span is its landing and rest. A hop still in the
+  air when the next would start goes first. Whatever else the row sets, the hop leaps with.
+- **While a hop is in the air**, rows can still move the face and how the agent is turned. The rest of the body is the
+  hop's, read at its start.
+- **The agent sits** where the path its hops take is centred on the stage, and in the stage's middle when it does not
+  hop.
+- **A motion plays to its window's end and holds its last frame** (his: *"stop on its last frame"*). Another motion
+  goes into it as a row at its own length (**Place**), linked.
+- **Version 1 starts from the Agent page's play**, a Hop there and back, written as a motion. His six moods are his to
+  make; none is seeded.
+- **Where it is kept: in the database**, built the same night (asked whether saving should come next, his *"Yes"*).
+  - **Each motion is an item** of kind `motion`, made for the Agent, with one draft (`apps/motion/src/app/actions.ts`,
+    server functions as the character studio's are).
+  - **It saves as he goes,** 500ms after the last change, whole, on the `rev` it was loaded at. Another device's save
+    first stops the saving, and the card says *Changed elsewhere* and offers *Load it*.
+  - **A new tab is a new item, made under its own id.** A deleted tab goes from the database if it was never published.
+    A published one stays, and its Delete is off.
+  - **Publishing** takes a name he types, beside the timeline on a wide field and on the Motions card on a narrow one.
+    It pins every motion the motion places to that motion's current version (`AttachRow.version`), then makes the draft
+    the next version. A motion that places one never published is refused until that one is. **Back to** makes an older
+    version the one pages would play, and the draft its motion.
+  - **The first time the database has none,** version 1's Hop is made there.
+  - **With no keys, or signed out,** the motions are the browser's, as M19's were, and the card says *In this browser
+    only*.
+  - *Found while testing it:* React's development double mount loaded twice, and the second load came back after a new
+    tab and put the page back to the database's. A load now never undoes edits made since it began, and nothing is
+    edited while the first is on its way.
+  - *Also found:* a control not set on a row showed the value underneath as its own, so typing that same value set
+    nothing, and a hop of one column (his Columns is 1) could not be typed. That value is now the field's placeholder.
+- **A pair set apart on a row** (his, the same night: *"I want to fix the mirror pairs"*; built). A row of a paired
+  part — the eyes, their pupils and lids, the brows — has a **Mirrored** switch, on. Off, the right side starts as the
+  left is, and **Left · Right** says which side the row's controls edit: a right-side value is the row's own
+  (`<token>-right`, `AttachRow` untouched), read by the model as the pair's right (`SphereMotion.right`). Mirrored again,
+  the right's values come off. One brow raised is a Brows row, Arch, the left's Angle −30 and the right's 35. Not every
+  setting of a pair has a side: their spacing, a style, the blink's clock and the like are the pair's, and the right's
+  controls for them are off. The Agent page itself has no right side yet: a character's set-apart pair is the character
+  studio's, and reaches a motion when the motion studio reads the character (open).
+- **Not built:**
+  - an event other than Play (his, the same night: *"later, whenever we need, we can attach motions to triggers, so we
+    don't need them"*);
+  - a view that brings the agent nearer, since at a 60px cell a turned eye moves 4px.
+
+## M21 — The slider's steps: a mark over each, a zone round each, and a tick as the head lands (2026-09-30)
+
+*His, the same night: "For sliders, we need an option to have segments … if the smallest unit is 1 and if the total
+slider numbers are 5, we can have small dots above them, which can be controlled, the size can be controlled of those
+dots, and … basically it should give the tactile feedback, and the motion should also be designed."* Then, before he had
+seen it: *"Give me a control where I can control the zone for each … mark. And if the cursor holding the head is in that
+zone, the head should snap right under the mark."* A motion he named, so it is on the bench (M9), after the grip, as
+**Steps**, designed version by version (no presets). It is not M18: the bar stays one fluid body, and the dots stand
+over it.
+
+- **The option is the component's.** `Slider marks` draws a dot over every step's place, and `marks={5}` one every five
+  of the value's units from `min`. A mark stands where a head stands at its value (radix's in-bounds offset, reckoned
+  from the values, never measured), so a head at rest is right under its mark. The dots are above the bar, before it
+  when the slider stands vertical, **in room the slider keeps at the top of its box** (tried outside the box first: in
+  the showcase's stack the dots read as the slider above's). `--slider-mark-size` and `--slider-mark-lift` set the dot
+  and its distance from the bar; 6px and 6px unset.
+- **The light.** A mark is the bar's grey, and lime where the value is: it lights the moment the value lands on it,
+  with its tick, and one the value has left stays lime until the body's lime (M16's follow) has flowed back past it,
+  fading over the dot's width. Arriving is a click; leaving drains. *Mine.* Version 1 lit them only as the body reached
+  them, which made the tick's dot pop grey; changed before he saw it.
+- **The zone** (his). Every mark has one, Zone px either side of it along the bar, never past half way to the next
+  mark (zones meet at most, and then the head is always under a mark). While a head is held and its cursor is in a
+  zone, the head goes right under the mark on a spring, Snap ms long, and the value is the mark's; out of every zone the
+  head is the cursor's again and **the value lands on no mark it has not snapped to**, so a drag let go between two
+  marks drops back to the last one it snapped to — a detent. A press outside every zone still takes radix's nearest
+  value, so a click on the bar moves it. With Zone at 0 there is no snapping and the value is radix's. *Mine:* the
+  value following the snap (his note spoke of the head; a head under a mark with the value elsewhere would jump when
+  let go), the hold between zones, and the press's exception.
+- **The tick.** With a zone, the snap is the tick; with none, or from the keys, it is the value landing on a mark.
+  A tick is three things at once: **the mark pops** — up to Pop times its size in Pop in ms on cubic out, then back on a
+  spring (Settle, Settle bounce), so a fast drag runs a wave through the marks; **the head kicks** on the same curve, to
+  Kick times its size, a bump in the bar at rest and a pulse in the cursor while held, stopped at the ring's inside
+  (20px); and **the hand feels it** where it can: a vibration Haptic ms long through the Vibration API, which Android's
+  browsers have and iOS Safari and every laptop do not — there the tick is only seen. *Mine:* the kick, and the haptic's
+  form.
+- **Tried and taken out before he saw it: the notch.** The held body clicking a share of each step behind the head.
+  It kept the bar's opening with the lime, so the held head sat over the grey instead of in its opening, breaking M16's
+  grip; the kick replaced it.
+- **Played on the grip's loop, modelled in the package.** `lib/step-motion.ts` is pure (`readStepMotion`, `stepPopAt`,
+  `markLit`, `zoneOf`, `paintMark`, `stepHaptic`); `useGripMotion` plays it with the grip — `land` for a value landing,
+  the zone found on every pointer move before radix reckons the value, `onSnap` handing the slider the mark's value and
+  `snapped` telling it which mark holds it. At rest the marks are the slider's own render. Under reduced motion the pop,
+  the kick and the snap take no time; the haptic stays.
+- **The tokens**, in three groups on the jig. **Marks**: Size, Lift. **Tick**: Pop, Pop in, Settle, Settle bounce.
+  **Feel**: Kick, Haptic, Zone, Snap. None in globals.css until he picks (M7); `STEP_START` and the slider's fallbacks
+  are version 1's.
+- **Version 1** (mine, from his two notes): a 6px dot 6px over the bar; Pop 1.8× in 60ms, Settle 360ms at 0.4; Kick
+  1.2×; Haptic 10ms; Zone 16px; Snap 90ms, no bounce.
+- **The specimen** is three system `Slider`s with marks on the stage's rows, a free row between: his example, 1 to 5;
+  a range, 0 to 10; and 0 to 20 marked every 5, where the value steps by 1 and only a mark snaps and ticks. It borrows
+  the grip at its own values. Live it is dragged by hand or stepped with the keys. On the timeline a play is the
+  grip's detach, the hand dragging each first head two steps out and back from where it is, the way there is room —
+  stepped from the start by the slider's own rules, so the zone, the snap, each tick and the body's follow are the same
+  as a hand's — holding and merging, with the cursor drawn as a ring over the hand.
+- **Fixed with it, in the grip's hook:** radix hides a head on its first render (it knows its index only once it is
+  mounted), so the grip's first measure found every head at the start edge, and the first move of any slider poured
+  the lime in from there. It measures again once the heads are placed.
+
+Flagged: a zone wider than the ring pulls the head out of it (the head is under the mark and the cursor is not); on a
+long slider with a mark every step the pops run together; iOS has no web haptics at all (a hidden switch input clicked
+from script gives one tick on iOS 18, and is a hack — his call); and only the studio and the showcase draw marks.
+
+## M22 — The intro is the agent: it breathes, hops in place, and the field wakes ring by ring (2026-09-30)
+
+*"Here is the intro loader that I want. Uh, we created agent character. So now what should happen is that uh, take
+the avatar. It should uh, breathe for like one, two seconds. And then it should jump within the same cell and create a
+ripple activations of cells. Like, I mean, each cell in circles around the agent circle should activate. One circle by
+one circle from center to the borders of the layout, and then the agent disappears and the card should render
+smoothly."* Built on the portfolio as Grid.md D50, Version 1. It is a family of its own, `intro`, and it plays the
+agent's parts rather than copying them. The breath is the agent's rest (`sphereStill`), and the hop is a
+`sphereCourse` from its nest back to the same nest. Both are read off the page with `readSphereMotion`, as the
+motion studio's stage reads them. What is the intro's own is when each part is and how far apart the rings are.
+
+| Token | Version 1 | What |
+|---|---|---|
+| `--motion-intro-breathe` | 2000ms | how long it breathes before it hops |
+| `--motion-intro-ring` | 45ms | from one ring of cells lighting to the next |
+| `--motion-intro-vanish` | 300ms | the agent fading, once the last ring has lit |
+| `--motion-intro-reveal` | 500ms | the page coming in, from the same moment |
+
+None is in globals.css. `readIntroMotion` (`lib/intro-motion.ts`) falls back to `INTRO_START`, which holds these values.
+A cell's lit ring fades over the field's 500ms, the pointer's (Grid.md D34). The intro is not on the bench. Putting it
+there, so he can tune it and send the settings back, is the next step if he wants one.
+
 ## 5. Open
 
 1. **The grid's motion onto the layer.** Its numbers are module constants, and the field's painter runs in a
@@ -785,3 +2119,91 @@ The component families' round 1, withdrawn from the bench with them (M9) and kep
     exit on one cell never need. Only a pointer's hover and Play enter it, as for movement (item 5).
 
 **M12 amendment — fixed character dimensions, 2026-09-28.** His: “the eyes should be circular” and “always be the height of the cells and 2 cells width.” The body is one measured cell high and spans two cells including their gutter; its dimensions never scale during playback. Its resting placement follows cell boundaries. Size, width, height, openness and elasticity jigs are removed. Eyes are SVG circles, with independent Eye size jigs under Left eye and Right eye; gaze and circular blinking never distort their shape. The specimen reports its fixed 2 × 1 size.
+
+**M12 amendment — the agent is a statechart, 2026-09-29.** His, on the bench built the day before: *"I did not like
+what it did. I want better controls and better state machines."* Five mechanisms were drawn up for him to compare
+(Agent-motion.md, round 1: a statechart, inputs and layers, clips on a dope sheet, springs, layered axes), and he
+picked the first: *"Let's go with A."* The one-gesture tween (delay, start pose to end pose, hold, back), its 33 tokens
+and its presets are replaced.
+
+- **Three regions run at once, each on its own clock:** Body (what the pill does), Gaze (where the eyes look) and Lids
+  (how open they are, and the blinks). A blink can fall in any gesture and a glance never restarts the body.
+- **States are his.** What ships is one blank state a region — `rest`, `ahead`, `open` — and nothing else: no
+  suggested names, personalities or moods. A Body state may hold children one level deep, and a transition may return
+  to the child last active (history).
+- **Events are the page's and the harness's**, a fixed catalogue (the load, the wake reaching the agent, a card
+  focused or blurred, a mode changed, the theme flip, the page hidden or shown; the harness idle, working, waiting,
+  succeeded, failed, unreachable), plus the machine's own: a state's clip done, a Body state entered, and `after`
+  timers. He chooses which to wire. The harness's status is also held as a level a transition can test, so a page that
+  opens mid-work shows it working. The browser only presents it: the lifecycle stays on the BEAM.
+- **Each transition says how it interrupts:** cut, blend over its ms, or spring — the body carries its speed through
+  and curves on — and whether it lets the current gesture finish first. A lag on a Body transition lets the eyes lead.
+- **A play is a take.** Events he fires live are recorded and compiled, on a simulated clock with seeded blinks, into
+  a trace, so any t on the timeline paints the same frame as playback (M6). Only the gaps between his events are
+  dragged there; a timer's length and a clip's are motion, set in the jigs. With no take, Play steps into the state he
+  has selected and lets his wiring take it from there.
+- **The motion is authored on the stage.** The pill's keys and the eyes' looks are set by dragging them on the drawn
+  specimen, an exception built in the app like the phase grip (§5 item 13), which the pick carries.
+
+Four choices were his and went unanswered, so these are mine and his to overrule: he drags on the stage (above); how
+a transition interrupts is his choice per transition, blend by default; idle blinks run on a seeded, jittered schedule
+he sets per Lids state, off (none a minute) until he sets one, and a Body state can also blink as it enters; and the
+chart — structure and numbers together — is data, copied from Settings and committed as `AGENT_CHART` in the package's
+`lib/agent-chart.ts` when he picks, not `--motion-agent-*` custom properties. States and keys named by him do not map
+onto stable CSS names, and a rename would orphan them. That bends M3 for this one family, and is flagged for him.
+
+**M12 amendment — the eyes have lids, 2026-09-29.** His, the same night: *"Currently eyes are blinking by just scaling
+down. I need the effect of having eye lids."* An eye is now always a whole circle of its face's size, and an upper and a
+lower lid in the body's colour close over it: the circle is clipped to what the lids leave open (`eyeAperture`), so a
+blink is the lids meeting, and a narrowed or sleepy eye is lids part way down, never a smaller eye. The 2026-09-28
+amendment's "circular blinking shrinks the radius" is replaced; its "never stretches an eye" still holds. A Lids
+state's `open` is now how open its lids are, 0 shut to 1 wide, and it has a lid shape that moves with it over its
+settle: **Lower lid** (how much of the closing the lower lid does — 0 the upper comes all the way down, 1 the lower
+comes up), **Lid curve** (the edges' bow: positive sags like a lid over a round eye, negative arches, a smile's squint)
+and **Lid tilt** (the lids slanted, mirrored: positive and the outer corners go down, negative a stern look). The
+numbers a blank Lids state starts with — lower 0, curve 0.35, tilt 0 — are mine.
+
+**M12 amendment — version 1, the agent's own controls, 2026-09-30.** His, on the statechart bench: *"none of the
+controls related to the agent in the motion studio is intuitive nor understandable … I'm imagining the size of the
+agent, the eyes, the lids, the movement of the eyes, the movement of the body, and I need the movement in multiple
+directions, XYZ."* And of how the work goes from here: *"I don't want the jigs to give me presets. But instead … you
+give me phase one, I will try on that and based on that I will give you the feedback, and then you can create version
+two … once we hit what we need, from there … I can improve it and then update the settings for you."*
+
+- **The bench is his five groups, in his order, and nothing else**: **Size** (width and height in cells), **Eyes**
+  (size, spacing, height on the face), **Lids** (open, lower lid, curve, tilt, and the blinks: how often, how long),
+  **Eye movement** (look X and Y, their time and ease, and how long before the body the eyes set off) and **Body
+  movement** (move X, Y and Z in cells, turn about X, Y and Z in degrees, its time and ease). Up, right and toward you
+  are positive everywhere. They are 24 ordinary `--motion-agent-*` tokens on the studio's own jigs, so M3 holds for the
+  agent again: the chart-as-data of the amendment of 2026-09-29 is gone from the bench.
+- **No presets, versions.** The family carries one start, its version's values, and the head says "Version 1" where
+  another family's preset select stands (`version` on the family). Reset goes back to the version; Copy hands his
+  tuning back as the settings block, headed with the version it started from. His settings are the next version's
+  start. A family made this way from now on (his "from this time") is designed the same way.
+- **The body is a capsule in 3D.** It moves in X, Y and Z, Z seen through a fixed perspective of twelve pitches, and
+  turns about X (a nod), Y (a turn) and Z (a tilt). Its outline stays a pill, since a capsule is one from anywhere. The
+  eyes ride its surface, so a turn carries them round and its edge cuts them as they go, and they fade as their side
+  turns away. **They stay circles** (the amendment of 2026-09-28): only where they are is 3D. The lids are the lids of
+  the amendment of 2026-09-29, rolling with the body's tilt.
+- **What plays.** Live, it stands at the pose the controls set, blinking, its rest drawn dashed where it starts, so a
+  move reads as from there to here. A play is the way there (the body and the eyes each on their own time and ease,
+  whichever leads setting off first), the hold, and the way back, a rest after it on a loop. The blinks keep their
+  clock through all of it.
+- **The model is the package's**, `lib/agent-rig.ts` (`readAgentRig`, `agentRigFrame`, `agentRigAlong`, `agentBlink`),
+  pure, falling back to version 1's values (`AGENT_RIG_START`); the studio draws it (`components/agent-rig.tsx`).
+  None of its tokens is in globals.css. The statechart's model (`lib/agent-motion.ts`, `lib/agent-chart.ts`,
+  `useAgentMotion`) and its bench (`agent-jigs.tsx`, `agent-stage.tsx`, `agent-store.tsx`, `lib/agent-edit.ts`) are
+  unplugged, not deleted, until he says whether the page's and the harness's events come back to drive this body.
+
+Version 1's numbers are mine, for him to react to: the pill he decided (two cells and their gap by one), eyes 30% of
+its height and half its width apart, lids open with a 0.35 curve, a blink of 200ms every 4s, and a pose that shows each
+kind of move once: two cells right and one up, turned 20° to the right, the eyes looking 15% of its height to the right
+over 220ms on cubic out and setting off 150ms before the body's 700ms on cubic in-out.
+
+**M12 amendment — the pill is deleted, and the sphere is the agent, 2026-09-30.** His, the same night: *"we'll remove
+agent and the sphere will become the agent. And agent can have eyes."* Asked, he chose to delete the pill rather than
+unplug it: its family (version 2, built from states, M19), its stage, its model (`lib/agent-rig.ts`), the statechart
+unplugged beside it (`lib/agent-motion.ts`, `lib/agent-chart.ts`, `useAgentMotion`, `agent-jigs.tsx`, `agent-stage.tsx`,
+`agent-store.tsx`, `lib/agent-edit.ts`) and their specs are gone; git keeps them, and this section keeps the record. His
+personal guide is the sphere now, with eyes (M17, version 11). What the pill taught stands: circles for eyes, lids for a
+blink, designed version by version.

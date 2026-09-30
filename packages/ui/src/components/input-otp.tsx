@@ -31,7 +31,7 @@ function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="input-otp-group"
       className={cn(
-        "flex items-center gap-1 rounded-none has-aria-invalid:border-b-destructive dark:has-aria-invalid:border-b-destructive/50",
+        "flex items-center gap-2",
         className
       )}
       {...props}
@@ -39,6 +39,8 @@ function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Diverged from sera (2026-09-29, his): every slot is outlined, as `Input` is, not an underline — and a box a cell or
+// less on both sides, so a circle (Grid.md D39), with room between them.
 function InputOTPSlot({
   index,
   className,
@@ -54,7 +56,7 @@ function InputOTPSlot({
       data-slot="input-otp-slot"
       data-active={isActive}
       className={cn(
-        "relative flex size-10 items-center justify-center border border-transparent border-b-input bg-transparent text-sm transition-[color,border-color] outline-none first:rounded-none last:rounded-none aria-invalid:border-b-destructive data-[active=true]:z-10 data-[active=true]:border-b-ring dark:aria-invalid:border-b-destructive/50",
+        "relative flex size-10 items-center justify-center rounded-lg border border-border bg-transparent text-sm transition-[color,border-color,box-shadow] outline-none aria-invalid:border-destructive data-[active=true]:z-10 data-[active=true]:border-ring data-[active=true]:ring-2 data-[active=true]:ring-ring/30 data-[active=true]:aria-invalid:border-destructive data-[active=true]:aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:data-[active=true]:aria-invalid:ring-destructive/40",
         className
       )}
       {...props}

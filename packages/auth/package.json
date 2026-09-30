@@ -1,0 +1,39 @@
+{
+  "name": "@no-origins/auth",
+  "version": "0.1.0",
+  "description": "No Origins sign-in: one Supabase session for every app — the gate, the clients, the callback and the login card.",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./env": "./src/env.ts",
+    "./cookies": "./src/cookies.ts",
+    "./server": "./src/server.ts",
+    "./client": "./src/client.ts",
+    "./proxy": "./src/proxy.ts",
+    "./routes": "./src/routes.ts",
+    "./webauthn": "./src/webauthn.ts",
+    "./login-card": "./src/login-card.tsx",
+    "./sign-in": "./src/sign-in.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@no-origins/ui": "workspace:*",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.60.0",
+    "lucide-react": "^1.46.0"
+  },
+  "peerDependencies": {
+    "next": ">=16",
+    "react": ">=19"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.6",
+    "@types/react": "^19",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "typescript": "^5"
+  }
+}

@@ -31,27 +31,43 @@ function SelectValue({
   return <SelectPrimitive.Value data-slot="select-value" {...props} />
 }
 
+// Diverged from sera (2026-09-29, his: "I like the dropdowns in the image … update the dropdowns in component library
+// to match"): the trigger is a box, not sera's underline field — an outlined pill (`rounded-lg`, which a box a cell
+// tall or less shrinks to a pill, Grid.md D39) with the chevron inside its end, in the ink of its text. `primary` is
+// the same pill filled lime, for the one choice a screen is about (the motion studio's family). Hover and open are the
+// outline Button's: the muted tint, mixed and never translucent.
+const selectTriggerVariants = {
+  outline:
+    "border-border bg-transparent text-foreground hover:bg-muted data-[state=open]:bg-muted data-placeholder:text-muted-foreground",
+  primary:
+    "bg-primary font-medium text-primary-foreground hover:bg-primary/80 data-[state=open]:bg-primary/80",
+} as const
+
 function SelectTrigger({
   className,
   size = "default",
+  variant = "outline",
   children,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
   size?: "sm" | "default"
+  variant?: keyof typeof selectTriggerVariants
 }) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       data-size={size}
+      data-variant={variant}
       className={cn(
-        "flex w-fit items-center justify-between gap-1.5 rounded-none border border-transparent border-b-input bg-transparent px-0 py-2 text-sm whitespace-nowrap transition-[color,border-color] outline-none focus-visible:border-b-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-b-destructive data-placeholder:text-muted-foreground data-[size=default]:h-10 data-[size=sm]:h-9 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:aria-invalid:border-b-destructive/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
+        "flex w-fit items-center justify-between gap-2 rounded-lg border border-transparent text-sm whitespace-nowrap transition-[color,background-color,border-color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 data-[size=default]:h-10 data-[size=default]:ps-4 data-[size=default]:pe-3.5 data-[size=sm]:h-9 data-[size=sm]:ps-3.5 data-[size=sm]:pe-3 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        selectTriggerVariants[variant],
         className
       )}
       {...props}
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="pointer-events-none size-3.5 text-muted-foreground" />
+        <ChevronDownIcon className="pointer-events-none size-4" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )

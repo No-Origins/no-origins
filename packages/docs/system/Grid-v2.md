@@ -867,8 +867,8 @@ to look at is its hover scale** (`hover:scale-105` in `profile-card.tsx`), which
 crosses its edge.
 
 **A page may still the lit cell (2026-09-28).** While the grid carries `data-cursor-still`, the pointer lights no
-cell. The ring is still the pointer. The portfolio sets it while a card is in focus (Portfolio.md P18), and the motion
-studio does the same on its focus stage. The reason is the blur round a focused card (Motion.md M13): it lies over the
+cell. The ring is still the pointer. The portfolio set it while a card was in focus (Portfolio.md P18, until P21 took
+the focus off on 2026-09-30), and the motion studio does the same on its focus stage. The reason is the blur round a focused card (Motion.md M13): it lies over the
 field, so a lit cell under it showed as a violet smear, and every frame of the cell's 500ms fade redrew all eleven of
 the blur's layers. That was his "a lot of flickering during the hover".
 
@@ -1044,9 +1044,9 @@ rounding the controls alone. Replaces `--radius: 0`, the rebuild's value since 2
 which is `var(--radius)`). A browser shrinks a box's corners to fit its shorter side, so the one number does the rest:
 
 - **a circle** where a box is a cell or less on both sides: a 1×1 slot, the pager's cells, an icon button, a checkbox,
-  a radio, the slider's thumb, an avatar, a chart's swatch;
+  a radio, an avatar, a chart's swatch;
 - **a pill** where it is a cell or less on one side: a button, a badge, a key, a tab, a switch, a menu's item, a
-  one-line alert, a slot one cell tall;
+  one-line alert, a slot one cell tall, the slider's bar (2026-09-30, below);
 - **a quarter of one cell's circle at each corner** of anything bigger: a card, a dialog, a menu, a popover, a slot of
   two by two or more. It is the curve of the field's cells (D40) and of every 1×1, so there is one curve on the page.
 
@@ -1062,9 +1062,8 @@ those, change it too.
 
 *Where it does not apply.*
 
-- **Lines are not boxes.** The underline fields — Input, Textarea, the Select and NativeSelect triggers, InputGroup,
-  InputOTP's slots, the Combobox's chips field — keep a straight rule: a bottom border on a rounded box bends into a
-  bowl. So do separators, table rows and a tab's underline.
+- **Lines are not boxes.** Separators, table rows and a tab's underline keep a straight rule. The fields did too,
+  as underlines, until 2026-09-29 (below): they are boxes now, and round like the rest.
 - **A `transparent` slot is not rounded.** It has no edge to see, and a round clip would only cut what it holds at the
   corners. What it holds rounds itself.
 - **A turned square stays square**: the tooltip's and the navigation menu's arrow tips.
@@ -1074,7 +1073,8 @@ those, change it too.
   the bar ran off the curve, and the border follows it.
 
 *Mine, his to change.* `rounded-lg` as the one utility; the transparent slot left square; the underline fields left
-straight; the alert's border; checkboxes as circles (a tick in a circle, beside a radio's dot).
+straight (his amendment, below, made them pills); the alert's border; checkboxes as circles (a tick in a circle,
+beside a radio's dot).
 
 *An exception, his, 2026-09-27: a fill inside a box that meets a straight line.* The portfolio's work tabs fill the
 active and the hovered mark's room between the dividers, and at the full radius the fill's ends curved away from the
@@ -1089,6 +1089,58 @@ image"). So an inset picture takes the box's radius **less its inset** — `calc
 22px on a pointer's cell. It was the radius less the inset and the border's pixel, the curves exactly concentric, and he
 asked for a pixel more the same day ("increase by 1 px"). It is derived from the one radius, never a number of its own
 (Portfolio.md P4).
+
+*Amended, his, 2026-09-29: the fields are pills.* The dropdowns went first ("I like the dropdowns in the image …
+update the dropdowns in component library to match"): the Select and NativeSelect triggers became outlined pills, the
+chevron inside the end. The same day the rest of the fields followed them ("even inputs will have full rounded
+border"): Input, Textarea, InputGroup, the Combobox's chips field, the Command's search and the Questionnaire's answer
+are the same outlined pill — `rounded-lg`, a 1px `border`, the text a step inside the ends — and InputOTP's slots are
+circles, a box a cell or less both ways. So the underline fields are gone: a field is a box, and the one radius rounds
+it like every other. Focus and an invalid value ring the outline; a Textarea grown past a cell tall takes a cell's
+curve at each corner, as any box does. *Mine, his to change:* no hover tint on a field (a field is typed into, not
+pressed, unlike a trigger); an addon's button or key concentric with the pill's end; a number field without the
+browser's spin buttons, a square control in the round end that also took the room a short value needed.
+
+*Amended, his, 2026-09-30: the slider is a thick bar with a head of its own.* "Instead of straight line and a circle,
+I want to make it a thick … close to the size of the cursor … instead of attaching the head to the body, let's make
+the head a vertical fully rounded head, which is at the height of the bar, but with just two pixels space between the
+body and the head." So the slider is a **bar 24px tall**, the cursor's ring (D34), and its head is **a vertical pill
+the bar's height and 4px across**, standing **2px clear** of the bar on each side. The bar is not one box under the
+head: it is drawn as its parts, each stopping the gap short of a head, lime from the start to the head (between the
+heads of a range) and the input's grey past it, so the gaps show what is under the slider, never a colour painted to
+match it. Every part is `rounded-lg`, so the bar's parts are pills and the head a pill stood on its end: the one
+radius, no second one. The whole bar is still the handle — a press anywhere moves the nearest head there and drags
+it — so the head only has to say where the value is. The three numbers are custom properties on the slider
+(`--slider-bar`, `--slider-head`, `--slider-gap`), and the parts are placed from the values alone, where radix puts a
+head, never measured. *Mine, his to change:* the head's 4px; the head lime, as the thumb was (violet on the studio's
+timeline, his player); no hover mark on the head, since a ring round it would close the gaps; keyboard focus rings the
+head, which fills the gaps while it has focus.
+
+*A third exception, his, the same day: the slider is square, and its head round only while it is held.* "Right now we
+have a head with four pixels … let's make it a square, and the body also to become sharp. No radius, no border radius
+at the head. And now when the cursor goes and held the head, the square should turn into sphere." So the head is **a
+square the bar's height** (`--slider-head` 24px), and neither it nor the bar's parts take a radius: the slider's boxes
+are `rounded-none`, the first back at 0 since this rule. Held, the head turns into a circle, and let go it is a square
+again: the grip, a motion on the bench (Motion.md M16), the one place the slider is round. The 2px gaps, the 24px bar
+and the parts placed from the values stay as above; the vertical pill is gone. *Mine, his to change:* both ends of the
+bar sharp, not only the ends at the head; the circle reached at a 50% radius, not the one radius, which a 24px head
+clamps long before the transition ends.
+
+*Withdrawn, his, the same day: round again, the head merged into the bar.* "We'll keep everything rounded, so including
+the head. But let's merge both head and body. But when I click, the cursor doesn't need to fill: the head should detach
+and fit into the cursor." (The transcript heard "grounded"; after the square, and with "including the head", it was
+read as rounded.) So the slider is the one radius again: a **24px pill**, and its head **a circle the bar's height,
+merged into it** — the lime and the grey meet under the head's centre, square there, and the head covers the join, so
+the lime ends in the head's round end, a range's lime in two. It is D39's joined things rounding their outer ends
+only. There are no gaps at rest. The 2px gap is the grip's now (Motion.md M16): held, the head detaches into the
+cursor and the bar parts round the cursor's ring, 2px clear of it, its ends rounding. A segment's corners are half
+the bar, not `--radius`: one half-cell corner scales every corner of its box down with it, and the ends at a head
+would never round fully. The square is gone.
+
+*A segmented variant, the same night, withdrawn within the hour* (Motion.md M18, his: "let's not have segments").
+The slider is the round bar above; its height is the grip's control since (`--slider-height`), and its body follows
+the head on a spring (M16). *His grip pick, the same night (Motion.md M16):* the bar is **16px**, two thirds of the
+cursor's ring, in globals.css with the grip's tokens; the 24px above is the day's first bar. Both still take the one radius's shape: a pill and a circle.
 
 **D40 — A cell is a circle.** *2026-09-26, the same conversation: asked whether the field's painted cells should
 become circles too, he picked "Cells become circles".* Amends D31, D34, D37 and D38; D9's cell stays square — the
@@ -1190,6 +1242,11 @@ theme; nothing else about the lit cell changes — lit at once, faded back over 
 square's corners, mouse and pen only. It was lime for the morning because "the cursor" was read as the ring alone.
 Violet is about 4 : 1 on the light theme's white, so the lit cell is no longer faint there either. The intro's and the
 ripple's lines still turn lime and violet about (D31, D32).
+
+**Amended 2026-09-30, his: a held slider keeps the ring.** *"When I click the cursor doesn't need to fill, the head
+should detach and fit into the cursor."* While a slider's head is held (`data-held`, from the press to the release,
+wherever the pointer goes), the pressed cursor stays the ring, and the head goes into it, a 16px dot 2px clear inside
+the line (Motion.md M16). A `:has()` rule in globals.css, over the filled one. Everywhere else a press still fills it.
 
 **D44 — The front's edge is the tip of a circle.** *2026-09-27: "instead of diamond shaped ripple let's make it a
 curve since we have circles now … like tip of a circle."* Amends D31 and D33. The front the intro, the ripple and the
@@ -1330,7 +1387,7 @@ want" (Motion.md M10); then, with his settings picked in the motion studio, "Pro
 portfolio: "Let's remove the ripple effect intro and page transitions and uh, replace with the current loaders that we
 created … I don't like the loader cells to be distributed randomly. I want them to be distributed between same number
 of columns and rows."* Replaces D31's drawing, D32, D37's wash and D44. D31's wait for the page, and its reveal of the
-pager, stay.
+pager, stay. *(Replaced by D49, 2026-09-30: no page loads with the loader, and nothing waits for the page.)*
 
 *What it is.*
 
@@ -1430,6 +1487,92 @@ the painters the motion studio's stage uses, so what is tuned there is what the 
 `loaderLayout` (`lib/load-motion.ts`). `GridPages` passes the page on the field as `page`; globals.css holds a loading
 page's boxes (`data-loading`) and the pieces of a box of pieces (`data-load-box`), the pager while the intro runs, and fades a turning page away (`data-turn="wash"`).
 
+**D49 — No page loads with the loader.** *2026-09-30: "I want to remove all the current uh, loaders that we have. I did
+not like it. So, uh, currently, just remove it and uh, let the components load quickly."* Replaces D48 and D31's wait
+for the page, which D48 kept. D35's turning on and D37's rule that nothing is squeezed stay.
+
+*What it is.*
+
+- **A page is on the field as soon as the grid has measured it.** No loader stands on the field and nothing holds the
+  page's boxes back. Nothing waits for the fonts, the window's load or the images.
+- **The intro is gone.** Page 1 is not held back from the server's first paint, there are no 2s at the least, and the
+  pager is not held either.
+- **A turn fades the page away and the next one in.** When the turn commits, the page fades away over the turn's 160ms
+  (`TURN_MS`), as it did under D48. Then the next page is put on the field and fades in over the same 160ms, whatever
+  it holds. Under reduced motion the page swaps at once.
+- **Nothing waits.** The wheel, a finger, the keys, the pager's arrows and its page numbers turn from the first frame.
+- **What went.**
+  - The `intro` prop on `Grid` and `GridPages`, and the `page` prop on `Grid`, which only the load read.
+  - `useGridLoad` and `GridLoader` in grid.tsx, with `INTRO_MIN_MS`, `INTRO_MAX_WAIT_MS` and the pager's reveal.
+  - `data-loading` and `data-intro` on the grid, and their rules in globals.css.
+  - `data-load-section` and `data-load-box`. Nothing reads them, so the portfolio's 37 marks came off.
+- **What stays.** Loading is still his motion (Motion.md M10). `lib/load-motion.ts`, `useLoadMotion`, its painters and
+  the `--motion-load-*` tokens stay, and the motion studio's Loading page still plays it. A page can take it up again
+  with no new motion work.
+- **The portfolio's wake stays** (Portfolio.md P16). Its boxes come onto the field inactive and brighten from the
+  avatar over 1200ms. The wake starts as soon as they are laid out, where it started when the load ended.
+
+*Measured* (`e2e/.mcp/no-loader.mjs`, `e2e/.mcp/no-loader-turn.mjs`, local dev servers, 2026-09-30):
+- **The portfolio at 1440 × 900:** the first box is on the field 0.39s after navigation. All twelve boxes are there
+  at once, none clipped or hidden, and the wake is over about a second later. D48's intro ended at 2.4s, and at 4.3s
+  with a ring a card.
+- **The showcase, turning with ↓:** the page fades away, the next fades in, and the turn is over at 0.45s. D48's took
+  2.25s.
+
+*Mine, his to change.* The next page fades in over the same 160ms the last one fades away in, as it did before D48.
+
+*Where it lives.* The fade, both ways, off `data-turn` in globals.css, played by the turn in grid-pages.tsx.
+
+**D50 — The intro is the agent.** *2026-09-30, the same day as D49: "Here is the intro loader that I want. Uh, we created agent character. So now what should happen is that uh, take
+the avatar. It should uh, breathe for like one, two seconds. And then it should jump within the same cell and create a
+ripple activations of cells. Like, I mean, each cell in circles around the agent circle should activate. One circle by
+one circle from center to the borders of the layout, and then the agent disappears and the card should render
+smoothly."* Version 1. Amends D49 for the page
+that asks for it: that page opens with the agent. Every other page, and every turn, still shows at once.
+
+*What it is.*
+
+- **Where it stands.** The agent (Motion.md M17, the design system's `Agent`) stands in the page's circle for it: the
+  element marked `data-intro-agent`, whose box's inscribed circle is its nest. On the portfolio that is the avatar's lime
+  ring (Portfolio.md P23). The nest is the muted tint in a lime line, as the character studio's cell is. A page without
+  a circle gets the field's centre, a cell across.
+- **The page is held.** From the server's first paint (`data-intro="agent"`) the page's boxes are laid out but unseen and
+  out of the pointer's way.
+- **It breathes** for 2s, its own rest. At the agent's 4s breath that is one breath in.
+- **It hops in place.** From the top of the breath it crouches, leaps and lands back in the same nest, with its own
+  crouch, hang and landing.
+- **The field wakes ring by ring.** As it lands, every cell whose centre is the same number of whole pitches out from the
+  nest's edge lights at once, in violet, the pointer's lit cell's colour (D43), and fades as that cell does (500ms).
+  The first ring lights at the landing and each next one 45ms later, out to the field's farthest corner. It is one pass
+  of the field's painter (D38), in its worker, sent as the intro starts, so the main thread cannot hold it back.
+- **It gives way to the page.** When the last ring has lit, the agent fades over 300ms. The page's boxes, and what the
+  page draws behind the grid, come in over 500ms from the same moment (`data-intro="reveal"`).
+- **The rules D31 and D48 had.** Once per document load. Never under reduced motion. A box that changes mid-intro hands
+  straight over.
+- **The API.** `intro` on `Grid`, back, and only with `overlay`, since the rings are its cells. `GridPages` does not take
+  it: no paged grid asks for one.
+
+*Measured* (`e2e/.mcp/agent-intro.mjs`, local dev server, 2026-09-30):
+- **The portfolio at 1440 × 900:** the agent is up at once. It hops at 2s and lands at about 2.6s. The rings reach the
+  far corner 0.8s later, 18 rings out on an 18 × 12 field, and the page is in at about 3.9s.
+- **A 412 × 915 phone:** the same.
+- **Reduced motion:** the page is on the field at once, with no layer.
+
+*Version 1, mine, his to tune.* The 2s, the 45ms a ring, the 300ms and the 500ms (`INTRO_START` in
+`lib/intro-motion.ts`; the `--motion-intro-*` tokens are read but not yet in globals.css). Also mine: violet for the
+rings; counting them from the nest's edge; the vanish and the page coming in together; the nest's tint; and the
+agent's look, SPHERE_START's, because the page holds no character's look.
+
+*Open.*
+- On a phone the nest does not cover the dashed cells its circle half-meets, which show round its edge. The character
+  studio's cell paints them out.
+- The agent is drawn from the main thread, one SVG group on GSAP's ticker, as the studio's stage draws it.
+- It is not on the motion studio's bench, so it cannot be tuned there yet.
+
+*Where it lives.* `useGridIntro` in grid.tsx, which holds the phase. `GridIntro` in grid-intro.tsx, which the grid loads
+only while an intro plays, finds the circle, draws the agent and sends the rings. `lib/intro-motion.ts` holds the plan
+and the rings. globals.css holds the page back and brings it in.
+
 ---
 
 ## 9. Where it lives
@@ -1438,8 +1581,8 @@ Field, config and the reference boxes (`GRID_REFERENCE_BOX`) in `grid.tsx`, the 
 and the turn in `grid-pages.tsx`, the pager in `grid-pager.tsx` (D27, D29) with its parts the registry's entries —
 the arrows as a pair, and one arrow or one page number a cell for the numbered bar (`registry.tsx`, D36) with the
 pages between the arrows as one block that plays movement (D46, D47) — each page's `title` on `GridPage` in
-`grid-layout.ts` — the theme flip in `grid.tsx` with `theme-provider.tsx` (D28), the intro and the ripple between pages in `grid.tsx` with
-their CSS in `globals.css` (D31, D32), the cursor in `grid.tsx` and its image in `globals.css` (D34), the hand and its fling's tail in `grid-pages.tsx`
+`grid-layout.ts` — the theme flip in `grid.tsx` with `theme-provider.tsx` (D28), the turn's fade in `globals.css` (D37, D49; the intro,
+the ripple and the loader that were in `grid.tsx` went with D48 and D49), the cursor in `grid.tsx` and its image in `globals.css` (D34), the hand and its fling's tail in `grid-pages.tsx`
 (D35), the wash in `grid.tsx` (`washAway`), played by the turn in `grid-pages.tsx` and faded in by `globals.css` (D37),
 the field's paint — the overlay's dashes, the lines, the pointer's cell and the intro's reveal — in `lib/grid-field.ts`,
 started and fed by `useGridField` in `grid.tsx` (D38), its rings and the lace in the same two files (D40), the one

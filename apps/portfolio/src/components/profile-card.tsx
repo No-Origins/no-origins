@@ -112,9 +112,8 @@ export function ProfileCard({ colSpan, rowSpan }: { colSpan: number; rowSpan: nu
   // outside the ring. So the face is the card less a gutter each side, less the clearance and the stroke each side.
   const face = `calc(${side - 2 * gap - 6}px - 2 * var(--stroke-accent))`;
 
-  // The face is page 1's one image that the intro cannot see: Radix's AvatarImage renders no <img> until it has loaded,
-  // so there is nothing in the field for the intro's wait (Grid.md D31) to hold for. Preloaded from the head, it is
-  // fetched at once and holds the window's load, which the intro does wait for.
+  // The face is the first screen's one picture, and Radix's AvatarImage renders no <img> until it has loaded, so nothing
+  // would ask for it before the script runs. Preloaded from the head, it is fetched at once and is in with the page.
   preload(profile.avatar.src, { as: "image", fetchPriority: "high" });
 
   // Click the face and it pops out to say hello (`useHey`). We grab the avatar's own rect off the event so the clone
@@ -122,9 +121,8 @@ export function ProfileCard({ colSpan, rowSpan }: { colSpan: number; rowSpan: nu
   const { pop: popHey, overlay: heyOverlay } = useHey();
 
   return (
-    // The avatar and the name are one profile, in focus as one (Portfolio.md P18: one component, one focus).
-    <div data-focus-group className="flex h-full min-h-0" style={{ gap }}>
-      <Card data-load-box className="h-full shrink-0 items-center justify-center gap-0 py-0" style={{ width: side }}>
+    <div className="flex h-full min-h-0" style={{ gap }}>
+      <Card className="h-full shrink-0 items-center justify-center gap-0 py-0" style={{ width: side }}>
         <Avatar
           role="button"
           tabIndex={0}
@@ -142,15 +140,18 @@ export function ProfileCard({ colSpan, rowSpan }: { colSpan: number; rowSpan: nu
         >
           <AvatarImage src={profile.avatar.src} alt={profile.avatar.alt} className="bg-muted" />
           <AvatarFallback>{profile.initials}</AvatarFallback>
+          {/* The ring is also where the grid's intro agent stands (Grid.md D50): the circle inscribed in its box is the
+              ring's own line. */}
           <svg
             aria-hidden="true"
+            data-intro-agent
             className="pointer-events-none absolute top-[calc(-3px_-_var(--stroke-accent)_/_2)] left-[calc(-3px_-_var(--stroke-accent)_/_2)] size-[calc(100%_+_6px_+_var(--stroke-accent))] overflow-visible fill-none stroke-(length:--stroke-accent)"
           >
             <circle cx="50%" cy="50%" r="50%" className="stroke-lime" />
           </svg>
         </Avatar>
       </Card>
-      <Card data-load-box size="sm" className="h-full min-h-0 min-w-0 flex-1 justify-center" data-density={narrow ? "compact" : "full"}>
+      <Card size="sm" className="h-full min-h-0 min-w-0 flex-1 justify-center" data-density={narrow ? "compact" : "full"}>
         <CardContent className="flex min-h-0 flex-col justify-center">
           {/* Balanced, so a role line that runs to two is "Senior Full / Stack Developer", not a word on its own. */}
           <Text role={name} as="h1" align="center" className="text-balance">
@@ -376,7 +377,7 @@ export function EducationPill({ className }: { className?: string }) {
 /** A fact's pill, its content centred — across the whole pill: the pill's round ends are its air. */
 export function FactCard({ className, style, children }: { className?: string; style?: CSSProperties; children: ReactNode }) {
   return (
-    <Card data-load-box size="sm" className={cn("min-h-0 min-w-0 justify-center py-0", className)} style={style}>
+    <Card size="sm" className={cn("min-h-0 min-w-0 justify-center py-0", className)} style={style}>
       <CardContent className="flex items-center justify-center px-0 whitespace-nowrap" style={{ gap: ICON_GAP }}>
         {children}
       </CardContent>
@@ -393,7 +394,7 @@ function ResumeButton({ width }: { width: number }) {
   const link = LINKS.find((each) => each.id === "resume");
   if (!link?.href) return null;
   return (
-    <Button asChild data-load-box className="h-full shrink-0 px-0 font-normal tracking-normal normal-case" style={{ width, gap: ICON_GAP }}>
+    <Button asChild className="h-full shrink-0 px-0 font-normal tracking-normal normal-case" style={{ width, gap: ICON_GAP }}>
       <a href={link.href} target="_blank" rel="noreferrer" aria-label={`${link.label} (PDF, opens in a new tab)`}>
         <Text as="span" className="text-primary-foreground">
           {link.label}
@@ -468,7 +469,7 @@ export function SocialMark({ id }: { id: Link["id"] }) {
   );
   return (
     <TooltipProvider>
-      <Card data-load-box size="sm" className="size-full justify-center py-0">
+      <Card size="sm" className="size-full justify-center py-0">
         <Tooltip>
           <TooltipTrigger asChild>
             {link.href ? (
@@ -540,7 +541,7 @@ function EmailCard({ className }: { className?: string }) {
     }
   };
   return (
-    <Card data-load-box size="sm" className={cn("@container h-full min-h-0 min-w-0 justify-center py-0", className)}>
+    <Card size="sm" className={cn("@container h-full min-h-0 min-w-0 justify-center py-0", className)}>
       {/* The address and its button a step of the spacing scale apart, as an icon and its words are everywhere on the
           first screen (`ICON_GAP`, gap-2; his, 2026-09-27: "add some spacing between email and copy icon, feels too
           tight"). It was a half step, which a card too narrow for the step keeps — an iPhone SE's four cells, 228px,

@@ -23,13 +23,18 @@ export const ENGINEERING_ROUTES = ["/", "/learn/jido"];
 
 /** The motion studio (Motion.md), a fourth, on :3004 — one route, a page per family of motion. */
 export const MOTION = "http://localhost:3004";
-export const MOTION_ROUTES = ["/"];
+export const MOTION_ROUTES = ["/", "/concepts/split", "/concepts/dock", "/concepts/inspector"];
+
+/** The character studio (Character-Studio.md), a fifth, on :3005 — one route, the agent's cell on the grid. */
+export const CHARACTER = "http://localhost:3005";
+export const CHARACTER_ROUTES = ["/", "/hiddenstack"];
 
 const APPS = [
   { name: "", base: "", routes: ROUTES },
   { name: "design", base: DESIGN, routes: DESIGN_ROUTES },
   { name: "engineering", base: ENGINEERING, routes: ENGINEERING_ROUTES },
   { name: "motion", base: MOTION, routes: MOTION_ROUTES },
+  { name: "character", base: CHARACTER, routes: CHARACTER_ROUTES },
 ];
 
 const slug = (route: string) => (route === "/" ? "home" : route.slice(1).replace(/\//g, "__"));
@@ -48,8 +53,10 @@ for (const app of APPS) {
       const response = await page.goto(`${app.base}${route}`, { waitUntil: "networkidle" });
       expect(response, `no response for ${title}`).not.toBeNull();
       expect(response!.status(), `${title} returned ${response!.status()}`).toBeLessThan(400);
-      // A grid with an intro (Grid.md D31, D48) holds page 1 back while its loader turns until the page has loaded — at
-      // most 3 s — then opens it, about 2 s more. The screenshot is of what it hands over to; a page stuck in it fails here.
+      // No page loads behind a loader (Grid.md D49), but a grid with an intro opens with the agent (D50): it breathes, hops
+      // and hands over in about 4 s. The screenshot is of the page it hands over to; a page stuck in it fails here. Then a
+      // moment for the grid to lay its page out; the screenshot fast-forwards what is still moving, the portfolio's wake
+      // (Portfolio.md P16) among it.
       await page.waitForFunction(() => !document.querySelector('[data-slot="grid"][data-intro]'), null, { timeout: 10_000 });
       await page.waitForTimeout(400);
 

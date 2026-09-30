@@ -157,6 +157,7 @@ function QuestionnaireChoiceDescription({
   )
 }
 
+// Diverged from sera (2026-09-29, his): the free-text answer is `Input`'s outlined pill, not an underline field.
 function QuestionnaireInput({
   className,
   ...props
@@ -169,7 +170,7 @@ function QuestionnaireInput({
       <QuestionnairePrimitive.Input
         data-slot="questionnaire-input"
         className={cn(
-          "h-10 min-h-11 w-full min-w-0 border border-transparent border-b-input bg-transparent px-0 py-1 text-base transition-[color,box-shadow,background-color] outline-none focus-visible:border-b-ring disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-b-destructive sm:min-h-0 md:text-sm dark:aria-invalid:border-b-destructive/50",
+          "h-10 min-h-11 w-full min-w-0 rounded-lg border border-border bg-transparent px-4 py-1 text-base transition-[color,box-shadow,background-color,border-color] outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 sm:min-h-0 md:text-sm dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
           "selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground",
           className
         )}

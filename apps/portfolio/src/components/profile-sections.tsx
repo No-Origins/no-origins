@@ -25,7 +25,7 @@ export function ProfileSections({ tabs, cols, rows }: { tabs: SectionTab[]; cols
   const [tab, setTab] = useState(tabs[0]?.id ?? "");
   return (
     <Tabs value={tab} onValueChange={setTab} className="h-full min-h-0" style={{ gap }}>
-      <TabsList data-load-box aria-label="My work, projects and skills" className="w-full shrink-0 border bg-card p-1" style={{ height: cell }}>
+      <TabsList aria-label="My work, projects and skills" className="w-full shrink-0 border bg-card p-1" style={{ height: cell }}>
         {tabs.map(({ id, label: { label, icon: Icon } }) => (
           <TabsTrigger
             key={id}

@@ -4,6 +4,10 @@ import * as React from "react"
 import { cn } from "cn"
 import { Avatar as AvatarPrimitive } from "radix-ui"
 
+// Diverged from shadcn (2026-09-29): `isolate` on the root. The ring's `mix-blend-*` makes Chrome isolate the nearest
+// stacking context to blend it, and where that is a box that also holds a cloth of `backdrop-filter` layers (focus,
+// focus mode, Motion.md M13, M14), that box becomes their backdrop root and the grid's field under it stays sharp.
+// Isolated here, the ring blends with the avatar's own picture, which is all it sits over.
 function Avatar({
   className,
   size = "default",
@@ -16,7 +20,7 @@ function Avatar({
       data-slot="avatar"
       data-size={size}
       className={cn(
-        "group/avatar relative flex size-8 shrink-0 rounded-full select-none after:absolute after:inset-0 after:rounded-full after:border after:border-border after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 dark:after:mix-blend-lighten",
+        "group/avatar relative isolate flex size-8 shrink-0 rounded-full select-none after:absolute after:inset-0 after:rounded-full after:border after:border-border after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 dark:after:mix-blend-lighten",
         className
       )}
       {...props}

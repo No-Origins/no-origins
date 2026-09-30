@@ -1,6 +1,10 @@
-import { AGENT_FAMILY } from "./agent";
+import type { MotionState, StateEvent } from "@no-origins/ui/lib/motion-states";
+
 import { FOCUS_FAMILY } from "./focus";
 import { MODE_FAMILY } from "./mode";
+import { AGENT_MOTIONS_FAMILY } from "./agent-motions";
+import { SPHERE_FAMILY } from "./sphere";
+import { STEP_FAMILY } from "./steps";
 
 /**
  * The studio's content (Motion.md M6, M9): each motion on the bench, the tokens it is made of, and five presets to
@@ -11,18 +15,19 @@ import { MODE_FAMILY } from "./mode";
  *
  * A family whose tokens are already in globals.css starts from what the page says ("Today", read off it, never copied
  * here). A family still being designed has no tokens there yet, so its preset A carries the values it starts from.
- * Movement's and loading's are both in globals.css since his picks (2026-09-27), so each A is "Today"; B–E are the
- * other four of each one's last round.
+ * Movement's and loading's are in globals.css since his picks (2026-09-27), hyper focus's since 2026-09-28 (picked again
+ * 2026-09-29) and focus mode's since 2026-09-29, so each A is "Today"; B–E are the other four of each one's last round.
  */
 
-export type FamilyId = "move" | "load" | "enter" | "agent" | "focus" | "mode";
+export type FamilyId = "move" | "load" | "enter" | "focus" | "mode" | "grip" | "step" | "sphere" | "motions";
 
 /** How a token's value is written in CSS and moved on a jig. */
-export type TokenKind = "ms" | "ease" | "scale" | "share" | "choice";
+export type TokenKind = "ms" | "ease" | "scale" | "share" | "choice" | "px";
 
 export type Token = {
   unit?: "cells" | "degrees" | "count" | "multiplier" | "px";
-  name: `--motion-${string}`;
+  /** A motion token, or a component's shape a family designs with its motion (the slider's height, M16). */
+  name: `--motion-${string}` | `--slider-${string}`;
   /** What the control is called. */
   label: string;
   /** What moving it changes, in a line. */
@@ -75,10 +80,50 @@ export type Family = {
   tokens: Token[];
   presets: Preset[];
   /**
+   * A family designed version by version, not from presets (his, 2026-09-30: "I don't want the jigs to give me presets
+   * … you give me phase one, I will try on that … then you can create version two"): the version its one start is. It
+   * offers nothing to pick — its preset A is that version's values — and the head names the version where the preset
+   * select stands. Its block is not drawn: a versioned family says in its own tokens what it is made of.
+   */
+  version?: number;
+  /**
    * Families whose motion this one plays a part of, at their decided values — loading borrows movement's hand-over. The
    * stage carries their tokens too, slowed by the tempo with the rest; they are tuned on their own page, never here.
    */
   borrows?: FamilyId[];
+  /**
+   * A family built from states (Motion.md M19, his, 2026-09-30): its specimen's parts, each a row a state configures
+   * and locks over a span; the states its version starts from; where every value stands before a row moves it; the
+   * values that are a clock, never eased; and the events its stage answers. Its bench is the states' — tabs, rows,
+   * lanes on the timeline — not the tokens' jigs. The pill agent's, version 2, until it was deleted (2026-09-30); none
+   * since: which family is built from states waits for the property model (M20).
+   */
+  machine?: FamilyMachine;
+};
+
+/** A part of a specimen a state's row configures (M19): what it is called, the tokens it sets, and the ease it starts on. */
+export type FamilyPart = {
+  id: string;
+  label: string;
+  tokens: string[];
+  ease: string;
+  /** Of a pair (two eyes, two brows): the tokens whose right side a row can set apart, as `<token>-right` (M20). */
+  sided?: string[];
+};
+
+export type FamilyMachine = {
+  parts: FamilyPart[];
+  start: MotionState[];
+  rest: Values;
+  /** The family whose values, as it is tuned, every row stands on in place of `rest` (the agent's motions: the Agent). */
+  restFrom?: FamilyId;
+  /**
+   * Where its states are kept: in the database (Motion.md M20, the agent's motions), each a draft saved as he goes and
+   * published as versions, when the studio has keys and he is signed in; else in the browser, as M19's were.
+   */
+  saved?: "database";
+  discrete: ReadonlySet<string>;
+  events: readonly StateEvent[];
 };
 
 /**
@@ -213,7 +258,7 @@ export const FAMILIES: Family[] = [
     label: "Loading",
     title: "The page loads",
     touches:
-      "While the page loads, a square of dashed lime cells stands at the centre, one a section, never wider than tall, and its rings turn. When it is ready, every ring is pressed at once, its dashes closing into a full circle as it shrinks, and goes straight to its section in one move of movement's dot, all in movement's duration, drowning as it leaves, unseen over the cells between, floating up as it arrives, every ring landing at once, then all are released into plain borders that fade as the sections open. The grid loads every page this way: its intro, and every turn.",
+      "While the page loads, a square of dashed lime cells stands at the centre, one a section, never wider than tall, and its rings turn. When it is ready, every ring is pressed at once, its dashes closing into a full circle as it shrinks, and goes straight to its section in one move of movement's dot, all in movement's duration, drowning as it leaves, unseen over the cells between, floating up as it arrives, every ring landing at once, then all are released into plain borders that fade as the sections open. No page loads this way since 2026-09-30: it lives on this bench alone.",
     hint: "Press Play to load the page.",
     // Eight columns hold the sample's hero pair, row of three, two columns and footer; seven rows hold all eight.
     block: { columns: 8, rows: 7, max: 12 },
@@ -428,11 +473,120 @@ export const FAMILIES: Family[] = [
       },
     ],
   },
-  AGENT_FAMILY,
   // The fifth, his, 2026-09-28 (Motion.md M13): a card in focus, the page blurring round it.
   FOCUS_FAMILY,
   // The sixth, his, the same evening (Motion.md M14): focus mode, one vertical at a time under a panel, a cloth round it.
   MODE_FAMILY,
+  // The seventh, his, 2026-09-30 (Motion.md M16): the slider — its head detaching into the cursor, its body fluid.
+  // Decided the same night (A As described, tuned), and tuned again (A Today, tuned): its tokens are in globals.css, so
+  // A is "Today", read off the page.
+  {
+    id: "grip",
+    label: "Grip",
+    title: "The slider: the head goes into the cursor, the body flows after it",
+    touches:
+      "The slider is a round bar with its head merged into it: the lime ends in the head. Take hold of the head — press it, or press the bar and drag — and the bar opens round the cursor, its sides 2px clear of the ring, while the head goes into the ring; the cursor stays a ring. The body is fluid: where its sides meet, or part round the head, follows the head on a spring, so the lime flows after a quick move and a moving end stretches. Let go and the head goes back into the bar. For every Slider.",
+    hint: "Press and drag a head, or press Play.",
+    // Columns: the sliders' length in cells. Rows: how many, one a row, every second one a range.
+    block: { columns: 6, rows: 2, max: 8 },
+    tokens: [
+      { group: "Head", name: "--motion-grip-in", label: "Detach", touches: "Into the cursor", kind: "ms", half: true, min: 0, max: 1000, step: 10 },
+      { group: "Head", name: "--motion-grip-out", label: "Merge", touches: "Back into the bar", kind: "ms", half: true, min: 0, max: 1000, step: 10 },
+      { group: "Head", name: "--motion-grip-in-ease", label: "Detach ease", touches: "Its curve in", kind: "ease", half: true },
+      { group: "Head", name: "--motion-grip-out-ease", label: "Merge ease", touches: "Its curve back", kind: "ease", half: true },
+      { group: "Head", name: "--motion-grip-size", label: "Size", touches: "The head in the cursor; clear inside 20", kind: "scale", unit: "px", min: 4, max: 20, step: 1 },
+      { group: "Body", name: "--slider-height", label: "Height", touches: "The bar; the cursor's ring is 24", kind: "px", unit: "px", half: true, min: 8, max: 24, step: 2 },
+      { group: "Body", name: "--motion-grip-lead", label: "Bar lead", touches: "+ it opens first, − the head goes first", kind: "share", half: true, min: -0.6, max: 0.6, step: 0.05 },
+      { group: "Body", name: "--motion-grip-follow", label: "Follow", touches: "One swing after the head, 0 with it", kind: "ms", half: true, min: 0, max: 1500, step: 10 },
+      { group: "Body", name: "--motion-grip-follow-bounce", label: "Follow bounce", touches: "0 settles, more overshoots", kind: "share", half: true, min: 0, max: 0.9, step: 0.05 },
+      { group: "Body", name: "--motion-grip-stretch", label: "Stretch", touches: "A moving end's cap, with its speed", kind: "share", min: 0, max: 1.5, step: 0.05 },
+    ],
+    presets: [
+      {
+        id: "A",
+        name: "Today",
+        why: "His, A Today, tuned (2026-09-30), his second tuning of his pick the same night: the bar 8px, a third of the cursor's ring. Held, the head is in the cursor at once, 0ms, an 8px dot, the bar's own size; let go, the bar closes and the head comes back after it over 240ms, each for half the time (a lead of −0.5), on cubic out. The body follows the head on a quick spring, 180ms with a bounce of 0.2, a moving end stretching by 0.6.",
+        risk: "With no time to take hold the grip is only seen letting go; at 8px the head at rest is a small dot the bar's height, and held the 24px ring stands 8px proud of the bar on each side, so the ring reads as bigger than the slider."
+      },
+      {
+        id: "B",
+        name: "Thin",
+        why: "The height he asked for with the segments: the bar half the cursor's height, 12px, the head growing out of it into the ring as a 16px dot, and the same fluid body. It tests the thin bar without the segments.",
+        risk: "At 12px the merged head is a small circle and hardly reads as a head at rest, and the ring stands well above and below the bar.",
+        values: {
+          "--motion-grip-in": 200,
+          "--motion-grip-out": 200,
+          "--motion-grip-in-ease": "cubic-bezier(0.215, 0.61, 0.355, 1)",
+          "--motion-grip-out-ease": "cubic-bezier(0.215, 0.61, 0.355, 1)",
+          "--motion-grip-size": 16,
+          "--slider-height": 12,
+          "--motion-grip-lead": 0,
+          "--motion-grip-follow": 320,
+          "--motion-grip-follow-bounce": 0.2,
+          "--motion-grip-stretch": 0.4,
+        },
+      },
+      {
+        id: "C",
+        name: "Liquid",
+        why: "The body at its most fluid: a slow follow, 700ms, with real bounce, 0.45, and a long stretch, so the lime pours after the head, overshoots it and settles back, its end drawn out while it runs.",
+        risk: "The body overshooting the head puts lime past the value for a moment, and on a long drag it is always behind.",
+        values: {
+          "--motion-grip-in": 240,
+          "--motion-grip-out": 260,
+          "--motion-grip-in-ease": EXPO_OUT,
+          "--motion-grip-out-ease": EXPO_OUT,
+          "--motion-grip-size": 16,
+          "--slider-height": 24,
+          "--motion-grip-lead": 0.2,
+          "--motion-grip-follow": 700,
+          "--motion-grip-follow-bounce": 0.45,
+          "--motion-grip-stretch": 1,
+        },
+      },
+      {
+        id: "D",
+        name: "Tight",
+        why: "The body barely behind: a quick follow with no bounce, 140ms, and no stretch, so it is almost rigid. The baseline, to see what the fluid body adds.",
+        risk: "It is the slider before the body was fluid, and the grip is all that moves.",
+        values: {
+          "--motion-grip-in": 160,
+          "--motion-grip-out": 180,
+          "--motion-grip-in-ease": "cubic-bezier(0.215, 0.61, 0.355, 1)",
+          "--motion-grip-out-ease": "cubic-bezier(0.215, 0.61, 0.355, 1)",
+          "--motion-grip-size": 16,
+          "--slider-height": 24,
+          "--motion-grip-lead": 0,
+          "--motion-grip-follow": 140,
+          "--motion-grip-follow-bounce": 0,
+          "--motion-grip-stretch": 0,
+        },
+      },
+      {
+        id: "E",
+        name: "Elastic",
+        why: "Spring everywhere: the head goes into the cursor on an overshoot, filling the ring, 20px, the bar opening first, and the body follows on a bouncy spring, 420ms at 0.6, its ends stretching — the brand's \"springy\" all through.",
+        risk: "Three things overshooting at once is busy, and a 20px head in the ring leaves it no air.",
+        values: {
+          "--motion-grip-in": 300,
+          "--motion-grip-out": 280,
+          "--motion-grip-in-ease": OVERSHOOT,
+          "--motion-grip-out-ease": OVERSHOOT,
+          "--motion-grip-size": 20,
+          "--slider-height": 24,
+          "--motion-grip-lead": 0.3,
+          "--motion-grip-follow": 420,
+          "--motion-grip-follow-bounce": 0.6,
+          "--motion-grip-stretch": 0.7,
+        },
+      },
+    ],
+  },
+  // His, the same night (Motion.md M21): the slider's steps — a dot over each, a tick as the value lands on one.
+  STEP_FAMILY,
+  // The eighth, his, the same night (Motion.md M17): a character, a 3D sphere that travels by diving from cell to cell.
+  SPHERE_FAMILY,
+  AGENT_MOTIONS_FAMILY,
 ];
 
 export const familyById = (id: string) => FAMILIES.find((f) => f.id === id);

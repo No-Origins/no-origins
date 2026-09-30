@@ -16,6 +16,7 @@ The first task is to learn from **No Origins → 04. Ontology** in Figma and pre
 
 1. **Ontology-source.md** — observed Figma content, source links and remaining gaps.
 2. **Agent-design.md** — implications, a proposed design vocabulary and questions to resolve together.
+3. **Agent-motion.md** — the agent's state machine and authoring controls: five options for him to pick from (round 1, 2026-09-29), after he rejected the first bench.
 
 These are exploratory notes with explicit user decisions marked confirmed. Proposals are not approved design decisions. The knowledge base's README.md reserves its documents for decisions; this folder keeps the developing brief and its source material together until the design direction is ready to formalise. Cite existing documents by their bare filenames.
 

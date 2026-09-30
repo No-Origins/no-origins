@@ -6,6 +6,8 @@ type NativeSelectProps = Omit<React.ComponentProps<"select">, "size"> & {
   size?: "sm" | "default"
 }
 
+// Diverged from sera (2026-09-29): the same outlined pill as `SelectTrigger`, his "dropdowns in the image" — a box
+// rounded to a pill (Grid.md D39) with the chevron inside its end, not sera's underline field.
 function NativeSelect({
   className,
   size = "default",
@@ -23,10 +25,10 @@ function NativeSelect({
       <select
         data-slot="native-select"
         data-size={size}
-        className="h-10 w-full min-w-0 appearance-none rounded-none border border-transparent border-b-input bg-transparent py-2 pe-8 ps-0 text-sm transition-[color,border-color] outline-none select-none selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground focus-visible:border-b-ring disabled:pointer-events-none disabled:cursor-not-allowed aria-invalid:border-b-destructive data-[size=sm]:h-9 dark:aria-invalid:border-b-destructive/50"
+        className="h-10 w-full min-w-0 appearance-none rounded-lg border border-border bg-transparent py-2 ps-4 pe-10 text-sm text-foreground transition-[color,background-color,border-color,box-shadow] outline-none select-none selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground hover:bg-muted focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 data-[size=sm]:h-9 data-[size=sm]:ps-3.5 data-[size=sm]:pe-9 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
         {...props}
       />
-      <ChevronDownIcon className="pointer-events-none absolute top-1/2 end-0 size-3.5 -translate-y-1/2 text-muted-foreground select-none" aria-hidden="true" data-slot="native-select-icon" />
+      <ChevronDownIcon className="pointer-events-none absolute top-1/2 end-3.5 size-4 -translate-y-1/2 text-foreground select-none group-data-[size=sm]/native-select:end-3" aria-hidden="true" data-slot="native-select-icon" />
     </div>
   )
 }

@@ -32,7 +32,7 @@ export type SectionLabel = { label: string; icon: LucideIcon };
  */
 export function SectionCell({ label, icon: Icon }: { label: string; icon: LucideIcon }) {
   return (
-    <Slot data-load-box fill="background" inset={12} alignX="center" alignY="center">
+    <Slot fill="background" inset={12} alignX="center" alignY="center">
       <div className="flex min-w-0 items-center gap-2">
         <Icon aria-hidden className="size-5 shrink-0 text-secondary" />
         <Text as="h2" className="truncate">
@@ -182,7 +182,7 @@ export function NoteCard({ title, paragraphs, state, href, className }: { title?
     };
   }, [paragraphs]);
   return (
-    <Card ref={card} data-load-box size="sm" className={cn("h-full min-h-0", className)}>
+    <Card ref={card} size="sm" className={cn("h-full min-h-0", className)}>
       {/* An auto margin rather than justify-center: it centres the words while they fit and lets them overflow at the
           foot, where the fit can see it, when they do not. */}
       <div className="my-auto flex flex-col gap-3">
@@ -226,7 +226,7 @@ export function NoteCard({ title, paragraphs, state, href, className }: { title?
  */
 export function StatementCard({ words }: { words: string }) {
   return (
-    <Card data-load-box size="sm" className="h-full min-h-0 justify-center bg-muted">
+    <Card size="sm" className="h-full min-h-0 justify-center bg-muted">
       <CardContent>
         <Text as="blockquote" role="heading" tone="muted">
           “{words}”

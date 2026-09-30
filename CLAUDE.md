@@ -2,8 +2,9 @@
 
 pnpm workspace. Apps live in `apps/*` — `portfolio` (hiddenstack.no-origins.com, :3000; bhargav.no-origins.com
 redirects to it), `design` (design.no-origins.com, the showcase, :3001), `admin` (admin.no-origins.com, the control
-surface, :3002), `engineering` (engineering.no-origins.com, the engineering publish library, :3003) and `motion`
-(motion.no-origins.com, the motion studio, :3004, since 2026-09-27), all Next.js 16; the shared design
+surface, :3002), `engineering` (engineering.no-origins.com, the engineering publish library, :3003), `motion`
+(motion.no-origins.com, the motion studio, :3004, since 2026-09-27) and `character` (character.no-origins.com, the
+character studio, :3005, since 2026-09-30: the agents' appearance, Character-Studio.md), all Next.js 16; the shared design
 system is `packages/ui` (`@no-origins/ui`, **2.0.0** since 2026-09-16), consumed from source. Each app has its own
 CLAUDE.md / AGENTS.md; read them before editing app code.
 
@@ -27,25 +28,35 @@ from the public `publish` bucket and served from the edge, never queried at visi
 declares it, fetches with the anon key through a per-table RLS policy, and has a fallback state. The showcase and
 engineering (Layer A) have no database anywhere near them, and that is deliberate.
 
+`packages/auth` (`@no-origins/auth`) is **the one sign-in** (Admin.md §8.4, amended 2026-09-30, his: "the same auth
+because it should be same across no origins"): the Supabase clients, the gate (`authGate`, called from each app's
+`proxy.ts`), the callback, the sign-out, the login card and the sign-in screen, consumed from source. One session for
+every app — the cookie is written for `.no-origins.com` — one allowlist, roles later. **The admin, the motion studio
+and the character studio are behind it.** Without its two keys the gate refuses in production; the two studios alone
+open on a development server that has none, so the review sweep and CI still see them.
+
 ## The design system
 
 **Rebuilt on shadcn/ui, 2026-09-16.** Every component of the hand-written 1.0 system — the atoms, molecules,
 organisms, templates, the registry, the blob, the patterns, the CSS layers — was deleted. What replaced it:
 
 - **shadcn/ui**, style `radix-sera`, base `radix`, base colour `neutral`, RTL on, and **one radius, half the grid's
-  cell** (`--radius`, `rounded-lg`; Grid.md D39 — it was `0` until 2026-09-26). 60 components in
-  `packages/ui/src/components/*.tsx`, plus `theme-provider.tsx`.
+  cell** (`--radius`, `rounded-lg`; Grid.md D39 — it was `0` until 2026-09-26). 61 components in
+  `packages/ui/src/components/*.tsx`, plus `theme-provider.tsx` and the agent (`agent.tsx`, 2026-09-30, the one
+  component no registry has: his approval, drawn from `lib/sphere-motion`).
 - **The accents are lime and violet (2026-09-27, his, set in the portfolio's accent jig).** `--primary` is `--lime`
   and `--secondary` is `--violet`, each with its own ink; the grey of hover and of being active (`--muted`) is lime at
   14% mixed over the page, and a menu's highlighted item (`--accent`) lime at 4% over the popover — mixed, never
   translucent. The rest of the palette is still shadcn's neutral. `text-primary` is lime text, about 1.3 : 1 on white,
   so it is not for text on the light theme. The jig (`?jig` on the portfolio in development, `jig.tsx`) stays, to be
-  showcased in experiments; its "Neutral" puts shadcn's greys back.
+  showcased in experiments; its "Neutral" puts shadcn's greys back. **The agent has paints of its own** beside them (2026-09-30,
+  Character-Studio.md C10): pink, peach, yellow, blue and grey, the `--agent-*` tokens with their inks, which nothing
+  but the agent paints with — the system's palette is still lime and violet, and widening it is his call.
 - **One stylesheet**, `packages/ui/src/styles/globals.css` — Tailwind, `tw-animate-css`, `shadcn/tailwind.css`, the
   `:root` / `.dark` tokens and the `@theme inline` map. Every app imports exactly this and nothing else.
 - **`cn`** from the `cn` package, re-exported at `@no-origins/ui/lib/utils`.
 - **`gsap`** for motion, since 2026-09-21 — his ask. It animates what is **inside** a box (`Progress`'s `animate`
-  prop grows the fill; Portfolio.md P11) and plays the grid's loader (D48); the grid's page turn keeps its own
+  prop grows the fill; Portfolio.md P11) and plays the motion studio's loading; the grid's page turn keeps its own
   per-frame writer for the pager's arrow (Grid.md D27). See `packages/ui/CLAUDE.md` rule 7.
 - **Motion is tokens (Motion.md, 2026-09-27).** Every number a component moves by is a `--motion-*` custom property
   in globals.css, one family a group — surface, panel, state, disclose, grow — and components read them, CSS through
@@ -59,12 +70,18 @@ organisms, templates, the registry, the blob, the patterns, the CSS layers — w
   (the page grows to spell its title, Grid.md D47), through `useCellMotion`
   (`@no-origins/ui/hooks/use-cell-motion`), the same hook the studio's stage plays through. **Loading is decided too**
   (his settings, the same night, the `--motion-load-*` tokens, `@no-origins/ui/lib/load-motion`): a square of dashed
-  lime rings on the centre, one a section, turning, each going to its section as movement's dot and opening. **The
-  grid loads every page with it** (Grid.md D48): the intro and every turn, where the ripple was. **Enter · exit** (M11, 2026-09-27), movement's first primitive (one
-  cell's element coming in and going out), is on the bench and not decided. **Focus** (M13, 2026-09-28, `@no-origins/ui/lib/focus-motion`, `useFocusMotion`), a card in focus and the page
-  blurring round it, least at the card and rising in rings out from it, a ripple in, **is decided too** (his settings,
-  2026-09-28, the `--motion-focus-*` tokens): the portfolio's cards play it (Portfolio.md P18), the one blur anywhere
-  since D48, his ask. Never write a literal
+  lime rings on the centre, one a section, turning, each going to its section as movement's dot and opening. **No page
+  loads with it since 2026-09-30** (Grid.md D49, his: "remove all the current loaders … let the components load
+  quickly"): it plays on the studio's Loading page only. **Enter · exit** (M11, 2026-09-27), movement's first primitive (one
+  cell's element coming in and going out), is on the bench and not decided. **Hyper focus** (M13, 2026-09-28, named so 2026-09-29; `@no-origins/ui/lib/focus-motion`, `useFocusMotion`), a card in focus and the page
+  blurring round it, least at the card and rising in rings out from it, **is decided too** (his settings,
+  2026-09-28, the `--motion-focus-*` tokens) — and since his note the same night **a cloth, not a ripple**: drawn out
+  from under the card to every corner of its container, the card lifting over it, with focus mode (M14) beside it. **Both are off the portfolio since 2026-09-30**
+  (Portfolio.md P21, his: "We can have it the motion studio but I did not like it in the portfolio"): they play on the
+  studio's pages 5 and 6 only, and no page in any app blurs. **Both were picked again on
+  2026-09-29** (his settings, hyper focus "C Unroll, tuned" and focus mode "A As described, tuned"): focus mode is
+  decided too, its `--motion-mode-*` tokens in globals.css, and its cloth wears a 60% veil of the page's colour, his
+  exception to the no-glass rule (in the studio). Never write a literal
   `duration-*` or `zoom-in-95` on a component again: name the token. The grid's own motion is not on the layer yet (Motion.md §5).
 
 Import a component by its own path — `@no-origins/ui/components/button` — never from a package root; there is no
@@ -123,8 +140,20 @@ rules in short, each one his:
   portal, an app with no grid) globals.css reckons it from the viewport with D13's and D33's numbers — and every box
   takes it as `rounded-lg`. The browser shrinks a corner to fit, so a 1×1 is a circle, a box a cell tall a pill, a
   bigger one a cell's curve at each corner. One radius: never a second one, never `rounded-none` on a box (his two exceptions, D39: a fill inside a box meeting a divider takes 4px there — the portfolio's work tabs; and a picture inset in a box takes the box's radius less its inset — the portfolio's project cards, 2026-09-28). **Lines stay
-  straight** — the underline fields, separators, table rows, a turned-square arrow tip — and a `transparent` slot is
-  not rounded (it has no edge; it would only cut what it holds). **A cell is a circle (D40)**: the painter draws each
+  straight** — separators, table rows, a turned-square arrow tip — and a `transparent` slot is not rounded (it has no
+  edge; it would only cut what it holds). **A field is a box, not a line (D39 amended, 2026-09-29, his: "even inputs
+  will have full rounded border")**: Input, Textarea, the Select triggers, InputGroup, Combobox, Command's search are
+  outlined pills and InputOTP's slots circles, where they were underlines. **The slider is a bar (D39 amended,
+  2026-09-30, his)**: 8px since his second tuning of the grip (16px at his pick, the cursor's ring, 24px, that morning), a pill with its head, a circle
+  the bar's height, merged into the lime end; held, the head detaches into the cursor, which stays a ring, and the bar
+  parts 2px round it (the grip, Motion.md M16). **The body is fluid** (his, the same night, after a segmented
+  version was tried and taken out, M18): it follows the head on a spring, its ends stretching as they move, and the
+  bar's height is a control (`--slider-height`). **The grip is decided** (his settings, the same night, "A As
+  described, tuned", then "A Today, tuned"): its `--motion-grip-*` tokens and `--slider-height: 8px` are in globals.css
+  — the head in the cursor at once, letting go over 240ms — and every `Slider` plays them. **A slider may have marks** (his, the same night, Motion.md M21): `marks`
+  puts a dot over each step above the bar; a held head snaps under a mark whose zone its cursor is in, and the snap is
+  a tick — the mark pops, the head kicks, a phone vibrates. On the studio's Steps page, version 1, not decided.
+  **A cell is a circle (D40)**: the painter draws each
   cell's dashes as a ring and the pointer lights a cell only inside its circle. (The front cut a cell's disc first and
   the rest of its tile `LACE_MS` later — the lace — in the intro and the wash, until D48 took both out.) D9's cell is
   still a square box; the circle is drawn in it.
@@ -159,9 +188,9 @@ rules in short, each one his:
   before): a turn is a progress from 0 to 1 that the wheel or a finger drives (a third of the field is one page), and
   **only the arrow follows the hand** — it fills by that share; let go short of half way and it settles back. **The
   boxes do not shrink (D37, 2026-09-25, his: "let's not shrink the cards")**: when the turn commits, the page **fades
-  away** over `TURN_MS` (160ms), opacity only, and the next page is put on the field and **loaded by the loader**
-  (D48, below). Every `GridPages` turns this way. Until D48 the ripple washed the page away, every box cut cell by cell
-  as its front crossed it (`washAway`, gone). Nothing in a box is ever squeezed, scaled or re-laid-out: D27's
+  away** over `TURN_MS` (160ms), opacity only, and the next page is put on the field and **fades in** over the same
+  (D49, below). Every `GridPages` turns this way. Until D48 the ripple washed the page away, every box cut cell by cell
+  as its front crossed it (`washAway`, gone), and from D48 to D49 the loader brought a page with images in. Nothing in a box is ever squeezed, scaled or re-laid-out: D27's
   clip-by-height went for the wash, and scaling (in Y, then uniformly) was sent back on 2026-09-21 — do not
   reintroduce a transform or a shrink here. **A hand that goes on scrolling goes on turning (D35, 2026-09-25)**: only a fling's
   decaying tail is ignored after a turn, never the hand (`readWheel`), a notch glides rather than jumps, and the turn
@@ -187,24 +216,21 @@ rules in short, each one his:
   top edge, falls
   from above until the box is covered, the theme commits underneath, and the sheet dissolves. `GridThemeFlip` in `grid.tsx`, GSAP, one transform; the light tokens sit on `.light` as well as `:root` so
   the sheet wears the theme before the page does. No grid on the page: the switch is instant.
-- **Every page is loaded by the loader (D48, 2026-09-27, his: "remove the ripple effect intro and page transitions and
-  replace with the current loaders that we created").** The loader is loading, his motion (Motion.md M10), on the
-  page's own boxes (not the pager's) — boxes with one `data-load-section` are one section, one ring, and an element
-  inside a box marked `data-load-box` is a section of its own (2026-09-28, his: "I want all the cards to have one
-  circle"; the portfolio marks every card, label, button and mark, 37 rings on a desktop). A square of dashed lime rings stands on the field's centre, one ring a section, as
-  near square as it can be and a row taller rather than wider (ten stand as 3, 3, 3, 1, his), in reading order, turning. When the
-  page is ready every ring is pressed to 0.5 at once, its dashes closing into a full circle as it shrinks (his,
-  2026-09-28), goes straight to its box's nearest cell in one move of movement's dot, lands with the rest, is released into a plain border and opens out to its box, the box shown inside it.
-  **The intro** (`intro` on `Grid` or `GridPages`; the portfolio has it, D31) is page 1's load: held back from the
-  server's first paint, the loader turns for 2 s at the least (his) and until the page is ready (fonts, window load,
-  images on the field, 3 s at most), the pager comes up from its bottom edge as page 1 opens, and nothing turns a page
-  meanwhile. Once per document load, none under reduced motion. Each ring goes to its box's top-left cell, and the box
-  opens from it; the turn is his chase. **A turn** loads the page it puts on the field only if its boxes have images
-  still to come; a page with nothing to load shows at once and fades in (his: "directly render the page"). `useGridLoad`
-  and `GridLoader` in `grid.tsx` play it through `useLoadMotion`, the hook and painters the motion studio uses;
-  globals.css holds a loading page's boxes (`data-loading`). **The ripple is gone**: the grid drawing itself in with a
-  circle-tipped front and glowing lime and violet lines, and drawing itself again while the page loaded (D31's
-  drawing, D44), the ripple between pages (D32) and its wash (D37), and the `ripple` prop. **The field is painted
+- **No page loads behind a loader (D49, 2026-09-30, his: "I want to remove all the current uh, loaders that we have. I
+  did not like it … just remove it and uh, let the components load quickly").** A page is on the field as soon as the
+  grid has measured it; a turn fades it away and the next one in, 160ms each. There is no intro: no `intro` prop on
+  `Grid` or `GridPages`, no `page` prop on `Grid`, no `data-loading` or `data-intro`, and nothing waits for page 1 before
+  a turn. D48's loader (2026-09-27) — dashed lime rings on the field's centre, one a box (`data-load-section`,
+  `data-load-box`), opening into the page after 2 s at the least — is gone from every page with `useGridLoad` and
+  `GridLoader`. Loading itself, his motion (Motion.md M10), stays whole in `lib/load-motion` and `useLoadMotion`, its
+  tokens in globals.css, and plays on the motion studio's Loading page only. Do not put a loader back on a page until
+  he names one. **He named one the same day: the intro is the agent (D50, version 1)**. `intro` on `Grid`, with
+  `overlay`, is the portfolio's. The agent stands in the page's `data-intro-agent` circle (the avatar's ring) and
+  breathes for 2s. It hops in place, and as it lands the field's cells light violet ring by ring from it, one pass of
+  the field's painter. Then it fades and the page's boxes come in. `grid-intro.tsx`, which the grid loads only then,
+  draws it; the `--motion-intro-*` values are INTRO_START's in `lib/intro-motion`, not yet in globals.css. Once per
+  document load, never under reduced motion. The ripple went before it (D48): the grid drawing itself in, the ripple between pages (D32), its wash
+  (D37) and the `ripple` prop. **The field is painted
   (D38, 2026-09-25)**: the overlay's dashes and the pointer's cell are canvases drawn by one painter
   (`lib/grid-field.ts`), in a worker where the browser can hand it a canvas, so the page's own loading on the main
   thread cannot stall it. They were ~1,300 elements. `gridFieldPainter` must stay self-contained — the worker runs it
@@ -213,7 +239,8 @@ rules in short, each one his:
   the root they restyled every element in the grid every frame of a turn; on the tracks, every box (until D37).
 - **The pointer is a violet ring, and the cell under it is lit (D34, 2026-09-25).** `cursor` on `Grid` or `GridPages`;
   the portfolio has it. A 24px ring with a violet line, filled violet while pressed (**D43, 2026-09-26**, his: "change the
-  cursor color to violet"; it was lime) — **the system's cursor drawn from an image**
+  cursor color to violet"; it was lime), but a ring still while a slider's head is held, the head fitting into it
+  (2026-09-30, his, Motion.md M16) — **the system's cursor drawn from an image**
   (globals.css), never a div moved on every pointer move: that cost a whole-page layerize a move and trailed the hand. The cell the pointer is on turns its **dashes** violet too (the default dashes, not a solid line — his, the same day; lime until D43)
   — its ring's since D40 — and fades back over 500ms when left;
   the gutter lights nothing, nor a square's corners outside its circle. Found from the field's numbers and sent to the field's painter (D38), never React state.
@@ -247,9 +274,14 @@ composer and nothing is edited in place.
 
 ## What builds
 
-**All five apps build** — `pnpm -r build` is green, and CI's **Build** job builds all five on every PR. The admin
+**All six apps build** — `pnpm -r build` is green, and CI's **Build** job builds all six on every PR. The admin
 builds with no Supabase keys, since its clients are made per request; it stays out of the **review sweep** because
-every route is behind auth and needs a running Supabase, which `pnpm review` does not boot. **Quests are gone**
+every route is behind auth and needs a running Supabase, which `pnpm review` does not boot. The motion studio is
+behind the same sign-in since 2026-09-30 and stays in the sweep: its dev server opens when it has no keys (CI, a fresh
+clone). The character studio (2026-09-30) is behind it the same way and is in the sweep too. **On his machine both have
+the local stack's keys** (their `.env.local`, his ask, 2026-09-30), so they ask for a sign-in as the admin does, and
+`e2e/global-setup.ts` signs the test browser in first — by magic link through the local mail catcher, as the address in
+`.private/e2e-email` (gitignored) — leaving the session in `e2e/.auth/state.json` for every spec and the sweep. **Quests are gone**
 (Admin.md §0.7, 2026-09-23): the admin is sign-in, a home of three cards and `/settings`. **The portfolio was rebuilt on
 the grid on 2026-09-21** (Portfolio.md, `apps/portfolio/CLAUDE.md`): one route, the first screen — and since 2026-09-27
 one page, a `Grid` with no pager, the rest of the site in the room the first screen leaves (P15). Its 1.0 pages, parked
@@ -260,12 +292,15 @@ in `.legacy/`, were deleted on 2026-09-23 — git history keeps them.
 Four Vercel projects under the `no-origins` team, one per app, each with its **Root Directory** set to `apps/<app>`:
 `no-origins` → portfolio, `design`, `admin`, `engineering`. Production is `main`. **The motion studio has no project
 yet** (2026-09-27): creating it, with root directory `apps/motion` and the `motion.no-origins.com` domain, is his step
-in the dashboard. Its `vercel.json` is already the same file.
+in the dashboard. Its `vercel.json` is already the same file. It needs the admin's two Supabase variables
+(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`), or production answers 503, and the hosted Supabase
+needs `https://motion.no-origins.com/**` among its redirect URLs (supabase/README.md). **Nor has the character
+studio** (2026-09-30): the same three steps, with `apps/character` and `character.no-origins.com`.
 
 **`apps/<app>/vercel.json` is the source of truth, not the dashboard.** A `vercel.json` in a project's root directory
 **overrides** the dashboard's fields, so the commands live in the repo, travel through review, and cannot quietly
 drift apart the way they did through 2026-09-22 (three projects, three different install commands). The dashboards
-carry the same commands since 2026-09-23; if they drift again, the file still wins. All five files are byte-identical on purpose:
+carry the same commands since 2026-09-23; if they drift again, the file still wins. All six files are byte-identical on purpose:
 
 ```json
 {
@@ -318,17 +353,17 @@ VERCEL_ORG_ID=$VERCEL_ORG_ID VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_DESIGN vercel 
 ```
 
 `.vercelignore` at the repo root keeps `e2e/`, `supabase/`, `services/`, `.claude/` and `.private/` out of the upload; its repo-root entries are
-anchored with a leading slash on purpose, because an unanchored `supabase` would also drop
-`apps/admin/src/lib/supabase/`.
+anchored with a leading slash on purpose, because an unanchored `supabase` would also drop any app folder of that name
+(the admin's `src/lib/supabase/` was one until the sign-in moved into `packages/auth`, 2026-09-30).
 
 ## Visual review loop (Playwright)
 
 After any UI change, look at the result before reporting done.
 
-1. `pnpm review` boots the portfolio on :3000, the showcase on :3001, engineering on :3003 and the motion studio on
-   :3004 (or reuses running ones), visits every route in `ROUTES`, `DESIGN_ROUTES`, `ENGINEERING_ROUTES` and
-   `MOTION_ROUTES` in `e2e/review.spec.ts` on desktop
-   (1440x900) and mobile (Pixel 7) in both themes, waits for a grid's intro (D31) to hand over, fails on a route that
+1. `pnpm review` boots the portfolio on :3000, the showcase on :3001, engineering on :3003, the motion studio on
+   :3004 and the character studio on :3005 (or reuses running ones), visits every route in `ROUTES`, `DESIGN_ROUTES`,
+   `ENGINEERING_ROUTES`, `MOTION_ROUTES` and `CHARACTER_ROUTES` in `e2e/review.spec.ts` on desktop
+   (1440x900) and mobile (Pixel 7) in both themes, waits for a grid's intro (D50) to hand over, fails on a route that
    answers 400+ or throws, echoes
    `console.error` output, and writes full-page screenshots to `e2e/screenshots/<project>/<route>.png`. CI runs the
    same sweep and uploads the screenshots.

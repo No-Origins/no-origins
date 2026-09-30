@@ -1,9 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // Visual review loop for the workspace apps.
-// `pnpm review` boots FOUR dev servers (or reuses ones already running) — the portfolio on :3000, the design
-// showcase on :3001, engineering on :3003 and the motion studio on :3004 — sweeps every route in e2e/review.spec.ts
-// on desktop + mobile viewports in both themes, and drops full-page screenshots into
+// `pnpm review` boots FIVE dev servers (or reuses ones already running) — the portfolio on :3000, the design
+// showcase on :3001, engineering on :3003, the motion studio on :3004 and the character studio on :3005 — sweeps
+// every route in e2e/review.spec.ts on desktop + mobile viewports in both themes, and drops full-page screenshots into
 // e2e/screenshots/<project>/<route>.png. CI runs the same sweep (.github/workflows/ci.yml) and uploads the screenshots.
 //
 // An app outside the loop is an app whose screenshots nobody looks at, and CLAUDE.md's rule is that you look at the
@@ -11,6 +11,8 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./e2e",
   outputDir: "./e2e/.results",
+  // The studios ask for a sign-in when they have the local stack's keys: sign the browser in once (e2e/global-setup.ts).
+  globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
   retries: 0,
   reporter: [
@@ -19,6 +21,7 @@ export default defineConfig({
   ],
   use: {
     baseURL: "http://localhost:3000",
+    storageState: "e2e/.auth/state.json",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
@@ -41,7 +44,7 @@ export default defineConfig({
       use: { ...devices["Pixel 7"], colorScheme: "dark" },
     },
   ],
-  // Four apps are booted (the admin is not: every route of it is behind auth and needs a running Supabase).
+  // Five apps are booted (the admin is not: every route of it is behind auth and needs a running Supabase).
   webServer: [
     {
       command: "pnpm --filter portfolio dev",
@@ -64,6 +67,12 @@ export default defineConfig({
     {
       command: "pnpm --filter motion dev",
       url: "http://localhost:3004",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      command: "pnpm --filter character dev",
+      url: "http://localhost:3005",
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

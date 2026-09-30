@@ -18,6 +18,7 @@ next-env.d.ts
 # playwright review loop
 e2e/.results
 e2e/.mcp
+e2e/.auth
 e2e/screenshots
 playwright-report
 e2e/*-snapshots/

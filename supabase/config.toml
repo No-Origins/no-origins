@@ -166,7 +166,9 @@ site_url = "http://localhost:3002"
 # does not admit `/auth/callback?next=…` — Supabase silently falls back to `site_url`, the `next` is lost, and the
 # link lands on the overview instead of where you were going. Found by following a real magic link, not by
 # reading this file.
-additional_redirect_urls = ["http://localhost:3002/**", "http://127.0.0.1:3002/**", "https://admin.no-origins.com/**"]
+# The motion studio signs in through the same project and session (Motion.md M20, `@no-origins/auth`), so its callback
+# is listed too, and so is the character studio's (:3005, Character-Studio.md C6, 2026-09-30).
+additional_redirect_urls = ["http://localhost:3002/**", "http://127.0.0.1:3002/**", "https://admin.no-origins.com/**", "http://localhost:3004/**", "http://127.0.0.1:3004/**", "https://motion.no-origins.com/**", "http://localhost:3005/**", "http://127.0.0.1:3005/**", "https://character.no-origins.com/**"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -195,17 +197,18 @@ minimum_password_length = 6
 password_requirements = ""
 
 # Configure passkey sign-ins (Admin.md §8.4 — the third door). Experimental in the CLI; the JS client also needs
-# `experimental: { passkey: true }` (see apps/admin/src/lib/supabase/client.ts) or every passkey call throws.
+# `experimental: { passkey: true }` (see packages/auth/src/client.ts) or every passkey call throws.
 [auth.passkey]
 enabled = true
 
 # WebAuthn relying party settings — required when passkey is enabled. rp_id is the registrable domain a credential
-# is bound to; rp_origins are the exact origins allowed to use it. Local is the admin on :3002. On the hosted
-# project set these in the dashboard to `no-origins.com` / `https://admin.no-origins.com`.
+# is bound to; rp_origins are the exact origins allowed to use it. Local is the admin on :3002, the motion studio
+# on :3004 and the character studio on :3005. On the hosted project set these in the dashboard to `no-origins.com` /
+# `https://admin.no-origins.com`, `https://motion.no-origins.com`, `https://character.no-origins.com`.
 [auth.webauthn]
 rp_display_name = "No Origins Admin"
 rp_id = "localhost"
-rp_origins = ["http://localhost:3002"]
+rp_origins = ["http://localhost:3002", "http://localhost:3004", "http://localhost:3005"]
 
 [auth.rate_limit]
 # Number of emails that can be sent per hour. Requires auth.email.smtp to be enabled.

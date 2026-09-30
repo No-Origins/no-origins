@@ -8,13 +8,15 @@ import { Button } from "@no-origins/ui/components/button"
 import { Input } from "@no-origins/ui/components/input"
 import { Textarea } from "@no-origins/ui/components/textarea"
 
+// Diverged from sera (2026-09-29, his): the group is the outlined pill `Input` is (Grid.md D39), not sera's underline
+// field, so the addons sit inside its ends — a button or a key concentric with the end's curve.
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="input-group"
       role="group"
       className={cn(
-        "group/input-group relative flex h-10 w-full min-w-0 items-center rounded-none border border-transparent border-b-input bg-transparent transition-[color,border-color] outline-none in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:ring-0 has-data-[align=block-end]:rounded-none has-data-[align=block-start]:rounded-none has-[[data-slot=input-group-control]:focus-visible]:border-b-ring has-[[data-slot][aria-invalid=true]]:border-b-destructive has-[textarea]:rounded-none has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>textarea]:h-auto dark:has-[[data-slot][aria-invalid=true]]:border-b-destructive/50 has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3",
+        "group/input-group relative flex h-10 w-full min-w-0 items-center rounded-lg border border-border bg-transparent transition-[color,border-color,box-shadow] outline-none in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:ring-0 has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-2 has-[[data-slot=input-group-control]:focus-visible]:ring-ring/30 has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:ring-2 has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>textarea]:h-auto dark:has-[[data-slot][aria-invalid=true]]:border-destructive/50 dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3",
         className
       )}
       {...props}
@@ -27,12 +29,12 @@ const inputGroupAddonVariants = cva(
   {
     variants: {
       align: {
-        "inline-start": "order-first",
-        "inline-end": "order-last",
+        "inline-start": "order-first ps-4 has-[>button]:ps-2 has-[>kbd]:ps-2.5",
+        "inline-end": "order-last pe-4 has-[>button]:pe-2 has-[>kbd]:pe-2.5",
         "block-start":
-          "order-first w-full justify-start pt-3 group-has-[>input]/input-group:pt-3.5 [.border-b]:pb-3.5",
+          "order-first w-full justify-start px-4 pt-3 group-has-[>input]/input-group:pt-3.5 [.border-b]:pb-3.5",
         "block-end":
-          "order-last w-full justify-start pb-3 group-has-[>input]/input-group:pb-3.5 [.border-t]:pt-3.5",
+          "order-last w-full justify-start px-4 pb-3 group-has-[>input]/input-group:pb-3.5 [.border-t]:pt-3.5",
       },
     },
     defaultVariants: {
