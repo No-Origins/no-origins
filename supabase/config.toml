@@ -431,3 +431,24 @@ enabled = true
 # formatted with uppercase keywords, indent 2, max width 180, trailing commas,
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
+
+# The hosted project's auth settings, where they differ from the local stack above. `supabase config push` compares
+# the whole [auth] section, so without these it would put the local values on production — `site_url` to localhost,
+# confirmations off, an 8-digit code down to 6 — the first time anyone pushed the redirect list. These are what the
+# dashboard held on 2026-09-30, read from the push's own diff; they are not decisions made here. Change production
+# here and push, never in the dashboard alone.
+[remotes.production]
+project_id = "szxaklpyzgkaflcgtvwk"
+
+[remotes.production.auth]
+site_url = "https://admin.no-origins.com"
+
+[remotes.production.auth.email]
+enable_confirmations = true
+max_frequency = "10s"
+otp_length = 8
+otp_expiry = 3600
+
+[remotes.production.auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
