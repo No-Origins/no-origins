@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@no-origins/ui/components/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@no-origins/ui/components/tabs";
@@ -7,6 +7,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@no-origins/ui/
 import { Input } from "@no-origins/ui/components/input";
 import { Button } from "@no-origins/ui/components/button";
 import { Alert, AlertDescription, AlertTitle } from "@no-origins/ui/components/alert";
+import { Spinner } from "@no-origins/ui/components/spinner";
 import { FieldSeparator } from "@no-origins/ui/components/field";
 import { KeyRound } from "lucide-react";
 import { supabaseBrowser } from "./client";
@@ -33,6 +34,14 @@ function LoginCardInner({ app }: { app: string }) {
   const params = useSearchParams();
   const next = safeNext(params.get("next"));
   const linkFailed = params.get("error") === "link";
+  const tokenHash = params.get("token_hash");
+  const tokenType = params.get("type");
+
+  // Arrived by a magic link: the callback handed the token hash here rather than spend it on a GET (`routes.ts`), and
+  // the card posts it back — the one request that signs in, which a mail client's preview never makes.
+  if (tokenHash && tokenType) {
+    return <ConfirmCard app={app} tokenHash={tokenHash} type={tokenType} next={next} />;
+  }
 
   // A development server with no Supabase keys has nothing to sign in to: an app that opens without them (the motion
   // and character studios, `openWithoutKeys`) is already open, so the card says so rather than a form that cannot send.
@@ -92,6 +101,42 @@ function LoginCardInner({ app }: { app: string }) {
         </Tabs>
 
         <PasskeyButton next={next} />
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * The last step of a magic link: a form that posts the token hash to the callback, submitted the moment it mounts,
+ * with its button there for a browser that did not run the script. The action carries the hash in its query, the
+ * same place the GET read it, so `authConfirm` reads one shape.
+ */
+function ConfirmCard({ app, tokenHash, type, next }: { app: string; tokenHash: string; type: string; next: string }) {
+  const form = useRef<HTMLFormElement>(null);
+  const submitted = useRef(false);
+  const action = `/auth/callback?token_hash=${encodeURIComponent(tokenHash)}&type=${encodeURIComponent(type)}&next=${encodeURIComponent(next)}`;
+
+  useEffect(() => {
+    // Once, whatever React does with effects in development: a second POST would find the hash already spent.
+    if (submitted.current) return;
+    submitted.current = true;
+    form.current?.requestSubmit();
+  }, []);
+
+  return (
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle>Signing you in</CardTitle>
+        <CardDescription>No Origins · {app}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form ref={form} method="post" action={action}>
+          <FieldGroup>
+            <Button type="submit">
+              <Spinner /> Sign in
+            </Button>
+          </FieldGroup>
+        </form>
       </CardContent>
     </Card>
   );
