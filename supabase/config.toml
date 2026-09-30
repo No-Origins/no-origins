@@ -260,6 +260,16 @@ otp_expiry = 900
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# The magic link goes to the app's own callback with a token hash, not through Supabase's verify page (2026-09-30, his:
+# a link opened on the phone said "expired"). The default `{{ .ConfirmationURL }}` ends in `?code=`, and exchanging
+# that code needs the PKCE verifier cookie of the browser that ASKED — so a link asked for on the laptop and opened
+# from mail on the phone, or asked in one browser and opened in another, always fails, and the card called it
+# expired. `{{ .TokenHash }}` is verified server-side by the callback (`routes.ts`, `verifyOtp`) with no cookie at all,
+# so it works in any browser. `{{ .RedirectTo }}` is the `emailRedirectTo` the card sent, already carrying `?next=`.
+[auth.email.template.magic_link]
+subject = "Sign in to No Origins"
+content_path = "./supabase/templates/magic-link.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"

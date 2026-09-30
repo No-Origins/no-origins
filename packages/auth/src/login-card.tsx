@@ -74,7 +74,7 @@ function LoginCardInner({ app }: { app: string }) {
         {linkFailed ? (
           <Alert variant="destructive" className="mb-6">
             <AlertTitle>That link did not work</AlertTitle>
-            <AlertDescription>It may have expired — they last fifteen minutes. Ask for another.</AlertDescription>
+            <AlertDescription>It may have been used already, or expired — a link lasts an hour. Ask for another.</AlertDescription>
           </Alert>
         ) : null}
 
