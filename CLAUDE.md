@@ -289,13 +289,14 @@ in `.legacy/`, were deleted on 2026-09-23 — git history keeps them.
 
 ## Deploying
 
-Four Vercel projects under the `no-origins` team, one per app, each with its **Root Directory** set to `apps/<app>`:
-`no-origins` → portfolio, `design`, `admin`, `engineering`. Production is `main`. **The motion studio has no project
-yet** (2026-09-27): creating it, with root directory `apps/motion` and the `motion.no-origins.com` domain, is his step
-in the dashboard. Its `vercel.json` is already the same file. It needs the admin's two Supabase variables
-(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`), or production answers 503, and the hosted Supabase
-needs `https://motion.no-origins.com/**` among its redirect URLs (supabase/README.md). **Nor has the character
-studio** (2026-09-30): the same three steps, with `apps/character` and `character.no-origins.com`.
+Six Vercel projects under the `no-origins` team, one per app, each with its **Root Directory** set to `apps/<app>`:
+`no-origins` → portfolio, `design`, `admin`, `engineering`, and since 2026-09-30 `motion` and `character`, made with
+the CLI the night PR #14 merged (`vercel link` from the app's folder creates the project; `vercel project update
+--root-directory`, because link leaves it at `.`; `vercel git connect`; `vercel domains add`; `vercel env add
+--type config` for the two `NEXT_PUBLIC_SUPABASE_*` variables, copied from the admin's — without them production
+answers 503). Production is `main`. The hosted Supabase carries both studio domains among its redirect URLs, pushed
+from `config.toml` (supabase/README.md). **Still to do in the dashboard: *Skip deployments for unaffected projects*
+on the two new projects** — the CLI has no flag for it, and until then every push rebuilds both studios.
 
 **`apps/<app>/vercel.json` is the source of truth, not the dashboard.** A `vercel.json` in a project's root directory
 **overrides** the dashboard's fields, so the commands live in the repo, travel through review, and cannot quietly

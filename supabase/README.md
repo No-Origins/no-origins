@@ -5,10 +5,18 @@ One project, `no-origins`: Postgres + Auth + Storage.
 > **One sign-in for every app — 2026-09-30 (Admin.md §8.4, amended).** The motion studio signs in through this
 > project too, with the admin's allowlist and the same session (`packages/auth`, the cookie written for
 > `.no-origins.com`). `config.toml` lists its callback on :3004 among the redirect URLs and its origin among the
-> passkey origins; a running local stack takes them on its next `supabase stop` / `start`. **On the hosted project
-> both are dashboard steps, and his:** add `https://motion.no-origins.com/**` to Auth → URL Configuration → Redirect
-> URLs, and `https://motion.no-origins.com` to the passkey origins, with the relying party ID `no-origins.com` so one
-> passkey opens both. A passkey registered under another relying party ID does not carry over.
+> passkey origins; a running local stack takes them on its next `supabase stop` / `start`. **The redirect URLs are
+> pushed, not typed** (2026-09-30, both studios): `npx supabase config push` after `npx supabase login`. It compares
+> the whole `[auth]` section, so `config.toml` ends with a `[remotes.production]` override pinning what the hosted
+> project holds where it differs from the local stack — `site_url`, confirmations on, an 8-digit code, TOTP on —
+> read from the push's own diff on 2026-09-30; without it the push would have put the local values on production.
+> Answer *No* to its storage question (`storage.analytics.enabled` differs and is not ours to change). **The passkey
+> origins are not among what config push manages**, so `https://motion.no-origins.com` and
+> `https://character.no-origins.com` under the relying party ID `no-origins.com` are still a dashboard step, and his,
+> until checked. A passkey registered under another relying party ID does not carry over.
+>
+> The same night `db push` applied `…_drop_quests.sql` and `…_studio_versions.sql` to the hosted project — the first
+> had waited since 2026-09-23 — so hosted and local carry the same seven migrations.
 
 > **Quests removed — 2026-09-23 (Admin.md §0.7).** *"remove showcase /composes,
 > admin's too and also quests feature."* `…_drop_quests.sql` drops `quests` (its
