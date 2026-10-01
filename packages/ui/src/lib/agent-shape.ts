@@ -1,5 +1,5 @@
 /**
- * THE AGENT'S SHAPES (Character-Studio.md C10, C12, C18), pure: what the head is drawn as when it is not the sphere.
+ * THE AGENT'S SHAPES (Orbit.md C10, C12, C18), pure: what the head is drawn as when it is not the sphere.
  * **Rounded solids in 3D** (version 3, 2026-09-30), turned by his rotation, resting in the cell as in a tunnel, **with
  * smooth edges** (version 5, 2026-10-01).
  *

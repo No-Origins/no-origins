@@ -68,7 +68,7 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm exec playwright install --with-deps chromium
-      # The sweep of CLAUDE.md: portfolio, showcase, engineering and both studios on their dev servers, every route
+      # The sweep of CLAUDE.md: portfolio, showcase, engineering, the motion studio and Orbit on their dev servers, every route
       # on desktop and mobile in both themes. It fails on a route that answers 400+ or throws; the screenshots are for
       # looking at.
       - run: pnpm review

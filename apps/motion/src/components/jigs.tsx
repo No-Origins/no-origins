@@ -18,6 +18,7 @@ import { cn } from "@no-origins/ui/lib/utils";
 import { EASES, PRESET_IDS, type Family, type PresetId, type Token } from "@/content/families";
 import { TEMPOS, useStudio, type Phase, type Tempo } from "@/components/studio-context";
 import { FOCUS_SAMPLE_COUNT } from "@/components/focus-stage";
+import { useJigHandle } from "@/components/jig-columns";
 import { settingsText, tokenLabel } from "@/lib/tokens";
 
 /**
@@ -41,15 +42,19 @@ import { settingsText, tokenLabel } from "@/lib/tokens";
  * separator.
  */
 
-/** A jig: a card filling its slot, a label for a head. */
+/** A jig: a card filling its slot, a label for a head, and the grip it is dragged by where it stands in a column. */
 export function Jig({ title, note, children, action, fit = false }: { title: string; note?: string; children: React.ReactNode; action?: React.ReactNode; fit?: boolean }) {
+  const grip = useJigHandle();
   return (
     <Slot fill="transparent" inset={0} className={fit ? "h-auto" : undefined}>
       <Card size="sm" className={cn("min-h-0 gap-3 shadow-none", fit ? "h-auto" : "h-full")}>
         <CardHeader className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <Text role="label" as="h2">{title}</Text>
-            {note ? <Text role="caption">{note}</Text> : null}
+          <div className="flex min-w-0 items-start gap-1">
+            {grip}
+            <div className={cn("flex min-w-0 flex-col gap-0.5", grip && "min-h-6 justify-center")}>
+              <Text role="label" as="h2">{title}</Text>
+              {note ? <Text role="caption">{note}</Text> : null}
+            </div>
           </div>
           {action}
         </CardHeader>

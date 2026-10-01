@@ -135,9 +135,7 @@ export function ProfileTech({ cols, rows, lead }: { cols: number; rows: number; 
           ghost.style.visibility = "visible";
         } else ghost.style.visibility = "hidden";
         dot.style.transform = `translate(${f.x - mark / 2}px, ${f.y - mark / 2}px) scale(${f.scale})`;
-        // Faded into the page with the rest of the column while its box is inactive (Portfolio.md P16), which the
-        // tokens cannot do for a brand's own colour.
-        const tint = TECH[i].brand && `color-mix(in oklch, ${TECH[i].brand} calc(var(--box-keep, 1) * 100%), var(--background))`;
+        const tint = TECH[i].brand;
         dot.style.color = !tint || f.lit <= 0 ? "" : f.lit >= 1 ? tint : `color-mix(in oklch, ${tint} ${f.lit * 100}%, var(--foreground))`;
         // The name rides a step after its mark, inside the ring (less its pixel of border), which clips it as it grows.
         name.style.opacity = String(f.lit);

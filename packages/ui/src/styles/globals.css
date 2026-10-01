@@ -67,7 +67,7 @@
      wore on the ripple's lime fill (D32, until D48), one value in both themes — lime is light in both, so the dark
      theme's white on it is 1.3 : 1 and this is 15 : 1. */
   --lime-foreground: oklch(0.145 0 0);
-  /* The agent's paints beside the two accents (Character-Studio.md C10, 2026-09-30, his: "I also need colors … options"):
+  /* The agent's paints beside the two accents (Orbit.md C10, 2026-09-30, his: "I also need colors … options"):
      the agent's own, not the system's palette: nothing else paints with them. Each has the ink its eyes are drawn in,
      dark on every one. One value in both themes, as the accents are.
      Pink and blue are the pastels of his sketch (Brand.md, colour), version 1. Peach, yellow and grey went on
@@ -452,11 +452,12 @@
 }
 
 /* ── the intro (grid.tsx, grid-intro.tsx, Grid.md D50) ────────────────────────────────────────────────────────────
-   The page opens with the agent (D50, 2026-09-30, his): it stands in the page's circle for it, breathes, hops in place,
-   and the field wakes ring by ring from it; then it fades away and the page comes in. While it plays (`data-intro` is
-   "agent", from the server's first paint, before any script) the page's boxes are held back here — laid out, so the
-   agent can find its circle among them, but unseen and out of the pointer's way — and as it fades ("reveal") they come
-   in over `--grid-intro-reveal`, which the grid writes from the intro's `--motion-intro-reveal`. What an app draws
+   The page opens with its agents (D50, version 5, 2026-10-01, his): they stand in a row on the field's middle, leap to the
+   centre of the boxes they open, and the boxes come in with each one's ripple. While it plays (`data-intro` is "agent",
+   from the server's first paint, before any script) the page's boxes are held back here — laid out, so the agents can
+   find them, but unseen and out of the pointer's way — and each is shown by the intro as the ripple crosses it, its own
+   opacity and clip written over this. When the last is in the grid
+   lets go of them ("reveal", over a `--grid-intro-reveal` of 0ms since version 2). What an app draws
    behind the grid (the portfolio's tagline) is held with them by carrying the grid's phase as `data-intro-held` and
    the same custom property. It never plays under reduced motion, so nothing here needs a reduced form. */
 @keyframes grid-intro-in {
@@ -507,7 +508,7 @@
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 2x) 12 12, auto;
 }
 
-/* Hiddenstack's first human-rig studies (Character-Studio.md, Hiddenstack): starting values, awaiting his tuning. */
+/* Hiddenstack's first human-rig studies (Orbit.md, Hiddenstack): starting values, awaiting his tuning. */
 :root {
   --motion-human-walk-cycle: 1200ms;
   --motion-human-run-cycle: 700ms;

@@ -1,20 +1,24 @@
 # No Origins — The six agents
 
 *Designed 2026-09-30, his ask: "design six agents, each with different color, different shape, and different
-characteristics and personality." Each is a character in the character studio at version 1, named by him: Bali, Kino,
+characteristics and personality." Each is a character in Orbit at version 1, named by him: Bali, Kino,
 Zaza, Oru, Mira, Lola. Downstream of
 **Brand.md** §4 (the character), §8 (one hue per agent; the blob is the mark of an agent; the host is Bhargav, clear
-glass, and everyone else is a colour) and **Character-Studio.md** (what a character can be: C10 the shapes, colours
+glass, and everyone else is a colour) and **Orbit.md** (what a character can be: C10 the shapes, colours
 and textures; C5 the face; C6 versions). Names are proposals; his to keep or replace.*
+
+**Together they are Orbit** (his, 2026-10-01: *"Orbit is what we collectively call agents as each agent will have its
+own name"*; Orbit.md C21). One agent is called by its name; all of them, by Orbit — the name of the app they are made
+in too.
 
 ## A1. What makes six agents six
 
-Each agent differs from every other on every axis the character studio has, so a visitor tells them apart at a
+Each agent differs from every other on every axis it can be set on in Orbit, so a visitor tells them apart at a
 glance, at a favicon's size, and by how they move:
 
 | Axis | The rule |
 |---|---|
-| **Paint** | One hue each (Brand.md §8): violet, lime, yellow, blue, grey, pink. Peach is kept for a seventh. **Since 2026-10-01 (Character-Studio.md C20, his: "high contrast")** peach, yellow and grey are gone: yellow is read as gold and grey as teal, and red, orange and green are new. |
+| **Paint** | One hue each (Brand.md §8): violet, lime, yellow, blue, grey, pink. Peach is kept for a seventh. **Since 2026-10-01 (Orbit.md C20, his: "high contrast")** peach, yellow and grey are gone: yellow is read as gold and grey as teal, and red, orange and green are new. |
 | **Shape** | One solid each: sphere, cube, cone, hexagonal prism, cylinder, hemisphere. The pyramid is kept. |
 | **Material** | Slime, ball or jelly — how it lands, settles and breathes, so its temperament is in its body. |
 | **Surface** | A hand-drawn texture (his reference sheet, 2026-09-30), or plain; and depth in flat bands. Not a tiled pattern: those were rejected. |
@@ -24,7 +28,7 @@ glance, at a favicon's size, and by how they move:
 And what every one of them shares, from Brand.md §4: **warm, curious, approachable at the maximum.** None is arrogant,
 snarky, edgy or gloomy. A "critic" here is kind; a "keeper" is not stern. They differ in temperament, not in warmth.
 
-**Each is a character in the database** (Character-Studio.md C6): a `studio_items` row of kind `character`, its look
+**Each is a character in the database** (Orbit.md C6): a `studio_items` row of kind `character`, its look
 held whole, published as versions. His, the same night: *"use the studio to design these because that's how we save
 the configurations, and your configurations will become version one for each agent."* So the five new ones are seeded
 as characters, each with a draft and a **version 1** holding the look in A2 whole (`resolveCharacter`), and the studio
@@ -35,6 +39,12 @@ version, as the first was.
 
 Every value below is a setting the studio has today, under its declared id (`@no-origins/ui/lib/agent-body`,
 `agent-face`); a setting not named is the Guide's version 15. Sizes are of the cell; angles in degrees.
+
+**Each one's "Rest and hop" no longer applies** (Motion.md M23, 2026-10-01, his: *"I don't want motions to be defined
+for each agent … motion is something that we can apply on any agent"*). How an agent moves is every agent's, the
+declaration's defaults; a character holds its look only, so the values below under "Rest and hop" are kept as the
+design they were and are not read. Its Material still makes each move its own way, and its moods are motions any
+agent can play.
 
 ### 1 · Bali, the Guide — violet sphere, slime
 
@@ -143,8 +153,8 @@ face as it should be and the shine being light on light; his to judge.
 them: *"They look very generic. I like to have more textures that have noise, gradient, depth."* A first pass of grain
 and relief on the tiles did not answer it, and then: *"I don't want patterns on the agents anymore."* So every agent is
 plain, and what is being designed for the surface is a **material**: fine grain over the whole body and depth in
-stepped tone bands from the light to the far side; **no gradient** (his: *"depth without gradient for now"*), in the
-character studio (Character-Studio.md). Then, with a reference image of 24 hand-drawn two-tone swatches (irregular
+stepped tone bands from the light to the far side; **no gradient** (his: *"depth without gradient for now"*), in Orbit
+(Orbit.md). Then, with a reference image of 24 hand-drawn two-tone swatches (irregular
 dots, scribbles, brushy stripes, pebbles, bricks, crosshatch, wobbly grids, sunbursts, waves, contour loops, splatter,
 smears): *"I see what you did. But I have better ideas. Take inspiration from the image I provide and then update the
 textures."* So the surface is **hand-drawn textures** — the tiles were what was wrong, not texture itself — drawn
@@ -194,7 +204,7 @@ moves.
 
 - **The names — his, 2026-09-30:** Bali the Guide, Kino the Maker, Zaza the Scout, Oru the Keeper, Mira the Editor,
   Lola the Muse. The job is what an agent does; the name is who it is, and is the character's name in the database.
-- **Which of the six exist first.** The Guide does. The others are made in the character studio from A2, each then
+- **Which of the six exist first.** The Guide does. The others are made in Orbit from A2, each then
   his to tune, version by version.
 - **A seventh** for the pyramid, when a block needs one (peach, kept for it, went with C20).
 - **Whether a mood is shared or each agent's own.** His Curious on the Guide is eyes only; on the Scout, Curious

@@ -278,8 +278,8 @@ const CARD = (rows: number): Responsive<Span> => ({
 });
 
 /**
- * The agent, still (Motion.md M17, Character-Studio.md C3): one frame of its model sitting in a nest, the way the
- * character studio shows it. Its tokens are read off the drawing, and none is set here, so it is the version on the
+ * The agent, still (Motion.md M17, Orbit.md C3): one frame of its model sitting in a nest, the way Orbit
+ * shows it. Its tokens are read off the drawing, and none is set here, so it is the version on the
  * motion studio's bench.
  */
 function StillAgent({ size }: { size: number }) {
@@ -300,7 +300,7 @@ function StillAgent({ size }: { size: number }) {
   );
 }
 
-/** The colour picker, live (Character-Studio.md C17): the agent's paints, one picked, its name under them. */
+/** The colour picker, live (Orbit.md C17): the agent's paints, one picked, its name under them. */
 function PickedColour() {
   const [paint, setPaint] = React.useState("violet");
   return (
@@ -355,7 +355,7 @@ export const MOLECULES: PageContent = {
         id: "Agent",
         span: CARD(4),
         render: () => (
-          <Specimen name="Agent" note="The agent, drawn from one frame of its model: the motion studio moves it, the character studio shows it still.">
+          <Specimen name="Agent" note="The agent, drawn from one frame of its model: the motion studio moves it, Orbit shows it still.">
             <StillAgent size={160} />
           </Specimen>
         ),

@@ -1,3 +1,4 @@
+import { ACTION_FAMILIES } from "@/content/agent-actions";
 import { FAMILIES, EASES, type Family, type FamilyId, type Token, type Value, type Values } from "@/content/families";
 
 /**
@@ -82,13 +83,13 @@ export function tokenLabel(token: Token, value: Value): string {
 }
 
 /**
- * Every family's decided values: off the document's root where globals.css has the token, else preset A's. Only in the
- * browser.
+ * Every family's decided values, the agents' actions' too (Motion.md M24): off the document's root where globals.css
+ * has the token, else preset A's. Only in the browser.
  */
 export function readDecided(): Record<FamilyId, Values> {
   const style = getComputedStyle(document.documentElement);
   const out = {} as Record<FamilyId, Values>;
-  for (const family of FAMILIES) {
+  for (const family of [...FAMILIES, ...ACTION_FAMILIES]) {
     const start = family.presets.find((p) => p.id === "A")?.values ?? {};
     const values: Values = {};
     for (const token of family.tokens) {

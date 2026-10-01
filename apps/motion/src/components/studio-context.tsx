@@ -10,7 +10,8 @@ import { readDecided, sameValues } from "@/lib/tokens";
  * What every slot on a studio page shares (Motion.md M6): each family's values on its jig, the specimen's own options
  * (its block's columns and rows, every family's, then its own), the timeline's settings — tempo, loop, hold, the same
  * on every motion — and the transport the timeline drives and the stage answers. Kept in the browser only
- * (`no-origins:motion`), wrapped so a blocked storage costs nothing but the memory.
+ * (`no-origins:motion`), wrapped so a blocked storage costs nothing but the memory — and where he has dragged each
+ * family's jigs.
  */
 
 export type Tempo = 1 | 2 | 5 | 10;
@@ -145,11 +146,6 @@ function createTransport(): Transport {
 export const TEMPOS: readonly Tempo[] = [1, 2, 5, 10];
 
 type Saved = {
-  /**
-   * A family's own data, which is neither tokens nor an option: a family built from states keeps them here. Each family
-   * says what it keeps; the studio only stores it.
-   */
-  data: Partial<Record<FamilyId, unknown>>;
   values: Partial<Record<FamilyId, Values>>;
   /** The preset each family's values were last set from. */
   from: Partial<Record<FamilyId, PresetId>>;
@@ -159,32 +155,40 @@ type Saved = {
   loop: boolean;
   /** How long a play holds its end state before letting go, in ms — real time, never slowed by the tempo. */
   hold: number;
+  /** Where he has put each family's jigs, by dragging them (his, 2026-10-01): their ids, column by column. */
+  jigs: Partial<Record<FamilyId, JigArrangement>>;
 };
+
+/** A family's jigs as he has arranged them: the ids in the stage's left column and its right, top to bottom. */
+export type JigArrangement = { left: string[]; right: string[] };
 
 const KEY = "no-origins:motion";
 export type Option = string | number | boolean;
 type Widen<T> = T extends string ? string : T extends number ? number : boolean;
 type Options = Record<string, Option>;
-const EMPTY: Saved = { data: {}, values: {}, from: {}, options: {}, tempo: 1, loop: false, hold: 900 };
+const EMPTY: Saved = { values: {}, from: {}, options: {}, tempo: 1, loop: false, hold: 900, jigs: {} };
 
 function load(): Saved {
   if (typeof window === "undefined") return EMPTY;
   try {
     const text = window.localStorage.getItem(KEY);
-    return text ? { ...EMPTY, ...(JSON.parse(text) as Partial<Saved>) } : EMPTY;
+    if (!text) return EMPTY;
+    // The agents' states were kept here as `data` until Motion.md M24 took them out: not carried on.
+    const kept = JSON.parse(text) as Partial<Saved> & { data?: unknown };
+    delete kept.data;
+    return { ...EMPTY, ...kept };
   } catch {
     return EMPTY;
   }
 }
 
 type Studio = {
-  /** A family's own data, as it last set it; undefined until it has. */
-  dataOf: (family: FamilyId) => unknown;
-  setData: (family: FamilyId, fn: (data: unknown) => unknown) => void;
   /** The decided values, off the page's root; null until the browser has them. */
   decided: Record<FamilyId, Values> | null;
   values: (family: Family) => Values;
   setValue: (family: Family, token: string, value: Values[string]) => void;
+  /** Every value at once, as kept somewhere else: an action's draft, loaded from the database (Motion.md M24). */
+  replaceValues: (family: Family, values: Values) => void;
   applyPreset: (family: Family, id: PresetId) => void;
   reset: (family: Family) => void;
   /** The preset a family's values match exactly, or null once they have been tuned. */
@@ -202,6 +206,9 @@ type Studio = {
   setLoop: (loop: boolean) => void;
   hold: number;
   setHold: (hold: number) => void;
+  /** Where a family's jigs stand, as he left them; undefined until he has moved one. */
+  jigsOf: (family: FamilyId) => JigArrangement | undefined;
+  setJigs: (family: FamilyId, jigs: JigArrangement | null) => void;
   /** Play from the start, on the timeline. */
   play: () => void;
   transport: Transport;
@@ -252,12 +259,11 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
       return (typeof value === typeof fallback ? value : fallback) as Widen<T>;
     };
     return {
-      dataOf: (family) => saved.data[family],
-      setData: (family, fn) => update((s) => ({ ...s, data: { ...s.data, [family]: fn(s.data[family]) } })),
       decided,
       values: valuesOf,
       setValue: (family, token, value) =>
         update((s) => ({ ...s, values: { ...s.values, [family.id]: { ...decided?.[family.id], ...s.values[family.id], [token]: value } } })),
+      replaceValues: (family, values) => update((s) => ({ ...s, values: { ...s.values, [family.id]: { ...decided?.[family.id], ...values } } })),
       applyPreset: (family, id) =>
         update((s) => ({ ...s, values: { ...s.values, [family.id]: { ...presetValues(family, id) } }, from: { ...s.from, [family.id]: id } })),
       reset: (family) =>
@@ -281,6 +287,14 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
       setLoop: (loop) => update((s) => ({ ...s, loop })),
       hold: saved.hold,
       setHold: (hold) => update((s) => ({ ...s, hold })),
+      jigsOf: (family) => saved.jigs?.[family],
+      setJigs: (family, jigs) =>
+        update((s) => {
+          const next = { ...s.jigs };
+          if (jigs) next[family] = jigs;
+          else delete next[family];
+          return { ...s, jigs: next };
+        }),
       play: () => transport.play(true),
       transport,
     };

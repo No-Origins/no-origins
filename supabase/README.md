@@ -14,7 +14,7 @@ One project, `no-origins`: Postgres + Auth + Storage.
 > card posts it back — a mail client's preview or a scanner between Resend and the inbox fetches the link and spends
 > nothing; the person's tap does. Answer *No* to its storage question (`storage.analytics.enabled` differs and is not ours to change). **The passkey
 > origins are not among what config push manages**, so `https://motion.no-origins.com` and
-> `https://character.no-origins.com` under the relying party ID `no-origins.com` are still a dashboard step, and his,
+> `https://orbit.no-origins.com` (Orbit's, `character.` until 2026-10-01) under the relying party ID `no-origins.com` are still a dashboard step, and his,
 > until checked. A passkey registered under another relying party ID does not carry over.
 >
 > The same night `db push` applied `…_drop_quests.sql` and `…_studio_versions.sql` to the hosted project — the first
@@ -61,8 +61,9 @@ One project, `no-origins`: Postgres + Auth + Storage.
 | `migrations/…_storage.sql` | The two buckets of §8.2 and their policies |
 | `migrations/…_quests.sql` | **The reset (§0.5):** drops the document/editor/products era, keeps identity, adds `quests` (+ its `rev` trigger and RLS) *(its `quests` dropped by `…_drop_quests.sql`)* |
 | `migrations/…_drop_quests.sql` | **Quests removed (§0.7):** drops `quests`, `noo_touch_quest_layout()` and `noo_quest_status`; identity untouched. **Drops data** on any database that has quest rows. |
-| `migrations/…_studio_versions.sql` | **The studios' drafts and versions (Motion.md M20, Character-Studio.md C6, 2026-09-30):** `studio_items` (a character, a motion or an uploaded drawing), `studio_drafts` (one per item, `rev` bumped by the database when `data` changes), `studio_versions` (numbered max + 1 per item, named, frozen: no update or delete for any role, truncate revoked), `studio_publish()` (the draft as he saw it, refused on a stale `rev`), owner-only RLS, and the agent's version 12 stored whole as its first. Adds only; drops nothing. |
-| `migrations/…_studio_minor_versions.sql` | **Major and minor versions, and a new character by its name (Character-Studio.md C19, 2026-10-01):** `studio_versions.minor` (from 0; `number` is the major; unique per item with it; every stored version is its number and .0, filled by the column's default, no frozen row written), the name optional, the trigger refusing anything but the next minor or the next major's .0, `studio_publish(p_item, p_ui_version, p_rev, p_label default null, p_step default 'major')` (the motion studio's call unchanged), and `studio_new_character(p_name, p_data)`. Drops only the one-number unique constraint and the old four-argument `studio_publish`. **Pushed to the hosted project on 2026-10-01** (`db push`), before the code that calls it was deployed; the code before it still works against it. |
+| `migrations/…_studio_versions.sql` | **The studios' drafts and versions (Motion.md M20, Orbit.md C6, 2026-09-30):** `studio_items` (a character, a motion or an uploaded drawing), `studio_drafts` (one per item, `rev` bumped by the database when `data` changes), `studio_versions` (numbered max + 1 per item, named, frozen: no update or delete for any role, truncate revoked), `studio_publish()` (the draft as he saw it, refused on a stale `rev`), owner-only RLS, and the agent's version 12 stored whole as its first. Adds only; drops nothing. |
+| `migrations/…_studio_minor_versions.sql` | **Major and minor versions, and a new character by its name (Orbit.md C19, 2026-10-01):** `studio_versions.minor` (from 0; `number` is the major; unique per item with it; every stored version is its number and .0, filled by the column's default, no frozen row written), the name optional, the trigger refusing anything but the next minor or the next major's .0, `studio_publish(p_item, p_ui_version, p_rev, p_label default null, p_step default 'major')` (the motion studio's call unchanged), and `studio_new_character(p_name, p_data)`. Drops only the one-number unique constraint and the old four-argument `studio_publish`. **Pushed to the hosted project on 2026-10-01** (`db push`), before the code that calls it was deployed; the code before it still works against it. |
+| `migrations/…_studio_actions.sql` | **The agents' actions (Motion.md M24, 2026-10-01):** the kind `action` (an item naming no character and no slot; its draft `{ action, values }`) and the shape check that allows it, and every motion never published deleted with its draft. Adds a kind; drops nothing else. **Pushed to the hosted project on 2026-10-01**, before the code that calls it was deployed. |
 
 ## Running it locally
 
@@ -95,6 +96,28 @@ magic link to attach to.
 
 ## What was verified, and how
 
+**The agents' actions (2026-10-01), against the local stack** (`…_studio_actions.sql`, Motion.md M24). Run first
+inside a transaction and rolled back, then applied with `npx supabase migration up --local`. It adds the kind
+`action` (an item that names no character and no slot; the shape check compares the kind as text, since a label added
+in a transaction cannot be used in it) and deletes every motion never published, with its draft — one, locally, a
+draft with no versions. Checked: an action inserts, and one naming a character is refused by `studio_items_shape`. The
+motion studio then made Bounce's item and draft, saved on its `rev`, published 1.0 and 2.0 through `studio_publish`
+(minor, then major) and went back to 1.0. **The two test versions were removed afterwards with the frozen trigger
+disabled for that delete alone**, as the character studio's was, and `current_version_id` put back to null: Bounce has
+a draft and no versions. **Pushed to the hosted project on 2026-10-01** (`db push`), before the code that calls it was
+deployed: it deleted the hosted project's one motion, a draft with no versions, as it had the local one's.
+
+**The studios' data, local → hosted (2026-10-01, at the deploy).** The same night the hosted project was made what the
+local one is, for every character and action: one transaction through `npx supabase db query --linked -f`, items
+matched by kind and name (each database made its own ids), a local version the hosted project lacked inserted with
+its id, label and date, the current version and the draft put to local's. The version triggers were disabled for it
+alone and re-enabled before its end, and the transaction checked itself before committing (every version's data, every
+draft, every current version, every trigger back on); it was run once first ending in a raised exception, so rolled
+back. **Two hosted versions were replaced**: Bali 15.1 and Mira 1.4, published on production that morning, whose
+numbers local had given to other versions since. They are in `.private/hosted-public-before-prod-sync-2026-10-01-2140.sql`
+(gitignored), the hosted public schema's data as it stood before. Checked afterwards by a fingerprint of both
+databases: 47 versions, 9 drafts, 9 current versions, identical.
+
 **The studios' drafts and versions (2026-09-30), against the local stack.** Run first inside a transaction and rolled
 back, then applied with `supabase migration up --local` (the allowlist row kept). Checked:
 
@@ -112,21 +135,21 @@ back, then applied with `supabase migration up --local` (the allowlist row kept)
 **Not pushed to the hosted project**, like the two migrations before it: that is his step (`supabase db push`).
 Before that push, regenerate its seed from the package (`resolveCharacter({ body: {}, face: {} })`,
 `@no-origins/ui/lib/agent-body`) if a default has moved: three face defaults did the same night (brow height and
-colour, symbol colour), and the seed and the local version 12 were brought up to them. `config.toml` lists the
-character studio's callback (:3005) and passkey origin beside the motion studio's; a running stack takes them on its
+colour, symbol colour), and the seed and the local version 12 were brought up to them. `config.toml` lists
+Orbit's callback (:3005) and passkey origin beside the motion studio's; a running stack takes them on its
 next `supabase stop` / `start`. On the hosted project both are his dashboard steps, with
-`https://character.no-origins.com`.
+`https://orbit.no-origins.com` (`https://character.no-origins.com` until the rename, Orbit.md C21).
 
 Its seed now holds four versions of the agent: 12, "his settings"; 13, "Version 13, tuned" (his settings block of
 the same night, "This becomes the rest state of the motion": 12 with Come back 1000 ms); 14, "Version 13, tuned,
 tuned" (his next block: 13 with Come back 500 ms and Spread 0.05); and 15, "his version 14, as it looks" (Spread 0.11
 once the whole slider was made live on slime), current, the draft starting from it — `resolveCharacter({ body: {},
-face: {} })` as the package stood. The agent's item is named **Bali** since he named it (2026-09-30). **And five more characters** (Agents.md A2, Character-Studio.md C13): Kino, Zaza,
+face: {} })` as the package stood. The agent's item is named **Bali** since he named it (2026-09-30). **And five more characters** (Agents.md A2, Orbit.md C13): Kino, Zaza,
 Oru, Mira and Lola — the Maker, Scout, Keeper, Editor and Muse — each an item with a draft and a version 1, "Version 1", its whole look, numbered 1 by hand
 (an item's first version may name its number). Replayed from scratch inside a rolled-back transaction each time, and
 every row added to the local database by hand, since the migration was already applied there.
 
-The character studio then saved against it (`e2e/.mcp/character-save.mjs`): a draft written on each change, a
+Orbit, then the character studio, saved against it (`e2e/.mcp/orbit-save.mjs`): a draft written on each change, a
 publish (13), a repeated name refused, a going back to 12, and a draft saved elsewhere first refused with "Load it".
 The test version was removed afterwards with the frozen trigger disabled — locally, and only for that row.
 

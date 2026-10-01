@@ -10,7 +10,7 @@ import {
 
 /**
  * THE AGENT'S FACE, declared (Motion.md M20, "The face, version 1", agreed 2026-09-30, his: *"yes for both"*): the
- * parts it can wear, their styles, and each part's settings as typed properties (`./properties`). The character studio
+ * parts it can wear, their styles, and each part's settings as typed properties (`./properties`). Orbit
  * builds its library from this and the motion studio its controls; the drawing (`sphere-motion`, `components/agent`)
  * reads the values a look and a motion give.
  *
@@ -23,8 +23,10 @@ import {
  * - **A pair is mirrored until a look sets its right side apart** (`FaceWear.right`), which is what gives one raised
  *   brow. A mirrored value reads the same on both sides: a slant or an angle is measured from the inner end, so 0.8 is
  *   both inner ends down.
- * - **`set` says where a setting's rest is designed**: `look`, in the character studio, as part of the character; or
- *   `motion`, only by a motion's rows, its rest the default here. A motion may change either.
+ * - **`set` says where a setting's rest is designed**: `look`, in Orbit, as part of the character; or
+ *   `motion`, only by a motion's rows, its rest the default here, every agent's alike (Motion.md M23). A look marked
+ *   `pose` — how open the lids are, the brows' angle — is one a motion's row may move for a while, which is how a mood
+ *   is made; no motion touches the rest of the look, and a row never puts a part on.
  * - **`worn` or `played`**: a look picks a worn slot's style; a played slot (the symbols) shows only while a motion's row
  *   sets its style.
  *
@@ -66,7 +68,7 @@ export const AGENT_FACE: readonly FaceSlot[] = [
     use: "worn",
     paired: true,
     settings: [
-      { id: "eye-size", label: "Size", touches: "Each eye across, of the head's", type: "number", unit: "head", min: 0, max: 0.6, step: 0.01, default: 0.24, set: "look" },
+      { id: "eye-size", label: "Size", touches: "Each eye across, of the head's", type: "number", unit: "head", min: 0, max: 0.6, step: 0.01, default: 0.24, set: "look", pose: true },
       { id: "eye-spacing", label: "Spacing", touches: "How far apart, of the head across", type: "number", unit: "head", min: 0, max: 1, step: 0.01, default: 0.45, set: "look" },
       { id: "eye-height", label: "Height", touches: "Over the head's middle +, under it −", type: "number", unit: "head", min: -0.8, max: 0.8, step: 0.01, default: 0.3, set: "look" },
       // His, 2026-10-01: "I should also be able to set the color of the eyes". Ink is what they have always been drawn
@@ -93,7 +95,7 @@ export const AGENT_FACE: readonly FaceSlot[] = [
       set: "look",
     },
     settings: [
-      { id: "pupil-size", label: "Size", touches: "The pupil across, of the eye's", type: "number", unit: "eye", min: 0.2, max: 0.9, step: 0.01, default: 0.55, set: "look", only: ["dot"] },
+      { id: "pupil-size", label: "Size", touches: "The pupil across, of the eye's", type: "number", unit: "eye", min: 0.2, max: 0.9, step: 0.01, default: 0.55, set: "look", pose: true, only: ["dot"] },
       { id: "shine-size", label: "Shine size", touches: "The catchlight across, of the eye's", type: "number", unit: "eye", min: 0.05, max: 0.5, step: 0.01, default: 0.3, set: "look", only: ["shine"] },
       { id: "shine-angle", label: "Shine angle", touches: "Where the light catches the eye, round from straight up", type: "angle", min: -180, max: 180, step: 1, default: -45, set: "look", only: ["shine"] },
     ],
@@ -113,9 +115,9 @@ export const AGENT_FACE: readonly FaceSlot[] = [
       set: "look",
     },
     settings: [
-      { id: "lid-open", label: "Open", touches: "How open at rest, 0 shut; a blink shuts them from here", type: "number", unit: "share", min: 0, max: 1, step: 0.01, default: 1, set: "look" },
-      { id: "lid-slant", label: "Slant", touches: "Inner ends down +, angry; outer ends down −, sad", type: "number", unit: "share", min: -1, max: 1, step: 0.01, default: 0, set: "look" },
-      { id: "lid-curve", label: "Curve", touches: "How round the lid's edge is, 0 straight", type: "number", unit: "share", min: -1, max: 1, step: 0.01, default: 0.5, set: "look" },
+      { id: "lid-open", label: "Open", touches: "How open at rest, 0 shut; a blink shuts them from here", type: "number", unit: "share", min: 0, max: 1, step: 0.01, default: 1, set: "look", pose: true },
+      { id: "lid-slant", label: "Slant", touches: "Inner ends down +, angry; outer ends down −, sad", type: "number", unit: "share", min: -1, max: 1, step: 0.01, default: 0, set: "look", pose: true },
+      { id: "lid-curve", label: "Curve", touches: "How round the lid's edge is, 0 straight", type: "number", unit: "share", min: -1, max: 1, step: 0.01, default: 0.5, set: "look", pose: true },
       { id: "blink-every", label: "Blink every", touches: "Time between blinks, 0 never", type: "duration", min: 0, max: 10000, step: 100, default: 3600, set: "motion" },
       { id: "blink", label: "Blink", touches: "One blink, shut and open again", type: "duration", min: 40, max: 1000, step: 10, default: 170, set: "motion" },
       { id: "squint", label: "Squint", touches: "How shut a landing squeezes them", type: "number", unit: "share", min: 0, max: 1, step: 0.01, default: 0.6, set: "motion" },
@@ -136,9 +138,9 @@ export const AGENT_FACE: readonly FaceSlot[] = [
       set: "look",
     },
     settings: [
-      { id: "lower-raise", label: "Raise", touches: "How far up the eye they rise, 0 not at all", type: "number", unit: "share", min: 0, max: 1, step: 0.01, default: 0, set: "look" },
-      { id: "lower-slant", label: "Slant", touches: "Inner ends up +, outer ends up −", type: "number", unit: "share", min: -1, max: 1, step: 0.01, default: 0, set: "look" },
-      { id: "lower-curve", label: "Curve", touches: "Arched up +, the ^ ^ of a content face; down −", type: "number", unit: "share", min: -1, max: 1, step: 0.01, default: 0, set: "look" },
+      { id: "lower-raise", label: "Raise", touches: "How far up the eye they rise, 0 not at all", type: "number", unit: "share", min: 0, max: 1, step: 0.01, default: 0, set: "look", pose: true },
+      { id: "lower-slant", label: "Slant", touches: "Inner ends up +, outer ends up −", type: "number", unit: "share", min: -1, max: 1, step: 0.01, default: 0, set: "look", pose: true },
+      { id: "lower-curve", label: "Curve", touches: "Arched up +, the ^ ^ of a content face; down −", type: "number", unit: "share", min: -1, max: 1, step: 0.01, default: 0, set: "look", pose: true },
     ],
   },
   {
@@ -156,9 +158,9 @@ export const AGENT_FACE: readonly FaceSlot[] = [
       set: "look",
     },
     settings: [
-      { id: "brow-height", label: "Height", touches: "Over the eye, of the head", type: "number", unit: "head", min: 0, max: 0.6, step: 0.01, default: 0.12, set: "look" },
-      { id: "brow-angle", label: "Angle", touches: "Inner end down +, angry; up −, worried", type: "angle", min: -40, max: 40, step: 1, default: 0, set: "look" },
-      { id: "brow-arch", label: "Arch", touches: "How it arches, 0 straight, − dipped", type: "number", unit: "share", min: -1, max: 1, step: 0.01, default: 0.3, set: "look" },
+      { id: "brow-height", label: "Height", touches: "Over the eye, of the head", type: "number", unit: "head", min: 0, max: 0.6, step: 0.01, default: 0.12, set: "look", pose: true },
+      { id: "brow-angle", label: "Angle", touches: "Inner end down +, angry; up −, worried", type: "angle", min: -40, max: 40, step: 1, default: 0, set: "look", pose: true },
+      { id: "brow-arch", label: "Arch", touches: "How it arches, 0 straight, − dipped", type: "number", unit: "share", min: -1, max: 1, step: 0.01, default: 0.3, set: "look", pose: true },
       { id: "brow-length", label: "Length", touches: "Across, of the eye's", type: "number", unit: "eye", min: 0.5, max: 2, step: 0.01, default: 1.2, set: "look" },
       { id: "brow-thickness", label: "Thickness", touches: "How thick, of the head", type: "number", unit: "head", min: 0.02, max: 0.2, step: 0.005, default: 0.06, set: "look" },
       { id: "brow-colour", label: "Colour", touches: "What they are drawn in", type: "colour", options: COLOUR_NAMES, default: "deep", set: "look" },
@@ -194,7 +196,7 @@ export const AGENT_FACE: readonly FaceSlot[] = [
 ]
 
 /**
- * An uploaded style's drawing, cleaned (M20's "An uploaded style", agreed with the character studio's session): its
+ * An uploaded style's drawing, cleaned (M20's "An uploaded style", agreed with Orbit's session): its
  * shapes in its slot's own space — the slot's anchor at the origin (`faceAnchors`), x right, y down, `unit` to the head's
  * radius (the template's 100) — each a flattened absolute path, filled and or stroked in one of the agent's colours by
  * name or a `#rrggbb`. A pair's is its left part, as you see it; the right is its mirror. `viewBox` is the library's
@@ -218,7 +220,7 @@ const COLOUR = (c: unknown): c is string =>
 
 /**
  * `raw` as a drawing, or null: every shape's path only commands and numbers, its colours named or `#rrggbb`, its width
- * a number, at most 400 shapes of at most 40,000 characters each. The character studio cleans an upload; this is what the
+ * a number, at most 400 shapes of at most 40,000 characters each. Orbit cleans an upload; this is what the
  * agent checks again before it draws one read back from the database.
  */
 export function checkDrawing(raw: unknown): DrawingData | null {

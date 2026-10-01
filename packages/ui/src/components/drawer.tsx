@@ -30,6 +30,8 @@ function DrawerClose({
   return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />
 }
 
+// Diverged from sera (2026-10-01): no backdrop blur on the overlay — the system keeps no glass (his, 2026-09-16: "No
+// more glass effects"), and no page blurs (Portfolio.md P21). The portfolio's More about me is the first dialog on a page.
 function DrawerOverlay({
   className,
   ...props
@@ -38,7 +40,7 @@ function DrawerOverlay({
     <DrawerPrimitive.Overlay
       data-slot="drawer-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-black/20 motion-panel supports-backdrop-filter:backdrop-blur-sm data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 z-50 bg-black/20 motion-panel data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}

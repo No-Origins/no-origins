@@ -28,9 +28,13 @@ export const profile = {
   years: { figure: "6+ Years", line: "Building Products" },
   // Where he is, beside the degree under the links (2026-09-27).
   city: "Hyderabad",
+  // Not from the résumé: his line under the profile, where the note was (2026-10-01, his: "I want to have the following
+  // tagline I'm a developer at the intersection of system design and design systems").
+  lead: "I'm a developer at the intersection of system design and design systems.",
   // Not from the résumé: his words for the note under the profile, a paragraph each (2026-09-27, his: "I want to replace
   // the what I am after content with the following"). As he wrote them, "sooo" and all; only the spelling is mended
-  // ("I've love", "keep track off", "over night", "optinionated", "mutiple", "deciplines").
+  // ("I've love", "keep track off", "over night", "optinionated", "mutiple", "deciplines"). Since 2026-10-01 they are
+  // behind "More about me", under his line (`AboutCard`).
   story: [
     "I worked as a full stack developer for over 6 years now.",
     "I love building systems and interfaces as part of process.",
@@ -180,7 +184,9 @@ export const LANGUAGES: { name: string; value: number }[] = [
   { name: "French", value: 20 },
 ];
 
-export const HOBBIES = ["Sketching", "UI/UX in Figma", "Video editing in DaVinci Resolve", "Ukulele"];
+// The interests (his, 2026-10-01: "my interests are sketching oil painting designing editing ukulele"). They were
+// Sketching, UI/UX in Figma, Video editing in DaVinci Resolve and Ukulele.
+export const HOBBIES = ["Sketching", "Oil painting", "Designing", "Editing", "Ukulele"];
 
 export const EDUCATION = {
   degree: "B.Tech in Computer Science (Hons.)",
@@ -203,7 +209,9 @@ export type Project = { name: string; line: string; short?: string; action?: str
 
 export const PROJECTS: Project[] = [
   {
-    name: "Agents Society",
+    // Orbit since 2026-10-01 (his: "the second project agent society, let's name it as orbit"); the lines are Agents
+    // Society's still, and the cards no longer show them.
+    name: "Orbit",
     line: "A cloud-based, self-governed and self-improving agent harness. Not here yet; this is where it will live.",
     short: "An agent harness I’m building.",
     state: "in progress",
@@ -216,4 +224,14 @@ export const PROJECTS: Project[] = [
     // No state (his, 2026-09-27: "remove 'you are here'"): the pill is the way out, to the showcase in a new tab.
     href: "https://design.no-origins.com",
   },
+];
+
+/**
+ * Not his projects: two dummies after them, so the projects' carousel has somewhere to turn (his, 2026-10-01: "add two
+ * more dummy projects so that it feels like a carousel"). The dummies of 2026-09-27 were Project Three and Four; in
+ * words they run past a two-cell card at `heading`, so these are numbered. Take them out when his own are in `PROJECTS`.
+ */
+export const DUMMY_PROJECTS: Project[] = [
+  { name: "Project 3", line: "A placeholder." },
+  { name: "Project 4", line: "A placeholder." },
 ];

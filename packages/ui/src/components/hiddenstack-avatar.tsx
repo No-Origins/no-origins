@@ -12,7 +12,7 @@ export type HiddenstackAvatarHandle = { view: (view: HiddenstackView) => void }
 export type HiddenstackAvatarStatus = "loading" | "ready" | "unavailable"
 
 /**
- * The explicitly requested character artwork, alongside Agent in the system (Character-Studio.md C11).
+ * The explicitly requested character artwork, alongside Agent in the system (Orbit.md C11).
  * Three.js loads only when this portrait mounts. All surrounding controls remain the system's existing controls.
  */
 export function HiddenstackAvatar({ ref, poster, className, onStatusChange, rig = HUMAN_RIG_START }: {

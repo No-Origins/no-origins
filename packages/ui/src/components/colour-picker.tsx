@@ -8,8 +8,8 @@ import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-g
 /**
  * THE COLOUR PICKER (his, 2026-10-01: *"We have to keep it consistent, so make it part of the design system. That
  * color pickers should always be like the paint we have in character studio"*): swatches, one a colour, the one picked
- * pressed — what a colour is is seen, not read. It is the character studio's Paint line, moved here whole, and every
- * pick of a colour in every app is one (Character-Studio.md C17). Written for the system rather than pulled from a
+ * pressed — what a colour is is seen, not read. It is Orbit's Paint line, moved here whole, and every
+ * pick of a colour in every app is one (Orbit.md C17). Written for the system rather than pulled from a
  * registry, since shadcn has none; composed from `ToggleGroup`, so its arrows, focus and pressed state are the toggle's.
  *
  * - **Each option is a value, a name and a colour** (`colour`, any CSS colour, so a caller passes what the colour is

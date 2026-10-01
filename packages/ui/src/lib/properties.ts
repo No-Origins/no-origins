@@ -101,12 +101,20 @@ export function checkValue(p: Property, v: unknown): PropertyValue {
 
 /**
  * Where a property's rest is designed (M20): `look`, as part of what the component looks like still (for the agent, in
- * the character studio); or `motion`, only by a motion's rows, its rest the default here. A motion may change either.
+ * Orbit); or `motion`, only by a motion's rows, its rest the default here.
  */
 export type SettingSet = "look" | "motion"
 
-/** A property as a component declares it: its type and meta, and where its rest is designed. */
-export type Setting = Property & { set: SettingSet }
+/**
+ * A property as a component declares it: its type and meta, and where its rest is designed. **`pose`** (Motion.md M23)
+ * marks a look that a motion's row may move for a while — how a mood is made — where every other look is what the
+ * component is, and no motion touches it. So a motion's rows offer a component's motion settings and its pose, never the
+ * rest of its look.
+ */
+export type Setting = Property & { set: SettingSet; pose?: boolean }
+
+/** Whether a motion's row may set it (M23): a motion setting, or a look that is a pose. */
+export const moves = (s: Setting): boolean => s.set === "motion" || s.pose === true
 
 /** Every property's default, keyed by id. */
 export const defaultsOf = (properties: readonly Property[]): PropertyValues =>

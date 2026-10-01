@@ -1026,6 +1026,40 @@ card instead of starting at a fixed row. Other jig cards also stop stretching to
 bar is four cells, family and preset selectors three each, and Reset and Copy one each, leaving the unused toolbar
 cells unfilled. The stage and transport retain their allocated workspace.
 
+**The stage at the centre, the jigs either side and dragged, 2026-10-01.** His: *"Right now, Motion Studio is all over
+the place … I want the timeline control to be maximum of uh, 10 columns … I want anywhere the control jigs to be a
+maximum of uh, six columns. And I also think it will be nice if I can drag and drop these jigs into different locations
+if I want to. And uh, the component should always uh, be in the center."* Version 1 of it:
+
+- **The stage is at the field's centre**, always. On a field fourteen columns or wider and eight rows or taller, the
+  jigs stand in two columns, one either side of it, from under the head to the field's foot: each as wide as the room
+  left, four cells to six (four on a field of up to eighteen columns, 1440 wide; five on twenty; six from twenty-two,
+  about 1600), and where the stage would be narrower
+  than ten, it takes the room before the jigs grow past four. The timeline is under the stage, centred, **ten cells at
+  the most**. The head keeps its one row. `studioLayout` in `src/lib/layout.ts` (`JIG_MAX`, `TIMELINE_MAX`).
+- **The agent sits at the stage's centre** when nothing plays, the cell left of and over the middle where the stage is
+  an even number of cells, so it stands on one. It sat in the nest the default jump started from until then.
+- **Every group is a card of its own** in the columns: a family's token groups, or Timing, Shape and Easing where it has
+  none, then Scene; on the agents, Motions and Row. They are split between the two columns in order, so the taller is
+  as short as it can be. The group select on the token jig went: every group's heading is on the page, as his notes
+  on Orbit asked (*"individual cards of controls for each of that with heading"*). A card is two controls to a line at
+  six cells and one below.
+- **A jig is dragged by its grip** (⠿, at the head of each card): to the other column or another place in its own, the
+  cards making room as it passes, its border violet while it is carried, as the portfolio's hovered card was (P18).
+  Escape while dragging puts it back; the grip's arrows move it from the keyboard (↑ ↓ in its column, ← → across). Where
+  he leaves them is kept per motion, in the browser with the studio's other settings (`no-origins:motion`, `jigs`).
+  The cards jump to their places; that move has no motion of its own yet.
+- **A column too short for its cards folds them** (Orbit.md C9's pattern): when it cannot give each card three lines of
+  controls, one is open and the rest are their heading alone, and pressing a heading opens that card and folds the
+  other. Where they fit, the room is shared — a card that needs less than an even share takes what it needs — and a
+  card pages its controls when its share is short (Grid.md D5).
+- **Narrow fields** keep one view at a time, the jig six cells at the most and centred, the timeline ten. The agents'
+  Rows is a view of its own there (it was under Motions, and cut off on a phone).
+
+*Mine:* the stage's width is what is left: ten cells at 1440, eight at 1280, fourteen at 1920. At 1280 focus mode's
+three verticals are tight in eight. And there is no button to put the jigs back where they started; dragging them is
+the only way, for now.
+
 ## M16 — The seventh is the grip: the slider's head detaches into the cursor (2026-09-30)
 
 *His, the morning after the slider became a bar (Grid-v2.md D39): "Let's try a motion for this slider."* A motion he
@@ -1145,11 +1179,11 @@ of 1000ms, a blink of 170ms every 3.6s, squinting 0.6. They are the base the sta
 in globals.css: nothing outside the studio plays the agent yet, and a character's settings go to its next version (M12,
 the amendment of 2026-09-30); M7's move into the stylesheet waits for a page that plays it.
 
-**The agent is drawn by the design system**, since later that night (his approval, given to the character studio's
+**The agent is drawn by the design system**, since later that night (his approval, given to Orbit's
 session). It is drawn by `@no-origins/ui/components/agent`, which draws one `SphereFrame`: the tail, the body, its lit
 side, and the eyes inside a face layer (`data-agent-face`) within the body's clip, where the face parts of M20 will go.
 The stage keeps the nests, the courses, the timeline and the blink's clock, and hands each frame to the agent's
-`paint`. The character studio draws the same component still. Before, it had its own copy, which had drifted and drew
+`paint`. Orbit draws the same component still. Before, it had its own copy, which had drifted and drew
 no eyes.
 
 **Version 13, the same night: the face's parts** (M20's face version 1, his *"yes for both"*). Version 12 with the
@@ -1179,13 +1213,13 @@ and its jigs come from the package's declaration (`lib/agent-face`), not a list 
 Colours are named (`deep` is the paint most of the way to black) and flat. A pair set apart on its right side (one brow
 raised) is drawn from `--motion-sphere-<id>-right`, but no jig sets it yet; that comes with the rows (M19 on the agent).
 
-**Version 13, tuned, the same night: his settings** (sent back in the character studio's session,
+**Version 13, tuned, the same night: his settings** (sent back in Orbit's session,
 headed *"Agent — Version 13, tuned"*: *"This becomes the rest state of the motion. So, in character studio also, let's
 use the rest phase motion."*). All 65 of its values are version 13's but one, **Come back, 1000ms** where it was 1200.
 It is `SPHERE_START` and the family's start, and it is **the agent's version 13 in the database**, the character every
 motion's rows sit on (M20). It keeps the number 13, although his tuned settings would have been the next version until
 now (M12's amendment). The database numbers versions from here: the studio's untuned 13 was never published, so his
-publish is 13. **The character studio plays its rest** (his "rest phase motion"): the agent breathing and blinking
+publish is 13. **Orbit plays its rest** (his "rest phase motion"): the agent breathing and blinking
 live, sitting in its cell.
 
 **Version 14, the same night: his settings**, sent back headed *"Agent — Version 13, tuned,
@@ -1195,7 +1229,7 @@ tuned"*. Two of its 65 values move:
 
 It is `SPHERE_START` and the family's start, and the next of the agent's versions in the database.
 
-**Shapes, colours and textures, the same night** (his, asked in the character studio; Character-Studio.md C10, drawn
+**Shapes, colours and textures, the same night** (his, asked in Orbit; Orbit.md C10, drawn
 by that studio's session in the package):
 - A head can be the sphere or a solid: a cube, a pyramid, a hemisphere, a cylinder, a hexagonal prism, or a cone.
 - There are five more paints, scoped to the agent (`--agent-*`, not the system's palette), and a surface texture.
@@ -1205,7 +1239,7 @@ frames). A solid moves on the sphere's course, and its face sits on its front. *
 from the declaration as well** (`AGENT_BODY`, as the face's already did), so the Head group has Shape and there is a
 Surface group; the studio has 69 settings.
 
-*Found by the character studio's session and mended here:* a settled head's face rode the course's centre, which sinks
+*Found by Orbit's session and mended here:* a settled head's face rode the course's centre, which sinks
 into the bowl as the head spreads, so at a high Spread (0.4 on slime) the eyes sank below the puddle and were cut by
 the bowl. The face now never sits lower than a little under the middle of the puddle drawn. At version 14's spread
 that moves nothing you can see (0.6px on a 200px cell).
@@ -1622,6 +1656,19 @@ M6's phases until each has named its parts. What is built, and where it went a d
 - **Live, the agent answers the pointer on itself.** The state the start plays runs once when the bench opens. An
   enter fires again when the agent moves back under a pointer that has not moved, since the pointer enters it again.
 
+**Amended 2026-10-01, his:** *"I don't have option to delete rows … in the timeline component … I'm still unable to figure
+out uh, what are the options here what can I do … I don't understand what is this drop down for place."*
+
+- **A row is deleted from its lane**: a bin at each lane's end (off while the row is locked, which says so), or Delete
+  on the lane's name. The Row card's Remove is Delete.
+- **Add row is one menu** where "+ Body" and the Place select stood: *a part's values* — every part the agents have, a
+  part the motion does not tick shown and said so — and *another motion, placed in this one*, which plays at its own
+  length and changes wherever it is edited (Place was M19's attach). Each group says what it does in a line. With no
+  other motion, it says how to make one.
+- **A ? beside the player's time** says how a motion works in five lines: a motion, a row, Add row, top to bottom is
+  priority, and Lock and the bin.
+- **A lane's name says what the row sets** when hovered ("Body 2, 0–1600 ms: Columns, Rows").
+
 ## M20 — Motion for any component: typed properties, versions, and the studio behind the sign-in (2026-09-30)
 
 *His, the same night, after the agent's states: "I don't think what I'm trying to say was only specific to agent. The
@@ -1750,8 +1797,8 @@ these properties, as a first guess for him to tune, not as settings:
 
 **The face is parts from a library.** This is *proposed*, not his yet:
 
-- **It lives in the character studio.** That studio is appearance, and C1 lists accessories among it
-  (Character-Studio.md). There he picks what the agent wears and how it looks; the motion studio moves what it wears.
+- **It lives in Orbit.** Orbit is appearance, and C1 lists accessories among it
+  (Orbit.md). There he picks what the agent wears and how it looks; the motion studio moves what it wears.
 - **A library is slots, and each slot has styles.** The slots are upper lids, lower lids, pupils, brows, mustache,
   hair, and marks (the pimples). A style is one way of drawing a slot: Brows could be a Line, an Arch or Bushy. The
   agent wears one style in a slot, or none.
@@ -1845,7 +1892,7 @@ system, so there is no soft-edged blush:
 
 Mustache and hair come after marks.
 
-**Versions and publishing.** *Agreed* (his, the same night, given in the character studio's session: *"I agree to your
+**Versions and publishing.** *Agreed* (his, the same night, given in Orbit's session: *"I agree to your
 split. And yes, a published motion should freeze. And any new change will lead to new publish. Each publish should be
 treated as a version."*). It answers the questions M20 left open above, and follows the admin's rules wherever they
 already decide (Admin.md §6.4, §7, R1 to R3). A change never alters a published version: it is saved in the draft, and
@@ -1853,7 +1900,7 @@ the next publish makes the next version.
 
 - **Three things get versions.**
   - A **character**: what the agent looks like, meaning its body, the parts it wears and their settings. It is edited
-    in the character studio.
+    in Orbit.
   - A **motion**, such as Curious or Hop and wonder: its timeline and its rows. It is edited here.
   - An **uploaded drawing**.
 
@@ -1892,7 +1939,7 @@ the next publish makes the next version.
 - **The tables follow once this is agreed:** characters, motions, their drafts and versions, and drawings, with the
   drawings' files in storage. RLS denies everything except the signed-in owner (Admin.md §8.3).
 
-**Built the same night, in two sessions** (the split his *"I agree to your split"* approved: the character studio's
+**Built the same night, in two sessions** (the split his *"I agree to your split"* approved: Orbit's
 session builds the library and the upload; this one draws the parts and their motion):
 
 - **The declaration**, in the package, pure:
@@ -1906,7 +1953,7 @@ session builds the library and the upload; this one draws the parts and their mo
   frozen with every value, not only the ones moved off a default. A default that changes in code later must not change
   what a published version looks like (Admin.md §7, the reason for the theme snapshot). A key missing from a look read
   back is a setting declared since it was saved, and takes its default.
-- **The tables** are the character studio session's migration, reviewed here and applied to the local stack only
+- **The tables** are the migration of Orbit's session, reviewed here and applied to the local stack only
   (`supabase/migrations/20260930090000_studio_versions.sql`, supabase/README.md). One shape serves all three kinds:
   - `studio_items`, each with one draft (`studio_drafts`, whose `rev` refuses a stale write).
   - `studio_versions`, numbered max + 1 per item with a label that is never empty and never repeated, frozen by
@@ -1917,7 +1964,7 @@ session builds the library and the upload; this one draws the parts and their mo
 - **The face's parts are drawn** (M17, version 13), and the motion studio's jigs for them are built from the
   declaration.
 - **Uploaded styles**, the same night:
-  - **The character studio's session** built the library, the upload and its checks (Character-Studio.md). The
+  - **Orbit's session** built the library, the upload and its checks (Orbit.md). The
     template for a slot is drawn from the package's `faceAnchors` and has Guides the cleaner maps back from.
   - **This session** built the drawing: `DrawingData` and `checkDrawing` in `lib/agent-face`, and the `Agent`'s
     `drawings`, each drawing placed on its slot's anchor, a pair's right part mirrored, colours from `lib/agent-colours`.
@@ -1951,7 +1998,7 @@ are.
   make; none is seeded.
 - **Where it is kept: in the database**, built the same night (asked whether saving should come next, his *"Yes"*).
   - **Each motion is an item** of kind `motion`, made for the Agent, with one draft (`apps/motion/src/app/actions.ts`,
-    server functions as the character studio's are).
+    server functions as Orbit's are).
   - **It saves as he goes,** 500ms after the last change, whole, on the `rev` it was loaded at. Another device's save
     first stops the saving, and the card says *Changed elsewhere* and offers *Load it*.
   - **A new tab is a new item, made under its own id.** A deleted tab goes from the database if it was never published.
@@ -1974,8 +2021,8 @@ are.
   (`<token>-right`, `AttachRow` untouched), read by the model as the pair's right (`SphereMotion.right`). Mirrored again,
   the right's values come off. One brow raised is a Brows row, Arch, the left's Angle −30 and the right's 35. Not every
   setting of a pair has a side: their spacing, a style, the blink's clock and the like are the pair's, and the right's
-  controls for them are off. The Agent page itself has no right side yet: a character's set-apart pair is the character
-  studio's, and reaches a motion when the motion studio reads the character (open).
+  controls for them are off. The Agent page itself has no right side yet: a character's set-apart pair is Orbit's,
+  and reaches a motion when the motion studio reads the character (open).
 - **Not built:**
   - an event other than Play (his, the same night: *"later, whenever we need, we can attach motions to triggers, so we
     don't need them"*);
@@ -2064,6 +2111,575 @@ motion studio's stage reads them. What is the intro's own is when each part is a
 None is in globals.css. `readIntroMotion` (`lib/intro-motion.ts`) falls back to `INTRO_START`, which holds these values.
 A cell's lit ring fades over the field's 500ms, the pointer's (Grid.md D34). The intro is not on the bench. Putting it
 there, so he can tune it and send the settings back, is the next step if he wants one.
+
+### Version 2 — the six (2026-10-01)
+
+*"Now this is what we will try to build. Is the intro scene. The complete motion design uh, based on our design system
+motion principle and everything and uh, the thing is uh, the intro will be filled with six of our agents that we
+designed uh, to be in the center. And then uh, after two seconds, they will jump into multiple sections and uh, build
+these components on the page. I mean, it's the feeling that I'm trying to say. It's like it should feel like these
+agents uh, are loading and then once everything is loaded, they jump into uh, different places and uh, they will open
+up the components."* Grid.md D50 amended, Portfolio.md P23 amended. It replaces version 1 whole: no hop in place and
+no rings of cells. Its parts are other families' decided motions, read and never copied:
+
+- **The gather is his loader's square** (M10, `loaderLayout`): one agent a nest on the field's centre, as near square
+  as can be and never wider than tall, so six stand two across and three down. Each breathes at its own pace, which is
+  the loading. Where each one stands is the spot that leaves them least to travel all told, so they fan out.
+- **The leap is the agent's own** (M17, `sphereCourse`), each with its look's crouch, landing and eyes leading. Two
+  numbers are the intro's: every agent is in the air for `flight`, however far it goes, and the arc's height grows
+  with the distance (`arc`), held so it never leaves the top of the screen. Each crouches as long as it does, so all
+  leave the floor together and land together: his loader's rule, *"let all the loading cells reach their destination
+  cell at once"*.
+- **It lands on the box's top-left cell** (M10: *"always move them to the top left corner of any component"*). Each box
+  names the agents that open it (`data-intro-by`). A box that names none goes to the nearest agent. An agent with no box
+  of its own lands beside the one that opens the box naming it, along its top row. On a phone that is the tabs bar,
+  one agent a tab.
+- **It dives, and the nest opens into the box.** After `settle` it sinks through its nest's circle over `dive`, cut to
+  the circle, through the page's opening its tail was always behind. From the same moment the nest opens rightward
+  and down into the box. This is the loader's opening (`openBox`, the `--motion-load-*` duration and reveal, movement's
+  ring curve). The lime line turns into a plain border over the loader's press as it grows, and the box comes in under
+  it as the border goes. The agent's other boxes follow, each from its own top-left cell, `cascade` later for every
+  pitch it is from the nest.
+
+| Token | Version 2 | What |
+|---|---|---|
+| `--motion-intro-gather` | 2000ms | how long they stand together before they leave the floor (his "after two seconds") |
+| `--motion-intro-flight` | 720ms | every agent's time in the air, however far |
+| `--motion-intro-arc` | 0.2 | an arc's height over the higher nest, in cells for every cell travelled, on half a cell |
+| `--motion-intro-settle` | 250ms | landed, before it dives |
+| `--motion-intro-dive` | 320ms | the dive through the nest |
+| `--motion-intro-cascade` | 80ms | each further box of its section, a pitch |
+
+Version 1's four tokens are gone. None of these is in globals.css: `INTRO_START` holds them. The cast is the page's
+(`introAgents` on `Grid`). The portfolio's is the six (brand/Agents.md), each at its current version in Orbit.
+
+*Measured* (`e2e/.mcp/agent-intro.mjs`, `e2e/.mcp/intro-fps.mjs`, local dev server, 2026-10-01):
+- **1440 × 900:** they land at 2.72s and open from 2.97s. The last box in, the statement about roles five rows down
+  Kino's column, is in at about 4.6s, and the wake (Portfolio.md P16) follows. A 412 × 915 phone is the same.
+- **Frame rate:** 60fps while all six paint, in headless Chromium on his Mac. With the CPU slowed four times it is
+  about 28fps. One frame of a shaped agent costs 1.2 to 1.6ms (the cube, the cone, the prism, the hemisphere), the
+  cylinder 0.4ms and the sphere 0.07ms. That cost is the shape model's (`agent-shape`), not the intro's.
+
+*Mine, his to tune:* every number above; which agent opens which section on the portfolio (P23); the dive itself, where
+"open up the components" could also be read as the agent staying on its box; landing all at once, not each at its own
+pace.
+
+### Version 3 — the actions (2026-10-01)
+
+*"Now here is the motion design I want. For intro. Since we have now defined the motions for uh, dive, jump and bounce,
+in intro, intro will be a three second sequence where all the six agents are randomly placed within the center four by
+four cells and then they will randomly keep bouncing not together random agents will bounce at random times with random
+frequency for uh, two seconds and then randomly some agents will dive and some agents will jump to their positions and
+um, once they reach their destination cell we should have the ripple the first type of ripple that we had where um, the
+agent jumps and then it spreads right so similarly but that should happen for all the agents with small radius."* Grid.md
+D50 amended, Portfolio.md P23 amended. It replaces version 2's gather and leap. The landing on the box's top-left cell,
+the dive into the nest and the box opening stay as they were.
+
+- **The moves are his actions** (M24), as he published them: Bounce 1.1, Jump 1.3 and Dive 1.4. The portfolio copies
+  their values (`content/actions.ts`, `INTRO_ACTIONS`, a snapshot as `agents.ts` is) and hands them to the grid
+  (`introActions`). Each agent moves as its look makes it under each action's values (`sphereMotionOf(look, values)`).
+  Nothing of how they move is the intro's. Version 2's `flight` and `arc` are gone.
+- **They stand at random.** Six cells picked at random from the field's centre four by four, a different six on every
+  load, never a cell an agent will land on. Each agent stands in the cell that leaves the cast least to travel overall,
+  so they fan out and no two cross where that can be helped (`introSpots`).
+- **They bounce, not together.** Each makes its first Bounce at a random moment in the first `first`, then again at its
+  own pace: a wait it picks up to `rest`, each wait varying by about a third either way. Some bounce often, some seldom.
+  A bounce may start once the last one has landed and come to rest, so the next one cuts its settle. His Bounce does
+  not squash, so nothing is seen to cut. Waiting out the settle would have let Bali and Lola bounce once: on slime it
+  runs about a second. No bounce starts that would not be at rest by the time its agent leaves.
+- **They leave, some diving and some jumping.** Each leaves at a random moment in the `leave` after `gather`, by a Jump
+  or a Dive picked at random, with at least one of each. It goes to the top-left cell of the box it opens first, as in
+  version 2 (`introCast`, unchanged).
+- **Each landing spreads a ripple.** This is version 1's ripple, made small. As an agent first touches down in its nest
+  (the play's `lands`), the cells round it light in violet, ring by ring out from the nest's edge, as version 1 counted
+  its rings. The rings are `ring` apart and go `ripple` rings out, and each cell fades as the pointer's cell does
+  (500ms). Two rings is the eight cells round the nest, then the ring after them: a disc about two cells across each
+  way. The nest's own cell, under it, never lights. Each agent's ripple is one pass of the field's painter, all sent as
+  the intro starts and each timed from its landing on the painter's clock. Where two ripples cross, a cell shows the
+  younger lighting (`grid-field.ts`).
+- **Then the components open**, as in version 2. `settle` after landing, each agent dives into its nest over `dive`,
+  and the nest opens into its box. Each agent does this from its own landing, not all at once.
+
+| Token | Version 3 | What |
+|---|---|---|
+| `--motion-intro-gather` | 2000ms | how long they bounce before the first may leave (his "two seconds") |
+| `--motion-intro-first` | 500ms | the latest an agent's first bounce starts |
+| `--motion-intro-rest` | 700ms | the longest an agent's pace waits between one bounce at rest and the next |
+| `--motion-intro-leave` | 300ms | the window after `gather` in which each leaves |
+| `--motion-intro-ripple` | 2 | how many rings out a ripple goes |
+| `--motion-intro-ring` | 80ms | from one ring of a ripple lighting to the next |
+| `--motion-intro-settle` | 250ms | landed, before it dives into its nest |
+| `--motion-intro-dive` | 320ms | that dive |
+| `--motion-intro-cascade` | 80ms | each further box it opens, a pitch |
+
+None is in globals.css: `INTRO_START` holds them. The ripple's 80ms a ring is slower than version 1's 45ms, so a
+spread only two rings long is seen to spread.
+
+*Measured* (`e2e/.mcp/agent-intro-v3.mjs`, `e2e/.mcp/intro-end.mjs`, `e2e/.mcp/intro-fps.mjs`, local dev server,
+2026-10-01):
+- **1440 × 900, three loads, at Jump 1.3 and Dive 1.4:** bouncing at random until 2s. They leave between 2.0 and 2.3s
+  and land between 2.40 and 2.80s; a Jump touches down 380ms after it leaves (its crouch and his 320ms Air time). The
+  ripples spread from each landing, and the page is handed over at 4.45 to 4.63s (version 2: about 4.6s).
+- **412 × 915 and a Pixel 7:** the six start in the centre four by four. Four of them land on the tabs bar side by
+  side, and their ripples join into one band across it. Handed over at about 4.3s.
+- **Frame rate:** 60fps while all six paint. With the CPU slowed four times it is about 27fps, the same as version 2.
+- **Reduced motion:** the page is on the field at once, with no layer.
+
+*Mine, his to tune:* every number but the two seconds. Also mine: that the next bounce may cut the settle; that
+departures are spread over 300ms; standing where travel is least, among the random cells; at least one Dive and one
+Jump; the ripple in violet; and keeping version 2's ending. **His Jump is one Air time however far it goes** (320ms
+in 1.3, 220ms in 1.2), so a leap across a desktop is quick and low (0.95 cells over the higher nest). That is the
+action's, tuned on a four-row hop in the studio. If it reads too fast here, its Air time is the control to move.
+
+*Open:*
+1. On a phone a cell is 72px or more, so a two-ring ripple covers a good part of the screen.
+2. The action values are a copy. A version he publishes later reaches the page only when `content/actions.ts` is copied
+   again, as for the looks.
+3. The intro is not on the motion studio's bench, so its numbers cannot be tuned there yet.
+
+### Version 4 — the centre and the ripple (2026-10-01)
+
+*"Right now, in intro, uh, when the agent jumps and reaches its destination cell, there are waves. But uh, what I want to
+update is that the agent should jump to the center of the sections that it is rendering. And uh, instead of uh,
+expanding these sections from top left they should render along with the uh, ripple."* Grid.md D50 amended, Portfolio.md
+P23 amended. Version 3's standing, bouncing, leaving, settle and dive are unchanged. What changed is where each agent
+lands and how its boxes come in.
+
+- **It lands on the centre of the boxes it opens.** This is the middle of the rectangle round all of them
+  (`introCast`). Where that rectangle is an odd number of cells across, the middle is a cell. Where it is even, the
+  middle is half way between two cells, so the nest can stand on the gutter. On the portfolio, Zaza lands on the middle
+  of its three rows (the links, the facts, the socials). Kino lands half way down the projects and its statement. Bali
+  lands on the middle of the profile and the note together. An agent that opens no box sits where version 3 put it:
+  on a phone that is Kino, Mira and Lola, each over its own tab.
+- **Its ripple crosses its boxes.** As it touches down, the cells light ring by ring out from the nest's edge, counted
+  as before. Every cell of the boxes it opens lights, plus `ripple` rings past their edges. An agent that opens no box
+  still makes a small ripple, `ripple` rings round its nest (`introRipple`).
+- **The boxes come in with the ripple.** A box no longer opens from its top-left corner. Each of its cells shows
+  `behind` after the ripple lights it, so the violet front runs a ring ahead of the page. A cell first shows its disc,
+  half a pitch round its centre, so two discs touch in the middle of the gutter. `lace` later it shows its whole tile.
+  This is Grid.md D40's lace, the reveal his first intro had (`introPlan`, `introShown`, `introClip`). Each box is
+  clipped to a path of the discs and tiles that are in. The path is written only when another cell comes in, so it
+  changes in the ripple's steps, not every frame. A further box of the same agent comes in when the ripple reaches it,
+  so `cascade` is gone. His loader's opening (M10) no longer plays in the intro, and neither do the boxes' lime lines.
+- **The nest stays over the box** until its agent has dived into it, and then goes over another `dive`
+  (`introNestLeft`).
+
+| Token | Version 4 | What |
+|---|---|---|
+| `--motion-intro-gather` | 2000ms | how long they bounce before the first may leave (his "two seconds") |
+| `--motion-intro-first` | 500ms | the latest an agent's first bounce starts |
+| `--motion-intro-rest` | 700ms | the longest an agent's pace waits between one bounce at rest and the next |
+| `--motion-intro-leave` | 300ms | the window after `gather` in which each leaves |
+| `--motion-intro-ripple` | 1 | how many rings a ripple goes past the boxes it opens (round its nest, for one that opens none) |
+| `--motion-intro-ring` | 80ms | from one ring of a ripple lighting to the next |
+| `--motion-intro-behind` | 80ms | from a box's cell lighting to it starting to come in: the front's lead on the page |
+| `--motion-intro-lace` | 90ms | from a cell's disc to its whole tile (D40's `LACE_MS`) |
+| `--motion-intro-settle` | 250ms | landed, before it dives into its nest |
+| `--motion-intro-dive` | 320ms | that dive; the nest goes over as long again |
+
+None is in globals.css: `INTRO_START` holds them. `--motion-intro-cascade` is gone, and `ripple` now counts from the
+boxes' edges, not from the nest.
+
+*Measured* (`e2e/.mcp/agent-intro-v4.mjs`, local dev server, 2026-10-01, one load each):
+- **1440 × 900, dark:** every nest stands on the centre of the boxes its agent opens. Bali's is at 210,282, the
+  middle of the profile and the note. The six landed between 2.41 and 2.64s. Their boxes were in by about 3.0s, and
+  the page was handed over between 3.45 and 3.8s. Version 3 handed over at about 4.5s: its loader's opening was the
+  long part.
+- **Pixel 7, light:** Bali lands on the profile row's middle and Zaza on its three rows'. Oru lands on the centre of
+  the sections panel. Kino, Mira and Lola land on their tabs. The ripple of the sections panel spreads one ring past
+  it, across the empty rows under it.
+- No errors on either.
+
+*Mine, his to tune:* every number but the two seconds. Also mine: the centre of the rectangle round all an agent's
+boxes, rather than the centre of each box or of its biggest; one ring of spill past them; the page a ring behind the
+front; bringing D40's disc-then-tile back for the cells; the dive still `settle` after landing, so an agent can go
+before its last box is in; and the guests' seats on a phone.
+
+*Open:*
+1. Text that is half in shows as fragments between the discs, as D40's wash did. The lace is 90ms, so this lasts only
+   a moment. If it reads as broken, the reveal could be a circle growing smoothly with the front instead of cell by cell.
+2. A nest that stands on the gutter sits over the corners of four cells, which the ripple lights round it.
+3. Version 3's open points 2 and 3 still stand (the action values are a copy; the intro is not on the bench).
+
+### Version 5 — the row (2026-10-01)
+
+*"Uh, now I want to make some small changes uh, instead of placing this agent's uh, randomly let's place them in uh,
+row in a line uh, without any gaps in between them uh, their order will be random and also not all the agents will
+bounce um, let's only make uh, Bali Kino and uh, Mira to bounce."* Grid.md D50 amended, Portfolio.md P23 amended.
+Version 4 is unchanged except for how the six stand and who bounces.
+
+- **They stand in a row.** Each agent takes one cell, side by side, with no empty cell between them. The field's gutter
+  is still there, as it is between any two cells. The row is centred across the field. Six cells on a field of even
+  width are symmetric about its centre (D26). It goes on the field's middle row, the upper of the two, because a
+  field's rows are even. If an agent lands in that row, it goes on the nearest row where none does (`introSpots`). On a
+  Pixel 7 that is the row under the tabs bar, where Kino, Mira and Lola land. Who stands in which cell is random on
+  every load. Version 3's ordering by least travel is gone, so two can cross on the way to their boxes.
+- **Only Bali, Kino and Mira bounce.** The page decides which agents bounce, with `bounces` on an `IntroAgent`; an agent
+  bounces unless the page says otherwise. The portfolio sets it in `content/intro.ts`, apart from the snapshot
+  `agents.ts`. Zaza, Oru and Lola sit in their nests, breathing and blinking, until they leave. The bouncers keep
+  version 3's random pace.
+
+No token changed.
+
+*Measured* (`e2e/.mcp/agent-intro-v5.mjs`, `e2e/.mcp/intro-bounces.mjs`, local dev server, 2026-10-01):
+- **1440 × 900:** the six stood in columns 7 to 12 of 18 on row 6 of 12, in a different order each load. Over the first
+  1.95s, Bali, Kino and Mira rose about 60px off their nests. Zaza, Oru and Lola moved 1px at most, which is their
+  breathing. Two loads gave the same result.
+- **Pixel 7:** all six columns on row 7, one under the tabs bar.
+- No errors.
+
+*Mine, his to tune:* the upper middle row; moving off a row that an agent lands in.
+
+### Version 6 — cells and rest (2026-10-01)
+
+*"those who are not bouncing should uh, be in the rest motion. And I also saw that uh, after bouncing, they just
+randomly appear over uh, some cell which is not part of the grid. And then they drop into it. They should actually drop
+into the cells on the grid. I don't know why you are creating new cells."* Grid.md D50 amended. Version 5 is unchanged
+except for these two things.
+
+- **Every nest is a cell of the field.** Version 4 stood a nest half way between two cells wherever the boxes' middle
+  fell between them. That was the "cell which is not part of the grid", and a Dive came up out of it. The nest is now
+  the cell at the middle. Where the middle falls between cells, it is the first of the two or four cells round it, in
+  reading order, that is in one of the agent's boxes (`introCast`). At 1440 × 900, Bali now lands on (2, 3) of the
+  profile, where it stood at (2.5, 3.5).
+- **Each is seen resting.** The rest is the agent's own: Breath 4s at depth 0.1, a blink every 3.6s (`SPHERE_START`;
+  Orbit plays the same). It was already playing, but every clock started at 0. In the two seconds they stand, each was
+  only half a breath in, and the first blinks fell after they had left, so the three that do not bounce looked frozen.
+  Now each agent's rest plays as if it had already sat for one to two Blink every (or Breath, the longer), picked at
+  random (`since` on its part). Its breath is at its own phase and its next blink at its own moment. A bouncer's rest
+  between bounces runs on the same clock.
+
+No token changed. *Measured* (`e2e/.mcp/agent-intro-v5.mjs`, `e2e/.mcp/intro-rest.mjs`, 2026-10-01):
+- Every nest at 1440 × 900 and on a Pixel 7 is a whole cell.
+- Over the two seconds in the row, in three loads, an agent blinked about half the time: one load four of the six,
+  one load one, one load none.
+- A breath widens the round agents by 1 to 3px and the boxy ones by almost nothing, at his Breath depth of 0.1.
+- No errors.
+
+*Mine, his to tune:* which of the cells round the middle; one to two blinks' worth of sitting. If the rest still reads
+as too still, the agent's own Breath depth is the control to move, and it moves the rest everywhere.
+
+### Version 7 — the small ripple, then the page (2026-10-01)
+
+*"I see some uncomfortable problems uh, during the intro and uh, portfolio loading. Is that when the agents jump and uh,
+reach to their sections, the ripple is now more stuttering it's not smooth and then also it stops at the borders of
+the section and which is weird so i don't think we need such big uh, ripples i think we can just have small ripples and
+uh, once the ripple ends we can drop the agents and then render the components."* Grid.md D50 amended, Portfolio.md
+P23 amended. Version 6 is unchanged (the row, Bali, Kino and Mira bouncing, the rest, landing on the cell at the centre
+of its boxes) except for what follows the landing.
+
+- **The ripple is small again**: version 3's. As each agent touches down, the cells round its nest light ring by ring,
+  two rings out, 80ms apart (`introRipple`, which no longer takes the boxes). Whatever the boxes round it, it never
+  crosses them or stops at their edges.
+- **Once it has spread, the agent drops.** 250ms after its last ring lights, it dives into its nest (`settle` now
+  counts from the ripple's last ring, not from the landing).
+- **Its nest goes back to a plain cell as it dives** (his, the same evening: *"while diving … I think the cell border
+  should also turn to its default state while the agent is diving"*). The nest's lime ring and tint fade over the dive
+  (`introNestLeft`), so the cell is the field's own by the time the agent is gone. The ripple's violet cells have faded
+  by then too: the last ring lights 80ms after the landing and fades over 500ms.
+- **Then its components render.** Once it is gone, every box it opens fades in over 500ms, version 1's "the card
+  should render smoothly" (`reveal`). Each box is one Web
+  Animations fade of its opacity, started once. The compositor plays it, so a busy main thread cannot make it stutter.
+  Version 4's reveal was what stuttered: it re-cut each box's `clip-path` cell by cell, a ring at a time, on the main
+  thread. It went, with `behind`, `lace`, `introShown` and `introClip`.
+
+| Token | Version 7 | What |
+|---|---|---|
+| `--motion-intro-gather` | 2000ms | how long they stand before the first may leave (his "two seconds") |
+| `--motion-intro-first` | 500ms | the latest a bouncer's first bounce starts |
+| `--motion-intro-rest` | 700ms | the longest a bouncer's pace waits between one bounce at rest and the next |
+| `--motion-intro-leave` | 300ms | the window after `gather` in which each leaves |
+| `--motion-intro-ripple` | 2 | how many rings out from its nest a ripple goes |
+| `--motion-intro-ring` | 80ms | from one ring of a ripple lighting to the next |
+| `--motion-intro-settle` | 250ms | from its ripple's last ring to its dive |
+| `--motion-intro-dive` | 320ms | the dive into its nest, its nest going back to a plain cell over it |
+| `--motion-intro-reveal` | 500ms | its boxes fading in once it has dived |
+
+None is in globals.css: `INTRO_START` holds them.
+
+*Measured* (`e2e/.mcp/agent-intro-v5.mjs`, `e2e/.mcp/intro-fps.mjs`, local dev server, 1440 × 900, 2026-10-01):
+- Each ripple is the two rings round its nest.
+- Bali landed at 2.70s and dived at about 3.03s, and its profile was in at about 3.85s. The page was handed over at
+  about 3.9s.
+- **Frame rate:** at full speed, 60fps all through. With the wake still on (Portfolio.md P16), one frame after the
+  landings took 35ms. With the wake gone, the worst frame after the landings took 21.7ms, and none over 20ms came while
+  they leaped and landed. With the CPU slowed four times it ran at 27 to 38fps, as
+  version 3 did.
+- No errors.
+
+*Mine, his to tune:* the 250ms, the 500ms fade, and all of an agent's boxes fading at once. The portfolio's wake after
+the intro is gone too (Portfolio.md P16 withdrawn, his), so the boxes are in their own colours as soon as they are in.
+
+### Version 8 — home (2026-10-01)
+
+*"after the intro scene, once the agents jump into their sections and dive, they all should uh, come and settle in the
+last row middle six columns cells"*, and before that was built: *"instead of uh, bringing them to the bottom, we'll
+bring them to the right the last most column vertically centered."* Grid.md D50 amended, Portfolio.md P23 amended.
+Version 7 is unchanged up to the ripple. What changes is where each agent goes after it.
+
+- **Each has a cell of its own** (`introHome`). The cast stands one above the other in the field's last column,
+  centred down it, in the cast's order: Bali at the top, then Kino, Zaza, Oru and Mira, and Lola at the bottom. On a
+  field twelve rows deep that is rows four to nine.
+- **It gets there by his Dive** (M24, as `content/actions.ts` copies it). It dives out of its nest behind the page,
+  going the way it is headed, and comes up in its cell, carrying on into the bowl. Version 7's own sink went with its
+  token, `--motion-intro-dive`: the Dive's length is his controls'.
+- **It dives once its ripple has spread and its landing has come to rest**, whichever is later, because a Dive sets
+  off from the agent sitting in its nest. With his Jump's 500ms come-back, a jumper now goes about 170ms later than in
+  version 7.
+- **Its nest goes as it dives into it** (`introNestLeft`, version 7's rule), over the Dive's way out of it. The cell it
+  comes up in lights while it is under, as his Dive lights it, and stays lit under it.
+- **Its boxes fade in once it is gone** behind the page (`IntroPart.gone`, the Dive's own `gone`).
+- **It stays.** Once every box is in and every agent at rest, the grid hands the page over as before, and the agents
+  go on breathing and blinking in their cells. On a field the grid is given after that, they are in its last column at
+  once (`introResting`). Under reduced motion there is no intro and they are drawn once, still, each half way between
+  two blinks.
+
+| Token | Version 8 | What |
+|---|---|---|
+| `--motion-intro-settle` | 250ms | from its ripple's last ring to its Dive home |
+| `--motion-intro-dive` | gone | his Dive's controls decide how long the dive takes |
+
+The rest are version 7's.
+
+*Measured* (`e2e/.mcp/agent-intro-v8.mjs`, `e2e/.mcp/intro-settled.mjs`, local dev server, 2026-10-01):
+- At 1440 × 900 the six landed between 2.45s and 2.68s. The first boxes were in by 3.45s. The page was handed over at
+  about 4.66s, about 0.8s later than version 7, because the Dive home is longer than the sink was.
+- At every size all six stayed after the hand-over, each in its cell (1440 × 900: column 18, rows 4 to 9).
+- After a resize they rested in the new field's last column. During the intro, a resize handed over and they rested
+  on the new field.
+- No errors.
+
+*Mine, his to tune:* the cast's order down the column. Also open: what keeps the column free where boxes stand in it
+(Portfolio.md P23 has the table).
+
+## M23 — Agents: a motion is every agent's, and what is motion and what is character (2026-10-01)
+
+*His, 2026-10-01:* "Currently review uh, motion in that we have agent and agent motion I think they are just duplicates
+we can delete the agent and uh, we can also rename agents motion as agents and uh, there we are only dealing with motion
+of an agent. So I want you to categorize what is related to motion and what is related to designing the character its
+body etc." Then, of the list: *"motion is something that we can apply on any agent … every agent have the same parts …
+if the motion contains something like … eyebrows and uh, Bali doesn't have eyebrows … only if the eyebrows are there
+then the motion will work if not uh, the motion will not work but if the motion contains some other configuration for
+the body since Bali has body the motion for the body will work … you can just give me a drop down to preview different
+agents it's not that I'm defining motion for a specific agent."* And: *"I don't really need anything right now from
+motion uh, right now the goal is to uh, full-fledgedly build these studios both motion studio and orbit studio."*
+
+**Every setting of the agent is in one of four groups** (his word for the list was "groups"; the package declares them,
+`set` and `pose` in `@no-origins/ui/lib/agent-body` and `agent-face`):
+
+| Group | What it is | Where it is designed | Declared |
+|---|---|---|---|
+| **1. Character** | What the agent is. No motion changes it. | Orbit | `set: "look"` |
+| **2. Pose** | How it holds itself at rest. A motion's row may move it for a while: that is how a mood is made. | Orbit, at rest; a motion's rows | `set: "look"`, `pose: true` |
+| **3. How it moves** | How every agent jumps, lands, slides, breathes and blinks: the same for all, under every motion. | The declaration's defaults (his version 15, `SPHERE_START`); a motion's rows | `set: "motion"` |
+| **4. What one motion does** | Where it hops, where it looks, the symbol it pops up. | A motion's rows | `set: "motion"` |
+
+- **1:** Shape, Paint, Material (`body`), Size, Shade; Texture with its Size, Wobble, Colour and Opacity, and Depth; the
+  tail's Length and Taper; the style each face slot wears and the uploaded drawings; Eye spacing, Eye height and Eye
+  colour; the brows' Length, Thickness and Colour; the catchlight's Size and Angle.
+- **2:** Rotation X, Y and Z; Spread; Eye size and Pupil size; the upper lids' Open, Slant and Curve; the lower lids'
+  Raise, Slant and Curve; the brows' Height, Angle and Arch.
+- **3:** Crouch, Squat, Height, Hang; Bounces, First bounce, Bounciness, Squash, Wobble, Wobble speed, Nest give; Land
+  at, Slippery, Way, Energy, Come back, Sway, Squeeze; the tail's Stiffness, Swing and Stretch; Look ahead, Look lead,
+  Blink every, Blink, Squint; Breath and Breath depth.
+- **4:** Columns and Rows (a hop); Look X and Look Y; the Symbol, its Size, At and Colour.
+
+Groups 3 and 4 are both `set: "motion"`: 3 has a base worth having (his version 15's), 4 only means something in a row.
+Nothing in code tells them apart yet, and nothing needs to.
+
+**The Agents page** is what the motion studio had of the agent then (since M24, the same day, it is the agents' actions,
+each with its own controls; its motions, rows and Hop went):
+
+- **The Agent page is deleted** (the family `sphere`): its jigs of every setting, its version-15 preset, its Copy and
+  its play of the jump, the hold and the jump back. That play is the Hop motion; a click on a cell still sends the agent
+  there, on the Agents stage. The settings it alone edited went to their groups' places: Material and the tail to Orbit
+  (C22), the rest to the declaration.
+- **Agent motions is renamed Agents** and keeps its id, `motions`, as the agent kept `sphere`.
+- **A motion is every agent's.** The parts are the same on every agent — Body, Eyes, Pupils, Upper lids, Lower lids,
+  Brows and Symbols. A row for a part the agent does not wear draws nothing on it, and the motion's other rows play. A
+  row never puts a part on: which a character wears is group 1. Symbols are played, so a motion pops one up on any
+  agent.
+- **The head's Agent select previews one of them** where the preset select stands: the agent as Orbit has it, its
+  draft, drawn with its uploads. It changes who is watched, never whose the motion is. It opens on Bali and remembers
+  the last one picked. With no database it has the one agent the code declares, "Default".
+- **A row offers groups 2, 3 and 4 of its part.** A value of group 1 left on a row saved before is not played.
+- **Under every motion** stands the previewed agent's look (groups 1 and 2) and the declaration's defaults for the rest.
+  There is no page to tune group 3 any more: a motion's row sets what it changes, and a default changes in code,
+  version by version, as `SPHERE_START` always has. A page for it waits until he asks for one.
+- **Each agent's own hop and breath go** (Agents.md A2's "Rest and hop"): a character holds groups 1 and 2 only
+  (`resolveCharacter`, `checkCharacter`), so a value of 3 or 4 in a draft or a frozen version is not read. Nothing is
+  deleted. The portfolio's intro (M22) leaps and breathes its six by the shared values. An agent still moves as its
+  Material makes it: a ball lands firmer and slime oozes, whatever the motion.
+- **Kept as it was, for now:** a motion is still a `studio_items` row of kind `motion` with Bali's `character_id`,
+  which the schema requires (`…_studio_versions.sql`). The studio reads every motion whatever it names. Making the
+  column empty for a motion is a migration, for the next time the schema changes.
+
+## M24 — Actions: the agent does named things, each with its own controls (2026-10-01)
+
+*His, 2026-10-01, having asked whether keyframes were what the studio lacked to make a bounce:* "instead of just
+trying to control every aspect uh, maybe we can have something like the actions that the agent does I mean which will
+become part of the code uh, if I say something like uh, we need jump action or like bounce action um, maybe you can
+just uh, give me controls for uh, how high it will bounce uh, how much time will it bounce uh, what should happen once
+it bounces and lands." *Then:* "we will remove everything uh, currently the agents have in motions and uh, probably I
+might say something like uh, okay now I need more bounce action so now you add bounce action you add uh, the controls
+that are needed uh, for bounce and uh, time frame and now I can adjust the bounce play it … once I like it I should be
+able to publish it … every card on the grid or like every jig uh, becomes a configuration for an action … later we can
+create something where uh, I can put in sequence of actions … use the same concept that we have for timeline right now
+where we put in rows." *Asked four things, he answered:* the saved motions are **deleted**; an action's **length
+follows from its controls**, the whole of it on one timeline; **the rest state is always there**; and **one Agents
+page with a picker**.
+
+**Built the same day** (his *"Okay. Proceed"*), with Bounce as the first action: below, after the rules. It replaces
+M19's and M20's rows on the agent and M23's Agents page as it stood. No other bench is touched.
+
+**Why not keyframes.** The rows were keyframes in all but name: a row moves a part from where it stands to its values
+by its span's end, so two rows back to back are three keys. A bounce still could not be made, because nothing on the
+body is a value a key can move. Its height and its squash are the hop's physics, worked out from Height, Squash and
+Bounciness, and a hop of no cells is skipped. Keys on new channels (a lift, a squash) were drawn up and set aside: he
+would place every frame by hand, the agents would stop moving as one body, and nothing would come of it that the
+harness could name.
+
+- **An action is code, and only what he names.** It has the name he gives it and is written in the package beside the
+  agent's drawing, its frames worked out from its controls by the physics the agent already has (`sphere-motion`).
+  Nothing exists until he names it, so a new kind of move is a new action written in code, which he then tunes in the
+  studio. Bounce was his example; which comes first is his.
+- **Its controls are its own.** Each is a typed property (M20, `lib/properties`), and the action's groups are the cards
+  on the grid round the stage. For a bounce: how high, how many times, how it lands, what it does once landed. M23's
+  groups 3 and 4 stop being settings shared under every motion: each control moves into the action it belongs to. The
+  character's look (groups 1 and 2) stays Orbit's, and its Material still shapes every action: a ball lands firmer and
+  slime oozes, whatever the action.
+- **Its length follows from its controls** (his answer). There is no length to set. The page has one timeline for the
+  whole action, its phases marked on it in order, each as long as its controls make it, growing and shrinking as they
+  are moved. For a bounce the phases are the crouch, the rise, each bounce, the landing and what follows. The timeline
+  is played and scrubbed, never dragged: to make an action longer, change what makes it long.
+- **The rest state is always there** (his answer): the breath, the blinks and the pose the character holds. An action
+  sets off from rest and hands back to it. Rest is not an action and needs no naming. Its values stay the declaration's
+  (`SPHERE_START`).
+- **One Agents page, with a picker** (his answer). The head holds two selects: the action being designed, and the agent
+  it is previewed on (M23's, unchanged: it changes who is watched, never whose the action is).
+- **An action is published as a character is** (M20, Orbit.md C19): a draft saves as he goes, and Publish makes the
+  next `major.minor`, frozen; a new major is his to make. An action is every agent's, as a motion was (M23).
+- **Later, the sequencer**, designed when he asks for it. Published actions are placed on rows, M19's concept kept: each
+  a block at its own length (his model in M20, motions "placed in motions at their own length"), rows overlapping,
+  the higher winning where two set the same thing, the whole sequence on one timeline.
+
+**What went:**
+
+- **Every saved motion is deleted** (his answer): the `studio_items` of kind `motion` never published, and their drafts
+  (`…_studio_actions.sql`). On the local stack that was one, Bounce, a draft with no versions. A motion with a published
+  version stays: `studio_versions_frozen` refuses its deletion (M20, "never deleted"), and lifting that for a kind that
+  goes would be a migration of its own. The hosted project is checked when the migration is pushed.
+- **The Hop motion** (`HOP`, version 1's), the tabs, the rows, the lanes and the timeline editor on the Agents page
+  (`states.tsx`, `machine.tsx`, the app's `lib/states.ts`, `content/agent-motions.ts`), the server functions that kept
+  motions, and **a click on a cell sending the agent there**: moving to a cell is a jump's, when he names one.
+
+**What stays:**
+
+- **`sphere-motion`'s physics.** Bounce is made from it, and Jump will be. The hop's Columns and Rows become a jump's,
+  if he names one.
+- **`lib/properties`, and versions.**
+- **The timeline's model** (`lib/motion-states`), in the package and unplugged until the sequencer, as the statechart
+  was kept (M12).
+- **The portfolio's intro** (M22). It leaps and breathes its six by the package's values, not by a saved motion.
+
+**Built, 2026-10-01:**
+
+- **`@no-origins/ui/lib/agent-actions`** declares the actions: each its id, name, version, groups of typed properties
+  (the agent's own motion settings with the action's labels and defaults, so `sphereMotionFrom` reads them), its
+  course from the nest it sits in, and its phases. `checkActionValues` holds its values whole, as a look is held.
+- **Bounce, version 1**: it crouches, leaps straight up out of its nest, falls back into the same nest, bounces off its
+  floor, each bounce lower than the last, and settles; landing off the bottom (Land at) it slides round the bowl and
+  comes back. Six groups: **Take-off** (Crouch 140ms, Squat 0.3), **Leap** (Height 1 cell, Air time 560ms), **Bounces**
+  (Bounces 3, First bounce 0.6, Bounciness 0.55, Squash 0.35, Nest give 0.12), **After landing** (Wobble 280ms, Wobble
+  speed 200ms, Land at 0°, Slippery, Way, Energy, Come back, Sway, Squeeze), **Tail** (Stiffness, Swing, Stretch at his
+  0) and **Eyes** (Look ahead 0.8, Squint 0.6). Its Material scales them: on slime, which Bali is, a bounce is about a
+  third of jelly's, so First bounce starts at 0.6 to be seen there. Its phases are **crouch · rise · fall · bounce 1…n
+  · come back · settle**, from the physics' own beats (`sphereBeats`), a part shorter than 40ms folded into the next.
+- **The physics, for a jump in place** (`sphereCourse` with the same nest at both ends): no drawing back in the crouch,
+  one nest lit throughout, and its landings dipping that nest. And **the bowl is hit only in its lower half**: its top
+  was a ceiling, so a bounce higher than the bowl is deep was cut off a few pixels up (Bali's head leaves its centre
+  5px of room). A jump's landing bounces as high as its controls say now too; version 15's has no bounces, so no hop,
+  and not the intro, moves differently.
+- **The Agents page**: the head is the studio's bar, Agents, **the action** (a select of the actions there are) and
+  **the agent** previewed (M23's), Reset and Copy; under sixteen cells across the bar takes three cells, and on a
+  narrow field the two picks take a row of their own. Each action is a family of its own in the studio
+  (`action-<id>`), so its values are kept apart from every other's, and the one picked is remembered in the browser.
+  Its jigs are **its card** (what it is, the version pages play and whether the draft has moved since, how it is kept,
+  **Publish** for the next minor and **Versions**, where it goes back to one or publishes the next major) and a card a
+  group. Its timeline is its phases, scrubbed and played, never dragged. **Live**, a click on the stage plays it from
+  where the agent sits; on the timeline it plays from the centre. **No rest on the timeline** (his, the same evening:
+  *"I don't want to include uh, milliseconds, like uh, resting phase in bounds, like bounds will only deal with
+  bouncing"*): the 700ms rest every other stage puts after a play on a loop is not put after an action's, so a loop
+  goes again as soon as it has settled. The rest is still always there, between plays.
+- **Its draft is in the database** (`apps/motion/src/app/actions.ts`): an item of kind `action` named as in code,
+  its draft `{ action, values }`, made the first time its bench opens, saved half a second after the jigs stand still
+  on the `rev` it was loaded at (another device's save first stops the saving: **Load**), and published through
+  `studio_publish` a minor or a major. With no keys, or signed out, its values are the browser's.
+- **Checked** against the local stack: a click bounces the agent a cell; Publish made 1.0 and then had nothing new to
+  publish; a change read "changed since" and saved; Versions published 2.0 and went back to 1.0 with its values; a
+  reload found it so. The two test versions were removed afterwards with the frozen trigger disabled for them alone,
+  as supabase/README.md records. `e2e/agents.spec.ts` plays Bounce on the agent previewed and **writes his draft
+  never**: there is one draft an action, and he may be tuning it as it runs (he was, the afternoon it was built). It
+  edits, reloads and resets only where the values are the browser's.
+
+**Jump and Dive, the next two** (his, the same evening): *"Next, I want to have motion for uh, diving. and jumping two
+separate motions in agents uh, basically jumping is jumping over the cells from one cell to another diving is diving
+behind from behind the screen from one cell to another."* Both version 1, both **travel**: their **Where** (Columns,
+Rows) says where they go on the timeline, from the nest that centres the path on the stage (`sphereJump`), and live a
+click on a cell sends the agent there, where it stays (Bounce plays where it sits).
+
+- **An action plays** (`play`, replacing a bare course): from a trip, it gives where the agent ends up, how long it
+  is, its phases, and any moment of it — the agent's frame, how far it has sunk into the page, the nest whose bowl it is
+  cut to, and whether it is gone behind the page. `actionStill` is the agent sitting, the rest between plays. The
+  bowl's path is the package's (`sphereBowl`), the one the `Agent` cuts a resting shape to.
+- **Jump** is the agent's hop, nest to nest: crouch, an arc over the cells, the landing in the nest it reaches —
+  bounces, the slide round the bowl and back — and the settle. **Its defaults are his version 15's** (`SPHERE_START`),
+  the hop he tuned on the Agent page, going three cells across. Groups: Where, Take-off, Leap, Landing, After landing,
+  Tail, Eyes (with Look lead, the eyes turning to the next nest before it leaps). Phases: crouch · rise · fall · …the
+  landing's, no settle.
+- **Dive** goes into its nest, behind the page and on into another. **Version 1** was the portfolio intro's grammar
+  (M22): a spring, straight down through its floor cut to its bowl, under the page, and a pop straight up out of the
+  next nest. **Version 2** (his, the same evening: *"dive is always uh, like falling down even if the direction that it
+  is supposed to go is up so I think instead of falling down It should exit in the direction that it's supposed to go"*,
+  and *"when it's popping from whatever that the direction it is coming from it is still popping up instead it should
+  just go and uh, follow inertia"*): the nest is **the page's opening**. After its spring (Spring; 0, it slips straight
+  in) it goes out of its nest behind the page **the way it is going**, cut to the nest's circle — through its top to a
+  nest above, its side to one beside, its floor to one below — until it is gone; it is **under** for Under, its nest
+  going out and the next lighting; it glides into the next nest behind the page the same way, on the line through its
+  middle, and then **carries on** in front of the page: coming up from under, it flies up out of the nest and falls
+  back in; from the side, it arcs into the bowl and slides up the far side and back; from above, it drops onto the
+  floor (`sphereArrival`, a leap's landing started in the air, `bowlSim`). **Pop** is how fast it comes in: the height
+  a fall that fast is from, so coming up it pops that high. **One gravity for all of it**: slipping straight down out
+  of its nest from rest takes Dive, so the spring, the going out and the coming in take as long as their distances make
+  them. A dive back into its own nest goes out through the floor and comes back up. The four are motion settings of
+  the agent (`agent-body`'s Dive group, read by `sphereMotionFrom`): Spring 0.4 cells, Dive 320ms (the intro's), Under
+  400ms, Pop 0.6 cells. Its Landing and After landing (Slippery, Way, Energy, Come back, Sway, Squeeze) are a jump's.
+  Phases: crouch · spring · dive · under · come in · carry · …the landing's, no settle.
+- **His answers on it** (the same evening): **Under is one length however far the dive goes** (*"we don't need uh, it
+  to stay longer if the dive is longer"*), and **nothing lights along the way** (*"we also don't need to add any
+  lighting up"*).
+- **No settle on Jump and Dive** (his, the same evening: *"I don't think we need settle in this uh, for dive and
+  jump"*): each is over once the agent has come to rest in the nest it reached, its last phase the landing's slide or
+  bounce. What is left of its jiggle dies out in the rest after, never cut. Bounce keeps its settle.
+- **Checked** on the stage: Jump goes three cells across and a cell up, lands and slides. Dive version 2, at his tuning
+  (Spring 0, Dive 80ms, Under 50ms, Pop 0) slowed ten times and sent up, left and down by a click: up, it leaves through
+  its nest's top and comes in from the next one's floor, flying up out of it; left, out of its side and in from the next
+  one's right, arcing into the bowl; down, out of its floor and in from the top. `e2e/agents.spec.ts` checks each ends in the nest its Where reaches and that the dive is
+  gone while under, reading their values and setting none.
+
+**Open:**
+
+1. **Look X, Look Y and the symbols** (group 4) were only ever set on a row. With the rows gone, they wait to be named
+   as actions (a look, a symbol popping up) or for the sequencer.
+2. **Whether the harness calls an action by its name.** The lifecycle stays on the BEAM and the browser presents it
+   (Brand.md §8). An action's name would be the first word the two share. Not decided.
+3. **How many times.** A bounce plays once, its bounces off the floor dying away; the timeline's Loop repeats the
+   play. A count of leaps, each as high as the first, is not a control yet.
+4. **The hosted project** has neither the kind nor the deletion until the migration is pushed, his step.
+5. **A reload in the half second after a change** loses that change: the draft saves once the jigs stand still, as
+   M20's did.
+6. **Going out from no spring**, the crouch's squash springs back to its sitting shape as it starts to go; and going out
+   sideways it keeps the shape it sits in. Coming in, it is round.
 
 ## 5. Open
 

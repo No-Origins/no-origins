@@ -1,9 +1,6 @@
-import type { MotionState, StateEvent } from "@no-origins/ui/lib/motion-states";
-
 import { FOCUS_FAMILY } from "./focus";
 import { MODE_FAMILY } from "./mode";
-import { AGENT_MOTIONS_FAMILY } from "./agent-motions";
-import { SPHERE_FAMILY } from "./sphere";
+import { AGENTS_FAMILY } from "./agent-actions";
 import { STEP_FAMILY } from "./steps";
 
 /**
@@ -19,7 +16,11 @@ import { STEP_FAMILY } from "./steps";
  * 2026-09-29) and focus mode's since 2026-09-29, so each A is "Today"; B–E are the other four of each one's last round.
  */
 
-export type FamilyId = "move" | "load" | "enter" | "focus" | "mode" | "grip" | "step" | "sphere" | "motions";
+/**
+ * A page of the studio, and each of the agents' actions (Motion.md M24), whose values are kept apart from every other's:
+ * `action-<its id>`.
+ */
+export type FamilyId = "move" | "load" | "enter" | "focus" | "mode" | "grip" | "step" | "motions" | `action-${string}`;
 
 /** How a token's value is written in CSS and moved on a jig. */
 export type TokenKind = "ms" | "ease" | "scale" | "share" | "choice" | "px";
@@ -44,7 +45,7 @@ export type Token = {
   choices?: { value: string; label: string }[];
   /**
    * A choice whose options are colours: what each one looks like, as CSS, from the family's values (the agent's paint
-   * makes its ink). Shown in the design system's colour picker, as every pick of a colour is (Character-Studio.md C17).
+   * makes its ink). Shown in the design system's colour picker, as every pick of a colour is (Orbit.md C17).
    */
   swatches?: (values: Values) => Record<string, string>;
 };
@@ -97,38 +98,17 @@ export type Family = {
    */
   borrows?: FamilyId[];
   /**
-   * A family built from states (Motion.md M19, his, 2026-09-30): its specimen's parts, each a row a state configures
-   * and locks over a span; the states its version starts from; where every value stands before a row moves it; the
-   * values that are a clock, never eased; and the events its stage answers. Its bench is the states' — tabs, rows,
-   * lanes on the timeline — not the tokens' jigs. The pill agent's, version 2, until it was deleted (2026-09-30); none
-   * since: which family is built from states waits for the property model (M20).
+   * Played on the agents of Orbit (Motion.md M23): the head's select previews one of them, and its look stands under
+   * every value the family's own do not set (`agent-preview.tsx`).
    */
-  machine?: FamilyMachine;
-};
-
-/** A part of a specimen a state's row configures (M19): what it is called, the tokens it sets, and the ease it starts on. */
-export type FamilyPart = {
-  id: string;
-  label: string;
-  tokens: string[];
-  ease: string;
-  /** Of a pair (two eyes, two brows): the tokens whose right side a row can set apart, as `<token>-right` (M20). */
-  sided?: string[];
-};
-
-export type FamilyMachine = {
-  parts: FamilyPart[];
-  start: MotionState[];
-  rest: Values;
-  /** The family whose values, as it is tuned, every row stands on in place of `rest` (the agent's motions: the Agent). */
-  restFrom?: FamilyId;
+  agents?: boolean;
   /**
-   * Where its states are kept: in the database (Motion.md M20, the agent's motions), each a draft saved as he goes and
-   * published as versions, when the studio has keys and he is signed in; else in the browser, as M19's were.
+   * The agents' page (Motion.md M24): it holds no motion of its own. Its head picks one of the agents' actions, and the
+   * bench is that action's (`actionFamily`).
    */
-  saved?: "database";
-  discrete: ReadonlySet<string>;
-  events: readonly StateEvent[];
+  actions?: boolean;
+  /** One of the agents' actions (M24), by its id in the package's `lib/agent-actions`: its bench, its stage and its draft. */
+  action?: string;
 };
 
 /**
@@ -589,9 +569,9 @@ export const FAMILIES: Family[] = [
   },
   // His, the same night (Motion.md M21): the slider's steps — a dot over each, a tick as the value lands on one.
   STEP_FAMILY,
-  // The eighth, his, the same night (Motion.md M17): a character, a 3D sphere that travels by diving from cell to cell.
-  SPHERE_FAMILY,
-  AGENT_MOTIONS_FAMILY,
+  // The eighth, his, the same night (Motion.md M17): a character, a 3D sphere that travels by diving from cell to cell,
+  // whose page went when its motions became every agent's (M23, 2026-10-01): Agents, a page of actions since M24.
+  AGENTS_FAMILY,
 ];
 
 export const familyById = (id: string) => FAMILIES.find((f) => f.id === id);

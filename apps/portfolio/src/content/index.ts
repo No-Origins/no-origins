@@ -60,7 +60,8 @@ export type PortfolioItem = {
    * it is true at — and is not shown where they do. It is packed under the block like a `below` item, its `fallback`s
    * where the rows are short, and the `side` items are left off. The first screen's tabs on a phone and a tablet
    * (2026-09-28, his, from the recruiter quick view: "I loved the mobile layout … take references from that and update
-   * ours too"): Work, Projects, Tech and Art in the rows under the profile's column, where only the work stood.
+   * ours too"): Work, Projects, Tech and Interests (Art until 2026-10-01) in the rows under the profile's column, where
+   * only the work stood.
    */
   compact?: Responsive<boolean>;
   /**
@@ -89,6 +90,12 @@ export type PortfolioItem = {
    * there at the first of its spans that fits, or is not shown.
    */
   fallback?: Responsive<Span>[];
+  /**
+   * The agents that open it in the intro (Grid.md D50, Motion.md M22, version 2, 2026-10-01): their ids in
+   * `INTRO_AGENTS` (`agents.ts`), space-separated, the one that opens it first; any after it land on its top row beside
+   * it (the phone's tabs, one agent a tab). Left out, the nearest agent opens it.
+   */
+  by?: string;
   render: (placed: GridLayoutItem) => ReactNode;
 };
 

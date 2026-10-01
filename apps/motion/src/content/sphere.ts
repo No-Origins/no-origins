@@ -4,9 +4,14 @@ import { AGENT_FACE } from "@no-origins/ui/lib/agent-face";
 import type { ColourName, Property } from "@no-origins/ui/lib/properties";
 import { SPHERE_START, type SpherePupils } from "@no-origins/ui/lib/sphere-motion";
 
-import type { Family, Token, Values } from "./families";
+import type { Token, Value, Values } from "./families";
 
 /**
+ * The agent's tokens (Motion.md M17, M23, M24): every setting of its body and face as the studio's `Token`, an action's
+ * jigs are made from (`./agent-actions`), and the agent's look is written on the stage by. Since M23 there is no page of
+ * them, and since M24 the Agents page is the agents' actions, each with its own controls. What follows is the agent's
+ * motion as it was designed, version by version, on the page that held them.
+ *
  * The sphere (Motion.md M17, his, 2026-09-30): *"a character … an energetic and calm, 3D sphere that travels by diving
  * from one cell to another. It should follow our design principles from motion and design system … so that I can design
  * its character and motion."* A motion he named, so it is on the bench (M9), the eighth.
@@ -84,7 +89,7 @@ const colourSwatches = (eyes: boolean) => (values: Values) => {
  * in degrees, a duration in ms, a style or a colour as a choice, a colour's and the paint's with their swatches. A face
  * slot's style is its group's first jig, Style.
  */
-function settingToken(group: string, p: Property, style = false): Token {
+export function settingToken(group: string, p: Property, style = false): Token {
   const base = { group, name: `--motion-sphere-${p.id}` as const, label: style ? "Style" : p.label, touches: p.touches };
   switch (p.type) {
     case "number":
@@ -103,10 +108,16 @@ function settingToken(group: string, p: Property, style = false): Token {
     case "colour":
       return { ...base, kind: "choice", choices: p.options.map((c) => ({ value: c, label: COLOUR_LABELS[c] })), swatches: colourSwatches(p.id === "eye-colour") };
     case "switch":
+      // A switch is the word `on` or `off` on the stage, as the model reads its token (Orbit.md C23: the tail).
+      return { ...base, kind: "choice", choices: [{ value: "on", label: "On" }, { value: "off", label: "Off" }] };
     case "drawing":
       throw new Error(`The agent's face has no ${p.type} jig yet: ${p.id}`);
   }
 }
+
+/** A setting's value as the stage holds it: a switch as its word. */
+export const stageValue = (v: unknown): Value | undefined =>
+  typeof v === "number" || typeof v === "string" ? v : typeof v === "boolean" ? (v ? "on" : "off") : undefined;
 
 /** Every setting of the agent, body and face, as it is declared: its default is the version's (`SPHERE_START`). */
 const SETTINGS: Property[] = [
@@ -115,9 +126,14 @@ const SETTINGS: Property[] = [
 ];
 
 /** The version's values, as the jigs hold them: every setting's default. */
-export const SPHERE_START_VALUES = Object.fromEntries(SETTINGS.map((p) => [`--motion-sphere-${p.id}`, p.default as number | string]));
+export const SPHERE_START_VALUES: Values = Object.fromEntries(
+  SETTINGS.flatMap((p) => {
+    const v = stageValue(p.default);
+    return v === undefined ? [] : [[`--motion-sphere-${p.id}`, v]];
+  }),
+);
 
-const TOKENS: Token[] = [
+export const SPHERE_TOKENS: Token[] = [
   // The body (M20): its jigs are its declaration's, one group a group of it — the head (with its shape), the tail, the
   // jump, the bounce, the slide, the rest and its surface.
   ...AGENT_BODY.flatMap((group) => group.settings.map((p) => settingToken(group.label, p))),
@@ -126,36 +142,3 @@ const TOKENS: Token[] = [
     [...(slot.style ? [slot.style] : []), ...slot.settings].map((p) => settingToken(slot.label, p, p === slot.style)),
   ),
 ];
-
-/**
- * **The agent since version 11** (his, 2026-09-30: *"we'll remove agent and the sphere will become the agent. And agent
- * can have eyes"*). The pill agent (M12, M19) was deleted; this is his personal guide now. It is shown as Agent and
- * keeps its id, `sphere`, and its `--motion-sphere-*` tokens, as hyper focus and focus mode kept `focus` and `mode` when
- * they were renamed. Its eyes are new, version 1 of them (his, asked: new eyes rather than the pill's): two circles on
- * its face in the ink of its paint, riding the head as it squashes, spreads and leans, looking where it goes, with lids
- * that blink and squint shut as it lands. **Version 13** (2026-09-30, Motion.md M20's face version 1, his "yes for both")
- * gives the face its parts — pupils, upper and lower lids, brows, and a symbol a mood pops up by its head — each a jig
- * group built from the package's declaration (`agent-face`), every part left as version 12 drew it.
- */
-export const SPHERE_FAMILY: Family = {
-  id: "sphere",
-  label: "Agent",
-  title: "Your personal guide",
-  touches:
-    "A head with eyes and a rubbery tail: it sits on the bottom of its nest, calm, its tail behind the page, and jumps to the next — its eyes on where it is going, crouching, leaping on an arc with its tail out behind it, landing, sliding, then sitting there.",
-  hint: "Set its jump in Jump and press Play, or click a cell to send it there.",
-  // Not a block of cells: the character is one, and its jump is its Columns and Rows. The specimen's are not drawn.
-  block: { columns: 1, rows: 1, max: 1 },
-  version: 15,
-  tokens: TOKENS,
-  presets: [
-    {
-      id: "A",
-      name: "Version 15",
-      why: "Version 14 as it looks, with slime spreading at 1.2 where it spread at 2.6, so the whole of Spread settles it (his \"Yes\"); Spread 0.11 is version 14's 0.05. Version 14 was his settings (2026-09-30, sent back as \"Agent — Version 13, tuned, tuned\"): version 13's, tuned, but coming back to rest in half a second where it took 1s, and settling a little into its nest (Spread 0.05) where it sat round. Version 13, tuned (\"This becomes the rest state of the motion\"), was version 12's with Come back 1s. Version 12's, fixed upon from version 11: a violet slime head three fifths of a cell across, deeply shaded, with a short limp tail and no squash, spread or sway; jumping one column and six rows on a 60ms crouch, 550ms in the air, touching down 30° up its near side and keeping all its speed along the bowl, squeezing 40%, at rest 1s after it lands; breathing every 4s, a tenth deep; its eyes a quarter of the head across, 0.45 apart and 0.3 up, looking 0.8 of its radius where it goes, blinking every 3.6s and squinting 60% as it lands.",
-      risk: "Version 13 adds the face's parts (Motion.md M20, the face version 1: pupils, upper and lower lids, brows, and a symbol by the head), every one left as version 12 draws it, so nothing changes until a Style is picked. They are drawn in code from their settings and flat. A pair is mirrored: its right side set apart comes with the states. Look lead is 1000ms, but a look turns no earlier than the crouch starts, and his crouch is 60ms, so it acts as 60ms.",
-      // His, every one: the declaration's defaults are `SPHERE_START`, version 15, his version 14 as it looks.
-      values: SPHERE_START_VALUES,
-    },
-  ],
-};

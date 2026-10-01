@@ -64,7 +64,10 @@ export type FieldMessage =
   | { type: "geometry"; geometry: FieldGeometry }
   | { type: "colours"; colours: FieldColours }
   | { type: "overlay"; on: boolean }
-  /** One pass on a colour: each cell is lit at `zero + delays[i]` and fades over `fade`. */
+  /**
+   * One pass on a colour: each cell is lit at `zero + delays[i]` and fades over `fade`; a cell whose delay is Infinity
+   * is not lit (the intro's ripples, D50 version 3, light a few cells round a nest).
+   */
   | { type: "pass"; layer: number; delays: Float64Array; span: number; zero: number }
   /**
    * The intro's reveal (D31): while it runs the grid wears the cover's colour (`--grid-intro-from`, globals.css), and at
@@ -363,7 +366,8 @@ export function gridFieldPainter(scope: PainterScope) {
       }
       ctx.clip()
     }
-    // Each colour as its own layer, lime under violet; a cell shows the newest pass on its colour that has reached it.
+    // Each colour as its own layer, lime under violet; a cell shows the youngest lighting on its colour — the intro's
+    // ripples are a pass an agent, sent together, and two that cross each light their cells (D50, version 3).
     for (let k = 0; k < passes.length; k++) {
       const list = passes[k]!
       for (let p = list.length - 1; p >= 0; p--) if (now > list[p]!.zero + list[p]!.span + fade) list.splice(p, 1)
@@ -375,12 +379,9 @@ export function gridFieldPainter(scope: PainterScope) {
         for (let c = 0; c < cols; c++) {
           const i = r * cols + c
           let age = -1
-          for (let p = list.length - 1; p >= 0; p--) {
+          for (let p = 0; p < list.length; p++) {
             const a = now - list[p]!.zero - list[p]!.delays[i]!
-            if (a >= 0) {
-              age = a
-              break
-            }
+            if (a >= 0 && (age < 0 || a < age)) age = a
           }
           if (age < 0 || age >= fade) continue
           const alpha = 1 - lineEase(age / fade)

@@ -2,41 +2,50 @@
 
 import { supabaseEnv } from "@no-origins/auth/env";
 import { supabaseServer } from "@no-origins/auth/server";
-import type { MotionState } from "@no-origins/ui/lib/motion-states";
-
-import { checkState } from "@/lib/states";
+import { agentAction, checkActionValues } from "@no-origins/ui/lib/agent-actions";
+import { checkCharacter, resolveCharacter, type CharacterLook } from "@no-origins/ui/lib/agent-body";
+import { checkDrawing, isUploaded, UPLOADED, type DrawingData } from "@no-origins/ui/lib/agent-face";
+import type { PropertyValues } from "@no-origins/ui/lib/properties";
 
 /**
- * The agent's motions, in the admin's database (Motion.md M20, "Versions and publishing"; the tables are
- * `supabase/migrations/…_studio_versions.sql`): each motion an item of kind `motion`, made for the agent's character,
- * with one draft and its published versions. Server functions, as the character studio's are: the signed-in person's
- * session, and RLS deciding what they may do — his only. Each checks someone is signed in, since a server function can
- * be reached by a POST from anywhere.
+ * The agents' actions, in the admin's database (Motion.md M24; the tables are `supabase/migrations/…_studio_versions.sql`,
+ * the kind `…_studio_actions.sql`): each action an item of kind `action`, named as it is in code, with one draft — its
+ * id in code and every control's value, whole — and its published versions, `major`.`minor` (Orbit.md C19). **An action
+ * is every agent's** (M23), so it names no character. The agents are read too, as Orbit has them, to preview an action
+ * on (`loadAgents`). Server functions, as Orbit's are: the signed-in person's session, and RLS deciding what they may
+ * do — his only. Each checks someone is signed in, since a server function can be reached by a POST from anywhere.
  *
- * - **A draft** is the motion as it stands, saved whole on the `rev` it was loaded at: another device's save first is
- *   refused, not merged. A motion it places is held by its item's id, linked (M19).
- * - **Publishing** pins every motion it places to that motion's current version (his: "a published motion should
- *   freeze"), then makes the draft a version: the next number, with the name he typed, never changed afterwards. A
- *   motion that places one never published is not published until that one is.
- * - **A published motion stays**: its versions keep it (`on delete restrict`). One never published can be deleted.
+ * - **A draft** is the action's values as they stand, saved whole on the `rev` it was loaded at: another device's save
+ *   first is refused, not merged.
+ * - **Publishing** makes the draft a version: the latest's next minor, or the next major at .0 when he says so. A
+ *   version never changes afterwards; any change after it is the next publish.
+ * - **Going back** to a version makes it the one pages would play, and the draft its values, to carry on from.
  *
- * With no Supabase keys every call says `offline`, and the studio keeps its motions in the browser, as M19 did.
+ * The motions that were here (M19, M20) went with M24: their rows, their tabs and their saving.
+ *
+ * With no Supabase keys every call says `offline`, and the studio keeps an action's values in the browser.
  */
 
-/** The character the motions are made for: Bali, the Guide (Agents.md), stored as the character studio stores it. */
-const CHARACTER = "Bali";
+export type ActionVersion = { id: string; major: number; minor: number; publishedAt: string };
 
-export type MotionVersion = { id: string; number: number; label: string; publishedAt: string };
-
-export type SavedMotion = {
-  state: MotionState;
+export type SavedAction = {
+  /** Its item's id. */
+  id: string;
+  /** The action's id in code. */
+  action: string;
+  /** Every control's value, whole, keyed by setting id. */
+  values: PropertyValues;
   /** The draft's `rev` as loaded: the next save names it. */
   rev: number;
   /** Newest first. */
-  versions: MotionVersion[];
-  /** The version pages would play. */
+  versions: ActionVersion[];
+  /** The version pages would play, and its values. */
   currentId: string | null;
+  current: PropertyValues | null;
 };
+
+/** What a publish adds to the latest version (C19): one to its minor, or one to its major, at .0. */
+export type PublishStep = "minor" | "major";
 
 export type Outcome<T> =
   | { ok: true; value: T }
@@ -48,7 +57,7 @@ const refused = (message: string) => ({ ok: false, reason: "refused", message })
 const conflict = {
   ok: false,
   reason: "conflict",
-  message: "This motion was changed somewhere else since it was loaded. Load it to carry on from there.",
+  message: "This action was changed somewhere else since it was loaded. Load it to carry on from there.",
 } as const;
 
 async function database() {
@@ -61,26 +70,16 @@ async function database() {
 
 type Db = Awaited<ReturnType<typeof supabaseServer>>;
 
-/** What a draft keeps of a motion: all of it but its id and name, which are its item's. */
-function stored(state: MotionState) {
-  const rest: Partial<MotionState> = { ...state };
-  delete rest.id;
-  delete rest.name;
-  return rest;
+/** A draft's data, read back as an action's: its id in code, and its values checked against what it offers now. */
+function readDraft(data: unknown): { action: string; values: PropertyValues } | null {
+  const d = data && typeof data === "object" ? (data as { action?: unknown; values?: unknown }) : {};
+  const action = typeof d.action === "string" ? agentAction(d.action) : undefined;
+  return action ? { action: action.id, values: checkActionValues(action, d.values) } : null;
 }
 
-async function character(db: Db): Promise<{ id: string } | { error: ReturnType<typeof refused> }> {
-  const item = await db.from("studio_items").select("id").eq("kind", "character").eq("name", CHARACTER).maybeSingle();
-  if (item.error) return { error: refused(item.error.message) };
-  if (!item.data) return { error: refused(`There is no character named ${CHARACTER} that this account may see.`) };
-  return { id: item.data.id };
-}
-
-/** The motions made for the agent, oldest first, each with its draft and versions. */
-async function readAll(db: Db, only?: string): Promise<Outcome<SavedMotion[]>> {
-  const agent = await character(db);
-  if ("error" in agent) return agent.error;
-  let query = db.from("studio_items").select("id, name, current_version_id, created_at").eq("kind", "motion").eq("character_id", agent.id);
+/** Every action, each with its draft and versions; or the one item `only`. */
+async function readAll(db: Db, only?: string): Promise<Outcome<SavedAction[]>> {
+  let query = db.from("studio_items").select("id, current_version_id").eq("kind", "action");
   if (only) query = query.eq("id", only);
   const items = await query.order("created_at", { ascending: true });
   if (items.error) return refused(items.error.message);
@@ -88,129 +87,137 @@ async function readAll(db: Db, only?: string): Promise<Outcome<SavedMotion[]>> {
   if (!ids.length) return { ok: true, value: [] };
   const [drafts, versions] = await Promise.all([
     db.from("studio_drafts").select("item_id, data, rev").in("item_id", ids),
-    db.from("studio_versions").select("id, item_id, number, label, published_at").in("item_id", ids).order("number", { ascending: false }),
+    db.from("studio_versions").select("id, item_id, number, minor, data, published_at").in("item_id", ids)
+      .order("number", { ascending: false }).order("minor", { ascending: false }),
   ]);
   if (drafts.error) return refused(drafts.error.message);
   if (versions.error) return refused(versions.error.message);
-  const motions = items.data.flatMap((item): SavedMotion[] => {
+  const actions = items.data.flatMap((item): SavedAction[] => {
     const draft = drafts.data.find((d) => d.item_id === item.id);
-    const state = checkState(draft?.data, item.id, item.name);
-    if (!state) return [];
+    const read = draft ? readDraft(draft.data) : null;
+    if (!draft || !read) return [];
+    const own = versions.data.filter((v) => v.item_id === item.id);
+    const current = own.find((v) => v.id === item.current_version_id);
     return [{
-      state,
-      rev: draft!.rev,
-      versions: versions.data
-        .filter((v) => v.item_id === item.id)
-        .map((v) => ({ id: v.id, number: v.number, label: v.label, publishedAt: v.published_at })),
+      id: item.id,
+      action: read.action,
+      values: read.values,
+      rev: draft.rev,
+      versions: own.map((v) => ({ id: v.id, major: v.number, minor: v.minor, publishedAt: v.published_at })),
       currentId: item.current_version_id,
+      current: current ? readDraft(current.data)?.values ?? null : null,
     }];
   });
-  return { ok: true, value: motions };
+  return { ok: true, value: actions };
 }
 
-/** The agent's motions as they are saved. */
-export async function loadMotions(): Promise<Outcome<SavedMotion[]>> {
+/** The actions as they are saved. */
+export async function loadActions(): Promise<Outcome<SavedAction[]>> {
   const { db, error } = await database();
   return error ?? readAll(db);
 }
 
-/** A new motion, under the id it was made with: an item for the agent, and its draft. */
-export async function createMotion(raw: MotionState): Promise<Outcome<SavedMotion>> {
+/**
+ * An agent to preview an action on (M23): its name, its look as Orbit has it now — its draft, groups 1 and 2, never how
+ * it moves — and the uploaded drawings that look wears, by version id.
+ */
+export type PreviewAgent = { id: string; name: string; look: CharacterLook; drawings: Record<string, DrawingData> };
+
+/** Every agent there is, by name, each as Orbit has it. Reading only: the motion studio never writes a character. */
+export async function loadAgents(): Promise<Outcome<PreviewAgent[]>> {
   const { db, error } = await database();
   if (error) return error;
-  const state = checkState(raw, raw?.id, typeof raw?.name === "string" ? raw.name.trim() : "");
-  if (!state || !state.name) return refused("That is not a motion this studio can keep.");
-  const agent = await character(db);
-  if ("error" in agent) return agent.error;
-  const item = await db.from("studio_items").insert({ id: state.id, kind: "motion", name: state.name, character_id: agent.id });
-  if (item.error) return item.error.code === "23505" ? refused(`A motion is already called “${state.name}”.`) : refused(item.error.message);
-  const draft = await db.from("studio_drafts").insert({ item_id: state.id, data: stored(state) }).select("rev").single();
-  if (draft.error) return refused(draft.error.message);
-  return { ok: true, value: { state, rev: draft.data.rev, versions: [], currentId: null } };
+  const items = await db.from("studio_items").select("id, name").eq("kind", "character").order("name");
+  if (items.error) return refused(items.error.message);
+  if (!items.data.length) return { ok: true, value: [] };
+  const drafts = await db.from("studio_drafts").select("item_id, data").in("item_id", items.data.map((i) => i.id));
+  if (drafts.error) return refused(drafts.error.message);
+  const looks = new Map(drafts.data.map((d) => [d.item_id, resolveCharacter(checkCharacter(d.data))]));
+  const wornBy = (look: CharacterLook) =>
+    Object.values(look.face).flatMap((wear) => (isUploaded(wear?.style) ? [wear.style.slice(UPLOADED.length)] : []));
+  const worn = [...new Set([...looks.values()].flatMap(wornBy))];
+  const drawn = worn.length ? await db.from("studio_versions").select("id, data").in("id", worn) : { data: [] as { id: string; data: unknown }[], error: null };
+  if (drawn.error) return refused(drawn.error.message);
+  const shapes = new Map(drawn.data.flatMap((v) => {
+    const data = checkDrawing(v.data);
+    return data ? [[v.id, data] as const] : [];
+  }));
+  return {
+    ok: true,
+    value: items.data.map((item) => {
+      const look = looks.get(item.id) ?? resolveCharacter({ body: {}, face: {} });
+      const drawings = Object.fromEntries(wornBy(look).flatMap((id) => (shapes.has(id) ? [[id, shapes.get(id)!]] : [])));
+      return { id: item.id, name: item.name, look, drawings };
+    }),
+  };
 }
 
-/** Save a motion's draft whole on the `rev` it was loaded at, and its name on its item. */
-export async function saveMotion(raw: MotionState, rev: number): Promise<Outcome<{ rev: number }>> {
+/**
+ * An action's item and draft, the first time it is saved: named as it is in code, its values as he has them. Made by
+ * another device first, it is that one that comes back.
+ */
+export async function createAction(actionId: string, values: unknown): Promise<Outcome<SavedAction>> {
   const { db, error } = await database();
   if (error) return error;
-  const state = checkState(raw, raw?.id, typeof raw?.name === "string" ? raw.name.trim() : "");
-  if (!state || !state.name) return refused("That is not a motion this studio can keep.");
-  const named = await db.from("studio_items").update({ name: state.name }).eq("id", state.id).eq("kind", "motion").neq("name", state.name);
-  if (named.error) return named.error.code === "23505" ? refused(`A motion is already called “${state.name}”.`) : refused(named.error.message);
-  const saved = await db.from("studio_drafts").update({ data: stored(state) }).eq("item_id", state.id).eq("rev", rev).select("rev").maybeSingle();
+  const action = agentAction(actionId);
+  if (!action) return refused("That is not an action this studio has.");
+  const item = await db.from("studio_items").insert({ kind: "action", name: action.label }).select("id").single();
+  if (item.error) {
+    if (item.error.code !== "23505") return refused(item.error.message);
+    const all = await readAll(db);
+    if (!all.ok) return all;
+    const made = all.value.find((a) => a.action === action.id);
+    return made ? { ok: true, value: made } : refused(`An action is already called “${action.label}”.`);
+  }
+  const data = { action: action.id, values: checkActionValues(action, values) };
+  const draft = await db.from("studio_drafts").insert({ item_id: item.data.id, data }).select("rev").single();
+  if (draft.error) return refused(draft.error.message);
+  return { ok: true, value: { id: item.data.id, action: action.id, values: data.values, rev: draft.data.rev, versions: [], currentId: null, current: null } };
+}
+
+/** Save an action's draft whole on the `rev` it was loaded at. */
+export async function saveAction(id: string, actionId: string, values: unknown, rev: number): Promise<Outcome<{ rev: number }>> {
+  const { db, error } = await database();
+  if (error) return error;
+  const action = agentAction(actionId);
+  if (!action) return refused("That is not an action this studio has.");
+  const data = { action: action.id, values: checkActionValues(action, values) };
+  const saved = await db.from("studio_drafts").update({ data }).eq("item_id", id).eq("rev", rev).select("rev").maybeSingle();
   if (saved.error) return refused(saved.error.message);
   if (!saved.data) return conflict;
   return { ok: true, value: { rev: saved.data.rev } };
 }
 
-/** Delete a motion never published; a published one stays, its versions keep it. */
-export async function deleteMotion(id: string): Promise<Outcome<null>> {
-  const { db, error } = await database();
-  if (error) return error;
-  const gone = await db.from("studio_items").delete().eq("id", id).eq("kind", "motion");
-  if (gone.error) {
-    if (gone.error.code === "23503") return refused("A published motion stays: its versions keep it.");
-    return refused(gone.error.message);
-  }
-  return { ok: true, value: null };
-}
-
 /**
- * Publish a motion as it was on his screen (`rev`): every motion it places pinned to that motion's current version, the
- * draft saved so, then made a version with the name he typed — the next number, and the one pages would play.
+ * Publish an action as it was on his screen (`rev`): the latest version's next minor, or the next major at .0 (C19). It
+ * becomes the one pages would play.
  */
-export async function publishMotion(id: string, label: string, rev: number): Promise<Outcome<SavedMotion>> {
+export async function publishAction(id: string, step: PublishStep, rev: number): Promise<Outcome<SavedAction>> {
   const { db, error } = await database();
   if (error) return error;
-  const draft = await db.from("studio_drafts").select("data, rev").eq("item_id", id).maybeSingle();
-  if (draft.error) return refused(draft.error.message);
-  if (!draft.data) return refused("There is no draft to publish.");
-  if (draft.data.rev !== rev) return conflict;
-  const item = await db.from("studio_items").select("name").eq("id", id).maybeSingle();
-  if (item.error || !item.data) return refused(item.error?.message ?? "That motion is gone.");
-  const state = checkState(draft.data.data, id, item.data.name);
-  if (!state) return refused("That motion no longer reads as one.");
-  // Pin what it places: each at its current version, which must exist.
-  const held = [...new Set(state.rows.flatMap((r) => (r.kind === "state" ? [r.state] : [])))];
-  const pins = new Map<string, string>();
-  if (held.length) {
-    const found = await db.from("studio_items").select("id, name, current_version_id").in("id", held);
-    if (found.error) return refused(found.error.message);
-    for (const h of held) {
-      const it = found.data.find((f) => f.id === h);
-      if (!it) return refused("A motion it places is gone. Take its row out, then publish.");
-      if (!it.current_version_id) return refused(`Publish “${it.name}” first: this motion places it.`);
-      pins.set(h, it.current_version_id);
-    }
-  }
-  const pinned: MotionState = { ...state, rows: state.rows.map((r) => (r.kind === "state" ? { ...r, version: pins.get(r.state) } : r)) };
-  const saved = await db.from("studio_drafts").update({ data: stored(pinned) }).eq("item_id", id).eq("rev", rev).select("rev").maybeSingle();
-  if (saved.error) return refused(saved.error.message);
-  if (!saved.data) return conflict;
+  if (step !== "minor" && step !== "major") return refused("A publish is a minor version or a major one.");
   const published = await db.rpc("studio_publish", {
     p_item: id,
-    p_label: label,
     p_ui_version: process.env.NEXT_PUBLIC_UI_VERSION ?? "unknown",
-    p_rev: saved.data.rev,
+    p_rev: rev,
+    p_step: step,
   });
   if (published.error) {
     if (published.error.code === "40001") return conflict;
-    if (published.error.code === "23505") return refused(`A version of this motion is already called “${label.trim()}”.`);
-    if (published.error.code === "23514") return refused("A version needs a name.");
     return refused(published.error.message);
   }
   const one = await readAll(db, id);
   if (!one.ok) return one;
-  return one.value[0] ? { ok: true, value: one.value[0] } : refused("That motion is gone.");
+  return one.value[0] ? { ok: true, value: one.value[0] } : refused("That action is gone.");
 }
 
-/** Go back to a version: the one pages would play again, and the draft its motion, to carry on from. */
-export async function restoreMotion(id: string, versionId: string, rev: number): Promise<Outcome<SavedMotion>> {
+/** Go back to a version: the one pages would play again, and the draft its values, to carry on from. */
+export async function restoreAction(id: string, versionId: string, rev: number): Promise<Outcome<SavedAction>> {
   const { db, error } = await database();
   if (error) return error;
   const version = await db.from("studio_versions").select("data").eq("id", versionId).eq("item_id", id).maybeSingle();
   if (version.error) return refused(version.error.message);
-  if (!version.data) return refused("That version is not this motion's.");
+  if (!version.data) return refused("That version is not this action's.");
   const draft = await db.from("studio_drafts").update({ data: version.data.data }).eq("item_id", id).eq("rev", rev).select("rev").maybeSingle();
   if (draft.error) return refused(draft.error.message);
   if (!draft.data) return conflict;
@@ -218,5 +225,5 @@ export async function restoreMotion(id: string, versionId: string, rev: number):
   if (current.error) return refused(current.error.message);
   const one = await readAll(db, id);
   if (!one.ok) return one;
-  return one.value[0] ? { ok: true, value: one.value[0] } : refused("That motion is gone.");
+  return one.value[0] ? { ok: true, value: one.value[0] } : refused("That action is gone.");
 }

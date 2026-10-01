@@ -1534,7 +1534,7 @@ that asks for it: that page opens with the agent. Every other page, and every tu
 
 - **Where it stands.** The agent (Motion.md M17, the design system's `Agent`) stands in the page's circle for it: the
   element marked `data-intro-agent`, whose box's inscribed circle is its nest. On the portfolio that is the avatar's lime
-  ring (Portfolio.md P23). The nest is the muted tint in a lime line, as the character studio's cell is. A page without
+  ring (Portfolio.md P23). The nest is the muted tint in a lime line, as Orbit's cell is. A page without
   a circle gets the field's centre, a cell across.
 - **The page is held.** From the server's first paint (`data-intro="agent"`) the page's boxes are laid out but unseen and
   out of the pointer's way.
@@ -1558,20 +1558,101 @@ that asks for it: that page opens with the agent. Every other page, and every tu
 - **A 412 × 915 phone:** the same.
 - **Reduced motion:** the page is on the field at once, with no layer.
 
+**D50 amended — version 2, the six.** *2026-10-01, his: "the intro will be filled with six of our agents that we
+designed uh, to be in the center. And then uh, after two seconds, they will jump into multiple sections and uh, build
+these components on the page … it should feel like these agents uh, are loading and then once everything is loaded,
+they jump into uh, different places and uh, they will open up the components."* Motion.md M22 has the motion and its
+numbers. What changed on the grid:
+
+- **The cast is the page's.** `introAgents` on `Grid` is a list of `IntroAgent`s: an id and a character's look. Without
+  one, a cast of one: the agent as the grid's tokens make it. Each box names the agents that open it with
+  `data-intro-by`, their ids separated by spaces, the one that opens it first.
+- **The page is held box by box.** `data-intro="agent"` still holds every box back from the server's first paint. The
+  intro shows each one as it opens, clipped to how far it has opened, a cell's circle at its corners, and faded in.
+  When the last is in the grid lets go of them all at once (`reveal` with 0ms), and the phase ends.
+- **No circle and no rings.** `data-intro-agent` on a page's element means nothing now, and the portfolio's avatar
+  ring no longer carries it. The field's painter is sent no pass. Its `pass` stays, as its reveal stayed after D48.
+- **`intro` no longer needs `overlay`.** The nests are the agents' own, drawn over the cells.
+- **Kept:** once per document load, never under reduced motion, and a box that changes mid-intro hands straight over.
+
 *Version 1, mine, his to tune.* The 2s, the 45ms a ring, the 300ms and the 500ms (`INTRO_START` in
 `lib/intro-motion.ts`; the `--motion-intro-*` tokens are read but not yet in globals.css). Also mine: violet for the
 rings; counting them from the nest's edge; the vanish and the page coming in together; the nest's tint; and the
 agent's look, SPHERE_START's, because the page holds no character's look.
 
 *Open.*
-- On a phone the nest does not cover the dashed cells its circle half-meets, which show round its edge. The character
-  studio's cell paints them out.
+- On a phone the nest does not cover the dashed cells its circle half-meets, which show round its edge. Orbit's
+  cell paints them out.
 - The agent is drawn from the main thread, one SVG group on GSAP's ticker, as the studio's stage draws it.
 - It is not on the motion studio's bench, so it cannot be tuned there yet.
 
 *Where it lives.* `useGridIntro` in grid.tsx, which holds the phase. `GridIntro` in grid-intro.tsx, which the grid loads
 only while an intro plays, finds the circle, draws the agent and sends the rings. `lib/intro-motion.ts` holds the plan
 and the rings. globals.css holds the page back and brings it in.
+
+**D50 amended — version 3, the actions.** *2026-10-01, his: "Since we have now defined the motions for uh, dive, jump
+and bounce, in intro, intro will be a three second sequence where all the six agents are randomly placed within the
+center four by four cells … randomly keep bouncing … for uh, two seconds and then randomly some agents will dive and
+some agents will jump to their positions and um, once they reach their destination cell we should have the ripple the
+first type of ripple that we had … with small radius."* Motion.md M22 has the motion and its numbers. What changed on
+the grid:
+
+- **`introActions` on `Grid`**: how the cast bounces, jumps and dives, each action's values as he published them
+  (Motion.md M24). An action left out is played at its defaults.
+- **The ripples are the field's painter's again.** Version 2 sent it no pass; version 3 sends one an agent, each
+  lighting the cells within two rings of that agent's nest, all sent as the intro starts and each timed from its
+  landing on the painter's clock. A pass's cell with an Infinity delay is never lit. Where passes cross, a cell shows
+  the younger lighting; until now it showed the last pass sent. `intro` keeps the painter on by itself, as `overlay`
+  and `cursor` do, so a grid with an intro and neither still has its ripples.
+- **Kept:** the landing on the top-left cell of the box each opens, the nest opening into the box, once per document
+  load, never under reduced motion, and a box that changes mid-intro hands straight over.
+
+
+**D50 amended — version 4, the centre and the ripple.** *2026-10-01, his: "the agent should jump to the center of the
+sections that it is rendering. And uh, instead of uh, expanding these sections from top left they should render along
+with the uh, ripple."* Motion.md M22 has the motion and its numbers. What changed on the grid:
+
+- **Each agent lands on the centre of the boxes it opens**, the middle of the rectangle round them all, a cell or half
+  way between two. An agent's nest is no longer always a cell of the field.
+- **The boxes come in with the ripple, cell by cell.** Each agent's pass lights every cell of its boxes and a ring past
+  them. Each cell of a box shows a ring's time behind that lighting: first its disc, then its tile, D40's lace. The
+  intro writes a box's `clip-path` as a path of those discs and tiles, and writes it only when another cell comes in.
+  The top-left opening and its lines are gone, so the intro no longer reads the loader's tokens.
+- **Kept:** `data-intro-by`, one pass of the painter an agent, the grid letting go of the boxes all at once at the end,
+  once per document load, never under reduced motion, and a box that changes mid-intro hands straight over.
+
+**D50 amended — version 5, the row.** *2026-10-01, his: "instead of placing this agent's uh, randomly let's place them
+in uh, row in a line uh, without any gaps in between them uh, their order will be random and also not all the agents
+will bounce um, let's only make uh, Bali Kino and uh, Mira to bounce."* Motion.md M22 has the motion. On the grid:
+
+- **The cast stands in a row**: a cell each, side by side, centred across the field on its middle row (or the nearest
+  row where no agent lands), in a random order. The centre four by four is gone.
+- **`bounces` on an `IntroAgent`** says whether it bounces while they stand; every agent does unless the page says not.
+
+
+**D50 amended — version 6, cells and rest.** *2026-10-01, his: "They should actually drop into the cells on the grid. I
+don't know why you are creating new cells."* Every nest is a cell of the field again: the cell at the middle of the
+boxes an agent opens, or the one next to the middle that is in one of them. Version 4's nests half way between cells
+are gone. Each agent's rest starts part-way through, so it is seen breathing and blinking while they stand (Motion.md
+M22).
+
+
+**D50 amended — version 7, the small ripple, then the page.** *2026-10-01, his: "the ripple is now more stuttering it's
+not smooth and then also it stops at the borders of the section … i think we can just have small ripples and uh, once
+the ripple ends we can drop the agents and then render the components."* Each agent's pass lights version 3's two
+rings round its nest again. Once it has spread, the agent dives, its nest going back to the field's plain cell as it
+does. Then the boxes it opens fade in, each by one Web Animations opacity fade the compositor plays. The intro writes no `clip-path` any more: version 4's cut, cell by cell,
+was what stuttered.
+
+**D50 amended — version 8, home.** *2026-10-01, his: "once the agents jump into their sections and dive, they all
+should uh, come and settle in the last row middle six columns cells", then, before it was built: "instead of uh,
+bringing them to the bottom, we'll bring them to the right the last most column vertically centered."* Once its ripple
+has spread, each agent's dive is his Dive (M24), from its nest to a cell of its own in the field's last column. The cast
+stands one above the other there, centred down the column, in its order (`introHome`). Its boxes fade in once it is
+gone behind the page. **The agents stay.** `GridIntro` stays mounted once the grid lets go of the page (`settled`): it
+draws them resting in those cells, and on any field the grid is given after that. A grid that skips the intro draws
+them there from the start, still under reduced motion. `data-intro` on the root still marks only the intro, so
+everything that waits for the hand-over waits as before.
 
 ---
 

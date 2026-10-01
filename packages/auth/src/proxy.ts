@@ -17,7 +17,7 @@ import { supabaseEnv } from "./env";
  *
  * **With no keys** (his, 2026-09-30: open only locally): in production the gate refuses, never opens — a deploy that
  * lost its keys is a closed door, not an open one. On a development server an app may ask to open without them
- * (`openWithoutKeys`, the motion studio), so CI's visual review and a laptop offline still see it.
+ * (`openWithoutKeys`, the motion studio and Orbit), so CI's visual review and a laptop offline still see it.
  */
 export type GateOptions = {
   /** Paths anyone may reach: the sign-in page and the callback. */

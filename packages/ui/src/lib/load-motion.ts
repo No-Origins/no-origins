@@ -339,8 +339,11 @@ function stepped(v: number): number {
   return n + s * s * (3 - 2 * s)
 }
 
-/** A section opening from its anchor's cell `a` to its box `to`, `q` of the way: each edge outward, never past its own. */
-function openBox(m: LoadMotion, a: LoadBox, to: LoadBox, q: number, pitch: number): LoadBox {
+/**
+ * A section opening from its anchor's cell `a` to its box `to`, `q` of the way: each edge outward, never past its own.
+ * The intro's boxes opened by it too, until its version 4 (`lib/intro-motion`, Motion.md M22).
+ */
+export function openBox(m: LoadMotion, a: LoadBox, to: LoadBox, q: number, pitch: number): LoadBox {
   if (m.open !== "cells") return lerpBox(a, to, q)
   const by = (from: number, edge: number) => stepped(Math.round(Math.abs(edge - from) / pitch) * q) * pitch
   return { l: a.l - by(a.l, to.l), r: a.r + by(a.r, to.r), t: a.t - by(a.t, to.t), b: a.b + by(a.b, to.b) }

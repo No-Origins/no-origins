@@ -1,27 +1,39 @@
 "use client";
 
-import { ArrowUpRightIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 
-import { Button } from "@no-origins/ui/components/button";
 import { Card } from "@no-origins/ui/components/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, useCarousel } from "@no-origins/ui/components/carousel";
 import { GRID_SPACING, useGridMetrics } from "@no-origins/ui/components/grid";
 import { Text } from "@no-origins/ui/components/text";
+import { cn } from "@no-origins/ui/lib/utils";
 
 import { SectionCell, type SectionLabel } from "@/components/cards";
-import { icon, ICON_GAP } from "@/components/profile-card";
-import { PROJECTS, type Project } from "@/content/resume";
+import { CARD_LINK, LINK_CARD } from "@/components/profile-card";
+import { DUMMY_PROJECTS, PROJECTS, type Project } from "@/content/resume";
 
-/** A project's rows, every project's the same (his, 2026-09-28: "all cards should be of the same height"). */
-const CARD_ROWS = 2;
+/**
+ * A project's rows, every project's the same (his, 2026-09-28: "all cards should be of the same height"): its image's
+ * two and its name's one (his, 2026-10-01: "expand the card to another row and then in that row we will just place the
+ * name of the project"). It was two, the image square at the card's left end and the words beside it.
+ */
+const CARD_ROWS = 3;
+/** A project's cells across (his, 2026-10-01: "only two columns width"). */
+const CARD_COLS = 2;
 
-/** The projects that are out first, as the recruiter quick view had them, then the rest as the résumé lists them. */
-const SHOWN = [...PROJECTS].sort((a, b) => Number(!!b.href) - Number(!!a.href));
+/**
+ * The projects that are out first, as the recruiter quick view had them, then the rest as the résumé lists them, then
+ * the two dummies (2026-10-01).
+ */
+const SHOWN = [...[...PROJECTS].sort((a, b) => Number(!!b.href) - Number(!!a.href)), ...DUMMY_PROJECTS];
 
-/** The section's rows: its label's and every project's. */
-export const PROJECTS_ROWS = 1 + SHOWN.length * CARD_ROWS;
+/** The section's rows: its label's (with the carousel's arrows, when it turns) and the cards'. */
+export const PROJECTS_ROWS = 1 + CARD_ROWS;
 
 /** The air between the card's border and its image, a step of the spacing scale. */
 const INSET = GRID_SPACING[2];
+/** The air under a project's name, to the card's foot, a step of the spacing scale: the round foot's corners take some. */
+const NAME_FOOT = GRID_SPACING[3];
 
 /**
  * The image's radius: the card's, less the inset (his, 2026-09-28: "the border radius of the image and the border
@@ -53,68 +65,124 @@ const NOISE = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
  * The projects (Portfolio.md P4, amended 2026-09-28, his: "I also liked what happened with projects cards … we'll add
  * a slot for image but for now use a skeleton", then "the image should be part of the card … inside the border of the
  * card", then "a project card's image will always be same width and height … all cards should be of the same
- * height"): the recruiter quick view's cards under the section's label, as wide as the column and two rows tall, each
- * holding a slot for its image at its left end, square, a step inside the border as the avatar is in its card. Beside
- * it, its name, its line, and the way out — "Explore the system ↗", in a new tab — or "Not published yet" where there
- * is none. The image is a lime and violet gradient until there are pictures (`FILLS`). Where the rows are fewer than
- * the label and the projects, the label goes first, then the last projects (P5).
+ * height"): cards two cells wide and three rows tall, each its image over its name (2026-10-01, his: "I did not like
+ * the cards … we will keep the image in the cards but remove the text in it, and then let's just expand the card to
+ * another row and then in that row we will just place the name of the project", then "I want the cards to take only
+ * two columns width and three rows height"), side by side from the column's start **in a carousel** (his, the same
+ * hour: "these projects have to be like a carousel not vertically stacked"), the system's `Carousel`, as many at a
+ * time as the column holds. Over the cards is the section's label, its first row. **Where there are more cards than
+ * the column holds**, the carousel's ‹ and › stand on that row's first and last cells, circles, the label between
+ * them; with no label (the phone's tab, which names it) they stand on the row under the cards, with which of how many
+ * is first between them. The arrows, a swipe and a drag turn it; ← and → do not, since they move the page's focus
+ * (Grid.md D45). Four cards, his two and two dummies, are more than any column holds. The image is a lime and violet
+ * gradient until there are pictures (`FILLS`). Where the rows do not hold the label, it goes and the cards stay (P5).
  */
 export function ProfileProjects({ cols, rows, lead }: { cols: number; rows: number; lead?: SectionLabel }) {
   const m = useGridMetrics();
   const cell = m?.cell ?? 60;
   const gap = m?.gap ?? 12;
-  const labelled = !!lead && rows >= PROJECTS_ROWS;
-  const top = labelled ? 2 : 1;
-  const shown = SHOWN.slice(0, Math.max(0, Math.floor((rows - top + 1) / CARD_ROWS)));
-  const image = CARD_ROWS * cell + (CARD_ROWS - 1) * gap - 2 * INSET;
+  if (rows < CARD_ROWS || cols < CARD_COLS) return null;
+  const bar = rows >= PROJECTS_ROWS && cols >= 3;
+  const labelled = bar && !!lead;
+  // The carousel's window is as many whole cards as the column holds, so its last stop is on the field's cells too.
+  const span = Math.floor(cols / CARD_COLS) * CARD_COLS;
   return (
-    <div className="grid" style={{ gridTemplateColumns: `repeat(${cols}, ${cell}px)`, gridAutoRows: `${cell}px`, gap }}>
-      {lead && labelled ? (
-        <div style={{ gridColumn: "1 / -1", gridRow: 1 }}>
-          <SectionCell label={lead.label} icon={lead.icon} />
-        </div>
-      ) : null}
-      {shown.map((project, i) => (
-        <div key={project.name} className="min-w-0" style={{ gridColumn: "1 / -1", gridRow: `${top + i * CARD_ROWS} / span ${CARD_ROWS}` }}>
-          <ProjectCard project={project} image={image} fill={FILLS[i % FILLS.length]} />
-        </div>
-      ))}
+    <Carousel
+      aria-label="Projects"
+      // From the column's start, a card a turn, so every stop puts the cards back on the field's cells.
+      opts={{ align: "start" }}
+      className="grid"
+      style={{ gridTemplateColumns: `repeat(${cols}, ${cell}px)`, gridAutoRows: `${cell}px`, gap }}
+    >
+      {bar ? <ProjectsBar cols={cols} row={labelled ? 1 : 1 + CARD_ROWS} lead={labelled ? lead : undefined} /> : null}
+      <div className="min-w-0" style={{ gridColumn: `1 / span ${span}`, gridRow: `${labelled ? 2 : 1} / span ${CARD_ROWS}` }}>
+        {/* The system's slides stand a gutter apart; here the gutter is the field's, and a slide is a card's cells. */}
+        <CarouselContent style={{ marginInlineStart: -gap }}>
+          {SHOWN.map((project, i) => (
+            <CarouselItem key={project.name} style={{ flexBasis: CARD_COLS * (cell + gap), paddingInlineStart: gap }}>
+              <ProjectCard project={project} height={CARD_ROWS * cell + (CARD_ROWS - 1) * gap} fill={FILLS[i % FILLS.length]} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </div>
+    </Carousel>
+  );
+}
+
+/**
+ * The projects' bar, row `row`: the label across it, or, where the carousel has somewhere to turn, ‹ and › on its
+ * first and last cells with the label — or which of how many is first, where there is no label — between them.
+ */
+function ProjectsBar({ cols, row, lead }: { cols: number; row: number; lead?: SectionLabel }) {
+  const { canScrollPrev, canScrollNext } = useCarousel();
+  const turns = canScrollPrev || canScrollNext;
+  if (!turns && !lead) return null;
+  return (
+    <>
+      {turns ? <CarouselPrevious className="static size-full" style={{ gridColumn: 1, gridRow: row }} /> : null}
+      <div className="min-w-0" style={{ gridColumn: turns ? `2 / span ${cols - 2}` : "1 / -1", gridRow: row }}>
+        {lead ? <SectionCell label={lead.label} icon={lead.icon} /> : <ProjectCount />}
+      </div>
+      {turns ? <CarouselNext className="static size-full" style={{ gridColumn: cols, gridRow: row }} /> : null}
+    </>
+  );
+}
+
+/** Which card is first of how many places the carousel stops at, "1 / 2", where the bar has no label to carry. */
+function ProjectCount() {
+  const { api } = useCarousel();
+  const [at, setAt] = useState({ index: 0, of: 1 });
+  useEffect(() => {
+    if (!api) return;
+    const select = () => setAt({ index: api.selectedScrollSnap(), of: api.scrollSnapList().length });
+    select();
+    api.on("select", select);
+    api.on("reInit", select);
+    return () => {
+      api.off("select", select);
+      api.off("reInit", select);
+    };
+  }, [api]);
+  return (
+    <div className="flex size-full items-center justify-center">
+      <Text as="span" role="caption" aria-live="polite">
+        {at.index + 1} / {at.of}
+      </Text>
     </div>
   );
 }
 
 /**
- * A project's card: its image, `image` square — `fill` under `NOISE` for now — then its name, its line in `caption`, and its way out
- * where it has one, the quick view's.
+ * A project's card, `height` tall: its image a step inside the border at the top and the sides — `fill` under `NOISE`
+ * for now — and its name under it, centred, a step (`INSET`) from it and `NAME_FOOT` from the card's foot; the image
+ * takes the rest. The name stood centred on the card's third row until his note the same day ("there's a lot of space
+ * between the image and the title … reduce that gap"), which left the image ending where the second row did and 28px
+ * of air over the name. The line, the way out ("Explore the system ↗") and "Not published yet" went (2026-10-01). **A
+ * project with a URL is its card**: the card is the link, in a new tab, its border lime under the pointer and the keys'
+ * focus, as the address's and GitHub's are (`LINK_CARD`); one without is its image and its name, not a Tab stop.
  */
-function ProjectCard({ project, image, fill }: { project: Project; image: number; fill: string }) {
+function ProjectCard({ project, height, fill }: { project: Project; height: number; fill: string }) {
   return (
-    <Card size="sm" className="h-full min-w-0 flex-row items-center gap-3 py-0" style={{ padding: INSET }}>
+    <Card size="sm" className={cn(project.href && LINK_CARD, "min-w-0 py-0")} style={{ height, padding: `${INSET}px ${INSET}px ${NAME_FOOT}px`, gap: INSET }}>
       <div
         aria-hidden
         data-project-image
-        className="shrink-0"
-        style={{ width: image, height: image, borderRadius: IMAGE_RADIUS, backgroundImage: `${NOISE}, ${fill}`, backgroundBlendMode: "overlay, normal" }}
+        className="min-h-0 flex-1"
+        style={{ borderRadius: IMAGE_RADIUS, backgroundImage: `${NOISE}, ${fill}`, backgroundBlendMode: "overlay, normal" }}
       />
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 pe-3">
-        <Text as="h3" className="shrink-0 truncate">
-          {project.name}
-        </Text>
-        <Text role="caption">{project.short ?? project.line}</Text>
-        {/* The way out stands a step (INSET) inside its fill, and is pulled back by the same step so its words start
-            where the name's do; lit, the fill clears the image by what is left of the gap. */}
-        {project.href ? (
-          <Button asChild variant="ghost" className="-ms-2 h-9 justify-start self-start px-2 font-normal tracking-normal normal-case" style={{ gap: ICON_GAP }}>
-            <a href={project.href} target="_blank" rel="noreferrer">
-              <Text as="span">{project.action ?? project.name}</Text>
-              <ArrowUpRightIcon aria-hidden className="shrink-0" style={icon} />
+      {/* The name in `heading` (his, 2026-10-01: "make the titles font in projects a little bigger and bolder"; it was
+          `body`), the next role up. On a card narrower than No Origins needs at it, 109px and its air — a phone's two
+          cells — it steps back to the body's size, still semibold, as the address and the degree step (P5). */}
+      <div className="@container flex shrink-0 items-center justify-center">
+        <Text as="h3" role="heading" className="truncate @max-[112px]:text-sm">
+          {project.href ? (
+            <a href={project.href} target="_blank" rel="noreferrer" aria-label={`${project.name} (opens in a new tab)`} className={CARD_LINK}>
+              {project.name}
             </a>
-          </Button>
-        ) : (
-          <Text as="span" role="caption" tone="foreground" className="flex h-9 items-center">
-            Not published yet
-          </Text>
-        )}
+          ) : (
+            project.name
+          )}
+        </Text>
       </div>
     </Card>
   );

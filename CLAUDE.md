@@ -3,10 +3,15 @@
 pnpm workspace. Apps live in `apps/*` — `portfolio` (hiddenstack.no-origins.com, :3000; bhargav.no-origins.com
 redirects to it), `design` (design.no-origins.com, the showcase, :3001), `admin` (admin.no-origins.com, the control
 surface, :3002), `engineering` (engineering.no-origins.com, the engineering publish library, :3003), `motion`
-(motion.no-origins.com, the motion studio, :3004, since 2026-09-27) and `character` (character.no-origins.com, the
-character studio, :3005, since 2026-09-30: the agents' appearance, Character-Studio.md), all Next.js 16; the shared design
+(motion.no-origins.com, the motion studio, :3004, since 2026-09-27) and `orbit` (orbit.no-origins.com, :3005, since
+2026-09-30: the agents' appearance, Orbit.md), all Next.js 16; the shared design
 system is `packages/ui` (`@no-origins/ui`, **2.0.0** since 2026-09-16), consumed from source. Each app has its own
 CLAUDE.md / AGENTS.md; read them before editing app code.
+
+**Orbit is what the agents are called together** (his, 2026-10-01, Orbit.md C21): each agent has its own name — Bali,
+Kino, Zaza, Oru, Mira, Lola (Agents.md) — and Orbit is all of them, and the app where they are made. That app was the
+character studio, `apps/character` on `character.no-origins.com`, until the same day. A *character* is still one
+agent's look (the database's rows of kind `character`, `CharacterLook`).
 
 `packages/docs` (`@no-origins/docs`) is the knowledge base — every document that decides something, grouped into
 `brand/`, `system/`, `apps/` and `archive/`. It builds and exports nothing. `packages/docs/README.md` is the index
@@ -32,7 +37,7 @@ engineering (Layer A) have no database anywhere near them, and that is deliberat
 because it should be same across no origins"): the Supabase clients, the gate (`authGate`, called from each app's
 `proxy.ts`), the callback, the sign-out, the login card and the sign-in screen, consumed from source. One session for
 every app — the cookie is written for `.no-origins.com` — one allowlist, roles later. **The admin, the motion studio
-and the character studio are behind it.** Without its two keys the gate refuses in production; the two studios alone
+and Orbit are behind it.** Without its two keys the gate refuses in production; the motion studio and Orbit alone
 open on a development server that has none, so the review sweep and CI still see them.
 
 ## The design system
@@ -52,7 +57,7 @@ organisms, templates, the registry, the blob, the patterns, the CSS layers — w
   translucent. The rest of the palette is still shadcn's neutral. `text-primary` is lime text, about 1.3 : 1 on white,
   so it is not for text on the light theme. The jig (`?jig` on the portfolio in development, `jig.tsx`) stays, to be
   showcased in experiments; its "Neutral" puts shadcn's greys back. **The agent has paints of its own** beside them (2026-09-30,
-  Character-Studio.md C10): pink, red, orange, gold, green, teal and blue since 2026-10-01 (C20, his: peach, yellow and
+  Orbit.md C10): pink, red, orange, gold, green, teal and blue since 2026-10-01 (C20, his: peach, yellow and
   grey out, "high contrast"), the `--agent-*` tokens with their inks, which nothing but the agent paints with — the
   system's palette is still lime and violet, and widening it is his call. The new five are mid-tones that stand 3.3 : 1
   from the page and the nest in both themes. A paint that went is read as its replacement (`RENAMED_PAINTS`).
@@ -67,7 +72,9 @@ organisms, templates, the registry, the blob, the patterns, the CSS layers — w
   `motion-surface`/`motion-panel` and token-valued utilities, script through `@no-origins/ui/lib/motion`. The values
   are the old defaults (shadcn's, Tailwind's, tw-animate's); none is his yet. Motion is designed in **the motion
   studio**, `apps/motion`: a transparent stage at the centre of the grid, jigs as slots around it, and the CSS lines
-  to commit handed back (M7). **Its bench holds only what he names** (M9). The first is movement, how one-cell
+  to commit handed back (M7). **Its bench holds only what he names** (M9). **The agents' are actions** (M24, 2026-10-01, his): its Agents page picks one
+of those `@no-origins/ui/lib/agent-actions` declares, each with its own controls and as long as they make it, its draft
+and `major.minor` versions in the database (kind `action`); Bounce, Jump and Dive are the three, and the motions of rows went. The first is movement, how one-cell
   elements move when one grows, whose model is `@no-origins/ui/lib/cell-motion`. **Movement is decided** (his
   settings, 2026-09-27, the `--motion-move-*` tokens), the first motion in the system that is his, and **the
   portfolio's tech column plays it** (a hovered or selected mark grows to spell its name), as does the numbered pager bar
@@ -228,17 +235,39 @@ rules in short, each one his:
   `data-load-box`), opening into the page after 2 s at the least — is gone from every page with `useGridLoad` and
   `GridLoader`. Loading itself, his motion (Motion.md M10), stays whole in `lib/load-motion` and `useLoadMotion`, its
   tokens in globals.css, and plays on the motion studio's Loading page only. Do not put a loader back on a page until
-  he names one. **He named one the same day: the intro is the agent (D50, version 1)**. `intro` on `Grid`, with
-  `overlay`, is the portfolio's. The agent stands in the page's `data-intro-agent` circle (the avatar's ring) and
-  breathes for 2s. It hops in place, and as it lands the field's cells light violet ring by ring from it, one pass of
-  the field's painter. Then it fades and the page's boxes come in. `grid-intro.tsx`, which the grid loads only then,
-  draws it; the `--motion-intro-*` values are INTRO_START's in `lib/intro-motion`, not yet in globals.css. Once per
-  document load, never under reduced motion. The ripple went before it (D48): the grid drawing itself in, the ripple between pages (D32), its wash
+  he names one. **He named one the same day: the intro is the agent (D50)**, and **since 2026-10-01 it is the six
+  playing his actions (version 3, Motion.md M22, his: "randomly some agents will dive and some agents will jump to
+  their positions")**, and **since version 4 the same day each lands on the centre of its sections and they come in
+  with its ripple** (his: "instead of uh, expanding these sections from top left they should render along with the uh,
+  ripple"), and **since version 5 they stand in a row and only some bounce** (his: "place them in uh, row in a line …
+  let's only make uh, Bali Kino and uh, Mira to bounce"), and **since version 6 every nest is a cell and the rest is
+  seen**, and **since version 7 the ripple is small again and the page comes after it** (his: "once the ripple ends we
+  can drop the agents and then render the components"), and **since version 8 they go home and stay** (his: "we'll
+  bring them to the right the last most column vertically centered"). `intro`, `introAgents` and `introActions` on `Grid` are the
+  portfolio's: its cast the six agents copied from their current versions (`apps/portfolio/src/content/agents.ts`),
+  each with whether it `bounces` (`content/intro.ts`), and its moves Bounce, Jump and Dive copied from theirs
+  (`content/actions.ts`). The six stand side by side in one row, a cell each, centred on the field's middle row (or the
+  nearest an agent does not land in), in a random order, and Bali, Kino and Mira Bounce, each at its own random times,
+  for 2s, the other three resting — breathing and blinking, each as if it had sat a while (version 6). Then each Jumps
+  or Dives, at random, to the centre of the boxes it opens, which every box names with `data-intro-by` — the cell at
+  the middle of the rectangle round them, always a cell of the field (version 6, his: "They should actually drop into
+  the cells on the grid"). As each lands, version 3's small ripple lights the two rings of cells round its nest in
+  violet: one pass of the field's painter an agent. Once it has spread, the agent Dives (his action) out of its nest
+  to a cell of its own in the field's last column, the six one above the other and centred down it, Bali at the top
+  (`introHome`, version 8); the boxes it opens fade in once it is gone, each by one Web Animations opacity fade (no
+  `clip-path`: version 4's cell-by-cell cut stuttered). The agents stay in those cells, breathing and blinking, after
+  the hand-over and on any field the grid is given later (`GridIntro` stays mounted, `settled`). `grid-intro.tsx`, which
+  the grid loads only then, draws it. The `--motion-intro-*` values are INTRO_START's in `lib/intro-motion`, not yet in
+  globals.css. Version 1 (one agent hopping in the avatar's ring, the whole field lit ring by ring), version 2 (the six
+  gathered in his loader's square, leaping all at once), version 3's top-left opening and its random spots in the
+  centre four by four are gone. Once per document load, never under reduced motion, where the agents are drawn in
+  their cells once, still. The ripple went before it (D48): the grid drawing itself in, the ripple between pages (D32), its wash
   (D37) and the `ripple` prop. **The field is painted
   (D38, 2026-09-25)**: the overlay's dashes and the pointer's cell are canvases drawn by one painter
   (`lib/grid-field.ts`), in a worker where the browser can hand it a canvas, so the page's own loading on the main
   thread cannot stall it. They were ~1,300 elements. `gridFieldPainter` must stay self-contained — the worker runs it
-  from its own source text. It still carries the intro's passes and reveal, which nothing sends any more.
+  from its own source text. It lights the intro's ripples (passes, the youngest lighting showing where two cross) and
+  still carries the intro's reveal, which nothing sends any more.
   **The turn's custom properties are written on the pager's bar, not the grid's root or tracks**: they inherit, and on
   the root they restyled every element in the grid every frame of a turn; on the tracks, every box (until D37).
 - **The pointer is a violet ring, and the cell under it is lit (D34, 2026-09-25).** `cursor` on `Grid` or `GridPages`;
@@ -282,7 +311,7 @@ composer and nothing is edited in place.
 builds with no Supabase keys, since its clients are made per request; it stays out of the **review sweep** because
 every route is behind auth and needs a running Supabase, which `pnpm review` does not boot. The motion studio is
 behind the same sign-in since 2026-09-30 and stays in the sweep: its dev server opens when it has no keys (CI, a fresh
-clone). The character studio (2026-09-30) is behind it the same way and is in the sweep too. **On his machine both have
+clone). Orbit (2026-09-30) is behind it the same way and is in the sweep too. **On his machine both have
 the local stack's keys** (their `.env.local`, his ask, 2026-09-30), so they ask for a sign-in as the admin does, and
 `e2e/global-setup.ts` signs the test browser in first — by magic link through the local mail catcher, as the address in
 `.private/e2e-email` (gitignored) — leaving the session in `e2e/.auth/state.json` for every spec and the sweep. **Quests are gone**
@@ -294,13 +323,16 @@ in `.legacy/`, were deleted on 2026-09-23 — git history keeps them.
 ## Deploying
 
 Six Vercel projects under the `no-origins` team, one per app, each with its **Root Directory** set to `apps/<app>`:
-`no-origins` → portfolio, `design`, `admin`, `engineering`, and since 2026-09-30 `motion` and `character`, made with
+`no-origins` → portfolio, `design`, `admin`, `engineering`, and since 2026-09-30 `motion` and `character` (Orbit's,
+named before it was; since 2026-10-01 its root directory is `apps/orbit` and its domain `orbit.no-origins.com`, with
+`character.no-origins.com` still attached and 308ing to it from `apps/orbit/next.config.ts`), made with
 the CLI the night PR #14 merged (`vercel link` from the app's folder creates the project; `vercel project update
 --root-directory`, because link leaves it at `.`; `vercel git connect`; `vercel domains add`; `vercel env add
 --type config` for the two `NEXT_PUBLIC_SUPABASE_*` variables, copied from the admin's — without them production
-answers 503). Production is `main`. The hosted Supabase carries both studio domains among its redirect URLs, pushed
-from `config.toml` (supabase/README.md). **Still to do in the dashboard: *Skip deployments for unaffected projects*
-on the two new projects** — the CLI has no flag for it, and until then every push rebuilds both studios.
+answers 503). Production is `main`. The hosted Supabase carries the motion studio's and the character studio's domains among its redirect
+URLs, pushed from `config.toml` (supabase/README.md); **`orbit.no-origins.com` is listed in `config.toml` and not yet
+pushed** — his `npx supabase config push`. **Still to do in the dashboard: *Skip deployments for unaffected projects*
+on the two new projects** — the CLI has no flag for it, and until then every push rebuilds the motion studio and Orbit.
 
 **`apps/<app>/vercel.json` is the source of truth, not the dashboard.** A `vercel.json` in a project's root directory
 **overrides** the dashboard's fields, so the commands live in the repo, travel through review, and cannot quietly
@@ -366,8 +398,8 @@ anchored with a leading slash on purpose, because an unanchored `supabase` would
 After any UI change, look at the result before reporting done.
 
 1. `pnpm review` boots the portfolio on :3000, the showcase on :3001, engineering on :3003, the motion studio on
-   :3004 and the character studio on :3005 (or reuses running ones), visits every route in `ROUTES`, `DESIGN_ROUTES`,
-   `ENGINEERING_ROUTES`, `MOTION_ROUTES` and `CHARACTER_ROUTES` in `e2e/review.spec.ts` on desktop
+   :3004 and Orbit on :3005 (or reuses running ones), visits every route in `ROUTES`, `DESIGN_ROUTES`,
+   `ENGINEERING_ROUTES`, `MOTION_ROUTES` and `ORBIT_ROUTES` in `e2e/review.spec.ts` on desktop
    (1440x900) and mobile (Pixel 7) in both themes, waits for a grid's intro (D50) to hand over, fails on a route that
    answers 400+ or throws, echoes
    `console.error` output, and writes full-page screenshots to `e2e/screenshots/<project>/<route>.png`. CI runs the
