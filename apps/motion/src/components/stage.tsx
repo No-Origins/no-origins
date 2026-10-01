@@ -21,10 +21,12 @@ import { springFollow } from "@no-origins/ui/lib/spring";
 import { loadFrame, loadPlan, loadSettled, loadTotal, readLoadMotion, type LoadBox, type LoadFrame } from "@no-origins/ui/lib/load-motion";
 import { cn } from "@no-origins/ui/lib/utils";
 
-import { FAMILIES, type Family, type Token } from "@/content/families";
+import { FAMILIES, type Family, type FamilyId, type Token } from "@/content/families";
+import { SPHERE_TOKENS } from "@/content/sphere";
 import { FocusStage } from "@/components/focus-stage";
 import { ModeStage } from "@/components/mode-stage";
-import { MotionsStage, SphereStage } from "@/components/sphere-stage";
+import { useAgentPreview } from "@/components/agent-preview";
+import { ActionStage } from "@/components/sphere-stage";
 import { StepStage } from "@/components/step-stage";
 import { holdPhase, useStudio, type Phase } from "@/components/studio-context";
 import { tokenCss } from "@/lib/tokens";
@@ -39,8 +41,13 @@ import { tokenCss } from "@/lib/tokens";
  */
 export function Stage({ family, cols, rows }: { family: Family; cols: number; rows: number }) {
   const studio = useStudio();
+  const preview = useAgentPreview();
   const [el, setEl] = React.useState<HTMLDivElement | null>(null);
-  const values = studio.values(family);
+  // On the agents (Motion.md M23), the agent previewed stands in the family's values: its look, as Orbit has it. An
+  // action's own tokens are its controls (M24), so the look goes on the stage by the agent's every token.
+  const look = family.agents ? preview?.values : undefined;
+  const values = look ? { ...studio.values(family), ...look } : studio.values(family);
+  const tokens = family.agents ? [...family.tokens, ...SPHERE_TOKENS.filter((t) => !family.tokens.some((own) => own.name === t.name))] : family.tokens;
   const borrowed = (family.borrows ?? []).flatMap((id) => {
     const from = FAMILIES.find((f) => f.id === id);
     const decided = studio.decided?.[id] ?? {};
@@ -48,7 +55,9 @@ export function Stage({ family, cols, rows }: { family: Family; cols: number; ro
   });
   const style = Object.fromEntries([
     ...borrowed.map(([t, v]) => [t.name, tokenCss(t, v, studio.tempo)]),
-    ...family.tokens.filter((t) => values[t.name] !== undefined).map((t) => [t.name, tokenCss(t, values[t.name]!, studio.tempo)]),
+    ...tokens.filter((t) => values[t.name] !== undefined).map((t) => [t.name, tokenCss(t, values[t.name]!, studio.tempo)]),
+    // A pair's right side set apart (M20) is no token of its own: it goes on the stage as it is.
+    ...Object.entries(look ?? {}).filter(([name]) => name.endsWith("-right")).map(([name, v]) => [name, String(v)]),
   ]) as React.CSSProperties;
 
   return (
@@ -56,7 +65,7 @@ export function Stage({ family, cols, rows }: { family: Family; cols: number; ro
       {/* Focus's blur (M13) and focus mode's cloth (M14) must see the field under the stage, as the portfolio's sees the page: paint containment
           makes the stage its backdrop root in Chrome, and the field's dashes would stay sharp. The slot still clips it. */}
       <div ref={setEl} data-stage={family.id} className={cn("relative size-full", family.id === "focus" || family.id === "mode" ? "[contain:layout]" : "[contain:layout_paint]")} style={style}>
-        {el ? <PortalContainer container={el}>{STAGES[family.id]({ family, cols, rows })}</PortalContainer> : null}
+        {el ? <PortalContainer container={el}>{family.action ? <ActionStage family={family} cols={cols} rows={rows} /> : STAGES[family.id as StagedId]?.({ family, cols, rows })}</PortalContainer> : null}
       </div>
     </Slot>
   );
@@ -687,7 +696,10 @@ function GripStage({ family, cols, rows }: StageProps) {
   );
 }
 
-const STAGES: Record<Family["id"], (props: StageProps) => React.ReactNode> = {
+/** The pages with a stage of their own: every family but the agents' page, whose bench is an action's (Motion.md M24). */
+type StagedId = Exclude<FamilyId, "motions" | `action-${string}`>;
+
+const STAGES: Record<StagedId, (props: StageProps) => React.ReactNode> = {
   grip: (p) => <GripStage {...p} />,
   step: (p) => <StepStage {...p} />,
   move: (p) => <MoveStage {...p} />,
@@ -695,6 +707,4 @@ const STAGES: Record<Family["id"], (props: StageProps) => React.ReactNode> = {
   enter: (p) => <EnterStage {...p} />,
   focus: (p) => <FocusStage {...p} />,
   mode: (p) => <ModeStage {...p} />,
-  sphere: (p) => <SphereStage {...p} />,
-  motions: (p) => <MotionsStage {...p} />,
 };

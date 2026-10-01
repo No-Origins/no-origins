@@ -1,12 +1,12 @@
 "use client";
 
-import { BookOpenTextIcon, BriefcaseIcon, CodeXmlIcon, FolderGit2Icon, NewspaperIcon, PaletteIcon } from "lucide-react";
+import { AtSignIcon, BookOpenTextIcon, BriefcaseIcon, CodeXmlIcon, FolderGit2Icon, PaletteIcon } from "lucide-react";
 
-import { CellWrap, NoteCard, SkillPill, StatementCard, type SectionLabel } from "@/components/cards";
-import { ProfileCard, ProfileFacts, ProfileLinks, ProfileSocials, SocialMark } from "@/components/profile-card";
+import { AboutCard, CellWrap, SkillPill, StatementCard, type SectionLabel } from "@/components/cards";
+import { ProfileCard, ProfileFacts, ProfileLinks, SocialMark } from "@/components/profile-card";
 import { PROJECTS_ROWS, ProfileProjects } from "@/components/profile-projects";
 import { ProfileSections, type SectionTab } from "@/components/profile-sections";
-import { ProfileTech, techRowsMost } from "@/components/profile-tech";
+import { ProfileTech } from "@/components/profile-tech";
 import { ProfileWork } from "@/components/profile-work";
 import type { PortfolioItem, PortfolioPage, Span } from "@/content";
 import { HOBBIES, profile, ROLES } from "@/content/resume";
@@ -36,23 +36,29 @@ const NARROW: Record<string, Span> = { base: { cols: 6, rows: 2 } };
 /**
  * The profile's column under the avatar and the name, in his order (2026-09-27: "the about me text should be just
  * below the avatar and name row … and then under that we will have resume email and GitHub and then underneath that
- * we will have education and location"), and under those the social marks (his, the same day: "add social media icons
- * like X, Instagram along with GitHub. Put that row under education row"). Each is `below` the one before — the first screen's twenty-four-column band
- * would otherwise pack it beside — and as wide as the profile.
+ * we will have education and location"). The social marks were a row under those from the same day (his: "Put that row
+ * under education row") until LinkedIn and Discord went into the socials (2026-10-01, `SOCIALS`). Each is `below` the
+ * one before — the first screen's twenty-four-column band would otherwise pack it beside — and as wide as the profile.
  *
- * What I am after, his six paragraphs (`profile.story`), `grow`s: it takes the rows the first screen leaves under the
- * flow, at most six, which hold every paragraph at six cells and at eight, and at least three (`FLOW_GROW_MIN`,
- * `arrange.ts`), the card letting paragraphs go as it shrinks (`NoteCard`). With fewer it is left off — on a phone and
- * a tablet, where the work takes the rows.
+ * His line and More about me (`AboutCard`, 2026-10-01, his: "the tag line should replace the card like other
+ * taglines"): three rows at six cells and at eight, two for the line — two lines of it on eight cells, three on six —
+ * and one for the button. It `grow`s, so it stands only where the first screen leaves it its three rows
+ * (`FLOW_GROW_MIN`, `arrange.ts`) and is left off where it does not — on a phone and a tablet, where the work takes
+ * the rows, as the note was. The note it replaced, his six paragraphs (`profile.story`), took up to six rows and is in
+ * the button's dialog now.
  */
-const NOTE: Record<string, Span> = { base: { cols: 6, rows: 6 }, lg: { cols: 8, rows: 6 } };
-const NOTE_NARROW: Record<string, Span> = { base: { cols: 6, rows: 6 } };
-/**
- * Each of the column's rows under the note — Résumé and Email (GitHub went to the marks), the degree and Hyderabad,
- * and the social marks — is one row at every size, as wide as the profile.
- */
+const ABOUT: Record<string, Span> = { base: { cols: 6, rows: 3 }, lg: { cols: 8, rows: 3 } };
+const ABOUT_NARROW: Record<string, Span> = { base: { cols: 6, rows: 3 } };
+/** The column's row under the links — the degree and Hyderabad — is one row at every size, as wide as the profile. */
 const ROW: Record<string, Span> = { base: { cols: 6, rows: 1 }, lg: { cols: 8, rows: 1 } };
 const ROW_NARROW: Record<string, Span> = { base: { cols: 6, rows: 1 } };
+/**
+ * Email · GitHub · Résumé (2026-10-01, his: "place GitHub between email and resume … give it the size of the resume
+ * button"): one row on eight cells, 4 · 2 · 2, and two rows on six, the address alone and then GitHub · Résumé (his
+ * pick, the same day), since the address and its button need four of the six (`ProfileLinks`).
+ */
+const LINKS_ROW: Record<string, Span> = { base: { cols: 6, rows: 2 }, lg: { cols: 8, rows: 1 } };
+const LINKS_NARROW: Record<string, Span> = { base: { cols: 6, rows: 2 } };
 /**
  * A pill one row tall (2026-09-27), as many whole cells as its words need with a round end of air each side: on a
  * phone's cells (51 to 56px), on touch's 72 and on a pointer's 60. Hobbies are wider than any phone.
@@ -76,11 +82,14 @@ const LABELS = {
   work: { label: "Work", icon: BriefcaseIcon },
   projects: { label: "Projects", icon: FolderGit2Icon },
   // The code mark says what kind of skill these are (his, 2026-09-27: "we have coding icon so we can treat them as
-  // technical skills"); the art skills are under them.
+  // technical skills"); the interests are under them.
   tech: { label: "Technical skills", icon: CodeXmlIcon },
-  art: { label: "Art skills", icon: PaletteIcon },
+  // The art skills until 2026-10-01 (his: "Rename art skills to interests"), the palette kept.
+  interests: { label: "Interests", icon: PaletteIcon },
   cases: { label: "Case studies", icon: BookOpenTextIcon },
-  content: { label: "Content", icon: NewspaperIcon },
+  // The content until 2026-10-01 (his: "rename content as socials and update the icon accordingly"): the at sign,
+  // which the socials wore when they were a section of their own (2026-09-27), where the content wore a newspaper.
+  socials: { label: "Socials", icon: AtSignIcon },
 } satisfies Record<string, SectionLabel>;
 /**
  * The work column (`side: 1`): its label's cell, and under it a row for each company, its mark's cell and a pill of
@@ -97,9 +106,10 @@ const WORK: Record<string, Span> = {
   xl: { cols: 8, rows: WORK_ROWS },
 };
 /**
- * The projects (`side: 1`), under the work: the label's row and a card for each project beside a slot for its image
- * (`ProfileProjects`, 2026-09-28, the recruiter quick view's cards) — two rows for one that is out and one for one that
- * is not, four with the label, as the pills took. These are its widths where it goes under the centre. The
+ * The projects (`side: 1`), under the work: the label's row and under it the projects' cards, two cells by three rows,
+ * side by side in a carousel (`ProfileProjects`, 2026-10-01, his: "these projects have to be like a carousel … only two
+ * columns width and three rows height") — four rows, where the cards stacked took five. These are its widths where it
+ * goes under the centre. The
  * placeholders Project Three and Four (his, 2026-09-27: "add some dummy cards too") went with the pills: the quick
  * view shows only his.
  */
@@ -115,14 +125,15 @@ const PROJECT_LIST: Record<string, Span> = {
  * cells as its words need — two rows, in the room as well (`WIP_ROW`). The case studies under the projects (his,
  * 2026-09-27: "let's also add another section: case studies. It's something in which there is not content/work yet, so
  * we can put 'Work In Progress' for it"). The content under the art skills was one too (his, the same day: "Add another
- * section for content - same as coming soon from case studies") until it took the marks (`CONTENT`), and the socials,
+ * section for content - same as coming soon from case studies") until it took the marks (`SOCIALS`), and the socials,
  * under the content, until they became the profile column's row of marks the same day.
  */
 const WIP = "Work In Progress";
 const WIP_PILL = pill(3, 2, 3);
 const WIP_ROW: Record<string, Span> = { base: { cols: 6, rows: 2 }, lg: { cols: 8, rows: 2 } };
-const comingSoon = (id: string, label: SectionLabel, side: number, air: number): PortfolioItem => ({
+const comingSoon = (id: string, label: SectionLabel, side: number, air: number, by?: string): PortfolioItem => ({
   id,
+  by,
   span: WIP_ROW,
   wraps: [LABEL_ROW, WIP_PILL],
   side,
@@ -137,75 +148,82 @@ const comingSoon = (id: string, label: SectionLabel, side: number, air: number):
   ),
 });
 /**
- * The content, under the art skills (`side: 2`): its label's row and under it the marks of where the content goes, X,
- * Instagram and YouTube, a cell each (`SocialMark`), from the column's start as the tech's marks are (2026-09-28, his:
- * "move Instagram X to content section, remove work in progress and also add YouTube"). Two rows, as the Work In
- * Progress pill took, so nothing else moves.
+ * The socials, under the interests (`side: 2`): its label's row and under it every social mark, a cell each
+ * (`SocialMark`), from the column's start as the tech's marks are. It was the content, with X, Instagram and YouTube
+ * (2026-09-28, his: "move Instagram X to content section, remove work in progress and also add YouTube"), until
+ * LinkedIn and Discord came from the row under the degree (2026-10-01, his: "rename content as socials … and also move
+ * LinkedIn and Discord logos into socials"), after the three: the two with a URL first, so the keys reach them first.
+ * Two rows, the five marks on one at the column's five cells or six, as the Work In Progress pill took, so nothing else
+ * moves.
  */
-const CONTENT_MARKS = ["x", "instagram", "youtube"] as const;
+const SOCIAL_LINKS = ["x", "instagram", "youtube", "linkedin", "discord"] as const;
 const MARK = pill(1, 1, 1);
-const CONTENT: PortfolioItem = {
-  id: "content",
+const SOCIALS: PortfolioItem = {
+  id: "socials",
+  by: "lola",
   span: WIP_ROW,
-  wraps: [LABEL_ROW, ...CONTENT_MARKS.map(() => MARK)],
+  wraps: [LABEL_ROW, ...SOCIAL_LINKS.map(() => MARK)],
   side: 2,
   air: 1,
   render: (placed) => (
     <CellWrap
-      label={LABELS.content}
-      pieces={CONTENT_MARKS.map((id) => ({ key: id, span: MARK, render: () => <SocialMark id={id} /> }))}
+      label={LABELS.socials}
+      pieces={SOCIAL_LINKS.map((id) => ({ key: id, span: MARK, render: () => <SocialMark id={id} /> }))}
       cols={placed.colSpan}
       rows={placed.rowSpan}
     />
   ),
 };
 /**
- * The tech stack (`side: 2`, `grow`), first in the third column since the degree went to the profile's (2026-09-27):
- * its label's row and a mark a cell under it. Beside the centre it takes the rows the art skills and the sections
- * under them leave and shows as many marks as they hold; under it, it takes its label's row, the rows twenty-three
- * marks need at the centre's width and one more, for what a hovered mark pushes over as it grows to spell its name
- * (2026-09-27, movement) — six of six, five of eight.
+ * The tech stack (`grow`), in the profile's column under his line since 2026-10-01 — first in the third column from
+ * 2026-09-27 until then: its label's row and a mark a cell under it. It takes the rows the column leaves under its other
+ * boxes, at most its label's row, the rows twenty-three marks need at the column's width and one more, for what a
+ * hovered mark pushes over as it grows to spell its name (2026-09-27, movement) — six of six, five of eight — and at
+ * least three (`FLOW_GROW_MIN`), else it is not shown there; it shows as many marks as its rows hold.
  */
 const TECH: Record<string, Span> = { base: { cols: 6, rows: 6 }, sm: { cols: 6, rows: 6 }, md: { cols: 6, rows: 6 }, lg: { cols: 8, rows: 5 }, xl: { cols: 8, rows: 5 } };
+const TECH_NARROW: Record<string, Span> = { base: { cols: 6, rows: 6 } };
 /**
- * The art skills (`side: 2`), under the tech stack (his, 2026-09-27: "move the sketching, UI/UX in Figma, video
- * editing in DaVinci … to something called art skills … under tech skills"): the hobbies, each a pill of its own
- * words, wrapped under the label's row as the projects are. Each is as many whole cells as its words need on a
- * phone's, touch's and a pointer's cells, measured off the page. These spans are its widths where it goes under the
- * centre.
+ * The interests (`side: 2`), under the tech stack (his, 2026-09-27: "move the sketching, UI/UX in Figma, video
+ * editing in DaVinci … to something called art skills … under tech skills"; named interests since 2026-10-01): the
+ * hobbies, each a pill of its own words, wrapped under the label's row as the projects are. Each is as many whole cells
+ * as its words need on a phone's, touch's and a pointer's cells, measured off the page. These spans are its widths
+ * where it goes under the centre.
  */
 /**
- * His statements, a card each (`StatementCard`), where he put them (2026-09-28, his: "break down that large piece about
- * me into small statements … place the first one between projects and case studies and second one above technical
- * skills"): the one about roles in the work's column, under the projects (`side: 1`), and the one about AI at the top
- * of the tech's (`side: 2`), a row of air under it. Each is the rows its words take in `heading`, measured: at five
- * and six cells of 60 the first holds in two and the second in three; on touch's 72 both hold in two; a phone's
- * narrower cells take a row more. Where a column is short, its last items go first (`arrange.ts`), so at 1440 × 900 the
- * first stands where the case studies did; the second takes its rows from the tech, which grows into what is left.
+ * His statement, a card (`StatementCard`), where he put it (2026-09-28, his: "break down that large piece about me into
+ * small statements … place the first one between projects and case studies and second one above technical skills"):
+ * the one about AI at the top of the tech's column (`side: 2`), a row of air under it. The one about roles, under the
+ * projects, came off on 2026-10-01 (his: "remove the love being in new roles that are shaping up at the intersection
+ * of disciplines tagline"); its words are still `profile.statements.roles`. It is the rows its words take in Anton at
+ * the display size (2026-10-01, `StatementWords`), measured: four at five cells of 60, where they are six lines (five
+ * at six cells, which three rows only just hold), and on touch, where it is not shown since the tabs, three on 72 and
+ * five on a phone's narrower cells. It was three in `heading`. It takes its rows from the tech, which grows into what is
+ * left.
  */
-const STATEMENT_ROLES: Record<string, Span> = { base: { cols: 6, rows: 3 }, sm: { cols: 6, rows: 2 }, lg: { cols: 8, rows: 2 } };
-const STATEMENT_AI: Record<string, Span> = { base: { cols: 6, rows: 4 }, sm: { cols: 6, rows: 2 }, lg: { cols: 8, rows: 3 } };
-const ART_PILLS: Record<string, Record<string, Span>> = {
+const STATEMENT_AI: Record<string, Span> = { base: { cols: 6, rows: 5 }, sm: { cols: 6, rows: 3 }, lg: { cols: 8, rows: 4 } };
+const INTEREST_PILLS: Record<string, Record<string, Span>> = {
   Sketching: pill(2, 2, 2),
-  "UI/UX in Figma": pill(3, 2, 2),
-  "Video editing in DaVinci Resolve": pill(4, 3, 4),
+  "Oil painting": pill(3, 2, 2),
+  Designing: pill(2, 2, 2),
+  Editing: pill(2, 2, 2),
   Ukulele: pill(2, 2, 2),
 };
-const ART_SKILLS = HOBBIES.map((name) => ({ name, span: ART_PILLS[name] ?? pill(4, 3, 4) }));
-const ART: Record<string, Span> = {
-  base: { cols: 6, rows: ART_SKILLS.length },
-  sm: { cols: 6, rows: ART_SKILLS.length },
-  md: { cols: 6, rows: ART_SKILLS.length },
-  lg: { cols: 8, rows: ART_SKILLS.length },
-  xl: { cols: 8, rows: ART_SKILLS.length },
+const INTERESTS = HOBBIES.map((name) => ({ name, span: INTEREST_PILLS[name] ?? pill(4, 3, 4) }));
+const INTEREST_LIST: Record<string, Span> = {
+  base: { cols: 6, rows: INTERESTS.length },
+  sm: { cols: 6, rows: INTERESTS.length },
+  md: { cols: 6, rows: INTERESTS.length },
+  lg: { cols: 8, rows: INTERESTS.length },
+  xl: { cols: 8, rows: INTERESTS.length },
 };
 /**
  * The first screen's sections as tabs (`compact`), where the columns cannot stand beside the profile — a phone and a
  * tablet (2026-09-28, his, from the recruiter quick view: "I loved the mobile layout … take references from that and
  * update ours too"). Where only the work stood under the profile's column, the tab bar and a panel: the work, the
- * projects, the tech and the art skills, each drawn as it is beside the profile, without its label. Six rows, the bar's
+ * projects, the tech and the interests, each drawn as it is beside the profile, without its label. Six rows, the bar's
  * and the tech's five — its label's, its marks' four at six cells and one for a grown mark — and fewer where the field
- * is short (an iPhone SE's five). The case studies and the content, which say "Work In Progress", are not in it.
+ * is short (an iPhone SE's five). The case studies and the socials are not in it.
  */
 const SECTIONS: Record<string, Span> = { base: { cols: 6, rows: 6 } };
 const SECTIONS_SHORT = [5, 4, 3].map((rows) => ({ base: { cols: 6, rows } }));
@@ -214,10 +232,10 @@ const TABS: SectionTab[] = [
   { id: "projects", label: LABELS.projects, render: (cols, rows) => <ProfileProjects cols={cols} rows={rows} /> },
   { id: "tech", label: { ...LABELS.tech, label: "Tech" }, render: (cols, rows) => <ProfileTech cols={cols} rows={rows} /> },
   {
-    id: "art",
-    label: { ...LABELS.art, label: "Art" },
+    id: "interests",
+    label: LABELS.interests,
     render: (cols, rows) => (
-      <CellWrap pieces={ART_SKILLS.map(({ name, span }) => ({ key: name, span, render: () => <SkillPill name={name} /> }))} cols={cols} rows={rows} />
+      <CellWrap pieces={INTERESTS.map(({ name, span }) => ({ key: name, span, render: () => <SkillPill name={name} /> }))} cols={cols} rows={rows} />
     ),
   },
 ];
@@ -240,16 +258,25 @@ export const SITE: PortfolioPage = {
       // two; on twenty, five each and one column of air; on eighteen, the same beside a profile of six (`NARROW`).
       band: { lg: 24, xl: 24 },
       items: [
-        { id: "profile", span: PROFILE, narrow: NARROW, render: (placed) => <ProfileCard colSpan={placed.colSpan} rowSpan={placed.rowSpan} /> },
+        { id: "profile", span: PROFILE, narrow: NARROW, by: "bali", render: (placed) => <ProfileCard colSpan={placed.colSpan} rowSpan={placed.rowSpan} /> },
         // His tagline, behind the field at the foot of the room (`backdrop`, P4), came off on 2026-09-27 (his: "remove
         // the quote from the bottom too"), and the @hiddenstack after it with it; `ProfileTagline` is kept.
-        // His words, then the résumé and the address, then the degree and the city, then the social marks
-        // (2026-09-27). The note has no heading and no state (his, 2026-09-27: "remove the 'What I'm after' heading
-        // and 'Open to it' text").
-        { id: "looking", span: NOTE, narrow: NOTE_NARROW, below: true, grow: true, render: () => <NoteCard paragraphs={profile.story} /> },
-        { id: "links", span: ROW, narrow: ROW_NARROW, below: true, render: () => <ProfileLinks /> },
-        { id: "facts", span: ROW, narrow: ROW_NARROW, below: true, render: () => <ProfileFacts /> },
-        { id: "socials", span: ROW, narrow: ROW_NARROW, below: true, render: (placed) => <ProfileSocials cols={placed.colSpan} /> },
+        // His line and More about me, then the address, GitHub and the résumé (2026-10-01), then the degree and the
+        // city. The social marks under them (2026-09-27) went into the socials (2026-10-01).
+        { id: "looking", span: ABOUT, narrow: ABOUT_NARROW, below: true, grow: true, by: "bali", render: () => <AboutCard words={profile.lead} paragraphs={profile.story} /> },
+        // The technical skills between his line and the address (his, 2026-10-01: "move the technical skills between the
+        // tagline in the first vertical and email"); they were the third column's, over the interests.
+        {
+          id: "tech",
+          span: TECH,
+          narrow: TECH_NARROW,
+          below: true,
+          grow: true,
+          by: "mira",
+          render: (placed) => <ProfileTech cols={placed.colSpan} rows={placed.rowSpan} lead={LABELS.tech} />,
+        },
+        { id: "links", span: LINKS_ROW, narrow: LINKS_NARROW, below: true, by: "zaza", render: (placed) => <ProfileLinks cols={placed.colSpan} /> },
+        { id: "facts", span: ROW, narrow: ROW_NARROW, below: true, by: "zaza", render: () => <ProfileFacts /> },
         // Where the columns cannot stand beside the profile, the tabs take their place under it (`compact`).
         {
           id: "sections",
@@ -257,9 +284,12 @@ export const SITE: PortfolioPage = {
           fallback: SECTIONS_SHORT,
           below: true,
           compact: { base: true, lg: false },
+          // Its tabs, one agent a tab: the Keeper on the work, the Maker on the projects, the Editor on the tech, the
+          // Muse on the interests.
+          by: "oru kino mira lola",
           render: (placed) => <ProfileSections tabs={TABS} cols={placed.colSpan} rows={placed.rowSpan} />,
         },
-        { id: "work", span: WORK, side: 1, render: (placed) => <ProfileWork cols={placed.colSpan} rows={placed.rowSpan} lead={LABELS.work} /> },
+        { id: "work", span: WORK, side: 1, by: "oru", render: (placed) => <ProfileWork cols={placed.colSpan} rows={placed.rowSpan} lead={LABELS.work} /> },
         // The projects under the work (his, 2026-09-27: "Swap education and projects"); the degree, first in the third
         // column until then, went to the profile's the same day.
         {
@@ -267,52 +297,41 @@ export const SITE: PortfolioPage = {
           span: PROJECT_LIST,
           side: 1,
           air: 1,
+          by: "kino",
           render: (placed) => <ProfileProjects cols={placed.colSpan} rows={placed.rowSpan} lead={LABELS.projects} />,
         },
-        // His statements (2026-09-28): the first between the projects and the case studies, the second over the tech.
+        // His statement, the third column's first (2026-09-28), over the interests since the tech went to the first
+        // column (2026-10-01). The one between the projects and the case studies came off the same day.
+        // Lola opens it with the rest of the column since the tech, Mira's, left it: an agent lands on the middle of
+        // its boxes, which across two columns was the work's.
+        { id: "statement-ai", span: STATEMENT_AI, side: 2, by: "lola", render: () => <StatementCard words={profile.statements.ai} /> },
         {
-          id: "statement-roles",
-          span: STATEMENT_ROLES,
-          side: 1,
-          air: 1,
-          render: () => <StatementCard words={profile.statements.roles} />,
-        },
-        { id: "statement-ai", span: STATEMENT_AI, side: 2, render: () => <StatementCard words={profile.statements.ai} /> },
-        {
-          id: "tech",
-          span: TECH,
+          id: "interests",
+          span: INTEREST_LIST,
+          wraps: [LABEL_ROW, ...INTERESTS.map((each) => each.span)],
           side: 2,
           air: 1,
-          grow: true,
-          growMost: techRowsMost,
-          render: (placed) => <ProfileTech cols={placed.colSpan} rows={placed.rowSpan} lead={LABELS.tech} />,
-        },
-        {
-          id: "art",
-          span: ART,
-          wraps: [LABEL_ROW, ...ART_SKILLS.map((each) => each.span)],
-          side: 2,
-          air: 1,
+          by: "lola",
           render: (placed) => (
             <CellWrap
-              label={LABELS.art}
-              pieces={ART_SKILLS.map(({ name, span }) => ({ key: name, span, render: () => <SkillPill name={name} /> }))}
+              label={LABELS.interests}
+              pieces={INTERESTS.map(({ name, span }) => ({ key: name, span, render: () => <SkillPill name={name} /> }))}
               cols={placed.colSpan}
               rows={placed.rowSpan}
             />
           ),
         },
-        // Last in the order, though they stand under the projects and the art skills (their `side`s): where the columns
-        // go under the profile, the room gives the work, the projects and the skills their rows first. The content takes
-        // rows the tech stack gives up under the art skills, a row of air over it (his, 2026-09-27: "add one row
-        // spacing between art skills and content"). The socials were a section here until the same day, and are the
-        // profile column's row of marks since.
-        comingSoon("cases", LABELS.cases, 1, 1),
-        CONTENT,
+        // Last in the order, though they stand under the projects and the interests (their `side`s): where the columns
+        // go under the profile, the room gives the work, the projects and the skills their rows first. The socials take
+        // rows the tech stack gives up under the interests, a row of air over them (his, 2026-09-27: "add one row
+        // spacing between art skills and content"). They were a section here until the same day, then the profile
+        // column's row of marks, and are a section again since 2026-10-01, where the content was.
+        comingSoon("cases", LABELS.cases, 1, 1, "kino"),
+        SOCIALS,
       ],
     },
     // Beyond — What I am after and Say hello's links, in the room the first screen left — is empty since 2026-09-27:
-    // the note and the links are the profile's column, the projects, the degree and the hobbies (as art skills) are
+    // the note and the links are the profile's column, the projects, the degree and the hobbies (as interests) are
     // the first screen's, and the languages came off.
   ],
 };

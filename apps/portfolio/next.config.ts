@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
 
   // the design system is consumed from source inside the workspace
   transpilePackages: ["@no-origins/ui"],
+
+  // a phone on the home network (his, 2026-10-01): the dev server refuses its HMR socket from any host not listed, and
+  // a page whose socket is refused never hydrates — the grid never measures and the page stays blank. Dev only.
+  allowedDevOrigins: ["192.168.*.*"],
 };
 
 export default nextConfig;

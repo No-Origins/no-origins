@@ -1,5 +1,5 @@
 /**
- * THE AGENT'S TEXTURES (Character-Studio.md C15; version 5), pure: what its surface is drawn with, **drawn on the
+ * THE AGENT'S TEXTURES (Orbit.md C15; version 5), pure: what its surface is drawn with, **drawn on the
  * surface** (his, 2026-09-30, of version 4: *"the texture is being applied as a plain flat image and it doesn't adapt to
  * the face of the shape … Bali is a sphere and the lines are straight instead of bending based on the surface"*).
  *

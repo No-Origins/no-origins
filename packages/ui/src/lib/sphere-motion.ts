@@ -100,7 +100,7 @@ export type SphereMotion = {
   /** What it is made of: a `ball` barely settles, `jelly` settles and softens, `slime` settles deep and pools. */
   body: SphereBody
   /**
-   * What its head is drawn as (Character-Studio.md C10, 2026-09-30): the sphere, or a shape in its room (`./agent-shape`),
+   * What its head is drawn as (Orbit.md C10, 2026-09-30): the sphere, or a shape in its room (`./agent-shape`),
    * which moves, settles and breathes as the sphere would. Look only: it changes nothing of how it moves.
    */
   shape: AgentShape
@@ -113,6 +113,11 @@ export type SphereMotion = {
   rotateY: number
   rotateZ: number
   // ── Tail: the rubbery body ──
+  /**
+   * Whether it has a tail at all (Orbit.md C23, his, 2026-10-01: "an option to have a tail or not"). Without one, or with
+   * one of no length, nothing of a tail is drawn, sitting or flying.
+   */
+  tail: boolean
   /** How long the tail is, in heads (the head's diameter). */
   length: number
   /** How thick the tail's tip is, as a share of the head; 0 a point. */
@@ -165,6 +170,15 @@ export type SphereMotion = {
   sway: number
   /** How far it squeezes along its way, squishing into the bowl's side and as it brakes, as a share of its size. */
   squeeze: number
+  // ── Dive (Motion.md M24, 2026-10-01): into its nest, behind the page the way it goes, and on into another ──
+  /** How high it springs out of its nest before it dives back into it, in cells; 0 it slips straight in. */
+  spring: number
+  /** Slipping straight down out of its nest from rest until it is gone, ms: the dive's one gravity. */
+  dive: number
+  /** How long it is behind the page between the two nests, ms. */
+  under: number
+  /** How fast it comes into the next nest, as the height a fall that fast is from, in cells: coming up, it pops so high. */
+  pop: number
   // ── Rest ──
   /** How far it spreads sitting on the nest's floor, as a share of its height. */
   spread: number
@@ -172,7 +186,7 @@ export type SphereMotion = {
   breath: number
   /** How far a breath spreads it more, as a share of its height. */
   breathDepth: number
-  // ── Surface (Character-Studio.md C10, 2026-09-30): look only ──
+  // ── Surface (Orbit.md C10, 2026-09-30): look only ──
   /**
    * Its surface (C14, C15): what it is drawn with — hand-drawn marks (`./agent-texture`), `none` plain — a cell of them
    * across, of the head, how hand-drawn they are, and what they are drawn in, by name, shaded as the face they are on;
@@ -265,6 +279,7 @@ export const SPHERE_START = {
   paint: "violet",
   shade: 0.75,
   body: "slime",
+  tail: true,
   length: 0.8,
   taper: 0,
   stiffness: 0,
@@ -290,6 +305,11 @@ export const SPHERE_START = {
   comeBack: 500,
   sway: 0,
   squeeze: 0.4,
+  // The dive (M24): a small spring, the intro's 320ms to go in (M22), a beat behind the page, and a pop out.
+  spring: 0.4,
+  dive: 320,
+  under: 400,
+  pop: 0.6,
   spread: 0.11,
   breath: 4000,
   breathDepth: 0.1,
@@ -448,6 +468,8 @@ export function sphereMotionFrom(src: SphereSource): SphereMotion {
     rotateX: clamp(n("rotate-x", S.rotateX), -180, 180),
     rotateY: clamp(n("rotate-y", S.rotateY), -180, 180),
     rotateZ: clamp(n("rotate-z", S.rotateZ), -180, 180),
+    // A switch, as a token, is the word `on` or `off`.
+    tail: ((w) => (w === "on" ? true : w === "off" ? false : S.tail))(src.word("tail")),
     length: clamp(n("length", S.length), 0, 8),
     taper: clamp01(n("taper", S.taper)),
     stiffness: clamp01(n("stiffness", S.stiffness)),
@@ -473,6 +495,10 @@ export function sphereMotionFrom(src: SphereSource): SphereMotion {
     comeBack: Math.max(200, ms("come-back", S.comeBack)),
     sway: clamp(n("sway", S.sway), 0, 1),
     squeeze: clamp(n("squeeze", S.squeeze), 0, 0.8),
+    spring: clamp(n("spring", S.spring), 0, 3),
+    dive: Math.max(40, ms("dive", S.dive)),
+    under: Math.max(0, ms("under", S.under)),
+    pop: clamp(n("pop", S.pop), 0, 3),
     spread: clamp(n("spread", S.spread), 0, 0.6),
     breath: ms("breath", S.breath),
     breathDepth: clamp(n("breath-depth", S.breathDepth), 0, 0.3),
@@ -582,6 +608,20 @@ const ring = (g: SphereGeometry) => g.cell / 2 - 1
 const halfHeight = (m: SphereMotion, R: number, s: number) =>
   s >= 0 ? R * (1 - knee(s * SINK[m.body], 0.5, 0.95)) : R * (1 + 0.6 * -s)
 
+/**
+ * A nest's bowl as an SVG path, what an agent in it is cut to: everything above its circle's middle, and the circle's
+ * lower half. What passes its floor is behind the page: a shape's rigid bottom resting in it (the `Agent`), and an agent
+ * diving through it (Motion.md M24, the Dive action).
+ */
+export function sphereBowl({ x, y, r }: { x: number; y: number; r: number }): string {
+  const far = 1e5
+  const [l, m, rt] = [x - r, y, x + r].map((n) => n.toFixed(2))
+  return `M ${x - far} ${y - far} H ${x + far} V ${m} H ${rt} A ${r.toFixed(2)} ${r.toFixed(2)} 0 0 1 ${l} ${m} H ${x - far} Z`
+}
+
+/** Whether a trip leaves and comes back to the same nest: a bounce (Motion.md M24), not a jump. */
+const inPlace = (trip: SphereTrip) => trip.from.col === trip.to.col && trip.from.row === trip.to.row
+
 /** The leap: where it starts and lands, its gravity, px/ms², and when it is highest. */
 function leapOf(m: SphereMotion, g: SphereGeometry, trip: SphereTrip) {
   const pitch = g.cell + g.gap
@@ -589,7 +629,8 @@ function leapOf(m: SphereMotion, g: SphereGeometry, trip: SphereTrip) {
   const a = centre(trip.from, g)
   const b = centre(trip.to, g)
   const dir = Math.sign(b.x - a.x) || 1
-  const back = R * m.squat * 0.6
+  // In place it goes straight up, so its crouch draws it back nowhere.
+  const back = inPlace(trip) ? 0 : R * m.squat * 0.6
   const start = { x: a.x - dir * back, y: a.y + ring(g) - halfHeight(m, R, m.squat) }
   // It comes down on the bowl where `landAt` says, its centre on the circle its bottom runs on: − on the side it comes
   // from, + the far side.
@@ -635,19 +676,43 @@ const MAX_LAND = 8000
 const WALL = (65 * Math.PI) / 180
 const landings = new Map<string, Landing>()
 
+/** Keyed on what moves it: the face does not, so tuning a brow never lands it again. */
+const landingKey = (parts: unknown[]) =>
+  JSON.stringify(parts, (k, v) => (k === "right" || k === "uploads" || FACE_13.has(k) || LOOK_ONLY.has(k) ? undefined : v))
+
 function landing(m: SphereMotion, g: SphereGeometry, trip: SphereTrip): Landing {
-  // Keyed on what moves it: the face does not, so tuning a brow never lands it again.
-  const key = JSON.stringify([m, g, trip], (k, v) => (k === "right" || k === "uploads" || FACE_13.has(k) || LOOK_ONLY.has(k) ? undefined : v))
+  const key = landingKey([m, g, trip])
   const known = landings.get(key)
   if (known) return known
   const pitch = g.cell + g.gap
   const R = radius(m, g)
   const L = Math.max(1, ring(g) - R)
   const leap = leapOf(m, g, trip)
-  // Energy: the bowl's pull, a quarter to four times the leap's gravity about the middle.
-  const G = leap.G * 4 ** (2 * (m.energy - 0.5))
-  const vx = (leap.end.x - leap.start.x) / m.hang
-  const vy = Math.sqrt(2 * leap.G * leap.fall)
+  return bowlSim(m, g, key, {
+    x: L * Math.sin(leap.land),
+    y: L * Math.cos(leap.land),
+    vx: (leap.end.x - leap.start.x) / m.hang,
+    vy: Math.sqrt(2 * leap.G * leap.fall),
+    G: leap.G,
+    firstHigh: m.first * Math.max(m.height * pitch, pitch * 0.25),
+    touching: true,
+  })
+}
+
+/**
+ * Where a ball in a bowl starts: its centre from the nest's, px, on its track or inside it; its speed, px/ms; the
+ * gravity it fell under, which `energy` quickens or slows in the bowl; how high its first bounce goes, px; and whether it
+ * is touching down at that moment (a leap's landing) or still in the air over the bowl (a dive coming into it, Motion.md
+ * M24), to fall on its own way into it.
+ */
+type BowlStart = { x: number; y: number; vx: number; vy: number; G: number; firstHigh: number; touching: boolean }
+
+function bowlSim(m: SphereMotion, g: SphereGeometry, key: string, start: BowlStart): Landing {
+  const R = radius(m, g)
+  const L = Math.max(1, ring(g) - R)
+  // Energy: the bowl's pull, a quarter to four times the gravity it fell under about the middle.
+  const G = start.G * 4 ** (2 * (m.energy - 0.5))
+  const { vx, vy } = start
   const vIn = Math.max(1e-6, Math.hypot(vx, vy))
   // Coming back: damped so what is left of its swing is a fiftieth by `comeBack`.
   const beta = (2 * Math.log(50)) / m.comeBack
@@ -657,11 +722,11 @@ function landing(m: SphereMotion, g: SphereGeometry, trip: SphereTrip): Landing 
   // Slime's lean oozes back, past critical damping; jelly's and a ball's spring back and wobble.
   const c = Math.max(2 / m.wobble, m.body === "slime" ? 2.4 * Math.sqrt(k) : 0)
   const gain = (m.sway * k) / G
-  const firstHigh = m.first * Math.max(m.height * pitch, pitch * 0.25)
+  const { firstHigh } = start
 
-  let theta = leap.land
-  let px = L * Math.sin(theta)
-  let py = L * Math.cos(theta)
+  let theta = Math.atan2(start.x, start.y)
+  let px = start.x
+  let py = start.y
   let vxs = 0
   let vys = 0
   let air = false
@@ -669,8 +734,8 @@ function landing(m: SphereMotion, g: SphereGeometry, trip: SphereTrip): Landing 
   let bounced = 0
   let sw = 0
   let swv = 0
-  let on = 1
-  const hits: { at: number; n: number }[] = [{ at: 0, n: 1 }]
+  let on = start.touching ? 1 : 0
+  const hits: { at: number; n: number }[] = start.touching ? [{ at: 0, n: 1 }] : []
   // An impact with the bowl at `theta`, going into it at `vn` and along it at `along`: it keeps `slippery` of its speed
   // along the bowl, going the way it is told; it bounces if it has a bounce left, else it slides. The jelly takes the
   // change in its speed along the bowl as a push.
@@ -693,8 +758,13 @@ function landing(m: SphereMotion, g: SphereGeometry, trip: SphereTrip): Landing 
       omega = vt / L
     }
   }
-  // Touching down: into the bowl and along it with the leap's speed.
-  impact(vx * Math.sin(theta) + vy * Math.cos(theta), vx * Math.cos(theta) - vy * Math.sin(theta))
+  // Touching down: into the bowl and along it with the leap's speed. Still in the air, it flies on into it.
+  if (start.touching) impact(vx * Math.sin(theta) + vy * Math.cos(theta), vx * Math.cos(theta) - vy * Math.sin(theta))
+  else {
+    air = true
+    vxs = vx
+    vys = vy
+  }
 
   const xs: number[] = []
   const ys: number[] = []
@@ -718,7 +788,9 @@ function landing(m: SphereMotion, g: SphereGeometry, trip: SphereTrip): Landing 
       px += vxs * STEP_MS
       py += vys * STEP_MS
       const d = Math.hypot(px, py)
-      if (d >= L) {
+      // Only the bowl is hit: over the nest's middle it flies free (Motion.md M24), so a bounce higher than the bowl is
+      // deep is not cut off by its top.
+      if (d >= L && py > 0) {
         px = (px / d) * L
         py = (py / d) * L
         theta = Math.atan2(px, py)
@@ -794,6 +866,25 @@ export function spherePhases(m: SphereMotion, g: SphereGeometry, trip: SphereTri
 /** How long a jump lasts, ms. */
 export const sphereTripMs = (m: SphereMotion, g: SphereGeometry, trip: SphereTrip) =>
   spherePhases(m, g, trip).reduce((sum, p) => sum + p.ms, 0)
+
+/**
+ * A jump's beats, ms, for a timeline that marks them (Motion.md M24, an action's phases): the crouch; the rise to the
+ * top of the arc and the fall from it; each impact with the bowl after it touches down, from touching down; how long
+ * from touching down until it is still; and the settle after. `crouch + rise + fall + still + settle` is the course's
+ * `total`.
+ */
+export function sphereBeats(m: SphereMotion, g: SphereGeometry, trip: SphereTrip) {
+  const leap = leapOf(m, g, trip)
+  const landed = landing(m, g, trip)
+  return {
+    crouch: m.crouch,
+    rise: m.hang * leap.peak,
+    fall: m.hang * (1 - leap.peak),
+    hits: landed.hits.slice(1).map((h) => h.at),
+    still: landed.duration,
+    settle: settleMs(m),
+  }
+}
 
 // ── a course: the head through time ─────────────────────────────────────────────────────────────────────────────
 
@@ -886,9 +977,16 @@ export function sphereCourse(m: SphereMotion, g: SphereGeometry, trip: SphereTri
   const still = land + landed.duration
   const total = still + settleMs(m)
   const s0 = sat(m, rested)
+  // In place (a bounce, Motion.md M24) it lands in the nest it left: one nest, lit throughout, both rings on it dipping
+  // together, so neither stands proud of the one it presses into.
+  const here = inPlace(trip)
+  const into: 0 | 1 = here ? 0 : 1
   // The impulses: pushing off its nest, landing in the next, and every impact with the bowl after, as hard as it hit.
-  const hits: Hit[] = [{ at: launch, n: 0.6, nest: 0 }, ...landed.hits.map((h) => ({ at: land + h.at, n: h.n, nest: 1 as const }))]
-  const dip = (t: number): [number, number] => [m.give * ring(g) * jiggle(m, hits, t, 0), m.give * ring(g) * jiggle(m, hits, t, 1)]
+  const hits: Hit[] = [{ at: launch, n: 0.6, nest: 0 }, ...landed.hits.map((h) => ({ at: land + h.at, n: h.n, nest: into }))]
+  const dip = (t: number): [number, number] => {
+    const d0 = m.give * ring(g) * jiggle(m, hits, t, 0)
+    return [d0, here ? d0 : m.give * ring(g) * jiggle(m, hits, t, 1)]
+  }
   const on = (t: number) => (t < land ? 0 : t >= still ? 1 : landedAt(landed, t - land).on)
 
   const squash = (t: number) => {
@@ -929,12 +1027,69 @@ export function sphereCourse(m: SphereMotion, g: SphereGeometry, trip: SphereTri
     return { sway: q.sway, squeeze: q.squeeze, nx: q.x / d, ny: q.y / d }
   }
   const lit = (t: number): [number, number] => {
+    if (here) return [1, 0]
     const u = (t - launch) / Th
     return [t < launch ? 1 : 1 - smooth((u - 0.2) / 0.4), t < launch ? 0 : smooth((u - 0.35) / 0.4)]
   }
+  // The landings, not the push of leaving: in place they are on the nest it left, after the leap.
   const impact = (t: number) =>
-    clamp01(hits.reduce((sum, h) => (h.nest === 1 && t >= h.at ? sum + h.n * Math.exp(-(t - h.at) / m.wobble) : sum), 0))
+    clamp01(hits.reduce((sum, h) => (h.nest === into && h.at >= land && t >= h.at ? sum + h.n * Math.exp(-(t - h.at) / m.wobble) : sum), 0))
   return { m, g, trip, total, head, squash, lit, dip, gravity: leap.G, lean, impact }
+}
+
+/**
+ * Coming into `cell`'s nest in front of the page, from `from` (its centre, px from the nest's, on the bowl's track or
+ * inside it) at speed `v`, px/ms, under `gravity` (Motion.md M24, the Dive coming out, his: *"it should just go and
+ * follow inertia"*): it carries on the way it was going and the bowl takes it — coming up from under, it flies up out of
+ * the nest and falls back in; from the side, it arcs into the bowl and slides up its far side and back; from above, it
+ * drops onto the floor — then bounces (`first` of `firstHigh`, px), slides and settles as a leap's landing does
+ * (`bowlSim`). Its impacts, ms from the start, the first where it lands; how long until it is still; and the settle.
+ */
+export function sphereArrival(
+  m: SphereMotion,
+  g: SphereGeometry,
+  cell: SphereCell,
+  from: { x: number; y: number },
+  v: { x: number; y: number },
+  gravity: number,
+  firstHigh: number,
+): { course: SphereCourse; hits: number[]; still: number; settle: number } {
+  const R = radius(m, g)
+  const b = centre(cell, g)
+  const key = landingKey(["arrive", m, g, from, v, gravity, firstHigh])
+  const landed = landings.get(key) ?? bowlSim(m, g, key, { x: from.x, y: from.y, vx: v.x, vy: v.y, G: gravity, firstHigh, touching: false })
+  const still = landed.duration
+  const settle = settleMs(m)
+  const total = still + settle
+  const hits: Hit[] = landed.hits.map((h) => ({ at: h.at, n: h.n, nest: 0 }))
+  const dipOf = (t: number) => m.give * ring(g) * jiggle(m, hits, t, 0)
+  const on = (t: number) => (t >= still ? 1 : landedAt(landed, t).on)
+  const squash = (t: number) => m.squash * jiggle(m, hits, t) + m.spread * on(t) + (t >= total ? sat(m, t - total) - m.spread : 0)
+  const head = (t: number) => {
+    const s = squash(t)
+    const cy = b.y + dipOf(t)
+    if (t < still) {
+      // Over the bowl and in it: where the bowl puts it, sunk into it along its floor as far as it is on it.
+      const q = landedAt(landed, t)
+      const d = Math.hypot(q.x, q.y) || 1
+      const reach = lerp(d, ring(g) - halfHeight(m, R, s), q.on)
+      return { x: b.x + (q.x / d) * reach, y: cy + (q.y / d) * reach }
+    }
+    return { x: b.x, y: cy + ring(g) - halfHeight(m, R, s) }
+  }
+  const lean = (t: number) => {
+    if (t >= still) return { sway: 0, squeeze: 0, nx: 0, ny: 1 }
+    const q = landedAt(landed, t)
+    const d = Math.hypot(q.x, q.y) || 1
+    return { sway: q.sway, squeeze: q.squeeze, nx: q.x / d, ny: q.y / d }
+  }
+  const impact = (t: number) => clamp01(hits.reduce((sum, h) => (t >= h.at ? sum + h.n * Math.exp(-(t - h.at) / m.wobble) : sum), 0))
+  const dip = (t: number): [number, number] => {
+    const d = dipOf(t)
+    return [d, d]
+  }
+  const course: SphereCourse = { m, g, trip: { from: cell, to: cell }, total, head, squash, lit: () => [1, 0], dip, gravity, lean, impact }
+  return { course, hits: hits.map((h) => h.at), still, settle }
 }
 
 // ── the tail ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1399,9 +1554,10 @@ export function sphereFrame(course: SphereCourse, t: number, blinkAt = t): Spher
     { x: top.x + axis.x * reach, y: top.y + axis.y * reach, r: short },
   ]
   const shape = (dx: number, dy: number) => (sat ? outline(sat, dx, dy) : chain(pill.map((d) => ({ ...d, x: d.x + dx, y: d.y + dy }))))
-  // The tail as far as it is in front of the page, cut where it goes behind it.
+  // The tail as far as it is in front of the page, cut where it goes behind it. None without one, or with one of no
+  // length: its pieces would all sit on the head, at z −0, which reads as in front, and draw a disc behind a shape.
   const tail: Drawn[] = []
-  for (let i = 1; i < spine.length; i++) {
+  for (let i = 1; i < spine.length && m.tail && m.length > 0; i++) {
     const p = spine[i]!
     const prev = spine[i - 1]!
     const r = girth(m, R, i / PIECES)
@@ -1873,7 +2029,7 @@ const FACE_SINK = 0.1
  * Where a settled head's face rides: its centre, but never lower than a little under the middle of the puddle it is
  * seen as. The course's centre sinks into the bowl as the head spreads while the puddle it draws stays in the bowl's
  * mouth, so past a little spread the eyes went down with it and were cut by the bowl (a Spread of 0.4 on slime, found in
- * the character studio). A little spread (version 14's) is under the bound and moves nothing.
+ * Orbit). A little spread (version 14's) is under the bound and moves nothing.
  */
 function onPuddle(pts: readonly Point[], head: Point, R: number): Point {
   let lo = Infinity
@@ -1895,7 +2051,7 @@ function symbolCentre(m: SphereMotion, head: Point, R: number): Point {
 }
 
 /**
- * Where each slot's parts are anchored (the character studio's upload templates, M20's "An uploaded style"): the left
+ * Where each slot's parts are anchored (Orbit's upload templates, M20's "An uploaded style"): the left
  * eye's centre (its pupil and lids), the middle of the left brow's line, and the symbol's centre, in head radii from the
  * head's centre, x right, y down, on a round head at rest — the same places `faceAt` and `symbolOf` put them before the
  * head squashes, leans or looks. An uploaded style's shapes are drawn about its slot's anchor.

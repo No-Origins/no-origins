@@ -1,18 +1,20 @@
 "use client";
 
 import { useLayoutEffect, useRef, type ReactNode } from "react";
-import { ArrowUpRightIcon, CalendarIcon, type LucideIcon } from "lucide-react";
+import { ArrowRightIcon, ArrowUpRightIcon, CalendarIcon, type LucideIcon } from "lucide-react";
 
 import { Badge } from "@no-origins/ui/components/badge";
 import { Button } from "@no-origins/ui/components/button";
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@no-origins/ui/components/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@no-origins/ui/components/dialog";
 import { useGridMetrics, type Responsive } from "@no-origins/ui/components/grid";
 import { Progress } from "@no-origins/ui/components/progress";
 import { Slot } from "@no-origins/ui/components/slot";
 import { Text } from "@no-origins/ui/components/text";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@no-origins/ui/components/tooltip";
 import { cn } from "@no-origins/ui/lib/utils";
 
-import { FactCard, LinkButtons } from "@/components/profile-card";
+import { FactCard, LinkButtons, icon } from "@/components/profile-card";
 import type { Span } from "@/content";
 import { HOBBIES } from "@/content/resume";
 import { wrap, wrapCells } from "@/lib/arrange";
@@ -218,22 +220,106 @@ export function NoteCard({ title, paragraphs, state, href, className }: { title?
 }
 
 /**
- * One of his statements, in quotes, on a card of its own (2026-09-28, his: "break down that large piece about me into
- * small statements … place that in a card … have some opaque background color … the text should also be bold and big
- * but also subtle"). The card wears the muted surface, lime mixed 14% into the page: the system's tint is a colour at
- * an opacity and still opaque, since nothing see-through goes over the grid. The words are `heading`, the biggest
- * role a column holds them in (two or three rows; `title` took four), in the muted tone, centred down the card.
+ * His statements' words (2026-10-01, his: "make it a little more bigger font … the biggest font that we had, which is
+ * also thick"; asked which, he picked Anton): in quotes, in Anton, the HEY!'s face (`--font-display`, the portfolio's
+ * own), at the display role's size, the biggest the system has, in the muted tone. Anton has one weight, so the role's
+ * bold is taken off rather than faked, and its tracking is normal, as the HEY!'s is. They were the `heading` role in
+ * bold, and `heading` alone before that.
+ *
+ * `after` stands at the end of the last line (his, the same day: "put the arrow icon in the tagline to be in the same
+ * line, same last line of the tagline"), held to the last word and the closing quote so it never wraps alone.
  */
-export function StatementCard({ words }: { words: string }) {
+function StatementWords({ words, after }: { words: string; after?: ReactNode }) {
+  const cut = after ? words.lastIndexOf(" ") + 1 : words.length;
   return (
-    <Card size="sm" className="h-full min-h-0 justify-center bg-muted">
-      <CardContent>
-        <Text as="blockquote" role="heading" tone="muted">
-          “{words}”
-        </Text>
+    <Text as="blockquote" role="display" tone="muted" className="font-normal tracking-normal" style={{ fontFamily: "var(--font-display)" }}>
+      “{words.slice(0, cut)}
+      {after ? (
+        <span className="whitespace-nowrap">
+          {words.slice(cut)}”{after}
+        </span>
+      ) : (
+        "”"
+      )}
+    </Text>
+  );
+}
+
+/**
+ * One of his statements on a card of its own (2026-09-28, his: "break down that large piece about me into small
+ * statements … place that in a card … the text should also be bold and big but also subtle"). **The card is the
+ * page's colour with no border** (2026-10-01, his: "I don't want a background behind it … that card to be the color
+ * of the background with no border"; it wore the muted surface, lime mixed 14% into the page): still opaque, so the
+ * field's lines stop at it, and nothing edges it. Its words (`StatementWords`) are centred down the card, a card's
+ * padding in from its sides: they stood on the column's edges for an hour, where the card's clip took the opening
+ * quote's overhang off (his, the same day: "the first quote in the taglines are chopped off … add some padding in
+ * the card"). No padding top and bottom: the rows round the card are its air.
+ */
+export function StatementCard({ words, after, className }: { words: string; after?: ReactNode; className?: string }) {
+  return (
+    <Card size="sm" className={cn("h-full min-h-0 justify-center border-0 py-0 shadow-none", className)}>
+      <CardContent className="relative">
+        <StatementWords words={words} after={after} />
       </CardContent>
     </Card>
   );
+}
+
+/**
+ * His line under the profile, where the note was, and the note behind a button (2026-10-01, his: "the tag line should
+ * replace the card like other taglines. And then add 'More about me' button which opens a modal with the text from the
+ * card"): a `StatementCard`, as his statements are, with **More about me** on its last line (his, the same day: "put
+ * the arrow icon in the tagline to be in the same line, same last line of the tagline", then "move the button to the
+ * right, completely right side"; it was in the card's bottom-right corner, the words flowing round it, and before that
+ * an outlined pill on a row of its own) — one cell, the lime fill and a → (his: "make it filled with lime but make it
+ * only one cell and just put a right arrow icon"), centred on the line at the card's right edge, which is the column's
+ * last cell. The line keeps a cell's room and a gutter after the closing quote, so the words never run under it. The
+ * cell is taller than the line, so the last line is as tall as the cell: held to the line's height, the circle ran into
+ * the descenders of the line above. Its name is its
+ * label and its tooltip. It opens the system's `Dialog` with the
+ * note's paragraphs, all of them: the dialog does not clip.
+ */
+export function AboutCard({ words, paragraphs }: { words: string; paragraphs: string[] }) {
+  const m = useGridMetrics();
+  const cell = m?.cell ?? 60;
+  const gap = m?.gap ?? 12;
+  const more = (
+    <span className="inline-block align-middle" style={{ width: cell, height: cell, marginInlineStart: gap }}>
+      {/* The button keeps this cell's line and leaves the cell itself as room at the line's end, and stands at the
+          card's right edge (`end-0` of the card's content, whose padding is the card's own). */}
+      <span className="absolute end-0" style={{ width: cell, height: cell }}>
+      <Dialog>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DialogTrigger asChild>
+                <Button aria-label="More about me" className="size-full px-0">
+                  <ArrowRightIcon aria-hidden style={icon} />
+                </Button>
+              </DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>More about me</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>About me</DialogTitle>
+          </DialogHeader>
+          <DialogDescription asChild>
+            <div className="mt-0 flex flex-col gap-3">
+              {paragraphs.map((paragraph) => (
+                <Text key={paragraph} tone="muted">
+                  {paragraph}
+                </Text>
+              ))}
+            </div>
+          </DialogDescription>
+        </DialogContent>
+      </Dialog>
+      </span>
+    </span>
+  );
+  return <StatementCard words={words} after={more} />;
 }
 
 export function HobbiesCard() {

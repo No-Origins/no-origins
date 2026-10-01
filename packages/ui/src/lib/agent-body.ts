@@ -9,9 +9,11 @@ import { SPHERE_START, sphereMotionFrom, type SphereMotion } from "./sphere-moti
  * together are what a character is (`CharacterLook`).
  *
  * `set` says where each rest is designed: what it looks like still — its size, paint, shade and material, its tail's
- * length and taper, how far it settles into its nest — is the **look**, in the character studio; everything that shows
- * only as it moves is **motion**. The defaults are version 12's, his settings (`SPHERE_START`). Ids are the tokens'
- * names without `--motion-sphere-`, unique with the face's, so a motion's row keys any of them alone.
+ * length and taper, how far it settles into its nest — is the **look**, in Orbit; everything that shows
+ * only as it moves is **motion**, every agent's alike (Motion.md M23). A look marked `pose` — how it is turned, how far
+ * it settles — is one a motion's row may move for a while; no motion touches the rest of the look. The defaults are
+ * version 15's, his settings (`SPHERE_START`). Ids are the tokens' names without `--motion-sphere-`, unique with the
+ * face's, so a motion's row keys any of them alone.
  */
 
 export type BodyGroup = { id: string; label: string; settings: readonly Setting[] }
@@ -33,7 +35,7 @@ export const AGENT_BODY: readonly BodyGroup[] = [
         id: "body", label: "Body", touches: "Ball firm, jelly as set, slime soft and oozing", type: "choice",
         options: [{ value: "ball", label: "Ball" }, { value: "jelly", label: "Jelly" }, { value: "slime", label: "Slime" }], default: S.body, set: "look",
       },
-      // Character-Studio.md C10 (his, 2026-09-30: "create shapes for basic shapes like cube, pyramid, hemi sphere,
+      // Orbit.md C10 (his, 2026-09-30: "create shapes for basic shapes like cube, pyramid, hemi sphere,
       // cyclinder, hexagonal prism, cone"). Version 1.
       {
         id: "shape", label: "Shape", touches: "What its head is: the sphere, or a solid that moves and rests as it would", type: "choice",
@@ -51,20 +53,23 @@ export const AGENT_BODY: readonly BodyGroup[] = [
     ],
   },
   {
-    // Character-Studio.md C10, version 2 (his, 2026-09-30: "I will also need control over rotation in 3D axis"): a shape
+    // Orbit.md C10, version 2 (his, 2026-09-30: "I will also need control over rotation in 3D axis"): a shape
     // turns whole, the sphere its face. Its rest is the look's; a motion's row may ease it, as any number.
     id: "rotation",
     label: "Rotation",
     settings: [
-      { id: "rotate-x", label: "X", touches: "Tipped toward you +, or back −", type: "angle", min: -180, max: 180, step: 1, default: S.rotateX, set: "look" },
-      { id: "rotate-y", label: "Y", touches: "Turned on the spot: its front to your right +, or left −", type: "angle", min: -180, max: 180, step: 1, default: S.rotateY, set: "look" },
-      { id: "rotate-z", label: "Z", touches: "Rolled about the way you look: clockwise +", type: "angle", min: -180, max: 180, step: 1, default: S.rotateZ, set: "look" },
+      { id: "rotate-x", label: "X", touches: "Tipped toward you +, or back −", type: "angle", min: -180, max: 180, step: 1, default: S.rotateX, set: "look", pose: true },
+      { id: "rotate-y", label: "Y", touches: "Turned on the spot: its front to your right +, or left −", type: "angle", min: -180, max: 180, step: 1, default: S.rotateY, set: "look", pose: true },
+      { id: "rotate-z", label: "Z", touches: "Rolled about the way you look: clockwise +", type: "angle", min: -180, max: 180, step: 1, default: S.rotateZ, set: "look", pose: true },
     ],
   },
   {
     id: "tail",
     label: "Tail",
     settings: [
+      // Orbit.md C23 (his, 2026-10-01: "I also want to like have an option to have a tail or not"). Off, nothing of a
+      // tail is drawn, and its other settings rest.
+      { id: "tail", label: "Tail", touches: "Whether it has a tail at all", type: "switch", default: S.tail, set: "look" },
       { id: "length", label: "Length", touches: "How long the tail is, in heads", type: "number", unit: "head", min: 0, max: 6, step: 0.1, default: S.length, set: "look" },
       { id: "taper", label: "Taper", touches: "Its tip, of the head: 0 a point", type: "number", unit: "share", min: 0, max: 1, step: 0.05, default: S.taper, set: "look" },
       { id: "stiffness", label: "Stiffness", touches: "How hard it pulls back into shape, 0 limp", type: "number", unit: "share", min: 0, max: 1, step: 0.05, default: S.stiffness, set: "motion" },
@@ -115,16 +120,28 @@ export const AGENT_BODY: readonly BodyGroup[] = [
     ],
   },
   {
+    // Motion.md M24 (his, 2026-10-01: "diving is diving behind from behind the screen from one cell to another"): the
+    // Dive action's own. Every agent dives alike.
+    id: "dive",
+    label: "Dive",
+    settings: [
+      { id: "spring", label: "Spring", touches: "How high it springs before it dives into its nest, 0 it slips straight in", type: "number", unit: "cell", min: 0, max: 3, step: 0.05, default: S.spring, set: "motion" },
+      { id: "dive", label: "Dive", touches: "Slipping straight down out of its nest until it is gone: how quick all of the dive is", type: "duration", min: 40, max: 2000, step: 10, default: S.dive, set: "motion" },
+      { id: "under", label: "Under", touches: "Behind the page, from one nest to the next", type: "duration", min: 0, max: 4000, step: 50, default: S.under, set: "motion" },
+      { id: "pop", label: "Pop", touches: "How fast it comes into the next nest: coming up, it pops this high; from the side, it slides", type: "number", unit: "cell", min: 0, max: 3, step: 0.05, default: S.pop, set: "motion" },
+    ],
+  },
+  {
     id: "rest",
     label: "Rest",
     settings: [
-      { id: "spread", label: "Spread", touches: "How far it settles into the nest", type: "number", unit: "share", min: 0, max: 0.6, step: 0.01, default: S.spread, set: "look" },
+      { id: "spread", label: "Spread", touches: "How far it settles into the nest", type: "number", unit: "share", min: 0, max: 0.6, step: 0.01, default: S.spread, set: "look", pose: true },
       { id: "breath", label: "Breath", touches: "One breath at rest, 0 none", type: "duration", min: 0, max: 10000, step: 100, default: S.breath, set: "motion" },
       { id: "breath-depth", label: "Breath depth", touches: "How far a breath spreads it more", type: "number", unit: "share", min: 0, max: 0.3, step: 0.01, default: S.breathDepth, set: "motion" },
     ],
   },
   {
-    // Character-Studio.md C15 (his, 2026-09-30, a sheet of hand-drawn swatches: "Take inspiration from the image I
+    // Orbit.md C15 (his, 2026-09-30, a sheet of hand-drawn swatches: "Take inspiration from the image I
     // provide and then update the textures"), and C14's depth. Defaults leave the body as it has always been.
     id: "surface",
     label: "Surface",
@@ -171,12 +188,16 @@ export const AGENT_BODY: readonly BodyGroup[] = [
 /** Every body setting, in its groups' order. */
 export const bodySettings = (): readonly Setting[] => AGENT_BODY.flatMap((g) => g.settings)
 
+/** The body's look, the settings a character holds (M23): everything a motion does is every agent's, not its own. */
+export const bodyLook = (): readonly Setting[] => bodySettings().filter((s) => s.set === "look")
+
 /**
  * A CHARACTER: what the agent looks like — its body's values and its face — as a look keeps it, in a character's draft
- * and in each of its versions (M20). **Kept whole** (`resolveCharacter`): a version is frozen, so it holds every value,
- * not only the ones moved off a default; a default that changes in code later must not change a published version
- * (Admin.md §7, the theme snapshot's reason). A value missing from one read back is a setting declared since it was
- * saved, and takes its default.
+ * and in each of its versions (M20). **Kept whole** (`resolveCharacter`): a version is frozen, so it holds every value
+ * of its look, not only the ones moved off a default; a default that changes in code later must not change a published
+ * version (Admin.md §7, the theme snapshot's reason). A value missing from one read back is a setting declared since it
+ * was saved, and takes its default. **Its look only** (Motion.md M23): how it moves is every agent's, so a motion value
+ * a character was saved with before is not read.
  */
 export type CharacterLook = { body: PropertyValues; face: FaceLook }
 
@@ -187,11 +208,13 @@ export type CharacterLook = { body: PropertyValues; face: FaceLook }
  */
 export function resolveCharacter(look: CharacterLook): CharacterLook {
   const checked = checkCharacter(look)
-  const body = Object.fromEntries(bodySettings().map((s) => [s.id, checked.body[s.id] ?? s.default]))
+  const body = Object.fromEntries(bodyLook().map((s) => [s.id, checked.body[s.id] ?? s.default]))
   const face: FaceLook = {}
   for (const slot of AGENT_FACE) {
+    // A played slot (the symbols) is a motion's, never a character's.
+    if (slot.use !== "worn") continue
     const wear = checked.face[slot.id]
-    const settings = [...slot.settings, ...(isUploaded(wear?.style) ? uploadSettings(slot.id) : [])]
+    const settings = [...slot.settings.filter((s) => s.set === "look"), ...(isUploaded(wear?.style) ? uploadSettings(slot.id) : [])]
     face[slot.id] = {
       ...(slot.style ? { style: wear?.style ?? slot.style.default } : {}),
       values: Object.fromEntries(settings.map((s) => [s.id, wear?.values[s.id] ?? s.default])),
@@ -201,17 +224,33 @@ export function resolveCharacter(look: CharacterLook): CharacterLook {
   return { body, face }
 }
 
-/** `raw` as a character's look: known body values checked, unknown ones dropped, and the face checked (`checkFace`). */
+/**
+ * `raw` as a character's look: its look's body values checked, the rest dropped — unknown ones, and the motion values a
+ * character was saved with before M23 — and the face checked (`checkFace`) and kept to its look.
+ */
 export function checkCharacter(raw: unknown): CharacterLook {
   const r = raw && typeof raw === "object" ? (raw as { body?: unknown; face?: unknown }) : {}
   const body: PropertyValues = {}
   if (r.body && typeof r.body === "object") {
     for (const [k, v] of Object.entries(r.body as Record<string, unknown>)) {
-      const setting = bodySettings().find((s) => s.id === k)
+      const setting = bodyLook().find((s) => s.id === k)
       if (setting) body[k] = checkValue(setting, v)
     }
   }
-  return { body, face: checkFace(r.face) }
+  return { body, face: faceLook(checkFace(r.face)) }
+}
+
+/** A face, its look only: the worn slots, each with its style and the settings a look sets. */
+function faceLook(face: FaceLook): FaceLook {
+  const out: FaceLook = {}
+  for (const slot of AGENT_FACE) {
+    const wear = face[slot.id]
+    if (slot.use !== "worn" || !wear) continue
+    const look = new Set([...slot.settings.filter((s) => s.set === "look"), ...uploadSettings(slot.id)].map((s) => s.id))
+    const keep = (values: PropertyValues) => Object.fromEntries(Object.entries(values).filter(([k]) => look.has(k)))
+    out[slot.id] = { ...(wear.style ? { style: wear.style } : {}), values: keep(wear.values), ...(wear.right ? { right: keep(wear.right) } : {}) }
+  }
+  return out
 }
 
 /** Which slot each face id is in, its style's or a setting's. */
@@ -223,14 +262,17 @@ const SLOT_OF = new Map<string, FaceSlotId>(
 
 /**
  * The agent a character's look makes (M20): what `sphereFrame` and the `Agent` draw, for a studio that holds a look
- * rather than writing tokens (the character studio). Read through the one reader the tokens go through
+ * rather than writing tokens (Orbit). Read through the one reader the tokens go through
  * (`sphereMotionFrom`), so a look and the same values written as tokens draw the same agent. An uploaded style is not
- * drawn yet: its slot draws its default.
+ * drawn yet: its slot draws its default. How it moves is `motion`'s where given — an action's values
+ * (`lib/agent-actions`), which the portfolio's intro plays its six by (Motion.md M22, version 3) — and else the
+ * declaration's defaults.
  */
-export function sphereMotionOf(look: CharacterLook): SphereMotion {
+export function sphereMotionOf(look: CharacterLook, motion: PropertyValues = {}): SphereMotion {
   const whole = checkCharacter(look)
   const value = (id: string) => {
     if (id in whole.body) return whole.body[id]
+    if (id in motion) return motion[id]
     const slot = SLOT_OF.get(id)
     const wear = slot ? whole.face[slot] : undefined
     if (!slot || !wear) return undefined
@@ -243,9 +285,10 @@ export function sphereMotionOf(look: CharacterLook): SphereMotion {
   return sphereMotionFrom({
     num,
     ms: num,
+    // A switch is read as its token is written, `on` or `off`.
     word: (id) => {
       const v = value(id)
-      return typeof v === "string" ? v : undefined
+      return typeof v === "string" ? v : typeof v === "boolean" ? (v ? "on" : "off") : undefined
     },
     right: (id) => {
       const slot = SLOT_OF.get(id)

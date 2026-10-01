@@ -2,7 +2,7 @@
 "@no-origins/ui": minor
 ---
 
-The agent can be more than the sphere (Character-Studio.md C10, version 1). `lib/agent-shape.ts` draws its head as a
+The agent can be more than the sphere (Orbit.md C10, version 1). `lib/agent-shape.ts` draws its head as a
 cube, a pyramid, a hemisphere, a cylinder, a hexagonal prism or a cone, faced to you and seen a little from above, each
 face one flat colour in its tone (`toneCss`: the paint, toward black away from the light, toward white on top), its
 silhouette rounded, and taking the room the sphere would so it settles, breathes and squashes as the sphere does,

@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 // Visual review loop for the workspace apps.
 // `pnpm review` boots FIVE dev servers (or reuses ones already running) — the portfolio on :3000, the design
-// showcase on :3001, engineering on :3003, the motion studio on :3004 and the character studio on :3005 — sweeps
+// showcase on :3001, engineering on :3003, the motion studio on :3004 and Orbit on :3005 — sweeps
 // every route in e2e/review.spec.ts on desktop + mobile viewports in both themes, and drops full-page screenshots into
 // e2e/screenshots/<project>/<route>.png. CI runs the same sweep (.github/workflows/ci.yml) and uploads the screenshots.
 //
@@ -71,7 +71,7 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: "pnpm --filter character dev",
+      command: "pnpm --filter orbit dev",
       url: "http://localhost:3005",
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,

@@ -267,7 +267,7 @@ function Control({ label, touches, children }: { label: string; touches: string;
   );
 }
 
-/** The hues as swatches, every pick of a colour being the colour picker (Character-Studio.md C17): Neutral, shadcn's grey. */
+/** The hues as swatches, every pick of a colour being the colour picker (Orbit.md C17): Neutral, shadcn's grey. */
 const HUE_SWATCHES = [
   { value: "neutral", label: "Neutral", colour: "oklch(0.556 0 0)" },
   { value: "lime", label: "Lime", colour: "var(--lime)" },

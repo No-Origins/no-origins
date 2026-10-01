@@ -2,7 +2,7 @@
 "@no-origins/ui": minor
 ---
 
-The agent's paints stand out from the page in both themes (Character-Studio.md C20).
+The agent's paints stand out from the page in both themes (Orbit.md C20).
 
 - `styles/globals.css`: `--agent-peach`, `--agent-yellow` and `--agent-grey` and their inks are gone. `--agent-red`,
   `--agent-orange`, `--agent-gold`, `--agent-green` and `--agent-teal` are new, each a mid-tone at least 3.3 : 1 from

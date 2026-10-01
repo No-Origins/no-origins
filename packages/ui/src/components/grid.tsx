@@ -5,6 +5,7 @@ import gsap from "gsap"
 import { cn } from "cn"
 
 import { useThemeFlipRegistry, type ThemeFlipper } from "@no-origins/ui/components/theme-provider"
+import type { IntroActions, IntroAgent } from "@no-origins/ui/lib/intro-motion"
 import {
   FIELD_PAD,
   startFieldPainter,
@@ -14,7 +15,7 @@ import {
 } from "@no-origins/ui/lib/grid-field"
 
 /**
- * The intro's agent (D50), loaded only when a grid plays it: the agent's model is the biggest thing in the package, and
+ * The intro's agents (D50), loaded only when a grid plays it: the agent's model is the biggest thing in the package, and
  * a page without an intro should not carry it.
  */
 const GridIntro = React.lazy(() => import("@no-origins/ui/components/grid-intro").then((m) => ({ default: m.GridIntro })))
@@ -235,12 +236,19 @@ export type GridProps = Omit<React.ComponentProps<"div">, "children"> & {
   /** Draw the cells behind the items. */
   overlay?: boolean
   /**
-   * Open the page with the agent (Grid.md D50): it stands in the page's circle for it (`data-intro-agent`, the
-   * portfolio's avatar ring), breathes, hops in place, and the field wakes ring by ring from it as it lands; then it
-   * fades away and the page's boxes come in. Once per document load, by the grid that asks for it; never under reduced
-   * motion. It needs `overlay`: the rings are the field's cells.
+   * Open the page with its agents (Grid.md D50, version 8, 2026-10-01): `introAgents` stand side by side in a row on the
+   * field's middle, in a random order, and those that `bounces` Bounce, each at its own random times, for two seconds;
+   * then each Jumps or Dives, at random, to the centre of the boxes it opens, a small ripple of lit cells spreading round
+   * it as it lands; then each Dives home, to its cell of the middle ones in the field's last column, and the boxes it
+   * opens fade in once it is gone (Motion.md M22). Each box names the agents that open it (`data-intro-by`, their ids). The
+   * intro plays once per document load, by the grid that asks for it, and never under reduced motion; the agents stay in
+   * their cells, resting, after it or without it — still, under reduced motion.
    */
   intro?: boolean
+  /** The intro's cast, in its order (`IntroAgent`: an id the boxes name, and a look). None, one agent as the tokens make it. */
+  introAgents?: readonly IntroAgent[]
+  /** How the cast bounces, jumps and dives: each action's values as he published them (M24). One left out, its defaults. */
+  introActions?: IntroActions
   /**
    * Draw the pointer as a violet ring that fills while it is pressed, and light the cell under it: its dashes in violet
    * (Grid.md D34, D43). A mouse or a pen only: nothing changes on touch.
@@ -256,6 +264,8 @@ function Grid({
   children,
   overlay = false,
   intro: introProp = false,
+  introAgents,
+  introActions,
   cursor: cursorProp = false,
   onMetrics,
   className,
@@ -309,10 +319,10 @@ function Grid({
     if (metrics) onMetrics?.(metrics)
   }, [metrics, onMetrics])
 
-  // The field's paint (D38) — the overlay's dashes and the pointer's cell, on canvases one painter draws — first, so
-  // its effects have run before the cursor asks anything of it.
-  const { field, on: painted } = useGridField(overlay || cursorProp, metrics, ref, overlay)
-  const intro = useGridIntro(introProp && overlay, metrics)
+  // The field's paint (D38) — the overlay's dashes, the pointer's cell and the intro's ripples, on canvases one painter
+  // draws — first, so its effects have run before the cursor asks anything of it.
+  const { field, on: painted } = useGridField(overlay || cursorProp || introProp, metrics, ref, overlay)
+  const intro = useGridIntro(introProp, metrics)
   const cursor = useGridCursor(cursorProp, metrics, ref, field)
 
   // The box's padding is the gutter (D15) — before the field is measured it is the breakpoint's gap by width alone,
@@ -324,8 +334,8 @@ function Grid({
       ref={setRef}
       data-slot="grid"
       data-breakpoint={metrics?.bp}
-      // While the intro runs (D50): "agent" as the agent plays, the page's boxes held back by globals.css; "reveal" as
-      // they come in.
+      // While the intro runs (D50): "agent" as the agents play, the page's boxes held back by globals.css but for the
+      // ones they open; "reveal" as the grid lets go of them.
       data-intro={intro.phase ?? undefined}
       // The ring is the pointer (D34): globals.css draws the system's cursor as the violet ring (D43) over the whole grid.
       data-cursor={cursor.on ? "" : undefined}
@@ -361,10 +371,20 @@ function Grid({
             >
               {children}
             </div>
-            {/* The intro's agent (D50): over the page's boxes, on the field, for as long as it plays. */}
-            {intro.phase && root ? (
+            {/* The intro's agents (D50): over the page's boxes, on the field, as it plays and, since version 8, resting
+                in their cells in the last column once it is over. */}
+            {(intro.phase || intro.settled) && root ? (
               <React.Suspense fallback={null}>
-                <GridIntro metrics={metrics} root={root} pass={field.pass} onReveal={intro.reveal} onDone={intro.done} />
+                <GridIntro
+                  metrics={metrics}
+                  root={root}
+                  agents={introAgents}
+                  actions={introActions}
+                  settled={intro.settled}
+                  pass={field.pass}
+                  onReveal={intro.reveal}
+                  onDone={intro.done}
+                />
               </React.Suspense>
             ) : null}
           </div>
@@ -385,15 +405,16 @@ function Grid({
 const LIT_FADE_MS = 500
 /**
  * The field's painter still takes the lace (grid-field.ts, D40): the gap between a cell's disc and its tile in the
- * intro's reveal. Nothing sends it a reveal or a pass since D48, so it cuts nothing.
+ * intro's reveal. Nothing sends it a reveal since D48, so it cuts nothing.
  */
 const LACE_MS = 90
 
 /**
- * The field's paint (Grid-v2.md D38, 2026-09-25): the overlay's dashes and the pointer's cell, on canvases one painter
- * draws (`lib/grid-field.ts`), in a worker wherever the browser can hand it a canvas. They were about 1,300 elements;
- * the intro's passes and the ripple between pages were painted here too, until D48 took them out. The grid tells the
- * painter the field, the theme's colours and the pointer's cell; the painter keeps time itself.
+ * The field's paint (Grid-v2.md D38, 2026-09-25): the overlay's dashes, the pointer's cell and the intro's ripples
+ * (D50, version 3), on canvases one painter draws (`lib/grid-field.ts`), in a worker wherever the browser can hand it a
+ * canvas. They were about 1,300 elements; the ripple between pages was painted here too, until D48 took it out. The
+ * grid tells the painter the field, the theme's colours, the pointer's cell and the intro's passes; the painter keeps
+ * time itself.
  */
 function useGridField(enabled: boolean, metrics: GridMetrics | null, rootRef: React.RefObject<HTMLDivElement | null>, overlay: boolean) {
   const on = enabled && !!metrics
@@ -483,7 +504,8 @@ function useGridField(enabled: boolean, metrics: GridMetrics | null, rootRef: Re
       },
       /**
        * Light the field's cells in one of the painter's colours (0 lime, 1 violet): each at `zero + delays[i]`, epoch
-       * ms, fading over LIT_FADE_MS as the pointer's does — the intro's rings (D50).
+       * ms — Infinity, never — fading over LIT_FADE_MS as the pointer's does: the intro's ripples (D50; version 1's rings
+       * out to the far corner, version 3's a few round each agent's nest).
        */
       pass(delays: Float64Array, span: number, zero: number, layer: number) {
         painter.current?.post({ type: "pass", layer, delays, span, zero })
@@ -552,10 +574,12 @@ let introPlayed = false
 type IntroPhase = "agent" | "reveal"
 
 /**
- * The intro's state (D50, his, 2026-09-30): "agent" from the server's first render on — the page's boxes held back by
- * globals.css — while the agent plays (`GridIntro`), then "reveal" as they come in, then over. Reduced motion, or a
+ * The intro's state (D50, his, 2026-09-30; versions 2 and 3 2026-10-01): "agent" from the server's first render on — the page's
+ * boxes held back by globals.css, but for the ones the agents are opening — while they play (`GridIntro`), then
+ * "reveal" as the grid lets go of the boxes (at once, since version 2: they came in as they opened), then over. Reduced motion, or a
  * document that has played it, skips it before the first measured frame paints. A new box mid-intro — a phone's bar
- * sliding away, a window resized — hands straight over rather than going on on a field it did not start on.
+ * sliding away, a window resized — hands straight over rather than going on on a field it did not start on. Over or
+ * skipped, it is `settled` (version 8): the agents rest in their cells on whatever field the grid has.
  */
 function useGridIntro(enabled: boolean, metrics: GridMetrics | null) {
   // The same on the server and in the browser's first render, so hydration matches.
@@ -586,7 +610,9 @@ function useGridIntro(enabled: boolean, metrics: GridMetrics | null) {
   const done = React.useCallback(() => setPhase(null), [])
   // How long the boxes take to come in, for globals.css.
   const style = phase === "reveal" ? ({ "--grid-intro-reveal": `${revealMs}ms` } as React.CSSProperties) : undefined
-  return { phase, reveal, done, style }
+  // Over, or skipped: the agents rest in their cells (version 8).
+  const settled = enabled && !phase
+  return { phase, reveal, done, style, settled }
 }
 
 // ── the cursor (Grid-v2.md D34, 2026-09-25) ──────────────────────────────────────────────────────────────────────

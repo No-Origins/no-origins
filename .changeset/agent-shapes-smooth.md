@@ -2,7 +2,7 @@
 "@no-origins/ui": patch
 ---
 
-The agent's shapes have smooth edges (Character-Studio.md C18, version 5 of the shapes).
+The agent's shapes have smooth edges (Orbit.md C18, version 5 of the shapes).
 
 - `lib/agent-shape`: a flat-sided shape's faces are each one tone, and every point of its edges' and corners' rounds is
   in the tone of the way it faces, in steps of a twenty-fourth (`TONE_STEPS`), so an edge rounds smoothly from one

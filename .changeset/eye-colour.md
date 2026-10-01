@@ -2,7 +2,7 @@
 "@no-origins/ui": minor
 ---
 
-The agent's eyes have a colour (Character-Studio.md C16).
+The agent's eyes have a colour (Orbit.md C16).
 
 - `lib/agent-face`: the eyes declare `eye-colour`, one of the agent's colours by name, default `ink`.
 - `lib/sphere-motion`: `SphereMotion.eyeColour`, read through the face's declaration like the rest of version 13's

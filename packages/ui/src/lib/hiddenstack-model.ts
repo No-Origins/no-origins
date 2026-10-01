@@ -1,7 +1,7 @@
 import * as THREE from "three"
 
 /**
- * Hiddenstack's first 3D bust (Character-Studio.md C11). Modelled from the portfolio's avatar.png, not the older
+ * Hiddenstack's first 3D bust (Orbit.md C11). Modelled from the portfolio's avatar.png, not the older
  * photo-derived Character.md proposal: swept hair, round wire glasses, a smile, black tee and folded arms.
  * These colours belong to the artwork, stay the same in either theme, and do not add UI palette tokens.
  * All parts are geometry, including the face and glasses; there is no portrait texture or camera-facing plane.

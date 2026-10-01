@@ -3,7 +3,7 @@ import type { SphereMotion } from "./sphere-motion"
 
 /**
  * The agent's colours by name, as CSS (Motion.md M20): what `components/agent` paints with, and what anything that paints
- * a part as the agent does uses — the character studio's preview of an upload. Flat, every one (2026-09-16).
+ * a part as the agent does uses — Orbit's preview of an upload. Flat, every one (2026-09-16).
  *
  * `paint` is its body's colour; `shade` the same mixed toward black by its shade, its dark side; `deep` the paint most
  * of the way to black; `ink` the eyes' colour since version 11, drawn for each paint to stand out on it; `light` the
@@ -11,7 +11,7 @@ import type { SphereMotion } from "./sphere-motion"
  */
 
 /**
- * The paints a body can be (Character-Studio.md C10, C20): the two accents, and the agent's own (`--agent-*` in
+ * The paints a body can be (Orbit.md C10, C20): the two accents, and the agent's own (`--agent-*` in
  * globals.css), each with its ink, round the wheel from pink to blue. Version 2 (2026-10-01): peach, yellow and grey
  * went for red, orange, gold, green and teal, which stand out from the page in both themes.
  */

@@ -4,19 +4,19 @@ import * as React from "react"
 
 import { agentColours, colourCss, eyeColours, toneCss } from "@no-origins/ui/lib/agent-colours"
 import { checkDrawing, type DrawingData } from "@no-origins/ui/lib/agent-face"
-import type { SphereFrame, SphereMotion } from "@no-origins/ui/lib/sphere-motion"
+import { sphereBowl, type SphereFrame, type SphereMotion } from "@no-origins/ui/lib/sphere-motion"
 
 /**
- * THE AGENT, drawn (Motion.md M17, Character-Studio.md C3): one frame of the sphere — the agent since version 11 — as
+ * THE AGENT, drawn (Motion.md M17, Orbit.md C3): one frame of the sphere — the agent since version 11 — as
  * the package's `sphereFrame` gives it. Written by hand, not from a registry: no registry has it, and he approved it
  * into the system on 2026-09-30 (his: "Yes", to making the agent a design-system component rather than a copy in each
- * app). Until then the motion studio and the character studio each painted it, and the character studio's copy had
+ * app). Until then the motion studio and Orbit each painted it, and Orbit's copy had
  * already missed the eyes.
  *
  * **It draws, it does not move.** The model is `@no-origins/ui/lib/sphere-motion`, pure; a caller makes the frame and
  * hands it over, so how the agent moves (a course, a timeline, a blink clock) stays with whoever moves it. Two ways in:
  *
- * - **Still**: pass `frame` and `look`, and it paints them whenever they change (the character studio).
+ * - **Still**: pass `frame` and `look`, and it paints them whenever they change (Orbit).
  * - **Every frame**: take the `ref`, an `AgentPainter`, and call `paint(frame, look)` from a ticker, which writes the
  *   paths straight onto the elements with no render (the motion studio's stage, on GSAP's ticker).
  *
@@ -41,7 +41,7 @@ import type { SphereFrame, SphereMotion } from "@no-origins/ui/lib/sphere-motion
  * — the caller loads the ones its look wears and passes them, checked again here (`checkDrawing`) — placed on the slot's
  * anchor as the frame says, a pair's right part its mirror; in the face layer, or over the head for a symbol.
  *
- * **A shape** (Character-Studio.md C10, 2026-09-30): where the head is not the sphere, the frame's `shape` gives its
+ * **A shape** (Orbit.md C10, 2026-09-30): where the head is not the sphere, the frame's `shape` gives its
  * faces, each painted in its tone (`toneCss`: its paint, toward black on the side away from the light, toward white on
  * top), over its outline in its dark side's colour and cut to it; the face layer is cut to it the same way. Resting in
  * a nest, it stands on the floor, and the body is cut to the nest's bowl, where its rigid bottom passes the ring the
@@ -49,7 +49,7 @@ import type { SphereFrame, SphereMotion } from "@no-origins/ui/lib/sphere-motion
  * is a tile of flat shapes repeated over each face, in that face's tone, fixed to the head (`frame.head`) so it rides
  * it: `<pattern>`s, one a face, their colour and tile written each frame. The sphere plain draws exactly as it did.
  *
- * The `data-sphere-*` attributes are the motion studio's specs' (e2e/agent.spec.ts): keep them.
+ * The `data-sphere-*` attributes are the motion studio's specs' (e2e/agents.spec.ts): keep them.
  */
 
 /**
@@ -71,12 +71,6 @@ const MARKS = 12
 /** Far enough out to cut nothing. */
 const FAR = 1e5
 const UNCUT = `M ${-FAR} ${-FAR} H ${FAR} V ${FAR} H ${-FAR} Z`
-
-/** A nest's bowl, what a shape in it is cut to: everything above its circle's middle, and the circle's lower half. */
-function bowlOf({ x, y, r }: { x: number; y: number; r: number }) {
-  const [l, m, rt] = [x - r, y, x + r].map((n) => n.toFixed(2))
-  return `M ${x - FAR} ${y - FAR} H ${x + FAR} V ${m} H ${rt} A ${r.toFixed(2)} ${r.toFixed(2)} 0 0 1 ${l} ${m} H ${x - FAR} Z`
-}
 
 /** The agent's painter, for a caller that paints it every frame. */
 export type AgentPainter = { paint: (frame: SphereFrame, look: AgentLook) => void }
@@ -142,7 +136,7 @@ function Agent({ ref, frame, look, drawings, ...props }: AgentProps) {
     }
     // A shape resting in a nest stands on its floor, and what of its rigid bottom passes the bowl is behind the page;
     // the sphere settles inside it on its own, and is never cut.
-    bowl.current?.setAttribute("d", f.shape && f.opening ? bowlOf(f.opening) : UNCUT)
+    bowl.current?.setAttribute("d", f.shape && f.opening ? sphereBowl(f.opening) : UNCUT)
     // Flat colours only: its paint, and the same mixed toward black for its dark side.
     const colour = agentColours(m)
     const body = colour.paint

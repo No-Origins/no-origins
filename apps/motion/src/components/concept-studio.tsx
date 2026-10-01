@@ -14,6 +14,7 @@ import { Slider } from "@no-origins/ui/components/slider";
 import { Slot } from "@no-origins/ui/components/slot";
 import { Tabs, TabsList, TabsTrigger } from "@no-origins/ui/components/tabs";
 import { Text } from "@no-origins/ui/components/text";
+import { actionFamilyOf } from "@/content/agent-actions";
 import { EASES, FAMILIES, type Family, type PresetId, type Token } from "@/content/families";
 import { StudioProvider, useStudio } from "@/components/studio-context";
 import { Stage } from "@/components/stage";
@@ -26,8 +27,9 @@ const CONCEPTS = {
   dock: { title: "Stage with a dock", note: "A wide stage, with a short workbench underneath." },
   inspector: { title: "Focused inspector", note: "More room to watch. One jig at a time." },
 };
-// These are layout proposals, not additional motions on the bench: every family on the studio's own stage.
-const SAMPLES = FAMILIES;
+// These are layout proposals, not additional motions on the bench: every family on the studio's own stage — the
+// agents' page as its first action's bench (Motion.md M24).
+const SAMPLES = FAMILIES.map((family) => (family.actions ? actionFamilyOf("") : family));
 
 function Placed({ at, children }: { at: number[]; children: React.ReactNode }) {
   const [col, row, width, height] = at;
@@ -68,7 +70,7 @@ function Parameter({ token, family }: { token: Token; family: Family }) {
         <Text role="caption">{token.kind === "ms" ? "ms" : token.unit ?? "×"}</Text>
       </div> : null}
     </div>
-    {/* A choice of colours is the colour picker, as every pick of a colour is (Character-Studio.md C17). */}
+    {/* A choice of colours is the colour picker, as every pick of a colour is (Orbit.md C17). */}
     {choices && token.swatches ? <ColourPicker id={id} aria-label={token.label} value={String(value)} onValueChange={set}
       options={choices.map((choice) => ({ ...choice, colour: token.swatches!(studio.values(family))[choice.value] ?? "transparent" }))} />
     : choices ? <Select value={String(value)} onValueChange={set}>

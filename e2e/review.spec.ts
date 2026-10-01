@@ -25,16 +25,16 @@ export const ENGINEERING_ROUTES = ["/", "/learn/jido"];
 export const MOTION = "http://localhost:3004";
 export const MOTION_ROUTES = ["/", "/concepts/split", "/concepts/dock", "/concepts/inspector"];
 
-/** The character studio (Character-Studio.md), a fifth, on :3005 — one route, the agent's cell on the grid. */
-export const CHARACTER = "http://localhost:3005";
-export const CHARACTER_ROUTES = ["/", "/hiddenstack"];
+/** Orbit (Orbit.md), the agents' app, a fifth, on :3005 — the agent's cell on the grid, and Hiddenstack's figure. */
+export const ORBIT = "http://localhost:3005";
+export const ORBIT_ROUTES = ["/", "/hiddenstack"];
 
 const APPS = [
   { name: "", base: "", routes: ROUTES },
   { name: "design", base: DESIGN, routes: DESIGN_ROUTES },
   { name: "engineering", base: ENGINEERING, routes: ENGINEERING_ROUTES },
   { name: "motion", base: MOTION, routes: MOTION_ROUTES },
-  { name: "character", base: CHARACTER, routes: CHARACTER_ROUTES },
+  { name: "orbit", base: ORBIT, routes: ORBIT_ROUTES },
 ];
 
 const slug = (route: string) => (route === "/" ? "home" : route.slice(1).replace(/\//g, "__"));
@@ -53,8 +53,8 @@ for (const app of APPS) {
       const response = await page.goto(`${app.base}${route}`, { waitUntil: "networkidle" });
       expect(response, `no response for ${title}`).not.toBeNull();
       expect(response!.status(), `${title} returned ${response!.status()}`).toBeLessThan(400);
-      // No page loads behind a loader (Grid.md D49), but a grid with an intro opens with the agent (D50): it breathes, hops
-      // and hands over in about 4 s. The screenshot is of the page it hands over to; a page stuck in it fails here. Then a
+      // No page loads behind a loader (Grid.md D49), but a grid with an intro opens with its agents (D50, version 2): they
+      // gather, leap to the boxes they open and open them, and it hands over in about 4.5 s. The screenshot is of the page it hands over to; a page stuck in it fails here. Then a
       // moment for the grid to lay its page out; the screenshot fast-forwards what is still moving, the portfolio's wake
       // (Portfolio.md P16) among it.
       await page.waitForFunction(() => !document.querySelector('[data-slot="grid"][data-intro]'), null, { timeout: 10_000 });

@@ -31,8 +31,10 @@ src/components/*.tsx    61 shadcn components + theme-provider.tsx (`useThemeTogg
                           grid's flip, Grid.md D28; `useThemeFlipRegistry` is how the grid takes it)
                         + grid.tsx (field, `GridThemeFlip`, D28 — no loader since D49, 2026-09-30: a page is shown as
                           soon as the field is measured, and `useGridLoad` and `GridLoader` are gone — the intro, the
-                          agent, D50, version 1: `intro` with `overlay`, `useGridIntro` holding the page back
-                          (`data-intro`) and loading grid-intro.tsx only then — the
+                          agents, D50, version 8 since 2026-10-01: `intro`, its cast `introAgents` and the actions'
+                          values it plays them by `introActions`, `useGridIntro` holding the page back (`data-intro`)
+                          and loading grid-intro.tsx only then, keeping it mounted once it is over so the agents rest in
+                          their cells (`settled`), the painter kept on for its ripples — the
                           cursor — `cursor`, `useGridCursor`, D34, its ring
                           an image in globals.css, no lit cell while the grid is `data-cursor-still` — and `GRID_REFERENCE_BOX`), grid-pages.tsx, grid-pager.tsx — the base layout, ours
                           (see repo-root CLAUDE.md); grid-pager.tsx is the navbar on the bottom row — a slot whose
@@ -40,9 +42,15 @@ src/components/*.tsx    61 shadcn components + theme-provider.tsx (`useThemeTogg
                           D29) — and grid-pages.tsx the turn (Grid.md D27, D35, D37, D49: the hand fills the arrow,
                           the page fades away, the next is put on the field and fades in). The grid renders and nothing edits it:
                           grid-editor.tsx and grid-frame.tsx went with the composer (Grid-v2.md D30, 2026-09-23)
-                        + grid-intro.tsx — `GridIntro`, the intro played (D50): the agent in the page's
-                          `data-intro-agent` circle, breathing (`sphereStill`) and hopping in place (`sphereCourse` nest to
-                          nest) on GSAP's ticker, and the field's rings as one pass of its painter
+                        + grid-intro.tsx — `GridIntro`, the intro played (D50, version 8): the cast standing in a row
+                          on the field's middle, those that `bounces` bouncing at random, then jumping or diving to the
+                          centre of the boxes each opens (his actions, `lib/agent-actions`, each frame cut and shifted
+                          as the studio's stage draws a dive; the boxes naming them by `data-intro-by`), a small ripple
+                          a landing handed to the field's painter as one pass an agent (`pass`), then his Dive home to a
+                          cell each in the field's last column, on GSAP's ticker, and each box fading in once its agent
+                          is gone — one Web Animations opacity fade, which the compositor plays; then the cast resting in
+                          those cells for good (`settled`, `introResting` on a field given later; once, still, under
+                          reduced motion)
                         + slot.tsx (the box on the grid: fill · inset · alignment; a component or sub-slots) and
                           registry.tsx (what a layout item can name by `kind`, drawn by `Placed` — the pager's
                           parts: the arrows as a pair, and for the numbered bar one arrow a cell and the pages
@@ -59,14 +67,14 @@ src/components/*.tsx    61 shadcn components + theme-provider.tsx (`useThemeTogg
                           the uploaded drawings its look wears (`drawings`, by version id, checked by `checkDrawing`)
                           on their slots' anchors; since 2026-09-30 a SHAPE's faces where the head is not the sphere
                           (`frame.shape`, each face in its tone, `toneCss`) and a TEXTURE's tile over each face in its
-                          tone (`<pattern>`s fixed to `frame.head`; Character-Studio.md C10). A still `frame` + `look`,
+                          tone (`<pattern>`s fixed to `frame.head`; Orbit.md C10). A still `frame` + `look`,
                           or `paint(frame, look)` through its ref every frame; it never moves itself. The motion studio's
-                          stage and the character studio both draw it; keep its `data-sphere-*` (e2e/agent.spec.ts)
+                          stage and Orbit both draw it; keep its `data-sphere-*` (e2e/agents.spec.ts)
                         + colour-picker.tsx — THE COLOUR PICKER (2026-10-01, his: "color pickers should always be like
                           the paint we have in character studio"; no registry has one): swatches composed from
                           `ToggleGroup`, one a colour, the one picked pressed, each named in its title, sharing out a
-                          narrow column rather than wrapping. Every pick of a colour in every app is one: the character
-                          studio's paints and colours by name, the motion studio's colour jigs, the portfolio's jig
+                          narrow column rather than wrapping. Every pick of a colour in every app is one: Orbit's
+                          paints and colours by name, the motion studio's colour jigs, the portfolio's jig
 src/hooks/*.ts          use-mobile.ts; use-reading-focus.ts — Tab and the arrows move focus in reading order, left to
                           right and top to bottom as the boxes stand, over a scope a page opts in (Grid.md D45);
                           use-cell-motion.ts — `useCellMotion` plays movement (Motion.md M9) on a block: one GSAP clock
@@ -101,10 +109,18 @@ src/lib/load-motion.ts  how a page loads (Motion.md M10), pure: a square of dash
                           section back until a passing ring has left its box). His (2026-09-27, the `--motion-load-*`
                           tokens); the grid loaded every page with it (Grid.md D48) until D49 (2026-09-30, his: "remove
                           all the current loaders"), and the studio designs it and is all that plays it
-src/lib/intro-motion.ts the intro (Motion.md M22, Grid.md D50), pure: when it breathes, hops, lands and gives way
-                          (`introPlan`), and which ring of the field each cell is in, counted in whole pitches from the
-                          agent's circle (`introRings`). Version 1's `--motion-intro-*` are read (`readIntroMotion`) but
-                          not in globals.css: `INTRO_START` is them
+src/lib/intro-motion.ts the intro (Motion.md M22, Grid.md D50, version 8: home, the last column), pure: who
+                          opens which box and lands where — the cell at the centre of the boxes it opens
+                          (`introCast`) — where each stands — side by side in a row on the field's middle, in a random
+                          order (`introSpots`) — and what each does when (`introPlan`: its rest as if it had sat a
+                          while (`since`), its Bounces, if it `bounces`, at its own random pace for two seconds, then a
+                          Jump or a Dive picked at random, from `IntroActions`' values (`introActionValues`), his Dive
+                          home once its ripple has spread and it is at rest, and when each box fades in, once its agent
+                          is gone), where each settles — a cell each down the field's last column, centred, in the
+                          cast's order (`introHome`) — the cast at rest there with no intro (`introResting`), any moment
+                          of it (`introAt`), the nest it dives out of going (`introNestLeft`) and the cells its ripple
+                          lights (`introRipple`, version 1's rings, two out). Its `--motion-intro-*` are read
+                          (`readIntroMotion`) but not in globals.css: `INTRO_START` is them
 src/lib/focus-motion.ts a card in focus and a CLOTH of blur round it (Motion.md M13; a cloth, not a ripple, since his
                           note the same night), pure: the field as rings measured from the card — its edges, the
                           circle through its corners, or its centre — least next to it and rising outward
@@ -161,8 +177,8 @@ src/lib/motion-states.ts states (Motion.md M19, 2026-09-30), pure: a motion as h
                           a state a named window (start, end, a unit, the event that plays it) of rows, each a part
                           configured over a span or another state attached, linked, top to bottom in priority
                           (`flattenState`, `stateValuesAt`: rows that overlap both play, and where two set the same value
-                          the higher wins; `canAttach`). No family is built from states since the pill agent was
-                          deleted (M12, 2026-09-30); which one will be waits for the property model (M20)
+                          the higher wins; `canAttach`). Nothing plays it since the agents' motions went with M24
+                          (2026-10-01): kept, unplugged, for the sequencer of actions he will ask for
 src/lib/sphere-motion.ts the sphere, the AGENT since version 11 (Motion.md M17, 2026-09-30), pure: seen from the side, a sphere head
                           and a rubbery tail (a chain of discs hulled together, filled nonzero, one shade band down its
                           dark side). It settles into the bottom of its nest's circle as into a bowl — its outline a
@@ -178,20 +194,25 @@ src/lib/sphere-motion.ts the sphere, the AGENT since version 11 (Motion.md M17, 
                           catchlight, upper lids plain or heavy with an open, a slant and a curve, lower lids rising from
                           below, brows (line, arch, bushy), a mood's symbol by the head, and a pair's right side set
                           apart (`right`) — `faceAt`, `browOf`, `symbolOf`; `faceAnchors`, where each slot's parts sit on a round head at rest
-                          (the upload templates'). One reader behind it, `sphereMotionFrom` (a
+                          (the upload templates'). A jump to the nest it left is a bounce (M24): straight up, one nest
+                          lit, the bowl hit in its lower half only so a bounce is never cut off by its top, and
+                          `sphereBeats` its parts; `sphereBowl` is a nest's bowl as a path, what a resting shape and a
+                          dive popping up are cut to; `sphereArrival`, a dive coming into a nest in front of the page and
+                          carrying on into its bowl (a leap's landing started in the air, `bowlSim`). One reader behind it, `sphereMotionFrom` (a
                           `SphereSource`), so tokens off an element (`readSphereMotion`) and a character's look
                           (`agent-body`'s `sphereMotionOf`) draw the same agent. None of its `--motion-sphere-*` tokens
                           is in globals.css: `SPHERE_START` is version 15's (his version 14 as it looks, slime spreading at 1.2 so Spread is 0.11), and the face's parts left off
 src/lib/properties.ts   typed properties (Motion.md M20, 2026-09-30), pure: what a component can have, declared once — a
                           type (number, angle, duration, colour, choice, switch, drawing) and its meta (label, touches,
-                          range, step, default) and where its rest is designed (`set`: the look, or motions);
-                          `checkValue`, `eases`, `defaultsOf`, `COLOUR_NAMES`. The declaration is code; what he picks
+                          range, step, default) and where its rest is designed (`set`: the look, or motions), and
+                          `pose`, a look a motion's row may move (Motion.md M23's four groups; `moves` is what a row
+                          may set); `checkValue`, `eases`, `defaultsOf`, `COLOUR_NAMES`. The declaration is code; what he picks
                           is data, in the studios' drafts and versions (supabase `studio_*`)
 src/lib/agent-face.ts   the agent's FACE declared (M20's face version 1, his "yes for both"): slots (eyes, pupils, upper
                           and lower lids, brows, symbols), each a style and its settings; `FaceLook`, what a look holds
                           of it (a pair's right side apart), `checkFace`; an uploaded style is `upload:<version id>`,
                           its drawing a `DrawingData` in its slot's own space (`checkDrawing`)
-src/lib/agent-shape.ts  the agent's SHAPES (Character-Studio.md C10; C12, version 3: ROUNDED SOLIDS IN 3D; C18, version
+src/lib/agent-shape.ts  the agent's SHAPES (Orbit.md C10; C12, version 3: ROUNDED SOLIDS IN 3D; C18, version
                           5: SMOOTH EDGES), pure: a cube,
                           pyramid, hemisphere, cylinder, hexagonal prism or cone, each a core grown by a ball `RHO` wide
                           (made once, `roundedFlat`), in the
@@ -220,13 +241,26 @@ src/lib/agent-texture.ts the agent's TEXTURES (C15, version 5: HAND-DRAWN ON THE
 src/lib/agent-colours.ts the agent's colours by name (`agentColours`), a face's tone (`toneCss`), and its PAINTS
                           (`AGENT_PAINTS`): lime, violet and, since 2026-09-30, five of its own (`--agent-*` in
                           globals.css, each with its ink) — the agent's, not the system's palette
-src/lib/agent-body.ts   the agent's BODY declared (head with its shape, tail, jump, bounce, slide, rest, surface; version 12's defaults), and a
+src/lib/agent-body.ts   the agent's BODY declared (head with its shape, tail, jump, bounce, slide, dive, rest, surface; version 12's defaults), and a
                           CHARACTER: `CharacterLook` ({ body, face }), `checkCharacter`, `resolveCharacter` (kept whole:
-                          a version freezes every value, Admin.md §7), `sphereMotionOf` (the agent a look makes)
+                          a version freezes every value of its look, Admin.md §7 — its look only since M23: how it
+                          moves is every agent's, `bodyLook`), `sphereMotionOf` (the agent a look makes)
+src/lib/agent-actions.ts the agent's ACTIONS (Motion.md M24, 2026-10-01, his: "we need jump action or like bounce
+                          action … give me controls for uh, how high it will bounce"), pure: each a thing an agent does by
+                          its name — its groups of controls (the agent's own motion settings, with its labels and
+                          defaults), whether it `travels` to another nest, and its `play` from a trip: where it ends,
+                          its total, its phases (as long as its controls make them) and any moment of it — the frame,
+                          how far it has sunk, the nest it is cut to, whether it is gone behind the page
+                          (`AGENT_ACTIONS`, `agentAction`, `actionStill`, `actionDefaults`, `checkActionValues`, held
+                          whole). Only what he names: BOUNCE (straight up out of its nest and back), JUMP (his version
+                          15's hop, nest to nest) and DIVE (version 2: into its nest, out of it behind the page the way
+                          it goes, under, and into another carrying on — `sphereArrival` — one gravity). The motion studio's Agents page tunes them; his values are data,
+                          in the studios' drafts and versions (kind `action`)
 src/lib/grid-layout.ts  the grid's layout model as pure functions: rects, packing, pages, derivation
-src/lib/grid-field.ts   the field's painter (Grid.md D38): the overlay's dashes and the pointer's cell, in a worker where a
-                          canvas can be handed to one. It still carries the intro's passes and reveal (the lit lines),
-                          which nothing sends since D48. The painter function must stay self-contained — the worker runs
+src/lib/grid-field.ts   the field's painter (Grid.md D38): the overlay's dashes, the pointer's cell and the intro's
+                          ripples (passes, D50 version 3: a cell lit at its delay, never at Infinity, showing the
+                          youngest lighting where passes cross), in a worker where a canvas can be handed to one. It
+                          still carries the intro's reveal, which nothing sends since D48. The painter function must stay self-contained — the worker runs
                           it from its own source text
 src/styles/globals.css  Tailwind + the theme + the @theme inline map — the only stylesheet in the workspace
 components.json         what the CLI reads; aliases resolve to @no-origins/ui/*

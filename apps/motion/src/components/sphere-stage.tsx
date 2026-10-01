@@ -5,77 +5,68 @@ import gsap from "gsap";
 
 import { Agent, type AgentPainter } from "@no-origins/ui/components/agent";
 import { useGridMetrics } from "@no-origins/ui/components/grid";
-import { AGENT_FACE } from "@no-origins/ui/lib/agent-face";
-import { flattenState, stateValuesAt, type MotionState, type PlacedRow, type StateValues } from "@no-origins/ui/lib/motion-states";
+import { actionStill, agentAction, type AgentActionFrame, type AgentActionPlay } from "@no-origins/ui/lib/agent-actions";
 import {
-  readSphereMotion, sphereCourse, sphereFrame, sphereJump, sphereMotionFrom, spherePhases, sphereStill, sphereTripMs,
-  type SphereCell, type SphereCourse, type SphereFrame, type SphereMotion, type SphereTrip,
+  readSphereMotion, sphereBowl, sphereJump, sphereMotionFrom,
+  type SphereCell, type SphereMotion, type SphereTrip,
 } from "@no-origins/ui/lib/sphere-motion";
 import { cn } from "@no-origins/ui/lib/utils";
 
-import { familyById, type Family } from "@/content/families";
-import { useMachine } from "@/components/machine";
+import type { Family, Values } from "@/content/families";
+import { SPHERE_START_VALUES } from "@/content/sphere";
+import { useAgentPreview } from "@/components/agent-preview";
 import { useHeld, useTrack, type Track } from "@/components/stage";
-import { holdPhase, useStudio, type Phase } from "@/components/studio-context";
+import { useStudio, type Phase } from "@/components/studio-context";
 
 /**
- * The sphere's stage (Motion.md M17), version 6: a head and a rubbery tail jumping from nest to nest on the field's own
- * cells, seen from the side, abstract geometry by his spec, painted from the package's `sphereFrame` with the tokens
- * read off the stage (`readSphereMotion`), slowed by the tempo like every family's. It sits on the bottom of its nest's
- * circle, its tail behind the page. The body is one outline, head and what of the tail is in front of the page,
- * painted twice: in its dark colour, then its lit side in its paint cut to the outline, which leaves one flat dark band
- * down its far side. The two nests of a jump are lit rings of the muted tint that dip as it lands. **The agent itself is
- * the design system's `Agent`** (`@no-origins/ui/components/agent`, 2026-09-30): this stage keeps the nests, the course,
- * the timeline and the blink clock, and hands it each frame through its painter; the character studio shows the same
- * component still.
+ * The sphere's stage (Motion.md M17): the agent on the field's own cells, seen from the side, abstract geometry by his
+ * spec, painted from the package's `sphereFrame` with the tokens read off the stage (`readSphereMotion`), slowed by the
+ * tempo like every family's. It sits on the bottom of its nest's circle, its tail behind the page. **The agent itself is
+ * the design system's `Agent`** (`@no-origins/ui/components/agent`, 2026-09-30): this stage keeps the nests, the play,
+ * the timeline and the blink clock, and hands it each frame through its painter; Orbit shows the same component still.
  *
- * **On the timeline** a play is its jump — the Jump jig's Columns and Rows, centred on the stage by `sphereJump`, the
- * character sitting in its first nest — then the hold, sitting in the nest it reached, and
- * the jump back, a rest after it on a loop; its parts are the jump's own, crouch · leap · bounce · settle, and a part it
- * goes without is not drawn. **Live** it sits in the jump's first nest, and a click on any cell sends it there from
- * where it is; a click while it is on its way is where it goes next. A click does not change the jump. A control moved
- * while it sits takes at once; one moved while it jumps takes when it has settled.
+ * **An action's stage** (Motion.md M24): it plays the action on the bench (`@no-origins/ui/lib/agent-actions`) on the
+ * agent previewed (`agent-preview.tsx`, M23) — its look, the action's values, and the declaration's defaults for the
+ * rest. **Live** it sits at the stage's centre (his, 2026-10-01: "the component should always be in the center"),
+ * breathing and blinking — the rest, always there — and a click plays the action from where it sits: an action that
+ * travels (Jump, Dive) to the cell clicked, staying there after; one that does not (Bounce) in place. A click while it
+ * plays is let go. A control moved while it sits takes at once; one moved while it plays takes when it has settled.
+ * **On the timeline** a play is the action from the centre — a traveller's path, as its Columns and Rows say, centred on
+ * the stage (`sphereJump`) — its phases as long as its controls make them. A dive is drawn moved behind the page, cut to
+ * its nest's circle, going out of it the way it travels and into the next from the side it comes from; popping up, cut
+ * to the nest's bowl (`sphereBowl`); and not at all while it is under.
  */
 
-/** A rest at the end of a play on a loop, in ms, as the other stages have. */
-const LOOP_REST = 700;
+/** Far enough out to cut nothing. */
+const FAR = 1e5;
+const UNCUT = `M ${-FAR} ${-FAR} H ${FAR} V ${FAR} H ${-FAR} Z`;
+
+/** A nest's circle as a path: the page's opening, which a dive goes out of and comes into behind the page. */
+const circlePath = ({ x, y, r }: { x: number; y: number; r: number }) =>
+  `M ${(x - r).toFixed(2)} ${y.toFixed(2)} a ${r.toFixed(2)} ${r.toFixed(2)} 0 1 0 ${(2 * r).toFixed(2)} 0 a ${r.toFixed(2)} ${r.toFixed(2)} 0 1 0 ${(-2 * r).toFixed(2)} 0 Z`;
 
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
-/** What it is doing between plays: the course it is on, since when, and where it goes next. A ref: the ticker moves it. */
+/** What it is doing between plays: the play it is in, since when, and how long it had sat before it. A ref: the ticker moves it. */
 type Live = {
   m: SphereMotion;
-  course: SphereCourse;
-  /** When the course started, on `performance.now()`, and how long it had sat before it (a still course's). */
+  play: AgentActionPlay;
+  /** When the play started, on `performance.now()`. */
   start: number;
   rested: number;
-  next: SphereCell | null;
 };
 
-/** Where a course leaves it at `t`: the nest it sits in, and how long it has sat there. */
+/** Where a play leaves it at `t`: the nest it sits in, and how long it has sat there. */
 const sittingAt = (state: Live, t: number) =>
-  state.course.total > 0 && t >= state.course.total
-    ? { cell: state.course.trip.to, rested: t - state.course.total }
-    : { cell: state.course.trip.from, rested: state.course.total > 0 ? 0 : state.rested + t };
+  state.play.total > 0
+    ? { cell: state.play.to, rested: Math.max(0, t - state.play.total) }
+    : { cell: state.play.to, rested: state.rested + t };
 
-/** A motion, laid out (Motion.md M20): what it plays, in its own time. */
-type Motion = { state: MotionState; rows: PlacedRow[] };
-
-/**
- * What a row may ease while a hop is in the air: its face, and how it is turned, which move nothing the hop is made of.
- * The rest of its body is the hop's, read at its start.
- */
-const FACE_KEYS = [
-  ...AGENT_FACE.flatMap((slot) => [...(slot.style ? [slot.style] : []), ...slot.settings]).map((p) => p.id.replace(/-(\w)/g, (_, c: string) => c.toUpperCase())),
-  "right",
-  "uploads",
-  "rotateX",
-  "rotateY",
-  "rotateZ",
-] as (keyof SphereMotion)[];
+/** Whether a play at `t` is still going. */
+const playing = (state: Live, t: number) => state.play.total > 0 && t < state.play.total;
 
 /** The agent its values make, keyed as the tokens are, in real ms (the timeline slows its clock, not its values). */
-function motionOf(values: StateValues): SphereMotion {
+function motionOf(values: Values): SphereMotion {
   const at = (id: string) => values[`--motion-sphere-${id}`];
   const num = (id: string) => {
     const v = at(id);
@@ -84,22 +75,17 @@ function motionOf(values: StateValues): SphereMotion {
   return sphereMotionFrom({ num, ms: num, word: (id) => (typeof at(id) === "string" ? (at(id) as string) : undefined), right: (id) => num(`${id}-right`) });
 }
 
-/** The agent's motions' stage (M20): the sphere's, playing the motion in front on the timeline. */
-export function MotionsStage({ family, cols, rows }: { family: Family; cols: number; rows: number }) {
-  const { machine, front } = useMachine(family);
-  const motion = React.useMemo<Motion>(() => ({ state: front, rows: flattenState(machine.states, front.id) }), [machine.states, front]);
-  return <SphereStage family={family} cols={cols} rows={rows} motion={motion} />;
-}
-
-export function SphereStage({ family, cols, rows, motion: played }: { family: Family; cols: number; rows: number; motion?: Motion }) {
+export function ActionStage({ family, cols, rows }: { family: Family; cols: number; rows: number }) {
+  const action = agentAction(family.action ?? "");
   const studio = useStudio();
+  const preview = useAgentPreview();
   const metrics = useGridMetrics();
   const cell = metrics?.cell ?? 60;
   const gap = metrics?.gap ?? 12;
   const pitch = cell + gap;
   const geometry = React.useMemo(() => ({ cell, gap }), [cell, gap]);
-  const tuning = `${JSON.stringify(studio.values(family))}·${studio.tempo}`;
-  const { hold, setHold, loop } = studio;
+  // Read again when the tuning changes, and when another agent is previewed (M23): its look is on the stage too.
+  const tuning = `${JSON.stringify(studio.values(family))}·${JSON.stringify(preview?.values ?? null)}·${studio.tempo}`;
   const held = useHeld(family);
 
   // The tokens are on the stage by the time a layout effect runs: read them whenever the tuning changes.
@@ -109,33 +95,41 @@ export function SphereStage({ family, cols, rows, motion: played }: { family: Fa
     if (root.current) setMotion(readSphereMotion(root.current));
   }, [tuning]);
 
-  // The jump the timeline plays: its Columns and Rows, centred on the stage and held to it, whatever its size.
+  // Where it sits live: the stage's centre (his, 2026-10-01: "the component should always be in the center"), the cell
+  // left of and over the middle where the stage is an even number of cells, so it stands on one.
   const fit = React.useCallback((c: SphereCell): SphereCell => ({ col: clamp(c.col, 0, cols - 1), row: clamp(c.row, 0, rows - 1) }), [cols, rows]);
-  const jump = motion ? sphereJump(motion, cols, rows) : null;
-  const [fromCol, fromRow, toCol, toRow] = jump ? [jump.from.col, jump.from.row, jump.to.col, jump.to.row] : [0, 0, 0, 0];
-  const trip = React.useMemo<SphereTrip>(
-    () => ({ from: { col: fromCol, row: fromRow }, to: { col: toCol, row: toRow } }),
-    [fromCol, fromRow, toCol, toRow],
-  );
+  const homeCol = Math.floor((cols - 1) / 2);
+  const homeRow = Math.floor((rows - 1) / 2);
+  const home = React.useMemo<SphereCell>(() => ({ col: homeCol, row: homeRow }), [homeCol, homeRow]);
 
   // ── painting ─────────────────────────────────────────────────────────────────────────────────────────────────
-  // The nests are the stage's; the agent is the design system's (`Agent`), painted through its ref every frame.
+  // The nests are the stage's; the agent is the design system's (`Agent`), painted through its ref every frame, inside
+  // a dive's cut and shift.
   const nests = React.useRef<(SVGGElement | null)[]>([]);
   const agent = React.useRef<AgentPainter>(null);
+  const cutPath = React.useRef<SVGPathElement>(null);
+  const behind = React.useRef<SVGGElement>(null);
+  const clipId = `dive-${React.useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
-  const paint = React.useCallback((f: SphereFrame, m: SphereMotion) => {
-    f.nests.forEach((n, i) => {
+  const paint = React.useCallback((af: AgentActionFrame, m: SphereMotion) => {
+    af.frame.nests.forEach((n, i) => {
       const g = nests.current[i];
       if (!g) return;
       g.setAttribute("transform", `translate(${n.x} ${n.y})`);
       g.style.opacity = String(n.lit);
     });
-    agent.current?.paint(f, m);
+    cutPath.current?.setAttribute("d", !af.cut ? UNCUT : af.cut.by === "bowl" ? sphereBowl(af.cut.nest) : circlePath(af.cut.nest));
+    const g = behind.current;
+    if (g) {
+      g.setAttribute("transform", `translate(${af.shift.x.toFixed(2)} ${af.shift.y.toFixed(2)})`);
+      g.style.display = af.hidden ? "none" : "";
+    }
+    if (!af.hidden) agent.current?.paint(af.frame, m);
   }, []);
 
   // ── live ─────────────────────────────────────────────────────────────────────────────────────────────────────
   const live = React.useRef<Live | null>(null);
-  // Whenever the timeline lets go, when it starts and when the jump changes, it sits in the jump's first nest, as a
+  // Whenever the timeline lets go, when it starts and when the stage changes size, it sits at the stage's centre, as a
   // play ends. The tuning at the time is read from a ref, so a moved control does not put it back.
   const latest = React.useRef<SphereMotion | null>(null);
   React.useLayoutEffect(() => {
@@ -145,36 +139,28 @@ export function SphereStage({ family, cols, rows, motion: played }: { family: Fa
   React.useLayoutEffect(() => {
     const m = latest.current;
     if (held || !m) return;
-    live.current = { m, course: sphereStill(m, geometry, trip.from), start: performance.now(), rested: 0, next: null };
-  }, [held, trip, geometry, ready]);
+    live.current = { m, play: actionStill(m, geometry, home), start: performance.now(), rested: 0 };
+  }, [held, home, geometry, ready]);
 
   React.useLayoutEffect(() => {
     if (!motion || held) return;
-    // Its blinks keep a clock of their own while it is live, whatever course it is on.
+    // Its blinks keep a clock of their own while it is live, whatever it is doing.
     const born = performance.now();
     const draw = () => {
       const state = live.current;
       if (!state) return;
       const now = performance.now();
       let t = now - state.start;
-      const done = state.course.total === 0 || t >= state.course.total;
       // A control moved: it takes as soon as it is sitting in a nest, from how long it has sat there.
-      if (done && state.m !== motion) {
+      if (!playing(state, t) && state.m !== motion) {
         const at = sittingAt(state, t);
-        state.course = sphereStill(motion, geometry, fit(at.cell), at.rested);
+        state.play = actionStill(motion, geometry, fit(at.cell), at.rested);
         state.m = motion;
         state.rested = at.rested;
         state.start = now;
         t = 0;
       }
-      if (state.course.total > 0 && t >= state.course.total && state.next) {
-        const at = sittingAt(state, t);
-        state.course = sphereCourse(state.m, geometry, { from: at.cell, to: state.next }, at.rested);
-        state.start = now;
-        state.next = null;
-        t = 0;
-      }
-      paint(sphereFrame(state.course, t, now - born), state.m);
+      paint(state.play.at(t, now - born), state.m);
     };
     draw();
     gsap.ticker.add(draw);
@@ -183,111 +169,66 @@ export function SphereStage({ family, cols, rows, motion: played }: { family: Fa
 
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     const state = live.current;
-    if (held || !motion || !state || event.button !== 0) return;
-    const box = event.currentTarget.getBoundingClientRect();
-    const to = fit({ col: Math.floor((event.clientX - box.left) / pitch), row: Math.floor((event.clientY - box.top) / pitch) });
+    if (held || !motion || !state || !action || event.button !== 0) return;
     const now = performance.now();
     const t = now - state.start;
-    if (state.course.total > 0 && t < state.course.total) {
-      state.next = to;
-      return;
-    }
+    // Playing: it finishes what it is doing.
+    if (playing(state, t)) return;
     const at = sittingAt(state, t);
-    state.course = sphereCourse(motion, geometry, { from: fit(at.cell), to }, at.rested);
+    const box = event.currentTarget.getBoundingClientRect();
+    const from = fit(at.cell);
+    // A traveller goes to the cell clicked; the rest play where it sits.
+    const to = action.travels ? fit({ col: Math.floor((event.clientX - box.left) / pitch), row: Math.floor((event.clientY - box.top) / pitch) }) : from;
+    state.play = action.play(motion, geometry, { from, to }, at.rested);
     state.m = motion;
     state.start = now;
   };
 
   // ── the timeline ─────────────────────────────────────────────────────────────────────────────────────────────
-  // A motion (M20), on the agent as the Agent page has it tuned: every value at the playhead from its rows, eased from
-  // where it stands; a Body row setting Columns or Rows a hop from where it sits, at its own speed.
-  const machine = family.machine;
-  const base = studio.values(familyById(machine?.restFrom ?? family.id) ?? family);
+  // The action from the centre, in real ms — a traveller's path centred on the stage — its phases as its controls make
+  // them, slowed by the tempo. Its timeline is the action alone (his, 2026-10-01: "bounds will only deal with
+  // bouncing"): no rest is put after it on a loop, as the other stages put one, so a loop goes again as soon as it has
+  // settled.
+  const base: Values = { ...SPHERE_START_VALUES, ...studio.values(family), ...preview?.values };
   const baseKey = JSON.stringify(base);
   const { tempo } = studio;
-  const buildMotion = React.useCallback((): Track | null => {
-    if (!played || !machine) return null;
-    const { state, rows: placed } = played;
-    const from = JSON.parse(baseKey) as StateValues;
-    const at = (t: number) => stateValuesAt(placed, from, t, { origin: state.start, discrete: machine.discrete });
-    const hopping = [...placed]
-      .sort((a, b) => a.start - b.start)
-      .filter((r) => typeof r.values["--motion-sphere-columns"] === "number" || typeof r.values["--motion-sphere-rows"] === "number");
-    // Where it sits to start: the path its hops take, centred on the stage — the middle of it when it does not hop.
-    let [c, r, lo, hi, top, bottom] = [0, 0, 0, 0, 0, 0];
-    for (const row of hopping) {
-      c += Math.round(Number(row.values["--motion-sphere-columns"] ?? 0));
-      r += Math.round(Number(row.values["--motion-sphere-rows"] ?? 0));
-      [lo, hi, top, bottom] = [Math.min(lo, c), Math.max(hi, c), Math.min(top, r), Math.max(bottom, r)];
-    }
-    const start = fit({ col: Math.floor((cols - 1 - (hi - lo)) / 2) - lo, row: Math.floor((rows - 1 - (bottom - top)) / 2) - top });
-    // The hops, in order: each from where the last left it, when its row starts and the last has landed.
-    const hops: { at: number; course: SphereCourse; to: SphereCell }[] = [];
-    let cell = start;
-    let free = state.start;
-    for (const row of hopping) {
-      const dc = row.values["--motion-sphere-columns"];
-      const dr = row.values["--motion-sphere-rows"];
-      const when = Math.max(row.start, free);
-      if (when >= state.end) break;
-      const to = fit({ col: cell.col + (typeof dc === "number" ? Math.round(dc) : 0), row: cell.row + (typeof dr === "number" ? Math.round(dr) : 0) });
-      if (to.col === cell.col && to.row === cell.row) continue;
-      const m = motionOf({ ...at(when), ...row.values });
-      const course = sphereCourse(m, geometry, { from: cell, to }, when - free);
-      hops.push({ at: when, course, to });
-      free = when + course.total;
-      cell = to;
-    }
-    const span = state.end - state.start;
-    const phases: Phase[] = [{ label: state.name, ms: span * tempo, note: "The motion in front, over its window" }];
-    if (loop) phases.push({ label: "rest", ms: LOOP_REST });
+  const build = React.useCallback((): Track | null => {
+    if (!action) return null;
+    const m = motionOf(JSON.parse(baseKey) as Values);
+    const trip: SphereTrip = action.travels ? sphereJump(m, cols, rows) : { from: home, to: home };
+    const play = action.play(m, geometry, trip);
+    const phases: Phase[] = play.phases.map((p) => ({ label: p.label, ms: p.ms * tempo, note: p.note }));
     return {
       phases,
       paint: (t) => {
-        const now = state.start + Math.min(t / tempo, span);
-        const values = motionOf(at(now));
-        const hop = [...hops].reverse().find((h) => h.at <= now);
-        if (hop && now - hop.at < hop.course.total) {
-          // In the air, the body is the hop's; the face is the moment's.
-          const m = { ...hop.course.m, ...Object.fromEntries(FACE_KEYS.map((k) => [k, values[k]])) } as SphereMotion;
-          paint(sphereFrame({ ...hop.course, m }, now - hop.at, now), m);
-          return;
-        }
-        const since = hop ? hop.at + hop.course.total : state.start;
-        paint(sphereFrame(sphereStill(values, geometry, hop ? hop.to : start), now - since, now), values);
+        const now = t / tempo;
+        paint(play.at(now, now), m);
       },
     };
-  }, [played, machine, baseKey, cols, rows, fit, geometry, tempo, loop, paint]);
-
-  const build = React.useCallback((): Track | null => {
-    if (played) return buildMotion();
-    if (!motion) return null;
-    const total = sphereTripMs(motion, geometry, trip);
-    const reverse = { from: trip.to, to: trip.from };
-    const there = sphereCourse(motion, geometry, trip);
-    // Back from where the hold leaves it, sitting in the nest it reached.
-    const back = sphereCourse(motion, geometry, reverse, hold);
-    // A part it goes without lasts 0 and is not drawn.
-    const parts = spherePhases(motion, geometry, trip).filter((p) => p.ms > 0);
-    const phases: Phase[] = [...parts, holdPhase(hold, setHold), { label: "back", ms: sphereTripMs(motion, geometry, reverse), note: "The same jump, back" }];
-    if (loop) phases.push({ label: "rest", ms: LOOP_REST });
-    return {
-      phases,
-      paint: (t) => paint(t < total + hold ? sphereFrame(there, t) : sphereFrame(back, t - total - hold, t), motion),
-    };
-  }, [played, buildMotion, motion, geometry, trip, hold, setHold, loop, paint]);
+  }, [action, baseKey, geometry, home, cols, rows, tempo, paint]);
   useTrack(family, build, held);
 
   return (
     <div ref={root} className={cn("absolute inset-0", held && "pointer-events-none")} onPointerDown={onPointerDown}>
       <svg data-sphere-preview role="img" aria-label="Personal agent" className="absolute inset-0 size-full overflow-visible select-none">
-        {/* The jump's two nests: the active cell's tint in a lime ring (Motion.md M9), giving as it lands. */}
+        <defs>
+          {/* A dive's cut: the circle of the nest it goes out of or comes into, behind the page; the bowl as it pops up. */}
+          <clipPath id={clipId}>
+            <path ref={cutPath} d={UNCUT} />
+          </clipPath>
+        </defs>
+        {/* A play's two nests: the active cell's tint in a lime ring (Motion.md M9), giving as it lands. An action in
+            place draws the first alone. */}
         {[0, 1].map((i) => (
           <g key={i} ref={(el) => void (nests.current[i] = el)} data-sphere-nest={i ? "to" : "from"} style={{ opacity: 0 }}>
             <circle r={cell / 2 - 0.5} fill="var(--muted)" stroke="var(--lime)" strokeWidth={1} />
           </g>
         ))}
-        <Agent ref={agent} />
+        <g clipPath={`url(#${clipId})`}>
+          <g ref={behind} data-sphere-behind>
+            <Agent ref={agent} drawings={preview?.drawings} />
+          </g>
+        </g>
       </svg>
     </div>
   );

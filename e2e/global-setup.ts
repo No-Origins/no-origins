@@ -3,8 +3,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 
 /**
- * Signs the test browser in when the studios need it (the shared sign-in, Admin.md §8.4). The motion and character
- * studios open without a login on a development server with no Supabase keys, which is CI and a fresh clone; with the
+ * Signs the test browser in when the studios need it (the shared sign-in, Admin.md §8.4). The motion studio and
+ * Orbit open without a login on a development server with no Supabase keys, which is CI and a fresh clone; with the
  * local stack's keys in their `.env.local` they ask for one, like the admin. So before the specs and the review sweep
  * run, this signs in once, by magic link through the local mail catcher, as he would, and leaves the session in
  * `STATE` for every project (`use.storageState`). A session still good from the last run is kept.

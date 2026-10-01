@@ -44,7 +44,7 @@ function LoginCardInner({ app }: { app: string }) {
   }
 
   // A development server with no Supabase keys has nothing to sign in to: an app that opens without them (the motion
-  // and character studios, `openWithoutKeys`) is already open, so the card says so rather than a form that cannot send.
+  // studio and Orbit, `openWithoutKeys`) is already open, so the card says so rather than a form that cannot send.
   if (!supabaseEnv()) {
     return (
       <Card className="w-full max-w-sm">
@@ -57,12 +57,12 @@ function LoginCardInner({ app }: { app: string }) {
             <Alert>
               <AlertTitle>This server has no Supabase keys</AlertTitle>
               <AlertDescription>
-                On a development server without them, the {app.toLowerCase()} is open: there is nothing to sign in to.
+                On a development server without them, this app is open: there is nothing to sign in to.
                 To sign in locally, give it the local stack&apos;s keys in its .env.local (see its .env.example).
               </AlertDescription>
             </Alert>
             <Button asChild>
-              <a href={next}>Open the {app.toLowerCase()}</a>
+              <a href={next}>Open {app}</a>
             </Button>
           </FieldGroup>
         </CardContent>

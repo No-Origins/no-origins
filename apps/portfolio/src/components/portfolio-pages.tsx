@@ -7,81 +7,9 @@ import { useReadingFocus } from "@no-origins/ui/hooks/use-reading-focus";
 import type { GridLayoutItem } from "@no-origins/ui/lib/grid-layout";
 
 import type { PortfolioField, PortfolioPage } from "@/content";
+import { INTRO_ACTIONS } from "@/content/actions";
+import { INTRO_CAST } from "@/content/intro";
 import { arrange } from "@/lib/arrange";
-
-/**
- * How much of its colour a box keeps, mixed into the page, before it is active (Portfolio.md P16). Mine, his to change.
- */
-const INACTIVE = 0.4;
-
-/**
- * The tokens an inactive box mixes into the page: its text, its lines, the accents and their inks, and the hover's
- * lime. Mixed, never see-through, because a faded card would show the field's dashes through it. The card and the page
- * are left alone, so a box stays a box. Its images fade over their own card (`--box-keep`).
- */
-const FADED = [
-  "foreground", "card-foreground", "muted-foreground", "faint-foreground", "accent-foreground", "border", "input",
-  "lime", "lime-foreground", "violet", "primary", "primary-foreground", "secondary", "secondary-foreground", "muted", "accent",
-] as const;
-
-/** The page's own value of each, carried on the box round the grid, because a token cannot be mixed from itself. */
-const PAGE_TOKENS = Object.fromEntries(FADED.map((token) => [`--page-${token}`, `var(--${token})`])) as React.CSSProperties;
-
-/**
- * A box's tokens: each mixed from the page's by `--box-keep`, which is INACTIVE of it before the box is active and all
- * of it after, following `--box-active` (0 or 1) as the wake's front crosses the box (`wakeFront`).
- */
-const BOX_TOKENS = {
-  "--box-keep": `calc(${INACTIVE} + ${1 - INACTIVE} * var(--box-active))`,
-  ...Object.fromEntries(FADED.map((token) => [`--${token}`, `color-mix(in oklch, var(--page-${token}) calc(var(--box-keep) * 100%), var(--background))`])),
-};
-
-/**
- * `--box-active` as a number, so the browser eases it and every colour mixed from it follows: a box becoming active
- * is a transition, not a jump. Where it cannot be registered, the switch happens at once.
- */
-function registerActive() {
-  try {
-    CSS.registerProperty({ name: "--box-active", syntax: "<number>", inherits: false, initialValue: "1" });
-  } catch {
-    // Registered already (a hot reload), or not supported.
-  }
-}
-
-/**
- * How long the wake's front takes to go from the avatar to the page's farthest corner, in ms (P16). Mine, his to
- * change: the portfolio's own motion, like the HEY!'s (Motion.md §2), not a component's, so it is not a system token.
- */
-const WAKE_MS = 1200;
-
-/** When the front reaches a box and how long it takes to cross it, in ms. */
-type WakeTiming = { delay: number; duration: number };
-
-/**
- * The wake's front (P16, his, 2026-09-27: "the activation is smooth and starts from the avatar"): a circle growing
- * from the avatar's centre at an even pace, over the whole page in WAKE_MS. A box starts to brighten when the front
- * reaches its nearest point and is fully active when the front has passed its farthest, evenly in between, so every
- * box the front is over is part way at once and the wake has no steps. Read off the boxes where the grid put them,
- * as soon as they are on the field; with no avatar on the field it starts at the field's top-left corner.
- */
-function wakeFront(grid: HTMLElement): Map<string, WakeTiming> {
-  const tracks = grid.querySelector<HTMLElement>('[data-slot="grid-tracks"]');
-  if (!tracks) return new Map();
-  const field = tracks.getBoundingClientRect();
-  const avatar = tracks.querySelector('[data-slot="avatar"]')?.getBoundingClientRect();
-  const x = avatar ? avatar.left + avatar.width / 2 : field.left;
-  const y = avatar ? avatar.top + avatar.height / 2 : field.top;
-  const reach = [...tracks.querySelectorAll<HTMLElement>(':scope > [data-slot="grid-item"][data-box]')].map((box) => {
-    const r = box.getBoundingClientRect();
-    return {
-      id: box.dataset.box!,
-      near: Math.hypot(Math.max(r.left - x, 0, x - r.right), Math.max(r.top - y, 0, y - r.bottom)),
-      far: Math.hypot(Math.max(x - r.left, r.right - x), Math.max(y - r.top, r.bottom - y)),
-    };
-  });
-  const farthest = Math.max(1, ...reach.map((box) => box.far));
-  return new Map(reach.map(({ id, near, far }) => [id, { delay: (near / farthest) * WAKE_MS, duration: ((far - near) / farthest) * WAKE_MS }]));
-}
 
 /** The field assumed before the grid has measured itself: the xl reference box, bare — the portfolio has no chrome above the grid. */
 const XL = GRID_REFERENCE_BOX.xl;
@@ -98,16 +26,16 @@ const FIRST_FIELD: PortfolioField = {
  * turn it — the scroll and a finger do nothing, and the arrow keys only ever moved focus (Grid.md D45). The grid is the
  * viewport (Grid.md D3, D11) and nothing here scrolls. The page is arranged on the field the grid reports, so every
  * coordinate is honoured as written: the first screen as it was, and the pieces of the pages that went in the room it
- * leaves (`arrange`). It opens with the grid's intro (Grid.md D50, P23, his, 2026-09-30): the agent stands in the
- * avatar's ring (`data-intro-agent`, profile-card.tsx), breathes, hops in place, and the field wakes ring by ring from
- * it; then it fades away and the page comes in. The pointer is the grid's violet ring, and the cell under it lights
- * (D34, D43).
+ * leaves (`arrange`). It opens with the grid's intro (Grid.md D50, P23, version 7, his, 2026-10-01): the six agents
+ * (`INTRO_CAST`) stand side by side in a row on the field's middle, in a random order, and Bali, Kino and Mira bounce,
+ * each at its own random times, for two seconds; then each jumps or dives, at random, to the cell at the centre of the
+ * boxes it opens — every item names its agent (`by`) — a small ripple of lit cells spreading round it as it lands;
+ * then it dives into its nest and its boxes fade in. They bounce, jump and dive as he published those actions
+ * (`INTRO_ACTIONS`). The pointer is the grid's violet ring, and the cell under it lights (D34, D43).
  *
- * **The page wakes from the avatar** (P16, amended — his, 2026-09-27: "once all the components render, lets
- * everything get activated", and then "the activation is smooth and starts from the avatar"): every box comes onto
- * the field inactive, faded into the page, and as the intro's agent gives way to the page a front grows from the
- * avatar's centre over it, each box brightening as it crosses it (`wakeFront`). They stay active: the pointer and the
- * focus change nothing in that.
+ * **Nothing wakes after it** (P16 withdrawn, his, 2026-10-01: "after they load, they uh, glow up. So I don't think we
+ * need that anymore"): a box is in its own colours as soon as it fades in. Until then every box came onto the field
+ * faded into the page and brightened as a front from the avatar crossed it, once the intro was over.
  */
 export function PortfolioPages({ page }: { page: PortfolioPage }) {
   const [field, setField] = React.useState<PortfolioField | null>(null);
@@ -121,8 +49,8 @@ export function PortfolioPages({ page }: { page: PortfolioPage }) {
   // comes first in the document and last on the screen.
   const scope = React.useRef<HTMLDivElement>(null);
   useReadingFocus(scope);
-  // The grid's intro (Grid.md D50), as its root carries it: "agent" while the agent plays and the page is held back,
-  // "reveal" as the page comes in, over `--grid-intro-reveal`. The tagline behind the grid is held with the boxes, so it
+  // The grid's intro (Grid.md D50), as its root carries it: "agent" while the agents play and the page is held back but
+  // for the boxes they open, "reveal" as the grid lets go of it, over `--grid-intro-reveal`. The tagline behind the grid is held with the boxes, so it
   // carries the same. Assumed held until the grid says otherwise, so it never shows a frame early.
   const grid = React.useRef<HTMLDivElement>(null);
   const [intro, setIntro] = React.useState<{ phase: string | null; reveal: string }>({ phase: "agent", reveal: "" });
@@ -135,19 +63,9 @@ export function PortfolioPages({ page }: { page: PortfolioPage }) {
     watch.observe(el, { attributes: true, attributeFilter: ["data-intro"] });
     return () => watch.disconnect();
   }, []);
-  // Awake (P16) once the boxes are on the measured field and the agent has given way to them: they have been laid out
-  // inactive — `wakeFront` reads them where the grid put them — and the front sets off as they come in. Each box's
-  // timing comes in the same render as its `--box-active`, so the front is what the transition runs on. Under reduced
-  // motion there is no intro, and the switch is instant.
-  const [wake, setWake] = React.useState<Map<string, WakeTiming> | null>(null);
-  React.useLayoutEffect(() => {
-    const el = grid.current;
-    if (field && !wake && el && intro.phase !== "agent") setWake(wakeFront(el));
-  }, [field, wake, intro.phase]);
-  React.useEffect(registerActive, []);
 
   return (
-    <div ref={scope} className="relative" style={PAGE_TOKENS}>
+    <div ref={scope} className="relative">
       {/* Before the grid, so the field's dashes and its boxes are drawn over it. Nothing in it takes the pointer but
           what asks for it (the tagline's handle). It carries the field's cell and gutter, so what it holds can be laid
           out on the cells it covers. */}
@@ -171,6 +89,8 @@ export function PortfolioPages({ page }: { page: PortfolioPage }) {
         ref={grid}
         overlay
         intro
+        introAgents={INTRO_CAST}
+        introActions={INTRO_ACTIONS}
         cursor
         onMetrics={(m) => {
           setField((prev) => (prev && prev.cols === m.cols && prev.rows === m.rows && prev.bp === m.bp ? prev : { cols: m.cols, rows: m.rows, bp: m.bp }));
@@ -184,30 +104,20 @@ export function PortfolioPages({ page }: { page: PortfolioPage }) {
         {/* Only once the grid has measured: the first field is a guess, and a box placed on it would flash in the wrong
             cells for a frame (GridPages waited the same way). */}
         {field
-          ? arranged.items.map((placed) => {
-              // The front's crossing of this box (`wakeFront`); none for a box that came after the wake, already active.
-              const timing = wake?.get(placed.id);
-              return (
-                <GridItem
-                  key={placed.id}
-                  col={placed.col}
-                  row={placed.row}
-                  colSpan={placed.colSpan}
-                  rowSpan={placed.rowSpan}
-                  data-box={placed.id}
-                  className="relative select-none [transition-property:--box-active] [transition-timing-function:linear] motion-reduce:[transition:none] [&_img]:opacity-(--box-keep)"
-                  style={
-                    {
-                      ...BOX_TOKENS,
-                      "--box-active": wake ? "1" : "0",
-                      ...(timing ? { transitionDelay: `${timing.delay}ms`, transitionDuration: `${timing.duration}ms` } : null),
-                    } as React.CSSProperties
-                  }
-                >
-                  {items.get(placed.id)?.render(placed)}
-                </GridItem>
-              );
-            })
+          ? arranged.items.map((placed) => (
+              <GridItem
+                key={placed.id}
+                col={placed.col}
+                row={placed.row}
+                colSpan={placed.colSpan}
+                rowSpan={placed.rowSpan}
+                data-box={placed.id}
+                data-intro-by={items.get(placed.id)?.by}
+                className="relative select-none"
+              >
+                {items.get(placed.id)?.render(placed)}
+              </GridItem>
+            ))
           : null}
       </Grid>
     </div>

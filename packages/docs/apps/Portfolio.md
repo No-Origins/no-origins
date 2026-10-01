@@ -628,7 +628,11 @@ section."* And: *"Let's put btech computer science card under work."*
     on row 1). A taller field leans a row up: 1920 × 1080 starts on row 2, where it was 3. A phone and a tablet,
     already on row 1, do not move.
   - **The address is a card** (`EmailCard`, `profile-card.tsx`): hiddenstack@no-origins.com in the text's colour,
-    which a click selects whole, and a ghost button in lime that copies it, its icon a check for 1.6s after. The two
+    which a click selected whole until 2026-10-01, and a ghost button in lime that copies it, its icon a check for 1.6s
+    after. **Since 2026-10-01 the card is the address's `mailto:`** (his: *"when someone is hovering on the email … it
+    should have a hover effect of turning the border to lime and … when clicked on it we can open mail"*): a press
+    anywhere on it opens mail but on the copy button, which stands over the link and only copies, and its border is
+    lime under the pointer and while the link has the keys' focus. The two
     are a step of the spacing scale apart (8px, 12 to the icon), as an icon and its words are on the rest of the
     screen (*"add some spacing between email and copy icon, feels too tight"*; it was 4). A card too narrow for the
     step, an iPhone SE's 228px, keeps the half step. Where the
@@ -944,6 +948,151 @@ section."* And: *"Let's put btech computer science card under work."*
     the second statement stands over three marks.
   - *His to decide:* whether the case studies or the statement wins a twelve-row field, and whether the second
     statement should take its rows from the tech or wait for a taller field.
+- **And GitHub between the address and the résumé, a pill the résumé's size (2026-10-01).** *"Place GitHub between
+  email and resume. And give it the size of the resume button and also put the text GitHub in it."* This answers the
+  open question from 2026-09-28 (above).
+  - **The links row is Email · GitHub · Résumé** (`ProfileLinks`, `profile-card.tsx`). GitHub is its mark and its name
+    on a pill two cells wide (`GitHubCard`). Like the address's card, it is outlined in the text's colour and its
+    border turns lime under the pointer and under the keys' focus (his pick of two, the same day). The résumé stays the
+    one lime button. It opens in a new tab and has no arrow: its mark and its name already fill the pill, as the
+    résumé's name and arrow do.
+  - **One row on eight cells, two on six** (his pick of three, the same day; `LINKS_ROW` in `site.tsx`). On eight cells
+    (1512 × 982, 1920 × 1080, 1280 × 720, 1024 × 768) the row is 4 · 2 · 2, and four cells are the least the address
+    and its copy button need. On six cells (1440 × 900, a tablet, a phone) the row would need eight. There the address
+    has a row of its own, with GitHub · Résumé under it, three cells each. The other two choices were to keep GitHub's
+    mark in the degree's row on six cells, and to make GitHub and the résumé one-cell icons there.
+  - **The degree's row is the degree · Hyderabad**: the degree takes six cells on eight and four on six, so it keeps
+    its cap everywhere but an iPhone SE, where four cells are 228px.
+  - *What it costs, measured:* on six cells the profile's column is a row longer. At 1440 × 900 that row was empty, at
+    the column's foot, so the note keeps its six rows. On a phone and a tablet the tabs' panel has a row less: a phone
+    still shows all four companies, and an iPhone SE shows two where it showed three.
+- **And his statements stand on the page's colour, in bold (2026-10-01).** *"For the taglines that we have, love being
+  in new roles and today AI shortens … I don't want a background behind it. I want that card to be the color of the
+  background, with no border, and the text should also be a little bolder, and I think we can use the header font
+  that we have in our design system."*
+  - **The card is the page's colour with no border** (`StatementCard`, `cards.tsx`). The muted surface went, the lime
+    mixed 14% into the page, and the border and the shadow went with it. The card is still opaque, so the field's
+    lines stop at it, and nothing edges it.
+  - **The words are bold**, the `heading` role with the weight up one step (700, where the role is 600). `heading` was
+    already the heading font, Montserrat (the portfolio's `--font-heading`), so the font did not change. They stay
+    muted, the tone his *"subtle"* asked for on 2026-09-28. The role stays `heading` because `title`, the bold role,
+    took four rows a statement.
+  - *Measured:* the lines are what they were at every size where the statements stand, from 1366 × 768 to 2560 × 1440.
+    The first statement is three lines and the second five (four on six cells), each inside its card.
+- **And the content is the socials, the art skills are the interests, and one statement is off (2026-10-01).**
+  *"Rename content as socials and update the icon accordingly and also move LinkedIn and Discord logos into socials.
+  Rename art skills to interests."* Then: *"And also remove the love being in new roles that are shaping up at the
+  intersection of disciplines tagline."*
+  - **The socials are the content's section, renamed** (`SOCIALS`, `site.tsx`). Its label is an at sign
+    (`AtSignIcon`) and "Socials". The at sign is the icon the socials had when they were a section of their own
+    (2026-09-27). The content wore a newspaper. **Its marks are X, Instagram, YouTube, LinkedIn and Discord**, a cell
+    each, all five on one row at the column's five or six cells, so the section is still two rows and nothing in the
+    column moves. The two with a URL come first, so the keys reach them first.
+  - **The row of marks under the degree went** (`ProfileSocials`, deleted). The profile's column ends at the degree
+    and Hyderabad.
+  - **The interests are the art skills, renamed**: the label, the phone's tab ("Interests", where it was "Art") and
+    the ids. The palette stays. **And they are his new list** (the same hour: *"My interests are sketching oil
+    painting designing editing ukulele"*): Sketching, Oil painting, Designing, Editing and Ukulele (`HOBBIES` in
+    `resume.ts`), where they were Sketching, UI/UX in Figma, Video editing in DaVinci Resolve and Ukulele. Measured,
+    each pill is two cells on a pointer and on touch, and Oil painting three on a phone. The five wrap to the rows the
+    four took: three under the label on a five-cell column, two on six and in a phone's panel.
+  - **The statement about roles is off the page.** The one about AI stays over the technical skills. The words are
+    still `profile.statements.roles`.
+  - *What it costs, measured:* **a phone and a tablet show no social marks.** The socials are a column, and a phone
+    has tabs where the columns stand. This is how X and Instagram left a phone on 2026-09-28. The tabs' panel gets the
+    row back: a phone shows all four companies, and an iPhone SE shows three where it showed two. **At 1440 × 900 the
+    case studies are back** in the rows the statement took, and the profile's column leaves its last row empty. **At
+    1280 × 720 the work is back and the note is off**: the column is a row shorter, so the four companies fit under
+    it, without their label. This was the open question of 2026-09-27.
+  - *His to decide:* whether a phone shows the socials. A fifth tab would not fit the bar beside "Interests" on an
+    iPhone SE. A row of marks under the degree on touch only would fit.
+- **And the projects are a carousel of cards, an image over a name (2026-10-01).** *"I did not like the cards … we
+  will keep the image in the cards but remove the text in it and then let's just expand the card to another row and
+  then in that row we will just place the name of the project, and the second project agent society, let's name it as
+  orbit."* Then, in the same hour: *"These projects have to be like a carousel, not vertically stacked"*, *"I want the
+  cards to take only two columns width and three rows height"*, *"make the titles font in projects a little bigger
+  and bolder"*, and *"there's a lot of space between the image and the title … reduce that gap … and also add two more
+  dummy projects so that it feels like a carousel."*
+  - **A project's card is two cells by three rows** (`ProfileProjects`, `profile-projects.tsx`). The image is a step
+    inside the border at the top and the sides. The name is under it, centred, a step from the image and 12px from
+    the card's foot, and the image takes the rest: 114 × 146 on a pointer's cells, 96 × 127 on a phone's. The line,
+    "Explore the system ↗" and "Not published yet" went. **The card with a URL is the link**: No Origins opens the
+    showcase in a new tab, its border lime under the pointer and the keys' focus, as the address's and GitHub's are.
+  - **The name is `heading`**, the next role up from `body` (Type.md T1 has no size between them), Montserrat at 20px
+    semibold. On a phone's two cells, 96px inside, it steps back to the body's size, still semibold (P5): No Origins
+    is 109px at `heading`.
+  - **The cards stand side by side in the system's `Carousel`**, from the column's start, as many as the column holds:
+    two on five cells, three on six. Its window is a whole number of cards, so every stop is on the field's cells, and
+    a turn is one card. **Where there are more cards than fit**, ‹ and › stand on the label row's first and last
+    cells, circles, the label between them. In the phone's tab, which has no label, they stand on the row under the
+    cards with "1 / 2" between them. The arrows, a swipe and a drag turn it. ← and → do not, since they move focus
+    (Grid.md D45). An iPhone SE's panel has no row for them, so it is swiped. The section is four rows, the label's
+    and the cards', where the stacked cards took five.
+  - **Agents Society is Orbit** (`PROJECTS`, `resume.ts`). Its lines are still Agents Society's, and no card shows
+    them. **Two dummies follow his two** (`DUMMY_PROJECTS`): Project 3 and Project 4. They are numbered because
+    "Project Three" runs past a two-cell card at `heading`. Take them out when his own projects are in.
+- **And the technical skills are in the first column, between his line and the address (2026-10-01).** *"Move the
+  technical skills between the tagline in the first vertical and email. And once we move that, you can move the
+  interests and socials up."*
+  - **The tech is in the profile's flow** (`grow`, no `side`). It takes the rows the column leaves, at most its label,
+    its marks and a row for a grown mark (five on eight cells, six on six), and at least three, else it is not shown
+    there. Measured: 16 marks at 1440 × 900 (four rows) and all 23 at 1920 × 1080 (five). 1280 × 720 and 1024 × 768
+    have no rows for it, as they had no third column. A phone and a tablet keep it in their Tech tab.
+  - **The third column is his AI statement, the interests and the socials**, each up into the rows the tech left, a
+    row of air between them. At 1920 × 1080 the interests are at row 6 and the socials at row 10.
+  - **The intro: Lola opens the AI statement** (it was Mira's), so each agent's boxes are in one column. An agent lands
+    on the middle of its boxes, and across the first and third columns that is the work's. Mira opens the tech.
+- **And his line replaces the note, with the note behind More about me (2026-10-01).** *"I want to have the following
+  tagline: I'm a developer at the intersection of system design and design systems."* Asked where it goes: *"The tag
+  line should replace the card like other taglines. And then add 'More about me' button which opens a model with the
+  text from the card."*
+  - **His line** (`profile.lead` in `resume.ts`) is a `StatementCard`, the same as his statements: in quotes, the
+    heading font in bold, muted, on a card the page's colour with no border. It is two rows, which hold two lines of it
+    on eight cells and three on six.
+  - **More about me** is the row under it (`AboutCard`, `cards.tsx`): a pill two cells wide, the résumé's size, from
+    the column's first cell. It is outlined and opaque, so the field's lines stop at it, and its border is lime under
+    the pointer, as the address's and GitHub's are. It opens the system's `Dialog`, titled *About me*, with his six
+    paragraphs (`profile.story`), all of them, because a dialog does not clip. Escape or the close button shuts it, and
+    focus goes back to the button. Tab reaches it after the avatar.
+  - **The dialog does not blur the page.** The system's four overlays (`Dialog`, `AlertDialog`, `Sheet`, `Drawer`)
+    had sera's backdrop blur, which came back with the 2.0 rebuild against the no-glass rule; it is gone from all four.
+    The overlay keeps its 20% black. That is translucent, and the rule against translucency over the grid would take
+    it off too: *his to decide.*
+  - **Three rows, and it `grow`s** (`ABOUT` in `site.tsx`), so it stands only where the first screen leaves it three
+    rows, as the note stood only where it had three. The note took up to six, so on a twelve-row field the profile's
+    column is three rows shorter. *Measured:* at 1440 × 900 it ends on row 8 and at 1512 × 982 and 1920 × 1080 on row
+    7, with the field under it empty. At 1280 × 720, where the note had the three rows left under the column and the
+    work was off, the work now stands there and the line is off. A phone and a tablet show neither, as before.
+  - `NoteCard` is unused since, kept with the other unused cards.
+- **And his words are Anton, and More about me is a lime cell in the corner (2026-10-01).** *"More about me button is
+  not looking great. And the taglines are also not looking good. We'll make it a little more bigger font. I remember
+  we have a biggest font that we had, which is also thick … use that. The more about me button make it filled with
+  lime but make it only one cell and just put a right arrow icon and it has to be in the tag component in the bottom
+  right corner."* Asked which font, Anton or the display role, he picked Anton.
+  - **His line and his statement are Anton** (`StatementWords`, `cards.tsx`), the HEY!'s face (`--font-display`, the
+    portfolio's own), at the display role's size, 36px, the biggest the system has. Anton has one weight, so the role's
+    bold is taken off rather than faked, and its tracking is normal, as the HEY!'s is. They stay muted.
+  - **No padding either**: with no border, the words stand on the column's own edges, where they were 20px in.
+  - **More about me is one cell in the line's bottom-right corner** (`AboutCard`): the system's Button in its lime,
+    a → in its ink, on the field's own cell. The words flow round it a gutter away (a float, with a spacer as tall as
+    the box less the cell above it), so it takes no row of its own. It is labelled and has a tooltip, *More about me*,
+    and opens the same dialog.
+  - *Measured:* his line is two lines on eight cells and four on six, in its three rows. The statement is six lines
+    on five cells and five on six, so **it takes four rows where it took three** (`STATEMENT_AI`). At 1440 × 900 and
+    1512 × 982 the row of air under it went, and the tech keeps its label and a row of marks.
+- **And the quotes are whole, and More about me is on the line's end (2026-10-01).** *"The first quote in the
+  taglines are chopped off, they are not visible, so add some padding in the card, and also try to put the arrow icon
+  in the tagline to be in the same line, same last line of the tagline."* Then, seeing it: *"Can we move the button to
+  the right, completely right side?"*
+  - **The cards have their side padding back** (`StatementCard`), 20px. Anton's opening quote overhangs its letter to
+    the left, and with no padding the card's clip cut it off. Top and bottom stay at none.
+  - **More about me is on the last line, at the card's right edge** (`AboutCard`), which is the column's last cell. The
+    words keep a cell's room and a gutter after the closing quote, so they never run under it, and the button holds on
+    to the last word, so it never takes a line alone. It is one cell and the line is 40px, so **the last line is as
+    tall as the cell**: held to the line's height, the circle ran into the descenders of the line above. The button is
+    centred on the line, within 2px.
+  - *Measured:* the line is three lines on eight cells and four on six, in its three rows. The statement's rows are as
+    they were.
 - **And the socials are marks in the profile's column; the projects wear the arrow (2026-09-27).** *"Remove socials as
   a section and add social media icons like X, Instagram along with GitHub. Put that row under education row. And then
   add one row spacing between art skills and content."* Then: *"Remove in progress, idea, shipped labels from the
@@ -1238,6 +1387,13 @@ mixed. The change eases through one registered number a box, `--box-active`, whi
 `--vertical-focus`). `node e2e/.mcp/page-wake.mjs <outdir> [w] [h] [scheme] [ms…]` shoots the page as the load ends
 and at the moments given after it, prints each box's `--box-active` at each, and hovers a box to show nothing changes.
 
+**P16 withdrawn — nothing wakes** (2026-10-01, his: *"I think we have added some effect uh, on the components, right,
+after they load, they uh, glow up. So I don't think we need that anymore, we can just uh, remove it."*). The boxes are
+in their own colours from the moment the intro fades them in (P23, version 7), and nothing brightens after it. Gone
+from `portfolio-pages.tsx`: `INACTIVE`, the mixed tokens and their `--page-*` copies, the registered `--box-active`,
+`WAKE_MS` and `wakeFront`. The tech mark's brand colour is no longer mixed into the page. `e2e/.mcp/page-wake.mjs`
+has nothing left to measure.
+
 **P18 — The card under the pointer is in focus; the rest of the page blurs round it, more the farther out.**
 *Withdrawn 2026-09-30 with P20 (P21): the page has no card focus and no blur. The motion stays on the studio's page 5,
 Hyper focus (Motion.md M13).* (It
@@ -1443,6 +1599,87 @@ smoothly."* Version 1 (Grid.md D50).
 - **Mine, his to change.** Reading "take the avatar" as standing the agent in the avatar's ring, so that his face
   appears where the agent was. Keeping the wake on top of the reveal.
 
+**P23 amended — the six open the page** (2026-10-01, his: *"the intro will be filled with six of our agents … after
+two seconds, they will jump into multiple sections and uh, build these components on the page"*). Version 2 (Grid.md
+D50 amended, Motion.md M22).
+
+- **The cast.** `INTRO_AGENTS` (`content/agents.ts`): Bali, Kino, Zaza, Oru, Mira and Lola, each copied whole from its
+  current version in Orbit (Bali 15.0, Kino 1.1, Zaza 1.2, Oru 1.2, Mira 1.3, Lola 1.2 on 2026-10-01).
+  It is a snapshot: the page holds no database key (Admin.md §0.6), so a version he publishes later reaches the page
+  only when it is copied again. Publish baking it is the way out of the copy.
+- **Who opens what** (`by` on each item, mine, his to change):
+
+  | Agent | Opens |
+  |---|---|
+  | Bali, the Guide | the profile and the note |
+  | Zaza, the Scout | where to find him: Email · Résumé, the degree and the city, the social marks |
+  | Oru, the Keeper | the work |
+  | Kino, the Maker | the projects, the statement about roles, the case studies |
+  | Mira, the Editor | the statement about AI, the technical skills |
+  | Lola, the Muse | the art skills, the content |
+
+  On a phone the tabs box names Oru, Kino, Mira and Lola, so the four land on its bar, one a tab, Oru opening it.
+- **What waits for it.** The wake (P16) sets off once the last box is in, so the boxes open inactive and brighten from
+  the avatar after.
+- **Gone with version 1:** `data-intro-agent` on the avatar ring's SVG.
+
+**P23 amended again — the actions** (2026-10-01, his: *"Since we have now defined the motions for uh, dive, jump and
+bounce, in intro … all the six agents are randomly placed within the center four by four cells and then they will
+randomly keep bouncing … and then randomly some agents will dive and some agents will jump to their positions"*).
+Version 3 (Grid.md D50 amended, Motion.md M22).
+
+- **How they move.** `INTRO_ACTIONS` (`content/actions.ts`): Bounce 1.1, Jump 1.3 and Dive 1.4, each copied whole from
+  its current version in the motion studio on 2026-10-01. Like `agents.ts`, it is a snapshot, so a version he
+  publishes later reaches the page only when it is copied again.
+- **The looks, copied again the same evening** (his: Kino "to not have any tail. But in the intro, I see that popping
+  out"): five of the six had been published since the first copy. The page now has Bali 15.4, Kino 1.6 (Length 0, no
+  tail), Zaza 1.3, Oru 1.5 (Tail off), Mira 1.6 and Lola 1.2. `node e2e/.mcp/intro-snapshot.mjs` (gitignored) copies
+  both files from the local database's current versions, looks and actions together, reading and never writing it.
+- **What changed on the page:** the six stand at random in the centre four by four and bounce at random for two
+  seconds. Then each jumps or dives to the top-left cell of the box it opens, and a small violet ripple spreads round
+  it as it lands. Who opens what (the table above) and the wake after the last box are unchanged.
+
+**P23 amended — the centre and the ripple** (2026-10-01, his: *"the agent should jump to the center of the sections
+that it is rendering. And uh, instead of uh, expanding these sections from top left they should render along with the
+uh, ripple"*). Version 4 (Grid.md D50 amended, Motion.md M22). Each agent lands on the middle of the boxes it opens:
+Bali on the profile and the note, Zaza on its three rows, Oru on the work, Kino on the projects and its statement, Mira
+on its statement and the tech, Lola on the art skills and the content. Its ripple then crosses them, and they come in
+cell by cell a ring behind it. On a phone, Kino, Mira and Lola still land on their tabs. Who opens what, `content/` and
+the wake after the last box are unchanged.
+
+**P23 amended — the row** (2026-10-01, his: *"let's place them in uh, row in a line uh, without any gaps in between
+them uh, their order will be random … let's only make uh, Bali Kino and uh, Mira to bounce"*). Version 5 (Grid.md D50
+amended, Motion.md M22). The six stand side by side in one row on the field's middle, in a random order. Only Bali, Kino
+and Mira bounce; Zaza, Oru and Lola sit until they leave. Who bounces is `content/intro.ts` (`INTRO_CAST`, the snapshot's
+six each with `bounces`), kept apart from `agents.ts` so a new snapshot does not lose it.
+
+**P23 amended — cells and rest** (2026-10-01, his: *"those who are not bouncing should uh, be in the rest motion … They
+should actually drop into the cells on the grid"*). Version 6 (Grid.md D50 amended, Motion.md M22). Each agent lands on
+a cell of the field, the one at the middle of its boxes. Zaza, Oru and Lola breathe and blink while Bali, Kino and Mira
+bounce.
+
+**P23 amended — the small ripple, then the page** (2026-10-01, his: *"i think we can just have small ripples and uh,
+once the ripple ends we can drop the agents and then render the components"*). Version 7 (Grid.md D50 amended, Motion.md
+M22). Each agent lands on its cell, a small ripple spreads round it, it dives into its nest, and then its sections fade
+in. Its nest's lime ring goes back to a plain cell while it dives (his, the same evening: *"the cell border should also
+turn to its default state while the agent is diving"*). The wake after the last box is gone (P16 withdrawn).
+
+**P23 amended — home** (2026-10-01, his: *"once the agents jump into their sections and dive, they all should uh, come
+and settle in the last row middle six columns cells"*, then, before that was built: *"instead of uh, bringing them to
+the bottom, we'll bring them to the right the last most column vertically centered"*). Version 8 (Grid.md D50 amended,
+Motion.md M22). Each agent's dive out of its section is his Dive, and it comes up in a cell of its own in the field's
+last column: the six one above the other, centred top to bottom, Bali at the top and Lola at the bottom. They stay
+there, breathing and blinking, for as long as the page is open. On a new field they are there at once, and under
+reduced motion they are drawn once, still. Nothing in the arrangement keeps those cells free yet:
+
+| Field | What is under the column |
+|---|---|
+| 1920 × 1080 (26 × 14), 1280 × 720 (16 × 8) | nothing |
+| 1440 × 900 (18 × 12) | the right column's boxes: Bali's cell touches the end of the statement about AI, and the interests' box runs under four more, past its pills |
+| a phone (6 × 12) | the content: Résumé, Hyderabad, the tabs' last tab and the work's cards. The layer takes no pointer, so all of it still takes a tap |
+
+What keeps the column free, or where they go on a phone, is his to say.
+
 ## 3. Where it lives
 
 | Thing | Where |
@@ -1452,6 +1689,9 @@ smoothly."* Version 1 (Grid.md D50).
 | The sections and every span (P7, P8) | `apps/portfolio/src/content/site.tsx` |
 | The facts (P6) | `apps/portfolio/src/content/resume.ts` |
 | The grid renderer (P2), one page on a `Grid` (P15), and the page waking from the avatar (P16) | `apps/portfolio/src/components/portfolio-pages.tsx` |
+| The intro's six agents, copied from their current versions (P23) | `apps/portfolio/src/content/agents.ts` |
+| Which of them bounce in the intro, and the cast the grid is given (P23) | `apps/portfolio/src/content/intro.ts` |
+| How the intro's six bounce, jump and dive, copied from the actions' current versions (P23) | `apps/portfolio/src/content/actions.ts` |
 | The first screen's centre: the profile card, the tagline, the résumé with Email, the degree with the city, and the social marks (P4, P5) | `apps/portfolio/src/components/profile-card.tsx` |
 | The work column: the label's cell, then a mark and a pill for each company (P4) | `apps/portfolio/src/components/profile-work.tsx` |
 | The tech stack, a mark a cell, under the projects (P4) | `apps/portfolio/src/components/profile-tech.tsx` |

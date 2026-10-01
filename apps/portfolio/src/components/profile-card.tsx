@@ -140,11 +140,8 @@ export function ProfileCard({ colSpan, rowSpan }: { colSpan: number; rowSpan: nu
         >
           <AvatarImage src={profile.avatar.src} alt={profile.avatar.alt} className="bg-muted" />
           <AvatarFallback>{profile.initials}</AvatarFallback>
-          {/* The ring is also where the grid's intro agent stands (Grid.md D50): the circle inscribed in its box is the
-              ring's own line. */}
           <svg
             aria-hidden="true"
-            data-intro-agent
             className="pointer-events-none absolute top-[calc(-3px_-_var(--stroke-accent)_/_2)] left-[calc(-3px_-_var(--stroke-accent)_/_2)] size-[calc(100%_+_6px_+_var(--stroke-accent))] overflow-visible fill-none stroke-(length:--stroke-accent)"
           >
             <circle cx="50%" cy="50%" r="50%" className="stroke-lime" />
@@ -323,12 +320,12 @@ export const ICON_GAP = GRID_SPACING[2];
 
 /**
  * The row under the address (Portfolio.md P4, amended 2026-09-27, his: "underneath that we will have education and
- * location"): GitHub's mark on a cell of its own (2026-09-28, his: "shrink the width of the education and on the left
- * of it add GitHub link button"), the degree's pill taking what the mark and the city leave, and a pin and Hyderabad
- * on two cells, each a Card one row tall, which the radius (Grid.md D39) makes a pill, its content centred. One row at
- * every size: the degree is five cells on a pointer's eight, three on six, where it gets denser (`EducationPill`). The
- * pin and the city are about 100px, which two of a phone's cells (108 to 114px) only touch, so there the city goes
- * without its pin (P5): the word alone is 66px.
+ * location"): the degree's pill taking what the city leaves, and a pin and Hyderabad on two cells, each a Card one row
+ * tall, which the radius (Grid.md D39) makes a pill, its content centred. One row at every size: the degree is six
+ * cells on a pointer's eight, four on six. GitHub's mark stood on a cell at the row's start from 2026-09-28 (his:
+ * "shrink the width of the education and on the left of it add GitHub link button") until it went between the address
+ * and the résumé (2026-10-01, `ProfileLinks`). The pin and the city are about 100px, which two of a phone's cells (108
+ * to 114px) only touch, so there the city goes without its pin (P5): the word alone is 66px.
  */
 export function ProfileFacts() {
   const m = useGridMetrics();
@@ -337,9 +334,6 @@ export function ProfileFacts() {
   const two = cells(2, cell, gap);
   return (
     <div className="flex h-full min-h-0" style={{ gap }}>
-      <div className="flex-none" style={{ width: cell }}>
-        <SocialMark id="github" />
-      </div>
       <EducationPill className="flex-1" />
       <FactCard className="flex-none" style={{ width: two }}>
         {two >= 130 ? <MapPinIcon aria-hidden className="shrink-0" style={icon} /> : null}
@@ -355,8 +349,10 @@ export function ProfileFacts() {
  * same in 1 row?"). Two lines are 36px, which a row's pill holds inside its round ends. It says the subject alone
  * (his, the same day: "remove B.Tech in and put in only computer science honors"), and it is in the profile's column
  * since then, with no section label beside it, so it keeps its cap. **Denser as it narrows** (P5, 2026-09-28, when
- * GitHub took a cell of its row): the subject is 175px and 203 with its cap, so under 228px (three cells of 60, 1440 ×
- * 900) the cap goes, and under 190 (three of a phone's cells) the subject steps down to the caption's size.
+ * GitHub took a cell of its row): the subject is 175px and 203 with its cap, so under 228px (three cells of 60) the cap
+ * goes, and under 190 (three of a phone's cells) the subject steps down to the caption's size. Since GitHub left the
+ * row (2026-10-01) it is four cells or more at every size, which keeps its size everywhere and its cap everywhere but
+ * an iPhone SE (four of its cells are 228px).
  */
 export function EducationPill({ className }: { className?: string }) {
   return (
@@ -390,11 +386,11 @@ export function FactCard({ className, style, children }: { className?: string; s
  * primary (2026-09-28, his, from the recruiter quick view: "I also like the resume button with filled lime color"; it
  * was the lime word on a card, the muted fill under the pointer). It opens in a new tab, as the arrow says.
  */
-function ResumeButton({ width }: { width: number }) {
+function ResumeButton({ width }: { width?: number }) {
   const link = LINKS.find((each) => each.id === "resume");
   if (!link?.href) return null;
   return (
-    <Button asChild className="h-full shrink-0 px-0 font-normal tracking-normal normal-case" style={{ width, gap: ICON_GAP }}>
+    <Button asChild className={cn("h-full px-0 font-normal tracking-normal normal-case", width ? "shrink-0" : "flex-1")} style={{ width, gap: ICON_GAP }}>
       <a href={link.href} target="_blank" rel="noreferrer" aria-label={`${link.label} (PDF, opens in a new tab)`}>
         <Text as="span" className="text-primary-foreground">
           {link.label}
@@ -406,22 +402,63 @@ function ResumeButton({ width }: { width: number }) {
 }
 
 /**
- * The address and the résumé, under his words (his, 2026-09-27: "under that we will have resume email and GitHub"):
- * his address in a card with a button that copies it (`EmailCard`), then Résumé ↗ on two cells at the row's right end
- * (2026-09-28, his: "instead of placing resume on the left of email place it on the right side of email"), the address
- * taking what the résumé leaves — one row at every size, 6 · 2 on a pointer's eight cells and 4 · 2 on six, which the
- * address and its button need. GitHub went to the row of marks under the degree the same day, and into the degree's
- * own row on 2026-09-28 (`ProfileFacts`).
+ * The address, GitHub and the résumé, under his words (his, 2026-09-27: "under that we will have resume email and
+ * GitHub"): his address in a card with a button that copies it (`EmailCard`), then GitHub (2026-10-01, his: "place
+ * GitHub between email and resume … give it the size of the resume button and also put the text GitHub in it") and
+ * Résumé ↗ (2026-09-28, his: "place it on the right side of email"), two cells each. On eight cells that is one row,
+ * 4 · 2 · 2, the address taking what the two leave. Six cells do not hold it — the address and its button need four —
+ * so there it is two rows (his pick, 2026-10-01): the address alone, then GitHub · Résumé, three cells each.
  */
-export function ProfileLinks() {
+export function ProfileLinks({ cols }: { cols: number }) {
   const m = useGridMetrics();
   const cell = m?.cell ?? 60;
   const gap = m?.gap ?? 12;
+  if (cols >= 8) {
+    const two = cells(2, cell, gap);
+    return (
+      <div className="flex h-full min-h-0" style={{ gap }}>
+        <EmailCard className="flex-1" />
+        <GitHubCard width={two} />
+        <ResumeButton width={two} />
+      </div>
+    );
+  }
   return (
-    <div className="flex h-full min-h-0" style={{ gap }}>
+    <div className="flex h-full min-h-0 flex-col" style={{ gap }}>
       <EmailCard className="flex-1" />
-      <ResumeButton width={cells(2, cell, gap)} />
+      <div className="flex min-h-0 flex-1" style={{ gap }}>
+        <GitHubCard />
+        <ResumeButton />
+      </div>
     </div>
+  );
+}
+
+/** A card the whole of which is its link: its border lime under the pointer and while the link has the keys' focus. */
+export const LINK_CARD = "relative transition-colors hover:border-lime has-[a:focus-visible]:border-lime";
+/** The link in a `LINK_CARD`: its `::after` is the card's hit area, the card its containing block. */
+export const CARD_LINK = "outline-none after:absolute after:inset-0 after:content-['']";
+
+/**
+ * GitHub: its mark and its name on a pill the résumé's size (2026-10-01, his: "give it the size of the resume button
+ * and also put the text GitHub in it"), outlined as the address's card is, in the text's colour, its border lime under
+ * the pointer (his pick, the same day) — the résumé stays the one lime button. It opens in a new tab.
+ */
+function GitHubCard({ width }: { width?: number }) {
+  const link = LINKS.find((each) => each.id === "github");
+  const path = SOCIAL_MARKS.github?.path;
+  if (!link?.href || !path) return null;
+  return (
+    <Card size="sm" className={cn(LINK_CARD, "h-full min-h-0 min-w-0 justify-center py-0", width ? "flex-none" : "flex-1")} style={{ width }}>
+      <CardContent className="flex items-center justify-center px-0 whitespace-nowrap">
+        <a href={link.href} target="_blank" rel="noreferrer" aria-label={`${link.label} (opens in a new tab)`} className={cn(CARD_LINK, "flex items-center")} style={{ gap: ICON_GAP }}>
+          <svg aria-hidden viewBox="0 0 24 24" className="shrink-0 fill-current text-foreground" style={icon}>
+            <path d={path} />
+          </svg>
+          <Text as="span">{link.label}</Text>
+        </a>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -443,11 +480,6 @@ const SOCIAL_MARKS: Partial<Record<Link["id"], Pick<SimpleIcon, "path">>> = {
   linkedin: LINKEDIN,
   discord: siDiscord,
 };
-/**
- * The marks left in the row under the degree. GitHub went into the degree's row, and X and Instagram into the content
- * section with YouTube (2026-09-28, his: "move Instagram X to content section … and also add YouTube").
- */
-const SOCIALS: Link["id"][] = ["linkedin", "discord"];
 
 /**
  * One social link's mark on the cell it is given: a Card the radius makes a circle, as the company marks are, the mark
@@ -455,8 +487,9 @@ const SOCIALS: Link["id"][] = ["linkedin", "discord"];
  * lime color? It looks very inconsistent"; they were lime, as the links are) — and its name as its tooltip. **One with
  * a URL is a link out in a new tab; one without is its mark alone**, not pressed and not a Tab stop, until he gives it
  * (his, the same day: "add them too, we'll add the URLs later" — LinkedIn and Discord, then YouTube; the one exception
- * to P6's "a link with no value is not rendered"). GitHub's stands in the degree's row, X, Instagram and YouTube in the
- * content section (`site.tsx`), LinkedIn and Discord in the row under the degree (`ProfileSocials`).
+ * to P6's "a link with no value is not rendered"). X, Instagram, YouTube, LinkedIn and Discord stand in the socials
+ * section (`SOCIALS`, `site.tsx`) since 2026-10-01, where LinkedIn and Discord were a row under the degree; GitHub's
+ * mark is in its own pill (`GitHubCard`).
  */
 export function SocialMark({ id }: { id: Link["id"] }) {
   const link = LINKS.find((each) => each.id === id);
@@ -491,38 +524,17 @@ export function SocialMark({ id }: { id: Link["id"] }) {
   );
 }
 
-/**
- * The row of social marks under the degree, the last of the profile's column (his, 2026-09-27: "remove socials as a
- * section and add social media icons like X, Instagram along with GitHub. Put that row under education row"): a mark a
- * cell (`SocialMark`), LinkedIn and Discord since 2026-09-28. The marks stand on the field's own cells, centred on the
- * column, an odd remainder leaning left as a block does (P8).
- */
-export function ProfileSocials({ cols }: { cols: number }) {
-  const m = useGridMetrics();
-  const cell = m?.cell ?? 60;
-  const gap = m?.gap ?? 12;
-  const ids = SOCIALS.filter((id) => LINKS.some((each) => each.id === id) && SOCIAL_MARKS[id]).slice(0, cols);
-  const lead = Math.max(0, Math.floor((cols - ids.length) / 2));
-  return (
-    <ul aria-label="Elsewhere" className="flex h-full min-h-0" style={{ gap, paddingInlineStart: lead * (cell + gap) }}>
-      {ids.map((id) => (
-        <li key={id} className="flex-none" style={{ width: cell }}>
-          <SocialMark id={id} />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 /** How long the copy button wears its check after a copy. */
 const COPIED_MS = 1600;
 
 /**
  * His address and a button that copies it (2026-09-27, his: "replace Email button with card containing my email …
- * and copy button to copy email to clipboard"): the address in the text's colour, which a click selects whole (the
- * grid's boxes are otherwise not selectable), and the button in lime, the colour of what is pressed here. A copy
- * swaps the button's icon for a check for a moment; where the browser refuses the clipboard, the address is selected
- * instead, for the keys to copy.
+ * and copy button to copy email to clipboard"): the address in the text's colour and the button in lime, the colour of
+ * what is pressed here. **The card is the address's `mailto:`** (2026-10-01, his: "when someone is hovering on the
+ * email … it should have a hover effect of turning the border to lime and … when clicked on it we can open mail"): the
+ * link's hit area is the whole card, its border lime under the pointer and while the link has the keys' focus, and the
+ * copy button stands over it, so a press there copies and opens nothing. A copy swaps the button's icon for a check
+ * for a moment; where the browser refuses the clipboard, the address is selected instead, for the keys to copy.
  */
 function EmailCard({ className }: { className?: string }) {
   const address = useRef<HTMLSpanElement>(null);
@@ -541,7 +553,7 @@ function EmailCard({ className }: { className?: string }) {
     }
   };
   return (
-    <Card size="sm" className={cn("@container h-full min-h-0 min-w-0 justify-center py-0", className)}>
+    <Card size="sm" className={cn(LINK_CARD, "@container h-full min-h-0 min-w-0 justify-center py-0", className)}>
       {/* The address and its button a step of the spacing scale apart, as an icon and its words are everywhere on the
           first screen (`ICON_GAP`, gap-2; his, 2026-09-27: "add some spacing between email and copy icon, feels too
           tight"). It was a half step, which a card too narrow for the step keeps — an iPhone SE's four cells, 228px,
@@ -549,10 +561,18 @@ function EmailCard({ className }: { className?: string }) {
       <CardContent className="flex items-center justify-center gap-2 px-0 whitespace-nowrap @max-[235px]:gap-1">
         {/* A step down in a card as narrow as an SE's or narrower, as the education pill's subject steps: a 360px
             phone's card is 220px, and the address, the gap and the button need 223 — at the body size they ran past it. */}
-        <span ref={address} className="select-all">
-          <Text as="span" className="@max-[227px]:text-xs">{profile.email}</Text>
-        </span>
-        <Button variant="ghost" size="icon-xs" aria-label={copied ? "Copied" : `Copy ${profile.email}`} onClick={copy}>
+        <a href={`mailto:${profile.email}`} aria-label={`Email ${profile.email}`} className={CARD_LINK}>
+          <span ref={address} className="select-all">
+            <Text as="span" className="@max-[227px]:text-xs">{profile.email}</Text>
+          </span>
+        </a>
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          aria-label={copied ? "Copied" : `Copy ${profile.email}`}
+          className="relative z-10"
+          onClick={copy}
+        >
           {copied ? <CheckIcon aria-hidden className="text-lime" style={icon} /> : <CopyIcon aria-hidden className="text-lime" style={icon} />}
         </Button>
       </CardContent>
