@@ -32,7 +32,7 @@ export async function authCallback(request: Request) {
   if (code) {
     const supabase = await supabaseServer();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return signedIn(request, `${origin}${next}`);
+    if (!error) return NextResponse.redirect(`${origin}${next}`, { status: 303 });
   }
 
   const tokenHash = searchParams.get("token_hash");
@@ -42,7 +42,7 @@ export async function authCallback(request: Request) {
     confirm.searchParams.set("token_hash", tokenHash);
     confirm.searchParams.set("type", type);
     if (next !== "/") confirm.searchParams.set("next", next);
-    return NextResponse.redirect(confirm, { status: 303 });
+    return withoutHostOnlySession(request, NextResponse.redirect(confirm, { status: 303 }));
   }
 
   return NextResponse.redirect(`${origin}/sign-in?error=link`, { status: 303 });
@@ -58,7 +58,8 @@ export async function authConfirm(request: Request) {
   if (tokenHash && type) {
     const supabase = await supabaseServer();
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
-    if (!error) return signedIn(request, `${origin}${next}`);
+    // 303, so a browser that arrived by POST leaves by GET.
+    if (!error) return NextResponse.redirect(`${origin}${next}`, { status: 303 });
   }
 
   return NextResponse.redirect(`${origin}/sign-in?error=link`, { status: 303 });
@@ -76,15 +77,19 @@ function tokenType(value: string | null): "magiclink" | "email" | null {
 }
 
 /**
- * The redirect after a sign-in — 303, so a browser that arrived by POST leaves by GET — which also clears a session
- * cookie the browser may still hold from before 2026-09-30, when the admin wrote it for its own host rather than for
- * `.no-origins.com`. Both are sent under one name, and a stale one read first is a signed-out user bounced straight
- * back to `/sign-in` with a fresh session in the other cookie. A `Set-Cookie` with no `domain` names only the
- * host-only cookie, so the one just written for the shared domain stays. Off the shared domain — localhost — the
- * host-only cookie IS the session, and nothing is cleared.
+ * Clears a session cookie the browser may still hold from before 2026-09-30, when the admin wrote it for its own host
+ * rather than for `.no-origins.com`. Both are sent under one name, and a stale one read first is a signed-out user
+ * bounced straight back to `/sign-in` with a fresh session in the other cookie. A `Set-Cookie` with no `domain` names
+ * only the host-only cookie, so the shared one stays. Off the shared domain — localhost — the host-only cookie IS the
+ * session, and nothing is cleared.
+ *
+ * **Never on the response that signs in** (2026-10-01, his: the link still took him back to the sign-in). A Next
+ * response holds one cookie per name, whatever its domain: what the handler sets on the response replaces what
+ * `cookies()` wrote under the same name. Sent beside the fresh session, this clear replaced it — the browser was
+ * told to delete the cookie it should have stored, and the next page found nobody signed in. So it goes on the GET's
+ * hop to the sign-in page, which writes no session.
  */
-function signedIn(request: Request, to: string) {
-  const response = NextResponse.redirect(to, { status: 303 });
+function withoutHostOnlySession(request: Request, response: NextResponse) {
   const host = request.headers.get("host");
   const env = supabaseEnv();
   if (env && sessionCookieOptions(host).domain) {
