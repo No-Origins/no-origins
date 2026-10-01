@@ -7,6 +7,7 @@ import { UPLOADED, type DrawingData, type FaceSlotId, type FaceWear } from "@no-
 import type { PropertyValue } from "@no-origins/ui/lib/properties";
 
 import {
+  createCharacter,
   loadCharacter,
   publishCharacter,
   restoreCharacter,
@@ -17,6 +18,7 @@ import {
   type Outcome,
   type UploadedDrawing,
   type CharacterEntry,
+  type PublishStep,
 } from "@/app/actions";
 
 /**
@@ -25,8 +27,9 @@ import {
  *
  * **The draft saves as he goes**: a change shows at once, and is saved `SAVE_AFTER` ms after the last one, whole, on the
  * `rev` it was loaded at. A save from another device first is refused, not merged, and the studio says so and offers to
- * load it (`conflict`). **Publishing** saves what is pending first, then makes the draft as it stands a version.
- * **Going back** to a version makes it the one pages show and the draft its look.
+ * load it (`conflict`). **Publishing** saves what is pending first, then makes the draft as it stands a version: the
+ * latest's next minor, or the next major (C19). **Going back** to a version makes it the one pages show and the draft
+ * its look. **A new character** is made by its name alone, and opens.
  *
  * With no database (a development server with no keys, the review sweep) it is `offline`: the look is the page's alone
  * and nothing is saved.
@@ -56,7 +59,9 @@ type Character = {
   connected: boolean;
   setBody: (id: string, value: PropertyValue) => void;
   setFace: (slot: FaceSlotId, change: (wear: FaceWear) => FaceWear) => void;
-  publish: (label: string) => Promise<boolean>;
+  publish: (step: PublishStep) => Promise<boolean>;
+  /** Make a character by its name and open it: what is pending here is saved first. The message when it is refused. */
+  create: (name: string) => Promise<{ ok: true } | { ok: false; message: string }>;
   /** Keep a cleaned upload as a style of `slot`, and wear it there. The message when it is refused. */
   upload: (slot: FaceSlotId, name: string, file: string, data: DrawingData) => Promise<{ ok: true } | { ok: false; message: string }>;
   restore: (versionId: string) => Promise<boolean>;
@@ -216,13 +221,13 @@ export function CharacterProvider({ children }: { children: React.ReactNode }) {
   }, [flush]);
 
   const publish = React.useCallback(
-    async (label: string) => {
+    async (step: PublishStep) => {
       if (!item.current || !(await settle())) return false;
       setStatus("saving");
-      const outcome = await publishCharacter(item.current, label, rev.current);
+      const outcome = await publishCharacter(item.current, step, rev.current);
       if (!outcome.ok) {
         failed(outcome);
-        // A refused name leaves the draft as it was, saved.
+        // A refused publish leaves the draft as it was, saved.
         if (outcome.reason === "refused") setStatus("saved");
         return false;
       }
@@ -260,6 +265,19 @@ export function CharacterProvider({ children }: { children: React.ReactNode }) {
     [apply, failed, settle],
   );
 
+  /** A new character (C19): what is pending here is saved first, then it is made and takes the page, a draft and no versions. */
+  const create = React.useCallback(
+    async (name: string) => {
+      if (!item.current) return { ok: false as const, message: "Agents are kept in the database, which this server has no keys for." };
+      if (!(await settle())) return { ok: false as const, message: "What is pending here could not be saved first." };
+      const outcome = await createCharacter(name);
+      if (!outcome.ok) return { ok: false as const, message: outcome.message };
+      apply(outcome.value);
+      return { ok: true as const };
+    },
+    [apply, settle],
+  );
+
   const upload = React.useCallback(
     async (slot: FaceSlotId, name: string, file: string, data: DrawingData) => {
       if (!item.current) return { ok: false as const, message: "Uploads are kept in the database, which this server has no keys for." };
@@ -290,11 +308,12 @@ export function CharacterProvider({ children }: { children: React.ReactNode }) {
       setBody,
       setFace,
       publish,
+      create,
       upload,
       restore,
       reload,
     }),
-    [look, characterId, characters, open, status, message, versions, currentId, drawings, drawingData, setBody, setFace, publish, upload, restore, reload],
+    [look, characterId, characters, open, status, message, versions, currentId, drawings, drawingData, setBody, setFace, publish, create, upload, restore, reload],
   );
   return <CharacterContext.Provider value={value}>{children}</CharacterContext.Provider>;
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Copy, RotateCcw } from "lucide-react";
 import { Button } from "@no-origins/ui/components/button";
 import { Card, CardContent, CardHeader } from "@no-origins/ui/components/card";
+import { ColourPicker } from "@no-origins/ui/components/colour-picker";
 import { Grid, useGridMetrics } from "@no-origins/ui/components/grid";
 import { Input } from "@no-origins/ui/components/input";
 import { Label } from "@no-origins/ui/components/label";
@@ -67,7 +68,10 @@ function Parameter({ token, family }: { token: Token; family: Family }) {
         <Text role="caption">{token.kind === "ms" ? "ms" : token.unit ?? "×"}</Text>
       </div> : null}
     </div>
-    {choices ? <Select value={String(value)} onValueChange={set}>
+    {/* A choice of colours is the colour picker, as every pick of a colour is (Character-Studio.md C17). */}
+    {choices && token.swatches ? <ColourPicker id={id} aria-label={token.label} value={String(value)} onValueChange={set}
+      options={choices.map((choice) => ({ ...choice, colour: token.swatches!(studio.values(family))[choice.value] ?? "transparent" }))} />
+    : choices ? <Select value={String(value)} onValueChange={set}>
       <SelectTrigger id={id} size="sm" className="w-full" aria-label={token.label}><SelectValue /></SelectTrigger>
       <SelectContent>
         {!choices.some((choice) => choice.value === value) ? <SelectItem value={String(value)}>{String(value)}</SelectItem> : null}

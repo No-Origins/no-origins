@@ -1,4 +1,4 @@
-import { AGENT_PAINTS } from "./agent-colours"
+import { AGENT_PAINTS, RENAMED_PAINTS } from "./agent-colours"
 import { AGENT_FACE, checkFace, isUploaded, uploadSettings, type FaceLook, type FaceSlotId } from "./agent-face"
 import { COLOUR_NAMES, checkValue, type PropertyValues, type Setting } from "./properties"
 import { SPHERE_START, sphereMotionFrom, type SphereMotion } from "./sphere-motion"
@@ -25,8 +25,8 @@ export const AGENT_BODY: readonly BodyGroup[] = [
     settings: [
       { id: "size", label: "Size", touches: "The head across, of the cell", type: "number", unit: "cell", min: 0.1, max: 0.9, step: 0.01, default: S.size, set: "look" },
       {
-        id: "paint", label: "Paint", touches: "Its colour: the two accents, or one of its own pastels", type: "choice",
-        options: AGENT_PAINTS.map(({ value, label }) => ({ value, label })), default: S.paint, set: "look",
+        id: "paint", label: "Paint", touches: "Its colour: the two accents, or one of its own", type: "choice",
+        options: AGENT_PAINTS.map(({ value, label }) => ({ value, label })), renamed: RENAMED_PAINTS, default: S.paint, set: "look",
       },
       { id: "shade", label: "Shade", touches: "Its side away from the light, 0 flat", type: "number", unit: "share", min: 0, max: 1, step: 0.01, default: S.shade, set: "look" },
       {

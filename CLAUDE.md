@@ -42,16 +42,20 @@ organisms, templates, the registry, the blob, the patterns, the CSS layers — w
 
 - **shadcn/ui**, style `radix-sera`, base `radix`, base colour `neutral`, RTL on, and **one radius, half the grid's
   cell** (`--radius`, `rounded-lg`; Grid.md D39 — it was `0` until 2026-09-26). 61 components in
-  `packages/ui/src/components/*.tsx`, plus `theme-provider.tsx` and the agent (`agent.tsx`, 2026-09-30, the one
-  component no registry has: his approval, drawn from `lib/sphere-motion`).
+  `packages/ui/src/components/*.tsx`, plus `theme-provider.tsx`, the agent (`agent.tsx`, 2026-09-30, his approval,
+  drawn from `lib/sphere-motion`) and the colour picker (`colour-picker.tsx`, 2026-10-01, his ask: *"color pickers
+  should always be like the paint"*), the two no registry has. **Every pick of a colour is a `ColourPicker`**:
+  swatches, one a colour, never a select of names or a row of worded toggles.
 - **The accents are lime and violet (2026-09-27, his, set in the portfolio's accent jig).** `--primary` is `--lime`
   and `--secondary` is `--violet`, each with its own ink; the grey of hover and of being active (`--muted`) is lime at
   14% mixed over the page, and a menu's highlighted item (`--accent`) lime at 4% over the popover — mixed, never
   translucent. The rest of the palette is still shadcn's neutral. `text-primary` is lime text, about 1.3 : 1 on white,
   so it is not for text on the light theme. The jig (`?jig` on the portfolio in development, `jig.tsx`) stays, to be
   showcased in experiments; its "Neutral" puts shadcn's greys back. **The agent has paints of its own** beside them (2026-09-30,
-  Character-Studio.md C10): pink, peach, yellow, blue and grey, the `--agent-*` tokens with their inks, which nothing
-  but the agent paints with — the system's palette is still lime and violet, and widening it is his call.
+  Character-Studio.md C10): pink, red, orange, gold, green, teal and blue since 2026-10-01 (C20, his: peach, yellow and
+  grey out, "high contrast"), the `--agent-*` tokens with their inks, which nothing but the agent paints with — the
+  system's palette is still lime and violet, and widening it is his call. The new five are mid-tones that stand 3.3 : 1
+  from the page and the nest in both themes. A paint that went is read as its replacement (`RENAMED_PAINTS`).
 - **One stylesheet**, `packages/ui/src/styles/globals.css` — Tailwind, `tw-animate-css`, `shadcn/tailwind.css`, the
   `:root` / `.dark` tokens and the `@theme inline` map. Every app imports exactly this and nothing else.
 - **`cn`** from the `cn` package, re-exported at `@no-origins/ui/lib/utils`.

@@ -26,7 +26,14 @@ const CHARACTER = "Bali";
 /** A character there is: what the studio's chooser lists (Character-Studio.md C13). */
 export type CharacterEntry = { id: string; name: string };
 
-export type CharacterVersion = { id: string; number: number; label: string; publishedAt: string };
+/**
+ * A published version: `major`.`minor` (C19). A publish is the latest's next minor, or the next major at .0 when he
+ * says so. The name is the motion studio's habit and the agent's first versions'; one published here has none.
+ */
+export type CharacterVersion = { id: string; major: number; minor: number; label: string | null; publishedAt: string };
+
+/** What a publish adds to the latest version (C19): one to its minor, or one to its major, at .0. */
+export type PublishStep = "minor" | "major";
 
 /** An uploaded style (C8): a drawing, its slot, and the version it stands at in the library. */
 export type UploadedDrawing = { itemId: string; name: string; slot: UploadSlot; versionId: string; number: number };
@@ -81,7 +88,12 @@ async function read(db: Db, itemId?: string): Promise<Outcome<CharacterState>> {
   if (!item.data) return refused(`There is no character that this account may see.`);
   const [draft, versions] = await Promise.all([
     db.from("studio_drafts").select("data, rev").eq("item_id", item.data.id).maybeSingle(),
-    db.from("studio_versions").select("id, number, label, published_at").eq("item_id", item.data.id).order("number", { ascending: false }),
+    db
+      .from("studio_versions")
+      .select("id, number, minor, label, published_at")
+      .eq("item_id", item.data.id)
+      .order("number", { ascending: false })
+      .order("minor", { ascending: false }),
   ]);
   if (draft.error) return refused(draft.error.message);
   if (versions.error) return refused(versions.error.message);
@@ -111,7 +123,7 @@ async function read(db: Db, itemId?: string): Promise<Outcome<CharacterState>> {
       characters,
       look: resolveCharacter(checkCharacter(draft.data?.data ?? {})),
       rev: draft.data?.rev ?? 0,
-      versions: versions.data.map((v) => ({ id: v.id, number: v.number, label: v.label, publishedAt: v.published_at })),
+      versions: versions.data.map((v) => ({ id: v.id, major: v.number, minor: v.minor, label: v.label, publishedAt: v.published_at })),
       currentId: item.data.current_version_id,
       drawings,
       drawingData,
@@ -142,30 +154,50 @@ export async function saveDraft(itemId: string, look: CharacterLook, rev: number
 }
 
 /**
- * Publish the draft as it was on his screen (`rev`): a new version, the next number, with the name he typed, and the one
- * pages show. A version never changes afterwards; any change after it is the next publish.
+ * Publish the draft as it was on his screen (`rev`): a new version, and the one pages show. `step` is what it adds to
+ * the latest version (C19): `minor`, what the bar's Publish does, or `major`, the next one at .0. No name: he gives the
+ * character one, not each version. A version never changes afterwards; any change after it is the next publish.
  */
-export async function publishCharacter(itemId: string, label: string, rev: number): Promise<Outcome<CharacterState>> {
+export async function publishCharacter(itemId: string, step: PublishStep, rev: number): Promise<Outcome<CharacterState>> {
   const { db, error } = await database();
   if (error) return error;
+  if (step !== "minor" && step !== "major") return refused("A publish is a minor version or a major one.");
   const published = await db.rpc("studio_publish", {
     p_item: itemId,
-    p_label: label,
     p_ui_version: process.env.NEXT_PUBLIC_UI_VERSION ?? "unknown",
     p_rev: rev,
+    p_step: step,
   });
   if (published.error) {
     if (published.error.code === "40001") return conflict;
-    if (published.error.code === "23505") return refused(`A version is already called “${label.trim()}”.`);
-    if (published.error.code === "23514") return refused("A version needs a name.");
     return refused(published.error.message);
   }
   return read(db, itemId);
 }
 
 /**
+ * A new character, by the name he gives it (C19): its draft starts from the look the code declares, the package's
+ * defaults, whole (`resolveCharacter`), and it has no version until its first publish, which is 1.0. Returns it opened.
+ */
+export async function createCharacter(name: string): Promise<Outcome<CharacterState>> {
+  const { db, error } = await database();
+  if (error) return error;
+  const title = name.trim();
+  if (!title) return refused("A new agent needs a name.");
+  const made = await db.rpc("studio_new_character", {
+    p_name: title,
+    p_data: resolveCharacter({ body: {}, face: {} }),
+  });
+  if (made.error) {
+    if (made.error.code === "23505") return refused(`An agent is already called “${title}”.`);
+    return refused(made.error.message);
+  }
+  return read(db, made.data as string);
+}
+
+/**
  * Go back to a version: pages show it again, and the draft becomes its look, to carry on from. Nothing is renumbered,
- * and the next publish is still the next number.
+ * and the next publish still counts from the latest version, not this one.
  */
 export async function restoreCharacter(itemId: string, versionId: string, rev: number): Promise<Outcome<CharacterState>> {
   const { db, error } = await database();

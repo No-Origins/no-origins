@@ -67,7 +67,7 @@ export const OVERVIEW: PageContent = {
               </Text>
               <Text role="body" tone="muted" className="max-w-3xl">
                 Rebuilt on shadcn/ui — style <Code>radix-sera</Code>, base <Code>radix</Code>, base colour <Code>neutral</Code>, square
-                corners, RTL on. Sixty-two components live in <Code>@no-origins/ui</Code>, plus the theme provider, and every app
+                corners, RTL on. Sixty-three components live in <Code>@no-origins/ui</Code>, plus the theme provider, and every app
                 consumes them from source.
               </Text>
             </div>

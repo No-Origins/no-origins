@@ -2,7 +2,7 @@
 
 import * as React from "react"
 
-import { agentColours, colourCss, toneCss } from "@no-origins/ui/lib/agent-colours"
+import { agentColours, colourCss, eyeColours, toneCss } from "@no-origins/ui/lib/agent-colours"
 import { checkDrawing, type DrawingData } from "@no-origins/ui/lib/agent-face"
 import type { SphereFrame, SphereMotion } from "@no-origins/ui/lib/sphere-motion"
 
@@ -32,8 +32,10 @@ import type { SphereFrame, SphereMotion } from "@no-origins/ui/lib/sphere-motion
  * and since version 13 the face's parts (Motion.md M20, the face version 1): a pupil or a catchlight in each eye, a heavy
  * upper lid's band over it, and the brows. **Colours by name** (`ColourName`): its `paint`; the `shade` of its dark
  * side; `deep`, its paint most of the way to black; the `ink` its eyes have always been; `light`, the page's white; and
- * the accents. Solid eyes are ink; a Dot is a pupil in `deep` on a `light` eye; a Shine is a `light` catchlight on a
- * `deep` eye. **The symbol** a mood plays is drawn over the head, not cut to it.
+ * the accents. **The eyes are drawn in their Colour** (2026-10-01): a solid eye is it; a Dot is a pupil in it on a
+ * `light` eye; a Shine is a `light` catchlight on an eye in it. Ink, its default, is what they always were — the
+ * paint's ink on a solid eye, `deep` with a pupil or a catchlight (`eyeColours`). **The symbol** a mood plays is drawn
+ * over the head, not cut to it.
  *
  * **Uploaded drawings** (M20's "An uploaded style"): a slot whose style is `upload:<id>` wears the drawing `drawings[id]`
  * — the caller loads the ones its look wears and passes them, checked again here (`checkDrawing`) — placed on the slot's
@@ -51,12 +53,13 @@ import type { SphereFrame, SphereMotion } from "@no-origins/ui/lib/sphere-motion
  */
 
 /**
- * What the agent is painted in: its paint; how dark its side away from the light is, 0 flat; the pupils it wears, which
- * colour its eyes; its brows' and its symbol's colours; and its surface's pattern, its size and its colour.
+ * What the agent is painted in: its paint; how dark its side away from the light is, 0 flat; its eyes' colour and the
+ * pupils it wears, which say where that colour goes; its brows' and its symbol's colours; and its surface's pattern,
+ * its size and its colour.
  */
 export type AgentLook = Pick<
   SphereMotion,
-  | "paint" | "shade" | "pupils" | "browColour" | "symbolColour"
+  | "paint" | "shade" | "eyeColour" | "pupils" | "browColour" | "symbolColour"
   | "texture" | "textureSize" | "textureWobble" | "textureColour" | "textureOpacity" | "depth"
 >
 
@@ -193,9 +196,10 @@ function Agent({ ref, frame, look, drawings, ...props }: AgentProps) {
       else layer.removeAttribute("transform")
       layer.style.display = f.faceHidden ? "none" : ""
     }
-    // Its eyes (version 11): circles cut to what their lids leave open — ink, or with a pupil or a catchlight in them
-    // (version 13) — and over each a heavy upper lid's band, where it wears one.
-    const eye = m.pupils === "dot" ? colour.light : m.pupils === "shine" ? colour.deep : colour.ink
+    // Its eyes (version 11): circles cut to what their lids leave open — in their colour, or with a pupil in it or a
+    // catchlight on it (version 13; the colour 2026-10-01) — and over each a heavy upper lid's band, where it wears one.
+    const iris = eyeColours(m)[m.eyeColour]
+    const eye = m.pupils === "dot" ? colour.light : iris
     f.eyes.forEach((e, i) => {
       eyes.current[i]?.setAttribute("transform", `translate(${e.x.toFixed(2)} ${e.y.toFixed(2)})`)
       const ball = balls.current[i]
@@ -204,7 +208,7 @@ function Agent({ ref, frame, look, drawings, ...props }: AgentProps) {
         ball.style.fill = eye
       }
       lids.current[i]?.setAttribute("d", e.lids)
-      disc(pupils.current[i], e.pupil, colour.deep)
+      disc(pupils.current[i], e.pupil, iris)
       disc(shines.current[i], e.shine, colour.light)
       hoods.current[i]?.setAttribute("r", (e.lid?.hood ?? 0).toFixed(2))
       const band = bands.current[i]

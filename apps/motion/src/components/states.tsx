@@ -460,6 +460,7 @@ export function RowCard({ family, budget }: { family: Family; budget: number }) 
                 key={key}
                 token={own ? { ...token, label: `${token.label} · right` } : token}
                 value={set ? row.values[key]! : under ?? 0}
+                swatches={token.swatches?.({ ...rest, ...row.values })}
                 unset={!set}
                 disabled={row.locked || (side === "right" && !sided.has(token.name))}
                 onChange={(value) => update((m) => setRowValue(m, row.id, key, value))}

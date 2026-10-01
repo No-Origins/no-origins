@@ -5,6 +5,7 @@ import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react
 import { Button } from "@no-origins/ui/components/button";
 import { Card, CardContent, CardHeader } from "@no-origins/ui/components/card";
 import { Checkbox } from "@no-origins/ui/components/checkbox";
+import { ColourPicker } from "@no-origins/ui/components/colour-picker";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@no-origins/ui/components/dropdown-menu";
@@ -202,11 +203,16 @@ function JigPanel() {
           <Slider min={0} max={40} step={1} value={[s.tabFill]} onValueChange={([v]) => set({ tabFill: v ?? 0 })} />
         </Control>
         <Control label="Name on light" touches="Lime is about 1.3 : 1 on white">
-          <ToggleGroup type="single" variant="outline" size="sm" value={s.tabNameLight} onValueChange={(v) => v && set({ tabNameLight: v as NameOnLight })}>
-            <ToggleGroupItem value="lime">Lime</ToggleGroupItem>
-            <ToggleGroupItem value="dark">Dark</ToggleGroupItem>
-            <ToggleGroupItem value="deep">Deeper lime</ToggleGroupItem>
-          </ToggleGroup>
+          <ColourPicker
+            aria-label="Name on light"
+            value={s.tabNameLight}
+            onValueChange={(v) => set({ tabNameLight: v as NameOnLight })}
+            options={[
+              { value: "lime", label: "Lime", colour: "var(--lime)" },
+              { value: "dark", label: "Dark", colour: "var(--foreground)" },
+              { value: "deep", label: "Deeper lime", colour: `oklch(${s.deepL} 0.196 119.552)` },
+            ]}
+          />
           {s.tabNameLight === "deep" ? (
             <Slider min={0.4} max={0.85} step={0.01} value={[s.deepL]} onValueChange={([v]) => set({ deepL: v ?? DEFAULTS.deepL })} />
           ) : null}
@@ -261,6 +267,13 @@ function Control({ label, touches, children }: { label: string; touches: string;
   );
 }
 
+/** The hues as swatches, every pick of a colour being the colour picker (Character-Studio.md C17): Neutral, shadcn's grey. */
+const HUE_SWATCHES = [
+  { value: "neutral", label: "Neutral", colour: "oklch(0.556 0 0)" },
+  { value: "lime", label: "Lime", colour: "var(--lime)" },
+  { value: "violet", label: "Violet", colour: "var(--violet)" },
+];
+
 function HueControl({
   label, touches, value, onChange, strength, onStrength,
 }: {
@@ -273,11 +286,7 @@ function HueControl({
 }) {
   return (
     <Control label={strength !== undefined && value !== "neutral" ? `${label}, ${strength}%` : label} touches={touches}>
-      <ToggleGroup type="single" variant="outline" size="sm" value={value} onValueChange={(v) => v && onChange(v as Hue)}>
-        <ToggleGroupItem value="neutral">Neutral</ToggleGroupItem>
-        <ToggleGroupItem value="lime">Lime</ToggleGroupItem>
-        <ToggleGroupItem value="violet">Violet</ToggleGroupItem>
-      </ToggleGroup>
+      <ColourPicker aria-label={label} value={value} onValueChange={(v) => onChange(v as Hue)} options={HUE_SWATCHES} />
       {strength !== undefined && onStrength && value !== "neutral" ? (
         <Slider min={4} max={60} step={1} value={[strength]} onValueChange={([v]) => onStrength(v ?? strength)} />
       ) : null}

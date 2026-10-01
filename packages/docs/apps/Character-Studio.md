@@ -123,7 +123,8 @@ publish should be treated as a version"*, on Motion.md M20's "Versions and publi
   Shade (C4) are its first two settings, and they move from the page into the character's draft.
 - **The draft saves as he goes, in the database**, one per character, so the studio opens where he left off on any
   device. A write from a second device at once is refused, not merged, and the studio says so (Admin.md §6.4's `rev`).
-- **Publishing makes a version**: a number and a name he types (Admin.md R1). Any change after it is a new publish,
+- **Publishing makes a version**: a number and a name he types (Admin.md R1) — **since C19 (2026-10-01) a `major.minor`
+  and no name**, the latest's next minor at a press, a new major when he makes one. Any change after it is a new publish,
   never an edit: a version never changes and is never deleted, and going back to one makes it the current version
   without renumbering. Each records the package version it was drawn with (Admin.md §7).
 - **The agent's numbering carries on**: version 12, his settings, is its first stored version. **Version 13, "Version
@@ -275,7 +276,8 @@ setting declared since.
 - **Colour**: the paint, as swatches, one a colour: lime and violet, and five of the agent's own — pink, peach,
   yellow, blue and grey, his sketch's pastels (Brand.md), lime and violet being its green and lavender. They are the
   agent's (`--agent-*` in globals.css, each with the dark ink its eyes are drawn in), not the system's palette, which
-  stays lime and violet: that is his to widen.
+  stays lime and violet: that is his to widen. **Since C20 (2026-10-01) peach, yellow and grey are gone**, for red,
+  orange, gold, green and teal: seven of the agent's own.
 - **Texture**: its pattern — None, Dots, Stripes, Checks, Grid, Speckle (`lib/agent-texture.ts`) — and once it wears
   one, its Size (a tile across, of the head) and its Colour (one of the agent's by name, Light to begin). Flat: a tile
   of flat shapes repeated over each face in that face's tone, so its dark side's pattern is darker, fixed to the head
@@ -307,7 +309,8 @@ was swatches and the texture's and brows' colours were selects of names; a line'
   character's, not a part of its look. The circle opens the versions in a dialog, a row each, newest first, the one
   pages show marked Showing and any other one to go back to, asked twice (C6). The pill is the draft's state, then the
   name and Publish. A bar only four cells across drops the state's words, and Publish its word for its mark, to leave
-  the name its room.
+  the name its room. **Since C19 the name is gone**: the pill is the agent, the state and Publish with the version it
+  makes, and the dialog opens with the next major.
 - **The circle keeps its six cells before the body keeps its place under it.** Where the body's card and the bar do
   not both fit under the circle (a field of fewer than twelve rows), the body goes first in the right room, so the body is
   still one place. Until C11 a field too short for the body under a six-cell circle gave the circle four.
@@ -326,9 +329,8 @@ was swatches and the texture's and brows' colours were selects of names; a line'
   at the end of its list: a face slot's, under **Your own**, his uploads by name, then **Download the template** and
   **Upload a drawing…** (C8), which waits for the database. They were two icon buttons at the line's end.
 - **A paint** is swatches across the same two columns, one a colour, each at most the small size.
-- **A colour by name** — paint, shade, deep, ink, light, lime, violet — is a select, each name with a dot of the colour
-  it is on the agent now. The name says what it follows when the paint changes, and a swatch alone would not: on a
-  violet body, "paint" and "violet" are one colour and "ink" and "light" another.
+- **A colour by name** — paint, shade, deep, ink, light, lime, violet — was a select, each name with a dot of the
+  colour it is on the agent now, until C17 made it swatches like the paint.
 - **A switch** stands at the control column's start.
 - The value's column holds a number or nothing. Every box in a line is the system's small size, 36 px.
 
@@ -386,7 +388,7 @@ read as a solid.
 - **Soft edges, in the solid** (version 3, his, the same night: *"let's not have sharp edges for the characters"*).
   Each core is grown by a ball a ninth of a head's radius wide (`RHO`, the Minkowski sum), so every edge is a
   quarter-round and every corner a piece of a sphere. A flat-sided solid is drawn as facets — its faces moved out, a
-  band of five facets along each edge, a fan at each corner (`roundedMesh`) — each one flat colour from which way it
+  band of five facets along each edge, a fan at each corner (`roundedMesh`, until version 4, C18) — each one flat colour from which way it
   faces, so an edge is a few steps of tone, never a gradient; facets of one tone are one path, and its silhouette is
   the edges its shown facets do not share, so it follows every facet exactly and rounds with them as it turns. Rounding
   the outline on the page (version 2's first try) popped as a turn crossed a threshold; rounding the solid cannot. The
@@ -421,7 +423,8 @@ compared the same; the motion studio's specs pass. Version 2 of the shapes, vers
 - **Uploads are a character's own** (C8): each has a library of its own (`character_id`), so a brow drawn for the
   Maker is not offered to the Muse.
 - **What a version is stays as it was**: publishing names the character's next number — 2 for the five, 16 for
-  Bali — and going back is per character.
+  Bali — and going back is per character. **Since C19** a publish is the next minor (1.1 for the five, 15.1 for
+  Bali), and a new agent is made from the end of the select's list, by its name.
 
 Version 1, awaiting his look at the six.
 
@@ -508,6 +511,178 @@ a flat picture, and he saw it):
   (`sharp`) where every other line is drawn smooth.
 
 Version 5 of the textures, awaiting his look.
+
+## C16. The eyes have a colour
+
+> "In character, I should also be able to set the color of the eyes." (his, 2026-10-01)
+
+- **Colour, on the Eyes card**, under Height: one of the agent's colours by name, a select with a dot of each, as the
+  brows' is (C11). It is the face's `eye-colour`, declared with the eyes (`lib/agent-face`), so the motion studio's
+  Eyes group has it too, and a motion can switch it at a row's start.
+- **Where it goes is the pupils' call**: a solid eye is drawn in it; a Dot is a pupil in it on a light eye; a Shine is
+  a light catchlight on an eye in it. The light of the eye and the catchlight stay light.
+- **Ink, the default, is the colour they have always been**: the paint's ink on a solid eye, and `deep` with a pupil
+  or a catchlight (`eyeColours` in `lib/agent-colours`), so every character and version saved before it draws as it
+  did, and a pupil in ink never vanishes into the light eye it sits on (on violet, the ink is white). The select's dots
+  are the eyes' colours, so under a pupil Ink shows as Deep.
+
+Version 1, awaiting his look.
+
+## C17. Every colour is picked the paint's way
+
+> "In the consistency with the color picker is not there. We have to keep it consistent, so make it part of the design
+> system. That color pickers should always be like the paint we have in character studio." (his, 2026-10-01)
+
+- **The colour picker is the design system's** (`@no-origins/ui/components/colour-picker`, `ColourPicker`): the
+  Paint line's swatches, moved into the package whole. Swatches composed from `ToggleGroup`, one a colour, the one
+  picked pressed with the foreground's edge, each a circle with a dot of its colour, standing together from its start
+  at the small size and sharing out a column too narrow for them rather than wrapping. One is always picked. Written for
+  the system, since no registry has one; on the showcase's molecules page.
+- **Every pick of a colour is one.** Here: the paint, and every colour by name — the eyes' (C16), the brows', the
+  texture's — whose swatches are what each name is on the agent now (the eyes' through `eyeColours`). In the motion
+  studio: the agent's paint and its colours, on the bench and on a state's rows, where a token carries its swatches
+  (`Token.swatches`, from the values: the paint makes the ink). On the portfolio's accent jig: the four accents
+  (Neutral, Lime, Violet) and the work tab's name on light. A select of names and a row of worded toggles for a colour
+  are gone.
+- **Each swatch is named in its title** and as its accessible name. Two can look alike — on a violet body Paint and
+  Violet are one colour, and Ink and Light another — and the name is what tells them apart: the reason C11 made a
+  colour by name a select, which he has overruled for consistency.
+
+Version 1, awaiting his look.
+
+## C18. The shapes' edges are smooth
+
+> "The edges of all shapes in … agent character are not smooth I can see the lines and … some weird edges and …
+> corners. We want these shapes to be smooth." (his, 2026-10-01)
+
+> "Now when I select cube shape, the edges are just a few subdivisions it's not even smooth." (his, the same day, of
+> version 4)
+
+**Version 5 of the shapes** (`lib/agent-shape.ts`). What he saw first was version 3's facets: five stripes of tone along
+every rounded edge, a star of triangles at every corner where the fans met, an outline of straight pieces round each
+corner, and on the round solids an outline that was the hull of a few rings of points, so the hemisphere's dome was a
+handful of straight sides with corners between them. **Version 4** painted one tone a face and one an edge, each point
+the nearest of those ways' tone: clean, but an edge read as a chamfer, three flat bands, not a round. Version 5 tones
+the round itself.
+
+- **Toned where it faces.** A face is its own tone, as it always was. Every point of an edge's quarter-round and of a
+  corner's ball wears the tone of the way it faces there (`facing`), drawn in steps of a twenty-fourth (`TONE_STEPS`):
+  an edge rounds from one face's tone to the next in steps of about a pixel, too fine to see, and a corner with them.
+  Flat colour still, each step one flat path, and what is one step is one path, so nothing shows between them. It
+  reads as a smooth round, which is what he asked for, and it is as near a gradient as flat colour comes: on the
+  rounds only, never a sweep across a face.
+- **Exact boundaries.** An edge is cut into runs of one step along its round, each run ending where the tone crosses
+  into the next, found by halving (`runsOf`). A corner's ball is cut to its horizon, then into the four quarters where
+  `facing` is a straight sum, then between the circles where its tone crosses a step (`cornerOf`), so every boundary
+  is an arc on the ball; a step's circle that lies wholly inside a quarter is a hole in the region round it. Where an
+  edge's straight runs meet a corner's curved ones, the steps turn a little sharply, as the shading of a rounded box
+  does where its cylinder meets its ball; at the studio's size it shows only as a soft patch.
+- **The outline is the solid's, finely** (since version 4). It is the hull of the horizon of each corner's ball, as
+  the camera sees it, and of the rims' quarter-rounds, a few degrees apart; the hemisphere's dome is the horizon of the
+  ball it is part of. It is found as the shape stands, then bent with everything else, so where the bowl bends a side
+  in, the outline follows it. The round solids used to take the hull after the bend, which bridged it. At the studio's
+  size the cone's lower sides now curve in as the pyramid's always have. The round solids keep the sphere's two tones.
+- **Measured.** Every shape turned through 80° on each axis in half-degree steps: its outline moves at most 0.9 px a
+  step, where version 3 moved up to 1.5 px. The pyramid's apex was a 66° point and is now an 11° curve. Nothing passes
+  the ring. A flat-sided shape is at most 34 paths of the `Agent`'s 40 over every rotation, and every texture still
+  draws on every shape. A cube frame takes about 1.5 ms where version 3 took 0.7, its paths about 49 K characters where
+  they were 21 K, and the browser paints it every frame without dropping one.
+
+Version 5 of the shapes, awaiting his look.
+
+## C19. An agent is named once; its versions are major and minor
+
+> "I don't want to give a name for each version … I should be able to create new agent so that means I should be able
+> to name it and then once I have the name next time I can just keep publishing it with different versions. We should
+> have major versions and minor versions. And minor versions should auto increment. Major versions is when I change
+> it. So let's say if I am in version 2.1, and then if I publish directly then it should auto increment the minor
+> version and publish it." (his, 2026-10-01)
+
+What was wrong: the bar's pill held the agent's select, the draft's state, a field for the version's name and Publish,
+and Publish waited for a name. Once C13 put the select at its start, the field was left about 40 px wide, its
+placeholder ("Name v16") showing as an "N", and nothing said that a name was what Publish was waiting for.
+
+- **A version is `major.minor`, and has no name.** Publish in the bar makes the latest version's next minor at a
+  press: 15.0 → 15.1 → 15.2. **A new major** is his to make: the versions' dialog opens with the next one, 16.0, and
+  its Publish. From then on the bar's Publish makes 16.1. A character's first version is 1.0. The next is always counted
+  from the latest version, not from the one pages show: going back to 14.0 from 15.2 makes the next minor 15.3, and
+  nothing is renumbered (C6).
+- **What was stored keeps its number, at .0**: Bali's 12 to 15 are 12.0 to 15.0, the five's 1 is 1.0, so the next
+  publish is 15.1 and 1.1. Their names stay and show beside them in the versions; a version published since has none.
+- **A new agent is made by its name** (`New agent…`, at the end of the bar's agent select, under a line, as a choice's
+  extra is at the end of its list, C11). It asks for the name and nothing else, and opens with the draft at the look
+  the code declares (`resolveCharacter`, the package's defaults), with no versions. A name another agent has, in any
+  case, is refused. Renaming one is not here yet.
+- **The bar's pill** is the agent's select, the draft's state and **Publish 15.1**. A bar four cells across (a short
+  laptop) drops the state's words and shows Publish as its mark and the number. The agent's select now gives way first,
+  cutting a long name, and opens its list above the bar, whole: laid over its trigger on the field's last row, it
+  scrolled and hid the new agent at its end.
+- **The database** (`supabase/migrations/…_studio_minor_versions.sql`): `studio_versions.number` is the major and a
+  new `minor` (from 0) counts the publishes within it. It is unique per item with the number, and the trigger refuses
+  anything but the latest's next minor or the next major's .0. The name is optional, and a name given is still never
+  empty and never repeated in its item. `studio_publish` takes a step, `minor` or `major`. Its default is `major`, what
+  every publish was, so **the motion studio's call is unchanged**: it still names each motion version and numbers
+  them whole. `studio_new_character` makes a character and its draft in one go. Stored versions were not written: the
+  column's default filled them, which fires no trigger.
+
+**Built the same day.** Checked against the local database through the studio, signed in: a new agent made by its
+name and opened at Publish 1.0, published to 1.0 and 1.1, a major from the versions to 2.0 (2.0 Showing, the bar at
+2.1), the same name in capitals refused, and Bali opened again at 15.1. The probe is `e2e/.mcp/character-versions.mjs`,
+and the agent it made was deleted with its versions. **Pushed to the hosted database the same day**, before the code that
+calls it was deployed. The studio deployed before it still published against it, with a name and no step, as the
+motion studio does.
+
+Version 1, awaiting his look.
+
+## C20. The paints stand out from the page
+
+> "Remove peach yellow and gray colors for characters and replace them with better colors, high contrast. I mean check
+> for the contrast and then what if there are possible colors then add them." (his, 2026-10-01)
+
+**Measured** with WCAG 2's contrast ratio, from the tokens as they are. An agent sits on the page and in its nest (the
+muted tint, lime 14% over the page), so a paint is measured against all four: the light page, the light nest, the dark
+page, the dark nest. Its eyes are measured against its paint, in its ink. 3 : 1 is WCAG's minimum for a shape against
+what is next to it (1.4.11). The five pastels were drawn for the dark theme: each is 6.4 to 15 : 1 there, and on the
+light page
+
+| Paint | Light page | Light nest | Dark page | Dark nest | Eyes |
+|---|---|---|---|---|---|
+| peach | 1.75 | 1.69 | 11.3 | 9.1 | 11.3 |
+| yellow | 1.30 | 1.25 | 15.2 | 12.3 | 15.2 |
+| grey | 2.49 | 2.40 | 8.0 | 6.4 | 8.0 |
+
+**Why mid-tones.** No one colour is far from both white and the dark page. Against all four backgrounds at 3.3 : 1 or
+more, a paint's luminance must lie between about 0.17 and 0.26. With dark eyes at 5 : 1 or more, between 0.22 and
+0.26. Violet sits there already (0.21). So the new paints are mid-tones of strong hues, with the same dark eyes the
+pastels had. **No yellow passes**: at that luminance yellow is mustard, and gold, at hue 75, is the nearest one comes.
+
+**Version 2 of the paints** (`AGENT_PAINTS`, `lib/agent-colours.ts`; `--agent-*` in globals.css), nine round the
+wheel: lime, violet, pink, then
+
+| Paint | oklch | Worst of the four | Eyes |
+|---|---|---|---|
+| Red | 0.642 0.207 27 | 3.55 | 5.38 |
+| Orange | 0.649 0.167 50 | 3.32 | 5.74 |
+| Gold | 0.64 0.131 75 | 3.31 | 5.76 |
+| Green | 0.603 0.133 150 | 3.55 | 5.38 |
+| Teal | 0.606 0.094 190 | 3.55 | 5.38 |
+
+then blue. Each is held below the gamut's edge, where these hues turn neon. Orange and gold are a little lighter than
+the rest (3.3 rather than 3.55 : 1) so they read warm rather than brown.
+
+- **A paint that went is read as the one it became** (`RENAMED_PAINTS`: peach as orange, yellow as gold, grey as teal),
+  through a choice's `renamed` in the declaration (`lib/properties.ts`) and the tokens' reader, so a look saved in one
+  keeps its place on the wheel rather than falling to the default. Drafts take the new name at their next save.
+  Versions are frozen with the old one and drawn in the new colour, as a paint always was its token's value. On the
+  local database: Mira's draft (peach) is orange; Zaza's was yellow and became green, picked in the studio; frozen
+  versions of Zaza, Lola and Mira wear yellow, peach or grey.
+- **The swatches are smaller.** Nine share the Paint line's two columns as seven did, 18 px each at 1440 × 900 where
+  seven were about 24. 24 px is WCAG 2.2's minimum target (2.5.8).
+- **Kept, and still under 3 : 1 on the light page**: lime (1.32), pink (1.98) and blue (2.28), each fine on the dark
+  page. Lime is the system's accent. Pink and blue could each be a mid-tone of its hue in the same way. Violet's eyes
+  are white, at 3.82 : 1. In dark ink they would be 4.96. None of these changed: they are his to decide.
+
+Version 2 of the paints, awaiting his look.
 
 ## Open
 

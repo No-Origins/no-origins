@@ -25,7 +25,7 @@ import { cardBlock, type Section } from "@/components/section";
 
 const setting = (id: string): Setting => bodySettings().find((s) => s.id === id)!
 
-/** The paints as swatches (C11): each paint's colour, as the agent wears it. */
+/** The paints in the colour picker (C11, C17): each paint's colour, as the agent wears it. */
 const PAINT_FILLS = Object.fromEntries(AGENT_PAINTS.map((p) => [p.value, p.fill]));
 
 /** A body setting's line, named by its section, `label` in place of the declaration's where the section needs it. */

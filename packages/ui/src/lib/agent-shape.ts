@@ -1,27 +1,40 @@
 /**
- * THE AGENT'S SHAPES (Character-Studio.md C10, C12), pure: what the head is drawn as when it is not the sphere.
- * **Version 3 (2026-09-30): rounded solids in 3D**, turned by his rotation, resting in the cell as in a tunnel.
+ * THE AGENT'S SHAPES (Character-Studio.md C10, C12, C18), pure: what the head is drawn as when it is not the sphere.
+ * **Rounded solids in 3D** (version 3, 2026-09-30), turned by his rotation, resting in the cell as in a tunnel, **with
+ * smooth edges** (version 5, 2026-10-01).
  *
- * **Each shape is a solid with soft edges** (his: *"let's not have sharp edges for the characters"*): a core — the cube,
- * the hexagonal prism and the pyramid as faces, the cylinder, the cone and the hemisphere as circles and a dome — grown
- * by a ball `RHO` wide, so every edge is a quarter-round and every corner a piece of a sphere (`roundedMesh`, the
- * Minkowski sum). A flat-sided one is drawn as facets: its faces moved out, a band of facets along each edge, a patch at
- * each corner — each facet one flat colour from which way it faces (`facing`), so an edge is a few steps of tone, not a
- * gradient, and its silhouette is the edges its shown facets do not share (`silhouette`), so it follows every facet
- * exactly. A round one keeps the sphere's two tones — its dark side, then its lit side moved toward the light — over
- * the hull of its rounded surface's points, and flat colour for its ends.
+ * **Each shape is a solid with soft edges** (his: *"let's not have sharp edges for the characters"*): a core — the
+ * cube, the hexagonal prism and the pyramid as faces, the cylinder, the cone and the hemisphere as circles and a dome —
+ * grown by a ball `RHO` wide, so every edge is a quarter-round and every corner a piece of a sphere (the Minkowski
+ * sum). A round one keeps the sphere's two tones — its dark side, then its lit side moved toward the light — and flat
+ * colour for its ends.
+ *
+ * **Its edges are smooth** (versions 4 and 5, 2026-10-01, his: *"the edges of all shapes … are not smooth I can see the
+ * lines and … weird edges and … corners. We want these shapes to be smooth"*, then, of version 4's one band an edge:
+ * *"the edges are just a few subdivisions it's not even smooth"*). **Its outline is the hull of its round parts,
+ * finely** — the horizon of each of its corners' balls and of its dome, as the camera sees it, and its rims'
+ * quarter-rounds, a few degrees apart — so it is a curve wherever the solid is round and straight where it is flat, and
+ * it moves smoothly as it turns: it is the solid's, not a rounding on the page. It is found as the solid stands and
+ * then bent with everything else (`bendOf`), so where the bowl bends a side in, the outline follows it in. **A
+ * flat-sided one is toned where it faces** (`facing`): each face in its own tone, and every point of an edge's
+ * quarter-round and a corner's ball in the tone of the way it faces there, drawn in steps of a twenty-fourth
+ * (`TONE_STEPS`) — so an edge rounds from one face's tone to the next in steps too fine to see, and a corner with them.
+ * An edge is cut into runs of one step along its round (`runsOf`); a corner's ball into regions between the circles
+ * where its tone crosses a step, every boundary an arc on the ball (`cornerOf`). Flat colour still: each step is one
+ * flat path, and what is one step is one path, so nothing shows between them. Version 3 was five facets an edge with a
+ * fan at each corner — the lines and the corners' stars he saw — and version 4 one band an edge.
  *
  * **Turned, then seen.** Rotate Y about its upright, on the spot, then X toward you or away, then Z about the way you
  * look; then a camera in front of it and above, in perspective, looking straight ahead (`VIEWS`, each shape's natural
  * view), so at rotation 0 its front is square to you and its base level.
  *
  * **It rests in the cell as in a tunnel** (his: *"imagine each cell is a tunnel and the character is resting on the
- * tunnel, so it should be a smooth curve"*). The nest is a cylinder going back into the page, so its floor under a point
- * depends only on how far across the point is: its underside is carried onto that floor — up where it would pass the
- * ring, down where it hangs clear, as slime settles — and what is over it moves with it, less the higher it stands, so
- * the bend fades up its body (`giveOf`). Every move is a smooth function of where a point is, so a turn moves every
- * point smoothly; its edges are drawn in pieces a few px long so a straight one can bend. Where its face goes is a patch
- * of its front carried through the same turn, bend and camera (`face`), hidden once the front turns away.
+ * tunnel, so it should be a smooth curve"*). The nest is a cylinder going back into the page, so its floor under a
+ * point depends only on how far across the point is: its underside is carried onto that floor — up where it would pass
+ * the ring, down where it hangs clear, as slime settles — and what is over it moves with it, less the higher it stands,
+ * so the bend fades up its body (`bendOf`). Every move is a smooth function of where a point is, so a turn moves every
+ * point smoothly; its edges are drawn in pieces a few px long so a straight one can bend. Where its face goes is a
+ * patch of its front carried through the same turn, bend and camera (`face`), hidden once the front turns away.
  */
 
 export const AGENT_SHAPES = ["sphere", "cube", "pyramid", "hemisphere", "cylinder", "hexagonal-prism", "cone"] as const
@@ -75,8 +88,15 @@ const VIEWS: Record<Exclude<AgentShape, "sphere">, View> = {
 
 /** How round its edges are: the ball a solid is grown by, of a head's radius. */
 const RHO = 0.11
-/** How many facets a quarter-round edge is drawn in. */
-const STEPS = 5
+/** How many steps a round rim's quarter-round is drawn in for the outline: under a fifth of a px off. */
+const RIM = 6
+/** How many points a ball's horizon is drawn with at least: a corner's, about 11° apart. */
+const HORIZON = 32
+/**
+ * How wide a step round a curve of ways is at most — an edge's quarter-round, a corner's lines — radians: 8°, under a
+ * tenth of a px off the curve on a corner's ball at the studio's size.
+ */
+const ARC = Math.PI / 22.5
 /** How far a round shape's lit side is moved toward the light, of its half width: the sphere's. */
 const LIFT = 0.32
 /** The light, toward it on the page: up and to the left, the sphere's. */
@@ -90,10 +110,13 @@ const UP = 0.35
 const LEFT = 0.15
 const RIGHT = -1
 const DOWN = -0.7
-/** A facet's tone is drawn to this many steps, so facets of one tone are one path. */
+/**
+ * A tone is drawn to this many steps a unit, so what is one tone is one path; fine enough that no step of a rounded
+ * edge shows, and few enough that a shape is never more paths than the `Agent` paints (37 at most, of its 40).
+ */
 const TONE_STEPS = 24
 /** How many points a circle is drawn with. */
-const ROUNDS = 64
+const ROUNDS = 96
 /** How far its front must face you, of straight on, to wear its face. */
 const SHOWN = 0.12
 /** How long a piece of an edge is at most when it may bend, of a head's radius: a few px, finer than the bend's curve. */
@@ -109,8 +132,16 @@ const LETGO = 0.3
 /** How far at most a part standing clear of the floor sags onto it, of its height: slime settles, it does not melt. */
 const SAG = 0.1
 
-const f2 = (n: number) => (Math.round(n * 100) / 100).toString()
-const poly = (pts: P[]) => `M ${pts.map((p) => `${f2(p.x)} ${f2(p.y)}`).join(" L ")} Z`
+/** A number to a tenth, written by hand: a path is thousands of them a frame, and this is twice as quick as `toString`. */
+const f1 = (n: number) => {
+  const t = Math.round(n * 10)
+  const a = t < 0 ? -t : t
+  const r = a % 10
+  return (t < 0 ? "-" : "") + (a - r) / 10 + (r ? "." + r : "")
+}
+/** A polygon's area, signed by which way it goes round. */
+const areaOf = (pts: P[]) => pts.reduce((s, p, i) => s + p.x * pts[(i + 1) % pts.length]!.y - pts[(i + 1) % pts.length]!.x * p.y, 0) / 2
+const poly = (pts: P[]) => `M ${pts.map((p) => `${f1(p.x)} ${f1(p.y)}`).join(" L ")} Z`
 const v = (x: number, y: number, z: number): V => ({ x, y, z })
 const add = (a: V, b: V, k = 1): V => v(a.x + b.x * k, a.y + b.y * k, a.z + b.z * k)
 const sub = (a: V, b: V): V => v(a.x - b.x, a.y - b.y, a.z - b.z)
@@ -167,19 +198,33 @@ function hull(pts: P[]): P[] {
 
 // ── the solids ──────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** A facet of a rounded solid: its corners as point ids, and which way it faces. */
-type Facet = { ids: number[]; normal: V }
+/**
+ * A flat-sided solid, made once: its faces moved out, each its corners and its normal; its edges' quarter-rounds, each
+ * between two of its core's corners, from one face's normal round to the other's; and its corners' balls, each its
+ * core's corner and the rim of its piece, the ways round it in order.
+ */
+type Flat = {
+  faces: { corners: V[]; normal: V }[]
+  edges: { a: V; b: V; from: V; to: V }[]
+  corners: { at: V; rim: V[] }[]
+}
+
+/** A ball of a solid's surface, whose horizon its outline is drawn round: only its part toward `on.way`, past `on.least`. */
+type Ball = { at: V; r: number; on?: { way: V; least: number } }
 
 /**
- * A solid, about its middle, a head's radius a unit, its edges rounded: every point of its surface it is drawn with
- * (`points`, by id); its facets, where it is flat-sided; its flat ends, where it is round, each a polygon of point ids
- * and its normal; whether it is round; and the patch of its front the face is laid on — a point, its across and its
- * down — with how far out the face's measures reach.
+ * A solid, about its middle, a head's radius a unit, its edges rounded: what its outline is the hull of, and it stands
+ * on — points of its surface (`cloud`), and balls whose horizon is drawn as the camera sees them (`balls`), each its
+ * centre, its radius, and where only part of it is the surface, the way that part is toward and how far; where it is
+ * flat-sided, its faces, edges and corners (`flat`); where it is round, its flat ends, each a ring of points and its
+ * normal; whether it is round; and the patch of its front the face is laid on — a point, its across and its down — with
+ * how far out the face's measures reach.
  */
 type Solid = {
-  points: V[]
-  facets: Facet[]
-  caps: Facet[]
+  cloud: V[]
+  balls: Ball[]
+  flat: Flat | null
+  caps: { ring: V[]; normal: V }[]
   round: boolean
   /** Its surface as patches a texture is drawn on (`agent-texture`), each with its outward way for the tone and the cull. */
   patches: Patch[]
@@ -233,29 +278,91 @@ function discPatch(r: number, y: number, s: 1 | -1): Patch {
 /** A flat-sided core: its corners, and its faces as corner indices, each going round the same way seen from outside. */
 type Core = { verts: V[]; faces: number[][] }
 
-/** The points of a solid as they are made, each once: the same corner in the same direction is the same point. */
-class Points {
-  list: V[] = []
-  private ids = new Map<string, number>()
-  at(p: V): number {
-    const key = `${p.x.toFixed(6)} ${p.y.toFixed(6)} ${p.z.toFixed(6)}`
-    let id = this.ids.get(key)
-    if (id === undefined) {
-      id = this.list.length
-      this.ids.set(key, id)
-      this.list.push(p)
-    }
-    return id
+/**
+ * A line on the ball of ways: the circle of ways `w` with `toward · w = at`, `toward` a unit way — a great circle at 0,
+ * a smaller one toward it as `at` grows — what of a way's is on its side (`keep`, 0 on it), and how a way is put on it.
+ */
+type Line = { toward: V; at: number; keep: (w: V) => number; on: (w: V) => boolean; onto: (w: V) => V }
+
+function lineOf(toward: V, at: number): Line {
+  const e = Math.max(-1 + 1e-9, Math.min(1 - 1e-9, at))
+  const s = Math.sqrt(1 - e * e)
+  return {
+    toward,
+    at: e,
+    keep: (w) => dot(w, toward) - e,
+    on: (w) => Math.abs(dot(w, toward) - e) < 1e-7,
+    onto: (w) => add(v(toward.x * e, toward.y * e, toward.z * e), unit(add(w, toward, -dot(w, toward))), s),
   }
 }
 
+/** A line's whole circle, in `n` ways. */
+function ringOf(line: Line, n: number): V[] {
+  const d = line.toward
+  const s = Math.sqrt(1 - line.at * line.at)
+  const u = unit(cross(d, Math.abs(d.y) < 0.9 ? v(0, 1, 0) : v(1, 0, 0)))
+  const w = cross(d, u)
+  return roundabout(n).map((a) => add(add(v(d.x * line.at, d.y * line.at, d.z * line.at), u, s * Math.cos(a)), w, s * Math.sin(a)))
+}
+
 /**
- * `core` grown by a ball `rho` wide, as facets: each face moved out along its normal; along each edge, a band of
- * facets a quarter-turn (`STEPS` of them) from one face's normal round to the other's; at each corner, a fan of facets
- * over the piece of sphere between its faces' normals. Every point is `corner + rho · direction`, made once
- * (`Points`), so facets share their corners exactly and the silhouette can be walked along their edges.
+ * What of a polygon of ways (unit vectors, its edges arcs) `keep` does not put below 0, `keep` linear: each edge that
+ * crosses it is cut where it does, and the way there put back on the line it is cut along by `onto`.
  */
-function roundedMesh(core: Core, rho: number, points: Points): Facet[] {
+function cutWays(ways: V[], keep: (w: V) => number, onto: (w: V) => V): V[] {
+  const out: V[] = []
+  ways.forEach((a, i) => {
+    const b = ways[(i + 1) % ways.length]!
+    const [ka, kb] = [keep(a), keep(b)]
+    if (ka >= 0) out.push(a)
+    if (ka >= 0 !== kb >= 0) out.push(onto(add(a, sub(b, a), ka / (ka - kb))))
+  })
+  return out
+}
+
+/**
+ * A polygon of ways with no edge wider than `most`: what is put in on an edge is on its great circle, or, where both
+ * its ends are on one of `lines`, on that line.
+ */
+function finer(ways: V[], most: number, lines: Line[] = []): V[] {
+  const out: V[] = []
+  ways.forEach((a, i) => {
+    const b = ways[(i + 1) % ways.length]!
+    out.push(a)
+    const n = Math.ceil(Math.acos(Math.max(-1, Math.min(1, dot(a, b)))) / most)
+    const put = lines.find((l) => l.on(a) && l.on(b))?.onto ?? unit
+    for (let k = 1; k < n; k++) out.push(put(add(a, sub(b, a), k / n)))
+  })
+  return out
+}
+
+/** Whether a way is inside a polygon of ways that is convex on the ball; never inside one with no width. */
+function insideWays(ways: V[], w: V): boolean {
+  const c = unit(mean(ways))
+  if (dot(w, c) <= 0) return false
+  let sides = 0
+  for (let i = 0; i < ways.length; i++) {
+    const n = cross(ways[i]!, ways[(i + 1) % ways.length]!)
+    const side = dot(n, c)
+    if (Math.abs(side) < 1e-12) continue
+    sides++
+    if (dot(n, w) * Math.sign(side) < -1e-12) return false
+  }
+  return sides >= 3
+}
+
+/** The ways from one to another along the great circle between them, no step wider than `ARC`. */
+function arcOf(from: V, to: V): V[] {
+  const n = Math.max(1, Math.ceil(Math.acos(Math.max(-1, Math.min(1, dot(from, to)))) / ARC))
+  return Array.from({ length: n + 1 }, (_, k) => slerp(from, to, k / n))
+}
+
+/**
+ * `core` grown by a ball `rho` wide: its faces moved out along their normals; each edge a quarter-round between its
+ * faces' normals; each corner the piece of its ball between its faces' normals, its rim the edges' arcs round it. Its
+ * outline is its corners' balls'.
+ */
+function roundedFlat(core: Core, rho: number): Pick<Solid, "cloud" | "balls" | "flat"> {
   const centre = mean(core.verts)
   const normals = core.faces.map((f) => {
     const [a, b, c] = [core.verts[f[0]!]!, core.verts[f[1]!]!, core.verts[f[2]!]!]
@@ -263,10 +370,8 @@ function roundedMesh(core: Core, rho: number, points: Points): Facet[] {
     if (dot(n, sub(mean(f.map((i) => core.verts[i]!)), centre)) < 0) n = v(-n.x, -n.y, -n.z)
     return n
   })
-  const at = (vi: number, n: V) => points.at(add(core.verts[vi]!, n, rho))
-  const facets: Facet[] = []
-  for (const [fi, f] of core.faces.entries()) facets.push({ ids: f.map((vi) => at(vi, normals[fi]!)), normal: normals[fi]! })
-  // Each edge, the two faces at it, and the directions from the first's normal round to the second's.
+  const faces = core.faces.map((f, fi) => ({ corners: f.map((vi) => add(core.verts[vi]!, normals[fi]!, rho)), normal: normals[fi]! }))
+  // Each edge, the two faces at it, and the ways from the first's normal round to the second's.
   type Edge = { a: number; b: number; faces: number[]; arc: V[] }
   const edges = new Map<string, Edge>()
   const keyOf = (a: number, b: number) => (a < b ? `${a}|${b}` : `${b}|${a}`)
@@ -278,19 +383,16 @@ function roundedMesh(core: Core, rho: number, points: Points): Facet[] {
       else edges.set(keyOf(a, b), { a, b, faces: [fi], arc: [] })
     })
   })
+  const rounds: Flat["edges"] = []
   for (const e of edges.values()) {
     if (e.faces.length !== 2) continue
-    const [nA, nB] = [normals[e.faces[0]!]!, normals[e.faces[1]!]!]
-    const theta = Math.acos(Math.max(-1, Math.min(1, dot(nA, nB))))
-    const steps = Math.max(1, Math.round((theta / (Math.PI / 2)) * STEPS))
-    e.arc = Array.from({ length: steps + 1 }, (_, k) => slerp(nA, nB, k / steps))
-    for (let k = 0; k < steps; k++) {
-      const [n0, n1] = [e.arc[k]!, e.arc[k + 1]!]
-      facets.push({ ids: [at(e.a, n0), at(e.b, n0), at(e.b, n1), at(e.a, n1)], normal: unit(add(n0, n1)) })
-    }
+    const [from, to] = [normals[e.faces[0]!]!, normals[e.faces[1]!]!]
+    e.arc = arcOf(from, to)
+    rounds.push({ a: core.verts[e.a]!, b: core.verts[e.b]!, from, to })
   }
-  // Each corner: its faces in order round it, the arcs between them as its patch's rim, and a fan over the patch.
-  core.verts.forEach((_, vi) => {
+  // Each corner: its faces in order round it, and the edges' arcs between them as its piece's rim.
+  const corners: Flat["corners"] = []
+  core.verts.forEach((at, vi) => {
     const first = core.faces.findIndex((f) => f.includes(vi))
     if (first < 0) return
     const rim: V[] = []
@@ -301,25 +403,20 @@ function roundedMesh(core: Core, rho: number, points: Points): Facet[] {
       const e = edges.get(keyOf(vi, f[(i + 1) % f.length]!))!
       if (e.faces.length !== 2) return
       const forward = e.faces[0] === fi
-      const arc = forward ? e.arc : [...e.arc].reverse()
-      for (const n of arc.slice(0, -1)) rim.push(n)
+      rim.push(...(forward ? e.arc : [...e.arc].reverse()).slice(0, -1))
       fi = forward ? e.faces[1]! : e.faces[0]!
       if (fi === first) break
     }
-    if (rim.length < 3) return
-    const nc = unit(rim.reduce((s, n) => add(s, n), v(0, 0, 0)))
-    const c = at(vi, nc)
-    rim.forEach((n0, m) => {
-      const n1 = rim[(m + 1) % rim.length]!
-      if (len(sub(n0, n1)) < 1e-9) return
-      facets.push({ ids: [c, at(vi, n0), at(vi, n1)], normal: unit(add(add(nc, n0), n1)) })
-    })
+    if (rim.length >= 3) corners.push({ at, rim })
   })
-  return facets
+  return { cloud: [], balls: core.verts.map((at) => ({ at, r: rho })), flat: { faces, edges: rounds, corners } }
 }
 
 /** Round a circle: `n` angles. */
 const roundabout = (n = ROUNDS) => Array.from({ length: n }, (_, i) => (2 * Math.PI * i) / n)
+
+/** A quarter-round from one way to another about `at`, `rho` out: its `RIM` + 1 points. */
+const quarter = (at: V, from: V, to: V, rho: number) => Array.from({ length: RIM + 1 }, (_, k) => add(at, slerp(from, to, k / RIM), rho))
 
 const SOLIDS = new Map<Exclude<AgentShape, "sphere">, Solid>()
 
@@ -327,8 +424,9 @@ const SOLIDS = new Map<Exclude<AgentShape, "sphere">, Solid>()
 function solidOf(shape: Exclude<AgentShape, "sphere">): Solid {
   const made = SOLIDS.get(shape)
   if (made) return made
-  const points = new Points()
   const rho = RHO
+  const up = v(0, 1, 0)
+  const down = v(0, -1, 0)
   let solid: Solid
   switch (shape) {
     case "cube": {
@@ -338,8 +436,7 @@ function solidOf(shape: Exclude<AgentShape, "sphere">): Solid {
       const verts = [v(-c, -c, c), v(c, -c, c), v(c, c, c), v(-c, c, c), v(-c, -c, -c), v(c, -c, -c), v(c, c, -c), v(-c, c, -c)]
       const faces = [[0, 1, 2, 3], [5, 4, 7, 6], [1, 5, 6, 2], [4, 0, 3, 7], [3, 2, 6, 7], [4, 5, 1, 0]]
       solid = {
-        points: points.list,
-        facets: roundedMesh({ verts, faces }, rho, points),
+        ...roundedFlat({ verts, faces }, rho),
         caps: [],
         round: false,
         patches: facePatches({ verts, faces }, rho),
@@ -358,8 +455,7 @@ function solidOf(shape: Exclude<AgentShape, "sphere">): Solid {
       const verts = [...ring.map((p) => v(p.x, -hc, p.z)), ...ring.map((p) => v(p.x, hc, p.z))]
       const faces = [...ring.map((_, i) => [i, (i + 1) % 6, 6 + ((i + 1) % 6), 6 + i]), [6, 7, 8, 9, 10, 11], [5, 4, 3, 2, 1, 0]]
       solid = {
-        points: points.list,
-        facets: roundedMesh({ verts, faces }, rho, points),
+        ...roundedFlat({ verts, faces }, rho),
         caps: [],
         round: false,
         patches: facePatches({ verts, faces }, rho),
@@ -381,8 +477,7 @@ function solidOf(shape: Exclude<AgentShape, "sphere">): Solid {
       const slope = unit(sub(v(0, -h, b), v(0, h, 0)))
       const at = add(v(0, h, 0), sub(v(0, -h, b), v(0, h, 0)), 0.7)
       solid = {
-        points: points.list,
-        facets: roundedMesh({ verts, faces }, rho, points),
+        ...roundedFlat({ verts, faces }, rho),
         caps: [],
         round: false,
         patches: facePatches({ verts, faces }, rho),
@@ -396,21 +491,23 @@ function solidOf(shape: Exclude<AgentShape, "sphere">): Solid {
       const h = 0.72
       const rc = r - rho
       const hc = h - rho
-      const capTop: number[] = []
-      const capLow: number[] = []
+      const cloud: V[] = []
+      const capTop: V[] = []
+      const capLow: V[] = []
       for (const a of roundabout()) {
         const u = v(Math.cos(a), 0, Math.sin(a))
         for (const s of [1, -1]) {
           const corner = add(v(0, s * hc, 0), u, rc)
           // Its rim rounds from its side's direction to its end's.
-          for (let k = 0; k <= STEPS; k++) points.at(add(corner, slerp(u, v(0, s, 0), k / STEPS), rho))
-          ;(s > 0 ? capTop : capLow).push(points.at(add(corner, v(0, s, 0), rho)))
+          cloud.push(...quarter(corner, u, v(0, s, 0), rho))
+          ;(s > 0 ? capTop : capLow).push(add(corner, v(0, s, 0), rho))
         }
       }
       solid = {
-        points: points.list,
-        facets: [],
-        caps: [{ ids: capTop, normal: v(0, 1, 0) }, { ids: capLow, normal: v(0, -1, 0) }],
+        cloud,
+        balls: [],
+        flat: null,
+        caps: [{ ring: capTop, normal: up }, { ring: capLow, normal: down }],
         round: true,
         // Its side as one sheet round, its ends as discs.
         patches: [
@@ -429,22 +526,24 @@ function solidOf(shape: Exclude<AgentShape, "sphere">): Solid {
       const apex = v(0, h - (rho * L) / r, 0)
       const low = -h + rho
       const rc = r - (rho * (L + r)) / (2 * h)
-      const cap: number[] = []
+      const cloud: V[] = []
+      const cap: V[] = []
       for (const a of roundabout()) {
         const u = v(Math.cos(a), 0, Math.sin(a))
         const slant = unit(add(v(0, r, 0), u, 2 * h))
-        // Its tip rounds from its side's direction to straight up; its rim from its side's to straight down.
-        for (let k = 0; k <= STEPS; k++) points.at(add(apex, slerp(slant, v(0, 1, 0), k / STEPS), rho))
+        // Its tip is a ball (below); its rim rounds from its side's direction to straight down.
         const rim = add(v(0, low, 0), u, rc)
-        for (let k = 0; k <= STEPS; k++) points.at(add(rim, slerp(slant, v(0, -1, 0), k / STEPS), rho))
-        cap.push(points.at(add(rim, v(0, -1, 0), rho)))
+        cloud.push(...quarter(rim, slant, down, rho))
+        cap.push(add(rim, down, rho))
       }
-      const up = 0.36
+      const lift = 0.36
       const slope = unit(v(0, -2 * h, r))
       solid = {
-        points: points.list,
-        facets: [],
-        caps: [{ ids: cap, normal: v(0, -1, 0) }],
+        cloud,
+        // Its tip: what of the ball shows past its side is all on the surface, the rest inside it.
+        balls: [{ at: apex, r: rho }],
+        flat: null,
+        caps: [{ ring: cap, normal: down }],
         round: true,
         // Its side as one sheet from the rim up to the tip, its base a disc.
         patches: [
@@ -465,11 +564,11 @@ function solidOf(shape: Exclude<AgentShape, "sphere">): Solid {
           discPatch(rc, -h, -1),
         ],
         front: {
-          at: v(0, -h + 2 * h * up, r * (1 - up)),
+          at: v(0, -h + 2 * h * lift, r * (1 - lift)),
           across: v(1, 0, 0),
           down: slope,
           normal: unit(cross(slope, v(1, 0, 0))),
-          reach: Math.min(r * (1 - up) * 0.8, 2 * h * 0.28),
+          reach: Math.min(r * (1 - lift) * 0.8, 2 * h * 0.28),
         },
       }
       break
@@ -481,23 +580,22 @@ function solidOf(shape: Exclude<AgentShape, "sphere">): Solid {
       // Its core is the dome cut a little over its middle; grown, its dome is the whole one again and its rim rounds over.
       const phi0 = Math.asin(rho / rc)
       const q = Math.sqrt(rc * rc - rho * rho)
-      const cap: number[] = []
+      const cloud: V[] = []
+      const cap: V[] = []
       for (const a of roundabout()) {
         const u = v(Math.cos(a), 0, Math.sin(a))
-        for (let i = 0; i <= 8; i++) {
-          const phi = phi0 + (Math.PI / 2 - phi0) * (i / 8)
-          points.at(add(v(0, low + r * Math.sin(phi), 0), u, r * Math.cos(phi)))
-        }
         const rim = add(v(0, low + rho, 0), u, q)
         const out = unit(add(v(0, Math.sin(phi0), 0), u, Math.cos(phi0)))
-        for (let k = 0; k <= STEPS; k++) points.at(add(rim, slerp(out, v(0, -1, 0), k / STEPS), rho))
-        cap.push(points.at(add(rim, v(0, -1, 0), rho)))
+        cloud.push(...quarter(rim, out, down, rho))
+        cap.push(add(rim, down, rho))
       }
       const phi = (25 * Math.PI) / 180
       solid = {
-        points: points.list,
-        facets: [],
-        caps: [{ ids: cap, normal: v(0, -1, 0) }],
+        cloud,
+        // Its dome: the ball it is part of, what of it is over its rim.
+        balls: [{ at: v(0, low, 0), r, on: { way: up, least: Math.sin(phi0) } }],
+        flat: null,
+        caps: [{ ring: cap, normal: down }],
         round: true,
         // Its dome as a sheet of longitude and latitude, its base a disc.
         patches: [
@@ -536,47 +634,140 @@ function solidOf(shape: Exclude<AgentShape, "sphere">): Solid {
 /** How a face that faces `n` (view space, turned) is toned, before it is measured from the front's. */
 const facing = (n: V) => UP * Math.max(0, n.y) + LEFT * Math.max(0, -n.x) + RIGHT * Math.max(0, n.x) + DOWN * Math.max(0, -n.y)
 
+/** The tone `facing` gives, as a straight sum of a way's parts where it faces right or left and up or down. */
+const facingIn = (right: boolean, up: boolean) => v(right ? RIGHT : -LEFT, up ? UP : -DOWN, 0)
+
+/** A tone's step, `TONE_STEPS` a unit, held to the tones a shape has: from its dark side, −1, to 0.5 toward white. */
+const stepOf = (tone: number) => Math.round(Math.max(-1, Math.min(0.5, tone)) * TONE_STEPS)
+
 /**
- * The silhouette of the facets shown: the edges no two of them share, walked into loops, the longest kept. Because
- * every facet's corners are shared exactly, the loops close, and the outline follows the facets however they bend.
+ * What the camera at `eye` sees of an edge's quarter-round between `a` and `b` (turned), from `from` round to `to`,
+ * in runs of one step of tone each (`toneOf` a way's): a run is the ways it spans, from the first strip any end of
+ * which faces the camera to the last — the outline cuts what reaches past it — and each run ends where the tone crosses
+ * into the next step, found between the arc's points by halving.
  */
-function silhouette(facets: Facet[]): number[] {
-  const count = new Map<string, { a: number; b: number; n: number }>()
-  const keyOf = (a: number, b: number) => (a < b ? `${a}|${b}` : `${b}|${a}`)
-  for (const f of facets) {
-    f.ids.forEach((a, i) => {
-      const b = f.ids[(i + 1) % f.ids.length]!
-      const e = count.get(keyOf(a, b))
-      if (e) e.n += 1
-      else count.set(keyOf(a, b), { a, b, n: 1 })
-    })
+function runsOf(a: V, b: V, from: V, to: V, eye: V, rho: number, toneOf: (n: V) => number): { step: number; ways: V[] }[] {
+  const way = (t: number) => slerp(from, to, t)
+  const shows = (t: number) => {
+    const w = way(t)
+    return dot(w, sub(eye, a)) > rho || dot(w, sub(eye, b)) > rho
   }
-  const open = [...count.values()].filter((e) => e.n === 1)
-  const next = new Map<number, number[]>()
-  for (const e of open) {
-    next.set(e.a, [...(next.get(e.a) ?? []), e.b])
-    next.set(e.b, [...(next.get(e.b) ?? []), e.a])
-  }
-  const walked = new Set<string>()
-  let best: number[] = []
-  for (const e of open) {
-    if (walked.has(keyOf(e.a, e.b))) continue
-    const start = e.a
-    const loop = [start]
-    let prev = start
-    let at = e.b
-    walked.add(keyOf(start, at))
-    while (at !== start) {
-      loop.push(at)
-      const onward = (next.get(at) ?? []).find((n) => n !== prev && !walked.has(keyOf(at, n)))
-      if (onward === undefined) break
-      walked.add(keyOf(at, onward))
-      prev = at
-      at = onward
+  // Where a test turns, between where it holds (`yes`) and where it does not (`no`): by halving.
+  const turn = (yes: number, no: number, holds: (t: number) => boolean) => {
+    for (let k = 0; k < 16; k++) {
+      const m = (yes + no) / 2
+      if (holds(m)) yes = m
+      else no = m
     }
-    if (loop.length > best.length) best = loop
+    return yes
   }
-  return best
+  const n = Math.max(2, Math.ceil(Math.acos(Math.max(-1, Math.min(1, dot(from, to)))) / ARC))
+  const ts = Array.from({ length: n + 1 }, (_, j) => j / n)
+  const first = ts.findIndex(shows)
+  if (first < 0) return []
+  const last = n - [...ts].reverse().findIndex(shows)
+  const t0 = first === 0 ? 0 : turn(ts[first]!, ts[first - 1]!, shows)
+  const t1 = last === n ? 1 : turn(ts[last]!, ts[last + 1]!, shows)
+  const tone = (t: number) => Math.max(-1, Math.min(0.5, toneOf(way(t)))) * TONE_STEPS
+  const runs: { step: number; ways: V[] }[] = []
+  let run = { step: stepOf(toneOf(way(t0))), ways: [way(t0)] }
+  let p = t0
+  for (const q of [...ts.filter((t) => t > t0 && t < t1), t1]) {
+    const target = stepOf(toneOf(way(q)))
+    while (run.step !== target) {
+      const next = run.step + Math.sign(target - run.step)
+      const edge = (run.step + next) / 2
+      const side = Math.sign(tone(p) - edge)
+      const t = turn(p, q, (t) => Math.sign(tone(t) - edge) === side)
+      run.ways.push(way(t))
+      runs.push(run)
+      run = { step: next, ways: [way(t)] }
+      p = t
+    }
+    run.ways.push(way(q))
+    p = q
+  }
+  runs.push(run)
+  return runs
+}
+
+/**
+ * What the camera at `eye` sees of a corner's ball, centred `at`, its piece's rim `rim` (turned), in regions of one step
+ * of tone each: the piece cut to its horizon, then into the four quarters where `facing` is a straight sum of a way's
+ * parts, then each quarter between the circles where its tone crosses from one step to the next — every boundary an arc
+ * on the ball, so a corner's tones follow it round smoothly. Where a step's circle lies wholly inside a quarter (the
+ * brightest or darkest way the quarter faces is in it), it is a hole in the region round it.
+ */
+function cornerOf(rim: V[], at: V, eye: V, rho: number, frontTone: number): { step: number; ways: V[]; holes: V[][] }[] {
+  const out = sub(eye, at)
+  const horizon = lineOf(unit(out), rho / len(out))
+  const cutAway = cutWays(rim, horizon.keep, horizon.onto)
+  if (cutAway.length < 3) return []
+  const seen = finer(cutAway, ARC, [horizon])
+  const regions: { step: number; ways: V[]; holes: V[][] }[] = []
+  for (const right of [true, false]) {
+    for (const up of [true, false]) {
+      let piece = cutWays(seen, (w) => (right ? w.x : -w.x), unit)
+      if (piece.length >= 3) piece = cutWays(piece, (w) => (up ? w.y : -w.y), unit)
+      if (piece.length < 3) continue
+      piece = finer(piece, ARC, [horizon])
+      const L = facingIn(right, up)
+      const size = len(L)
+      const axis = unit(L)
+      const back = v(-axis.x, -axis.y, -axis.z)
+      const values = piece.map((w) => dot(L, w))
+      const brightest = insideWays(piece, axis)
+      const darkest = insideWays(piece, back)
+      const low = stepOf((darkest ? -size : Math.min(...values)) - frontTone)
+      const high = stepOf((brightest ? size : Math.max(...values)) - frontTone)
+      for (let k = low; k <= high; k++) {
+        let ways = piece
+        const holes: V[][] = []
+        const lines = [horizon]
+        // At least this step: brighter than halfway down to the one under it.
+        if (k > low) {
+          const line = lineOf(axis, (frontTone + (k - 0.5) / TONE_STEPS) / size)
+          if (ways.every((w) => line.keep(w) >= 0)) {
+            const ring = darkest ? ringOf(line, Math.max(24, Math.ceil((2 * Math.PI) / ARC))) : []
+            if (ring.length && ring.every((w) => insideWays(ways, w))) holes.push(ring)
+          } else ways = cutWays(ways, line.keep, line.onto)
+          lines.push(line)
+        }
+        // At most this step: darker than halfway up to the one over it.
+        if (k < high && ways.length >= 3) {
+          const line = lineOf(back, -(frontTone + (k + 0.5) / TONE_STEPS) / size)
+          if (ways.every((w) => line.keep(w) >= 0)) {
+            const ring = brightest ? ringOf(line, Math.max(24, Math.ceil((2 * Math.PI) / ARC))) : []
+            if (ring.length && ring.every((w) => insideWays(ways, w))) holes.push(ring)
+          } else ways = cutWays(ways, line.keep, line.onto)
+          lines.push(line)
+        }
+        if (ways.length >= 3) regions.push({ step: k, ways: finer(ways, ARC, lines), holes })
+      }
+    }
+  }
+  return regions
+}
+
+/**
+ * The points of a ball's horizon as the camera at `eye` sees it, turned: the circle on it where its surface turns away,
+ * as many as its size wants; where only part of the ball is the surface, those on that part.
+ */
+function horizonOf(ball: Ball, turned: (p: V) => V, eye: V): V[] {
+  const at = turned(ball.at)
+  const out = sub(eye, at)
+  const d = unit(out)
+  const e = ball.r / len(out)
+  const s = Math.sqrt(1 - e * e)
+  const u = unit(cross(d, Math.abs(d.y) < 0.9 ? v(0, 1, 0) : v(1, 0, 0)))
+  const w = cross(d, u)
+  const on = ball.on && { way: turned(ball.on.way), least: ball.on.least }
+  const pts: V[] = []
+  for (const a of roundabout(Math.max(HORIZON, Math.ceil(ROUNDS * ball.r)))) {
+    const way = add(add(v(d.x * e, d.y * e, d.z * e), u, s * Math.cos(a)), w, s * Math.sin(a))
+    if (!on || dot(way, on.way) >= on.least) pts.push(add(at, way, ball.r))
+  }
+  return pts
 }
 
 /**
@@ -612,50 +803,74 @@ function undersideOf(pts: P[]) {
   }
   return (x: number) => {
     if (x <= chain[0]!.x) return chain[0]!.y
-    for (let i = 1; i < chain.length; i++) {
-      const a = chain[i - 1]!
-      const b = chain[i]!
-      if (x <= b.x) return b.x - a.x > 1e-9 ? a.y + ((b.y - a.y) * (x - a.x)) / (b.x - a.x) : Math.max(a.y, b.y)
+    if (x > chain[chain.length - 1]!.x) return chain[chain.length - 1]!.y
+    // The piece of the chain over x, by halving: the bend asks this for every point it moves. Where the chain rises
+    // straight up at its end, x there is its foot, the first point at it, as its outline's own end asks.
+    let [lo, hi] = [0, chain.length - 1]
+    while (hi - lo > 1) {
+      const m = (lo + hi) >> 1
+      if (chain[m]!.x < x) lo = m
+      else hi = m
     }
-    return chain[chain.length - 1]!.y
+    const a = chain[lo]!
+    const b = chain[hi]!
+    return b.x - a.x > 1e-9 ? a.y + ((b.y - a.y) * (x - a.x)) / (b.x - a.x) : Math.max(a.y, b.y)
   }
 }
 
 /**
- * How a solid's underside gives to the nest it rests in: the nest is a cylinder going back into the page, so its floor
- * under a point depends only on how far across the point is — on the page, the ring (`floorAt`). Its underside is
- * carried onto the floor — up where it would pass the ring, down where it stands clear of it, as slime settles into a
- * bowl, the sag easing into a limit — and what is over it moves with it, less the higher it stands, so the bend fades
- * up its body and its top stays as it was. Its underside is the lower edge of its outline as it stands (`undersideOf`),
- * which moves smoothly as it turns, so every point does too. The move is on the page, carried back into the solid at the
- * point's depth, so the back of its base moves as its front does and shows over it, as the far edge of a tunnel's
- * floor would. It settles only while it rests: lifted off the floor (a jump leaving, landing), it lets go as it rises,
+ * How a solid's underside gives to the nest it rests in, on the page: the nest is a cylinder going back into the page,
+ * so its floor under a point depends only on how far across the point is — on the page, the ring (`floorAt`). Its
+ * underside is carried onto the floor — up where it would pass the ring, down where it stands clear of it, as slime
+ * settles into a bowl, the sag easing into a limit — and what is over it moves with it, less the higher it stands, so
+ * the bend fades up its body and its top stays as it was. Its underside is the lower edge of its outline as it stands
+ * (`undersideOf`), which moves smoothly as it turns, so every point does too. A point moves straight down the page by
+ * what is under it, whatever its depth, so the back of its base moves as its front does and shows over it, as the far
+ * edge of a tunnel's floor would — and so the bend is of the picture: the outline as it stands, bent, is the bent
+ * solid's. It settles only while it rests: lifted off the floor (a jump leaving, landing), it lets go as it rises,
  * though it never passes the ring.
  */
-function giveOf(
-  place: (p: V) => P,
-  depth: (p: V) => number,
-  underside: (x: number) => number,
-  nest: { x: number; y: number; r: number },
-  rests: number,
-  tall: number,
-  perY: number,
-) {
+function bendOf(underside: (x: number) => number, nest: { x: number; y: number; r: number }, rests: number, tall: number) {
   const floorAt = (x: number) => {
     const dx = Math.min(Math.abs(x - nest.x), nest.r)
     return nest.y + Math.sqrt(nest.r * nest.r - dx * dx) - SEAT
   }
   const sag = SAG * tall
-  return (p: V): V => {
-    const q = place(p)
+  return (q: P): P => {
     const under = underside(q.x)
     const shift = floorAt(q.x) - under
     // Down onto the floor only as far as it rests, easing into its limit; up off the ring always.
     const move = shift > 0 ? sag * Math.tanh(shift / sag) * rests : shift
     const fade = Math.max(0, 1 - Math.max(0, under - q.y) / (FADE * tall))
-    const dy = move * fade
-    if (Math.abs(dy) < 1e-4) return p
-    return v(p.x, p.y - dy / (perY * depth(p)), p.z)
+    return { x: q.x, y: q.y + move * fade }
+  }
+}
+
+/**
+ * A polygon bent by `bend`, each edge cut in as many pieces as the bend needs to curve it — halved until its middle
+ * bends no more than a fifth of a px off the straight, and, where the bend moves it at all, no piece is longer than
+ * `most` px, so a turn in the bend inside a long edge is not missed.
+ */
+function bentBy(bend: (q: P) => P, most: number) {
+  return (pts: P[]): P[] => {
+    const out: P[] = []
+    const ends = pts.map(bend)
+    const piece = (a: P, b: P, ba: P, bb: P, depth: number) => {
+      const m = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+      const bm = bend(m)
+      const off = Math.hypot(bm.x - (ba.x + bb.x) / 2, bm.y - (ba.y + bb.y) / 2)
+      const moved = Math.max(Math.abs(ba.y - a.y), Math.abs(bb.y - b.y), Math.abs(bm.y - m.y)) > 0.01
+      if (depth > 8 || (off < 0.2 && (!moved || Math.hypot(b.x - a.x, b.y - a.y) <= most))) return
+      piece(a, m, ba, bm, depth + 1)
+      out.push(bm)
+      piece(m, b, bm, bb, depth + 1)
+    }
+    pts.forEach((a, i) => {
+      const j = (i + 1) % pts.length
+      out.push(ends[i]!)
+      piece(a, pts[j]!, ends[i]!, ends[j]!, 0)
+    })
+    return out
   }
 }
 
@@ -663,7 +878,7 @@ function giveOf(
  * `shape` in the room the sphere would take, `head`, turned by `turn`: null for the sphere, which its own model draws.
  * `R` is the sphere's radius there, px: a unit of the solid. The room's shape — the sphere settled, breathing,
  * squashed — squashes the solid's picture the same way; its lowest point stands on the room's bottom, centred across.
- * In a nest (`nest`, px) its underside gives to the bowl (`giveOf`) rather than passing it.
+ * In a nest (`nest`, px) its underside gives to the bowl (`bendOf`) rather than passing it.
  */
 export function shapeFrame(
   shape: AgentShape,
@@ -686,46 +901,30 @@ export function shapeFrame(
   // Where it stands, from the solid as it is before it gives: its middle across over the room's, its lowest point on
   // the room's bottom, softly (`SETTLE_SOFT` px), so as it turns its place never jumps when another corner becomes the
   // lowest or the widest. The give only moves points up and down, so this stays where it stands.
-  const spun = solid.points.map(turned)
-  const rigid = spun.map(look)
+  const rigid = [...solid.cloud.map(turned), ...solid.balls.flatMap((b) => horizonOf(b, turned, eye))].map(look)
   const [tx, ty] = [SETTLE_SOFT / sx, SETTLE_SOFT / sy]
   const middle = (softLeast(rigid.map((p) => p.x), tx) - softLeast(rigid.map((p) => -p.x), tx)) / 2
   const y0 = softLeast(rigid.map((p) => p.y), ty)
   const onBox = (p: P): P => ({ x: head.x + (p.x - middle) * sx, y: floor - (p.y - y0) * sy })
+  const standing = rigid.map(onBox)
   const tall = (Math.max(...rigid.map((p) => p.y)) - y0) * sy
   // It rests as far as the room it stands in does: the sphere's bottom on the nest's floor, letting go as it rises.
-  const give = nest
-    ? giveOf(
-        (p) => onBox(look(p)),
-        (p) => view.d / Math.max(0.2, view.d - p.z),
-        undersideOf(rigid.map(onBox)),
-        nest,
-        Math.max(0, Math.min(1, 1 - (nest.y + nest.r - floor - SEAT) / (LETGO * tall))),
-        tall,
-        sy,
-      )
-    : (p: V) => p
-  // A turned point on the box; and a polygon of point ids on the box, each edge in pieces where it may bend.
-  const drawn = (p: V) => onBox(look(give(p)))
-  const polygon = (ids: number[]): P[] => {
-    const out: P[] = []
-    ids.forEach((id, i) => {
-      const a = spun[id]!
-      const b = spun[ids[(i + 1) % ids.length]!]!
-      const pieces = nest ? Math.max(1, Math.ceil(len(sub(b, a)) / PIECE)) : 1
-      for (let k = 0; k < pieces; k++) out.push(drawn(add(a, sub(b, a), k / pieces)))
-    })
-    return out
-  }
+  const bend = nest
+    ? bendOf(undersideOf(standing), nest, Math.max(0, Math.min(1, 1 - (nest.y + nest.r - floor - SEAT) / (LETGO * tall))), tall)
+    : null
+  // A turned point on the box, as it stands; and as it is drawn, bent. A polygon is bent in pieces, so its edges curve.
+  const placed = (p: V) => onBox(look(p))
+  const drawn = (p: V) => (bend ? bend(placed(p)) : placed(p))
+  const bent = bend ? bentBy(bend, 6 * PIECE * R) : (pts: P[]) => pts
 
   const front = solid.front
   const frontTone = facing(front.normal)
   const toneOf = (n: V) => Math.max(-1, Math.min(0.5, facing(n) - frontTone))
   const faces: ShapeFace[] = []
-  let outline: P[]
+  // Its outline: the hull of its round parts as it stands, bent.
+  const outline = bent(hull(standing))
   if (solid.round) {
     // Shaded as the sphere is: its dark side, then its lit side moved toward the light; then its flat ends that face you.
-    outline = hull(spun.map(drawn))
     const xs = outline.map((p) => p.x)
     const lift = ((Math.max(...xs) - Math.min(...xs)) / 2) * LIFT
     faces.push({ d: poly(outline), tone: -1 })
@@ -735,22 +934,46 @@ export function shapeFrame(
     else faces.push({ d: moved(1), tone: 0 })
     for (const cap of solid.caps) {
       const n = turned(cap.normal)
-      if (dot(n, sub(eye, mean(cap.ids.map((id) => spun[id]!)))) <= 1e-6) continue
-      faces.push({ d: poly(polygon(cap.ids)), tone: toneOf(n) })
+      const ring = cap.ring.map(turned)
+      if (dot(n, sub(eye, mean(ring))) <= 1e-6) continue
+      faces.push({ d: poly(bent(ring.map(placed))), tone: toneOf(n) })
     }
   } else {
-    // Its facets that show — the camera on their outer side — farther first; each in its tone, those of one tone one path.
-    const shown = solid.facets
-      .map((f) => ({ f, n: turned(f.normal), c: mean(f.ids.map((id) => spun[id]!)) }))
-      .filter(({ n, c }) => dot(n, sub(eye, c)) > 1e-6)
-      .sort((a, b) => a.c.z - b.c.z)
+    // What it shows of each piece, in its way's tone; the pieces of one tone one path, painted darkest first.
+    // Each face in its tone; each edge and corner in the tone of every way it faces, a step at a time, so it rounds
+    // smoothly from one face's tone to the next; what is one step is one path, painted darkest first.
+    const flat = solid.flat!
     const byTone = new Map<number, string[]>()
-    for (const { f, n } of shown) {
-      const step = Math.round(toneOf(n) * TONE_STEPS)
-      byTone.set(step, [...(byTone.get(step) ?? []), poly(polygon(f.ids))])
+    const paint = (step: number, pts: V[], holes: V[][] = []) => {
+      const shape = bent(pts.map(placed))
+      const parts = byTone.get(step) ?? []
+      parts.push(poly(shape))
+      // A hole goes round the other way, so the path's fill leaves it out.
+      for (const hole of holes) {
+        const ring = bent(hole.map(placed))
+        parts.push(poly(areaOf(ring) * areaOf(shape) > 0 ? ring.reverse() : ring))
+      }
+      byTone.set(step, parts)
+    }
+    for (const face of flat.faces) {
+      const corners = face.corners.map(turned)
+      const n = turned(face.normal)
+      if (dot(n, sub(eye, corners[0]!)) > 1e-6) paint(stepOf(toneOf(n)), corners)
+    }
+    for (const edge of flat.edges) {
+      const [a, b] = [turned(edge.a), turned(edge.b)]
+      for (const run of runsOf(a, b, turned(edge.from), turned(edge.to), eye, RHO, toneOf)) {
+        paint(run.step, [...run.ways.map((w) => add(a, w, RHO)), ...[...run.ways].reverse().map((w) => add(b, w, RHO))])
+      }
+    }
+    for (const corner of flat.corners) {
+      const at = turned(corner.at)
+      for (const region of cornerOf(corner.rim.map(turned), at, eye, RHO, frontTone)) {
+        const onBall = (w: V) => add(at, w, RHO)
+        paint(region.step, region.ways.map(onBall), region.holes.map((h) => h.map(onBall)))
+      }
     }
     for (const [step, parts] of [...byTone.entries()].sort((a, b) => a[0] - b[0])) faces.push({ d: parts.join(" "), tone: step / TONE_STEPS })
-    outline = polygon(silhouette(shown.map(({ f }) => f)))
   }
 
   // The face's patch: its point on the box, and its across and down there, through the turn, the give and the camera.

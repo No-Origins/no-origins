@@ -68,19 +68,27 @@
      theme's white on it is 1.3 : 1 and this is 15 : 1. */
   --lime-foreground: oklch(0.145 0 0);
   /* The agent's paints beside the two accents (Character-Studio.md C10, 2026-09-30, his: "I also need colors … options"):
-     the pastels of his own sketch (Brand.md, colour), pink, peach, yellow, blue and grey — lime and violet are its green
-     and lavender. The agent's own, not the system's palette: nothing else paints with them. Each has the ink its eyes
-     are drawn in, dark on all five. One value in both themes, as the accents are. Version 1. */
+     the agent's own, not the system's palette: nothing else paints with them. Each has the ink its eyes are drawn in,
+     dark on every one. One value in both themes, as the accents are.
+     Pink and blue are the pastels of his sketch (Brand.md, colour), version 1. Peach, yellow and grey went on
+     2026-10-01 (C20, his: "remove peach yellow and gray … replace them with better colors … high contrast"): on the
+     light page they stood at 1.7, 1.3 and 2.5 : 1. Red, orange, gold, green and teal took their place, each a mid-tone
+     that stands at least 3.3 : 1 from the page and from its nest in both themes, its eyes at least 5.3 : 1 on it
+     (WCAG 2's ratio; 3 : 1 is a shape's minimum). No yellow does both: gold is as near as one comes. Version 2. */
   --agent-pink: oklch(0.8 0.13 355);
   --agent-pink-ink: oklch(0.145 0 0);
-  --agent-peach: oklch(0.83 0.11 50);
-  --agent-peach-ink: oklch(0.145 0 0);
-  --agent-yellow: oklch(0.91 0.15 98);
-  --agent-yellow-ink: oklch(0.145 0 0);
+  --agent-red: oklch(0.642 0.207 27);
+  --agent-red-ink: oklch(0.145 0 0);
+  --agent-orange: oklch(0.649 0.167 50);
+  --agent-orange-ink: oklch(0.145 0 0);
+  --agent-gold: oklch(0.64 0.131 75);
+  --agent-gold-ink: oklch(0.145 0 0);
+  --agent-green: oklch(0.603 0.133 150);
+  --agent-green-ink: oklch(0.145 0 0);
+  --agent-teal: oklch(0.606 0.094 190);
+  --agent-teal-ink: oklch(0.145 0 0);
   --agent-blue: oklch(0.74 0.13 245);
   --agent-blue-ink: oklch(0.145 0 0);
-  --agent-grey: oklch(0.72 0.015 286);
-  --agent-grey-ink: oklch(0.145 0 0);
   /* The first width token (his, 2026-09-24): the stroke of an accent ring — the portfolio's lime-and-violet ring round
      the avatar was the first. Every other width in the system is a Tailwind step written where it is used (1px
      hairlines, 2px focus rings). Tailwind has no theme namespace for widths, and `stroke-accent` is already the accent

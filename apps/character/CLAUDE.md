@@ -24,8 +24,9 @@ its heading on a row of its own — the portfolio's section label, composed the 
 left; **the body's Shape, Rotation, Colour, Texture and Rest** (`components/body-sections.tsx`, C10, C12) flow down the room to its
 right, and nothing else (C11); **the body** (`components/appearance-card.tsx`, C4) is under the circle, or first in the
 right room where it and the bar do not both fit there; **the draft's bar** (`components/versions-panel.tsx`, C6, C11)
-is on the field's last row under the circle, between the rooms' pagers: a circle that opens the versions in a dialog,
-and a pill of the draft's state, the name and Publish. A column of air stands between the circle and each room. `flow` (`lib/stage.ts`) places a room's sections column by column, a section
+is on the field's last row under the circle, between the rooms' pagers: a circle that opens the versions in a dialog
+(the next major over them, to publish), and a pill of the agent's select, the draft's state and Publish, which makes the
+next minor version at a press (C19: a version is `major.minor` and has no name; `lib/versions.ts` spells them). A column of air stands between the circle and each room. `flow` (`lib/stage.ts`) places a room's sections column by column, a section
 whole unless it is taller than a column, and what the room cannot hold is its next page, turned by its pager on the
 field's last row (`Flow`); a style picked that moves its section to another page turns to it. **A section folds to its
 heading** (C9): the heading row is its toggle, a folded section flows as one row, and the page follows a section that
@@ -37,19 +38,20 @@ columns — label, control, value — that **every card in a room shares**, `LIN
 package's declaration (`@no-origins/ui/lib/properties`, `agent-face`, `agent-body`), never a list of its own. **One
 grammar for every line** (C11): a number is a slider and its typed value; a choice a select across the control's and
 the value's columns, what it offers that is not a value (a face slot's uploads, template and upload) at the end of its
-list; a paint swatches; a colour by name a select with a dot of each; a switch at the control's start. The value's
+list; a paint, and a colour by name, the design system's `ColourPicker` (C17: every pick of a colour is one); a switch at the control's start. The value's
 column holds a number or nothing, and every box is 36px. Do not put a button at a line's end again. **The agent's cell** (C2) is a cell of
 the field grown to a radius of three cells, six across, centred across the field **at the top, one row above it** (his);
 a field too narrow or too short gives it fewer cells, kept even. **The body's card** (C4) is four across and two down,
 centred under the circle, its heading on the row between them: Size, then Shade, one a row.
 
 **Saving** (C6) is `src/app/actions.ts`, server functions on his session (`@no-origins/auth/server`), RLS deciding.
-**There are six characters** (C13, Agents.md): Bali (the Agent until he named it) and Kino, Zaza, Oru, Mira and Lola, seeded at version 1; the draft bar's select opens one
+**There are six characters** (C13, Agents.md): Bali (the Agent until he named it) and Kino, Zaza, Oru, Mira and Lola, seeded at version 1 (1.0 since C19); the draft bar's select opens one, and makes a new one by its name at the end of its list (`createCharacter`, C19)
 (`open` in the context settles what is pending first), every action takes the open one's `itemId`, and uploads are the
 open character's own. The
 draft loads when the studio opens, saves `SAVE_AFTER` ms after the last change, whole (`resolveCharacter`), on the
 `rev` it was loaded at; a save another device made first is refused, and the draft's bar offers to load it.
-Publishing saves what is pending first. With no keys it is `offline` and the page is all there is. To save locally,
+Publishing saves what is pending first, then makes the latest version's next minor (`publish("minor")`) or, from the
+versions, its next major (`publish("major")`), counted from the latest and never from the one pages show. With no keys it is `offline` and the page is all there is. To save locally,
 put the local stack's two keys in `.env.local` (`.env.example`); the studio then asks for a sign-in, and a session made
 on the admin (:3002) is this one too, since a localhost cookie is every port's.
 Inside it the agent sits (C3), drawn by `AgentCell` (`src/components/agent-cell.tsx`). **The cell is part of the
@@ -108,6 +110,9 @@ keys, printing the agent's body each time, and shoots it. `node e2e/.mcp/charact
 folds and opens headings by pointer, Enter and Space, printing the boxes, the pager and each heading's `aria-expanded`
 at every step. `node e2e/.mcp/character-chooser.mjs <out> [WxH] [scheme]` (signed in) opens each of the six from the bar's select,
 prints its shape and next version, and shoots its cell; it saves nothing.
+`node e2e/.mcp/character-eyes.mjs <out> [port] [scheme]` (signed in) picks each pupil style with the eyes' Colour at Ink
+and at Lime, printing the eye's, the pupil's and the catchlight's fills and shooting the cell; it lets the draft load
+and then aborts every server action, so it saves nothing.
 `node e2e/.mcp/character-rotate.mjs <out> [WxH] [scheme]` (signed in, `e2e/.auth/state.json`) picks the cube and
 shoots it at four rotations; it autosaves into the draft, so snapshot and restore the draft around it.
 `node e2e/.mcp/character-shapes.mjs <out> [scheme]` (written for C10's textures, which went; its texture part is stale) picks every shape and paint and shoots the
@@ -120,7 +125,10 @@ probe) signs in and, changing nothing, shoots the page and the versions and open
 from the style list.
 `node e2e/.mcp/character-save.mjs <out>` (gitignored; the local stack, the admin on :3002 and this app on :3005 with
 `.env.local`) signs in through the admin's magic link, then saves, picks a brow style, publishes, refuses a repeated
-name, goes back and meets a conflict, printing the database after each. It leaves a version behind: versions are
+name, goes back and meets a conflict, printing the database after each (written before C19: its publish types a version's
+name, which the bar no longer has). `node e2e/.mcp/character-versions.mjs <out> [name]` (signed in) makes an agent by its
+name, publishes it to 1.0 and 1.1, a major from the versions to 2.0, has the same name refused, measures the bar at three
+sizes and opens Bali again; it leaves the agent and its versions behind, to clean out the same way. It leaves a version behind: versions are
 frozen, so clean a test one out with the trigger disabled, locally only. `node e2e/.mcp/character-upload.mjs <out>`
 (the same needs) takes the brows' template, uploads a brow drawn on it and exported moved and scaled, checks the
 preview, the save, the file, the draft and where the agent wears it, then a refused one; it leaves a drawing and its
