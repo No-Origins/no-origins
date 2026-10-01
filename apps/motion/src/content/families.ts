@@ -42,6 +42,11 @@ export type Token = {
   max?: number;
   step?: number;
   choices?: { value: string; label: string }[];
+  /**
+   * A choice whose options are colours: what each one looks like, as CSS, from the family's values (the agent's paint
+   * makes its ink). Shown in the design system's colour picker, as every pick of a colour is (Character-Studio.md C17).
+   */
+  swatches?: (values: Values) => Record<string, string>;
 };
 
 /** A token's value on a jig: a number in the token's unit (ms, a scale, a share), or an ease or a choice as CSS. */

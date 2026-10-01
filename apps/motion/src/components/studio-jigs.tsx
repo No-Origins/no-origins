@@ -4,6 +4,7 @@ import * as React from "react";
 import { ArrowLeft, ArrowRight, Copy, RotateCcw, X } from "lucide-react";
 import { Button } from "@no-origins/ui/components/button";
 import { Card, CardContent, CardHeader } from "@no-origins/ui/components/card";
+import { ColourPicker } from "@no-origins/ui/components/colour-picker";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@no-origins/ui/components/dialog";
 import { Input } from "@no-origins/ui/components/input";
 import { Label } from "@no-origins/ui/components/label";
@@ -41,19 +42,21 @@ function Parameter({ token, family }: { token: Token; family: Family }) {
   const studio = useStudio();
   const value = studio.values(family)[token.name];
   if (value === undefined) return null;
-  return <ParameterControl token={token} value={value} onChange={(next) => studio.setValue(family, token.name, next)} />;
+  return <ParameterControl token={token} value={value} swatches={token.swatches?.(studio.values(family))} onChange={(next) => studio.setValue(family, token.name, next)} />;
 }
 
 /**
  * One token's control, as every jig draws it: its label and its value typed beside it, the slider (or the select, for
  * an ease or a choice) under them, and what it moves in a line. A state's row (Motion.md M19) draws the same control
  * for a value it may or may not set: `unset`, it shows the value underneath, dimmed, and moving it sets it; `onClear`
- * takes it off the row again. `disabled`, for a locked row, it only shows.
+ * takes it off the row again. `disabled`, for a locked row, it only shows. A choice of colours (`swatches`, what each
+ * looks like now) is the design system's colour picker, as every pick of a colour is (Character-Studio.md C17).
  */
-export function ParameterControl({ token, value, onChange, unset = false, onClear, disabled = false }: {
+export function ParameterControl({ token, value, onChange, swatches, unset = false, onClear, disabled = false }: {
   token: Token;
   value: Value;
   onChange: (value: Value) => void;
+  swatches?: Record<string, string>;
   unset?: boolean;
   onClear?: () => void;
   disabled?: boolean;
@@ -72,7 +75,7 @@ export function ParameterControl({ token, value, onChange, unset = false, onClea
   };
   const unit = token.kind === "ms" ? "ms" : token.unit ?? "ratio";
   // Unset on a row (M19), the value underneath is the field's placeholder, so typing any number, that one too, sets it.
-  return <div className={cn("flex min-w-0 flex-col gap-1", unset && "[&_[data-slot=slider]]:opacity-45")} data-unset={unset ? "" : undefined}>
+  return <div className={cn("flex min-w-0 flex-col gap-1", unset && "[&_[data-slot=slider]]:opacity-45 [&_[data-slot=colour-picker]]:opacity-45")} data-unset={unset ? "" : undefined}>
     <div className="flex min-h-6 items-center justify-between gap-2">
       <Label htmlFor={id} className={cn("min-w-0", unset && "text-muted-foreground")}>{token.label}</Label>
       {!choices ? <div className="flex shrink-0 items-center gap-1">
@@ -83,7 +86,9 @@ export function ParameterControl({ token, value, onChange, unset = false, onClea
         <Text role="caption">{unit}</Text>
       </div> : null}
     </div>
-    {choices ? <Select value={String(value)} onValueChange={onChange} disabled={disabled}>
+    {choices && swatches ? <ColourPicker id={id} aria-label={token.label} value={String(value)} disabled={disabled} onValueChange={onChange}
+      options={choices.map((choice) => ({ ...choice, colour: swatches[choice.value] ?? "transparent" }))} />
+    : choices ? <Select value={String(value)} onValueChange={onChange} disabled={disabled}>
       <SelectTrigger id={id} size="sm" className="w-full" aria-label={token.label}><SelectValue /></SelectTrigger>
       <SelectContent>
         {!choices.some((choice) => choice.value === value) ? <SelectItem value={String(value)}>{String(value)}</SelectItem> : null}

@@ -1,4 +1,4 @@
-import { isAgentPaint } from "./agent-colours"
+import { agentPaintOf } from "./agent-colours"
 import { AGENT_FACE, UPLOADED, isUploaded, uploadSettings, type FaceSlotId } from "./agent-face"
 import { isAgentShape, shapeFrame, type AgentShape, type ShapeFrame } from "./agent-shape"
 import { drawTexture, isAgentTexture, SPHERE_PATCH, type AgentTexture, type TextureGroup } from "./agent-texture"
@@ -92,7 +92,7 @@ export type SphereMotion = {
   size: number
   /**
    * Its colour: `lime` (the system's primary), `violet` (its secondary), or since 2026-09-30 one of the agent's own
-   * pastels (`AGENT_PAINTS`, `./agent-colours`).
+   * (`AGENT_PAINTS`, `./agent-colours`; a paint that went is read as the one it became, `RENAMED_PAINTS`).
    */
   paint: string
   /** How dark its side away from the light is, 0 flat. */
@@ -207,6 +207,8 @@ export type SphereMotion = {
   lookY: number
   /** Solid eyes, a pupil in a light eye, or a catchlight on a deep one; each of the eye across; the catchlight's place, degrees round from straight up. */
   pupils: SpherePupils
+  /** What the eyes are drawn in, by name (2026-10-01): the eye, the pupil in a light one, or the eye under a catchlight; `ink` as they always were (`eyeColours`). */
+  eyeColour: ColourName
   pupilSize: number
   shineSize: number
   shineAngle: number
@@ -314,6 +316,7 @@ export const SPHERE_START = {
   lookX: 0,
   lookY: 0,
   pupils: "none",
+  eyeColour: "ink",
   pupilSize: 0.55,
   shineSize: 0.3,
   shineAngle: -45,
@@ -438,7 +441,7 @@ export function sphereMotionFrom(src: SphereSource): SphereMotion {
   const paint = src.word("paint") ?? S.paint
   return made({
     size: clamp(n("size", S.size), 0.1, 0.9),
-    paint: isAgentPaint(paint) ? paint : "lime",
+    paint: agentPaintOf(paint) ?? "lime",
     shade: clamp01(n("shade", S.shade)),
     body: bodyOf(src.word("body") ?? S.body),
     shape: ((w) => (isAgentShape(w) ? w : S.shape))(src.word("shape")),
@@ -494,14 +497,14 @@ export function sphereMotionFrom(src: SphereSource): SphereMotion {
 /** The fields the face's version 13 added, read by their declaration; version 11's eyes are read above. */
 type Face13 = Pick<
   SphereMotion,
-  | "lookX" | "lookY" | "pupils" | "pupilSize" | "shineSize" | "shineAngle" | "upperLids" | "lidOpen" | "lidSlant"
+  | "lookX" | "lookY" | "pupils" | "eyeColour" | "pupilSize" | "shineSize" | "shineAngle" | "upperLids" | "lidOpen" | "lidSlant"
   | "lidCurve" | "lowerLids" | "lowerRaise" | "lowerSlant" | "lowerCurve" | "brows" | "browHeight" | "browAngle"
   | "browArch" | "browLength" | "browThickness" | "browColour" | "symbol" | "symbolSize" | "symbolAt" | "symbolColour"
   | "right"
   | "uploads"
 >
 const FACE_13 = new Set([
-  "lookX", "lookY", "pupils", "pupilSize", "shineSize", "shineAngle", "upperLids", "lidOpen", "lidSlant", "lidCurve",
+  "lookX", "lookY", "pupils", "eyeColour", "pupilSize", "shineSize", "shineAngle", "upperLids", "lidOpen", "lidSlant", "lidCurve",
   "lowerLids", "lowerRaise", "lowerSlant", "lowerCurve", "brows", "browHeight", "browAngle", "browArch", "browLength",
   "browThickness", "browColour", "symbol", "symbolSize", "symbolAt", "symbolColour",
 ])

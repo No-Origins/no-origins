@@ -1,8 +1,10 @@
 import { AGENT_BODY } from "@no-origins/ui/lib/agent-body";
+import { AGENT_PAINTS, agentColours, eyeColours } from "@no-origins/ui/lib/agent-colours";
 import { AGENT_FACE } from "@no-origins/ui/lib/agent-face";
 import type { ColourName, Property } from "@no-origins/ui/lib/properties";
+import { SPHERE_START, type SpherePupils } from "@no-origins/ui/lib/sphere-motion";
 
-import type { Family, Token } from "./families";
+import type { Family, Token, Values } from "./families";
 
 /**
  * The sphere (Motion.md M17, his, 2026-09-30): *"a character … an energetic and calm, 3D sphere that travels by diving
@@ -57,10 +59,30 @@ const COLOUR_LABELS: Record<ColourName, string> = {
   violet: "Violet",
 };
 
+/** The paints' swatches: each paint as the agent wears it. */
+const PAINT_SWATCHES = Object.fromEntries(AGENT_PAINTS.map((p) => [p.value, p.fill]));
+
+/**
+ * The swatches of a colour by name: what each name is on the agent the values make — its paint and its shade, and for
+ * the eyes the pupils they wear, under which Ink is Deep (`eyeColours`).
+ */
+const colourSwatches = (eyes: boolean) => (values: Values) => {
+  const at = (id: string) => values[`--motion-sphere-${id}`];
+  const shade = Number(at("shade"));
+  const pupils = at("pupils");
+  const look = {
+    paint: String(at("paint") ?? SPHERE_START.paint),
+    shade: Number.isFinite(shade) ? shade : SPHERE_START.shade,
+    pupils: (pupils === "dot" || pupils === "shine" ? pupils : "none") as SpherePupils,
+  };
+  return eyes ? eyeColours(look) : agentColours(look);
+};
+
 /**
  * A setting as a jig (M20: the controls come from the declaration, `@no-origins/ui/lib/agent-body` and `agent-face`):
  * its label, range and step — a number as a share, cells or a count as a scale, heads past one as a multiplier, an angle
- * in degrees, a duration in ms, a style or a colour as a choice. A face slot's style is its group's first jig, Style.
+ * in degrees, a duration in ms, a style or a colour as a choice, a colour's and the paint's with their swatches. A face
+ * slot's style is its group's first jig, Style.
  */
 function settingToken(group: string, p: Property, style = false): Token {
   const base = { group, name: `--motion-sphere-${p.id}` as const, label: style ? "Style" : p.label, touches: p.touches };
@@ -76,9 +98,10 @@ function settingToken(group: string, p: Property, style = false): Token {
     case "duration":
       return { ...base, kind: "ms", min: p.min, max: p.max, step: p.step };
     case "choice":
-      return { ...base, kind: "choice", choices: p.options.map((o) => ({ value: o.value, label: o.label })) };
+      // The paint is a colour: its jig is the colour picker, as every pick of a colour is (C17).
+      return { ...base, kind: "choice", choices: p.options.map((o) => ({ value: o.value, label: o.label })), ...(p.id === "paint" ? { swatches: () => PAINT_SWATCHES } : {}) };
     case "colour":
-      return { ...base, kind: "choice", choices: p.options.map((c) => ({ value: c, label: COLOUR_LABELS[c] })) };
+      return { ...base, kind: "choice", choices: p.options.map((c) => ({ value: c, label: COLOUR_LABELS[c] })), swatches: colourSwatches(p.id === "eye-colour") };
     case "switch":
     case "drawing":
       throw new Error(`The agent's face has no ${p.type} jig yet: ${p.id}`);

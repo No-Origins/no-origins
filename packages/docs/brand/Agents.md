@@ -14,7 +14,7 @@ glance, at a favicon's size, and by how they move:
 
 | Axis | The rule |
 |---|---|
-| **Paint** | One hue each (Brand.md §8): violet, lime, yellow, blue, grey, pink. Peach is kept for a seventh. |
+| **Paint** | One hue each (Brand.md §8): violet, lime, yellow, blue, grey, pink. Peach is kept for a seventh. **Since 2026-10-01 (Character-Studio.md C20, his: "high contrast")** peach, yellow and grey are gone: yellow is read as gold and grey as teal, and red, orange and green are new. |
 | **Shape** | One solid each: sphere, cube, cone, hexagonal prism, cylinder, hemisphere. The pyramid is kept. |
 | **Material** | Slime, ball or jelly — how it lands, settles and breathes, so its temperament is in its body. |
 | **Surface** | A hand-drawn texture (his reference sheet, 2026-09-30), or plain; and depth in flat bands. Not a tiled pattern: those were rejected. |
@@ -70,7 +70,7 @@ can be named as guide. Bali"): a job is what an agent does, a name is who it is,
 
 *The one that goes and finds out: search, research, the first look at anything.*
 
-- **Look:** `paint` yellow · `shape` cone · `body` jelly · `texture` none · `size` 0.5 · `shade` 0.55 · `spread` 0.05.
+- **Look:** `paint` yellow (gold since C20) · `shape` cone · `body` jelly · `texture` none · `size` 0.5 · `shade` 0.55 · `spread` 0.05.
 - **Face:** the biggest eyes of the six, `eye-size` 0.3, `eye-height` 0.36 (up the cone), `pupils` shine
   (`shine-size` 0.32); `brows` arch, `brow-height` 0.1, `brow-arch` 0.6, `brow-angle` −12 (raised); `upper-lids`
   plain, `lid-open` 1; `look` 1 (it looks all the way where it goes), `look-lead` 200ms.
@@ -103,7 +103,7 @@ can be named as guide. Bali"): a job is what an agent does, a name is who it is,
 
 *The one that reads it back: reviews, checks, the second pair of eyes. Kind, always.*
 
-- **Look:** `paint` grey · `shape` cylinder · `body` ball · `texture` none · `size` 0.54 · `shade` 0.5, the flattest light · `spread` 0.
+- **Look:** `paint` grey (teal since C20) · `shape` cylinder · `body` ball · `texture` none · `size` 0.54 · `shade` 0.5, the flattest light · `spread` 0.
 - **Face:** `pupils` dot (`pupil-size` 0.6, the largest pupils: it reads); `eye-size` 0.24, `eye-spacing` 0.44;
   `upper-lids` plain, `lid-open` 0.85, `lid-slant` 0.25 (attentive, not angry); `brows` line, `brow-thickness` 0.05,
   `brow-angle` 8 (thoughtful), `brow-height` 0.14.
@@ -163,7 +163,7 @@ scales, crackle — from textiles, wood and stone, ceramics, animal coats and pr
 | | Guide | Maker | Scout | Keeper | Editor | Muse |
 |---|---|---|---|---|---|---|
 | Name | Bali | Kino | Zaza | Oru | Mira | Lola |
-| Paint | violet | lime | yellow | blue | grey | pink |
+| Paint | violet | lime | yellow → gold | blue | grey → teal | pink |
 | Shape | sphere | cube | cone | hexagonal prism | cylinder | hemisphere |
 | Material | slime | ball | jelly | ball | ball | slime |
 | Surface | plain | plain | plain | plain | plain | plain |
@@ -196,6 +196,6 @@ moves.
   Lola the Muse. The job is what an agent does; the name is who it is, and is the character's name in the database.
 - **Which of the six exist first.** The Guide does. The others are made in the character studio from A2, each then
   his to tune, version by version.
-- **A seventh** for peach and the pyramid, when a block needs one.
+- **A seventh** for the pyramid, when a block needs one (peach, kept for it, went with C20).
 - **Whether a mood is shared or each agent's own.** His Curious on the Guide is eyes only; on the Scout, Curious
   might also lean the cone. A motion is made for a character (Motion.md M20), so each can have its own.

@@ -6,6 +6,8 @@ import { CircleDot, Eye, EyeClosed, Smile, Spline, type LucideIcon } from "lucid
 import { Label } from "@no-origins/ui/components/label";
 import { Switch } from "@no-origins/ui/components/switch";
 import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-group";
+import { sphereMotionOf } from "@no-origins/ui/lib/agent-body";
+import { eyeColours } from "@no-origins/ui/lib/agent-colours";
 import { AGENT_FACE, faceValue, isUploaded, settingsFor, UPLOADED, type FaceSlot, type FaceSlotId, type FaceWear } from "@no-origins/ui/lib/agent-face";
 
 import { useCharacter } from "@/components/character-context";
@@ -43,6 +45,8 @@ export function useFaceSections(): Section[] {
   const { look, setFace, drawings, connected } = useCharacter();
   // Which side of each pair set apart its settings move; the left until he picks.
   const [sides, setSides] = React.useState<Partial<Record<FaceSlotId, Side>>>({});
+  // The eyes' colours as they are drawn — Ink is Deep under a pupil or a catchlight — so their Colour's swatches say true.
+  const eyeDots = React.useMemo(() => eyeColours(sphereMotionOf(look)), [look]);
 
   return WORN.map((slot): Section => {
     const wear: FaceWear = look.face[slot.id] ?? { values: {} };
@@ -104,6 +108,7 @@ export function useFaceSections(): Section[] {
           scope={slot.label}
           property={setting}
           value={faceValue(look.face, slot, setting.id, editing)}
+          dots={slot.id === "eyes" ? eyeDots : undefined}
           onChange={(next) =>
             setFace(slot.id, (w) =>
               editing === "right" ? { ...w, right: { ...w.right, [setting.id]: next } } : { ...w, values: { ...w.values, [setting.id]: next } },

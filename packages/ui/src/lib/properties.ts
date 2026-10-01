@@ -47,6 +47,8 @@ export type ChoiceProperty = PropertyBase & {
   type: "choice"
   options: readonly { value: string; label: string }[]
   default: string
+  /** Options that went, each read as the one it became, so a value saved before still picks its nearest. */
+  renamed?: Readonly<Record<string, string>>
 }
 export type SwitchProperty = PropertyBase & { type: "switch"; default: boolean }
 /** An uploaded drawing, by its version's id; `null` for none. */
@@ -86,8 +88,10 @@ export function checkValue(p: Property, v: unknown): PropertyValue {
     }
     case "colour":
       return typeof v === "string" && (p.options as readonly string[]).includes(v) ? v : p.default
-    case "choice":
-      return typeof v === "string" && p.options.some((o) => o.value === v) ? v : p.default
+    case "choice": {
+      const now = typeof v === "string" ? (p.renamed?.[v] ?? v) : v
+      return typeof now === "string" && p.options.some((o) => o.value === now) ? now : p.default
+    }
     case "switch":
       return typeof v === "boolean" ? v : p.default
     case "drawing":

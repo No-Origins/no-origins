@@ -62,6 +62,11 @@ src/components/*.tsx    61 shadcn components + theme-provider.tsx (`useThemeTogg
                           tone (`<pattern>`s fixed to `frame.head`; Character-Studio.md C10). A still `frame` + `look`,
                           or `paint(frame, look)` through its ref every frame; it never moves itself. The motion studio's
                           stage and the character studio both draw it; keep its `data-sphere-*` (e2e/agent.spec.ts)
+                        + colour-picker.tsx — THE COLOUR PICKER (2026-10-01, his: "color pickers should always be like
+                          the paint we have in character studio"; no registry has one): swatches composed from
+                          `ToggleGroup`, one a colour, the one picked pressed, each named in its title, sharing out a
+                          narrow column rather than wrapping. Every pick of a colour in every app is one: the character
+                          studio's paints and colours by name, the motion studio's colour jigs, the portfolio's jig
 src/hooks/*.ts          use-mobile.ts; use-reading-focus.ts — Tab and the arrows move focus in reading order, left to
                           right and top to bottom as the boxes stand, over a scope a page opts in (Grid.md D45);
                           use-cell-motion.ts — `useCellMotion` plays movement (Motion.md M9) on a block: one GSAP clock
@@ -186,16 +191,20 @@ src/lib/agent-face.ts   the agent's FACE declared (M20's face version 1, his "ye
                           and lower lids, brows, symbols), each a style and its settings; `FaceLook`, what a look holds
                           of it (a pair's right side apart), `checkFace`; an uploaded style is `upload:<version id>`,
                           its drawing a `DrawingData` in its slot's own space (`checkDrawing`)
-src/lib/agent-shape.ts  the agent's SHAPES (Character-Studio.md C10; C12, version 3: ROUNDED SOLIDS IN 3D), pure: a cube,
+src/lib/agent-shape.ts  the agent's SHAPES (Character-Studio.md C10; C12, version 3: ROUNDED SOLIDS IN 3D; C18, version
+                          5: SMOOTH EDGES), pure: a cube,
                           pyramid, hemisphere, cylinder, hexagonal prism or cone, each a core grown by a ball `RHO` wide
-                          (`roundedMesh`: faces moved out, a band of facets an edge, a fan a corner; made once), in the
+                          (made once, `roundedFlat`), in the
                           room the sphere's head takes (`shapeFrame`), turned by `rotate-x/y/z` and seen in perspective
-                          from in front and above (each shape's natural view, `VIEWS`), a tone a facet from its normal
-                          (facets of one tone one path; the `Agent` has 40 face slots), its outline the hull (round) or
-                          the edges no two shown facets share (flat), its
+                          from in front and above (each shape's natural view, `VIEWS`); a flat-sided one's faces each in
+                          its tone and its edges' and corners' rounds in the tone of every way they face, in steps of a
+                          twenty-fourth (`TONE_STEPS`): an edge in runs of one step (`runsOf`), a corner's ball cut
+                          between the circles where its tone crosses a step (`cornerOf`); what is one step one path
+                          (at most 34 of the `Agent`'s 40 face slots); its outline
+                          the hull of its balls' horizons and its rims (`horizonOf`), found as it stands and then bent, its
                           face laid on its front by a matrix (`face`, `faceShown`; the frame's `faceTransform`), standing on the
                           sphere's bottom so it rests on the nest's floor (his: "any character will rest on the nest"),
-                          its underside carried onto the bowl both ways, a cylinder into the page (`giveOf`, his: "they are
+                          its underside carried onto the bowl both ways, a cylinder into the page (`bendOf`, his: "they are
                           slimy … super smooth": every point a smooth function of the turn, no slots, no snapping),
                           so nothing passes the ring and the `Agent`'s bowl cut is only a guard; `front` is where its face is drawn round. `sphereFrame`
                           calls it when `m.shape` is not the sphere; the sphere's own drawing is untouched
@@ -231,7 +240,7 @@ components.json         what the CLI reads; aliases resolve to @no-origins/ui/*
 2. **One stylesheet.** Tokens, the dark theme and the Tailwind map live in `src/styles/globals.css`. An app that
    needs a colour adds it there, not in the app.
 3. **No barrel.** Consumers import `@no-origins/ui/components/<name>`. The `exports` map is per-file on purpose:
-   a barrel would pull all sixty-two components into every page that wanted a button.
+   a barrel would pull all sixty-three components into every page that wanted a button.
 4. **The package ships no fonts.** It reads `--font-sans`, `--font-heading` and `--font-mono`; the host declares them.
 5. **`exports` maps `components/*` to `.tsx` and `lib/*` to `.ts`.** A pure-logic module goes in `lib/`; a
    `.ts` file in `components/` is unreachable from the apps.

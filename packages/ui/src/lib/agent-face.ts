@@ -69,6 +69,9 @@ export const AGENT_FACE: readonly FaceSlot[] = [
       { id: "eye-size", label: "Size", touches: "Each eye across, of the head's", type: "number", unit: "head", min: 0, max: 0.6, step: 0.01, default: 0.24, set: "look" },
       { id: "eye-spacing", label: "Spacing", touches: "How far apart, of the head across", type: "number", unit: "head", min: 0, max: 1, step: 0.01, default: 0.45, set: "look" },
       { id: "eye-height", label: "Height", touches: "Over the head's middle +, under it −", type: "number", unit: "head", min: -0.8, max: 0.8, step: 0.01, default: 0.3, set: "look" },
+      // His, 2026-10-01: "I should also be able to set the color of the eyes". Ink is what they have always been drawn
+      // in (`eyeColours`), so a look saved before they had a colour draws as it did.
+      { id: "eye-colour", label: "Colour", touches: "What they are drawn in: the eye, the pupil in a light one, or the eye under a catchlight", type: "colour", options: COLOUR_NAMES, default: "ink", set: "look" },
       { id: "look-x", label: "Look X", touches: "Where they look, left − or right +, as far as an eye can go", type: "number", unit: "share", min: -1, max: 1, step: 0.01, default: 0, set: "motion" },
       { id: "look-y", label: "Look Y", touches: "Where they look, down − or up +", type: "number", unit: "share", min: -1, max: 1, step: 0.01, default: 0, set: "motion" },
       { id: "look", label: "Look ahead", touches: "How far they look where it is going", type: "number", unit: "share", min: 0, max: 1, step: 0.01, default: 0.8, set: "motion" },

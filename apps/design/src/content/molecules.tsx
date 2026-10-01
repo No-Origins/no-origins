@@ -69,6 +69,7 @@ import {
   CarouselPrevious,
 } from "@no-origins/ui/components/carousel";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@no-origins/ui/components/collapsible";
+import { ColourPicker } from "@no-origins/ui/components/colour-picker";
 import {
   Command,
   CommandEmpty,
@@ -247,6 +248,7 @@ import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-g
 import { Tooltip, TooltipContent, TooltipTrigger } from "@no-origins/ui/components/tooltip";
 
 import type { Responsive } from "@no-origins/ui/components/grid";
+import { AGENT_PAINTS } from "@no-origins/ui/lib/agent-colours";
 import { readSphereMotion, sphereFrame, sphereStill, type SphereMotion } from "@no-origins/ui/lib/sphere-motion";
 import { cn } from "@no-origins/ui/lib/utils";
 
@@ -298,6 +300,22 @@ function StillAgent({ size }: { size: number }) {
   );
 }
 
+/** The colour picker, live (Character-Studio.md C17): the agent's paints, one picked, its name under them. */
+function PickedColour() {
+  const [paint, setPaint] = React.useState("violet");
+  return (
+    <div className="flex w-72 flex-col gap-2">
+      <ColourPicker
+        aria-label="Paint"
+        value={paint}
+        onValueChange={setPaint}
+        options={AGENT_PAINTS.map((p) => ({ value: p.value, label: p.label, colour: p.fill }))}
+      />
+      <Text role="caption">{AGENT_PAINTS.find((p) => p.value === paint)?.label}</Text>
+    </div>
+  );
+}
+
 /**
  * Every specimen, in reading order, with its size in cells — the one design decision each one carries now that the
  * page is a field (Grid.md D1) rather than a column. A box that clips its content is too small; make it bigger here.
@@ -313,7 +331,7 @@ export const MOLECULES: PageContent = {
         id: "header",
         span: band(1),
         variant: "none",
-        render: (placed) => <SectionHeader index="02" label="Molecules · 44 components" title="Atoms with a job to do" cols={placed.colSpan} />,
+        render: (placed) => <SectionHeader index="02" label="Molecules · 45 components" title="Atoms with a job to do" cols={placed.colSpan} />,
       },
       {
         id: "Accordion",
@@ -323,7 +341,7 @@ export const MOLECULES: PageContent = {
             <Accordion type="single" collapsible className="w-full max-w-lg">
               <AccordionItem value="a">
                 <AccordionTrigger>What is in the package?</AccordionTrigger>
-                <AccordionContent>Sixty-two components, the theme, and the `cn` helper. Nothing else.</AccordionContent>
+                <AccordionContent>Sixty-three components, the theme, and the `cn` helper. Nothing else.</AccordionContent>
               </AccordionItem>
               <AccordionItem value="b">
                 <AccordionTrigger>Who consumes it?</AccordionTrigger>
@@ -444,7 +462,7 @@ export const MOLECULES: PageContent = {
                 <BubbleContent>Rebuild the design system on shadcn.</BubbleContent>
               </Bubble>
               <Bubble>
-                <BubbleContent>Sixty-two components installed. Take a look.</BubbleContent>
+                <BubbleContent>Sixty-three components installed. Take a look.</BubbleContent>
               </Bubble>
             </BubbleGroup>
           </Specimen>
@@ -549,6 +567,15 @@ export const MOLECULES: PageContent = {
                 ))}
               </CollapsibleContent>
             </Collapsible>
+          </Specimen>
+        ),
+      },
+      {
+        id: "ColourPicker",
+        span: CARD(3),
+        render: () => (
+          <Specimen name="ColourPicker" note="Every pick of a colour: swatches, one a colour, each named in its title.">
+            <PickedColour />
           </Specimen>
         ),
       },
@@ -1193,7 +1220,7 @@ export const MOLECULES: PageContent = {
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
               <TabsContent value="overview" className="pt-4 text-sm">
-                Three apps, one package, sixty-two components.
+                Three apps, one package, sixty-three components.
               </TabsContent>
               <TabsContent value="routes" className="pt-4 text-sm">
                 <code className="font-mono text-xs">/ · /atoms · /molecules</code>

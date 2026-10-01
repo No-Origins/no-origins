@@ -3,6 +3,7 @@
 import * as React from "react";
 import type { LucideIcon } from "lucide-react";
 
+import { ColourPicker } from "@no-origins/ui/components/colour-picker";
 import { Input } from "@no-origins/ui/components/input";
 import { Label } from "@no-origins/ui/components/label";
 import {
@@ -18,7 +19,6 @@ import {
 import { Slider } from "@no-origins/ui/components/slider";
 import { Switch } from "@no-origins/ui/components/switch";
 import { Text } from "@no-origins/ui/components/text";
-import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-group";
 import { sphereMotionOf } from "@no-origins/ui/lib/agent-body";
 import { agentColours } from "@no-origins/ui/lib/agent-colours";
 import { checkValue, type ColourName, type Property, type PropertyValue } from "@no-origins/ui/lib/properties";
@@ -37,11 +37,10 @@ import { Line } from "@/components/section";
  * - A **number**, an angle or a duration is a slider in the control's column and its value, typed, in the value's.
  * - A **choice** is a select across the control's column and the value's, always, so every select in a room is one
  *   width; what a choice also offers that is not a value — an upload, a template — is at the end of its list (`more`).
- * - A **paint** — a choice whose options are colours (`fills`) — is swatches across the same two columns, one a colour,
- *   what a paint is seen, not read.
- * - A **colour** is one of the agent's by name — its paint, its dark, its ink — so it is a select like any choice, each
- *   name with a dot of what it is on the agent now: the name says what it follows when the paint changes, which a
- *   swatch alone would not (on a violet body, "paint" and "violet" are one colour, "ink" and "light" another).
+ * - **Every pick of a colour is the design system's `ColourPicker`** (C17, his, 2026-10-01: *"color pickers should
+ *   always be like the paint"*), across the same two columns: a paint — a choice whose options are colours (`fills`) —
+ *   and a colour by name, one of the agent's — its paint, its dark, its ink — each swatch what that name is on the agent
+ *   now and named in its title, since two can look alike (on a violet body "paint" and "violet" are one colour).
  * - A **switch** stands at the control column's start.
  *
  * Nothing else stands in the value's column: it holds a number or nothing. Every box in a line — a select, a value —
@@ -60,14 +59,16 @@ export type ChoiceAction = { value: string; label: string; icon: LucideIcon; run
 /** The end of a choice's list, under its own heading: more of its values (his uploads), then its actions. */
 export type ChoiceMore = { label: string; options: { value: string; label: string }[]; actions: ChoiceAction[] };
 
-export function PropertyControl({ property, value, onChange, scope, fills, more, children }: {
+export function PropertyControl({ property, value, onChange, scope, fills, dots, more, children }: {
   property: Property;
   value: PropertyValue;
   onChange: (value: PropertyValue) => void;
   /** The section's name, which its accessible names start with: "Eyes size", "Brows style". */
   scope: string;
-  /** A choice shown as swatches: each option's colour, as CSS. */
+  /** A choice whose options are colours, shown in the colour picker: each option's colour, as CSS. */
   fills?: Record<string, string>;
+  /** A colour's swatches, where its names are drawn otherwise than on the body (the eyes', `eyeColours`); the agent's own when left out. */
+  dots?: Record<ColourName, string>;
   /** A choice's more: the end of its list. */
   more?: ChoiceMore;
   /** What the line also holds that takes no column of it: an upload's file picker and its dialog. */
@@ -79,19 +80,20 @@ export function PropertyControl({ property, value, onChange, scope, fills, more,
   return (
     <Line data-property={property.id} title={property.touches}>
       <Label htmlFor={id}>{property.label}</Label>
-      <Control id={id} name={name} property={property} value={value} onChange={onChange} fills={fills} more={more} />
+      <Control id={id} name={name} property={property} value={value} onChange={onChange} fills={fills} dots={dots} more={more} />
       {children}
     </Line>
   );
 }
 
-function Control({ id, name, property: p, value, onChange, fills, more }: {
+function Control({ id, name, property: p, value, onChange, fills, dots, more }: {
   id: string;
   name: string;
   property: Property;
   value: PropertyValue;
   onChange: (value: PropertyValue) => void;
   fills?: Record<string, string>;
+  dots?: Record<ColourName, string>;
   more?: ChoiceMore;
 }) {
   switch (p.type) {
@@ -102,13 +104,13 @@ function Control({ id, name, property: p, value, onChange, fills, more }: {
     case "choice": {
       const current = String(value ?? p.default);
       if (fills) {
-        const options = p.options.map((o) => ({ ...o, fill: fills[o.value] ?? "transparent" }));
-        return <Swatches id={id} name={name} value={current} options={options} onChange={onChange} />;
+        const options = p.options.map((o) => ({ ...o, colour: fills[o.value] ?? "transparent" }));
+        return <ColourPicker id={id} aria-label={name} value={current} options={options} onValueChange={onChange} className="col-span-2" />;
       }
       return <Choice id={id} name={name} value={current} options={p.options} more={more} onChange={onChange} />;
     }
     case "colour":
-      return <ColourChoice id={id} name={name} value={String(value ?? p.default)} options={p.options} onChange={onChange} />;
+      return <ColourChoice id={id} name={name} value={String(value ?? p.default)} options={p.options} dots={dots} onChange={onChange} />;
     case "switch":
       return <Switch id={id} aria-label={name} checked={value === true} onCheckedChange={onChange} className="col-span-2 justify-self-start" />;
     case "drawing":
@@ -157,69 +159,27 @@ function Choice({ id, name, value, options, more, onChange }: {
   );
 }
 
-/** A named colour's select, each name with a dot of the colour it is on the agent now (`agentColours`). */
-function ColourChoice({ id, name, value, options, onChange }: {
+/** A named colour's picker, each swatch the colour that name is on the agent now (`agentColours`, or `dots`). */
+function ColourChoice({ id, name, value, options, dots, onChange }: {
   id: string;
   name: string;
   value: string;
   options: readonly ColourName[];
+  dots?: Record<ColourName, string>;
   onChange: (value: PropertyValue) => void;
 }) {
   const { look } = useCharacter();
-  const colours = React.useMemo(() => agentColours(sphereMotionOf(look)), [look]);
+  const own = React.useMemo(() => agentColours(sphereMotionOf(look)), [look]);
+  const colours = dots ?? own;
   return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger id={id} size="sm" aria-label={name} className="col-span-2 w-full min-w-0"><SelectValue /></SelectTrigger>
-      <SelectContent>
-        {options.map((o) => (
-          <SelectItem key={o} value={o}>
-            <Dot fill={colours[o]} />
-            {colourLabel(o)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
-/** A colour's dot, ringed so the page's white shows on the page. */
-const Dot = ({ fill }: { fill: string }) => <span aria-hidden className="size-4 shrink-0 rounded-lg ring-1 ring-border" style={{ background: fill }} />;
-
-/**
- * Swatches, one a colour, the one worn pressed: what a colour is is seen, not read. They share the line's two columns
- * out equally, each at most the small size across, so seven fit a room's narrowest card.
- */
-function Swatches({ id, name, value, options, onChange }: {
-  id: string;
-  name: string;
-  value: string;
-  options: readonly { value: string; label: string; fill: string }[];
-  onChange: (value: PropertyValue) => void;
-}) {
-  return (
-    <ToggleGroup
+    <ColourPicker
       id={id}
-      type="single"
-      size="sm"
-      variant="outline"
-      value={value}
-      onValueChange={(next) => next && onChange(next)}
       aria-label={name}
-      className="col-span-2 grid w-full justify-between gap-1"
-      style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 2.25rem))` }}
-    >
-      {options.map((o) => (
-        <ToggleGroupItem
-          key={o.value}
-          value={o.value}
-          aria-label={o.label}
-          title={o.label}
-          className="aspect-square h-auto w-full min-w-0 px-0 data-[state=on]:border-foreground"
-        >
-          <Dot fill={o.fill} />
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
+      value={value}
+      options={options.map((o) => ({ value: o, label: colourLabel(o), colour: colours[o] }))}
+      onValueChange={onChange}
+      className="col-span-2"
+    />
   );
 }
 

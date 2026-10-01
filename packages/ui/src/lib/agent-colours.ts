@@ -11,21 +11,36 @@ import type { SphereMotion } from "./sphere-motion"
  */
 
 /**
- * The paints a body can be (Character-Studio.md C10): the two accents, and since 2026-09-30 the agent's own pastels
- * (`--agent-*` in globals.css, his sketch's), each with its ink. Version 1.
+ * The paints a body can be (Character-Studio.md C10, C20): the two accents, and the agent's own (`--agent-*` in
+ * globals.css), each with its ink, round the wheel from pink to blue. Version 2 (2026-10-01): peach, yellow and grey
+ * went for red, orange, gold, green and teal, which stand out from the page in both themes.
  */
 export const AGENT_PAINTS = [
   { value: "lime", label: "Lime", fill: "var(--lime)", ink: "var(--primary-foreground)" },
   { value: "violet", label: "Violet", fill: "var(--violet)", ink: "var(--secondary-foreground)" },
   { value: "pink", label: "Pink", fill: "var(--agent-pink)", ink: "var(--agent-pink-ink)" },
-  { value: "peach", label: "Peach", fill: "var(--agent-peach)", ink: "var(--agent-peach-ink)" },
-  { value: "yellow", label: "Yellow", fill: "var(--agent-yellow)", ink: "var(--agent-yellow-ink)" },
+  { value: "red", label: "Red", fill: "var(--agent-red)", ink: "var(--agent-red-ink)" },
+  { value: "orange", label: "Orange", fill: "var(--agent-orange)", ink: "var(--agent-orange-ink)" },
+  { value: "gold", label: "Gold", fill: "var(--agent-gold)", ink: "var(--agent-gold-ink)" },
+  { value: "green", label: "Green", fill: "var(--agent-green)", ink: "var(--agent-green-ink)" },
+  { value: "teal", label: "Teal", fill: "var(--agent-teal)", ink: "var(--agent-teal-ink)" },
   { value: "blue", label: "Blue", fill: "var(--agent-blue)", ink: "var(--agent-blue-ink)" },
-  { value: "grey", label: "Grey", fill: "var(--agent-grey)", ink: "var(--agent-grey-ink)" },
 ] as const
 
 export type AgentPaint = (typeof AGENT_PAINTS)[number]["value"]
 export const isAgentPaint = (p: unknown): p is AgentPaint => AGENT_PAINTS.some((each) => each.value === p)
+
+/**
+ * The paints that went (C20) and the one each is read as now: the nearest of the new, so a look saved in one — a draft,
+ * or a version, frozen with the name — keeps its colour's place on the wheel rather than falling to the default.
+ */
+export const RENAMED_PAINTS: Readonly<Record<string, AgentPaint>> = { peach: "orange", yellow: "gold", grey: "teal" }
+
+/** `p` as a paint this version knows: one of `AGENT_PAINTS`, a renamed one as what it is now, else nothing. */
+export const agentPaintOf = (p: unknown): AgentPaint | undefined => {
+  const now = typeof p === "string" ? (RENAMED_PAINTS[p] ?? p) : p
+  return isAgentPaint(now) ? now : undefined
+}
 
 /** A paint's colour and its ink, as CSS; lime's for a paint this version does not know. */
 export const paintCss = (paint: string) => AGENT_PAINTS.find((each) => each.value === paint) ?? AGENT_PAINTS[0]
@@ -41,6 +56,17 @@ export function agentColours(look: Pick<SphereMotion, "paint" | "shade">): Recor
     lime: "var(--lime)",
     violet: "var(--violet)",
   }
+}
+
+/**
+ * The agent's colours as its eyes are drawn in them (2026-10-01, the eyes' Colour): its colours, but for `ink` with a
+ * pupil or a catchlight, which is `deep`. Ink is the colour the eyes have always been — the paint's ink on a solid eye,
+ * `deep` for a pupil on a light eye and for an eye under a catchlight (version 13) — so a look saved before the eyes had
+ * a colour of their own draws as it did, and a pupil in ink never vanishes into the light eye it is on.
+ */
+export function eyeColours(look: Pick<SphereMotion, "paint" | "shade" | "pupils">): Record<ColourName, string> {
+  const colours = agentColours(look)
+  return look.pupils === "dot" || look.pupils === "shine" ? { ...colours, ink: colours.deep } : colours
 }
 
 /**

@@ -1817,7 +1817,7 @@ unmirrors it; after that, left and right are set apart, which is what gives one 
 
 | Part | Styles | Settings |
 |---|---|---|
-| Eyes (today's) | none | Size, Spacing and Height; **Look X** and **Look Y** (−1 … 1): with a pupil, the pupil moves inside the eye, and without one the eye moves on the face; Look ahead and Look lead, as today |
+| Eyes (today's) | none | Size, Spacing and Height; **Colour** (2026-10-01, his: *"I should also be able to set the color of the eyes"*), one of the agent's colours by name — a solid eye, a Dot's pupil, a Shine's eye — and Ink, its default, the colours they have always been (`eyeColours`: ink on a solid eye, deep under a pupil or a catchlight); **Look X** and **Look Y** (−1 … 1): with a pupil, the pupil moves inside the eye, and without one the eye moves on the face; Look ahead and Look lead, as today |
 | Pupils | **None**: the eye is solid ink, as today · **Dot**: the eye is light, with an ink pupil in it · **Shine**: solid ink, with a light catchlight that stays put as the eye looks | Size (a share of the eye), Shine size, Shine angle |
 | Upper lids | **Plain**: cuts the eye, as today · **Heavy**: a band of the body over the top of the eye, with an ink line on its edge | Open (0 shut … 1 wide), Slant (−1 sad … 1 angry), Curve, Blink every, Blink, Squint on landing |
 | Lower lids | **None**: as today · **Plain**: rises from below and cuts the eye | Raise (0 … 1), Slant, Curve (up gives the ^ ^ of a content face) |
