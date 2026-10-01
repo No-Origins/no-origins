@@ -10,7 +10,9 @@ One project, `no-origins`: Postgres + Auth + Storage.
 > the whole `[auth]` section, so `config.toml` ends with a `[remotes.production]` override pinning what the hosted
 > project holds where it differs from the local stack — `site_url`, confirmations on, an 8-digit code, TOTP on —
 > read from the push's own diff on 2026-09-30; without it the push would have put the local values on production.
-> Answer *No* to its storage question (`storage.analytics.enabled` differs and is not ours to change). **The passkey
+> **The link is not spent by being opened** (2026-10-01): the callback's GET only carries the token hash to `/sign-in`, and the
+> card posts it back — a mail client's preview or a scanner between Resend and the inbox fetches the link and spends
+> nothing; the person's tap does. Answer *No* to its storage question (`storage.analytics.enabled` differs and is not ours to change). **The passkey
 > origins are not among what config push manages**, so `https://motion.no-origins.com` and
 > `https://character.no-origins.com` under the relying party ID `no-origins.com` are still a dashboard step, and his,
 > until checked. A passkey registered under another relying party ID does not carry over.
