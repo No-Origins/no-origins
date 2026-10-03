@@ -51,8 +51,11 @@ function downloadTemplate(slot: UploadSlot, motion: SphereMotion) {
   URL.revokeObjectURL(url);
 }
 
-/** A style list's two entries for uploading: the template, then the upload, which waits for the database. */
-export function uploadActions(slot: UploadSlot, look: CharacterLook, connected: boolean): ChoiceAction[] {
+/**
+ * A style list's two entries for uploading: the template, then the upload, which waits for the database and is the
+ * owner's (C24) — `why` says why it is not offered, or is null when it is.
+ */
+export function uploadActions(slot: UploadSlot, look: CharacterLook, why: string | null): ChoiceAction[] {
   const label = faceSlot(slot).label.toLowerCase();
   return [
     {
@@ -66,8 +69,8 @@ export function uploadActions(slot: UploadSlot, look: CharacterLook, connected: 
       value: "action:upload",
       label: "Upload a drawing…",
       icon: Upload,
-      disabled: !connected,
-      title: connected ? HOW : "Uploads are kept in the database, which this server has no keys for.",
+      disabled: why !== null,
+      title: why ?? HOW,
       run: () => document.getElementById(inputId(slot))?.click(),
     },
   ];

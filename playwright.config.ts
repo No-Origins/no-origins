@@ -1,13 +1,21 @@
+import { existsSync } from "node:fs";
+
 import { defineConfig, devices } from "@playwright/test";
 
 // Visual review loop for the workspace apps.
-// `pnpm review` boots FIVE dev servers (or reuses ones already running) — the portfolio on :3000, the design
-// showcase on :3001, engineering on :3003, the motion studio on :3004 and Orbit on :3005 — sweeps
+// `pnpm review` boots SEVEN dev servers (or reuses ones already running) — the portfolio on :3000, the design
+// showcase on :3001, engineering on :3003, the motion studio on :3004, Orbit on :3005, Home on :3006 and Status on
+// :3007 — sweeps
 // every route in e2e/review.spec.ts on desktop + mobile viewports in both themes, and drops full-page screenshots into
 // e2e/screenshots/<project>/<route>.png. CI runs the same sweep (.github/workflows/ci.yml) and uploads the screenshots.
 //
 // An app outside the loop is an app whose screenshots nobody looks at, and CLAUDE.md's rule is that you look at the
 // result before reporting done.
+//
+// Home is not in the repository (Home.md H4: the house is private and the repo is public, so the app stays on his
+// machine until he says where the house lives). The sweep boots it where the app is and leaves it out where it is not,
+// so CI and a fresh clone sweep the other six.
+const HOME_PRESENT = existsSync("apps/home/package.json");
 export default defineConfig({
   testDir: "./e2e",
   outputDir: "./e2e/.results",
@@ -44,7 +52,8 @@ export default defineConfig({
       use: { ...devices["Pixel 7"], colorScheme: "dark" },
     },
   ],
-  // Five apps are booted (the admin is not: every route of it is behind auth and needs a running Supabase).
+  // Six apps are booted, seven where Home is (the admin is not: every route of it is behind auth and needs a running
+  // Supabase).
   webServer: [
     {
       command: "pnpm --filter portfolio dev",
@@ -73,6 +82,22 @@ export default defineConfig({
     {
       command: "pnpm --filter orbit dev",
       url: "http://localhost:3005",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    ...(HOME_PRESENT
+      ? [
+          {
+            command: "pnpm --filter home dev",
+            url: "http://localhost:3006",
+            reuseExistingServer: !process.env.CI,
+            timeout: 120_000,
+          },
+        ]
+      : []),
+    {
+      command: "pnpm --filter status dev",
+      url: "http://localhost:3007",
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

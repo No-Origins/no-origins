@@ -21,6 +21,11 @@ import * as React from "react"
  * A line is the stops whose top is above the middle of the line's first, so a stop set a little down in its box (the
  * avatar in its card) reads with the row it stands in. A stop is anything the browser would tab to that can be seen:
  * not disabled, not inert, not hidden from assistive technology, not transparent.
+ *
+ * **A group that reads after the page** (`data-reading-after`, 2026-10-03): the stops inside an element so marked come
+ * after every other stop, in reading order among themselves, as a navbar after the content — a column of controls
+ * standing beside a page would otherwise be read a stop at a time between the page's lines, each with the line it
+ * happens to share. The portfolio's agents at home, in the field's last column, are one (Portfolio.md P24).
  */
 export function useReadingFocus(scope: React.RefObject<HTMLElement | null>, enabled = true) {
   React.useEffect(() => {
@@ -45,8 +50,10 @@ export function useReadingFocus(scope: React.RefObject<HTMLElement | null>, enab
       if (!stops.length) return
       const rtl = getComputedStyle(root).direction === "rtl"
       // The focused element is placed among the stops even when it is not one (a box a click focused), so the keys go
-      // on from where it stands.
-      const lines = readingLines(idle || stops.includes(active!) ? stops : [...stops, active!], rtl)
+      // on from where it stands. A group marked to read after the page follows every other line.
+      const after = stops.filter((el) => el.closest(AFTER))
+      const page = stops.filter((el) => !after.includes(el))
+      const lines = [...readingLines(idle || stops.includes(active!) ? page : [...page, active!], rtl), ...readingLines(after, rtl)]
       const flat = lines.flat().map((box) => box.el)
       const move = (el: HTMLElement | undefined) => {
         if (!el) return false
@@ -95,6 +102,9 @@ const ARROWS: Record<string, { axis: "x" | "y"; dir: 1 | -1 }> = {
   ArrowUp: { axis: "y", dir: -1 },
   ArrowDown: { axis: "y", dir: 1 },
 }
+
+/** Marks an element whose stops read after every other (above). */
+const AFTER = "[data-reading-after]"
 
 const TABBABLE =
   "a[href], area[href], button, input, select, textarea, iframe, summary, audio[controls], video[controls], [tabindex], [contenteditable]"

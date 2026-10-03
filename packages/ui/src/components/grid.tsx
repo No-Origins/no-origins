@@ -5,7 +5,7 @@ import gsap from "gsap"
 import { cn } from "cn"
 
 import { useThemeFlipRegistry, type ThemeFlipper } from "@no-origins/ui/components/theme-provider"
-import type { IntroActions, IntroAgent } from "@no-origins/ui/lib/intro-motion"
+import type { IntroActionId, IntroActions, IntroAgent } from "@no-origins/ui/lib/intro-motion"
 import {
   FIELD_PAD,
   startFieldPainter,
@@ -250,6 +250,26 @@ export type GridProps = Omit<React.ComponentProps<"div">, "children"> & {
   /** How the cast bounces, jumps and dives: each action's values as he published them (M24). One left out, its defaults. */
   introActions?: IntroActions
   /**
+   * The agent in focus, by its id (D50, version 9, 2026-10-03): the page's boxes are its section alone, and it is under
+   * them. The intro ends with it diving into its section's centre and the rest at home; a new one turns the page — the
+   * section fades away as its agent comes home, `onIntroFocus` asks for the next section, and its agent dives out of its
+   * cell, into the centre of those boxes, and they fade in. While a page turns the grid carries `data-intro-turn`. None,
+   * version 8: every agent opens its own boxes and they all go home.
+   */
+  introFocus?: string
+  /** The field is clear for `introFocus`'s section: put its boxes on the field now (version 9). */
+  onIntroFocus?: (agent: string) => void
+  /**
+   * Where the agent in focus stands, a cell placed as a box is, 1-based (version 9, 2026-10-03, his: "put the agent in
+   * the bottom third row in the large screen"). None, the cell below its section, at its centre.
+   */
+  introFocusAt?: { col: number; row: number }
+  /**
+   * An action for an agent to play where it rests, played each time `key` changes (version 9, 2026-10-03, his: "When we
+   * click on the agent, add bounce"): once the intro is over, when no page is turning and the agent is not in the air.
+   */
+  introAct?: { agent: string; action: IntroActionId; key: number }
+  /**
    * Draw the pointer as a violet ring that fills while it is pressed, and light the cell under it: its dashes in violet
    * (Grid.md D34, D43). A mouse or a pen only: nothing changes on touch.
    */
@@ -266,6 +286,10 @@ function Grid({
   intro: introProp = false,
   introAgents,
   introActions,
+  introFocus,
+  onIntroFocus,
+  introFocusAt,
+  introAct,
   cursor: cursorProp = false,
   onMetrics,
   className,
@@ -381,6 +405,10 @@ function Grid({
                   agents={introAgents}
                   actions={introActions}
                   settled={intro.settled}
+                  focus={introFocus}
+                  onFocus={onIntroFocus}
+                  focusAt={introFocusAt ? { col: introFocusAt.col - 1, row: introFocusAt.row - 1 } : undefined}
+                  act={introAct}
                   pass={field.pass}
                   onReveal={intro.reveal}
                   onDone={intro.done}

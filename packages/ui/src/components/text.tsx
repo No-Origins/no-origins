@@ -2,12 +2,12 @@ import * as React from "react"
 import { cn } from "cn"
 
 /**
- * Text (Type.md). Seven roles, read off the showcase as it stood on 2026-09-21; two knobs besides the role, tone (four
- * since 2026-09-25) and alignment. Every piece of text in an app is one of these — a page does not reach for
- * `text-2xl` on its own (T1).
+ * Text (Type.md). Seven roles, read off the showcase as it stood on 2026-09-21, and an eighth over them since
+ * 2026-10-03 (`hero`, T5: the name a screen is called by); two knobs besides the role, tone (four since 2026-09-25)
+ * and alignment. Every piece of text in an app is one of these — a page does not reach for `text-2xl` on its own (T1).
  */
 
-export const TEXT_ROLES = ["display", "title", "heading", "label", "body", "caption", "mono"] as const
+export const TEXT_ROLES = ["hero", "display", "title", "heading", "label", "body", "caption", "mono"] as const
 export type TextRole = (typeof TEXT_ROLES)[number]
 /**
  * `faint` is for text meant to be found rather than read — a step past muted, flat, in both themes (Type.md T3).
@@ -19,6 +19,7 @@ export const TEXT_ALIGNS = ["start", "center", "end"] as const
 export type TextAlign = (typeof TEXT_ALIGNS)[number]
 
 const ROLE: Record<TextRole, { className: string; tag: keyof React.JSX.IntrinsicElements; tone: TextTone }> = {
+  hero: { className: "font-heading text-5xl font-bold tracking-tight", tag: "h1", tone: "foreground" },
   display: { className: "font-heading text-4xl font-bold tracking-tight", tag: "h1", tone: "foreground" },
   title: { className: "font-heading text-3xl font-bold tracking-tight", tag: "h2", tone: "foreground" },
   heading: { className: "font-heading text-xl font-semibold", tag: "h3", tone: "foreground" },
@@ -35,19 +36,21 @@ export type TextProps = Omit<React.ComponentProps<"p">, "children"> & {
   role?: TextRole
   tone?: TextTone
   align?: TextAlign
+  /** Heavy emphasis for a screen's closing or opening hero; typography stays in the system. */
+  weight?: "default" | "heavy"
   /** Override the element the role picks (`h1` for display, `h2` for title, `h3` for heading, `p` otherwise). */
   as?: keyof React.JSX.IntrinsicElements
   children?: React.ReactNode
 }
 
-function Text({ role = "body", tone, align = "start", as, className, ...props }: TextProps) {
+function Text({ role = "body", tone, align = "start", weight = "default", as, className, ...props }: TextProps) {
   const spec = ROLE[role]
   const Tag = (as ?? spec.tag) as React.ElementType
   return (
     <Tag
       data-slot="text"
       data-role={role}
-      className={cn("m-0 min-w-0 wrap-break-word", spec.className, TONE[tone ?? spec.tone], ALIGN[align], className)}
+      className={cn("m-0 min-w-0 wrap-break-word", spec.className, TONE[tone ?? spec.tone], ALIGN[align], weight === "heavy" && "font-black", className)}
       {...props}
     />
   )

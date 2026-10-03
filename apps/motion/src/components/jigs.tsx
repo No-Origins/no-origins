@@ -419,7 +419,24 @@ const SPECIMEN: Partial<Record<Family["id"], (props: { family: Family }) => Reac
   enter: (p) => <MoveOptions {...p} />,
   focus: (p) => <FocusOptions {...p} />,
   mode: (p) => <ModeOptions {...p} />,
+  liquid: (p) => <LiquidOptions {...p} />,
 };
+
+/**
+ * The liquid's own option (Motion.md M25): how full it is. The status page's cells are 40% (his: "Fill only 40% of the
+ * liquid"); a new level pours from the one before.
+ */
+function LiquidOptions({ family }: { family: Family }) {
+  const studio = useStudio();
+  const level = studio.optionOf(family, "level", 40);
+  return (
+    <Controls>
+      <Control label="Level" value={`${level}%`}>
+        <Slider min={0} max={100} step={5} value={[level]} onValueChange={([v]) => v !== undefined && studio.setOption(family, "level", v)} aria-label="Level" />
+      </Control>
+    </Controls>
+  );
+}
 
 /**
  * Which way movement's elements fill the block (his, 2026-09-27: "an option to have both rows and columns … it can

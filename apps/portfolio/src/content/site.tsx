@@ -82,8 +82,9 @@ const LABELS = {
   work: { label: "Work", icon: BriefcaseIcon },
   projects: { label: "Projects", icon: FolderGit2Icon },
   // The code mark says what kind of skill these are (his, 2026-09-27: "we have coding icon so we can treat them as
-  // technical skills"); the interests are under them.
-  tech: { label: "Technical skills", icon: CodeXmlIcon },
+  // technical skills"); the interests were under them. Technical skills until 2026-10-03 (his: "the technical skills
+  // (rename as tech stack)").
+  tech: { label: "Tech stack", icon: CodeXmlIcon },
   // The art skills until 2026-10-01 (his: "Rename art skills to interests"), the palette kept.
   interests: { label: "Interests", icon: PaletteIcon },
   cases: { label: "Case studies", icon: BookOpenTextIcon },
@@ -160,7 +161,9 @@ const SOCIAL_LINKS = ["x", "instagram", "youtube", "linkedin", "discord"] as con
 const MARK = pill(1, 1, 1);
 const SOCIALS: PortfolioItem = {
   id: "socials",
-  by: "lola",
+  // Zaza's since the page is one section a page (P24, 2026-10-03), with the address and the résumé until those went to
+  // the first page the same day. Lola's while they stood in her column.
+  by: "zaza",
   span: WIP_ROW,
   wraps: [LABEL_ROW, ...SOCIAL_LINKS.map(() => MARK)],
   side: 2,
@@ -201,7 +204,9 @@ const TECH_NARROW: Record<string, Span> = { base: { cols: 6, rows: 6 } };
  * five on a phone's narrower cells. It was three in `heading`. It takes its rows from the tech, which grows into what is
  * left.
  */
-const STATEMENT_AI: Record<string, Span> = { base: { cols: 6, rows: 5 }, sm: { cols: 6, rows: 3 }, lg: { cols: 8, rows: 4 } };
+// Three rows at eight cells since it stands on a page of its own, eight cells wide (P24, 2026-10-03): its words are
+// four lines there, and four rows left one empty under them.
+const STATEMENT_AI: Record<string, Span> = { base: { cols: 6, rows: 5 }, sm: { cols: 6, rows: 3 }, lg: { cols: 8, rows: 3 } };
 const INTEREST_PILLS: Record<string, Record<string, Span>> = {
   Sketching: pill(2, 2, 2),
   "Oil painting": pill(3, 2, 2),
@@ -240,7 +245,30 @@ const TABS: SectionTab[] = [
   },
 ];
 /**
- * The portfolio (Portfolio.md §4), one page since 2026-09-27 (P15). The first screen is three columns (P4, amended
+ * The pages, one an agent's section, in the order the page turns to them (Portfolio.md P24, his, 2026-10-03: "having
+ * pages is a good idea … each agent can pick a section. So we scroll from one agent to another"). Who he is first —
+ * with the address, GitHub, the résumé, the degree and the city since the same day (his) — then **his order** (the same
+ * evening: "the socials should be in the end … the technical skills (rename as tech stack) should be 2nd, work should
+ * be the 3rd. Projects should be 4th, Case studies should be 5th"): the tech stack, the work, the projects with the case
+ * studies under them (Kino's one page: a page is one agent's section, and a new agent is what turns it), the statement
+ * about AI with the interests, and the socials last. Until then the socials were second and the rest in the résumé's
+ * order. The agents stand at home in this order too (`INTRO_CAST`), so the page goes down their column as it turns.
+ */
+export const PAGES = ["bali", "mira", "oru", "kino", "lola", "zaza"] as const;
+
+/** Each page's name, said by the agent at home that brings it (`AgentHome`): its section's label; who he is for Bali's. */
+export const PAGE_TITLES: Record<(typeof PAGES)[number], string> = {
+  bali: "About me",
+  mira: LABELS.tech.label,
+  oru: LABELS.work.label,
+  kino: LABELS.projects.label,
+  lola: LABELS.interests.label,
+  zaza: LABELS.socials.label,
+};
+
+/**
+ * The portfolio (Portfolio.md §4), one page since 2026-09-27 (P15), and one agent's section a page since 2026-10-03
+ * (P24): each item is on the page of the agent that opens it (`by`, `arrangeAgent`). The first screen is three columns (P4, amended
  * 2026-09-26), in this order since 2026-09-27: who I am and how to reach me, where I have worked and what I make, and
  * what I make it with, each section's label its first cell. The Work and Stack screens went into its columns the same
  * day, and Beyond and Say hello, which were a screen each, into the room it leaves and then into the profile's column,
@@ -275,8 +303,10 @@ export const SITE: PortfolioPage = {
           by: "mira",
           render: (placed) => <ProfileTech cols={placed.colSpan} rows={placed.rowSpan} lead={LABELS.tech} />,
         },
-        { id: "links", span: LINKS_ROW, narrow: LINKS_NARROW, below: true, by: "zaza", render: (placed) => <ProfileLinks cols={placed.colSpan} /> },
-        { id: "facts", span: ROW, narrow: ROW_NARROW, below: true, by: "zaza", render: () => <ProfileFacts /> },
+        // Bali's, on the first page, under his line (his, 2026-10-03: "I need a the resume, Hyderabad, education, GitHub,
+        // and email in the first page"); Zaza's, with the socials, from the pages' start that morning until then.
+        { id: "links", span: LINKS_ROW, narrow: LINKS_NARROW, below: true, by: "bali", render: (placed) => <ProfileLinks cols={placed.colSpan} /> },
+        { id: "facts", span: ROW, narrow: ROW_NARROW, below: true, by: "bali", render: () => <ProfileFacts /> },
         // Where the columns cannot stand beside the profile, the tabs take their place under it (`compact`).
         {
           id: "sections",

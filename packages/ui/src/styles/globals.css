@@ -477,6 +477,16 @@
   animation: grid-intro-in var(--grid-intro-reveal) cubic-bezier(0.33, 1, 0.68, 1) backwards;
 }
 
+/* A page turning by its agents (D50, version 9): the section on the field fades away and the next comes in as its agent
+   dives into it, each box shown by the intro's own fade written over this; any box it has not shown yet is held back and
+   out of the pointer's way, as while the intro plays. A fixture (`data-intro-fixed`: the portfolio's status pill, the
+   agents' cells to click) is no box of the page — a turn leaves it where it is, and the intro neither measures it nor
+   fades it in; it is shown when the intro hands over. */
+[data-slot="grid"][data-intro-turn] [data-slot="grid-tracks"]>[data-slot="grid-item"]:not([data-intro-fixed]) {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* The grid's own pointer (grid.tsx, Grid.md D34, D43): a 24px ring, a 2px violet line on nothing, filled violet while pressed —
    the system's cursor, drawn from an image, over the whole field: a link's hand and a button's included, because the
    ring is the pointer. The system draws it where the hand is, so it never trails and costs the page nothing; it was a

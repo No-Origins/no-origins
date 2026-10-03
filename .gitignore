@@ -20,6 +20,7 @@ e2e/.results
 e2e/.mcp
 e2e/.auth
 e2e/screenshots
+/test-results/
 playwright-report
 e2e/*-snapshots/
 .claude/worktrees/

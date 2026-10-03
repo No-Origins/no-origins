@@ -8,6 +8,29 @@ import { sphereBeats, type SphereGeometry, type SphereMotion } from "@no-origins
  * The intro (Grid.md D50, Motion.md M22), pure: who stands where, what each does and when, which cells its ripple lights,
  * and when each box comes in.
  *
+ * **Version 9, one agent's section at a time** (his, 2026-10-03, after a recruiter friend found the page too much at
+ * once: *"I think it's very interesting if each agent can pick a section. So we scroll from one agent to another. So
+ * whoever agent is in focus should dive in to show their section. And when we scroll, they dive back into their place
+ * and the new agent dives in."*). Where the page names one agent as in focus (`focus`), the boxes on the field are its
+ * section alone, and:
+ *
+ * - **The one in focus stays on its page, below its section** (his, the same day, before he had seen it: *"it will be
+ *   great if the agent stays on the same page until we change the section"*, then: *"place it right in the center bottom
+ *   of the section"*): in the cell under the section's last row, at its centre, never on it (`introBeside`), resting
+ *   there, breathing and blinking, its nest lit under it, until the page turns. Where the field has no free cell round
+ *   the section, it dives into the section's centre and is **held** there, gone behind the page (`hold`), as first
+ *   built.
+ * - **The intro ends with that one below its section and the rest at home** (`introPlan` with `focus`): they stand in
+ *   their row and bounce as in version 8; then the one in focus jumps or dives to its cell below its section, its
+ *   ripple spreads, and once it has the section fades in. The others jump or dive straight to their cells at home, with
+ *   no ripple: they open nothing.
+ * - **The page turns by the agents** (`introGoIn`, `introGoHome`): the one in focus dives out of its cell below its
+ *   section, under the page and up into its cell at home, while its section fades away (`out`); the next one dives out
+ *   of its cell at home and comes up below its own section, its ripple spreads, and the section fades in. An empty cell
+ *   at home is the page being shown.
+ * - **Home is the bottom row on a field taller than it is wide** (`introHome`): a phone's six columns are the six cells,
+ *   where version 8's last column stood over the page's own boxes.
+ *
  * **Version 8, home** (his, 2026-10-01: "after the intro scene, once the agents jump into their sections and dive, they
  * all should uh, come and settle in the last row middle six columns cells", and before it was built: "instead of uh,
  * bringing them to the bottom, we'll bring them to the right the last most column vertically centered"). Version 7 as
@@ -124,15 +147,18 @@ export type IntroMotion = {
   settle: number
   /** How long the boxes it opens take to fade in, once it is gone behind the page, ms. */
   reveal: number
+  /** How long a section takes to fade away as the page turns (version 9), ms: its agent is already on its way home. */
+  out: number
 }
 
 /**
  * Version 8 (2026-10-01, mine but `gather`): version 3's bouncing, leaving and ripple — two rings, 80ms apart; the dive
  * home 250ms after the ripple's last ring, so the ripple is seen spread before the agent goes; and the boxes fading in
  * over version 1's 500ms, his first "the card should render smoothly". Version 7's `dive`, its own sink's 320ms, is his
- * Dive's since version 8.
+ * Dive's since version 8. Version 9's `out`, a section fading away as the page turns, is the grid's own turn's 160ms
+ * (`TURN_MS`, D37, D49).
  */
-export const INTRO_START: IntroMotion = { gather: 2000, first: 500, rest: 700, leave: 300, ripple: 2, ring: 80, settle: 250, reveal: 500 }
+export const INTRO_START: IntroMotion = { gather: 2000, first: 500, rest: 700, leave: 300, ripple: 2, ring: 80, settle: 250, reveal: 500, out: 160 }
 
 /** The intro's tokens off `el`, read as it starts; INTRO_START where one is unset. */
 export function readIntroMotion(el: Element): IntroMotion {
@@ -145,6 +171,7 @@ export function readIntroMotion(el: Element): IntroMotion {
     ring: Math.max(0, motionMs(el, "--motion-intro-ring", INTRO_START.ring)),
     settle: Math.max(0, motionMs(el, "--motion-intro-settle", INTRO_START.settle)),
     reveal: Math.max(0, motionMs(el, "--motion-intro-reveal", INTRO_START.reveal)),
+    out: Math.max(0, motionMs(el, "--motion-intro-out", INTRO_START.out)),
   }
 }
 
@@ -208,6 +235,14 @@ function middle(list: readonly IntroBox[]): IntroCell {
   const either = (v: number) => (Number.isInteger(v) ? [v] : [Math.floor(v), Math.ceil(v)])
   const round = either((t + b) / 2).flatMap((row) => either((l + r) / 2).map((col) => ({ col, row })))
   return round.find((c) => list.some((box) => reach(box, c) === 0)) ?? round[0]!
+}
+
+/**
+ * The nest an agent opens `boxes` from: the cell at the centre of them all (version 6's rule, `middle`) — a section's,
+ * as the page turns to it (version 9). None, with no boxes.
+ */
+export function introNest(boxes: readonly IntroBox[]): IntroCell | null {
+  return boxes.length ? middle(boxes) : null
 }
 
 /**
@@ -300,11 +335,46 @@ export function introSpots(nests: readonly (IntroCell | null)[], cols: number, r
 }
 
 /**
+ * Where the agent in focus stands on its page (version 9, his: "it will be great if the agent stays on the same page
+ * until we change the section", and then: "instead of placing them on the left of the section, uh, place it right in
+ * the center bottom of the section"): the cell under the section `boxes` make, at its centre — where the section is an
+ * even number of cells across, the left of its two middle cells, then the right, since an agent stands on a cell (his,
+ * 2026-10-01). Where that row is not free, the same cells over the section, then the cell left of its first row and the
+ * one right of it. Never in a box nor in any cell of `taken` (the agents' cells at home). None, with no boxes or no
+ * such cell.
+ */
+export function introBeside(boxes: readonly IntroBox[], cols: number, rows: number, taken: readonly IntroCell[] = []): IntroCell | null {
+  if (!boxes.length) return null
+  const l = Math.min(...boxes.map((b) => b.col))
+  const t = Math.min(...boxes.map((b) => b.row))
+  const r = Math.max(...boxes.map((b) => b.col + b.across - 1))
+  const b = Math.max(...boxes.map((x) => x.row + x.down - 1))
+  const mid = [...new Set([Math.floor((l + r) / 2), Math.ceil((l + r) / 2)])]
+  const free = (c: IntroCell) =>
+    c.col >= 0 && c.row >= 0 && c.col < cols && c.row < rows && !boxes.some((x) => reach(x, c) === 0) && !taken.some((h) => h.col === c.col && h.row === c.row)
+  const candidates = [...mid.map((col) => ({ col, row: b + 1 })), ...mid.map((col) => ({ col, row: t - 1 })), { col: l - 1, row: t }, { col: r + 1, row: t }]
+  return candidates.find(free) ?? null
+}
+
+/**
+ * Where home is on a field `cols` × `rows`: its last column (version 8), or its bottom row where it is taller than it is
+ * wide (version 9) — a phone's, whose six columns are the six cells, where the last column stood over its boxes.
+ */
+export const introHomeSide = (cols: number, rows: number): "column" | "row" => (rows > cols ? "row" : "column")
+
+/**
  * Where each of `n` agents settles once the intro is over, a field `cols` × `rows` (version 8, his): one above the other
  * in its last column, a cell each, centred down it, in the cast's order from the top — the fourth row to the ninth of a
  * field twelve deep, since a field's rows are even (D26). A cast taller than the field goes on in the column left of it.
+ * **On a field taller than it is wide, side by side along its bottom row** (version 9, `introHomeSide`), centred across
+ * it, in the cast's order from the left; a cast wider than the field goes on in the row over it.
  */
 export function introHome(n: number, cols: number, rows: number): IntroCell[] {
+  if (introHomeSide(cols, rows) === "row") {
+    const across = Math.max(1, Math.min(n, cols))
+    const c0 = Math.floor((cols - across) / 2)
+    return Array.from({ length: n }, (_, k) => ({ col: c0 + (k % across), row: Math.max(0, rows - 1 - Math.floor(k / across)) }))
+  }
   const down = Math.max(1, Math.min(n, rows))
   const r0 = Math.floor((rows - down) / 2)
   return Array.from({ length: n }, (_, k) => ({ col: Math.max(0, cols - 1 - Math.floor(k / down)), row: r0 + (k % down) }))
@@ -342,6 +412,13 @@ export type IntroPart = {
   open: number
   gone: number
   settled: number
+  /**
+   * Held, from this moment on, gone behind the page (version 9): the agent in focus, dived into its section's nest and
+   * staying under it while its section is shown, until the page turns (`introComeHome`). None, never held.
+   */
+  hold?: number
+  /** Whether its landing in its nest lights a ripple; it does unless it says not (version 9: one going home opens nothing). */
+  ripple?: boolean
 }
 
 /** The intro, played: each agent's part, when each box of the page starts to fade in, and when it is all over. */
@@ -372,9 +449,16 @@ export function introPlan(input: {
   boxes: readonly IntroBox[]
   /** Whether each agent bounces while they stand (`IntroAgent.bounces`); every one where none is given. */
   bounces?: readonly boolean[]
+  /**
+   * The agent in focus, by its index (version 9): it alone goes to its nest — below its section — and opens every box,
+   * staying there; the rest go straight home. None, version 8: each opens its own and every one goes home.
+   */
+  focus?: number
+  /** Its nest is its section's centre, with no cell below it: once its ripple has spread it dives in and is held. */
+  under?: boolean
   random?: () => number
 }): IntroPlan {
-  const { m, g, roles, spots, homes, motions, boxes, bounces, random = Math.random } = input
+  const { m, g, roles, spots, homes, motions, boxes, bounces, focus, under = false, random = Math.random } = input
   const bounce = agentAction("bounce")!
   const dive = agentAction("dive")!
   const n = roles.length
@@ -407,15 +491,57 @@ export function introPlan(input: {
       t += resting + pace * (0.65 + 0.7 * random())
     }
     const travel = divers.has(a) ? "dive" : "jump"
+    // Version 9: one not in focus goes straight home, and that is all it does.
+    if (focus !== undefined && a !== focus) {
+      const home = homes?.[a] ?? spot
+      const go = agentAction(travel)!.play(ms[travel], g, { from: spot, to: home }, restedAt(leave))
+      steps.push({ at: leave, play: go, m: ms[travel] })
+      return {
+        spot,
+        nest: home,
+        home,
+        boxes: [],
+        travel,
+        still: { at: 0, play: actionStill(ms.bounce, g, spot, since), m: ms.bounce },
+        steps,
+        since,
+        leave,
+        lands: leave + go.lands,
+        open: Infinity,
+        gone: Infinity,
+        settled: leave + go.total,
+        ripple: false,
+      }
+    }
     const go = agentAction(travel)!.play(ms[travel], g, { from: spot, to: nest }, restedAt(leave))
     steps.push({ at: leave, play: go, m: ms[travel] })
     const lands = leave + go.lands
+    // Version 9: the one in focus stays below its section, which fades in once its ripple has spread.
+    if (focus === a && !under) {
+      return {
+        spot,
+        nest,
+        home: homes?.[a] ?? nest,
+        boxes: role.boxes,
+        travel,
+        still: { at: 0, play: actionStill(ms.bounce, g, spot, since), m: ms.bounce },
+        steps,
+        since,
+        leave,
+        lands,
+        open: Infinity,
+        gone: lands + rippleSpan(m),
+        settled: leave + go.total,
+      }
+    }
     // Home, by his Dive (version 8): once its ripple has spread — its last ring lit, and `settle` more — and its landing
     // has come to rest, since a Dive sets off from the agent sitting in its nest.
     const open = Math.max(lands + rippleSpan(m) + m.settle, leave + go.total)
     const home = homes?.[a] ?? nest
     const back = dive.play(ms.dive, g, { from: nest, to: home }, restedAt(open))
     steps.push({ at: open, play: back, m: ms.dive })
+    // Version 9: the one in focus stays under its section once it has dived in.
+    const held = focus === a ? open + (back.gone ?? back.lands) : undefined
     return {
       spot,
       nest,
@@ -429,7 +555,8 @@ export function introPlan(input: {
       lands,
       open,
       gone: open + (back.gone ?? back.lands),
-      settled: open + back.total,
+      settled: held ?? open + back.total,
+      hold: held,
     }
   })
   // Each box once the agent that opens it is gone; a box no one opens, with the first of them.
@@ -454,20 +581,26 @@ export function introResting(input: {
   homes: readonly IntroCell[]
   motions: readonly IntroMotions[]
   still?: boolean
+  /** The agent in focus, by its index (version 9): below its section, its cell at home empty. */
+  out?: number
+  /** Where the one in focus stands, below its section (`introBeside`); none, under it (`hold`). */
+  outAt?: IntroCell | null
   random?: () => number
 }): IntroPlan {
-  const { g, homes, motions, still = false, random = Math.random } = input
+  const { g, homes, motions, still = false, out, outAt, random = Math.random } = input
   const parts = homes.map((home, a): IntroPart => {
     const ms = motions[a]!.dive
     const sat = (1 + random()) * Math.max(ms.blinkEvery, ms.breath, 1)
     const since = still && ms.blinkEvery > 0 ? sat - (sat % ms.blinkEvery) + ms.blinkEvery / 2 : sat
+    if (a === out && !outAt) return introUnder(g, home, ms, sat)
+    const at = a === out && outAt ? outAt : home
     return {
-      spot: home,
+      spot: at,
       nest: home,
       home,
       boxes: [],
       travel: "dive",
-      still: { at: 0, play: actionStill(ms, g, home, since), m: ms },
+      still: { at: 0, play: actionStill(ms, g, at, since), m: ms },
       steps: [],
       since,
       leave: Infinity,
@@ -480,15 +613,184 @@ export function introResting(input: {
   return { parts, boxes: [], end: 0 }
 }
 
-/** An agent at `t` ms into the intro: its moment of the step it is in, or past, and how it moves in it, its blinks on its own clock. */
+/**
+ * An agent under the page with no section to have dived into (version 9): the page in focus on a field the intro did not
+ * play on. Held, from its start, at the moment its Dive home from its own cell is gone; `introComeHome` brings it up.
+ */
+function introUnder(g: SphereGeometry, home: IntroCell, m: SphereMotion, since: number): IntroPart {
+  const back = agentAction("dive")!.play(m, g, { from: home, to: home }, since)
+  const gone = back.gone ?? back.lands
+  return {
+    spot: home,
+    nest: home,
+    home,
+    boxes: [],
+    travel: "dive",
+    still: { at: 0, play: actionStill(m, g, home, since), m },
+    steps: [{ at: -gone, play: back, m }],
+    since,
+    leave: -Infinity,
+    lands: -Infinity,
+    open: -gone,
+    gone: 0,
+    settled: 0,
+    hold: 0,
+    ripple: false,
+  }
+}
+
+/**
+ * The agent in focus diving in as the page turns to its section (version 9): out of its cell at `home` by his Dive and up
+ * in `nest`, below its section, its ripple spreading as it lands; the section fades in from `gone`, once the ripple has
+ * spread, and it stays there, resting. `under`, with no cell below it: `nest` is the section's centre, and it dives
+ * into it once the ripple has spread and it is at rest — the intro's own timing (`settle`) — and is held there, gone
+ * behind the page, while the section fades in. `since`, how long it has sat at home: where its breath and its blinks are.
+ */
+export function introGoIn(input: { m: IntroMotion; g: SphereGeometry; home: IntroCell; nest: IntroCell; motions: IntroMotions; since: number; under?: boolean }): IntroPart {
+  const { m, g, home, nest, motions, since, under = false } = input
+  const dive = agentAction("dive")!
+  const ms = motions.dive
+  const go = dive.play(ms, g, { from: home, to: nest }, since)
+  if (!under) {
+    return {
+      spot: home,
+      nest,
+      home,
+      boxes: [],
+      travel: "dive",
+      still: { at: 0, play: actionStill(ms, g, home, since), m: ms },
+      steps: [{ at: 0, play: go, m: ms }],
+      since,
+      leave: 0,
+      lands: go.lands,
+      open: Infinity,
+      gone: go.lands + rippleSpan(m),
+      settled: go.total,
+    }
+  }
+  const open = Math.max(go.lands + rippleSpan(m) + m.settle, go.total)
+  const back = dive.play(ms, g, { from: nest, to: home }, open - go.total)
+  const gone = open + (back.gone ?? back.lands)
+  return {
+    spot: home,
+    nest,
+    home,
+    boxes: [],
+    travel: "dive",
+    still: { at: 0, play: actionStill(ms, g, home, since), m: ms },
+    steps: [
+      { at: 0, play: go, m: ms },
+      { at: open, play: back, m: ms },
+    ],
+    since,
+    leave: 0,
+    lands: go.lands,
+    open,
+    gone,
+    settled: gone,
+    hold: gone,
+  }
+}
+
+/** Where an agent is at rest once its part is over: where its last step went, else where it sat. */
+export const introRestsAt = (part: IntroPart): IntroCell => part.steps[part.steps.length - 1]?.play.to ?? part.spot
+
+/**
+ * The agent in focus going home as the page turns away from its section (version 9, his: "when we scroll, they dive back
+ * into their place"): from the cell below the section where it rests, `t` ms into its part, by his Dive, out of that
+ * nest — which goes as it does (`introNestLeft`) — under the page and up into its cell at `home`. A part on a clock of its
+ * own, from 0.
+ */
+export function introGoHome(input: { g: SphereGeometry; part: IntroPart; t: number; home: IntroCell; motions: IntroMotions }): IntroPart {
+  const { g, part, t, home, motions } = input
+  const ms = motions.dive
+  const from = introRestsAt(part)
+  const last = part.steps[part.steps.length - 1]
+  const rested = Math.max(0, last ? t - (last.at + last.play.total) : t)
+  const since = part.since + t
+  const back = agentAction("dive")!.play(ms, g, { from, to: home }, rested)
+  return {
+    spot: from,
+    nest: from,
+    home,
+    boxes: [],
+    travel: "dive",
+    still: { at: 0, play: actionStill(ms, g, from, since), m: ms },
+    steps: [{ at: 0, play: back, m: ms }],
+    since,
+    leave: 0,
+    lands: back.lands,
+    open: 0,
+    gone: back.gone ?? back.lands,
+    settled: back.total,
+    ripple: false,
+  }
+}
+
+/**
+ * An action played where the agent rests, `t` ms into its part (version 9, his, 2026-10-03: "When we click on the
+ * agent, add bounce"): his Bounce, or any action, from its cell back into it, as it moves in that action; then resting
+ * there. A part on a clock of its own, from 0.
+ */
+export function introActHere(input: { g: SphereGeometry; part: IntroPart; t: number; action: IntroActionId; motions: IntroMotions }): IntroPart {
+  const { g, part, t, action, motions } = input
+  const m = motions[action]
+  const at = introRestsAt(part)
+  const last = part.steps[part.steps.length - 1]
+  const rested = Math.max(0, last ? t - (last.at + last.play.total) : t)
+  const since = part.since + t
+  const play = agentAction(action)!.play(m, g, { from: at, to: at }, rested)
+  return {
+    spot: at,
+    nest: at,
+    home: part.home,
+    boxes: [],
+    travel: part.travel,
+    still: { at: 0, play: actionStill(m, g, at, since), m },
+    steps: [{ at: 0, play, m }],
+    since,
+    leave: 0,
+    lands: play.lands,
+    open: Infinity,
+    gone: Infinity,
+    settled: play.total,
+    ripple: false,
+  }
+}
+
+/** Whether an agent is in the air or under the page at `t`: an action it is in has not landed yet. */
+export const introAway = (part: IntroPart, t: number) => {
+  if (introHeld(part, t)) return true
+  const last = part.steps[part.steps.length - 1]
+  return !!last && t >= last.at && t < last.at + last.play.lands
+}
+
+/**
+ * A held agent let go of (version 9): it carries on the Dive it was held in, under the page and up into its cell at
+ * home, from where it was held — so the clock it is drawn on runs from `hold` ms before the page turned. Done once it has
+ * come to rest there (`settled`).
+ */
+export function introComeHome(part: IntroPart): IntroPart {
+  const last = part.steps[part.steps.length - 1]
+  return { ...part, hold: undefined, ripple: false, settled: last ? last.at + last.play.total : part.settled }
+}
+
+/**
+ * An agent at `t` ms into the intro: its moment of the step it is in, or past, and how it moves in it, its blinks on its
+ * own clock. Held (version 9), it stays at `hold`, gone behind the page.
+ */
 export function introAt(part: IntroPart, t: number): { frame: AgentActionFrame; m: SphereMotion } {
+  const at = part.hold === undefined ? t : Math.min(t, part.hold)
   let step = part.still
   for (const s of part.steps) {
-    if (s.at > t) break
+    if (s.at > at) break
     step = s
   }
-  return { frame: step.play.at(t - step.at, part.since + t), m: step.m }
+  return { frame: step.play.at(at - step.at, part.since + t), m: step.m }
 }
+
+/** Whether an agent is held under the page at `t` (version 9): nothing of it is drawn. */
+export const introHeld = (part: IntroPart, t: number) => part.hold !== undefined && t >= part.hold
 
 /**
  * How much of the nest it landed in is left at `t`: all of it until it dives home, then going back to the field's own

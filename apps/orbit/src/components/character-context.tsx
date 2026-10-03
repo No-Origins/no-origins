@@ -33,12 +33,17 @@ import {
  *
  * With no database (a development server with no keys, the review sweep) it is `offline`: the look is the page's alone
  * and nothing is saved.
+ *
+ * **A visitor** (C24, his, 2026-10-03: "users can experiment and play around") — nobody signed in, or not the owner —
+ * loads each agent as it was published, never the draft, and `editable` is false: every control moves the look on the
+ * page, the agents open one after another, the versions can be read, and nothing is saved, asked or refused.
+ * Publishing, going back, a new agent and an upload are the owner's, and the bar offers the sign-in in Publish's place.
  */
 
 /** How long after the last change the draft is saved, ms: once a drag is over, not at every step of it. */
 const SAVE_AFTER = 500;
 
-export type SaveStatus = "loading" | "saved" | "unsaved" | "saving" | "conflict" | "offline" | "signed-out" | "error";
+export type SaveStatus = "loading" | "saved" | "unsaved" | "saving" | "conflict" | "offline" | "signed-out" | "visitor" | "error";
 
 type Character = {
   look: CharacterLook;
@@ -55,8 +60,10 @@ type Character = {
   /** The uploaded styles (C8), each at its current version, and every version's shapes by id. */
   drawings: UploadedDrawing[];
   drawingData: Record<string, DrawingData>;
-  /** Whether there is a database to publish to. */
+  /** Whether there is a database, with the agents in it. */
   connected: boolean;
+  /** Whether the draft is the signed-in person's to save and publish — the owner's (C24). A visitor plays; nothing is saved. */
+  editable: boolean;
   setBody: (id: string, value: PropertyValue) => void;
   setFace: (slot: FaceSlotId, change: (wear: FaceWear) => FaceWear) => void;
   publish: (step: PublishStep) => Promise<boolean>;
@@ -89,6 +96,7 @@ export function CharacterProvider({ children }: { children: React.ReactNode }) {
   const [characters, setCharacters] = React.useState<CharacterEntry[]>([]);
   const [drawings, setDrawings] = React.useState<UploadedDrawing[]>([]);
   const [drawingData, setDrawingData] = React.useState<Record<string, DrawingData>>({});
+  const [editable, setEditable] = React.useState(false);
 
   // What the saver works from: refs, so a save in flight reads the newest look and rev, not the render's.
   const item = React.useRef<string | null>(null);
@@ -98,6 +106,8 @@ export function CharacterProvider({ children }: { children: React.ReactNode }) {
   const saving = React.useRef<Promise<boolean> | null>(null);
   const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const halted = React.useRef(false);
+  // Whether what is on the page is his draft to save (C24); a visitor's changes stay on the page.
+  const owner = React.useRef(false);
 
   const apply = React.useCallback((state: CharacterState) => {
     item.current = state.itemId;
@@ -112,7 +122,9 @@ export function CharacterProvider({ children }: { children: React.ReactNode }) {
     setCurrentId(state.currentId);
     setDrawings(state.drawings);
     setDrawingData(state.drawingData);
-    setStatus("saved");
+    owner.current = state.editable;
+    setEditable(state.editable);
+    setStatus(state.editable ? "saved" : "visitor");
     setMessage(null);
   }, []);
 
@@ -186,8 +198,8 @@ export function CharacterProvider({ children }: { children: React.ReactNode }) {
       const look = next(latest.current);
       latest.current = look;
       setLook(look);
-      // With no database the page is all there is.
-      if (!item.current) return;
+      // With no database the page is all there is; a visitor's page is theirs to play with, and nothing is saved (C24).
+      if (!item.current || !owner.current) return;
       dirty.current = true;
       if (!halted.current) setStatus("unsaved");
       if (timer.current) clearTimeout(timer.current);
@@ -222,7 +234,7 @@ export function CharacterProvider({ children }: { children: React.ReactNode }) {
 
   const publish = React.useCallback(
     async (step: PublishStep) => {
-      if (!item.current || !(await settle())) return false;
+      if (!item.current || !owner.current || !(await settle())) return false;
       setStatus("saving");
       const outcome = await publishCharacter(item.current, step, rev.current);
       if (!outcome.ok) {
@@ -239,7 +251,7 @@ export function CharacterProvider({ children }: { children: React.ReactNode }) {
 
   const restore = React.useCallback(
     async (versionId: string) => {
-      if (!item.current || !(await settle())) return false;
+      if (!item.current || !owner.current || !(await settle())) return false;
       setStatus("saving");
       const outcome = await restoreCharacter(item.current, versionId, rev.current);
       if (!outcome.ok) {
@@ -269,6 +281,7 @@ export function CharacterProvider({ children }: { children: React.ReactNode }) {
   const create = React.useCallback(
     async (name: string) => {
       if (!item.current) return { ok: false as const, message: "Agents are kept in the database, which this server has no keys for." };
+      if (!owner.current) return { ok: false as const, message: "Only the owner makes an agent here." };
       if (!(await settle())) return { ok: false as const, message: "What is pending here could not be saved first." };
       const outcome = await createCharacter(name);
       if (!outcome.ok) return { ok: false as const, message: outcome.message };
@@ -281,6 +294,7 @@ export function CharacterProvider({ children }: { children: React.ReactNode }) {
   const upload = React.useCallback(
     async (slot: FaceSlotId, name: string, file: string, data: DrawingData) => {
       if (!item.current) return { ok: false as const, message: "Uploads are kept in the database, which this server has no keys for." };
+      if (!owner.current) return { ok: false as const, message: "Uploads are the owner's. Sign in to add one." };
       const outcome = await uploadDrawing(item.current, slot, name, file, data);
       if (!outcome.ok) return { ok: false as const, message: outcome.message };
       // The drawings as they now are, and the draft as it stands here: what is pending is not thrown away.
@@ -304,7 +318,8 @@ export function CharacterProvider({ children }: { children: React.ReactNode }) {
       currentId,
       drawings,
       drawingData,
-      connected: status !== "offline" && status !== "signed-out" && status !== "loading",
+      connected: characterId !== null,
+      editable,
       setBody,
       setFace,
       publish,
@@ -313,7 +328,7 @@ export function CharacterProvider({ children }: { children: React.ReactNode }) {
       restore,
       reload,
     }),
-    [look, characterId, characters, open, status, message, versions, currentId, drawings, drawingData, setBody, setFace, publish, create, upload, restore, reload],
+    [look, characterId, editable, characters, open, status, message, versions, currentId, drawings, drawingData, setBody, setFace, publish, create, upload, restore, reload],
   );
   return <CharacterContext.Provider value={value}>{children}</CharacterContext.Provider>;
 }

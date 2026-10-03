@@ -42,7 +42,13 @@ const ICONS: Record<string, LucideIcon> = {
 type Side = "left" | "right";
 
 export function useFaceSections(): Section[] {
-  const { look, setFace, drawings, connected } = useCharacter();
+  const { look, setFace, drawings, connected, editable } = useCharacter();
+  // Why an upload is not offered — no database, or not the owner's page (C24) — or null when it is.
+  const uploadWhy = !connected
+    ? "Uploads are kept in the database, which this server has no keys for."
+    : !editable
+      ? "Uploads are the owner's. Sign in to add one."
+      : null;
   // Which side of each pair set apart its settings move; the left until he picks.
   const [sides, setSides] = React.useState<Partial<Record<FaceSlotId, Side>>>({});
   // The eyes' colours as they are drawn — Ink is Deep under a pupil or a catchlight — so their Colour's swatches say true.
@@ -72,7 +78,7 @@ export function useFaceSections(): Section[] {
           onChange={(next) => setFace(slot.id, (w) => ({ ...w, style: String(next) }))}
           more={
             upload || uploaded.length
-              ? { label: "Your own", options: uploaded, actions: upload ? uploadActions(upload, look, connected) : [] }
+              ? { label: "Your own", options: uploaded, actions: upload ? uploadActions(upload, look, uploadWhy) : [] }
               : undefined
           }
         >

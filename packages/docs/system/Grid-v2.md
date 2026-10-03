@@ -1304,6 +1304,12 @@ block they stand beside, and what is drawn behind the field before all of it. `u
   to and can be seen: not disabled, not inert, not under `aria-hidden`, not transparent — so the tagline's handle, at
   opacity 0 on page 2, is not one.
 
+- **A group reads after the page where it is marked so** (`data-reading-after`, amended 2026-10-03, for the
+  portfolio's agents at home, Portfolio.md P24): the stops inside an element with that attribute come after every
+  other stop, in reading order among themselves, as a navbar after the content. A column of controls standing beside a
+  page — the agents in the field's last column, each a way to its page — was otherwise read a stop at a time between
+  the page's lines, each with the line it happened to share: the avatar, then Mira, then More about me, then Oru.
+
 It runs in the capture phase, ahead of a component's own keys, so a roving group — the Tabs' ← → — moves in reading
 order with the rest of the page; the portfolio's work column makes every company a stop (Portfolio.md P4). The page
 opts in: the portfolio calls it on the box that holds the backdrop and the grid, and nothing else does yet.
@@ -1654,7 +1660,35 @@ draws them resting in those cells, and on any field the grid is given after that
 them there from the start, still under reduced motion. `data-intro` on the root still marks only the intro, so
 everything that waits for the hand-over waits as before.
 
+**D50 amended — version 9, one agent in focus.** *2026-10-03, his: "I think it's very interesting if Each agent can
+pick a section. So we scroll from one agent to another. So whoever agent is in [focus] should dive in to show their
+section. And uh, when we scroll, they dive back into their place and the new agent dives in", then: "it will be great
+if the agent stays on the same uh, page until we change the section", and "place it right in the center bottom of the
+section."* `Grid` takes **`introFocus`**, an agent's id: the page's boxes are that agent's section alone. The intro ends
+with that agent in the cell below the section, centred (`introBeside`), and the rest at home. **A new `introFocus`
+turns the page.** The section fades away while its agent Dives home. Then the grid calls **`onIntroFocus`**, and the
+page puts the next section on the field. That section's agent Dives from home to the cell below it, its ripple spreads,
+and the section fades in. While a page turns, the root carries **`data-intro-turn`**, and globals.css holds back any
+box the agents have not shown, as `data-intro` does during the intro. **Home is the bottom row on a field taller than
+it is wide** (`introHome`): on a phone, version 8's last column stood over the boxes. This is a page turn that is not
+`GridPages`'s (D27, D37): it has no bar and no hand-driven progress, and it is the agents'. Motion.md M22 version 9 has
+the steps. Without `introFocus` the intro is version 8's. **The page may say where the agent in focus stands:
+`introFocusAt`**, a cell placed as a box is, 1-based. The portfolio puts it in one cell on every page of a wide field
+(his: *"put the agent in the bottom third row in the large screen"*). Without it, the agent stands in the cell below
+the section. **And `introAct`**, `{ agent, action, key }`, has an agent do one of its actions where it rests, each time
+`key` changes, once the intro is over, when no page is turning and the agent is not in the air. The portfolio bounces
+the agent of the page on a click (his: *"When we click on the agent, add bounce"*).
+
 ---
+
+**D50 amended — fixtures.** *2026-10-03, for the portfolio's status pill (Portfolio.md P25), which must not fade with
+the page it stands beside.* A `GridItem` carrying `data-intro-fixed` is a **fixture** of the intro, not a box of the
+page: the intro does not measure it as a section's box (`measureBoxes`), a turn neither fades it away nor fades it in,
+and globals.css leaves it alone while a page turns (`[data-intro-turn]`). It is hidden while the intro plays, with
+every other box, and is there the moment the intro hands over. It is the `Grid`'s answer to what `GridPages` draws
+outside its pages, the pager's bar (D27): something on the field for every page. The portfolio's status pill and the
+agents' cells to click (the one in focus, and each at home) are fixtures; the agents themselves are the intro's drawing
+and never were boxes. *Mine.*
 
 ## 9. Where it lives
 

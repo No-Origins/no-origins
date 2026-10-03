@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+
 import { test, expect } from "@playwright/test";
 
 /**
@@ -29,12 +31,26 @@ export const MOTION_ROUTES = ["/", "/concepts/split", "/concepts/dock", "/concep
 export const ORBIT = "http://localhost:3005";
 export const ORBIT_ROUTES = ["/", "/hiddenstack"];
 
+/**
+ * Home (Home.md), the model of the house, a sixth, on :3006 — one route, the model and its views. Not in the repository
+ * (H4: the house is private, the repo public), so it is swept only where the app is — his machine, not CI.
+ */
+export const HOME = "http://localhost:3006";
+export const HOME_ROUTES = ["/"];
+const HOME_PRESENT = existsSync("apps/home/package.json");
+
+/** Status (Status.md), where every app stands, a seventh, on :3007 — one route, public. */
+export const STATUS = "http://localhost:3007";
+export const STATUS_ROUTES = ["/"];
+
 const APPS = [
   { name: "", base: "", routes: ROUTES },
   { name: "design", base: DESIGN, routes: DESIGN_ROUTES },
   { name: "engineering", base: ENGINEERING, routes: ENGINEERING_ROUTES },
   { name: "motion", base: MOTION, routes: MOTION_ROUTES },
   { name: "orbit", base: ORBIT, routes: ORBIT_ROUTES },
+  ...(HOME_PRESENT ? [{ name: "home", base: HOME, routes: HOME_ROUTES }] : []),
+  { name: "status", base: STATUS, routes: STATUS_ROUTES },
 ];
 
 const slug = (route: string) => (route === "/" ? "home" : route.slice(1).replace(/\//g, "__"));
@@ -58,6 +74,12 @@ for (const app of APPS) {
       // moment for the grid to lay its page out; the screenshot fast-forwards what is still moving, the portfolio's wake
       // (Portfolio.md P16) among it.
       await page.waitForFunction(() => !document.querySelector('[data-slot="grid"][data-intro]'), null, { timeout: 10_000 });
+      // Home opens on its tour's long shot (Home.md H9); a model standing at a stop with a picture fades it in over
+      // 0.6 s, and the screenshot is of the picture hung. Nothing to wait for on a page with no model.
+      await page.waitForFunction(() => {
+        const canvas = document.querySelector<HTMLElement>('[data-slot="model-view"] canvas');
+        return !canvas || (canvas.dataset.ready === "true" && (!canvas.dataset.picture || canvas.dataset.picture === "100"));
+      }, null, { timeout: 5_000 }).catch(() => undefined);
       await page.waitForTimeout(400);
 
       const file = `e2e/screenshots/${testInfo.project.name}/${app.name ? `${app.name}__` : ""}${slug(route)}.png`;

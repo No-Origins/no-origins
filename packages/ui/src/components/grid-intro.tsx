@@ -8,20 +8,34 @@ import type { GridMetrics } from "@no-origins/ui/components/grid"
 import { sphereMotionOf } from "@no-origins/ui/lib/agent-body"
 import {
   introActionValues,
+  introActHere,
   introAt,
+  introAway,
+  introBeside,
   introCast,
+  introComeHome,
+  introGoHome,
+  introGoIn,
+  introHeld,
   introHome,
+  introNest,
   introNestLeft,
   introPlan,
   introResting,
+  introRestsAt,
   introRipple,
   introSpots,
   readIntroMotion,
+  type IntroActionId,
   type IntroActions,
   type IntroAgent,
   type IntroBox,
+  type IntroCell,
+  type IntroMotion,
   type IntroMotions,
+  type IntroPart,
   type IntroPlan,
+  type IntroRole,
 } from "@no-origins/ui/lib/intro-motion"
 import { readSphereMotion, sphereBowl } from "@no-origins/ui/lib/sphere-motion"
 
@@ -57,6 +71,14 @@ import { readSphereMotion, sphereBowl } from "@no-origins/ui/lib/sphere-motion"
  *
  * **The ripples** are the field's painter's (D38), one pass an agent, all sent as the intro starts, each timed from its
  * landing on the painter's own clock, so a busy main thread cannot hold them back (version 1's rule).
+ *
+ * **One agent in focus** (version 9, `focus`): the page shows that agent's section alone, and the agent stays below it,
+ * centred (`introBeside`; under it, held behind the page, where no cell round it is free). The intro ends with it there and the rest at home; a
+ * new `focus` turns the page — the section on the field fades away over `out` while its agent dives home, the page is
+ * told it may put the next section on the field (`onFocus`), and the next agent dives from home to the cell below
+ * those boxes, its ripple spreading, and they fade in. While a page turns the grid carries `data-intro-turn`, and
+ * globals.css holds back any box it has not shown. Each agent is drawn on a clock of its own (`Live`), so one can turn
+ * while the rest go on resting. Resting, it finds the boxes too, to stand the one in focus below them.
  */
 
 /** How long it waits for the page's boxes before it plays without them. */
@@ -92,10 +114,49 @@ export type GridIntroProps = {
   onReveal: (ms: number) => void
   /** It is over: every box is in and every agent at rest in its cell. It goes on drawing them. */
   onDone: () => void
+  /**
+   * The agent in focus, by its id (version 9): its section is the page's boxes, and it is under it. A new one turns the
+   * page. None, version 8: every agent opens its own boxes and they all go home.
+   */
+  focus?: string
+  /** The field is clear for `focus`'s section (version 9): the page puts its boxes on the field now. */
+  onFocus?: (agent: string) => void
+  /**
+   * Where the agent in focus stands, a cell of the field, 0-based (version 9, his, 2026-10-03: "put the agent in the
+   * bottom third row"): the page's to say, read as the intro plans and as each page comes in. None, below its section
+   * (`introBeside`).
+   */
+  focusAt?: IntroCell
+  /**
+   * An action for an agent to play where it rests (version 9, his, 2026-10-03: "When we click on the agent, add
+   * bounce"): played each time `key` changes, once the intro is over, when no page is turning and the agent is not in
+   * the air or under the page.
+   */
+  act?: { agent: string; action: IntroActionId; key: number }
 }
 
 /** A box of the page: its element, and where it is in cells. */
 type Found = { el: HTMLElement; cells: IntroBox }
+
+/** Each agent's part and the moment its clock started (`performance.now()`): what is drawn (version 9). */
+type Live = { parts: IntroPart[]; zeros: number[] }
+
+/** The page's boxes on the tracks, in cells from the field's first. */
+function measureBoxes(tracks: HTMLElement, metrics: GridMetrics): Found[] {
+  const pitch = metrics.cell + metrics.gap
+  const at = tracks.getBoundingClientRect()
+  return [...tracks.querySelectorAll<HTMLElement>(':scope > [data-slot="grid-item"]:not([data-intro-fixed])')].map((el) => {
+    const r = el.getBoundingClientRect()
+    const cells: IntroBox = {
+      col: Math.round((r.left - at.left) / pitch),
+      row: Math.round((r.top - at.top) / pitch),
+      across: Math.max(1, Math.round((r.width + metrics.gap) / pitch)),
+      down: Math.max(1, Math.round((r.height + metrics.gap) / pitch)),
+      by: (el.dataset.introBy ?? "").split(/\s+/).filter(Boolean),
+    }
+    return { el, cells }
+  })
+}
 
 /** Everything the play needs, made once the boxes are known. */
 type Play = {
@@ -104,7 +165,14 @@ type Play = {
   found: Found[]
   plan: IntroPlan
   ids: string[]
-  ripples: { delays: Float64Array; span: number }[]
+  /** The intro's numbers, each agent's motions and its cell at home: what a turn is planned from (version 9). */
+  intro: IntroMotion
+  motions: IntroMotions[]
+  homes: IntroCell[]
+  /** The agent in focus as it was planned: under its section, its boxes the page's (version 9). */
+  focus?: string
+  /** Each agent's ripple, none for one that opens nothing (version 9). */
+  ripples: ({ delays: Float64Array; span: number } | null)[]
   /** How long the boxes take to fade in. */
   reveal: number
   /** Resting in their cells, with nothing to play: the boxes are the grid's, and nothing ends. */
@@ -113,7 +181,7 @@ type Play = {
   still: boolean
 }
 
-export function GridIntro({ metrics, root, agents, actions, settled = false, pass, onReveal, onDone }: GridIntroProps) {
+export function GridIntro({ metrics, root, agents, actions, settled = false, focus, onFocus, focusAt, act, pass, onReveal, onDone }: GridIntroProps) {
   const layer = React.useRef<HTMLDivElement>(null)
   // The page's boxes, and the field they were found on: what it plans on, so a field that changes plans nothing until
   // they are found on it.
@@ -123,32 +191,44 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, pas
   // Read as it plans, never planned on: the grid letting go of the page as the intro ends must not start them over.
   const resting = React.useRef(settled)
   resting.current = settled
+  // The focus as it is now, read as it plans (version 9).
+  const focusNow = React.useRef(focus)
+  focusNow.current = focus
+  const focusAtNow = React.useRef(focusAt)
+  focusAtNow.current = focusAt
 
   // The page's boxes, in cells from the field's first, once the page has put them on the field. Resting, none: the
   // boxes are the grid's.
   React.useLayoutEffect(() => {
-    if (resting.current) {
-      setFound({ metrics, boxes: [] })
-      return
-    }
     const tracks = root.querySelector<HTMLElement>('[data-slot="grid-tracks"]')
-    if (!tracks) return
-    const pitch = metrics.cell + metrics.gap
-    const find = () => {
-      const els = [...tracks.querySelectorAll<HTMLElement>(':scope > [data-slot="grid-item"]')]
-      if (!els.length) return false
-      const at = tracks.getBoundingClientRect()
-      const boxes = els.map((el) => {
-        const r = el.getBoundingClientRect()
-        const cells: IntroBox = {
-          col: Math.round((r.left - at.left) / pitch),
-          row: Math.round((r.top - at.top) / pitch),
-          across: Math.max(1, Math.round((r.width + metrics.gap) / pitch)),
-          down: Math.max(1, Math.round((r.height + metrics.gap) / pitch)),
-          by: (el.dataset.introBy ?? "").split(/\s+/).filter(Boolean),
-        }
-        return { el, cells }
+    if (resting.current) {
+      // Resting, the boxes matter only to stand the one in focus below them (version 9): measured now, and again as the
+      // page arranges itself on the new field, unless a page is turning.
+      if (focusNow.current === undefined || !tracks) {
+        setFound({ metrics, boxes: [] })
+        return
+      }
+      const measure = () => {
+        if (!root.hasAttribute("data-intro-turn")) setFound({ metrics, boxes: measureBoxes(tracks, metrics) })
+      }
+      measure()
+      let frame = 0
+      const watch = new MutationObserver(() => {
+        cancelAnimationFrame(frame)
+        frame = requestAnimationFrame(measure)
       })
+      watch.observe(tracks, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] })
+      const cap = window.setTimeout(() => watch.disconnect(), BOXES_WAIT_MS)
+      return () => {
+        watch.disconnect()
+        cancelAnimationFrame(frame)
+        window.clearTimeout(cap)
+      }
+    }
+    if (!tracks) return
+    const find = () => {
+      const boxes = measureBoxes(tracks, metrics)
+      if (!boxes.length) return false
       setFound({ metrics, boxes })
       return true
     }
@@ -187,19 +267,29 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, pas
     const { cell, gap, cols, rows } = metrics
     const g = { cell, gap }
     const homes = introHome(ids.length, cols, rows)
+    const intro = readIntroMotion(root)
+    // The agent in focus (version 9), if the page names one the cast has.
+    const focus = focusNow.current !== undefined && ids.includes(focusNow.current) ? focusNow.current : undefined
+    const f = focus === undefined ? undefined : ids.indexOf(focus)
+    const base = { metrics, ids, intro, motions, homes, focus }
+    const boxes = found.boxes.map((b) => b.cells)
+    // In focus, it stands where the page says, else below its section (version 9).
+    const beside = f === undefined ? null : (focusAtNow.current ?? introBeside(boxes, cols, rows, homes))
     if (resting.current) {
       // Under reduced motion they are drawn once, still: their eyes open.
       const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      return { metrics, found: [], plan: introResting({ g, homes, motions, still }), ids, ripples: [], reveal: 0, resting: true, still }
+      return { ...base, found: [], plan: introResting({ g, homes, motions, still, out: f, outAt: beside }), ripples: [], reveal: intro.reveal, resting: true, still }
     }
-    const intro = readIntroMotion(root)
-    const boxes = found.boxes.map((f) => f.cells)
-    const roles = introCast(ids, boxes)
+    // In focus, every box on the field is its section's, and it alone has a nest: below them, else their centre.
+    const roles: IntroRole[] =
+      f === undefined
+        ? introCast(ids, boxes)
+        : ids.map((_, a) => (a === f ? { nest: beside ?? introNest(boxes), boxes: boxes.map((_, i) => i) } : { nest: null, boxes: [] }))
     const spots = introSpots(roles.map((r) => r.nest), cols, rows)
     const bounces = ids.map((_, a) => cast?.[a]?.bounces ?? true)
-    const plan = introPlan({ m: intro, g, roles, spots, homes, motions, boxes, bounces })
-    const ripples = plan.parts.map((p) => introRipple({ cols, rows, cell, gap }, p.nest, intro))
-    return { metrics, found: found.boxes, plan, ids, ripples, reveal: intro.reveal, resting: false, still: false }
+    const plan = introPlan({ m: intro, g, roles, spots, homes, motions, boxes, bounces, focus: f, under: !beside })
+    const ripples = plan.parts.map((p) => (p.ripple === false ? null : introRipple({ cols, rows, cell, gap }, p.nest, intro)))
+    return { ...base, found: found.boxes, plan, ripples, reveal: intro.reveal, resting: false, still: false }
   }, [found, agents, actions, root])
 
   // The play, on GSAP's ticker.
@@ -208,8 +298,15 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, pas
   const nestTo = React.useRef<(SVGGElement | null)[]>([])
   const cuts = React.useRef<(SVGPathElement | null)[]>([])
   const behind = React.useRef<(SVGGElement | null)[]>([])
-  const done = React.useRef({ onReveal, onDone, pass })
-  done.current = { onReveal, onDone, pass }
+  const done = React.useRef({ onReveal, onDone, pass, onFocus })
+  done.current = { onReveal, onDone, pass, onFocus }
+  // The agent whose section is on the field (version 9), and how the play turns the page to another: set by the play
+  // while it can turn — once the intro is over and no page is turning (`idle`).
+  const shown = React.useRef<string | undefined>(undefined)
+  const turnTo = React.useRef<((agent: string) => void) | null>(null)
+  // How the play has an agent do an action where it rests.
+  const actHere = React.useRef<((agent: string, action: IntroActionId) => void) | null>(null)
+  const [idle, setIdle] = React.useState(false)
   React.useLayoutEffect(() => {
     if (!play) return
     const { found, plan, ripples, reveal } = play
@@ -221,31 +318,185 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, pas
       const r = ripples[a]
       if (r) done.current.pass(r.delays, r.span, performance.timeOrigin + start + p.lands, RIPPLE_LAYER)
     })
+    // Each agent on its own clock, every one from the start (version 9: a turn restarts two of them).
+    const live: Live = { parts: [...plan.parts], zeros: plan.parts.map(() => start) }
+    shown.current = play.focus
+    // The page is told whose section the play takes as on the field (version 9). Where the play begins with a focus
+    // the page asked for before it could turn — the intro skipped, under reduced motion or on a second mount, and a
+    // turn asked before this chunk had loaded — the page would otherwise wait for a hand-over that never comes, and no
+    // turn after it would go. Told the agent it already shows, the page changes nothing.
+    if (play.focus !== undefined) done.current.onFocus?.(play.focus)
     const cutNow: string[] = []
     // Each box's fade, once it has started.
     const fades: (Animation | null)[] = found.map(() => null)
     let ended = play.resting
+    const tracks = root.querySelector<HTMLElement>('[data-slot="grid-tracks"]')
+    const g = { cell: play.metrics.cell, gap: play.metrics.gap }
+
+    // A page turning (version 9): its section fading away, then the next one's boxes, each fading in from `at`.
+    type Turn = {
+      to: string
+      phase: "out" | "in"
+      leaving: Animation[]
+      boxes: { el: HTMLElement; at: number; fade: Animation | null }[]
+      /** When the next agent's boxes are in and the last one is home: the turn is over. */
+      end: number
+      timer?: number
+      cap?: number
+      watch?: MutationObserver
+    }
+    let turn: Turn | null = null
+    const endTurn = () => {
+      if (!turn) return
+      window.clearTimeout(turn.timer)
+      window.clearTimeout(turn.cap)
+      turn.watch?.disconnect()
+      turn.leaving.forEach((f) => f.cancel())
+      turn.boxes.forEach(({ el, fade }) => {
+        fade?.cancel()
+        el.style.opacity = ""
+      })
+      delete root.dataset.introTurn
+      // Cut short before the page was told: it is told now, so it is never left on the last section.
+      if (turn.phase === "out") {
+        shown.current = turn.to
+        done.current.onFocus?.(turn.to)
+      }
+      turn = null
+    }
+    // The next agent's section is on the field: it dives in.
+    const comeIn = (b: number) => {
+      if (!turn || !tracks) return
+      window.clearTimeout(turn.cap)
+      turn.watch?.disconnect()
+      const now = performance.now()
+      const boxes = measureBoxes(tracks, play.metrics)
+      const { cols, rows, cell, gap } = play.metrics
+      const cells = boxes.map((x) => x.cells)
+      // Below its section, else behind its centre.
+      const beside = focusAtNow.current ?? introBeside(cells, cols, rows, play.homes)
+      const nest = beside ?? introNest(cells) ?? play.homes[b]!
+      const before = live.parts[b]!
+      // Under reduced motion it is there at once, and so is its section.
+      if (play.still) {
+        live.parts[b] = introResting({ g, homes: [beside ?? play.homes[b]!], motions: [play.motions[b]!], still: true, out: beside ? undefined : 0 }).parts[0]!
+        live.zeros[b] = now
+        tick()
+        endTurn()
+        setIdle(true)
+        return
+      }
+      const part = introGoIn({ m: play.intro, g, home: play.homes[b]!, nest, motions: play.motions[b]!, since: before.since + (now - live.zeros[b]!), under: !beside })
+      live.parts[b] = part
+      live.zeros[b] = now
+      const r = introRipple({ cols, rows, cell, gap }, nest, play.intro)
+      done.current.pass(r.delays, r.span, performance.timeOrigin + now + part.lands, RIPPLE_LAYER)
+      turn.boxes = boxes.map(({ el }) => ({ el, at: now + part.gone, fade: null }))
+      const homeAt = live.parts.reduce((most, p, a) => (introHeld(p, now - live.zeros[a]!) ? most : Math.max(most, live.zeros[a]! + p.settled)), 0)
+      turn.end = Math.max(now + part.gone + reveal, homeAt)
+    }
+    turnTo.current = (agent) => {
+      const a = shown.current === undefined ? -1 : play.ids.indexOf(shown.current)
+      const b = play.ids.indexOf(agent)
+      const now = performance.now()
+      // The one in focus goes home: on from where it was held under its section, or by a Dive from below it.
+      if (a >= 0) {
+        const p = live.parts[a]!
+        const home = play.homes[a]!
+        if (play.still) {
+          live.parts[a] = introResting({ g, homes: [home], motions: [play.motions[a]!], still: true }).parts[0]!
+          live.zeros[a] = now
+        } else if (p.hold !== undefined) {
+          live.zeros[a] = now - p.hold
+          live.parts[a] = introComeHome(p)
+        } else {
+          const at = introRestsAt(p)
+          if (at.col !== home.col || at.row !== home.row) {
+            live.parts[a] = introGoHome({ g, part: p, t: now - live.zeros[a]!, home, motions: play.motions[a]! })
+            live.zeros[a] = now
+          }
+        }
+      }
+      // With no agent for it, the page is put on the field at once.
+      if (b < 0 || !tracks) {
+        shown.current = agent
+        done.current.onFocus?.(agent)
+        tick()
+        setIdle(true)
+        return
+      }
+      // Its section fades away, held back by globals.css from here on but for this fade — at once, under reduced motion.
+      root.dataset.introTurn = ""
+      const leaving = play.still
+        ? []
+        : [...tracks.querySelectorAll<HTMLElement>(':scope > [data-slot="grid-item"]:not([data-intro-fixed])')].map((el) => {
+            el.style.opacity = "0"
+            return el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: play.intro.out, easing: REVEAL_EASE })
+          })
+      if (play.still) tick()
+      turn = { to: agent, phase: "out", leaving, boxes: [], end: Infinity }
+      // Then the page puts the next section on the field, and its agent dives in once its boxes are there.
+      turn.timer = window.setTimeout(() => {
+        if (!turn) return
+        turn.phase = "in"
+        turn.watch = new MutationObserver(() => {
+          if (tracks.querySelector(':scope > [data-slot="grid-item"]:not([data-intro-fixed])')) comeIn(b)
+        })
+        turn.watch.observe(tracks, { childList: true })
+        turn.cap = window.setTimeout(() => comeIn(b), BOXES_WAIT_MS)
+        shown.current = agent
+        done.current.onFocus?.(agent)
+      }, play.still ? 0 : play.intro.out)
+    }
+    actHere.current = (agent, action) => {
+      const a = play.ids.indexOf(agent)
+      if (!ended || turn || a < 0 || play.still) return
+      const now = performance.now()
+      const part = live.parts[a]!
+      const t = now - live.zeros[a]!
+      if (introAway(part, t)) return
+      live.parts[a] = introActHere({ g, part, t, action, motions: play.motions[a]! })
+      live.zeros[a] = now
+    }
     const tick = () => {
-      const t = performance.now() - start
-      plan.parts.forEach((part, a) => {
-        const { frame: af, m } = introAt(part, t)
+      const now = performance.now()
+      const t = now - start
+      live.parts.forEach((part, a) => {
+        const ta = now - live.zeros[a]!
+        const { frame: af, m } = introAt(part, ta)
         const [from, to] = af.frame.nests
+        // Held under its section (version 9): nothing of it, nor of its nests.
+        const held = introHeld(part, ta)
         // The nest it leaves: its spot's as it goes to its box, and its box's as it dives home, going as it dives into it.
-        place(nestFrom.current[a], from.x, from.y, from.lit * introNestLeft(part, t))
-        place(nestTo.current[a], to.x, to.y, to.lit)
+        place(nestFrom.current[a], from.x, from.y, held ? 0 : from.lit * introNestLeft(part, ta))
+        place(nestTo.current[a], to.x, to.y, held ? 0 : to.lit)
         // What it is cut to: the action's cut, if any — the nest it goes out of or comes into, or the bowl it pops up into.
         const d = !af.cut ? UNCUT : af.cut.by === "bowl" ? sphereBowl(af.cut.nest) : circlePath(af.cut.nest)
         if (cutNow[a] !== d) {
           cutNow[a] = d
           cuts.current[a]?.setAttribute("d", d)
         }
-        const g = behind.current[a]
-        if (g) {
-          g.setAttribute("transform", `translate(${af.shift.x.toFixed(2)} ${af.shift.y.toFixed(2)})`)
-          g.style.display = af.hidden ? "none" : ""
+        const hidden = af.hidden || held
+        const el = behind.current[a]
+        if (el) {
+          el.setAttribute("transform", `translate(${af.shift.x.toFixed(2)} ${af.shift.y.toFixed(2)})`)
+          el.style.display = hidden ? "none" : ""
         }
-        if (!af.hidden) painters.current[a]?.paint(af.frame, m)
+        if (!hidden) painters.current[a]?.paint(af.frame, m)
       })
+      // A page turning (version 9): the next section's boxes, each fading in from its moment, and the end.
+      if (turn) {
+        for (const box of turn.boxes) {
+          const since = now - box.at
+          if (box.fade || since < 0) continue
+          box.el.style.opacity = "1"
+          box.fade = box.el.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: reveal, delay: -since, easing: REVEAL_EASE }) ?? null
+        }
+        if (now >= turn.end) {
+          endTurn()
+          setIdle(true)
+        }
+      }
       // The boxes: each fading in once the agent that opens it is gone, from the moment it is due.
       found.forEach(({ el }, i) => {
         const since = t - plan.boxes[i]!
@@ -258,17 +509,39 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, pas
         ended = true
         done.current.onReveal(0)
         done.current.onDone()
+        setIdle(true)
       }
     }
     tick()
     if (!play.still) gsap.ticker.add(tick)
+    if (ended) setIdle(true)
     return () => {
       gsap.ticker.remove(tick)
+      turnTo.current = null
+      actHere.current = null
+      endTurn()
+      setIdle(false)
       // The boxes are the grid's again.
       fades.forEach((fade) => fade?.cancel())
       for (const { el } of found) el.style.opacity = ""
     }
-  }, [play])
+  }, [play, root])
+
+  // An action where it rests, each time the page asks again (version 9).
+  const actNow = React.useRef(act)
+  actNow.current = act
+  const actKey = act?.key
+  React.useEffect(() => {
+    const ask = actNow.current
+    if (actKey !== undefined && ask) actHere.current?.(ask.agent, ask.action)
+  }, [actKey])
+
+  // The page turns (version 9): once the play can, whenever the focus is not the agent whose section is on the field.
+  React.useLayoutEffect(() => {
+    if (!idle || focus === undefined || focus === shown.current || !turnTo.current) return
+    setIdle(false)
+    turnTo.current(focus)
+  }, [idle, focus])
 
   if (!play) return <div ref={layer} data-slot="grid-intro" aria-hidden className="pointer-events-none absolute inset-0 overflow-visible" />
   const { cell, gridW, gridH } = play.metrics

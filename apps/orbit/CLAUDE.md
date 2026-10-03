@@ -28,7 +28,8 @@ C22) flow down the room to its right, and nothing else (C11) — the Tail's firs
 right room where it and the bar do not both fit there; **the draft's bar** (`components/versions-panel.tsx`, C6, C11)
 is on the field's last row under the circle, between the rooms' pagers: a circle that opens the versions in a dialog
 (the next major over them, to publish), and a pill of the agent's select, the draft's state and Publish, which makes the
-next minor version at a press (C19: a version is `major.minor` and has no name; `lib/versions.ts` spells them). A column of air stands between the circle and each room. `flow` (`lib/stage.ts`) places a room's sections column by column, a section
+next minor version at a press (C19: a version is `major.minor` and has no name; `lib/versions.ts` spells them) — or,
+for a visitor, "Yours to play with" and Sign in (C24). A column of air stands between the circle and each room. `flow` (`lib/stage.ts`) places a room's sections column by column, a section
 whole unless it is taller than a column, and what the room cannot hold is its next page, turned by its pager on the
 field's last row (`Flow`); a style picked that moves its section to another page turns to it. **A section folds to its
 heading** (C9): the heading row is its toggle, a folded section flows as one row, and the page follows a section that
@@ -46,7 +47,14 @@ the field grown to a radius of three cells, six across, centred across the field
 a field too narrow or too short gives it fewer cells, kept even. **The body's card** (C4) is four across and two down,
 centred under the circle, its heading on the row between them: Size, then Shade, one a row.
 
-**Saving** (C6) is `src/app/actions.ts`, server functions on his session (`@no-origins/auth/server`), RLS deciding.
+**Orbit is everyone's to play with, and the owner's to publish** (C24, his, 2026-10-03: *"make controls in Orbit
+public, and only when I log in as an admin I should be able to publish, so that users can experiment and play
+around"*). `src/proxy.ts` runs the shared gate with `open`: nobody is sent to the sign-in, and `/sign-in` stays for
+him. `src/app/actions.ts` is server functions for whoever asks (`@no-origins/auth/server`), RLS deciding: every load
+says whether the page is `editable` — the signed-in person's role in `profiles` is `owner`, his "admin" — and a
+visitor loads each agent as **the version pages show, never the draft**, moves every control on the page, opens the
+six and reads the versions, and nothing is saved: the context schedules no save for a visitor, and the server's
+`writer()` refuses anyone but the owner before RLS would. **Saving** (C6) is the owner's.
 **There are six characters** (C13, Agents.md): Bali (the Agent until he named it) and Kino, Zaza, Oru, Mira and Lola, seeded at version 1 (1.0 since C19); the draft bar's select opens one, and makes a new one by its name at the end of its list (`createCharacter`, C19)
 (`open` in the context settles what is pending first), every action takes the open one's `itemId`, and uploads are the
 open character's own. The
@@ -54,8 +62,8 @@ draft loads when the studio opens, saves `SAVE_AFTER` ms after the last change, 
 `rev` it was loaded at; a save another device made first is refused, and the draft's bar offers to load it.
 Publishing saves what is pending first, then makes the latest version's next minor (`publish("minor")`) or, from the
 versions, its next major (`publish("major")`), counted from the latest and never from the one pages show. With no keys it is `offline` and the page is all there is. To save locally,
-put the local stack's two keys in `.env.local` (`.env.example`); the studio then asks for a sign-in, and a session made
-on the admin (:3002) is this one too, since a localhost cookie is every port's.
+put the local stack's two keys in `.env.local` (`.env.example`); the studio then shows the published agents and the
+bar offers the sign-in, and a session made on the admin (:3002) is this one too, since a localhost cookie is every port's.
 Inside it the agent sits (C3), drawn by `AgentCell` (`src/components/agent-cell.tsx`). **The cell is part of the
 grid** (his): every cell of the field its circle overlaps is not drawn (`coveredCells`, painted out under the circle),
 and the four in the corners of its square, which it misses, stay. Its slot is `transparent`, because the `background`
@@ -102,14 +110,23 @@ that is the body and its sections, the face, and the draft and its versions. Its
   corner cells he wants kept.
 - **The cell is abstract geometry, by his spec**, drawn in SVG round the `Agent` like the motion studio's nests. That
   is the one element here that is not `@no-origins/ui`. Every control is.
-- **The studio is behind the sign-in** (`src/proxy.ts`, the shared gate of `@no-origins/auth`), and **opens without a
-  login on a development server with no Supabase keys**, so `pnpm review` and CI still see it.
+- **The studio is open to everyone, and publishing is the owner's** (C24; `src/proxy.ts`, the shared gate of
+  `@no-origins/auth` with `open`). It was behind the sign-in until 2026-10-03. A visitor's page never asks the server
+  to save: the guard is `owner` in the context and `writer()` on the server, and the anon key's policies
+  (`…_studio_public_read.sql`) read the agents and their versions and nothing else — never the draft. Do not read the
+  draft for a visitor, and do not offer them Publish, Go back, a new agent or an upload. **The hosted push of that
+  migration is his** (`npx supabase db push`): until it is pushed, a visitor on production sees no agents.
 
 ## Reviewing it
 
 In the sweep since 2026-09-30: `pnpm review` boots this app on :3005 and screenshots `/` (`ORBIT_ROUTES` in
-`e2e/review.spec.ts`) on desktop and mobile in both themes. `pnpm review e2e/review.spec.ts -g orbit` runs only
-this app's route. `node e2e/.mcp/orbit-look.mjs <out> [light|dark] [WxH …]` (gitignored, :3005 running) shoots
+`e2e/review.spec.ts`) on desktop and mobile in both themes — the owner's page on his machine, where the sweep's browser
+is signed in first (`e2e/global-setup.ts`), the offline page in CI. `pnpm review e2e/review.spec.ts -g orbit` runs only
+this app's route. `node e2e/.mcp/orbit-public.mjs <out>` (gitignored; the local stack, :3005 with `.env.local`, and
+:3002 if the kept session has lapsed) is C24's probe: a fresh browser opens `/` as a visitor, reads the bar, lists the
+agents, types a Size and counts the server actions it sends (none), reads the versions and opens `/sign-in`, light and
+dark and on a phone; then signed in as the owner checks Publish, *New agent…* and the versions' actions. It writes
+nothing. `node e2e/.mcp/orbit-look.mjs <out> [light|dark] [WxH …]` (gitignored, :3005 running) shoots
 `/` at five sizes, or the ones given, and prints every box with its cells and anything drawn outside its box.
 `node e2e/.mcp/orbit-flow.mjs <out> [WxH] [scheme]` turns the face's pages, arches the brows and checks the page
 follows them. `node e2e/.mcp/orbit-controls.mjs <out>` types Size and Shade, drags Size and steps it with the

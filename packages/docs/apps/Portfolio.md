@@ -19,7 +19,8 @@ layout grid from our design system."*
 The portfolio is the first block on No Origins (Brand.md §1) and the first app to be **designed on the grid** rather
 than ported to it. Its content is the résumé; its layout is the field; its components are the design system's. Nothing
 in it scrolls: what does not fit a screen goes to the next page, turned with ← → (Grid.md D5, D23). *Since
-2026-09-27 (P15) it is one page: what the first screen has no room for is not shown.*
+2026-09-27 (P15) it is one page: what the first screen has no room for is not shown.* *Since 2026-10-03 (P24) it is
+pages again, one agent's section a page, turned by a scroll and by the agents.*
 
 ## 2. The rules
 
@@ -1294,7 +1295,8 @@ to it. The bar is built on the field's own bar width, which the renderer reads o
 tablet, six on a phone and seven on an SE; with three pages the bar's fourth number cell is empty, as D27's own cells
 are.* *Withdrawn 2026-09-27 with the pages (P15): the portfolio draws no bar.*
 
-**P15 — One page: the first screen, and the rest in the room it leaves.** *2026-09-27: "We don't need multiple pages
+**P15 — One page: the first screen, and the rest in the room it leaves.** *Superseded 2026-10-03 by P24: a page is
+one agent's section. `arrange`, which this rule describes, is kept in `arrange.ts` and is not called.* *2026-09-27: "We don't need multiple pages
 in portfolio now. Remove pagination navbar. For now, try arranging pieces from those pages to the first page, without
 disturbing the current ones."* The renderer is a `Grid`, not a `GridPages`: no pager's bar, no turn, and nothing that
 turns — the scroll and a finger do nothing, and the arrow keys only ever moved focus (Grid.md D45). The intro stays
@@ -1680,6 +1682,132 @@ reduced motion they are drawn once, still. Nothing in the arrangement keeps thos
 
 What keeps the column free, or where they go on a phone, is his to say.
 
+**P24 — One agent's section a page, and the agents turn it.** *2026-10-03, his, after a friend in HR looked at the
+portfolio: "there is too much information at once and uh, having pages is a good idea so like instead of uh, vertical
+scrolling I want to have horizontal scrolling each vertical will become a page and uh, it should be a very quick scroll
+I mean it has to be a trigger like once I scroll it should directly the current vertical should uh, get off the page
+from the left and uh, the new page should slide in from the right or maybe or maybe I think it's very interesting if
+Each agent can pick a section. So we scroll from one agent to another. So whoever agent is in [focus], uh, should dive
+in to show their section. And uh, when we scroll, they dive back into their place and the new agent dives in."* Then,
+while it was being built: *"it will be great if the agent stays on the same uh, page until we change the section"*,
+and *"Instead of placing them on the left of the section, uh, place it right in the center bottom of the section."*
+Version 1, the second of his two ideas: the slide was not built. Grid.md D50 and Motion.md M22 version 9 have the
+agents' side.
+
+- **The pages.** Six, one an agent, in this order (`PAGES`, `site.tsx`): each holds the items that agent opens (`by`).
+
+  | Page | Agent | Its section |
+  |---|---|---|
+  | 1 | Bali, the Guide | the profile, his line and More about me, Email · GitHub · Résumé, the degree and the city |
+  | 2 | Mira, the Editor | the tech stack, every mark |
+  | 3 | Oru, the Keeper | the work |
+  | 4 | Kino, the Maker | the projects, and the case studies under them |
+  | 5 | Lola, the Muse | the statement about AI and the interests |
+  | 6 | Zaza, the Scout | the socials |
+
+  **The order is his** (the same evening: *"the socials should be in the end. The technical skills (rename as tech
+  stack) should be 2nd, work should be the 3rd. Projects should be 4th, Case studies should be 5th."*). Until then the
+  socials were the second page and the rest followed the résumé — the work, the projects, the skills, the interests.
+  **The technical skills are the tech stack** since the same words, the label and the section's name (`LABELS.tech`;
+  the phone's tab still says Tech). The case studies are on Kino's page, under the projects, so they are the fifth
+  section as the pages read: a page is one agent's section and a new agent in focus is what turns it (Grid.md D50
+  version 9), so a page of their own would need an agent of their own, or an agent that presents two pages — his call,
+  not made. The socials are Zaza's again. They were Lola's while they stood in her column. **The address, GitHub, the résumé, the
+  degree and the city are on the first page** (his, the same day: *"Actually, I need a the resume, Hyderabad,
+  education, GitHub, and email in the first page"*), under his line, as they stood in the one page's column. They were
+  Zaza's, on the second page, until then, so Zaza's page is the socials alone. Page 1 is seven rows on a pointer and
+  eight on a phone, the tallest page with the projects and the interests, so the agent's cell does not move.
+  The phone's tabs (`compact`) are on no page: every section has a page of its own.
+- **A page is its section alone** (`arrangeAgent`, `arrange.ts`). Its items stand one under the other, each at its own
+  span and with its own `air` over it, centred across the field and down it. The agents' cells are kept free, with a
+  line of air before them where the field has one. Where the rows are short, a grower gives up rows first and then
+  the last items are left off. The statement about AI is three rows at eight cells now (it was four, for a five-cell
+  column).
+- **The agents.** At home they stand in the field's last column, or along its bottom row on a field taller than it is
+  wide (a phone). They stand in page order, Bali first, so the page goes down them as it turns. The agent of the page
+  on the field rests in one cell until the page turns, and its cell at home is empty. **On a wide field it is the same
+  cell on every page** (his, the same day, once he had seen it: *"right now, uh, each agent is taking a different cell
+  in a different row uh, which I did not like. So, we've, we shall uh, put the agent in the bottom third row in the
+  large screen"*). That cell is the third row from the bottom, at the field's centre: the left of its two middle cells,
+  since a field is an even number of cells across. It goes lower only where the tallest page needs the rows above it.
+  At 1280 × 720, eight rows deep, that is the bottom row, because the projects and the interests take seven. Every
+  section stands over that cell with a row of air where there is one, centred down the field as far as that allows.
+  On a phone it is still the cell below the section, at its centre. That cell is `stand` from `arrangeAgent`, given to
+  the grid as `introFocusAt`.
+- **Its pill** (his, the same message: *"when I click on it, it should open up a pill of three cells which has name, of
+  the agent a chat icon button to chat with it and uh, 45 degree arrow that link icon in the icon button to open up a
+  new page in a new tab it should open orbit application"*). **It opens by hover** (his, the same day, once he had
+  tried the click: *"instead of clicking the agent to open up its information I think uh, let's show it with hover"*).
+  A mouse or a pen on the agent opens a pill three cells wide beside it, to its right where it fits. The pill stays
+  while the pointer is on the agent or the pill, and closes 200ms after it has left both, which leaves time to cross
+  the gutter between them. Each cell holds one thing: the agent's name, a chat button, and ↗ to Orbit
+  (`orbit.no-origins.com`) in a new tab (`AgentSpot`, `AgentPill`, `agent-pill.tsx`). The agent is the grid's drawing
+  and takes no pointer, so a round button the size of its cell stands under it, for the pointer, a finger, the keys and
+  a screen reader (`useAgentPill`). Where there is no hover there is still a way in: a tap opens and closes it, and the
+  keys' focus on the agent opens it, Enter toggling it. Escape closes it and puts focus back on the agent, as do a
+  press anywhere else and a turn. The name is semibold (his: *"Make the name of the agent a little bold"*; it was
+  medium).
+- **A click on the agent bounces it** (his, the same day: *"When we click on the agent, add bounce"*). A click, a tap
+  or Enter plays his Bounce where it stands, the same action and values the intro plays (`INTRO_ACTIONS`), through
+  `introAct` on the grid. A press while it is in the air, while the page is turning or while the intro plays does
+  nothing. A press after it has landed bounces it again, cutting the end of its jiggle. Measured at 1440 × 900: it
+  rises about 60px over 0.18s and is back in its cell by 0.4s. **The
+  chat button is drawn and does nothing:** there is no chat yet. **Orbit is behind the one sign-in** (Admin.md §8.4),
+  so a visitor who is not on the allowlist gets its sign-in card. Orbit has no page for each agent, so ↗ opens its
+  front page.
+- **The agents at home turn the page too** (his, the same evening: *"I should be able to travel to pages by clicking on
+  the agent on the right column"*). A click on any agent in the column — a tap, Enter on it — turns straight to its
+  page, the same turn as a scroll's: the section fades away as its agent Dives home, and the one clicked Dives in. Each
+  home cell has a spot the cell's size under the drawing (`AgentHome`, `agent-pill.tsx`), as the agent in focus has,
+  lit under the pointer as a ghost button is, and named for a screen reader by its page and its agent ("Tech stack,
+  Mira's page"; `PAGE_TITLES`, `site.tsx`); the empty cell of the agent on the field has none. The cells are `homes`
+  from `arrangeAgent`. **The keys read the column after the section** (`data-reading-after`, Grid.md D45 amended):
+  Tab goes through the page's items and then down the agents, Enter on one turning to its page, where the reading
+  order alone had put each agent between the lines it shared a row with. A click while the intro plays or a page
+  turns does nothing, as with every trigger.
+- **The turn.** One scroll is one turn. The first wheel event of a gesture turns the page, and nothing more of that
+  gesture does: a new gesture is a wheel event after 200ms with none. Either axis works, and a positive delta is
+  forward, never negated (Grid.md D27): fingers moving up or left on a trackpad, or a wheel turned toward you. A swipe
+  works the same way: a finger moving left or up goes forward, except a swipe across the projects' carousel, which
+  turns the carousel. Page Down and Page Up turn it too. The arrows still move focus (Grid.md D45). Nothing turns it
+  while the intro plays or a page is turning, and the first and last pages go no further. The section on the field
+  fades away while its agent Dives home. The next agent Dives from home to the cell below its own section, its
+  ripple spreads, and the section fades in. About a second at 1440 × 900.
+- **The intro** opens on Bali's page. The six stand in their row and Bali, Kino and Mira bounce. Then Bali goes to the
+  cell under the profile, and the others go home.
+
+*Mine, his to change:* which agent's section is which page (their order is his since the same evening, above); the
+socials going to Zaza, and staying there alone once the rest of Zaza's page went to the first; the left of the
+two middle cells; the phone keeping the cell below its section; the pill opening to the right, and how it opens (the
+surfaces' fade and grow, `motion-surface`); the 200ms it waits before closing; that the last page does not wrap round to the first; Page Down and Page Up
+as the keys; the 200ms gap between gestures. *Not built:* his first idea, the section sliding out to the left and the next sliding
+in from the right. P15's `arrange` is kept, uncalled, while this is a trial.
+
+**P25 — The status pill.** *2026-10-03, his: "Add a pill in the bottom right of the portfolio with a 'violet' circle.
+When hovered on it, it should expand to 'Status page' with link icon that opens new tab."* The way from the portfolio to
+the status page (Status.md), which says where every app stands.
+
+- **At rest it is a circle one cell big in the field's bottom-right corner, a violet dot in it** — the dot the company
+  marks' size, half the cell less a step of the spacing scale, in `--secondary`. Where an agent's home is the corner
+  (a field six rows deep), it takes the cell left of it; on a phone, where the agents have the bottom row, it is the
+  right end of the row over them, the agent's row, whose agent stands at the centre. `status` from `arrangeAgent`.
+- **The pointer on it, or the keys' focus, and it grows LEFT to three cells**: the dot stays in its cell and "Status
+  page" with ↗ comes in beside it, its border turning violet as it grows. The growth is **movement** (Motion.md M9,
+  his decided motion for a one-cell element that grows to spell its name — the tech column's), played by
+  `useCellMotion` on the tokens in globals.css and mirrored, since it grows from the right edge rather than the left.
+  Leaving it, it closes the same way. *Mine:* the mirror, the violet ring, three cells.
+- **The whole pill is the link**, to `status.no-origins.com` in a new tab, so a finger with no hover taps the circle
+  and goes; its name to a screen reader is "Status page (opens in a new tab)". The keys reach it last of the page's
+  stops, before the agents' column.
+- **It is a fixture** (Grid.md D50, version 9 amended): a page's turn leaves it where it is, where every other box
+  fades away and the next page's fade in. It is hidden while the intro plays, with everything else, and is there when
+  the intro hands over. `data-intro-fixed` on its `GridItem`; the agents' cells to click carry it too.
+- `node e2e/.mcp/status-pill.mjs <out>` shoots it at rest, hovered and after a turn, and on a phone, and logs its cell,
+  its width, its ring and its opacity through a turn.
+
+*Mine, his to change:* the dot's size; the three cells; the ring going violet; the row over the agents on a phone;
+where it goes on a six-row field. *Not built:* a tooltip or any cue before the hover that it is a link.
+
 ## 3. Where it lives
 
 | Thing | Where |
@@ -1688,7 +1816,11 @@ What keeps the column free, or where they go on a phone, is his to say.
 | The packer — top row, band, the first screen, and the room it leaves (P2, P3, P8, P15) | `apps/portfolio/src/lib/arrange.ts` |
 | The sections and every span (P7, P8) | `apps/portfolio/src/content/site.tsx` |
 | The facts (P6) | `apps/portfolio/src/content/resume.ts` |
-| The grid renderer (P2), one page on a `Grid` (P15), and the page waking from the avatar (P16) | `apps/portfolio/src/components/portfolio-pages.tsx` |
+| The grid renderer (P2), one agent's section a page on a `Grid` and what turns it (P24) | `apps/portfolio/src/components/portfolio-pages.tsx` |
+| The pages' order, one an agent (P24) | `PAGES` in `apps/portfolio/src/content/site.tsx` |
+| One agent's section on the field, where its agent stands and where its pill opens (P24) | `arrangeAgent` in `apps/portfolio/src/lib/arrange.ts` |
+| The agent's cell to click and its pill (P24) | `apps/portfolio/src/components/agent-pill.tsx` |
+| The status pill, its growth and its link (P25) | `apps/portfolio/src/components/status-pill.tsx`; its cell, `status` from `arrangeAgent` |
 | The intro's six agents, copied from their current versions (P23) | `apps/portfolio/src/content/agents.ts` |
 | Which of them bounce in the intro, and the cast the grid is given (P23) | `apps/portfolio/src/content/intro.ts` |
 | How the intro's six bounce, jump and dive, copied from the actions' current versions (P23) | `apps/portfolio/src/content/actions.ts` |

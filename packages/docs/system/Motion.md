@@ -2452,6 +2452,64 @@ The rest are version 7's.
 *Mine, his to tune:* the cast's order down the column. Also open: what keeps the column free where boxes stand in it
 (Portfolio.md P23 has the table).
 
+### Version 9 — one section a page, the agents turning it (2026-10-03)
+
+His, after a recruiter friend told him the portfolio was too much at once: *"having pages is a good idea … each
+vertical will become a page and uh, it should be a very quick scroll … or maybe I think it's very interesting if Each
+agent can pick a section. So we scroll from one agent to another. So whoever agent is in Opus [focus], uh, should dive
+in to show their section. And uh, when we scroll, they dive back into their place and the new agent dives in."* Then,
+while it was being built: *"it will be great if the agent stays on the same uh, page until we change the section"*,
+and *"Instead of placing them on the left of the section, uh, place it right in the center bottom of the section."*
+
+The page names one agent as **in focus** (`introFocus` on `Grid`), and the boxes on the field are that agent's
+section alone (Portfolio.md P24).
+
+- **It stands below its section** (`introBeside`): in the cell under the section's last row, at its centre. A section
+  is an even number of cells across, so that is the left of its two middle cells: an agent stands on a cell. Where
+  that row is not free, it stands in the same cells over the section, then left or right of its first row. It rests
+  there, breathing and blinking, in its lit nest, until the page turns.
+- **Or where the page says** (`focusAt`, `introFocusAt` on `Grid`). Once he had seen it: *"right now, uh, each agent is
+  taking a different cell in a different row uh, which I did not like. So, we've, we shall uh, put the agent in the
+  bottom third row in the large screen."* The portfolio gives one cell for every page of a wide field: the third row
+  from the bottom, at the field's centre (Portfolio.md P24). The intro sends the agent there, and each turn brings the
+  next agent up there.
+- **An action where it rests** (`introActHere`, `act`, `introAct` on `Grid`; his, the same day: *"When we click on the
+  agent, add bounce"*). The page can ask an agent for one of its actions in its own cell, and the portfolio asks for
+  his Bounce on a click. The agent is not asked while it is in the air or under the page (`introAway`), nor while a
+  page turns. A new Bounce after it has landed cuts the end of the last one's jiggle, as the intro's bounces do.
+- **The intro ends with it there** (`introPlan` with `focus`). The six stand in their row and bounce as before. Then
+  the one in focus jumps or dives to its cell below its section, and its ripple spreads. As the ripple's last ring
+  lights, the section fades in. The other five jump or dive straight home, with no ripple.
+- **The page turns by the agents.** The section on the field fades away over `out` (160ms, the grid's own turn,
+  Grid.md D37) while its agent Dives home (`introGoHome`), its nest going as it goes. Then the page puts the next
+  section on the field, held back. Its agent Dives out of its cell at home and comes up below that section
+  (`introGoIn`), and its ripple spreads. As the ripple's last ring lights, the section fades in over `reveal`. The
+  two dives overlap under the page. An empty cell at home is the page being shown.
+- **Home is the bottom row on a field taller than it is wide** (`introHome`, `introHomeSide`). A phone's six columns
+  are the six cells. Version 8's last column stood over a phone's boxes.
+- **Under reduced motion** there is no intro and no dive. The agents are drawn once, still, and a turn puts the next
+  section and its agent in place at once.
+- *Kept, unused by the portfolio:* where no cell round the section is free, the one in focus dives into the
+  section's centre and is held there behind the page (`hold`, `introComeHome`). This was how it was built before his
+  second note.
+
+| Token | Version 9 | What |
+|---|---|---|
+| `--motion-intro-out` | 160ms | a section fading away as the page turns |
+
+The rest are version 8's. A turn's length is his Dive's twice, overlapped, and `reveal`.
+
+*Measured* (`e2e/.mcp/pages-shot.mjs`, `pages-turn-frames.mjs`, `pages-reduced.mjs`, local dev server, 2026-10-03):
+- From the scroll to the next section all in took 0.93s to 1.0s at 1440 × 900, and 1.3s to 1.5s on a Pixel 7.
+- The intro handed over at 3.66s at 1440 × 900. Version 8 took 4.66s, because only one agent opens anything now.
+- A second scroll inside the same gesture did nothing, and the next gesture turned once.
+- After a resize, the agent in focus stood below its section on the new field.
+- Under reduced motion, the scroll and Page Down turned at once.
+- No errors.
+
+*Mine, his to tune:* the cell when the centre falls between two (the left one); the section coming in as the ripple's
+last ring lights, where version 7 waited `settle` more for the dive; `out`.
+
 ## M23 — Agents: a motion is every agent's, and what is motion and what is character (2026-10-01)
 
 *His, 2026-10-01:* "Currently review uh, motion in that we have agent and agent motion I think they are just duplicates
@@ -2680,6 +2738,52 @@ click on a cell sends the agent there, where it stays (Bounce plays where it sit
    M20's did.
 6. **Going out from no spring**, the crouch's squash springs back to its sitting shape as it starts to go; and going out
    sideways it keeps the shape it sits in. Coming in, it is round.
+
+## M25 — Liquid: a box filled to a level, its surface flowing (2026-10-03)
+
+*His, 2026-10-03, asking for the status page: "that should show all our apps and each one of it is still in progress
+and to represent that as an icon, let's fill a cell beside in progress with flowing liquid. Fill only 40% of the
+liquid. So first to test the liquid, we need that in motions."* A motion he named, so it is on the bench (M9), after
+Steps, as **Liquid**, designed version by version (no presets). The status page (Status.md) plays it in a cell beside
+every app; the showcase shows it among the molecules.
+
+- **The component is the design system's.** `Liquid` (`components/liquid.tsx`; no registry has one, his ask) fills
+  whatever box it is given up to `level`, 0 to 1 — a cell is a circle (Grid.md D39), so a 1 × 1 is a round glass. Its
+  colour is the primary, lime, unless given (`colour`); it says "40% full" to a screen reader unless told otherwise.
+  Two SVG paths, the back wave and the front, painted each tick; the box is `border bg-card`, which a class may
+  change.
+- **The surface flows as two waves.** The front, in the liquid's colour: Height (crest to trough, a share of the box's
+  height), Length (one wavelength, times the box's width) and Period (one wavelength passing, ms). Behind it the
+  **back wave**, a tone of the colour **mixed toward the card** (`color-mix`, never an opacity: the no-glass rule
+  holds, and the flat second tone is what reads as depth), its Height times the front's, its Lag a share of a
+  wavelength behind, its Speed times the front's — anything but 1 and the two drift past each other — and its Tone,
+  how far toward the card. *Mine:* two waves, and the back one slower rather than only behind.
+- **The level breathes.** Bob is how far the whole level rises and falls, a share of the box; Bob period how long one
+  rise and fall takes. 0 holds it. *Mine.*
+- **The pour.** When a liquid arrives it pours from empty to its level over Pour ms on Pour ease, and a new level
+  pours from wherever the liquid is. 0 and it is there at once. *Mine.*
+- **Reduced motion**: a flat surface at the level, no waves, no bob, no pour; a new level is drawn at once.
+- **Pure, played by one hook.** `lib/liquid-motion.ts` is the model (`readLiquidMotion`, `liquidFrame`, `liquidLevel`,
+  `liquidStill`, `liquidPath`, `liquidBackColour`, `paintLiquid`); `hooks/use-liquid-motion.ts` plays it on a box —
+  one GSAP ticker for the box's life, each tick handing a frame to the painter, `still` for the studio's timeline,
+  `always` for the studio — and `Liquid` is the two together. The motion is read off the box when it starts and when
+  `tuning` changes, never cached.
+- **The tokens**, eleven in four groups on the jig. **Wave**: Height, Length, Period. **Back wave**: Height, Lag,
+  Speed, Tone. **Sway**: Bob, Bob period. **Pour**: Pour, Pour ease. None in globals.css until he picks (M7);
+  `LIQUID_START` and the family's version 1 are the same values.
+- **Version 1** (mine, from his words): a wave 8% of the box tall and 1.2 boxes long passing in 2.4s; a back wave 70%
+  as tall, 0.35 of a wavelength behind at 0.8 of the speed, mixed 45% toward the card; a bob of 1.5% over 4.2s; a 1.4s
+  pour on expo out.
+- **The specimen** (`components/liquid-stage.tsx`) is the system's own `Liquid` filling the block — a cell to start
+  with, as the status page has it; Columns and Rows make it a bigger box — at the level the specimen's **Level** sets,
+  40% unless moved (steps of 5). Live it flows on its own clock and pours when the level changes. On the timeline a
+  play is the pour from empty and then the flow for the hold; on a loop it pours again. `node e2e/.mcp/studio-liquid.mjs
+  <out>` turns to the page and shoots it live and 450ms into a pour.
+
+Flagged: in a 60px cell a wave 8% tall is under 5px and may read as a shimmer rather than liquid; the back wave's tone
+is mixed toward the card, so it reads differently in the two themes; eight liquids bobbing together on the status page
+may read as the page breathing (Bob can go to 0); and the colour is a prop, not a token — whether a liquid's colour is
+his to pick per use is open.
 
 ## 5. Open
 
