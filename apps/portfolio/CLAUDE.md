@@ -11,6 +11,50 @@ pnpm --filter portfolio dev                # :3000 (design :3001, admin :3002)
 
 ## The shape
 
+**Since 2026-10-03 it is six pages, one agent's section each** (Portfolio.md P24, his, after a friend in HR found the
+one page too much at once: "each agent can pick a section. So we scroll from one agent to another"). The page order is
+`PAGES` in `site.tsx` — Bali (the profile, his line, and since the same day Email · GitHub · Résumé, the degree and the
+city, his: "I need a the resume, Hyderabad, education, GitHub, and email in the first page"), Mira (the tech stack —
+Technical skills until the same evening, his: "rename as tech stack"), Oru (the work), Kino (the projects, the case
+studies under them), Lola (the statement about AI, the interests), Zaza (the socials) — his order, the same evening
+("the socials should be in the end … tech stack … 2nd, work … 3rd. Projects … 4th, Case studies … 5th"; the socials
+were second until then) — and a page is the items whose `by` names that agent first, one under the other, centred
+(`arrangeAgent` in `arrange.ts`); the tabs (`compact`) are on none. `PortfolioPages` passes the page asked for to the
+grid as `introFocus` and puts the next section on the field when the grid calls `onIntroFocus`. The agents turn it
+(Grid.md D50 version 9): the agent of the page on the field stands, on a wide field, in ONE cell for every page — the
+third row from the bottom, at the field's centre, lower only where the tallest page needs the rows (his: "put the agent
+in the bottom third row in the large screen"); on a phone, the cell below its section — `stand` from `arrangeAgent`,
+given to the grid as `introFocusAt`; its cell at home empty. Hovering it opens its pill beside it (his: "let's show it with
+hover"; a click until then), three cells: its name, a chat button that does nothing yet, and ↗ to Orbit (`ORBIT_URL`,
+behind the sign-in) in a new tab (`agent-pill.tsx`: `useAgentPill`, `AgentSpot`, the round button under the drawn
+agent, and `AgentPill`); it stays while the pointer is on the agent or the pill and goes 200ms after it leaves both; a
+tap toggles it and the keys' focus opens it where there is no hover; Escape, a press elsewhere or a turn closes it; the
+name is semibold. A click on the agent (a tap, Enter) plays his Bounce where it stands (`introAct`; his: "When we click
+on the agent, add bounce"), never in the air or while the page turns; `node e2e/.mcp/agent-bounce-click.mjs <outdir>
+[w|pixel] [h]` measures it. **A click on an agent at home turns straight to its page** (his, the same evening: "travel to
+pages by clicking on the agent on the right column"): `AgentHome`, a spot like the agent's on every home cell but the one
+left empty (`homes` from `arrangeAgent`, `turnTo` in `portfolio-pages.tsx`), named by its page and its agent
+(`PAGE_TITLES`); `node e2e/.mcp/agent-home-click.mjs <outdir> [w|pixel] [h] [scheme]` clicks them.
+**The status pill** (Portfolio.md P25, his, the same evening: "Add a pill in the bottom right of the portfolio with a
+'violet' circle. When hovered on it, it should expand to 'Status page' with link icon that opens new tab"): a bordered
+circle one cell big on the field's bottom-right cell (`status` from `arrangeAgent`: the cell left of it where an agent's
+home is the corner, the right end of the row over the agents' row on a phone), a violet dot in it, that grows LEFT to
+three cells under the pointer or the keys' focus — "Status page ↗" beside the dot, the border violet — by movement
+(`useCellMotion`, mirrored, `status-pill.tsx`); the whole pill is the link to `STATUS_URL` (status.no-origins.com,
+Status.md) in a new tab. It is a **fixture** (`data-intro-fixed`, Grid.md D50 version 9 amended): a turn leaves it
+alone, and so are the agents' cells to click. `node e2e/.mcp/status-pill.mjs <outdir>` shoots it at rest, hovered,
+through a turn and on a phone.
+`node e2e/.mcp/agent-pill.mjs <outdir> [w|pixel] [h] [scheme]` checks the cell on every page and the pill, and `node
+e2e/.mcp/agent-hover.mjs <outdir>` the hover, the keys and a tap; at home they are the field's last column, or its bottom row on a phone, in page order. One scroll — the
+first wheel event of a gesture, either axis, a positive delta forward — a swipe, or Page Down / Page Up turns it: the
+section fades away as its agent Dives home, the next agent Dives in below its own section, ripples, and the section
+fades in, about a second. Nothing turns it while the intro plays or a page turns. `node e2e/.mcp/pages-shot.mjs
+<outdir> [w|pixel] [h] [scheme] [turns]` shoots every page and times each turn, `node e2e/.mcp/pages-turn-frames.mjs
+<outdir> [w] [h] [step] [count]` shoots one turn frame by frame and checks a second scroll in the same gesture does
+nothing and a resize keeps the agent below its section, and `node e2e/.mcp/pages-reduced.mjs <outdir>` checks reduced
+motion. **What follows describes the one page (P15) the pages were cut from**: the items, their spans and the cards
+are the same, and `arrange` is kept, uncalled.
+
 Rebuilt from nothing on 2026-09-21, on the grid. There is one route, `/`, and since 2026-09-27 it is **one page**
 (Portfolio.md P15, his: "We don't need multiple pages in portfolio now. Remove pagination navbar"): the first screen,
 and the pieces of the pages that went — Beyond and Say hello — in the profile's column since 2026-09-27 (they were in
@@ -77,8 +121,8 @@ note and no columns.
   axis does not move on it. An item taller than the room gives up rows — at most a quarter of them while it shares a page, then it takes a
   page of its own.
 - **`PortfolioPages`** (`src/components/portfolio-pages.tsx`) is the renderer: a `Grid` — not a `GridPages`, so no
-  bar and no turn (P15) — that runs `arrange` on whatever field the grid reports, so every coordinate is honoured as
-  written. It opens with the grid's `intro` (Grid.md D50, P23, version 8 since 2026-10-01, his: "we'll bring them to
+  bar; since P24 its turn is the agents' (above) — that runs `arrangeAgent` (`arrange` until P24) on whatever field
+  the grid reports, so every coordinate is honoured as written. It opens with the grid's `intro` (Grid.md D50, P23, version 8 since 2026-10-01, his: "we'll bring them to
   the right the last most column vertically centered"): the six agents of `INTRO_CAST` (`content/intro.ts`: the six
   of `content/agents.ts`, each copied whole from its current version in Orbit, with whether it `bounces`) stand side by
   side in a row on the field's middle, in a random order; Bali, Kino and Mira bounce, each at its own random times, and

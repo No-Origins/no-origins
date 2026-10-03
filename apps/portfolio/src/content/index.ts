@@ -117,4 +117,13 @@ export type PortfolioPage = { title: string; sections: PortfolioSection[] };
 /**
  * The page `arrange` returns: the grid's own, and where its backdrop goes, if it has one and there is room for it.
  */
-export type PortfolioGridPage = GridPage & { backdrop?: GridLayoutItem };
+export type PortfolioGridPage = GridPage & {
+  backdrop?: GridLayoutItem;
+  /** Where the agent of a page stands, a cell, 1-based (P24), and where its pill opens, its first cell. */
+  stand?: { col: number; row: number };
+  pill?: { col: number; row: number };
+  /** The agents' cells at home, 1-based, in page order (P24): each a way to its page. */
+  homes?: { col: number; row: number }[];
+  /** The status pill's cell, 1-based (P25): the field's bottom-right corner, or the nearest cell the agents leave. */
+  status?: { col: number; row: number };
+};

@@ -28,6 +28,7 @@ import { ModeStage } from "@/components/mode-stage";
 import { useAgentPreview } from "@/components/agent-preview";
 import { ActionStage } from "@/components/sphere-stage";
 import { StepStage } from "@/components/step-stage";
+import { LiquidStage } from "@/components/liquid-stage";
 import { holdPhase, useStudio, type Phase } from "@/components/studio-context";
 import { tokenCss } from "@/lib/tokens";
 
@@ -702,6 +703,7 @@ type StagedId = Exclude<FamilyId, "motions" | `action-${string}`>;
 const STAGES: Record<StagedId, (props: StageProps) => React.ReactNode> = {
   grip: (p) => <GripStage {...p} />,
   step: (p) => <StepStage {...p} />,
+  liquid: (p) => <LiquidStage {...p} />,
   move: (p) => <MoveStage {...p} />,
   load: (p) => <LoadStage {...p} />,
   enter: (p) => <EnterStage {...p} />,

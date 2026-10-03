@@ -10,8 +10,14 @@ import { isUploadSlot, MAX_FILE, strictDrawing, type UploadSlot } from "@/lib/dr
 /**
  * The character's draft and versions, in the admin's database (Orbit.md C6, Motion.md M20; the tables are
  * `supabase/migrations/…_studio_versions.sql`). Server functions, as every read and write in the apps goes through the
- * server (`@no-origins/auth/server`): the signed-in person's session, and RLS deciding what they may do — his only.
- * Each checks that someone is signed in, since a server function can be reached by a POST from anywhere.
+ * server (`@no-origins/auth/server`): the session, if there is one, and RLS deciding what it may do.
+ *
+ * **Reading is everyone's; writing is the owner's** (C24, his, 2026-10-03: "only when I log in as an admin should I be
+ * able to publish, so that users can experiment and play around"). A visitor — nobody signed in, or someone signed in
+ * who is not the owner — loads each agent as its current published version (`…_studio_public_read.sql`), never the
+ * draft, and `editable` is false: the page is theirs to play with and nothing is saved. The owner loads the draft and
+ * saves, publishes, goes back, makes agents and uploads as before. Every write checks that the owner is the one
+ * asking, since a server function can be reached by a POST from anywhere; RLS would refuse anyway.
  *
  * A look is **held whole** (`resolveCharacter`): every value of its look (never how it moves, Motion.md M23), so a published version never follows a default that
  * changes in code later. A value missing from one read back is a setting declared since, and takes its default then.
@@ -40,6 +46,8 @@ export type UploadedDrawing = { itemId: string; name: string; slot: UploadSlot; 
 
 export type CharacterState = {
   itemId: string;
+  /** Whether the draft is the signed-in person's to save and publish: the owner's (C24). A visitor plays, and nothing is saved. */
+  editable: boolean;
   /** Every character this account may see, by name: the six (Agents.md A2), and any made since. */
   characters: CharacterEntry[];
   look: CharacterLook;
@@ -60,7 +68,7 @@ export type Outcome<T> =
   | { ok: false; reason: "offline" | "signed-out" | "conflict" | "refused"; message: string };
 
 const offline = { ok: false, reason: "offline", message: "Nothing is saved here: this server has no database keys." } as const;
-const signedOut = { ok: false, reason: "signed-out", message: "Sign in to save." } as const;
+const signedOut = { ok: false, reason: "signed-out", message: "Sign in as the owner to save and publish." } as const;
 const refused = (message: string) => ({ ok: false, reason: "refused", message }) as const;
 const conflict = {
   ok: false,
@@ -68,26 +76,66 @@ const conflict = {
   message: "The draft was changed somewhere else since it was loaded. Load it to carry on from there.",
 } as const;
 
-/** The database as the signed-in person, or why there is none. */
+/**
+ * The database as whoever is asking — a visitor on the anon key's own policies, or the signed-in person on theirs —
+ * and whether that is the owner, whose the draft is (C24). Or why there is no database.
+ */
 async function database() {
   if (!supabaseEnv()) return { error: offline } as const;
   const db = await supabaseServer();
   const { data } = await db.auth.getUser();
-  if (!data.user) return { error: signedOut } as const;
+  let editable = false;
+  if (data.user) {
+    // The role is read, never trusted from the token (`currentProfile`'s reasoning): `profiles` is what RLS reads.
+    const profile = await db.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
+    editable = profile.data?.role === "owner";
+  }
+  return { db, editable } as const;
+}
+
+/** The database for a write: the owner's, or why not. */
+async function writer() {
+  const { db, editable, error } = await database();
+  if (error) return { error } as const;
+  if (!editable) return { error: signedOut } as const;
   return { db } as const;
 }
 
 type Db = Awaited<ReturnType<typeof supabaseServer>>;
 
-/** `itemId`'s character, or the one the studio opens on; and every character there is, for the chooser. */
-async function read(db: Db, itemId?: string): Promise<Outcome<CharacterState>> {
+/**
+ * What a look is read from: the owner's draft, and the `rev` the next save names; for anyone else the version pages
+ * show (C24) — the draft is his alone, by RLS, and not asked for — or, before a first publish, nothing, which resolves
+ * to the look the package declares.
+ */
+async function source(
+  db: Db,
+  item: { id: string; current_version_id: string | null },
+  editable: boolean,
+): Promise<{ look: unknown; rev: number } | { error: string }> {
+  if (editable) {
+    const draft = await db.from("studio_drafts").select("data, rev").eq("item_id", item.id).maybeSingle();
+    if (draft.error) return { error: draft.error.message };
+    if (draft.data) return { look: draft.data.data, rev: draft.data.rev };
+  }
+  if (!item.current_version_id) return { look: {}, rev: 0 };
+  const version = await db.from("studio_versions").select("data").eq("id", item.current_version_id).maybeSingle();
+  if (version.error) return { error: version.error.message };
+  return { look: version.data?.data ?? {}, rev: 0 };
+}
+
+/**
+ * `itemId`'s character, or the one the studio opens on; and every character there is, for the chooser. The owner
+ * (`editable`) reads its draft; anyone else reads the version pages show (C24).
+ */
+async function read(db: Db, itemId: string | undefined, editable: boolean): Promise<Outcome<CharacterState>> {
   const all = await db.from("studio_items").select("id, name, current_version_id").eq("kind", "character").order("name");
   if (all.error) return refused(all.error.message);
   const characters = all.data.map((c) => ({ id: c.id, name: c.name }));
   const item = { data: all.data.find((c) => (itemId ? c.id === itemId : c.name === CHARACTER)) ?? all.data[0] };
-  if (!item.data) return refused(`There is no character that this account may see.`);
-  const [draft, versions] = await Promise.all([
-    db.from("studio_drafts").select("data, rev").eq("item_id", item.data.id).maybeSingle(),
+  if (!item.data) return refused(`There is no agent to show.`);
+  const [from, versions] = await Promise.all([
+    source(db, item.data, editable),
     db
       .from("studio_versions")
       .select("id, number, minor, label, published_at")
@@ -95,7 +143,7 @@ async function read(db: Db, itemId?: string): Promise<Outcome<CharacterState>> {
       .order("number", { ascending: false })
       .order("minor", { ascending: false }),
   ]);
-  if (draft.error) return refused(draft.error.message);
+  if ("error" in from) return refused(from.error);
   if (versions.error) return refused(versions.error.message);
   // The uploaded styles made for it, and every version of each: a look may still wear an older one.
   const items = await db.from("studio_items").select("id, name, slot, current_version_id").eq("kind", "drawing").eq("character_id", item.data.id);
@@ -120,9 +168,10 @@ async function read(db: Db, itemId?: string): Promise<Outcome<CharacterState>> {
     ok: true,
     value: {
       itemId: item.data.id,
+      editable,
       characters,
-      look: resolveCharacter(checkCharacter(draft.data?.data ?? {})),
-      rev: draft.data?.rev ?? 0,
+      look: resolveCharacter(checkCharacter(from.look ?? {})),
+      rev: from.rev,
       versions: versions.data.map((v) => ({ id: v.id, major: v.number, minor: v.minor, label: v.label, publishedAt: v.published_at })),
       currentId: item.data.current_version_id,
       drawings,
@@ -131,15 +180,18 @@ async function read(db: Db, itemId?: string): Promise<Outcome<CharacterState>> {
   };
 }
 
-/** A character as it is saved — `itemId`'s, or the one the studio opens on: its draft, its versions and the one pages show. */
+/**
+ * A character as it is kept — `itemId`'s, or the one the studio opens on: its versions, the one pages show, and its
+ * draft for the owner or that version's look for anyone else (C24).
+ */
 export async function loadCharacter(itemId?: string): Promise<Outcome<CharacterState>> {
-  const { db, error } = await database();
-  return error ?? read(db, itemId);
+  const { db, editable, error } = await database();
+  return error ?? read(db, itemId, editable);
 }
 
 /** Save the draft whole, on the `rev` it was loaded at. Refused, not merged, when another device saved first. */
 export async function saveDraft(itemId: string, look: CharacterLook, rev: number): Promise<Outcome<{ rev: number }>> {
-  const { db, error } = await database();
+  const { db, error } = await writer();
   if (error) return error;
   const saved = await db
     .from("studio_drafts")
@@ -159,7 +211,7 @@ export async function saveDraft(itemId: string, look: CharacterLook, rev: number
  * character one, not each version. A version never changes afterwards; any change after it is the next publish.
  */
 export async function publishCharacter(itemId: string, step: PublishStep, rev: number): Promise<Outcome<CharacterState>> {
-  const { db, error } = await database();
+  const { db, error } = await writer();
   if (error) return error;
   if (step !== "minor" && step !== "major") return refused("A publish is a minor version or a major one.");
   const published = await db.rpc("studio_publish", {
@@ -172,7 +224,7 @@ export async function publishCharacter(itemId: string, step: PublishStep, rev: n
     if (published.error.code === "40001") return conflict;
     return refused(published.error.message);
   }
-  return read(db, itemId);
+  return read(db, itemId, true);
 }
 
 /**
@@ -180,7 +232,7 @@ export async function publishCharacter(itemId: string, step: PublishStep, rev: n
  * defaults, whole (`resolveCharacter`), and it has no version until its first publish, which is 1.0. Returns it opened.
  */
 export async function createCharacter(name: string): Promise<Outcome<CharacterState>> {
-  const { db, error } = await database();
+  const { db, error } = await writer();
   if (error) return error;
   const title = name.trim();
   if (!title) return refused("A new agent needs a name.");
@@ -192,7 +244,7 @@ export async function createCharacter(name: string): Promise<Outcome<CharacterSt
     if (made.error.code === "23505") return refused(`An agent is already called “${title}”.`);
     return refused(made.error.message);
   }
-  return read(db, made.data as string);
+  return read(db, made.data as string, true);
 }
 
 /**
@@ -200,7 +252,7 @@ export async function createCharacter(name: string): Promise<Outcome<CharacterSt
  * and the next publish still counts from the latest version, not this one.
  */
 export async function restoreCharacter(itemId: string, versionId: string, rev: number): Promise<Outcome<CharacterState>> {
-  const { db, error } = await database();
+  const { db, error } = await writer();
   if (error) return error;
   const version = await db.from("studio_versions").select("data").eq("id", versionId).eq("item_id", itemId).maybeSingle();
   if (version.error) return refused(version.error.message);
@@ -216,7 +268,7 @@ export async function restoreCharacter(itemId: string, versionId: string, rev: n
   if (!draft.data) return conflict;
   const current = await db.from("studio_items").update({ current_version_id: versionId }).eq("id", itemId);
   if (current.error) return refused(current.error.message);
-  return read(db, itemId);
+  return read(db, itemId, true);
 }
 
 /**
@@ -232,7 +284,7 @@ export async function uploadDrawing(
   file: string,
   data: unknown,
 ): Promise<Outcome<{ versionId: string; state: CharacterState }>> {
-  const { db, error } = await database();
+  const { db, error } = await writer();
   if (error) return error;
   const title = name.trim();
   if (!isUploadSlot(slot)) return refused("That slot does not take an uploaded style.");
@@ -279,6 +331,6 @@ export async function uploadDrawing(
     source,
   });
   if (version.error) return refused(version.error.message);
-  const state = await read(db, itemId);
+  const state = await read(db, itemId, true);
   return state.ok ? { ok: true, value: { versionId, state: state.value } } : state;
 }

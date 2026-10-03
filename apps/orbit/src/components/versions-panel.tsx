@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { History, Plus, Send } from "lucide-react";
+import Link from "next/link";
+import { History, LogIn, Plus, Send } from "lucide-react";
 
 import {
   AlertDialog,
@@ -48,6 +49,11 @@ import { nextVersion, versionName } from "@/lib/versions";
  * directly then it should auto increment the minor version"*). A version has no name: the character has one (his: *"I
  * don't want to give a name for each version"*). A version never changes: any change after one is the next publish
  * (his: "Each publish should be treated as a version").
+ *
+ * **For a visitor** (C24, his, 2026-10-03: *"only when I log in as an admin I should be able to publish so that …
+ * users can experiment and play around"*) the bar is the agent's select, "Yours to play with" and **Sign in** where
+ * Publish stands; the list ends with the agents, no new one; and the versions open to read, the one pages show marked,
+ * with nothing to press. Everything else on the page moves as it does for him, and nothing is saved.
  */
 
 const STATUS: Record<SaveStatus, string> = {
@@ -58,6 +64,7 @@ const STATUS: Record<SaveStatus, string> = {
   conflict: "Changed elsewhere",
   offline: "Not saved here",
   "signed-out": "Signed out",
+  visitor: "Yours to play with",
   error: "Not saved",
 };
 
@@ -65,7 +72,7 @@ const STATUS: Record<SaveStatus, string> = {
 const NEW_CHARACTER = "action:new";
 
 export function DraftBar({ box }: { box: StudioBox }) {
-  const { status, message, versions, connected, publish, characterId, characters, open, reload } = useCharacter();
+  const { status, message, versions, connected, editable, publish, characterId, characters, open, reload } = useCharacter();
   const metrics = useGridMetrics();
   const cell = metrics?.cell ?? 60;
   const gap = metrics?.gap ?? 12;
@@ -101,11 +108,16 @@ export function DraftBar({ box }: { box: StudioBox }) {
                 {characters.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
-                <SelectSeparator />
-                <SelectItem value={NEW_CHARACTER}>
-                  <Plus aria-hidden />
-                  New agent…
-                </SelectItem>
+                {/* A new agent is the owner's to make (C24). */}
+                {editable ? (
+                  <>
+                    <SelectSeparator />
+                    <SelectItem value={NEW_CHARACTER}>
+                      <Plus aria-hidden />
+                      New agent…
+                    </SelectItem>
+                  </>
+                ) : null}
               </SelectContent>
             </Select>
           ) : null}
@@ -113,19 +125,29 @@ export function DraftBar({ box }: { box: StudioBox }) {
             {said ?? STATUS[status]}
           </Text>
           {status === "conflict" ? <Button size="sm" variant="outline" className="shrink-0" onClick={() => void reload()}>Load it</Button> : null}
-          <Button
-            size="sm"
-            className="ml-auto shrink-0"
-            aria-label={connected ? `Publish ${next}` : "Publish"}
-            title={connected ? `Publish the draft as version ${next}, the next minor` : undefined}
-            data-publish={connected ? next : undefined}
-            disabled={!connected || busy}
-            onClick={() => void publish("minor")}
-          >
-            <Send aria-hidden className="hidden @max-[15rem]:block" />
-            <span className="@max-[15rem]:hidden">Publish</span>
-            {connected ? <span>{next}</span> : null}
-          </Button>
+          {connected && !editable ? (
+            // A visitor (C24): the sign-in, where Publish stands for the owner. The session it makes is every app's.
+            <Button size="sm" variant="outline" className="ml-auto shrink-0" asChild>
+              <Link href="/sign-in" aria-label="Sign in" title="Sign in to save and publish" data-sign-in>
+                <LogIn aria-hidden />
+                <span className="@max-[15rem]:hidden">Sign in</span>
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              className="ml-auto shrink-0"
+              aria-label={connected ? `Publish ${next}` : "Publish"}
+              title={connected ? `Publish the draft as version ${next}, the next minor` : undefined}
+              data-publish={connected ? next : undefined}
+              disabled={!connected || busy}
+              onClick={() => void publish("minor")}
+            >
+              <Send aria-hidden className="hidden @max-[15rem]:block" />
+              <span className="@max-[15rem]:hidden">Publish</span>
+              {connected ? <span>{next}</span> : null}
+            </Button>
+          )}
         </PillCard>
       </div>
       <NewCharacterDialog open={creating} onOpenChange={setCreating} />
@@ -189,7 +211,7 @@ function NewCharacterForm({ onDone }: { onDone: () => void }) {
 
 /** The versions, opened from the bar's circle: the next major to publish, then a row each, newest first. */
 function VersionsDialog() {
-  const { status, versions, currentId, connected, characterId, characters, publish, restore } = useCharacter();
+  const { status, versions, currentId, connected, editable, characterId, characters, publish, restore } = useCharacter();
   const [open, setOpen] = React.useState(false);
   const busy = status === "saving" || status === "loading";
   const name = characters.find((c) => c.id === characterId)?.name;
@@ -206,15 +228,19 @@ function VersionsDialog() {
         <DialogHeader>
           <DialogTitle>{name ? `Versions of ${name}` : "Versions"}</DialogTitle>
           <DialogDescription>
-            {versions.length
-              ? `Publish in the bar makes ${minor}, the next minor version; a new major starts at ${major}. ` +
-                "Going back to a version makes it the one pages show and the draft its look. Nothing is renumbered."
-              : "Its first publish is 1.0."}
+            {!editable
+              ? versions.length
+                ? "What was published, newest first. The one pages show is marked; the owner publishes the next."
+                : "Nothing is published yet."
+              : versions.length
+                ? `Publish in the bar makes ${minor}, the next minor version; a new major starts at ${major}. ` +
+                  "Going back to a version makes it the one pages show and the draft its look. Nothing is renumbered."
+                : "Its first publish is 1.0."}
           </DialogDescription>
         </DialogHeader>
         {connected ? (
           <ItemGroup className="max-h-[60dvh] gap-2 overflow-y-auto">
-            {versions.length ? (
+            {editable && versions.length ? (
               <Item variant="outline" size="sm" role="listitem" data-next-major={major}>
                 <ItemContent className="min-w-0">
                   <ItemTitle className="min-w-0 tracking-normal normal-case">
@@ -238,7 +264,7 @@ function VersionsDialog() {
               </Item>
             ) : null}
             {versions.map((v) => (
-              <VersionItem key={v.id} version={v} current={v.id === currentId} next={minor} busy={busy} onRestore={restore} />
+              <VersionItem key={v.id} version={v} current={v.id === currentId} next={minor} busy={busy} editable={editable} onRestore={restore} />
             ))}
           </ItemGroup>
         ) : (
@@ -249,11 +275,13 @@ function VersionsDialog() {
   );
 }
 
-function VersionItem({ version: v, current, next, busy, onRestore }: {
+function VersionItem({ version: v, current, next, busy, editable, onRestore }: {
   version: CharacterVersion;
   current: boolean;
   next: string;
   busy: boolean;
+  /** Whether going back is offered — the owner's (C24). A visitor reads the list. */
+  editable: boolean;
   onRestore: (id: string) => Promise<boolean>;
 }) {
   const number = versionName(v);
@@ -271,7 +299,7 @@ function VersionItem({ version: v, current, next, busy, onRestore }: {
       <ItemActions>
         {current ? (
           <Badge variant="outline">Showing</Badge>
-        ) : (
+        ) : !editable ? null : (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button size="xs" variant="outline" disabled={busy}>Go back</Button>

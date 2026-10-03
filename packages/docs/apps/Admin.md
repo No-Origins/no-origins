@@ -578,7 +578,8 @@ OAuth is still absent by choice — a third-party identity provider is another m
 - **One session.** The session cookie is written for `.no-origins.com` (`sessionCookieOptions`), so signing in on either app signs in on both, and signing out of one signs out of both. Locally every app is on `localhost`, where a cookie is shared across ports anyway. The same project, the same allowlist, the same three doors. Every subdomain's requests carry the cookie; the portfolio and the showcase read nothing from it and still hold no database key.
 - **`proxy.ts`, not `middleware.ts`.** Next 16 renamed the file convention; the admin's gate moved with it.
 - **Without keys**, the gate refuses in production, a 503 that names the missing values — a deploy that lost its keys is a closed door. On a development server an app may ask to open without them: the motion studio does, so CI's visual review and its specs, which run with no database, still see it. The admin does not; every route in it reads the database.
-- **Roles are later** (his). `profiles.role` and `noo_is()` are there for them.
+- **An open app** (2026-10-03, Orbit.md C24, his: *"make controls in Orbit public, and only when I log in as an admin I should be able to publish, so that users can experiment and play around"*): `authGate`'s `open` makes every path everyone's — the gate refreshes the session and sends nobody to the sign-in; the page asks who is signed in, and RLS decides what they may write. Orbit runs with it: a visitor plays with the agents as published, the owner publishes. Without keys an open app opens everywhere, there being nothing a sign-in guards.
+- **Roles are later** (his). `profiles.role` and `noo_is()` are there for them — and Orbit reads the first since 2026-10-03: its draft, its publish and its uploads are the owner's (Orbit.md C24).
 
 ---
 

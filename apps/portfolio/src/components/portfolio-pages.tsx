@@ -4,12 +4,14 @@ import * as React from "react";
 
 import { countFor, DEFAULT_GRID_CONFIG, Grid, GRID_REFERENCE_BOX, GridItem, specFor } from "@no-origins/ui/components/grid";
 import { useReadingFocus } from "@no-origins/ui/hooks/use-reading-focus";
-import type { GridLayoutItem } from "@no-origins/ui/lib/grid-layout";
 
+import { AgentHome, AgentPill, AgentSpot, useAgentPill } from "@/components/agent-pill";
+import { STATUS_CELLS, StatusPill } from "@/components/status-pill";
 import type { PortfolioField, PortfolioPage } from "@/content";
 import { INTRO_ACTIONS } from "@/content/actions";
 import { INTRO_CAST } from "@/content/intro";
-import { arrange } from "@/lib/arrange";
+import { PAGE_TITLES, PAGES } from "@/content/site";
+import { AGENT_PILL_CELLS, arrangeAgent } from "@/lib/arrange";
 
 /** The field assumed before the grid has measured itself: the xl reference box, bare — the portfolio has no chrome above the grid. */
 const XL = GRID_REFERENCE_BOX.xl;
@@ -21,85 +23,176 @@ const FIRST_FIELD: PortfolioField = {
 };
 
 /**
- * The portfolio on the grid, ONE page (Portfolio.md P15, his, 2026-09-27: "We don't need multiple pages in portfolio
- * now. Remove pagination navbar"): a `Grid`, not a `GridPages`, so there is no pager's bar, no turn and nothing to
- * turn it — the scroll and a finger do nothing, and the arrow keys only ever moved focus (Grid.md D45). The grid is the
- * viewport (Grid.md D3, D11) and nothing here scrolls. The page is arranged on the field the grid reports, so every
- * coordinate is honoured as written: the first screen as it was, and the pieces of the pages that went in the room it
- * leaves (`arrange`). It opens with the grid's intro (Grid.md D50, P23, version 7, his, 2026-10-01): the six agents
- * (`INTRO_CAST`) stand side by side in a row on the field's middle, in a random order, and Bali, Kino and Mira bounce,
- * each at its own random times, for two seconds; then each jumps or dives, at random, to the cell at the centre of the
- * boxes it opens — every item names its agent (`by`) — a small ripple of lit cells spreading round it as it lands;
- * then it dives into its nest and its boxes fade in. They bounce, jump and dive as he published those actions
- * (`INTRO_ACTIONS`). The pointer is the grid's violet ring, and the cell under it lights (D34, D43).
+ * One scroll is one turn (P24, his: "it has to be a trigger like once I scroll it should directly…"): a wheel turns the
+ * page on its first event, and nothing more of that gesture turns it — a trackpad's fling goes on sending events for a
+ * second or more. A new gesture is a wheel event after this long with none.
+ */
+const WHEEL_GAP_MS = 200;
+/** A wheel event smaller than this, in px, is a hand resting on the trackpad, not a scroll. */
+const WHEEL_MIN_PX = 4;
+/** A swipe shorter than this, in px, is a tap. */
+const SWIPE_MIN_PX = 40;
+
+/**
+ * The portfolio on the grid, ONE AGENT'S SECTION A PAGE (Portfolio.md P24, his, 2026-10-03, after a recruiter friend
+ * found the one page too much at once: "having pages is a good idea … I think it's very interesting if each agent can
+ * pick a section. So we scroll from one agent to another. So whoever agent is in focus should dive in to show their
+ * section. And when we scroll, they dive back into their place and the new agent dives in"). It was one page from
+ * 2026-09-27 (P15).
  *
- * **Nothing wakes after it** (P16 withdrawn, his, 2026-10-01: "after they load, they uh, glow up. So I don't think we
- * need that anymore"): a box is in its own colours as soon as it fades in. Until then every box came onto the field
- * faded into the page and brightened as a front from the avatar crossed it, once the intro was over.
+ * A `Grid`, not a `GridPages` — there is no bar, and the turn is the agents' (Grid.md D50, version 9). The page on the
+ * field is `PAGES[shown]`, arranged alone (`arrangeAgent`); the page asked for is `PAGES[want]`, the grid's `introFocus`.
+ * They differ while the page turns: the section on the field fades away as its agent dives home, the grid asks for the
+ * next one (`onIntroFocus`) and its agent dives in. The intro opens on Bali's (version 9): the six stand in their row,
+ * Bali, Kino and Mira bounce, then Bali goes into the centre of the profile and the rest go home to the field's last
+ * column — its bottom row on a phone.
+ *
+ * **What turns it**: the wheel or a trackpad, either way, one gesture one turn — a positive delta is forward, never
+ * negated (Grid.md D27): fingers moving up or left on a trackpad, a wheel turned toward you; a swipe, a finger moving
+ * left or up; Page Down and Page Up; **and a click on an agent at home**, which turns straight to its page (his, the
+ * same evening: "I should be able to travel to pages by clicking on the agent on the right column" — `AgentHome` on
+ * every home cell but the empty one of the agent on the field, `homes` from `arrangeAgent`). Nothing turns
+ * it while it is turning or while the intro plays, and the first and last pages go no further. The arrows still move
+ * focus in reading order (Grid.md D45), and a swipe across the projects' carousel turns the carousel.
+ *
+ * **The agent of the page** stands in one cell on every page of a wide field — the third row from the bottom, at its
+ * centre — and below its section on a phone (`stand`, his, 2026-10-03: "put the agent in the bottom third row in the
+ * large screen"), where the grid draws it (`introFocusAt`). Hovering it opens its pill beside it (`AgentSpot`,
+ * `AgentPill`, `useAgentPill`; his, the same day: "let's show it with hover"): its name, a chat button and ↗ to Orbit.
+ * A click on it — a tap, Enter — plays his Bounce where it stands (`introAct`; his: "When we click on the agent, add
+ * bounce"), as the intro plays it, never while it is in the air or the page is turning.
+ * Leaving the agent and the pill, Escape, a press anywhere else or a turn closes it; a tap or the keys open it where
+ * there is no hover.
  */
 export function PortfolioPages({ page }: { page: PortfolioPage }) {
   const [field, setField] = React.useState<PortfolioField | null>(null);
-  // Where the field sits in the grid's box, for what is drawn behind it (the tagline, P4): the grid centres the field
-  // and leaves the rest as margin (Grid.md D14).
-  const [frame, setFrame] = React.useState<Frame | null>(null);
-  const arranged = React.useMemo(() => arrange(page, field ?? FIRST_FIELD), [page, field]);
+  // The page asked for and the page on the field (P24).
+  const [want, setWant] = React.useState(0);
+  const [shown, setShown] = React.useState(0);
+  // The agent's pill, opened by hover, and its bounce, each press of it (P24, his: "When we click on the agent, add bounce").
+  const [bounces, setBounces] = React.useState(0);
+  const pill = useAgentPill(React.useCallback(() => setBounces((n) => n + 1), []));
+  const { open, close, dismiss } = pill;
+  const closeRef = React.useRef(close);
+  React.useEffect(() => {
+    closeRef.current = close;
+  }, [close]);
+  const pillId = React.useId();
+  const arranged = React.useMemo(() => arrangeAgent(page, field ?? FIRST_FIELD, PAGES[shown]!, INTRO_CAST.length), [page, field, shown]);
   const items = React.useMemo(() => new Map(page.sections.flatMap((s) => s.items).map((item) => [item.id, item])), [page]);
-  const backdrop = arranged.backdrop;
-  // Tab and the arrows move focus in reading order (Grid.md D45), over the backdrop's handle as well as the grid: it
-  // comes first in the document and last on the screen.
+  // Tab and the arrows move focus in reading order (Grid.md D45).
   const scope = React.useRef<HTMLDivElement>(null);
   useReadingFocus(scope);
-  // The grid's intro (Grid.md D50), as its root carries it: "agent" while the agents play and the page is held back but
-  // for the boxes they open, "reveal" as the grid lets go of it, over `--grid-intro-reveal`. The tagline behind the grid is held with the boxes, so it
-  // carries the same. Assumed held until the grid says otherwise, so it never shows a frame early.
   const grid = React.useRef<HTMLDivElement>(null);
-  const [intro, setIntro] = React.useState<{ phase: string | null; reveal: string }>({ phase: "agent", reveal: "" });
-  React.useLayoutEffect(() => {
+
+  // The turn's triggers (P24).
+  const asked = React.useRef({ want: 0, shown: 0 });
+  React.useEffect(() => {
+    asked.current.shown = shown;
+  }, [shown]);
+  // A turn straight to a page: what a click on an agent at home asks for.
+  const turnTo = React.useRef<(next: number) => void>(() => undefined);
+  React.useEffect(() => {
     const el = grid.current;
     if (!el) return;
-    const read = () => setIntro({ phase: el.getAttribute("data-intro"), reveal: el.style.getPropertyValue("--grid-intro-reveal") });
-    read();
-    const watch = new MutationObserver(read);
-    watch.observe(el, { attributes: true, attributeFilter: ["data-intro"] });
-    return () => watch.disconnect();
+    const goTo = (next: number) => {
+      // Not while the intro plays or a page turns.
+      if (el.hasAttribute("data-intro") || el.hasAttribute("data-intro-turn") || asked.current.want !== asked.current.shown) return;
+      if (next < 0 || next >= PAGES.length || next === asked.current.want) return;
+      asked.current.want = next;
+      closeRef.current();
+      setWant(next);
+    };
+    turnTo.current = goTo;
+    const go = (step: 1 | -1) => goTo(Math.min(PAGES.length - 1, Math.max(0, asked.current.want + step)));
+    let last = -Infinity;
+    let armed = true;
+    const wheel = (e: WheelEvent) => {
+      // A dialog over the page keeps its own wheel.
+      if (!(e.target instanceof Node) || !el.contains(e.target)) return;
+      if (e.timeStamp - last > WHEEL_GAP_MS) armed = true;
+      last = e.timeStamp;
+      const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (!armed || (e.deltaMode === 0 && Math.abs(d) < WHEEL_MIN_PX) || d === 0) return;
+      armed = false;
+      go(d > 0 ? 1 : -1);
+    };
+    let from: { x: number; y: number; carousel: boolean } | null = null;
+    const touchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      from = e.touches.length === 1 && t ? { x: t.clientX, y: t.clientY, carousel: !!(e.target as Element | null)?.closest?.('[data-slot="carousel"]') } : null;
+    };
+    const touchEnd = (e: TouchEvent) => {
+      const t = e.changedTouches[0];
+      if (!from || !t) return;
+      const dx = t.clientX - from.x;
+      const dy = t.clientY - from.y;
+      const across = Math.abs(dx) > Math.abs(dy);
+      const far = Math.max(Math.abs(dx), Math.abs(dy)) >= SWIPE_MIN_PX;
+      // Across the carousel, the carousel turns.
+      if (far && !(across && from.carousel)) go((across ? -dx : -dy) > 0 ? 1 : -1);
+      from = null;
+    };
+    const key = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      // A dialog over the page keeps its keys, as it keeps its wheel.
+      if ((e.target as Element | null)?.closest?.('[role="dialog"], [role="alertdialog"]')) return;
+      if (e.key === "PageDown") go(1);
+      else if (e.key === "PageUp") go(-1);
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener("wheel", wheel, { passive: true });
+    el.addEventListener("touchstart", touchStart, { passive: true });
+    el.addEventListener("touchend", touchEnd, { passive: true });
+    window.addEventListener("keydown", key);
+    return () => {
+      window.removeEventListener("wheel", wheel);
+      el.removeEventListener("touchstart", touchStart);
+      el.removeEventListener("touchend", touchEnd);
+      window.removeEventListener("keydown", key);
+    };
   }, []);
 
+  // The pill closes on Escape, back to the agent, and on a press anywhere but on it or the agent — a finger's way out.
+  React.useEffect(() => {
+    if (!open) return;
+    const away = (e: PointerEvent) => {
+      const at = e.target as Element | null;
+      if (!at?.closest?.("[data-agent-pill], [data-agent-spot]")) close();
+    };
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape") dismiss();
+    };
+    document.addEventListener("pointerdown", away);
+    window.addEventListener("keydown", key);
+    return () => {
+      document.removeEventListener("pointerdown", away);
+      window.removeEventListener("keydown", key);
+    };
+  }, [open, close, dismiss]);
+
+  const onIntroFocus = React.useCallback((agent: string) => setShown(Math.max(0, PAGES.indexOf(agent as (typeof PAGES)[number]))), []);
+  const onMetrics = React.useCallback(
+    (m: { cols: number; rows: number; bp: PortfolioField["bp"] }) =>
+      setField((prev) => (prev && prev.cols === m.cols && prev.rows === m.rows && prev.bp === m.bp ? prev : { cols: m.cols, rows: m.rows, bp: m.bp })),
+    [],
+  );
+
   return (
-    <div ref={scope} className="relative">
-      {/* Before the grid, so the field's dashes and its boxes are drawn over it. Nothing in it takes the pointer but
-          what asks for it (the tagline's handle). It carries the field's cell and gutter, so what it holds can be laid
-          out on the cells it covers. */}
-      {backdrop && frame ? (
-        <div
-          className="pointer-events-none absolute"
-          data-intro-held={intro.phase ?? undefined}
-          style={
-            {
-              ...place(backdrop, frame),
-              "--grid-intro-reveal": intro.reveal || undefined,
-              "--grid-cell": `${frame.cell}px`,
-              "--grid-gap": `${frame.gap}px`,
-            } as React.CSSProperties
-          }
-        >
-          {items.get(backdrop.id)?.render(backdrop)}
-        </div>
-      ) : null}
+    <div ref={scope} className="relative" data-portfolio-page={PAGES[shown]}>
       <Grid
         ref={grid}
         overlay
         intro
         introAgents={INTRO_CAST}
         introActions={INTRO_ACTIONS}
+        introFocus={PAGES[want]}
+        onIntroFocus={onIntroFocus}
+        introFocusAt={field ? arranged.stand : undefined}
+        introAct={bounces ? { agent: PAGES[shown]!, action: "bounce", key: bounces } : undefined}
         cursor
-        onMetrics={(m) => {
-          setField((prev) => (prev && prev.cols === m.cols && prev.rows === m.rows && prev.bp === m.bp ? prev : { cols: m.cols, rows: m.rows, bp: m.bp }));
-          setFrame((prev) =>
-            prev && prev.boxW === m.boxW && prev.boxH === m.boxH && prev.gridW === m.gridW && prev.gridH === m.gridH && prev.cell === m.cell && prev.gap === m.gap
-              ? prev
-              : { boxW: m.boxW, boxH: m.boxH, gridW: m.gridW, gridH: m.gridH, cell: m.cell, gap: m.gap },
-          );
-        }}
+        onMetrics={onMetrics}
       >
         {/* Only once the grid has measured: the first field is a guess, and a box placed on it would flash in the wrong
             cells for a frame (GridPages waited the same way). */}
@@ -119,21 +212,55 @@ export function PortfolioPages({ page }: { page: PortfolioPage }) {
               </GridItem>
             ))
           : null}
+        {/* The agent's cell, to click, and the pill it opens beside it. */}
+        {field && arranged.stand ? (
+          <GridItem col={arranged.stand.col} row={arranged.stand.row} colSpan={1} rowSpan={1} data-box="agent" data-intro-fixed className="relative" {...pill.spot}>
+            <AgentSpot id={PAGES[shown]!} open={open} controls={pillId} />
+          </GridItem>
+        ) : null}
+        {/* The agents at home, each a way to its page (his: "travel to pages by clicking on the agent on the right column"):
+            a spot on every home cell but the empty one of the agent on the field. The keys read the column after the
+            section (`data-reading-after`, Grid.md D45), not a cell at a time between its lines. */}
+        {field && arranged.homes
+          ? PAGES.map((id, i) => {
+              const home = arranged.homes?.[i];
+              return home && i !== shown ? (
+                <GridItem key={id} col={home.col} row={home.row} colSpan={1} rowSpan={1} data-box="agent-home" data-intro-fixed data-reading-after className="relative">
+                  <AgentHome id={id} title={PAGE_TITLES[id]} onClick={() => turnTo.current(i)} />
+                </GridItem>
+              ) : null;
+            })
+          : null}
+        {/* The status pill (P25, his: "a pill in the bottom right … with a violet circle"), a fixture: on the corner cell, with
+            the two it grows into to its left. */}
+        {field && arranged.status ? (
+          <GridItem
+            col={Math.max(1, arranged.status.col - STATUS_CELLS + 1)}
+            row={arranged.status.row}
+            colSpan={STATUS_CELLS}
+            rowSpan={1}
+            data-box="status"
+            data-intro-fixed
+            className="relative"
+          >
+            <StatusPill />
+          </GridItem>
+        ) : null}
+        {field && open && arranged.pill ? (
+          <GridItem
+            col={arranged.pill.col}
+            row={arranged.pill.row}
+            colSpan={AGENT_PILL_CELLS}
+            rowSpan={1}
+            data-box="agent-pill"
+            data-intro-fixed
+            className="relative"
+            {...pill.pill}
+          >
+            <AgentPill id={PAGES[shown]!} domId={pillId} />
+          </GridItem>
+        ) : null}
       </Grid>
     </div>
   );
-}
-
-/** The grid's box and field in px, and its cell and gutter. */
-type Frame = { boxW: number; boxH: number; gridW: number; gridH: number; cell: number; gap: number };
-
-/** A rect of cells on the field, in px from the grid's box: the field is centred in it (Grid.md D14). */
-function place(rect: GridLayoutItem, { boxW, boxH, gridW, gridH, cell, gap }: Frame): React.CSSProperties {
-  const pitch = cell + gap;
-  return {
-    left: (boxW - gridW) / 2 + (rect.col - 1) * pitch,
-    top: (boxH - gridH) / 2 + (rect.row - 1) * pitch,
-    width: rect.colSpan * pitch - gap,
-    height: rect.rowSpan * pitch - gap,
-  };
 }

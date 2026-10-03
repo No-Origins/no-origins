@@ -27,7 +27,7 @@ So:
 - **Each agent is a character**, with a name, its meta and a personality (his, the same message). How those are shown
   is still to come.
 - **The same setup as the motion studio**: one `Grid` with the intro and the cursor, behind the shared sign-in, in the
-  review sweep.
+  review sweep. (Open to everyone since C24, 2026-10-03; the sign-in is for publishing.)
 
 ## C2. The stage is one cell, grown to a radius of three
 
@@ -739,6 +739,52 @@ Everything that shows only as it moves is the motion studio's. So:
   not.
 - **A switch is the word `on` or `off` as a token** (`--motion-sphere-tail`), the way the motion studio's stage holds
   it, its jig a choice of the two.
+
+## C24. The controls are everyone's; publishing is his
+
+> "Let's make controls in Orbit public, and only when I log in as an admin I should be able to publish, so that users
+> can experiment and play around." (his, 2026-10-03)
+
+Until now Orbit was behind the shared sign-in as the motion studio is (C1), and a visitor saw its login card. Now:
+
+- **Orbit opens for everyone.** `src/proxy.ts` runs the shared gate with `open` (`@no-origins/auth`, `authGate`): it
+  refreshes the one session the apps share and sends nobody to the sign-in. `/sign-in` and the `/auth` routes stay, for
+  him. Without keys an open app opens everywhere, production included — there is nothing to sign in to and nothing a
+  sign-in guards — where a gated app's deploy without them is a closed door (Admin.md §8.4).
+- **A visitor sees each agent as it was published**, the version pages show (its `current_version_id`), never the
+  draft: the draft is his work in progress, and what others play from is what he has shown. Before a first publish
+  they see the look the package declares. The six open one after another from the bar's select, as for him.
+- **Every control moves the look on the page, and nothing is saved.** The context knows whether the page is
+  `editable` — the server says so with each load, from the signed-in person's role in `profiles`, the owner's and no
+  other (his "admin"; RLS §8.3 has had the role since the schema) — and for a visitor a change updates the look and
+  schedules no save, asks nothing of the server and is refused by nothing. The bar reads **"Yours to play with"** and
+  holds **Sign in** where Publish stands; its list ends with the agents, with no *New agent…*; the versions open to
+  read, the one pages show marked *Showing*, with no *Go back* and no next major; and *Upload a drawing…* at the end
+  of a style's list is there and disabled, saying uploads are the owner's.
+- **The owner signs in and it is the studio it was**: the draft, saved half a second after a change on its `rev`;
+  Publish, the next minor; the next major and going back from the versions; a new agent by its name; uploads. A
+  session made on the admin is this one too, and the sign-in on Orbit lands back on Orbit. On the server every write
+  goes through `writer()`, which refuses anyone but the owner before RLS would, with one message: "Sign in as the
+  owner to save and publish."
+- **The database** (`supabase/migrations/…_studio_public_read.sql`): two read policies for `anon` and `authenticated`
+  alike — the items of kind `character` and `drawing`, and the versions of those items — and `anon`'s privileges on the
+  three studio tables revoked, then `select` granted back on the columns Orbit reads, never `created_by` or
+  `published_by` (his user id) and never the draft at all. Actions stay the motion studio's and his. This is Admin.md
+  §0.6's live component — a per-table RLS policy on the anon key, with a fallback — rather than §8.3's "no anon
+  policy, anywhere", which was written for the public site's documents, which reach it baked.
+- **The review sweep still sees the owner's page on his machine**: its browser is signed in first (`e2e/global-setup.ts`),
+  the localhost cookie is every port's, and Orbit now reads who is signed in rather than asking. CI, with no keys,
+  sees the offline page as before. The visitor's page is what `e2e/.mcp/orbit-public.mjs` shoots, in a fresh browser.
+
+**Built the same day**, applied to the local database and checked there: the anon key reads the six agents and their
+35 versions and is refused `select *`, the drafts, an insert, an update and `studio_publish`; a fresh browser opens
+`/` without a redirect, reads "Yours to play with", lists six agents and no new one, moves the look by a control with
+no server action sent, opens the versions with nothing to press, and the drafts' `rev`s are what they were after it;
+signed in as the owner the bar is Publish and the next minor (15.5 that day) and the list ends with *New agent…*. **The hosted push
+(`npx supabase db push`) is his**, before the deploy: until it is pushed, a visitor on production reads nothing — the
+policy is not there — and sees the look the package declares, with no agents to choose; the owner's studio is unchanged.
+
+Version 1, awaiting his look.
 
 ## Open
 

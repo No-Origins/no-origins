@@ -34,7 +34,11 @@ src/components/*.tsx    61 shadcn components + theme-provider.tsx (`useThemeTogg
                           agents, D50, version 8 since 2026-10-01: `intro`, its cast `introAgents` and the actions'
                           values it plays them by `introActions`, `useGridIntro` holding the page back (`data-intro`)
                           and loading grid-intro.tsx only then, keeping it mounted once it is over so the agents rest in
-                          their cells (`settled`), the painter kept on for its ripples — the
+                          their cells (`settled`), the painter kept on for its ripples; since version 9 (2026-10-03)
+                          `introFocus`, the agent whose section is the page, `introFocusAt`, the cell it stands in,
+                          `introAct`, an action an agent plays where it rests (the portfolio's bounce on a click), and
+                          `onIntroFocus`, called when the field is clear for the next one's section — a new focus turns the page by the agents,
+                          `data-intro-turn` on the root while it does — the
                           cursor — `cursor`, `useGridCursor`, D34, its ring
                           an image in globals.css, no lit cell while the grid is `data-cursor-still` — and `GRID_REFERENCE_BOX`), grid-pages.tsx, grid-pager.tsx — the base layout, ours
                           (see repo-root CLAUDE.md); grid-pager.tsx is the navbar on the bottom row — a slot whose
@@ -50,7 +54,11 @@ src/components/*.tsx    61 shadcn components + theme-provider.tsx (`useThemeTogg
                           cell each in the field's last column, on GSAP's ticker, and each box fading in once its agent
                           is gone — one Web Animations opacity fade, which the compositor plays; then the cast resting in
                           those cells for good (`settled`, `introResting` on a field given later; once, still, under
-                          reduced motion)
+                          reduced motion); since version 9 one agent in `focus`, standing below its section
+                          (`introBeside`) while the rest rest at home, and a new `focus` played as a turn — the
+                          section on the field faded away while its agent Dives home, `onFocus`, and the next agent
+                          Diving in below the next section, its ripple, the section faded in — each agent on a clock
+                          of its own (`Live`)
                         + slot.tsx (the box on the grid: fill · inset · alignment; a component or sub-slots) and
                           registry.tsx (what a layout item can name by `kind`, drawn by `Placed` — the pager's
                           parts: the arrows as a pair, and for the numbered bar one arrow a cell and the pages
@@ -75,8 +83,16 @@ src/components/*.tsx    61 shadcn components + theme-provider.tsx (`useThemeTogg
                           `ToggleGroup`, one a colour, the one picked pressed, each named in its title, sharing out a
                           narrow column rather than wrapping. Every pick of a colour in every app is one: Orbit's
                           paints and colours by name, the motion studio's colour jigs, the portfolio's jig
+                        + liquid.tsx — THE LIQUID (2026-10-03, his: "fill a cell beside in progress with flowing
+                          liquid. Fill only 40% of the liquid"; no registry has one): a box filled to `level`, its
+                          surface flowing — two SVG paths, the front in the liquid's `colour` (the primary unless given)
+                          and the back a tone of it mixed toward the card, never translucent — played by
+                          `useLiquidMotion` on the `--motion-liquid-*` tokens read off the box (Motion.md M25); a cell
+                          is a circle, so a 1 × 1 is a round glass. The status page's cells and the studio's Liquid page
 src/hooks/*.ts          use-mobile.ts; use-reading-focus.ts — Tab and the arrows move focus in reading order, left to
-                          right and top to bottom as the boxes stand, over a scope a page opts in (Grid.md D45);
+                          right and top to bottom as the boxes stand, over a scope a page opts in (Grid.md D45); the
+                          stops inside an element marked `data-reading-after` read after every other, as a navbar after
+                          the content (2026-10-03, the portfolio's agents at home);
                           use-cell-motion.ts — `useCellMotion` plays movement (Motion.md M9) on a block: one GSAP clock
                           a change of the active element, each tick's `cellMotionFrame` handed to the caller's painter;
                           and `useCellEnter` plays enter and exit (M11), movement's first primitive, the same way;
@@ -84,6 +100,9 @@ src/hooks/*.ts          use-mobile.ts; use-reading-focus.ts — Tab and the arro
                           turns and the sections expand, each tick's `loadFrame` handed to the caller's painter;
                           `paintLoadRing` and `paintLoadSection` are its painters; only the motion studio plays it
                           since the grid stopped loading pages (D49)
+                          use-liquid-motion.ts — `useLiquidMotion` plays liquid (M25) on a box: one GSAP ticker for
+                          the box's life, each tick's `liquidFrame` handed to the caller's painter; a new `level` pours
+                          from where the liquid is; `still` for the studio's timeline, a flat surface under reduced motion
 src/lib/utils.ts        re-exports `cn` from the `cn` package
 src/lib/motion.ts       the motion tokens for script (Motion.md M3): `motionMs`, `motionEase` read a `--motion-*` token
                           off an element when a motion starts; `easing`/`cubicBezier` turn a CSS easing into a function
@@ -119,7 +138,13 @@ src/lib/intro-motion.ts the intro (Motion.md M22, Grid.md D50, version 8: home, 
                           is gone), where each settles — a cell each down the field's last column, centred, in the
                           cast's order (`introHome`) — the cast at rest there with no intro (`introResting`), any moment
                           of it (`introAt`), the nest it dives out of going (`introNestLeft`) and the cells its ripple
-                          lights (`introRipple`, version 1's rings, two out). Its `--motion-intro-*` are read
+                          lights (`introRipple`, version 1's rings, two out). Version 9 (2026-10-03): with `focus`,
+                          `introPlan` sends only that agent to its section — to the cell below it, centred
+                          (`introBeside`) — and the rest straight home; `introGoIn` and `introGoHome` are a page
+                          turn's two Dives; home is the bottom row on a field taller than wide (`introHomeSide`); a
+                          section fades away over `out` (`--motion-intro-out`, 160ms); `hold`, `introComeHome` and
+                          `introNest` are the held-behind-the-page way, used where no cell round a section is free.
+                          Its `--motion-intro-*` are read
                           (`readIntroMotion`) but not in globals.css: `INTRO_START` is them
 src/lib/focus-motion.ts a card in focus and a CLOTH of blur round it (Motion.md M13; a cloth, not a ripple, since his
                           note the same night), pure: the field as rings measured from the card — its edges, the
@@ -173,6 +198,12 @@ src/lib/step-motion.ts  the slider's steps (Motion.md M21), pure: a mark over ea
                           into (`zoneOf`); and the tick — the mark's pop (`stepPopAt`), the head's kick on the same
                           curve and a vibration where the browser can (`stepHaptic`). `useGripMotion` plays it with the
                           grip, on the same loop. None of its tokens is in globals.css: `STEP_START` is version 1's
+src/lib/liquid-motion.ts liquid (Motion.md M25, 2026-10-03), pure: a box filled to a level, its surface two waves
+                          running across it — the front in the colour, the back a tone of it mixed toward the card,
+                          trailing and slower (`liquidPath`, `liquidBackColour`) — the level breathing (the bob), and the
+                          pour, the level rising on a curve when it arrives or changes (`liquidLevel`); `liquidFrame`
+                          is any moment, `liquidStill` the flat surface reduced motion shows, `paintLiquid` writes a
+                          frame onto a `Liquid`. None of its tokens is in globals.css: `LIQUID_START` is version 1's
 src/lib/motion-states.ts states (Motion.md M19, 2026-09-30), pure: a motion as he builds it on the studio's timeline —
                           a state a named window (start, end, a unit, the event that plays it) of rows, each a part
                           configured over a span or another state attached, linked, top to bottom in priority

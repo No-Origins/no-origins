@@ -3,8 +3,11 @@
 pnpm workspace. Apps live in `apps/*` — `portfolio` (hiddenstack.no-origins.com, :3000; bhargav.no-origins.com
 redirects to it), `design` (design.no-origins.com, the showcase, :3001), `admin` (admin.no-origins.com, the control
 surface, :3002), `engineering` (engineering.no-origins.com, the engineering publish library, :3003), `motion`
-(motion.no-origins.com, the motion studio, :3004, since 2026-09-27) and `orbit` (orbit.no-origins.com, :3005, since
-2026-09-30: the agents' appearance, Orbit.md), all Next.js 16; the shared design
+(motion.no-origins.com, the motion studio, :3004, since 2026-09-27), `orbit` (orbit.no-origins.com, :3005, since
+2026-09-30: the agents' appearance, Orbit.md) and `home` (home.no-origins.com, :3006, since 2026-10-02: the model of
+the house he is building, Home.md — **on his machine only, not in the repository**: the house is private and the repo
+is public (Home.md H4), until he says where the house lives) and `status` (status.no-origins.com, :3007, since 2026-10-03: where every app
+stands, public, Status.md), all Next.js 16; the shared design
 system is `packages/ui` (`@no-origins/ui`, **2.0.0** since 2026-09-16), consumed from source. Each app has its own
 CLAUDE.md / AGENTS.md; read them before editing app code.
 
@@ -36,9 +39,11 @@ engineering (Layer A) have no database anywhere near them, and that is deliberat
 `packages/auth` (`@no-origins/auth`) is **the one sign-in** (Admin.md §8.4, amended 2026-09-30, his: "the same auth
 because it should be same across no origins"): the Supabase clients, the gate (`authGate`, called from each app's
 `proxy.ts`), the callback, the sign-out, the login card and the sign-in screen, consumed from source. One session for
-every app — the cookie is written for `.no-origins.com` — one allowlist, roles later. **The admin, the motion studio
-and Orbit are behind it.** Without its two keys the gate refuses in production; the motion studio and Orbit alone
-open on a development server that has none, so the review sweep and CI still see them.
+every app — the cookie is written for `.no-origins.com` — one allowlist, roles later. **The admin and the motion studio
+are behind it; Orbit is open to everyone and its publishing is the owner's** (Orbit.md C24, 2026-10-03, his: "users
+can experiment and play around"), the gate's `open` only refreshing the session there. Without its two keys the gate
+refuses in production; the motion studio alone opens on a development server that has none, and Orbit opens anywhere,
+so the review sweep and CI still see them.
 
 ## The design system
 
@@ -48,8 +53,9 @@ organisms, templates, the registry, the blob, the patterns, the CSS layers — w
 - **shadcn/ui**, style `radix-sera`, base `radix`, base colour `neutral`, RTL on, and **one radius, half the grid's
   cell** (`--radius`, `rounded-lg`; Grid.md D39 — it was `0` until 2026-09-26). 61 components in
   `packages/ui/src/components/*.tsx`, plus `theme-provider.tsx`, the agent (`agent.tsx`, 2026-09-30, his approval,
-  drawn from `lib/sphere-motion`) and the colour picker (`colour-picker.tsx`, 2026-10-01, his ask: *"color pickers
-  should always be like the paint"*), the two no registry has. **Every pick of a colour is a `ColourPicker`**:
+  drawn from `lib/sphere-motion`), the colour picker (`colour-picker.tsx`, 2026-10-01, his ask: *"color pickers
+  should always be like the paint"*) and the liquid (`liquid.tsx`, 2026-10-03, his ask: *"fill a cell beside in
+  progress with flowing liquid"*; Motion.md M25, its motion on the studio's bench), the three no registry has. **Every pick of a colour is a `ColourPicker`**:
   swatches, one a colour, never a select of names or a row of worded toggles.
 - **The accents are lime and violet (2026-09-27, his, set in the portfolio's accent jig).** `--primary` is `--lime`
   and `--secondary` is `--violet`, each with its own ink; the grey of hover and of being active (`--muted`) is lime at
@@ -210,8 +216,8 @@ rules in short, each one his:
   that glyph (D42, 2026-09-26), a key a focused component took or a modified one left alone; the flip is gone.
   **Where a page opts in with `useReadingFocus` (D45, 2026-09-27 — the portfolio), Tab and the arrows move focus in
   reading order**, left to right and top to bottom as the boxes stand — **like a game controller's, the arrows never
-  turn that page** (a `GridPages` that opts in takes `keyboard={false}`; the portfolio has no pages to turn since
-  Portfolio.md P15). The field
+  turn that page** (a `GridPages` that opts in takes `keyboard={false}`; the portfolio's pages, one agent's section
+  each since Portfolio.md P24, turn by the scroll, a swipe and Page Down / Page Up, never by the arrows). The field
   and the pager never move. What the bar's
   empty cells hold is now a layout question, not an open one (D29). **A bar may number its pages (D36, 2026-09-25)**:
   `numberedPagerBar` puts back (↑) on the first cell, forward (↓) on the last and a page number on every cell
@@ -243,7 +249,18 @@ rules in short, each one his:
   let's only make uh, Bali Kino and uh, Mira to bounce"), and **since version 6 every nest is a cell and the rest is
   seen**, and **since version 7 the ripple is small again and the page comes after it** (his: "once the ripple ends we
   can drop the agents and then render the components"), and **since version 8 they go home and stay** (his: "we'll
-  bring them to the right the last most column vertically centered"). `intro`, `introAgents` and `introActions` on `Grid` are the
+  bring them to the right the last most column vertically centered"), and **since version 9 (2026-10-03) one agent is
+  in focus and the agents turn the page** (his: "each agent can pick a section. So we scroll from one agent to another
+  … when we scroll, they dive back into their place and the new agent dives in", then "the agent stays on the same
+  uh, page" and "right in the center bottom of the section"): `introFocus` names the agent whose section is the page's
+  boxes, and it stands where `introFocusAt` says (the portfolio: one cell on every page of a wide field, the third row
+  from the bottom at the centre, his) or else in the cell below the section, while the rest are at home; hovering
+  it opens its pill (name, chat, ↗ to Orbit, Portfolio.md P24) and a click bounces it (`introAct`, an action an agent
+  plays where it rests). A new `introFocus` turns the
+  page: the section fades away as its agent Dives home, `onIntroFocus` asks for the next section, and its agent Dives
+  in below it, ripples, and the section fades in (`data-intro-turn` while it does). Home is the bottom row on a field
+  taller than it is wide (Grid.md D50 version 9, Motion.md M22, Portfolio.md P24). What follows is version 8's
+  intro, which version 9 ends with one agent below page 1's section and the other five going straight home. `intro`, `introAgents` and `introActions` on `Grid` are the
   portfolio's: its cast the six agents copied from their current versions (`apps/portfolio/src/content/agents.ts`),
   each with whether it `bounces` (`content/intro.ts`), and its moves Bounce, Jump and Dive copied from theirs
   (`content/actions.ts`). The six stand side by side in one row, a cell each, centred on the field's middle row (or the
@@ -303,27 +320,33 @@ carry a span per breakpoint, packed into a centred band above the pager's row, t
 in the workspace scrolls. **A page is content data**: sections of items, each with a span per breakpoint and a render
 function, arranged on the field it is shown on. To change a page, change its data. There is no design mode, no
 composer and nothing is edited in place.
-**Text is a `Text`** (`text.tsx`, Type.md): seven roles, tone, alignment — an app does not reach for `text-2xl`.
+**Text is a `Text`** (`text.tsx`, Type.md): eight roles (`hero` over `display` since 2026-10-03, T5), tone, alignment — an app does not reach for `text-2xl`.
 
 ## What builds
 
-**All six apps build** — `pnpm -r build` is green, and CI's **Build** job builds all six on every PR. The admin
+**All eight apps build** — `pnpm -r build` is green on his machine, and CI's **Build** job builds the seven in the
+repository on every PR (Home is not in it, Home.md H4). The admin
 builds with no Supabase keys, since its clients are made per request; it stays out of the **review sweep** because
 every route is behind auth and needs a running Supabase, which `pnpm review` does not boot. The motion studio is
 behind the same sign-in since 2026-09-30 and stays in the sweep: its dev server opens when it has no keys (CI, a fresh
-clone). Orbit (2026-09-30) is behind it the same way and is in the sweep too. **On his machine both have
-the local stack's keys** (their `.env.local`, his ask, 2026-09-30), so they ask for a sign-in as the admin does, and
+clone). Orbit (2026-09-30) was behind it the same way until 2026-10-03, when it opened to everyone (Orbit.md C24), and
+is in the sweep too. **On his machine both have
+the local stack's keys** (their `.env.local`, his ask, 2026-09-30), so the motion studio asks for a sign-in as the admin does, Orbit shows a visitor the published agents, and
 `e2e/global-setup.ts` signs the test browser in first — by magic link through the local mail catcher, as the address in
 `.private/e2e-email` (gitignored) — leaving the session in `e2e/.auth/state.json` for every spec and the sweep. **Quests are gone**
 (Admin.md §0.7, 2026-09-23): the admin is sign-in, a home of three cards and `/settings`. **The portfolio was rebuilt on
 the grid on 2026-09-21** (Portfolio.md, `apps/portfolio/CLAUDE.md`): one route, the first screen — and since 2026-09-27
-one page, a `Grid` with no pager, the rest of the site in the room the first screen leaves (P15). Its 1.0 pages, parked
+one page, a `Grid` with no pager, the rest of the site in the room the first screen leaves (P15) — and since
+2026-10-03 **one agent's section a page**, six of them, turned by a scroll and played by the agents (P24). Its 1.0 pages, parked
 in `.legacy/`, were deleted on 2026-09-23 — git history keeps them.
 
 ## Deploying
 
-Six Vercel projects under the `no-origins` team, one per app, each with its **Root Directory** set to `apps/<app>`:
-`no-origins` → portfolio, `design`, `admin`, `engineering`, and since 2026-09-30 `motion` and `character` (Orbit's,
+Seven Vercel projects under the `no-origins` team, one per app in the repository, each with its **Root Directory** set
+to `apps/<app>` (**home has none**: the app is not in the repository, Home.md H4 — make it by the recipe below when he
+says where the house lives):
+`no-origins` → portfolio, `design`, `admin`, `engineering`, since 2026-10-03 `status` (status.no-origins.com, by the
+same recipe, with no environment variables: it has no database), and since 2026-09-30 `motion` and `character` (Orbit's,
 named before it was; since 2026-10-01 its root directory is `apps/orbit` and its domain `orbit.no-origins.com`, with
 `character.no-origins.com` still attached and 308ing to it from `apps/orbit/next.config.ts`), made with
 the CLI the night PR #14 merged (`vercel link` from the app's folder creates the project; `vercel project update
@@ -332,12 +355,12 @@ the CLI the night PR #14 merged (`vercel link` from the app's folder creates the
 answers 503). Production is `main`. The hosted Supabase carries the motion studio's and the character studio's domains among its redirect
 URLs, pushed from `config.toml` (supabase/README.md); **`orbit.no-origins.com` is listed in `config.toml` and not yet
 pushed** — his `npx supabase config push`. **Still to do in the dashboard: *Skip deployments for unaffected projects*
-on the two new projects** — the CLI has no flag for it, and until then every push rebuilds the motion studio and Orbit.
+on the three newer projects (motion, character, status)** — the CLI has no flag for it, and until then every push rebuilds the motion studio and Orbit.
 
 **`apps/<app>/vercel.json` is the source of truth, not the dashboard.** A `vercel.json` in a project's root directory
 **overrides** the dashboard's fields, so the commands live in the repo, travel through review, and cannot quietly
 drift apart the way they did through 2026-09-22 (three projects, three different install commands). The dashboards
-carry the same commands since 2026-09-23; if they drift again, the file still wins. All six files are byte-identical on purpose:
+carry the same commands since 2026-09-23; if they drift again, the file still wins. All seven files are byte-identical on purpose:
 
 ```json
 {
@@ -398,8 +421,10 @@ anchored with a leading slash on purpose, because an unanchored `supabase` would
 After any UI change, look at the result before reporting done.
 
 1. `pnpm review` boots the portfolio on :3000, the showcase on :3001, engineering on :3003, the motion studio on
-   :3004 and Orbit on :3005 (or reuses running ones), visits every route in `ROUTES`, `DESIGN_ROUTES`,
-   `ENGINEERING_ROUTES`, `MOTION_ROUTES` and `ORBIT_ROUTES` in `e2e/review.spec.ts` on desktop
+   :3004, Orbit on :3005, Status on :3007 and, only where the app is (Home.md H4), Home on :3006 (or reuses running
+   ones), visits every route in `ROUTES`,
+   `DESIGN_ROUTES`, `ENGINEERING_ROUTES`, `MOTION_ROUTES`, `ORBIT_ROUTES`, `HOME_ROUTES` and `STATUS_ROUTES` in
+   `e2e/review.spec.ts` on desktop
    (1440x900) and mobile (Pixel 7) in both themes, waits for a grid's intro (D50) to hand over, fails on a route that
    answers 400+ or throws, echoes
    `console.error` output, and writes full-page screenshots to `e2e/screenshots/<project>/<route>.png`. CI runs the

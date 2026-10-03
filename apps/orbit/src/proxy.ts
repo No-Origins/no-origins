@@ -2,14 +2,17 @@ import type { NextRequest } from "next/server";
 import { authGate } from "@no-origins/auth/proxy";
 
 /**
- * Orbit is behind the sign-in, as the motion studio is (his, 2026-09-30: "the same setup like … motion studio"):
- * the shared gate of `@no-origins/auth`, one session with the admin and every app after it, the same allowlist.
+ * Orbit is open to everyone (his, 2026-10-03, Orbit.md C24: "make the controls in Orbit public, and only when I log
+ * in as an admin should I be able to publish, so that users can experiment and play around"). The shared gate of
+ * `@no-origins/auth` runs with `open`: it refreshes the one session the apps share and sends nobody to the sign-in.
+ * A visitor sees each agent as it was published and plays with every control on the page; nothing they do is saved.
+ * The owner signs in — `/sign-in` is still here, and a session made on the admin is this one too — and the draft, the
+ * saves and the publishes are his (`app/actions.ts`, RLS deciding).
  *
- * **Open only locally**: on a development server with no Supabase keys — CI's visual review, a laptop offline — it
- * opens without a login, so the sweep still sees it. In production it never opens without them.
+ * Until C24 it was behind the sign-in as the motion studio is, open only on a development server with no keys.
  */
 export function proxy(request: NextRequest) {
-  return authGate(request, { openWithoutKeys: true });
+  return authGate(request, { open: true });
 }
 
 export const config = {

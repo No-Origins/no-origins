@@ -201,6 +201,15 @@ export const EDUCATION = {
 };
 
 /**
+ * Orbit, where the agents are made (Orbit.md): where an agent's ↗ goes, in a new tab (P24, his, 2026-10-03: "it should
+ * open orbit application"). Open to everyone since Orbit.md C24 (2026-10-03): a visitor plays with the published agents,
+ * and publishing is his.
+ */
+export const ORBIT_URL = "https://orbit.no-origins.com";
+/** The status page (Portfolio.md P25), public: where every app stands. */
+export const STATUS_URL = "https://status.no-origins.com";
+
+/**
  * A project. `short` is its card's line and `action` the words on its way out, the recruiter quick view's
  * (2026-09-28): the card has two rows for a project that is out and one for one that is not, and `line` is longer
  * than either holds. One with no `href` says it is not published yet.

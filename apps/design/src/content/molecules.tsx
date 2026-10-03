@@ -70,6 +70,7 @@ import {
 } from "@no-origins/ui/components/carousel";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@no-origins/ui/components/collapsible";
 import { ColourPicker } from "@no-origins/ui/components/colour-picker";
+import { Liquid } from "@no-origins/ui/components/liquid";
 import {
   Command,
   CommandEmpty,
@@ -576,6 +577,19 @@ export const MOLECULES: PageContent = {
         render: () => (
           <Specimen name="ColourPicker" note="Every pick of a colour: swatches, one a colour, each named in its title.">
             <PickedColour />
+          </Specimen>
+        ),
+      },
+      {
+        id: "Liquid",
+        span: CARD(3),
+        render: () => (
+          <Specimen name="Liquid" note="A box filled to a level, its surface flowing (Motion.md M25): 40%, a cell, as the status page has it.">
+            <div className="flex items-end gap-4">
+              <div className="size-15"><Liquid level={0.4} label="40% full" /></div>
+              <div className="size-15"><Liquid level={0.7} colour="var(--violet)" label="70% full, violet" /></div>
+              <div className="h-15 w-30"><Liquid level={0.4} label="40% full, a pill" /></div>
+            </div>
           </Specimen>
         ),
       },

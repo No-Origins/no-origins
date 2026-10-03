@@ -2,6 +2,7 @@ import { FOCUS_FAMILY } from "./focus";
 import { MODE_FAMILY } from "./mode";
 import { AGENTS_FAMILY } from "./agent-actions";
 import { STEP_FAMILY } from "./steps";
+import { LIQUID_FAMILY } from "./liquid";
 
 /**
  * The studio's content (Motion.md M6, M9): each motion on the bench, the tokens it is made of, and five presets to
@@ -20,7 +21,7 @@ import { STEP_FAMILY } from "./steps";
  * A page of the studio, and each of the agents' actions (Motion.md M24), whose values are kept apart from every other's:
  * `action-<its id>`.
  */
-export type FamilyId = "move" | "load" | "enter" | "focus" | "mode" | "grip" | "step" | "motions" | `action-${string}`;
+export type FamilyId = "move" | "load" | "enter" | "focus" | "mode" | "grip" | "step" | "liquid" | "motions" | `action-${string}`;
 
 /** How a token's value is written in CSS and moved on a jig. */
 export type TokenKind = "ms" | "ease" | "scale" | "share" | "choice" | "px";
@@ -569,6 +570,7 @@ export const FAMILIES: Family[] = [
   },
   // His, the same night (Motion.md M21): the slider's steps — a dot over each, a tick as the value lands on one.
   STEP_FAMILY,
+  LIQUID_FAMILY,
   // The eighth, his, the same night (Motion.md M17): a character, a 3D sphere that travels by diving from cell to cell,
   // whose page went when its motions became every agent's (M23, 2026-10-01): Agents, a page of actions since M24.
   AGENTS_FAMILY,

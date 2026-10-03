@@ -12,13 +12,14 @@ cell sizes these are read against).
 
 ## 1. The roles
 
-Every piece of text in an app is one of seven roles. The roles were **read off the showcase's pages** as they stood on
+Every piece of text in an app is one of eight roles (seven until T5). The roles were **read off the showcase's pages** as they stood on
 2026-09-21 — the sizes and weights already in use — rather than derived from a ratio, so adopting them changed nothing
 that was on screen. Fonts are the three slots the host declares (`--font-heading`, `--font-sans`, `--font-mono`); the
 package only reads them.
 
 | Role | Font | Size · weight · tracking | For |
 |---|---|---|---|
+| `hero` | heading | 5xl · bold · tight | the one name a screen is called by, over its title (T5, 2026-10-03) |
 | `display` | heading | 4xl · bold · tight | a page's one big title |
 | `title` | heading | 3xl · bold · tight | a section title |
 | `heading` | heading | xl · semibold | a card or group title |
@@ -61,8 +62,18 @@ small text font."* It is `text-lime`, the `--lime` token his HEY! introduced, on
 *Since 2026-09-26 it is also, from his mock, the portfolio's role line (a `label`, not pressed) and its *Résumé* link (a
 `body`), Portfolio.md P4, so the light-theme contrast is now three pieces of text.*
 
+**T5 — An eighth role, `hero`, for the name a screen is called by.** *2026-10-03, for Home's name under the model
+(Home.md H9): "instead of putting the house in the card, make it a heading font that we have with a large size", then
+"increase the text size".* `display` was the top of the scale, 4xl; `hero` is 5xl, bold, tight, in the heading font —
+the one piece of text on a screen that stands over its title, and it is a role rather than a size on the page because
+T1 leaves the page no size to reach for. The first use is Home's name under the model — "The house", a stop's name,
+"Plan" — a row tall on a wide field, two on a phone, keyed so a new name arrives as a surface does (Motion.md M4). The
+step above display is mine; whether it is the right one, and the name, are his.
+
 ## 3. Open
 
 - **Line length.** A `body` in a wide slot runs the whole width; whether `Text` caps its measure (at ~65ch) or leaves
   that to the slot's span is undecided. It leaves it to the span for now — the cell is the unit.
 - **A second body size.** `body` is `sm`; if a reading page ever wants `base`, that is an eighth role, here.
+
+**Heavy emphasis, 2026-10-03:** Home’s closing thank-you uses the largest role, `hero`, with `weight="heavy"` (900); added to `Text` so the app does not invent a typography style. The host heading font remains Montserrat. Default role weights remain as before.

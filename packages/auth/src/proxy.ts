@@ -17,19 +17,30 @@ import { supabaseEnv } from "./env";
  *
  * **With no keys** (his, 2026-09-30: open only locally): in production the gate refuses, never opens — a deploy that
  * lost its keys is a closed door, not an open one. On a development server an app may ask to open without them
- * (`openWithoutKeys`, the motion studio and Orbit), so CI's visual review and a laptop offline still see it.
+ * (`openWithoutKeys`, the motion studio), so CI's visual review and a laptop offline still see it.
+ *
+ * **An open app** (`open`; Orbit since 2026-10-03, Orbit.md C24, his: "make the controls in Orbit public, and only
+ * when I log in as an admin should I be able to publish"): every path is everyone's, and the gate only refreshes the
+ * session, so the page can ask who is signed in and RLS can decide what they may write. Nobody is sent to the sign-in;
+ * the sign-in is still there for the one who publishes. Without keys it opens everywhere, production included: there is
+ * nothing to sign in to, and nothing a visitor could reach that a sign-in guards.
  */
 export type GateOptions = {
   /** Paths anyone may reach: the sign-in page and the callback. */
   publicPaths?: readonly string[];
   /** Open, ungated, on a development server that has no Supabase keys. Never in production. */
   openWithoutKeys?: boolean;
+  /** Every path is public: the gate refreshes the session and sends nobody to the sign-in. */
+  open?: boolean;
 };
 
-export async function authGate(request: NextRequest, { publicPaths = ["/sign-in", "/auth"], openWithoutKeys = false }: GateOptions = {}) {
+export async function authGate(
+  request: NextRequest,
+  { publicPaths = ["/sign-in", "/auth"], openWithoutKeys = false, open = false }: GateOptions = {},
+) {
   const env = supabaseEnv();
   if (!env) {
-    if (openWithoutKeys && process.env.NODE_ENV !== "production") return NextResponse.next({ request });
+    if (open || (openWithoutKeys && process.env.NODE_ENV !== "production")) return NextResponse.next({ request });
     return new NextResponse("Sign-in is not configured: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are not set.", {
       status: 503,
       headers: { "content-type": "text/plain; charset=utf-8" },
@@ -51,9 +62,9 @@ export async function authGate(request: NextRequest, { publicPaths = ["/sign-in"
 
   const { data: { user } } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
-  const open = publicPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  const reachable = open || publicPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
-  if (!user && !open) {
+  if (!user && !reachable) {
     const url = request.nextUrl.clone();
     url.pathname = "/sign-in";
     // Where they were going, so the link lands there rather than at the home.
