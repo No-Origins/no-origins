@@ -139,6 +139,15 @@
   /* The scale it grows from and shrinks to, and how far it slides from its anchor. */
   --motion-surface-scale: 0.95;
   --motion-surface-shift: 0.5rem;
+  /* farewell — settle a compact clear scene, then its hero and cell-sized destinations; his, 2026-10-03. */
+  --motion-farewell-plan-in: 1200ms;
+  --motion-farewell-in: 1200ms;
+  --motion-farewell-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-farewell-shift: 16;
+  --motion-farewell-links-delay: 500ms;
+  --motion-farewell-links-in: 700ms;
+  --motion-farewell-links-stagger: 90ms;
+  --motion-farewell-links-shift: 8;
   /* panel — a panel slides in from an edge: the sheet, and the drawer's scrim. */
   --motion-panel-in: 200ms;
   --motion-panel-out: 200ms;

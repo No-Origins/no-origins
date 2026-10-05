@@ -1,5 +1,3 @@
-import { existsSync } from "node:fs";
-
 import { test, expect } from "@playwright/test";
 
 /**
@@ -31,13 +29,9 @@ export const MOTION_ROUTES = ["/", "/concepts/split", "/concepts/dock", "/concep
 export const ORBIT = "http://localhost:3005";
 export const ORBIT_ROUTES = ["/", "/hiddenstack"];
 
-/**
- * Home (Home.md), the model of the house, a sixth, on :3006 — one route, the model and its views. Not in the repository
- * (H4: the house is private, the repo public), so it is swept only where the app is — his machine, not CI.
- */
+/** Home (Home.md), the model of the house, a sixth, on :3006 — one route, the model and its tour. */
 export const HOME = "http://localhost:3006";
 export const HOME_ROUTES = ["/"];
-const HOME_PRESENT = existsSync("apps/home/package.json");
 
 /** Status (Status.md), where every app stands, a seventh, on :3007 — one route, public. */
 export const STATUS = "http://localhost:3007";
@@ -49,7 +43,7 @@ const APPS = [
   { name: "engineering", base: ENGINEERING, routes: ENGINEERING_ROUTES },
   { name: "motion", base: MOTION, routes: MOTION_ROUTES },
   { name: "orbit", base: ORBIT, routes: ORBIT_ROUTES },
-  ...(HOME_PRESENT ? [{ name: "home", base: HOME, routes: HOME_ROUTES }] : []),
+  { name: "home", base: HOME, routes: HOME_ROUTES },
   { name: "status", base: STATUS, routes: STATUS_ROUTES },
 ];
 

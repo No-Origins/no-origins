@@ -93,7 +93,7 @@ transpiles the design system and nothing else. `vercel.json` is byte-identical t
 **Deployed** (2026-10-03, his: "I want all of that to be deployed"). The Vercel project `status`, made by the repo-root
 CLAUDE.md's recipe (`vercel link` from `apps/status`, root directory `apps/status`, `vercel git connect`,
 `vercel domains add status.no-origins.com`), builds `main` and answers at `status.no-origins.com`; it has no
-environment variables, since it has no database. Home has no project: the app is not in the repository (Home.md H4).
+environment variables, since it has no database. Home's project `home` followed the same day (Home.md H3).
 
 ## S5. Open
 
