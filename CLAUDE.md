@@ -5,8 +5,8 @@ redirects to it), `design` (design.no-origins.com, the showcase, :3001), `admin`
 surface, :3002), `engineering` (engineering.no-origins.com, the engineering publish library, :3003), `motion`
 (motion.no-origins.com, the motion studio, :3004, since 2026-09-27), `orbit` (orbit.no-origins.com, :3005, since
 2026-09-30: the agents' appearance, Orbit.md) and `home` (home.no-origins.com, :3006, since 2026-10-02: the model of
-the house he is building, Home.md — **on his machine only, not in the repository**: the house is private and the repo
-is public (Home.md H4), until he says where the house lives) and `status` (status.no-origins.com, :3007, since 2026-10-03: where every app
+the house he is building, Home.md — the app is in the repository and the house is not: it lives in
+`apps/home/src/content`, gitignored, and in a private Vercel Blob store the site reads behind the sign-in, H4) and `status` (status.no-origins.com, :3007, since 2026-10-03: where every app
 stands, public, Status.md), all Next.js 16; the shared design
 system is `packages/ui` (`@no-origins/ui`, **2.0.0** since 2026-09-16), consumed from source. Each app has its own
 CLAUDE.md / AGENTS.md; read them before editing app code.
@@ -324,8 +324,7 @@ composer and nothing is edited in place.
 
 ## What builds
 
-**All eight apps build** — `pnpm -r build` is green on his machine, and CI's **Build** job builds the seven in the
-repository on every PR (Home is not in it, Home.md H4). The admin
+**All eight apps build** — `pnpm -r build` is green, and CI's **Build** job builds all eight on every PR. The admin
 builds with no Supabase keys, since its clients are made per request; it stays out of the **review sweep** because
 every route is behind auth and needs a running Supabase, which `pnpm review` does not boot. The motion studio is
 behind the same sign-in since 2026-09-30 and stays in the sweep: its dev server opens when it has no keys (CI, a fresh
@@ -342,25 +341,27 @@ in `.legacy/`, were deleted on 2026-09-23 — git history keeps them.
 
 ## Deploying
 
-Seven Vercel projects under the `no-origins` team, one per app in the repository, each with its **Root Directory** set
-to `apps/<app>` (**home has none**: the app is not in the repository, Home.md H4 — make it by the recipe below when he
-says where the house lives):
+Eight Vercel projects under the `no-origins` team, one per app, each with its **Root Directory** set to `apps/<app>`:
 `no-origins` → portfolio, `design`, `admin`, `engineering`, since 2026-10-03 `status` (status.no-origins.com, by the
-same recipe, with no environment variables: it has no database), and since 2026-09-30 `motion` and `character` (Orbit's,
+same recipe, with no environment variables: it has no database) and `home` (home.no-origins.com, the same recipe, the
+two `NEXT_PUBLIC_SUPABASE_*` variables as the studios', and the private Blob store `home-house` connected to it, which
+holds the house — Home.md H4; `pnpm --filter home publish:house` fills it), and since 2026-09-30 `motion` and `character` (Orbit's,
 named before it was; since 2026-10-01 its root directory is `apps/orbit` and its domain `orbit.no-origins.com`, with
 `character.no-origins.com` still attached and 308ing to it from `apps/orbit/next.config.ts`), made with
 the CLI the night PR #14 merged (`vercel link` from the app's folder creates the project; `vercel project update
 --root-directory`, because link leaves it at `.`; `vercel git connect`; `vercel domains add`; `vercel env add
 --type config` for the two `NEXT_PUBLIC_SUPABASE_*` variables, copied from the admin's — without them production
-answers 503). Production is `main`. The hosted Supabase carries the motion studio's and the character studio's domains among its redirect
-URLs, pushed from `config.toml` (supabase/README.md); **`orbit.no-origins.com` is listed in `config.toml` and not yet
-pushed** — his `npx supabase config push`. **Still to do in the dashboard: *Skip deployments for unaffected projects*
-on the three newer projects (motion, character, status)** — the CLI has no flag for it, and until then every push rebuilds the motion studio and Orbit.
+answers 503). Production is `main`. The hosted Supabase carries every studio's domain and Home's among its redirect URLs, pushed from `config.toml`
+(supabase/README.md; `orbit.no-origins.com` and `home.no-origins.com` on 2026-10-03 — `config.toml` declares
+production's pooler and storage-analytics values under `[remotes.production]` so a push changes only what was meant).
+*Skip deployments for unaffected projects* is on for motion, character, status and home since 2026-10-03, set through
+the project API (`vercel api -X PATCH /v9/projects/<name> --input -` with `enableAffectedProjectsDeployments`) — the CLI
+has no flag for it.
 
 **`apps/<app>/vercel.json` is the source of truth, not the dashboard.** A `vercel.json` in a project's root directory
 **overrides** the dashboard's fields, so the commands live in the repo, travel through review, and cannot quietly
 drift apart the way they did through 2026-09-22 (three projects, three different install commands). The dashboards
-carry the same commands since 2026-09-23; if they drift again, the file still wins. All seven files are byte-identical on purpose:
+carry the same commands since 2026-09-23; if they drift again, the file still wins. All eight files are byte-identical on purpose:
 
 ```json
 {
@@ -421,8 +422,7 @@ anchored with a leading slash on purpose, because an unanchored `supabase` would
 After any UI change, look at the result before reporting done.
 
 1. `pnpm review` boots the portfolio on :3000, the showcase on :3001, engineering on :3003, the motion studio on
-   :3004, Orbit on :3005, Status on :3007 and, only where the app is (Home.md H4), Home on :3006 (or reuses running
-   ones), visits every route in `ROUTES`,
+   :3004, Orbit on :3005, Home on :3006 and Status on :3007 (or reuses running ones), visits every route in `ROUTES`,
    `DESIGN_ROUTES`, `ENGINEERING_ROUTES`, `MOTION_ROUTES`, `ORBIT_ROUTES`, `HOME_ROUTES` and `STATUS_ROUTES` in
    `e2e/review.spec.ts` on desktop
    (1440x900) and mobile (Pixel 7) in both themes, waits for a grid's intro (D50) to hand over, fails on a route that

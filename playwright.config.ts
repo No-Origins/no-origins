@@ -1,5 +1,3 @@
-import { existsSync } from "node:fs";
-
 import { defineConfig, devices } from "@playwright/test";
 
 // Visual review loop for the workspace apps.
@@ -11,11 +9,6 @@ import { defineConfig, devices } from "@playwright/test";
 //
 // An app outside the loop is an app whose screenshots nobody looks at, and CLAUDE.md's rule is that you look at the
 // result before reporting done.
-//
-// Home is not in the repository (Home.md H4: the house is private and the repo is public, so the app stays on his
-// machine until he says where the house lives). The sweep boots it where the app is and leaves it out where it is not,
-// so CI and a fresh clone sweep the other six.
-const HOME_PRESENT = existsSync("apps/home/package.json");
 export default defineConfig({
   testDir: "./e2e",
   outputDir: "./e2e/.results",
@@ -52,8 +45,7 @@ export default defineConfig({
       use: { ...devices["Pixel 7"], colorScheme: "dark" },
     },
   ],
-  // Six apps are booted, seven where Home is (the admin is not: every route of it is behind auth and needs a running
-  // Supabase).
+  // Seven apps are booted (the admin is not: every route of it is behind auth and needs a running Supabase).
   webServer: [
     {
       command: "pnpm --filter portfolio dev",
@@ -85,16 +77,12 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
-    ...(HOME_PRESENT
-      ? [
-          {
-            command: "pnpm --filter home dev",
-            url: "http://localhost:3006",
-            reuseExistingServer: !process.env.CI,
-            timeout: 120_000,
-          },
-        ]
-      : []),
+    {
+      command: "pnpm --filter home dev",
+      url: "http://localhost:3006",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
     {
       command: "pnpm --filter status dev",
       url: "http://localhost:3007",

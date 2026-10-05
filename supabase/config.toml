@@ -168,8 +168,9 @@ site_url = "http://localhost:3002"
 # reading this file.
 # The motion studio signs in through the same project and session (Motion.md M20, `@no-origins/auth`), so its callback
 # is listed too, and so is Orbit's (:3005, Orbit.md C6, 2026-09-30). Orbit was the character studio until 2026-10-01
-# (C21): its old domain stays listed until it only redirects to orbit.no-origins.com.
-additional_redirect_urls = ["http://localhost:3002/**", "http://127.0.0.1:3002/**", "https://admin.no-origins.com/**", "http://localhost:3004/**", "http://127.0.0.1:3004/**", "https://motion.no-origins.com/**", "http://localhost:3005/**", "http://127.0.0.1:3005/**", "https://orbit.no-origins.com/**", "https://character.no-origins.com/**"]
+# (C21): its old domain stays listed until it only redirects to orbit.no-origins.com. Home (:3006, Home.md H3) signs in
+# through it too, since 2026-10-03.
+additional_redirect_urls = ["http://localhost:3002/**", "http://127.0.0.1:3002/**", "https://admin.no-origins.com/**", "http://localhost:3004/**", "http://127.0.0.1:3004/**", "https://motion.no-origins.com/**", "http://localhost:3005/**", "http://127.0.0.1:3005/**", "https://orbit.no-origins.com/**", "https://character.no-origins.com/**", "http://localhost:3006/**", "http://127.0.0.1:3006/**", "https://home.no-origins.com/**"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -204,12 +205,12 @@ enabled = true
 
 # WebAuthn relying party settings — required when passkey is enabled. rp_id is the registrable domain a credential
 # is bound to; rp_origins are the exact origins allowed to use it. Local is the admin on :3002, the motion studio
-# on :3004 and Orbit on :3005. On the hosted project set these in the dashboard to `no-origins.com` /
-# `https://admin.no-origins.com`, `https://motion.no-origins.com`, `https://orbit.no-origins.com`.
+# on :3004, Orbit on :3005 and Home on :3006. On the hosted project set these in the dashboard to `no-origins.com` /
+# `https://admin.no-origins.com`, `https://motion.no-origins.com`, `https://orbit.no-origins.com`, `https://home.no-origins.com`.
 [auth.webauthn]
 rp_display_name = "No Origins Admin"
 rp_id = "localhost"
-rp_origins = ["http://localhost:3002", "http://localhost:3004", "http://localhost:3005"]
+rp_origins = ["http://localhost:3002", "http://localhost:3004", "http://localhost:3005", "http://localhost:3006"]
 
 [auth.rate_limit]
 # Number of emails that can be sent per hour. Requires auth.email.smtp to be enabled.
@@ -463,3 +464,14 @@ otp_expiry = 3600
 [remotes.production.auth.mfa.totp]
 enroll_enabled = true
 verify_enabled = true
+
+# The hosted project's pooler and storage analytics as the dashboard holds them, read from `supabase config diff` on
+# 2026-10-03: declared here so a push changes nothing but what was meant — without them the base values above, the
+# local stack's, would go to production the first time anyone pushed the redirect list. Not decisions made here either.
+[remotes.production.db.pooler]
+default_pool_size = 15
+max_client_conn = 200
+
+[remotes.production.storage.analytics]
+enabled = true
+max_namespaces = 10

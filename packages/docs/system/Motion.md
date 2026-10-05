@@ -2927,3 +2927,9 @@ unplugged beside it (`lib/agent-motion.ts`, `lib/agent-chart.ts`, `useAgentMotio
 `agent-store.tsx`, `lib/agent-edit.ts`) and their specs are gone; git keeps them, and this section keeps the record. His
 personal guide is the sphere now, with eyes (M17, version 11). What the pill taught stands: circles for eyes, lids for a
 blink, designed version by version.
+
+**Home closing sequence, 2026-10-03:** his request gives `farewell` its own token family: blur and soften the scene, settle a heavy hero, wait half a second, then reveal destinations in a row. `useFarewellMotion` plays one GSAP timeline, reading `--motion-farewell-*` off its root. Entry is 1200ms, easing cubic-bezier(0.22,1,0.36,1), hero travel 16px, background blur 32px/opacity .3; links wait 500ms after the hero settles, enter over 700ms with 90ms stagger and 8px travel. Reduced motion settles immediately with only the 500ms reveal delay. Cleanup restores the backdrop on navigation/replay. These tokens are used by Home; no new motion-studio bench item is added.
+
+**Farewell revision, 2026-10-03:** Home’s next version replaces blur with a clear five-column Plan. `--motion-farewell-plan-in` (1200ms) moves/resizes its real box, with the canvas refitting on resize. The hero then enters over `--motion-farewell-in`; destinations follow after `--motion-farewell-links-delay`. Blur and backdrop-opacity tokens are removed. This is a page-specific closing composition and does not change the grid’s page-turn behavior.
+
+**Farewell smoothness correction, 2026-10-03:** Plan entry uses a uniform compositor transform instead of tweening live canvas dimensions. Its starting scale matches the content's aspect-fit size in the previous box, and its translation matches the previous centre. One destination refit happens before paint; no canvas allocation or geometry rebuild is driven by the animation. Timing and hero/link choreography remain token-based and unchanged.
