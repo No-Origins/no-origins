@@ -1,6 +1,6 @@
 # No Origins — Access
 
-*Opened 2026-10-06, **proposed**. Who may do what across No Origins, people and agents alike: the permissions the
+*Opened 2026-10-06, **proposed, every decision his and recorded; for approval**. Who may do what across No Origins, people and agents alike: the permissions the
 apps declare, the roles he makes from them in the admin, who holds them, where each is checked, and the record of every
 change. It replaces the three fixed roles of Admin.md §8.3 and the allowlist of §8.4, and it is what the login host of
 Admin.md §8.4 (`auth.no-origins.com`) opens sign-up behind. Nothing here is built until he approves it.*
@@ -75,11 +75,10 @@ check adds its permission to the catalogue in the same change; until a role is g
 - **Owner** — built in, and **one person, him** (his, 2026-10-06). Holds every permission, those added later included,
   without rows. Cannot be given, taken or deleted in the admin, so he can never be locked out.
 - **Member** — built in as **the default**: what every sign-up gets. Its permissions are his to change; it starts with
-  `motion.open` and `home.open` (his, 2026-10-06: *"Let's also add home along with Motion Studio. And of course, public
-  apps and other"*). The default can be moved to another role; there is always exactly one. **Named, for his
-  confirmation:** sign-up is open to everyone, so `home.open` in Member lets anyone who makes an account see the house
-  and its pictures, where Home.md H4 made them private to him. The narrower way is a role given only by invitation
-  ("Family") that holds `home.open`, with Member keeping the motion studio.
+  `motion.open` (his, 2026-10-06), beside the public apps and Orbit's play. **Home is not in it**: sign-up is open to
+  everyone, so `home.open` in Member would show the house to every account (Home.md H4). He first asked for it there,
+  then, shown that, chose a role of his own for it: *"I'll create family or any relevant role later."* Until he makes
+  one, Home is the owner's alone. The default can be moved to another role; there is always exactly one.
 - **Every other role is his to make** in the admin: a name, a sentence, the permissions ticked. There is no fixed
   editor (his: not decided); if one is wanted, it is made like any other. A role is the same whoever holds it, so a role
   can be made for agents ("Builder"), for people ("Friend") or for both.
@@ -131,11 +130,11 @@ Three places, as today (Admin.md §8.3), each closer to the data:
   already asks the auth server on every request (`getUser()`, Admin.md §8.4), closes on their next click. To prove in
   step 3 that a revoked session fails at the gate before its access token runs out; if it does not, ten minutes is the
   bound.
-- **The admin needs a second factor** (proposed). An `admin.*` permission counts only in a session that has passed a
+- **The admin needs a second factor** (his, 2026-10-06: agreed). An `admin.*` permission counts only in a session that has passed a
   second factor — Supabase's assurance level `aal2`, which the database rules can read from the token. The authenticator
   app (TOTP) is already switched on for the hosted project; a passkey as the second factor follows when Supabase offers
   it. A stolen password or a forwarded magic link then never reaches the admin.
-- **The gravest actions ask again** (proposed). Making a role with admin powers, removing an account and rotating an
+- **The gravest actions ask again** (his, 2026-10-06: agreed). Making a role with admin powers, removing an account and rotating an
   agent's credential need the second factor within the last five minutes, so a session left open is not enough.
 - **The studio tables serve two apps.** A row's `kind` says whose it is: `character` and `drawing` are Orbit's
   (`orbit.*`), `action` the motion studio's (`motion.*`).
@@ -216,7 +215,7 @@ Each step is a migration and a pull request; each hosted push is his.
 ## Open
 
 - **Settled, his, 2026-10-06**: an agent signs in as a person does (A5); both tokens, the access token ten minutes,
-  sessions ended when a role is taken (A6); Member starts with the motion studio and Home (A4).
-- **His to confirm**: `home.open` in Member, which shows the house to every account (A4, Home.md H4), or an
-  invitation-only role for it.
-- **His to pick**: the second factor for the admin, and asking again before the gravest actions (A6).
+  sessions ended when a role is taken, a second factor for the admin and asked again before the gravest actions (A6);
+  Member starts with the motion studio, and Home waits for a role he makes (A4).
+- **To prove while building**: that a revoked session closes the gate before its access token runs out (A11 step 3);
+  how an agent's request names its delegation to the database (step 6).
