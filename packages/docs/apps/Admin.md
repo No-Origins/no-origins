@@ -581,7 +581,7 @@ OAuth is still absent by choice — a third-party identity provider is another m
 - **An open app** (2026-10-03, Orbit.md C24, his: *"make controls in Orbit public, and only when I log in as an admin I should be able to publish, so that users can experiment and play around"*): `authGate`'s `open` makes every path everyone's — the gate refreshes the session and sends nobody to the sign-in; the page asks who is signed in, and RLS decides what they may write. Orbit runs with it: a visitor plays with the agents as published, the owner publishes. Without keys an open app opens everywhere, there being nothing a sign-in guards.
 - **Roles are later** (his). `profiles.role` and `noo_is()` are there for them — and Orbit reads the first since 2026-10-03: its draft, its publish and its uploads are the owner's (Orbit.md C24).
 
-**One door for every app: `auth.no-origins.com` (proposed 2026-10-06).** His: *"What if we have one subdomain uh, for
+**One door for every app: `auth.no-origins.com` (proposed 2026-10-06; name and sign-up his the same day).** His: *"What if we have one subdomain uh, for
 just logging in? Like something like auth.noorigins.com and uh, once we log in, into it, we should be able to access
 every other subdomain that needs login."* Then, on the assessment: *"okay. Proceed"* — to this section, not to code.
 
@@ -621,9 +621,29 @@ already in an inbox. (3) Move the password and passkey settings out of the admin
 passkey signs in on the auth app, then switch `site_url`, and only then take the old callbacks and origins out of
 Supabase. (5) Move the gated apps to the server-only names and drop the public ones from their projects.
 
-**What is his.** The name — `auth`, or `id`, `login`, `account`. What the auth app shows when there is nowhere to
-return to: the apps you may open, or straight to the admin. Whether the admin keeps any login of its own: this proposal
-says none. Nothing is built until he approves it.
+**His answers, 2026-10-06.** (1) **The name is `auth`.** (2) **The auth app has a sign-up**: *"I want to have pages in auth
+so that users can also signup. So, once they login, we can show all the subdomains to go to, except admin."* Signed in
+with nowhere to return to, a person sees every subdomain they may open; the admin is never among them. (3) Whether the
+admin keeps a login of its own (a second door for him if the auth app is down, at the cost of two login pages to keep
+in step and to secure) he asked about; the proposal still says no.
+
+**What sign-up changes (open, his).** Today the allowlist is the whole membership rule (above), and every gate asks
+only whether someone is signed in: the admin's, the motion studio's and Home's. Open sign-up makes "signed in" and
+"invited" two different things, and a stranger with an account would pass all three gates — Home's included, whose
+house is private (Home.md H4). So sign-up brings roles forward, from "later" to now:
+
+- **A new account gets a role with no rights**, `member`, a new value of `noo_role`; not `viewer`, which the RLS
+  policies let read. The allowlist stays, as the list of who gets more than `member` — the owner, an editor.
+- **Every gate asks for a role, not a session.** The admin and Home are the owner's alone; Orbit stays open; the
+  motion studio is his to say. The list after sign-in shows what the person's role opens, so the admin is missing
+  because they cannot enter it, not because a link was left out.
+- **A sign-up is the magic link for an address with no account yet**, so the address is proved before the account
+  exists; a password is still only set while signed in. Anyone with the URL can now make accounts, so Supabase's rate
+  limits and a challenge on the form (Cloudflare Turnstile, which Supabase supports) guard it, and every sign-up is a
+  mail through Resend, whose free tier caps how many go out.
+
+**Still to answer before anything is built:** which apps a `member` may open (the motion studio?); whether sign-up is
+open to anyone or a request he approves; and (3). Nothing is built until he approves this section.
 
 ---
 
