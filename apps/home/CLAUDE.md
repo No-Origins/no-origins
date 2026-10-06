@@ -63,8 +63,9 @@ type what it cannot yet say (and to `src/sample` if the sample should show it).
   Do not move a stop's camera to "fix" the model behind its picture.
 - **The walk goes through doors, never walls.** When a wall or a door moves, move the legs' points with it and look at
   the walk (`e2e/.mcp/home-tour.mjs`, below).
-- **Behind the sign-in, twice** (H4): the gate in `src/proxy.ts`, whose matcher exempts no image so the pictures are
-  gated, and `signedIn()` in `src/lib/store.ts`, asked again where the house is read. **Open without a login only on a
+- **Behind the sign-in, twice** (H4): the gate in `src/proxy.ts`, which asks for `home.open` (Access.md A6) and whose
+  matcher exempts no image so the pictures are gated, and `signedIn()` in `src/lib/store.ts`, which asks the database
+  for `home.open` again where the house is read. Only the Owner holds it until he gives it in a role. **Open without a login only on a
   development server with no Supabase keys**, so `pnpm review` and CI see the sample.
 - **Only `@no-origins/ui` stands on the page.** The canvas is the one element that is not a component of the system,
   as the avatar's is; every control is.

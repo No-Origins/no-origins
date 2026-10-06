@@ -1,8 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { sessionCookieOptions } from "./cookies";
 import { supabaseEnv } from "./env";
+import type { Permission } from "./permissions";
 
 /**
  * The gate, and the session refresh, in one pass (Admin.md §8.4) — every app's `proxy.ts` calls it.
@@ -24,6 +26,10 @@ import { supabaseEnv } from "./env";
  * session, so the page can ask who is signed in and RLS can decide what they may write. Nobody is sent to the sign-in;
  * the sign-in is still there for the one who publishes. Without keys it opens everywhere, production included: there is
  * nothing to sign in to, and nothing a visitor could reach that a sign-in guards.
+ *
+ * **An app's permission** (`permission`, Access.md A6, 2026-10-06): a session is not enough — the account must hold the
+ * app's `<app>.open`. Without it the gate sends the person to the sign-in page, which says the account cannot open the
+ * app and offers a sign-out; it never sends them to the app.
  */
 export type GateOptions = {
   /** Paths anyone may reach: the sign-in page and the callback. */
@@ -32,11 +38,45 @@ export type GateOptions = {
   openWithoutKeys?: boolean;
   /** Every path is public: the gate refreshes the session and sends nobody to the sign-in. */
   open?: boolean;
+  /**
+   * The permission that opens this app (Access.md A6): `admin.open`, `motion.open`, `home.open`. A signed-in principal
+   * without it is sent to the sign-in page, which says the account cannot open the app; with none named, any session
+   * opens it.
+   */
+  permission?: Permission;
 };
+
+/**
+ * Whether the signed-in principal holds `permission` (Access.md A6). The token shows: its `perms` claim, written by the
+ * database when the token was issued (`noo_access_token_hook`), read from the token `getUser()` has just had the auth
+ * server verify — so it is never a claim the browser wrote. A token from before the hook has no such claim, and then
+ * the database is asked, live (`noo_can`). Either way a change reaches the gate within the token's ten minutes, and at
+ * once when the person's sessions are ended.
+ */
+async function holds(supabase: SupabaseClient, permission: Permission): Promise<boolean> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const perms = session ? claimedPermissions(session.access_token) : null;
+  if (perms) return perms.includes(permission);
+  const { data, error } = await supabase.rpc("noo_can", { p_permission: permission });
+  return !error && data === true;
+}
+
+/** The `perms` claim of a token, or null when it has none. Decoding only: the token was verified before this is read. */
+function claimedPermissions(token: string): string[] | null {
+  try {
+    const part = token.split(".")[1];
+    if (!part) return null;
+    const json = atob(part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "="));
+    const perms = (JSON.parse(json) as { perms?: unknown }).perms;
+    return Array.isArray(perms) && perms.every((p) => typeof p === "string") ? perms : null;
+  } catch {
+    return null;
+  }
+}
 
 export async function authGate(
   request: NextRequest,
-  { publicPaths = ["/sign-in", "/auth"], openWithoutKeys = false, open = false }: GateOptions = {},
+  { publicPaths = ["/sign-in", "/auth"], openWithoutKeys = false, open = false, permission }: GateOptions = {},
 ) {
   const env = supabaseEnv();
   if (!env) {
@@ -63,6 +103,8 @@ export async function authGate(
   const { data: { user } } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
   const reachable = open || publicPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  // Signed in, and whether this account may open the app (Access.md A6). Asked once a request, only where it matters.
+  const allowed = !user || !permission || (await holds(supabase, permission));
 
   if (!user && !reachable) {
     const url = request.nextUrl.clone();
@@ -72,7 +114,15 @@ export async function authGate(
     return NextResponse.redirect(url);
   }
 
-  if (user && pathname === "/sign-in") {
+  // Signed in without the app's permission: the sign-in page, saying so — and only it and the auth routes (sign-out).
+  if (user && !allowed && !reachable) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/sign-in";
+    url.search = "?denied=1";
+    return NextResponse.redirect(url);
+  }
+
+  if (user && allowed && pathname === "/sign-in") {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     url.search = "";

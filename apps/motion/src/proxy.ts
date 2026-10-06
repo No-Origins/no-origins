@@ -11,7 +11,7 @@ import { authGate } from "@no-origins/auth/proxy";
  * without them.
  */
 export function proxy(request: NextRequest) {
-  return authGate(request, { openWithoutKeys: true });
+  return authGate(request, { openWithoutKeys: true, permission: "motion.open" });
 }
 
 export const config = {

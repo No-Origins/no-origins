@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 
 import { sessionCookieOptions } from "./cookies";
 import { requireSupabaseEnv } from "./env";
+import type { Permission } from "./permissions";
 
 /**
  * The server client — a request-scoped Supabase reading the session out of cookies (Admin.md §8.4).
@@ -44,4 +45,15 @@ export async function currentProfile() {
   if (!user) return null;
   const { data } = await supabase.from("profiles").select("id, email, name, role").eq("id", user.id).maybeSingle();
   return data ?? null;
+}
+
+/**
+ * Whether the signed-in principal may do `permission` (Access.md A6) — asked of the database, live, through the same
+ * `noo_can()` every rule asks, so a server action and the table it writes agree. `item` is A9's room for single items,
+ * ignored until then. False for nobody signed in; throws without keys, as every database call here does.
+ */
+export async function can(permission: Permission, item?: string): Promise<boolean> {
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc("noo_can", { p_permission: permission, p_item: item ?? null });
+  return !error && data === true;
 }

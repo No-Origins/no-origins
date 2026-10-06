@@ -3,7 +3,7 @@ import path from "node:path";
 import { connection } from "next/server";
 import { get } from "@vercel/blob";
 import { supabaseEnv } from "@no-origins/auth/env";
-import { supabaseServer } from "@no-origins/auth/server";
+import { can } from "@no-origins/auth/server";
 
 import { HOME, HOME_TOUR } from "@house";
 import type { House } from "@/lib/house";
@@ -31,17 +31,15 @@ const PICTURE = /^[a-z0-9][a-z0-9-]*\.webp$/;
 const fromStore = () => process.env.VERCEL === "1" || process.env.HOME_STORE === "1";
 
 /**
- * Whether the request is signed in: the gate's own question, asked again where the house is read, so a matcher that
- * one day lets a path through still never lets the house out. Without keys the gate's rule stands — open only on a
- * development server.
+ * Whether the request may open Home (`home.open`, Access.md A6): the gate's own question, asked again of the database
+ * where the house is read, so a matcher that one day lets a path through still never lets the house out. Without keys
+ * the gate's rule stands — open only on a development server.
  */
 export async function signedIn(): Promise<boolean> {
   // A question about the request, so never answered at build time: the page is rendered at each visit, keys or none.
   await connection();
   if (!supabaseEnv()) return process.env.NODE_ENV !== "production";
-  const supabase = await supabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
-  return !!user;
+  return can("home.open");
 }
 
 /** The house and its tour, from the store on Vercel and from the files anywhere else. */

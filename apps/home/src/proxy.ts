@@ -12,7 +12,7 @@ import { authGate } from "@no-origins/auth/proxy";
  * does, and no image format — the pictures are the house seen from inside, and the house is private.
  */
 export function proxy(request: NextRequest) {
-  return authGate(request, { openWithoutKeys: true });
+  return authGate(request, { openWithoutKeys: true, permission: "home.open" });
 }
 
 export const config = {
