@@ -200,7 +200,15 @@ address; `noo_is()` in about twenty policies — the studio tables, `profiles`, 
 buckets (`assets`, `publish`); Orbit's server asking for the owner; and gates that ask only for a session.
 
 1. **The tables, `noo_can`, the catalogue and the two built-in roles**, beside the old. His account becomes the Owner.
-   Nothing reads them yet.
+   Nothing reads them yet. **Built 2026-10-06** (`…_access.sql`): the eight tables of A10 (with `invitation_roles`
+   beside `invitations`), `noo_can()`, `noo_is_owner()` and `noo_permissions_of()`, the sixteen permissions, Owner and
+   Member, his account the Owner, and every new account given its invited roles or the default. Already enforced in the
+   database, as the lock and not the screen: one Owner, never given or taken by a request; built-in roles never
+   deleted, always exactly one default, a held role not deleted; nobody granting, taking or inviting with more than
+   they hold; the record append-only, every change to the access tables on it. The catalogue in code is
+   `packages/auth/src/permissions.ts`, checked against the migrations by the package's typecheck, so by CI. Thirty-one
+   database tests (`supabase/tests/access_test.sql`, `npx supabase test db`) pass on the local stack; the hosted push
+   is his.
 2. **The policies move from `noo_is` to `noo_can`**, table by table: the studio tables by kind (A6), `profiles` and the
    allowlist to the `admin.*` permissions, the two 1.0 buckets to the owner alone until they have a use.
 3. **The token hook, and every gate asks for `<app>.open`**; Orbit's and Home's server checks become `can()`.

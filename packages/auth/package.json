@@ -1,7 +1,7 @@
 {
   "name": "@no-origins/auth",
   "version": "0.1.0",
-  "description": "No Origins sign-in: one Supabase session for every app — the gate, the clients, the callback and the login card.",
+  "description": "No Origins sign-in: one Supabase session for every app \u2014 the gate, the clients, the callback and the login card.",
   "type": "module",
   "private": true,
   "exports": {
@@ -13,10 +13,11 @@
     "./routes": "./src/routes.ts",
     "./webauthn": "./src/webauthn.ts",
     "./login-card": "./src/login-card.tsx",
-    "./sign-in": "./src/sign-in.tsx"
+    "./sign-in": "./src/sign-in.tsx",
+    "./permissions": "./src/permissions.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && node scripts/check-catalogue.mjs"
   },
   "dependencies": {
     "@no-origins/ui": "workspace:*",
