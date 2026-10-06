@@ -75,7 +75,11 @@ check adds its permission to the catalogue in the same change; until a role is g
 - **Owner** — built in, and **one person, him** (his, 2026-10-06). Holds every permission, those added later included,
   without rows. Cannot be given, taken or deleted in the admin, so he can never be locked out.
 - **Member** — built in as **the default**: what every sign-up gets. Its permissions are his to change; it starts with
-  `motion.open` (his, 2026-10-06). The default can be moved to another role; there is always exactly one.
+  `motion.open` and `home.open` (his, 2026-10-06: *"Let's also add home along with Motion Studio. And of course, public
+  apps and other"*). The default can be moved to another role; there is always exactly one. **Named, for his
+  confirmation:** sign-up is open to everyone, so `home.open` in Member lets anyone who makes an account see the house
+  and its pictures, where Home.md H4 made them private to him. The narrower way is a role given only by invitation
+  ("Family") that holds `home.open`, with Member keeping the motion studio.
 - **Every other role is his to make** in the admin: a name, a sentence, the permissions ticked. There is no fixed
   editor (his: not decided); if one is wanted, it is made like any other. A role is the same whoever holds it, so a role
   can be made for agents ("Builder"), for people ("Friend") or for both.
@@ -88,8 +92,9 @@ check adds its permission to the catalogue in the same change; until a role is g
 His, 2026-10-06: an agent acts **both** as itself and on behalf of a person.
 
 - **An agent is an account of kind `agent`.** It has no inbox and never uses the login page. The admin makes it
-  (`admin.agents.manage`) and shows its credential once; the agents harness (`services/agents`) keeps it and signs in
-  with it; rotating it ends the old one.
+  (`admin.agents.manage`) and shows its credential once; the agents harness (`services/agents`) keeps it and **signs in
+  with it as a person does** (his, 2026-10-06), so an agent has the same tokens and sessions (A6) and nothing new to
+  secure; rotating the credential ends its sessions.
 - **As itself**, it may do what its roles grant, like anyone.
 - **On behalf of a person**, it acts under a **delegation**: the person, signed in, lets that agent act for them, for a
   stated purpose, until an expiry, and can end it at any time. While it acts under one, the agent may do only what
@@ -115,6 +120,23 @@ Three places, as today (Admin.md §8.3), each closer to the data:
 - **The token shows, the database decides.** Buttons appear from the token's list; the refusal is the server's and the
   database's, which are live — a permission taken away stops a save at once, even while an older token still opens the
   app. Taking a role in the admin also ends the person's sessions, so the gates close too.
+- **Two tokens, as Supabase issues them** (his, 2026-10-06: *"we can have both refresh token and access token if you
+  have better auth ideas then we can explore them too"*). The **access token** is short and carries the permissions the
+  gates read; the **refresh token** is long, lives in the session cookie, and quietly gets a new access token — the
+  proxy already refreshes on every request. Refresh tokens already rotate, each used once, and one used twice ends the
+  whole session (reuse detection, `supabase/config.toml`).
+- **The access token lives ten minutes**, not the hour of today (`jwt_expiry`). A changed role reaches every gate within
+  ten minutes with nothing else done; the cost is a refresh every ten minutes of use, which nobody sees.
+- **Taking a role away ends that person's sessions at once.** Their refresh tokens are revoked, and the gate, which
+  already asks the auth server on every request (`getUser()`, Admin.md §8.4), closes on their next click. To prove in
+  step 3 that a revoked session fails at the gate before its access token runs out; if it does not, ten minutes is the
+  bound.
+- **The admin needs a second factor** (proposed). An `admin.*` permission counts only in a session that has passed a
+  second factor — Supabase's assurance level `aal2`, which the database rules can read from the token. The authenticator
+  app (TOTP) is already switched on for the hosted project; a passkey as the second factor follows when Supabase offers
+  it. A stolen password or a forwarded magic link then never reaches the admin.
+- **The gravest actions ask again** (proposed). Making a role with admin powers, removing an account and rotating an
+  agent's credential need the second factor within the last five minutes, so a session left open is not enough.
 - **The studio tables serve two apps.** A row's `kind` says whose it is: `character` and `drawing` are Orbit's
   (`orbit.*`), `action` the motion studio's (`motion.*`).
 
@@ -193,8 +215,8 @@ Each step is a migration and a pull request; each hosted push is his.
 
 ## Open
 
-- **An agent's credential**: an account the harness signs in to like a person (proposed: the same path as everyone,
-  nothing new to secure) or tokens the harness mints itself. To prove in step 6.
-- **The token's life**: an hour today. Shorter, if a role taken must close the gates sooner than ending the sessions
-  does — to see in step 3.
-- **Member's first permissions**: `motion.open` alone, beside the public apps and Orbit's play (proposed).
+- **Settled, his, 2026-10-06**: an agent signs in as a person does (A5); both tokens, the access token ten minutes,
+  sessions ended when a role is taken (A6); Member starts with the motion studio and Home (A4).
+- **His to confirm**: `home.open` in Member, which shows the house to every account (A4, Home.md H4), or an
+  invitation-only role for it.
+- **His to pick**: the second factor for the admin, and asking again before the gravest actions (A6).
