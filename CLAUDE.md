@@ -41,10 +41,11 @@ because it should be same across no origins"): the Supabase clients, the gate (`
 `proxy.ts`), the callback, the sign-out, the login card and the sign-in screen, consumed from source. One session for
 every app — the cookie is written for `.no-origins.com` — one allowlist, and **roles and permissions being built**
 (**Access.md**, approved 2026-10-06: people and agents, permissions the code declares in
-`packages/auth/src/permissions.ts`, roles he makes in the admin; steps 1 to 3 of A11 are in: the tables and `noo_can()`, every
-database rule asking for a permission instead of a role, and a token that carries the permissions, read by the gate:
-`authGate`'s `permission` — the admin `admin.open`, the motion studio `motion.open`, Home `home.open` — sends an account
-without it to a no-access card; `npx supabase test db` runs their tests). The hosted project takes a hook change as
+`packages/auth/src/permissions.ts`, roles he makes in the admin; steps 1 to 4 of A11 are in: the tables and `noo_can()`, every
+database rule asking for a permission instead of a role, a token that carries the permissions, read by the gate
+(`authGate`'s `permission` — the admin `admin.open`, the motion studio `motion.open`, Home `home.open` — sends an account
+without it to a no-access card), and the admin's People, Roles, Invitations and Audit pages; `npx supabase test db` runs
+their tests). The hosted project takes a hook change as
 `db push` first, then `config push`. **The admin and the motion studio
 are behind it; Orbit is open to everyone and its publishing is the owner's** (Orbit.md C24, 2026-10-03, his: "users
 can experiment and play around"), the gate's `open` only refreshing the session there. Without its two keys the gate

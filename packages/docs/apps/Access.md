@@ -235,7 +235,22 @@ buckets (`assets`, `publish`); Orbit's server asking for the owner; and gates th
    `config push`**: a hook enabled before its function exists refuses every sign-in. **Due before step 5**: the motion
    studio reads every action from its draft, so an account with only `motion.open` sees an empty studio; it must read
    the published versions and save nothing, as Orbit does for a visitor (C24).
-4. **The admin's pages**: people, roles, invitations, audit. The allowlist's rows become invitations.
+4. **The admin's pages**: people, roles, invitations, audit. The allowlist's rows become invitations. **Built
+   2026-10-06, version 1** (`…_access_admin.sql`, `apps/admin`): People (`/people`: everyone and every agent, their
+   roles, joined and last signed in; give or take a role, which ends the person's sessions; end sessions; remove),
+   Roles (`/roles`, `/roles/<id>`: make, rename, delete, tick permissions by app with each one's sentence, move the
+   default), Invitations (`/invitations`: an address, its roles, 7, 14 or 30 days; revoke) and Audit (`/audit`: fifty
+   to a page, by kind), each card on the admin's home shown only to whoever holds its page's permission. The database
+   gives the pages `noo_people()`, `noo_give_role`, `noo_take_role`, `noo_end_sessions`, `noo_remove_account` and
+   `noo_set_default_role`, each asking its permission and refusing a change that names nobody, never acting on the
+   Owner, on oneself or on someone who holds more; who made, gave or invited is stamped from the request. **The
+   allowlist's rows did not become invitations**: there is one, his, and his account exists. Instead an unexpired
+   invitation now admits an address the allowlist does not hold, so until step 5 the Invitations page is the way in.
+   Seventeen database tests pass beside the sixty-two before; through the pages, signed in as him, a role was made, a
+   permission ticked, the role deleted, an address invited and revoked, each on the audit log, no console error.
+   The pages are version 1, the Settings page's frame, and the screens are his to design.
+   **Due before step 5, beside the motion studio's read path (step 3)**: the admin's second factor and asking again
+   before the gravest actions (A6, his, agreed), not built yet.
 5. **Only then does sign-up open** (the login host, Admin.md §8.4): the allowlist's refusal goes and the default role
    is given. Never before step 3, or a stranger's account would pass the old gates, which ask only for a session.
 6. **Agents**: their accounts, their credentials in the harness, delegations.
