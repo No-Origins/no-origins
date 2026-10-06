@@ -64,6 +64,7 @@ One project, `no-origins`: Postgres + Auth + Storage.
 | `migrations/…_studio_versions.sql` | **The studios' drafts and versions (Motion.md M20, Orbit.md C6, 2026-09-30):** `studio_items` (a character, a motion or an uploaded drawing), `studio_drafts` (one per item, `rev` bumped by the database when `data` changes), `studio_versions` (numbered max + 1 per item, named, frozen: no update or delete for any role, truncate revoked), `studio_publish()` (the draft as he saw it, refused on a stale `rev`), owner-only RLS, and the agent's version 12 stored whole as its first. Adds only; drops nothing. |
 | `migrations/…_studio_minor_versions.sql` | **Major and minor versions, and a new character by its name (Orbit.md C19, 2026-10-01):** `studio_versions.minor` (from 0; `number` is the major; unique per item with it; every stored version is its number and .0, filled by the column's default, no frozen row written), the name optional, the trigger refusing anything but the next minor or the next major's .0, `studio_publish(p_item, p_ui_version, p_rev, p_label default null, p_step default 'major')` (the motion studio's call unchanged), and `studio_new_character(p_name, p_data)`. Drops only the one-number unique constraint and the old four-argument `studio_publish`. **Pushed to the hosted project on 2026-10-01** (`db push`), before the code that calls it was deployed; the code before it still works against it. |
 | `migrations/…_studio_actions.sql` | **The agents' actions (Motion.md M24, 2026-10-01):** the kind `action` (an item naming no character and no slot; its draft `{ action, values }`) and the shape check that allows it, and every motion never published deleted with its draft. Adds a kind; drops nothing else. **Pushed to the hosted project on 2026-10-01**, before the code that calls it was deployed. |
+| `migrations/…_access.sql` | **Access, step 1 (Access.md A10, A11; his, 2026-10-06):** who may do what, for people and agents — `permissions` (the catalogue, written only through `noo_permission_upsert`/`_drop`, which `packages/auth/scripts/check-catalogue.mjs` compares with `packages/auth/src/permissions.ts`), `roles` (Owner and Member built in), `role_permissions`, `role_assignments`, `invitations` + `invitation_roles`, `delegations`, `audit_events` (append-only); `profiles.kind` (person · agent); `noo_can(permission, item)`, `noo_is_owner()`, `noo_permissions_of()`; guards for one Owner, the built-in roles, exactly one default, and nobody granting more than they hold; an audit row for every change to the access tables. Seeds the sixteen permissions, makes the owner's account the Owner and every other a Member, and replaces `noo_handle_new_user()` so a new account gets its invited roles or the default. **Read by nothing yet**: every policy still asks `noo_is()`. Adds only. **Not yet pushed to the hosted project** — his `npx supabase db push`. |
 | `migrations/…_studio_public_read.sql` | **The agents are everyone's to see; publishing is his (Orbit.md C24, 2026-10-03):** two read policies for `anon` and `authenticated` alike — `studio_items` of kind `character` and `drawing`, and `studio_versions` of those items — and `anon`'s privileges on the three studio tables revoked, then `select` granted back on the columns Orbit reads (never `created_by`, `published_by`, nor the drafts). The first anon policy in the schema, under Admin.md §0.6's rule for a live component. Adds two policies and narrows anon; drops nothing. **Pushed to the hosted project on 2026-10-03** (`db push`, his permission in the session), about an hour after Orbit's deploy — a visitor on production saw no agents in between, the fallback by design. |
 
 ## Running it locally
@@ -96,6 +97,17 @@ row exists **nobody can sign in at all** — including you. That is the design
 magic link to attach to.
 
 ## What was verified, and how
+
+**Access, step 1 (2026-10-06), against the local stack** (`…_access.sql`, Access.md A11). Applied with `npx supabase
+migration up --local`, then `npx supabase test db`, which runs `tests/access_test.sql` with pgTAP in one transaction
+that is rolled back: 31 tests pass — the seed (sixteen permissions, two built-in roles, Member holding only
+`motion.open`, the owner's account the Owner, the seed on the record); a sign-up given the default, an invited one its
+invitation's roles with the invitation used up; one Owner; a built-in role never deleted, a held role not deleted,
+always one default; the record append-only even for the database; as the owner, everything, but the Owner never given
+or taken by a request; as a member, only its roles' permissions, no role changed, no record read, only its own roles
+seen, a delegation made for itself and never for someone else; as an invited helper, an invitation with a role it
+holds all of and never one with a permission it lacks; as a visitor, nothing and no access table read. Afterwards the
+local data held no test account.
 
 **Orbit's public read (2026-10-03), against the local stack** (`…_studio_public_read.sql`, Orbit.md C24). Applied
 with `npx supabase migration up --local`, then through PostgREST on the anon key: the six characters list by name

@@ -39,7 +39,10 @@ engineering (Layer A) have no database anywhere near them, and that is deliberat
 `packages/auth` (`@no-origins/auth`) is **the one sign-in** (Admin.md §8.4, amended 2026-09-30, his: "the same auth
 because it should be same across no origins"): the Supabase clients, the gate (`authGate`, called from each app's
 `proxy.ts`), the callback, the sign-out, the login card and the sign-in screen, consumed from source. One session for
-every app — the cookie is written for `.no-origins.com` — one allowlist, roles later. **The admin and the motion studio
+every app — the cookie is written for `.no-origins.com` — one allowlist, and **roles and permissions being built**
+(**Access.md**, approved 2026-10-06: people and agents, permissions the code declares in
+`packages/auth/src/permissions.ts`, roles he makes in the admin; step 1 of A11, the tables and `noo_can()`, is in the
+database and read by nothing yet; `npx supabase test db` runs its tests). **The admin and the motion studio
 are behind it; Orbit is open to everyone and its publishing is the owner's** (Orbit.md C24, 2026-10-03, his: "users
 can experiment and play around"), the gate's `open` only refreshing the session there. Without its two keys the gate
 refuses in production; the motion studio alone opens on a development server that has none, and Orbit opens anywhere,
