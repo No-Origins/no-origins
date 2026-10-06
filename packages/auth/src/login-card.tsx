@@ -43,6 +43,10 @@ function LoginCardInner({ app }: { app: string }) {
     return <ConfirmCard app={app} tokenHash={tokenHash} type={tokenType} next={next} />;
   }
 
+  // Signed in, but this account cannot open the app (Access.md A6): the gate sent it here. Say so, and offer the way out —
+  // never a sign-in form, which would only sign the same account in again.
+  if (params.get("denied")) return <DeniedCard app={app} />;
+
   // A development server with no Supabase keys has nothing to sign in to: an app that opens without them (the motion
   // studio and Orbit, `openWithoutKeys`) is already open, so the card says so rather than a form that cannot send.
   if (!supabaseEnv()) {
@@ -101,6 +105,35 @@ function LoginCardInner({ app }: { app: string }) {
         </Tabs>
 
         <PasskeyButton next={next} />
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * Signed in, without the app's permission (Access.md A6). A sign-out is a POST to the app's own `/auth/sign-out`, which
+ * signs out of every app and lands on this page's form; the owner gives access from the admin's People page.
+ */
+function DeniedCard({ app }: { app: string }) {
+  return (
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle>No access to {app}</CardTitle>
+        <CardDescription>No Origins · {app}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <FieldGroup>
+          <Alert>
+            <AlertTitle>This account cannot open {app}</AlertTitle>
+            <AlertDescription>
+              You are signed in, but your roles do not include {app}. Sign out to use another account, or ask the owner
+              for access.
+            </AlertDescription>
+          </Alert>
+          <form action="/auth/sign-out" method="post">
+            <Button type="submit" className="w-full">Sign out</Button>
+          </form>
+        </FieldGroup>
       </CardContent>
     </Card>
   );

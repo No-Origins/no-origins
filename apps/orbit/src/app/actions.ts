@@ -1,6 +1,7 @@
 "use server";
 
 import { supabaseEnv } from "@no-origins/auth/env";
+import type { Permission } from "@no-origins/auth/permissions";
 import { supabaseServer } from "@no-origins/auth/server";
 import { checkCharacter, resolveCharacter, type CharacterLook } from "@no-origins/ui/lib/agent-body";
 import { checkDrawing, type DrawingData } from "@no-origins/ui/lib/agent-face";
@@ -16,8 +17,10 @@ import { isUploadSlot, MAX_FILE, strictDrawing, type UploadSlot } from "@/lib/dr
  * able to publish, so that users can experiment and play around"). A visitor — nobody signed in, or someone signed in
  * who is not the owner — loads each agent as its current published version (`…_studio_public_read.sql`), never the
  * draft, and `editable` is false: the page is theirs to play with and nothing is saved. The owner loads the draft and
- * saves, publishes, goes back, makes agents and uploads as before. Every write checks that the owner is the one
- * asking, since a server function can be reached by a POST from anywhere; RLS would refuse anyway.
+ * saves, publishes, goes back, makes agents and uploads as before. Since Access.md A11 step 3 (2026-10-06) each of those
+ * is a permission rather than the owner's role — `orbit.draft.save`, `orbit.version.publish`, `orbit.agent.create`,
+ * `orbit.style.upload` — which he holds as the Owner and may give in a role. Every write asks for its own, since a
+ * server function can be reached by a POST from anywhere; RLS would refuse anyway.
  *
  * A look is **held whole** (`resolveCharacter`): every value of its look (never how it moves, Motion.md M23), so a published version never follows a default that
  * changes in code later. A value missing from one read back is a setting declared since, and takes its default then.
@@ -68,7 +71,7 @@ export type Outcome<T> =
   | { ok: false; reason: "offline" | "signed-out" | "conflict" | "refused"; message: string };
 
 const offline = { ok: false, reason: "offline", message: "Nothing is saved here: this server has no database keys." } as const;
-const signedOut = { ok: false, reason: "signed-out", message: "Sign in as the owner to save and publish." } as const;
+const signedOut = { ok: false, reason: "signed-out", message: "Sign in with an account that may save and publish here." } as const;
 const refused = (message: string) => ({ ok: false, reason: "refused", message }) as const;
 const conflict = {
   ok: false,
@@ -76,28 +79,31 @@ const conflict = {
   message: "The draft was changed somewhere else since it was loaded. Load it to carry on from there.",
 } as const;
 
+/** Whether whoever is asking may `permission`: the database's own answer (`noo_can`, Access.md A6), never the token's. */
+async function may(db: Db, permission: Permission): Promise<boolean> {
+  const { data, error } = await db.rpc("noo_can", { p_permission: permission, p_item: null });
+  return !error && data === true;
+}
+
 /**
  * The database as whoever is asking — a visitor on the anon key's own policies, or the signed-in person on theirs —
- * and whether that is the owner, whose the draft is (C24). Or why there is no database.
+ * and whether they may work on the draft (`orbit.draft.save`, Access.md A3), whose the draft is (C24). Or why there is
+ * no database.
  */
 async function database() {
   if (!supabaseEnv()) return { error: offline } as const;
   const db = await supabaseServer();
   const { data } = await db.auth.getUser();
-  let editable = false;
-  if (data.user) {
-    // The role is read, never trusted from the token (`currentProfile`'s reasoning): `profiles` is what RLS reads.
-    const profile = await db.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
-    editable = profile.data?.role === "owner";
-  }
+  const editable = data.user ? await may(db, "orbit.draft.save") : false;
   return { db, editable } as const;
 }
 
-/** The database for a write: the owner's, or why not. */
-async function writer() {
-  const { db, editable, error } = await database();
-  if (error) return { error } as const;
-  if (!editable) return { error: signedOut } as const;
+/** The database for a write that needs `permission`, or why not. */
+async function writer(permission: Permission) {
+  if (!supabaseEnv()) return { error: offline } as const;
+  const db = await supabaseServer();
+  const { data } = await db.auth.getUser();
+  if (!data.user || !(await may(db, permission))) return { error: signedOut } as const;
   return { db } as const;
 }
 
@@ -191,7 +197,7 @@ export async function loadCharacter(itemId?: string): Promise<Outcome<CharacterS
 
 /** Save the draft whole, on the `rev` it was loaded at. Refused, not merged, when another device saved first. */
 export async function saveDraft(itemId: string, look: CharacterLook, rev: number): Promise<Outcome<{ rev: number }>> {
-  const { db, error } = await writer();
+  const { db, error } = await writer("orbit.draft.save");
   if (error) return error;
   const saved = await db
     .from("studio_drafts")
@@ -211,7 +217,7 @@ export async function saveDraft(itemId: string, look: CharacterLook, rev: number
  * character one, not each version. A version never changes afterwards; any change after it is the next publish.
  */
 export async function publishCharacter(itemId: string, step: PublishStep, rev: number): Promise<Outcome<CharacterState>> {
-  const { db, error } = await writer();
+  const { db, error } = await writer("orbit.version.publish");
   if (error) return error;
   if (step !== "minor" && step !== "major") return refused("A publish is a minor version or a major one.");
   const published = await db.rpc("studio_publish", {
@@ -232,7 +238,7 @@ export async function publishCharacter(itemId: string, step: PublishStep, rev: n
  * defaults, whole (`resolveCharacter`), and it has no version until its first publish, which is 1.0. Returns it opened.
  */
 export async function createCharacter(name: string): Promise<Outcome<CharacterState>> {
-  const { db, error } = await writer();
+  const { db, error } = await writer("orbit.agent.create");
   if (error) return error;
   const title = name.trim();
   if (!title) return refused("A new agent needs a name.");
@@ -252,7 +258,7 @@ export async function createCharacter(name: string): Promise<Outcome<CharacterSt
  * and the next publish still counts from the latest version, not this one.
  */
 export async function restoreCharacter(itemId: string, versionId: string, rev: number): Promise<Outcome<CharacterState>> {
-  const { db, error } = await writer();
+  const { db, error } = await writer("orbit.version.publish");
   if (error) return error;
   const version = await db.from("studio_versions").select("data").eq("id", versionId).eq("item_id", itemId).maybeSingle();
   if (version.error) return refused(version.error.message);
@@ -284,7 +290,7 @@ export async function uploadDrawing(
   file: string,
   data: unknown,
 ): Promise<Outcome<{ versionId: string; state: CharacterState }>> {
-  const { db, error } = await writer();
+  const { db, error } = await writer("orbit.style.upload");
   if (error) return error;
   const title = name.trim();
   if (!isUploadSlot(slot)) return refused("That slot does not take an uploaded style.");

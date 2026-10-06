@@ -172,7 +172,7 @@ site_url = "http://localhost:3002"
 # through it too, since 2026-10-03.
 additional_redirect_urls = ["http://localhost:3002/**", "http://127.0.0.1:3002/**", "https://admin.no-origins.com/**", "http://localhost:3004/**", "http://127.0.0.1:3004/**", "https://motion.no-origins.com/**", "http://localhost:3005/**", "http://127.0.0.1:3005/**", "https://orbit.no-origins.com/**", "https://character.no-origins.com/**", "http://localhost:3006/**", "http://127.0.0.1:3006/**", "https://home.no-origins.com/**"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
-jwt_expiry = 3600
+jwt_expiry = 600
 # JWT issuer URL. If not set, defaults to auth.external_url.
 # jwt_issuer = ""
 # Path to JWT signing key. DO NOT commit your signing keys file to git.
@@ -310,9 +310,11 @@ max_frequency = "5s"
 # uri = "pg-functions://postgres/auth/before-user-created-hook"
 
 # This hook runs before a token is issued and allows you to add additional claims based on the authentication method used.
-# [auth.hook.custom_access_token]
-# enabled = true
-# uri = "pg-functions://<database>/<schema>/<hook_name>"
+# Access.md A6 (2026-10-06): every token carries the principal's permissions (`perms`) and its `kind`, for the gates.
+# On the hosted project the function must exist before this is pushed (`db push`, then `config push`).
+[auth.hook.custom_access_token]
+enabled = true
+uri = "pg-functions://postgres/public/noo_access_token_hook"
 
 # Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
 [auth.sms.twilio]

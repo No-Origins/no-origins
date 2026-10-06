@@ -220,7 +220,21 @@ buckets (`assets`, `publish`); Orbit's server asking for the owner; and gates th
    reads the published actions and no draft, a motion editor saves and publishes actions and never a look, an Orbit
    drafter saves a look and publishes none, a visitor sees the agents and no action. The sweep, signed in as him, loads
    Orbit's and the motion studio's drafts as before.
-3. **The token hook, and every gate asks for `<app>.open`**; Orbit's and Home's server checks become `can()`.
+3. **The token hook, and every gate asks for `<app>.open`**; Orbit's and Home's server checks become `can()`. **Built
+   2026-10-06** (`…_access_token.sql`, `supabase/config.toml`): `noo_access_token_hook` writes `perms` and `kind` into
+   every token and never refuses a sign-in (a failure gives a token with no permissions, every gate shut); the access
+   token lives ten minutes. `authGate` takes `permission` — the admin `admin.open`, the motion studio `motion.open`,
+   Home `home.open`; Orbit stays open — reads it from the token `getUser()` has just had verified, and asks
+   `noo_can()` live for a token from before the hook. A signed-in account without it is sent to the sign-in page, which
+   says it cannot open the app and offers a sign-out. Orbit's writes each ask their own permission instead of the
+   owner's role; Home asks `home.open`; `can()` in `@no-origins/auth/server` asks the database. **Proven on the local
+   stack**: a fresh token of his holds all sixteen and lives 600 s; a member's holds `motion.open`, is refused by the
+   admin with the no-access card and opens the motion studio; and **ending a person's sessions closes every gate on
+   their next request**, with their token still unexpired — so taking a role closes the gates at once (A6). Eight
+   database tests of the hook pass beside the sixty-two before. **On the hosted project the order is `db push`, then
+   `config push`**: a hook enabled before its function exists refuses every sign-in. **Due before step 5**: the motion
+   studio reads every action from its draft, so an account with only `motion.open` sees an empty studio; it must read
+   the published versions and save nothing, as Orbit does for a visitor (C24).
 4. **The admin's pages**: people, roles, invitations, audit. The allowlist's rows become invitations.
 5. **Only then does sign-up open** (the login host, Admin.md §8.4): the allowlist's refusal goes and the default role
    is given. Never before step 3, or a stranger's account would pass the old gates, which ask only for a session.

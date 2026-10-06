@@ -6,7 +6,7 @@ import { authGate } from "@no-origins/auth/proxy";
  * never opens without its keys — every route in it reads the database.
  */
 export function proxy(request: NextRequest) {
-  return authGate(request);
+  return authGate(request, { permission: "admin.open" });
 }
 
 export const config = {
