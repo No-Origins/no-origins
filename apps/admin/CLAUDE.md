@@ -33,13 +33,20 @@ rest of the platform is reviewed — a passing typecheck has never caught a visu
 Two things to know when you do:
 
 - The circular **N** at the bottom-left is Next's dev-tools button. Dev only; it is not a layout bug.
-- **There is no menu.** The IA is Admin.md §0.5, not §4: the home (`/`) is a grid of three feature cards (Design
-  System, Products, Settings) rendered with `GridPages`, and account controls live at `/settings`. **Quests are gone**
+- **There is no menu.** The IA is Admin.md §0.5, not §4: the home (`/`) is a grid of feature cards rendered with
+  `GridPages` — since 2026-10-06 People, Roles, Invitations and Audit on its first row (Access.md A7), each shown only
+  to whoever holds its page's permission, then Design System, Products and Settings — and account controls live at
+  `/settings`. The access pages (`/people`, `/roles`, `/roles/<id>`, `/invitations`, `/audit`) read through
+  `src/lib/access.ts` and change through `src/app/access/actions.ts`; each asks its permission, and the database's
+  rules and guards are the lock. They are version 1, in the Settings page's frame (`components/page-shell.tsx`). **Quests are gone**
   (Admin.md §0.7, 2026-09-23): `/quests`, the compose dashboard and the `quests` table, which
   `supabase/migrations/…_drop_quests.sql` drops. The old page-mode `Menu`/rail went with the 1.0 system; each route
   renders itself, and the grid *is* the shell.
 
 ## What is true here and easy to get wrong
+
+- **The gate asks for `admin.open`** (Access.md A6), not just a session: an account without it lands on the sign-in
+  page's no-access card. Only the Owner holds it until he gives it in a role.
 
 - **The server client uses the anon key, never the service role.** Every table is deny-by-default with no anon
   policy, so RLS decides what a page can see rather than the app remembering to filter. A service-role client

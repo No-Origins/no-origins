@@ -3,7 +3,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@no-origins/ui/components/card";
 import { Button } from "@no-origins/ui/components/button";
 import { Badge } from "@no-origins/ui/components/badge";
-import { currentProfile } from "@no-origins/auth/server";
+import { currentProfile, supabaseServer } from "@no-origins/auth/server";
 import { SetPassword } from "@/components/set-password";
 import { Passkeys } from "@/components/passkeys";
 
@@ -15,6 +15,14 @@ export const metadata = { title: "Settings" };
  */
 export default async function SettingsPage() {
   const profile = await currentProfile();
+  // Your roles (Access.md A2): read through your own row's rules, which show a principal what it holds.
+  const held = profile
+    ? await (await supabaseServer()).from("role_assignments").select("roles(name)").eq("principal_id", profile.id)
+    : { data: [] };
+  const roles = (held.data ?? []).flatMap((row) => {
+    const role = (row as { roles: { name: string } | { name: string }[] | null }).roles;
+    return Array.isArray(role) ? role.map((r) => r.name) : role ? [role.name] : [];
+  });
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 p-6">
@@ -34,7 +42,9 @@ export default async function SettingsPage() {
         <CardContent className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4 text-sm">
             <span className="text-muted-foreground">{profile?.email ?? "Unknown account"}</span>
-            {profile?.role ? <Badge variant="secondary">{profile.role}</Badge> : null}
+            <span className="flex flex-wrap justify-end gap-1">
+              {roles.map((name) => <Badge key={name} variant="secondary">{name}</Badge>)}
+            </span>
           </div>
           <form action="/auth/sign-out" method="post">
             <Button type="submit" variant="outline" className="w-full">

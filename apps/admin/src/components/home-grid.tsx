@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { PackageIcon, PaletteIcon, SettingsIcon } from "lucide-react";
+import { KeyRoundIcon, MailIcon, PackageIcon, PaletteIcon, ScrollTextIcon, SettingsIcon, UsersIcon } from "lucide-react";
 
 import { cn } from "@no-origins/ui/lib/utils";
 import { Badge } from "@no-origins/ui/components/badge";
@@ -23,6 +23,11 @@ type Feature = {
 };
 
 const FEATURES: Record<string, Feature> = {
+  // Who may do what (Access.md A7), each card shown only to whoever holds its page's permission.
+  people: { title: "People", blurb: "Everyone and every agent, and their roles.", href: "/people", icon: UsersIcon },
+  roles: { title: "Roles", blurb: "Sets of permissions, made here.", href: "/roles", icon: KeyRoundIcon },
+  invitations: { title: "Invitations", blurb: "An address and the roles it gets.", href: "/invitations", icon: MailIcon },
+  audit: { title: "Audit", blurb: "Every change to who may do what.", href: "/audit", icon: ScrollTextIcon },
   design: {
     title: "Design System",
     blurb: "Every component and token, live in both themes.",
@@ -45,8 +50,8 @@ const FEATURES: Record<string, Feature> = {
   },
 };
 
-// Authored on a 12 × 6 field at lg as three features in a row; every other field derives by packing (grid-layout.ts)
-// — since Grid.md D12 the counts are the box's, so that is most screens.
+// Authored on a 12 × 6 field at lg: who may do what on the first row (Access.md A7), the three features under it; every
+// other field derives by packing (grid-layout.ts) — since Grid.md D12 the counts are the box's, so that is most screens.
 const LAYOUT: GridLayout = {
   shapes: { lg: { cols: 12, rows: 6 } },
   authored: {
@@ -54,9 +59,13 @@ const LAYOUT: GridLayout = {
       {
         id: "home",
         items: [
-          { id: "design", label: "Design System", col: 1, row: 1, colSpan: 4, rowSpan: 3 },
-          { id: "products", label: "Products", col: 5, row: 1, colSpan: 4, rowSpan: 3 },
-          { id: "settings", label: "Settings", col: 9, row: 1, colSpan: 4, rowSpan: 3 },
+          { id: "people", label: "People", col: 1, row: 1, colSpan: 3, rowSpan: 3 },
+          { id: "roles", label: "Roles", col: 4, row: 1, colSpan: 3, rowSpan: 3 },
+          { id: "invitations", label: "Invitations", col: 7, row: 1, colSpan: 3, rowSpan: 3 },
+          { id: "audit", label: "Audit", col: 10, row: 1, colSpan: 3, rowSpan: 3 },
+          { id: "design", label: "Design System", col: 1, row: 4, colSpan: 4, rowSpan: 3 },
+          { id: "products", label: "Products", col: 5, row: 4, colSpan: 4, rowSpan: 3 },
+          { id: "settings", label: "Settings", col: 9, row: 4, colSpan: 4, rowSpan: 3 },
         ],
       },
     ],
@@ -104,10 +113,18 @@ function FeatureCard({ item }: { item: GridLayoutItem }) {
   );
 }
 
-export function HomeGrid() {
+/** The home. `hidden`: the cards whose page the signed-in person may not open (Access.md A7). */
+export function HomeGrid({ hidden = [] }: { hidden?: readonly string[] }) {
+  const layout = React.useMemo<GridLayout>(() => ({
+    ...LAYOUT,
+    authored: Object.fromEntries(Object.entries(LAYOUT.authored).map(([bp, pages]) => [
+      bp,
+      pages?.map((page) => ({ ...page, items: page.items.filter((item) => !hidden.includes(item.id)) })),
+    ])) as GridLayout["authored"],
+  }), [hidden]);
   return (
     <div className="h-dvh">
-      <GridPages layout={LAYOUT} overlay className="h-full" renderItem={(item) => <FeatureCard item={item} />} />
+      <GridPages layout={layout} overlay className="h-full" renderItem={(item) => <FeatureCard item={item} />} />
     </div>
   );
 }
