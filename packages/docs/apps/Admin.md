@@ -646,9 +646,15 @@ house is private (Home.md H4). So sign-up brings roles forward, from "later" to 
 login of its own: it sends you to `auth` like every other app.
 
 **Before anything is built, the roles** (his: *"Before implementing, I want to learn the architecture of roles and it's
-management. We might have to brainstorm on it."*): what a role is made of, where it is read, how it changes and who
-changes it, and what a member may do in the motion studio. The decisions from that land here; nothing is built until
-they have.
+management. We might have to brainstorm on it."*). His view, the same day: *"though we are allowing everyone to sign
+up, I also want to have roles and permissions for agents that I will create in the next project … have complete
+control over what applications they can access, what features they can access, what permissions do they have"*, and
+roles should be **dynamic**: *"I should be able to create roles in the admin dashboard and assign permissions."* His
+answers so far: a role is copied into the sign-in token for the gates to read; roles are managed from the admin, with
+invitations that carry a role; a member tries every control in the motion studio with nothing saved, as Orbit's
+visitors do; there is one owner, him; a member may delete their own account. Not yet decided: what a role is made of
+(his view points at permissions bundled into roles he creates), and whether there is an editor at all. The roles
+architecture is its own document, next; nothing is built until it is approved.
 
 ---
 
