@@ -210,7 +210,16 @@ buckets (`assets`, `publish`); Orbit's server asking for the owner; and gates th
    database tests (`supabase/tests/access_test.sql`, `npx supabase test db`) pass on the local stack; the hosted push
    is his.
 2. **The policies move from `noo_is` to `noo_can`**, table by table: the studio tables by kind (A6), `profiles` and the
-   allowlist to the `admin.*` permissions, the two 1.0 buckets to the owner alone until they have a use.
+   allowlist to the `admin.*` permissions, the two 1.0 buckets to the owner alone until they have a use. **Built
+   2026-10-06** (`…_access_policies.sql`): no rule asks for an old role any more. A studio item is read by whoever may
+   save its app's drafts, and an action also with `motion.open`; made with `orbit.agent.create` (a character),
+   `orbit.style.upload` (a drawing) or `motion.draft.save` (an action); changed, which is publishing or restoring, with
+   `<app>.version.publish` (and an upload for a drawing); deleted by the owner alone. Drafts need `<app>.draft.save`,
+   versions `<app>.version.publish`; a character's and drawing's published looks stay everyone's (Orbit.md C24). 23
+   database tests (`supabase/tests/access_policies_test.sql`) pass beside step 1's: the owner keeps everything, a member
+   reads the published actions and no draft, a motion editor saves and publishes actions and never a look, an Orbit
+   drafter saves a look and publishes none, a visitor sees the agents and no action. The sweep, signed in as him, loads
+   Orbit's and the motion studio's drafts as before.
 3. **The token hook, and every gate asks for `<app>.open`**; Orbit's and Home's server checks become `can()`.
 4. **The admin's pages**: people, roles, invitations, audit. The allowlist's rows become invitations.
 5. **Only then does sign-up open** (the login host, Admin.md §8.4): the allowlist's refusal goes and the default role
