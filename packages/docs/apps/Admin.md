@@ -581,6 +581,50 @@ OAuth is still absent by choice — a third-party identity provider is another m
 - **An open app** (2026-10-03, Orbit.md C24, his: *"make controls in Orbit public, and only when I log in as an admin I should be able to publish, so that users can experiment and play around"*): `authGate`'s `open` makes every path everyone's — the gate refreshes the session and sends nobody to the sign-in; the page asks who is signed in, and RLS decides what they may write. Orbit runs with it: a visitor plays with the agents as published, the owner publishes. Without keys an open app opens everywhere, there being nothing a sign-in guards.
 - **Roles are later** (his). `profiles.role` and `noo_is()` are there for them — and Orbit reads the first since 2026-10-03: its draft, its publish and its uploads are the owner's (Orbit.md C24).
 
+**One door for every app: `auth.no-origins.com` (proposed 2026-10-06).** His: *"What if we have one subdomain uh, for
+just logging in? Like something like auth.noorigins.com and uh, once we log in, into it, we should be able to access
+every other subdomain that needs login."* Then, on the assessment: *"okay. Proceed"* — to this section, not to code.
+
+Half of it stands already: one session for every app since 2026-09-30, the cookie written for `.no-origins.com`. What
+does not is one login page. Every gated app carries its own `/sign-in`, its own `/auth/callback` and its own entry in
+Supabase's redirect list, and every one of them ships the two `NEXT_PUBLIC_SUPABASE_*` values to the browser because
+its sign-in card runs there. So:
+
+- **The login is an app.** `apps/auth` on `auth.no-origins.com`, port 3008, a Vercel project `auth` made by the root
+  CLAUDE.md's recipe. It owns everything a person does with their account: `/sign-in` (the login card, the three doors
+  above), `/auth/callback` (both flows, the GET that carries a token hash and the POST that spends it),
+  `/auth/sign-out`, and **the account's settings** — setting a password and registering a passkey, which leave the
+  admin. Arriving with nowhere to return to, it shows the apps you may open.
+- **Every other gated app keeps only its gate.** The admin, the motion studio and Home keep `proxy.ts` and the server's
+  own check (Home's `signedIn()`); their `/sign-in` pages and `/auth` routes go. The gate sends a request with no session
+  to `https://auth.no-origins.com/sign-in?next=<the address it asked for>`. Orbit, an open app, sends nobody; its
+  "Sign in" goes there too. A sign-out anywhere is the auth app's.
+- **The return address is the one dangerous part.** Today `next` may only be a path on the same site (`safeNext`), on
+  purpose: a login that sends you anywhere hands the session to whatever page it sends you to. `next` becomes a full
+  address, accepted only if it is `https:`, carries no user or password, and its host is exactly one of a list — the
+  gated apps' hosts and the auth app's — kept once, in the package. Anything else lands on the auth app's own page.
+  Locally the list is the apps' `http://localhost` ports. Both ends read the same function, as both read `safeNext`
+  today: the callback, and the card that navigates after a password or a passkey.
+- **Supabase knows one address.** `site_url` becomes `https://auth.no-origins.com`; the redirect list holds the auth
+  app's callback and nothing else, so a new gated app needs no `config push`. Passkeys stay bound to `no-origins.com`
+  (`rp_id`), and the origins allowed to use them shrink to the auth app's, since a passkey is only ever used on its
+  page. The magic-link template's address follows `site_url`.
+- **The gated apps' browsers hold no Supabase values.** Their gates still need the URL and the anon key, on the
+  server, under names without the public prefix (`SUPABASE_URL`, `SUPABASE_ANON_KEY`); `supabaseEnv()` reads those
+  first and the public names after, for the move. Only the auth app ships them to a browser. The anon key is public by
+  design (RLS decides what it may do, §8.3), so this is tidiness, not a fix: each app exposes what it uses and no more.
+
+**The order, each step leaving sign-in working.** (1) Build `apps/auth` from the package's screens and the new return
+address; deploy it; add its callback and origin to Supabase beside the old ones. (2) Point the gates at it one app at a
+time, Home first; each app's `/sign-in` stays a redirect to the auth app for a while, for bookmarks and for magic links
+already in an inbox. (3) Move the password and passkey settings out of the admin. (4) Check on his own devices that his
+passkey signs in on the auth app, then switch `site_url`, and only then take the old callbacks and origins out of
+Supabase. (5) Move the gated apps to the server-only names and drop the public ones from their projects.
+
+**What is his.** The name — `auth`, or `id`, `login`, `account`. What the auth app shows when there is nowhere to
+return to: the apps you may open, or straight to the admin. Whether the admin keeps any login of its own: this proposal
+says none. Nothing is built until he approves it.
+
 ---
 
 ## 9. Publishing
