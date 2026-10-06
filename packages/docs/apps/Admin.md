@@ -642,8 +642,13 @@ house is private (Home.md H4). So sign-up brings roles forward, from "later" to 
   limits and a challenge on the form (Cloudflare Turnstile, which Supabase supports) guard it, and every sign-up is a
   mail through Resend, whose free tier caps how many go out.
 
-**Still to answer before anything is built:** which apps a `member` may open (the motion studio?); whether sign-up is
-open to anyone or a request he approves; and (3). Nothing is built until he approves this section.
+**His answers, the same day.** A `member` may open the motion studio. Sign-up is open to everyone. The admin keeps no
+login of its own: it sends you to `auth` like every other app.
+
+**Before anything is built, the roles** (his: *"Before implementing, I want to learn the architecture of roles and it's
+management. We might have to brainstorm on it."*): what a role is made of, where it is read, how it changes and who
+changes it, and what a member may do in the motion studio. The decisions from that land here; nothing is built until
+they have.
 
 ---
 
