@@ -654,7 +654,7 @@ answers so far: a role is copied into the sign-in token for the gates to read; r
 invitations that carry a role; a member tries every control in the motion studio with nothing saved, as Orbit's
 visitors do; there is one owner, him; a member may delete their own account. Not yet decided: what a role is made of
 (his view points at permissions bundled into roles he creates), and whether there is an editor at all. The roles
-architecture is its own document, next; nothing is built until it is approved.
+architecture is **Access.md** (proposed 2026-10-06, with his answers); nothing is built until it is approved.
 
 ---
 
