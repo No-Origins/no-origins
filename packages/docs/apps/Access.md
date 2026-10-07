@@ -136,9 +136,10 @@ Three places, as today (Admin.md §8.3), each closer to the data:
 - **The admin needs a second factor** (his, 2026-10-06: agreed). An `admin.*` permission counts only in a session that has passed a
   second factor — Supabase's assurance level `aal2`, which the database rules can read from the token. The authenticator
   app (TOTP) is already switched on for the hosted project; a passkey as the second factor follows when Supabase offers
-  it. A stolen password or a forwarded magic link then never reaches the admin.
+  it. A stolen password or a forwarded magic link then never reaches the admin. How it works and the order it is built
+  in: A12.
 - **The gravest actions ask again** (his, 2026-10-06: agreed). Making a role with admin powers, removing an account and rotating an
-  agent's credential need the second factor within the last five minutes, so a session left open is not enough.
+  agent's credential need the second factor within the last five minutes, so a session left open is not enough (A12).
 - **The studio tables serve two apps.** A row's `kind` says whose it is: `character` and `drawing` are Orbit's
   (`orbit.*`), `action` the motion studio's (`motion.*`).
 
@@ -273,13 +274,88 @@ buckets (`assets`, `publish`); Orbit's server asking for the owner; and gates th
    role's page loads that role alone: the admin home makes one call to the database where it made five, People five
    where nine, Roles and a role four where seven.
    **Due before step 5, beside the motion studio's read path (step 3)**: the admin's second factor and asking again
-   before the gravest actions (A6, his, agreed), not built yet.
+   before the gravest actions (A6, his, agreed), not built yet; proposed in A12, 2026-10-08.
 5. **Only then does sign-up open** (the login host, Admin.md §8.4): the allowlist's refusal goes and the default role
    is given. Never before step 3, or a stranger's account would pass the old gates, which ask only for a session.
 6. **Agents**: their accounts, their credentials in the harness, delegations.
 7. **The old goes**: `noo_role`, `profiles.role`, `noo_is`, the allowlist — once nothing reads them.
 
 Each step is a migration and a pull request; each hosted push is his.
+
+## A12. The admin's second factor
+
+*Proposed 2026-10-08; **his answers the same day, every one as proposed** ("Let's go with your suggestion", then
+"Yes" to each). What it rests on is his (A6, 2026-10-06: agreed); this is how it works and the order it is built in.*
+
+An `admin.*` permission counts only in a session that has passed a second factor: Supabase's assurance level `aal2`,
+carried in the token as `aal`. Every other permission is unchanged — the motion studio, Home and Orbit open on one
+factor, as today.
+
+- **Once a sign-in, not once a page.** A sign-in — magic link, password or passkey — gives `aal1`. Opening the admin
+  then asks for the six-digit code from an authenticator app, and the session is `aal2` from then on, through every
+  ten-minute refresh and in every app (the session is one, Admin.md §8.4), until it ends. A new sign-in — another
+  device, a sign-out, a role taken — asks again.
+- **Enrolling.** On the first visit with no factor, the admin shows the authenticator's QR code and asks for a code to
+  prove it took; the session is `aal2` there and then. After that, adding or removing a factor needs `aal2` (Supabase's
+  rule, to confirm while building), so a stolen magic link cannot add its own authenticator once he has one. **Until
+  he has enrolled, it could** — so he enrolls the day the screens ship, before the requirement is switched on (the
+  order, below).
+- **Asking again.** The gravest actions need the code entered within the last five minutes, read from the token's
+  record of when it was (`amr`), so a session left open is not enough: (1) ticking an `admin.*` permission into a
+  role, (2) giving someone a role that holds one, (3) removing an account, (4) rotating an agent's credential (step
+  6). A6 named three; (2) is the power of (1) given another way, so it is added (his, 2026-10-08). The database
+  refuses with a sentence the page knows; the page asks for the code and saves again, the draft kept.
+- **Where it is checked**, as every permission is (A6). The gate reads `aal` beside `perms` from the token `getUser()`
+  has verified: an `admin.*` permission without `aal2` is not held, and a session at `aal1` is sent to the code step,
+  not to the no-access card. `shown()` applies the same rule, so no admin button shows on one factor. `noo_can()`
+  checks `aal` for `admin.*`, so every rule and function the admin calls refuses on one factor whatever a page does.
+  The asking again is a database helper (`noo_second_factor_within(interval)`) that the functions behind the four
+  actions call.
+- **Agents.** An agent signs in as a person does (A5) but has no phone to read a code from, and a code the harness
+  computed from a stored secret would only be a second password. **The admin is people's** (his, 2026-10-08) — a role holding
+  an `admin.*` permission is never given to an agent, a guard in the database like the Owner's. Agents act through the
+  other apps' permissions and delegations (step 6).
+- **The screens are the package's.** The code step and enrolling are `@no-origins/auth` screens on the sign-in page's
+  grid, so they move to `auth.no-origins.com` with the sign-in (Admin.md §8.4) unchanged. The admin's Settings lists
+  the factors beside the passkeys, to add a second or remove one.
+
+**If the phone is lost.** He is the only Owner, so a lost authenticator locks him out of the admin — never out of the
+database. Three ways back, not exclusive:
+
+- **A second authenticator** enrolled beside the phone: a password manager that keeps codes (iCloud Passwords,
+  1Password). Supabase allows ten factors.
+- **Recovery codes**, Supabase's own and experimental: ten single-use codes shown once, each a way to `aal2`, kept in
+  the password manager. They need the hosted Auth server to offer them — checked while building; if it does not, this
+  way is not there yet.
+- **The break-glass, always there.** As the project's owner, from the Supabase CLI: delete his factors
+  (`delete from auth.mfa_factors where user_id = …`, through `npx supabase db query --linked`), sign in, enroll again.
+  The CLI's own login is the root all of this rests on; it is written here so it is found when it is needed.
+
+**His, 2026-10-08: the second authenticator and the break-glass, and recovery codes too if the server has them.**
+
+**A passkey.** A passkey sign-in is already two things — the device and its unlock (Face ID, Touch ID) — and a phishing
+page cannot replay it, which it can a six-digit code. Whether it counts as the second factor by itself, so a passkey
+sign-in opens the admin with no code, depends on what Supabase writes in the token for it (`amr`), checked while
+building. **His, 2026-10-08: yes** — if the token tells it apart from the other ways in; else the code after it, as after a magic
+link. Supabase now also offers a passkey as a second factor proper (`[auth.mfa.web_authn]`), A6's "when Supabase
+offers it" — a later option, not needed for this.
+
+**The order, each step leaving him able to sign in:**
+
+1. Locally, TOTP switched on in `supabase/config.toml` (the hosted project has it already); the package's enrolling and
+   code screens; the factors in Settings. Nothing required yet. A pull request.
+2. **He enrolls on production** — the phone and the second authenticator — and keeps the recovery codes, if any.
+3. The requirement: `noo_can()`, the gate and `shown()` ask for `aal2` on `admin.*`; the code step after sign-in. A
+   migration and a pull request; the hosted push his, **after step 2, never before**.
+4. Asking again on the four actions, and the agents' guard. A migration and a pull request.
+
+Database tests for each: one factor reads and changes nothing in the admin's tables and two factors do; a code older
+than five minutes is asked again; an agent is never given an `admin.*` role. The admin's local helper scripts enroll a
+factor for the test account and compute its codes.
+
+**His answers, 2026-10-08.** (1) The ways back: the second authenticator and the break-glass, and recovery codes if
+the server offers them. (2) Giving a role with an `admin.*` permission asks again. (3) A passkey sign-in counts as both
+factors, if the token tells it apart. (4) The admin is people's: no agent holds an `admin.*` permission.
 
 ## Open
 
@@ -288,3 +364,7 @@ Each step is a migration and a pull request; each hosted push is his.
   Member starts with the motion studio, and Home waits for a role he makes (A4).
 - **To prove while building**: that a revoked session closes the gate before its access token runs out (A11 step 3);
   how an agent's request names its delegation to the database (step 6).
+- **Settled, his, 2026-10-08 (A12)**: the ways back if the phone is lost (a second authenticator, the break-glass,
+  recovery codes if offered); giving a role with an `admin.*` permission asks again; a passkey sign-in counts as both
+  factors; the admin is people's. To check while building: that Supabase asks for `aal2` to add a factor once one
+  exists, whether the hosted server offers recovery codes, and what a passkey sign-in writes in `amr`.
