@@ -38,10 +38,34 @@ Two things to know when you do:
   to whoever holds its page's permission, then Design System, Products and Settings — and account controls live at
   `/settings`. The access pages (`/people`, `/roles`, `/roles/<id>`, `/invitations`, `/audit`) read through
   `src/lib/access.ts` and change through `src/app/access/actions.ts`; each asks its permission, and the database's
-  rules and guards are the lock. They are version 1, in the Settings page's frame (`components/page-shell.tsx`). **Quests are gone**
+  rules and guards are the lock. They are version 1, on the grid since 2026-10-07 (below). **Quests are gone**
   (Admin.md §0.7, 2026-09-23): `/quests`, the compose dashboard and the `quests` table, which
   `supabase/migrations/…_drop_quests.sql` drops. The old page-mode `Menu`/rail went with the 1.0 system; each route
   renders itself, and the grid *is* the shell.
+
+## Every page is on the grid
+
+**No route renders a page that scrolls, a centred column, or any frame of its own — the grid is the base layout of
+every app, this one included** (his, 2026-10-07, when the access pages and Settings were found off it: "I really made
+it very clear from the beginning that the grid is the base layout for the whole application"). A "version 1" or a
+screen "his to design" is still on the grid; what is his to design is what sits on it.
+
+- **The home** is `GridPages` with a layout written in code (`components/home-grid.tsx`).
+- **Every other route** is `AdminPages` (`components/admin-pages.tsx`): a way back in the first cell (a circle), the
+  page's name and its line beside it, then the page's boxes — each an `AdminItem` with a span per breakpoint and a
+  render function — packed on the field the page is on by `lib/arrange.ts`, the showcase's packer for lists. The way
+  back, the name and a list's column names are `repeat`: on every page a long list spills onto. A route's server
+  page checks its permissions and loads its data, then hands plain data to a client view (`components/people.tsx`,
+  `roles.tsx`, `invitations.tsx`, `audit.tsx`, `settings.tsx`) that builds the items. `NoAccessPage` and
+  `app/not-found.tsx` are on it too; the sign-in screen is `@no-origins/auth`'s, on its own grid.
+- **A record is a box.** A person, a role, a permission, an invitation, an event, a passkey: one `RecordBox` each, a
+  pill one cell tall from eight columns up (its parts in columns by a container-query template its `ColumnNames`
+  shares), stacked and taller on six. Spans come from `band(rows, narrow, phone)` and `wideOnly()`. Nothing in a box
+  scrolls; a box that clips is a span that is too small.
+- **A refused change shows under the page's name** (`useChange` in `components/outcome.tsx`), which grows a row.
+- `node e2e/.mcp/admin-grid-look.mjs <outdir>` (gitignored) signs in through Mailpit and shoots every route at five
+  sizes, turning each through its pages, and prints any route off the grid, any page that scrolls and any box whose
+  content is cut. `admin-grid-interact.mjs` drives a refusal, a role's permissions and an invitation made and revoked.
 
 ## What is true here and easy to get wrong
 

@@ -1,13 +1,16 @@
 "use client";
 import { useState } from "react";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@no-origins/ui/components/field";
-import { Input } from "@no-origins/ui/components/input";
 import { Button } from "@no-origins/ui/components/button";
-import { Alert, AlertDescription, AlertTitle } from "@no-origins/ui/components/alert";
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@no-origins/ui/components/input-group";
+import { Text } from "@no-origins/ui/components/text";
 import { supabaseBrowser } from "@no-origins/auth/client";
 
+import { RecordBox } from "@/components/admin-pages";
+
+const COLS = "@min-[600px]:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto]";
+
 /**
- * Set (or change) the account password, while signed in.
+ * Set (or change) the account password, while signed in — a record on the Settings page's field.
  *
  * This is the only place a password is ever created. The membership path is the magic link — you get in with a
  * link first, then set a password here if you want the faster door next time. `updateUser` runs against the
@@ -37,37 +40,34 @@ export function SetPassword() {
     setState("saved");
   }
 
+  const note = error
+    ? `Could not save: ${error}`
+    : state === "saved"
+      ? "Set. You can now sign in with your email and password."
+      : "Optional: a faster door than the magic link. Eight characters or more.";
+
   return (
-    <form onSubmit={save}>
-      <FieldGroup>
-        {error ? (
-          <Alert variant="destructive">
-            <AlertTitle>Could not save</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
-        {state === "saved" ? (
-          <Alert>
-            <AlertTitle>Password set</AlertTitle>
-            <AlertDescription>You can now sign in with your email and password.</AlertDescription>
-          </Alert>
-        ) : null}
-        <Field>
-          <FieldLabel htmlFor="new-password">New password</FieldLabel>
-          <Input
-            id="new-password"
+    <form onSubmit={save} className="size-full">
+      <RecordBox className={COLS}>
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <Text role="body" as="span">Password</Text>
+          <Text role="caption" as="span" tone={error ? "foreground" : "muted"} className="line-clamp-2" aria-live="polite">{note}</Text>
+        </div>
+        <InputGroup>
+          <InputGroupAddon><InputGroupText>New</InputGroupText></InputGroupAddon>
+          <InputGroupInput
+            aria-label="New password"
             type="password"
             name="new-password"
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.currentTarget.value)}
           />
-          <FieldDescription>At least eight characters.</FieldDescription>
-        </Field>
+        </InputGroup>
         <Button type="submit" disabled={state === "saving"}>
           {state === "saving" ? "Saving…" : "Set password"}
         </Button>
-      </FieldGroup>
+      </RecordBox>
     </form>
   );
 }
