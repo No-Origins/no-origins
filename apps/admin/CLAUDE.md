@@ -85,5 +85,8 @@ screen "his to design" is still on the grid; what is his to design is what sits 
   draft until Save, which sends the whole set in one transaction — `noo_save_role` (name, sentence, permissions) and
   `noo_set_roles` (a person's roles). The role page asks before it is left with changes not saved. Do not bring back a
   write per tick.
+- **Authenticator apps are the package's** (Access.md A12, step 1, 2026-10-08): Settings shows them through
+  `@no-origins/auth/second-factor` (`useSecondFactor`, `AddAuthenticatorDialog`, `CodeDialog`), so they move to the auth
+  app unchanged. Nothing asks for the code yet; step 3 makes `admin.*` need `aal2` or a passkey sign-in.
 - **The sign-in page says the same thing whatever happens.** The allowlist is the membership rule, so a page
   that distinguished "not on the list" from "link sent" would be a membership oracle for anyone with the URL.

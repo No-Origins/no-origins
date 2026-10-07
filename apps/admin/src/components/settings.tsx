@@ -5,8 +5,10 @@ import * as React from "react";
 import { Badge } from "@no-origins/ui/components/badge";
 import { Button } from "@no-origins/ui/components/button";
 import { Text } from "@no-origins/ui/components/text";
+import { useSecondFactor } from "@no-origins/auth/second-factor";
 
 import { AdminPages, band, NoteBox, RecordBox, type AdminItem } from "@/components/admin-pages";
+import { AuthenticatorRecord, AuthenticatorsHead } from "@/components/authenticators";
 import { PasskeyRecord, usePasskeys } from "@/components/passkeys";
 import { SetPassword } from "@/components/set-password";
 
@@ -16,11 +18,12 @@ const HEAD_COLS = "@min-[600px]:grid-cols-[minmax(0,1fr)_auto]";
 
 /**
  * Settings (Admin.md §0.5) — the account controls that used to be the whole signed-in landing, on the field: who you
- * are and the way out, your password, then your passkeys, a record each. The self rights of Access.md A2: no
- * permission is asked for any of it.
+ * are and the way out, your password, then your passkeys and your authenticator apps (Access.md A12), a record each.
+ * The self rights of Access.md A2: no permission is asked for any of it.
  */
 export function SettingsView({ email, roles }: { email: string; roles: string[] }) {
   const { status, passkeys, busy, error, register, remove } = usePasskeys();
+  const secondFactor = useSecondFactor();
 
   const items = React.useMemo<AdminItem[]>(() => {
     const out: AdminItem[] = [
@@ -80,8 +83,27 @@ export function SettingsView({ email, roles }: { email: string; roles: string[] 
     } else {
       for (const pk of passkeys) out.push({ id: `passkey-${pk.id}`, span: band(1), render: () => <PasskeyRecord passkey={pk} busy={busy} onRemove={() => void remove(pk.id)} /> });
     }
+    // The second factor (Access.md A12): its heading, then an authenticator a record.
+    out.push({ id: "authenticators", span: band(1, 2, 3), render: () => <AuthenticatorsHead secondFactor={secondFactor} /> });
+    if (secondFactor.status === "unavailable") {
+      out.push({
+        id: "authenticators-off",
+        span: band(1, 2, 3),
+        render: () => (
+          <NoteBox title="Authenticator apps are not available">
+            The server has them off: enable [auth.mfa.totp] in supabase/config.toml (or the hosted dashboard) and restart.
+          </NoteBox>
+        ),
+      });
+    } else if (secondFactor.status === "ready" && !secondFactor.authenticators.length) {
+      out.push({ id: "authenticators-none", span: band(1, 1, 2), render: () => <NoteBox>No authenticator yet. Add your phone first, then a password manager.</NoteBox> });
+    } else {
+      for (const a of secondFactor.authenticators) {
+        out.push({ id: `authenticator-${a.id}`, span: band(1), render: () => <AuthenticatorRecord authenticator={a} secondFactor={secondFactor} /> });
+      }
+    }
     return out;
-  }, [email, roles, status, passkeys, busy, error, register, remove]);
+  }, [email, roles, status, passkeys, busy, error, register, remove, secondFactor]);
 
-  return <AdminPages title="Settings" line="Your account, your password and your passkeys." items={items} />;
+  return <AdminPages title="Settings" line="Your account, your password, your passkeys and your authenticator apps." items={items} />;
 }

@@ -88,7 +88,7 @@ export function usePasskeys(): Passkeys {
 /** One passkey, a record on the field. */
 export function PasskeyRecord({ passkey, busy, onRemove }: { passkey: Passkey; busy: boolean; onRemove: () => void }) {
   return (
-    <RecordBox className="flex-row items-center justify-between py-0">
+    <RecordBox className="flex-row items-center justify-between @min-[600px]:grid-cols-[minmax(0,1fr)_auto]">
       <div className="flex min-w-0 items-center gap-3">
         <KeyRound className="text-muted-foreground size-4 shrink-0" />
         <div className="flex min-w-0 flex-col gap-0.5">
