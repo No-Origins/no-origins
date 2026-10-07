@@ -1,8 +1,7 @@
-import { Card, CardContent } from "@no-origins/ui/components/card";
-
-import { NoAccess, PageShell, when } from "@/components/page-shell";
-import { PeopleTable } from "@/components/people-table";
+import { NoAccessPage } from "@/components/admin-pages";
+import { PeopleView } from "@/components/people";
 import { loadPeople, loadRoles, mayAll, myId } from "@/lib/access";
+import { when } from "@/lib/when";
 
 export const metadata = { title: "People" };
 
@@ -10,22 +9,16 @@ export const metadata = { title: "People" };
 export default async function PeoplePage() {
   const may = await mayAll(["admin.people.view", "admin.people.assign", "admin.people.remove"] as const);
   if (!may["admin.people.view"]) {
-    return <PageShell title="People" line="Everyone and every agent, and their roles."><NoAccess permission="admin.people.view" /></PageShell>;
+    return <NoAccessPage title="People" line="Everyone and every agent, and their roles." permission="admin.people.view" />;
   }
   const [people, roles, me] = await Promise.all([loadPeople(), loadRoles(), myId()]);
   return (
-    <PageShell title="People" line="Everyone and every agent, and their roles. Taking a role signs the person out at once.">
-      <Card>
-        <CardContent>
-          <PeopleTable
-            people={people.map((p) => ({ ...p, joined: when(p.joinedAt), lastSignIn: when(p.lastSignInAt) }))}
-            roles={roles.filter((r) => r.builtIn !== "owner").map((r) => ({ id: r.id, name: r.name }))}
-            me={me}
-            mayAssign={may["admin.people.assign"]}
-            mayRemove={may["admin.people.remove"]}
-          />
-        </CardContent>
-      </Card>
-    </PageShell>
+    <PeopleView
+      people={people.map((p) => ({ ...p, joined: when(p.joinedAt), lastSignIn: when(p.lastSignInAt) }))}
+      roles={roles.filter((r) => r.builtIn !== "owner").map((r) => ({ id: r.id, name: r.name }))}
+      me={me}
+      mayAssign={may["admin.people.assign"]}
+      mayRemove={may["admin.people.remove"]}
+    />
   );
 }

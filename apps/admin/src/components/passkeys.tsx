@@ -1,36 +1,45 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@no-origins/ui/components/button";
-import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@no-origins/ui/components/item";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@no-origins/ui/components/empty";
-import { Alert, AlertDescription, AlertTitle } from "@no-origins/ui/components/alert";
-import { Spinner } from "@no-origins/ui/components/spinner";
 import { KeyRound, Trash2 } from "lucide-react";
+import { Button } from "@no-origins/ui/components/button";
+import { Text } from "@no-origins/ui/components/text";
 import { supabaseBrowser } from "@no-origins/auth/client";
 import { useWebAuthn } from "@no-origins/auth/webauthn";
 
-type Passkey = { id: string; friendly_name?: string; created_at: string; last_used_at?: string };
+import { RecordBox } from "@/components/admin-pages";
+
+export type Passkey = { id: string; friendly_name?: string; created_at: string; last_used_at?: string };
 
 /** The passkeys on this account, or `null` when the list call fails. */
 async function listPasskeys(): Promise<Passkey[] | null> {
   const { data, error } = await supabaseBrowser().auth.passkey.list();
-  // A 404/feature-off reads as "not enabled on the server"; anything else is a real error.
   if (error) return null;
   return data ?? [];
 }
 
+export type Passkeys = {
+  /** `checking` until the list is in; `unsupported` when the browser has no authenticator or the server has passkeys off. */
+  status: "checking" | "unsupported" | "ready";
+  passkeys: Passkey[];
+  busy: boolean;
+  error: string | null;
+  register: () => Promise<void>;
+  remove: (passkeyId: string) => Promise<void>;
+};
+
 /**
- * Passkey enrollment (Admin.md §8.4 — the third door).
+ * Passkey enrollment (Admin.md §8.4 — the third door), as state the Settings page lays out on the field: a record for
+ * each passkey (settings.tsx).
  *
  * You register a passkey *here*, while signed in — the session is the proof it belongs to you, so there is no
  * address to type and no oracle to leak. Once one exists, the login card's "Sign in with a passkey" button uses
  * it for a one-tap, phishing-resistant sign-in with no email round-trip.
  *
  * All of this is Supabase's experimental passkey API and needs the server to have passkeys enabled (`config.toml`
- * locally, the dashboard on the hosted project). If it is off, `list()` errors and this card explains what to do
+ * locally, the dashboard on the hosted project). If it is off, `list()` errors and the page says what to do
  * rather than showing a broken button.
  */
-export function Passkeys() {
+export function usePasskeys(): Passkeys {
   const webauthn = useWebAuthn();
   const [passkeys, setPasskeys] = useState<Passkey[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -48,102 +57,48 @@ export function Passkeys() {
     if (webauthn) void listPasskeys().then(show);
   }, [webauthn, show]);
 
-  async function register() {
+  const register = useCallback(async () => {
     setBusy(true);
     setError(null);
-    const supabase = supabaseBrowser();
-    const { error } = await supabase.auth.registerPasskey();
+    const { error } = await supabaseBrowser().auth.registerPasskey();
     setBusy(false);
     if (error) {
-      // A user who dismisses the OS prompt is not an error worth shouting about.
       if (!/cancel|abort|NotAllowed/i.test(error.message)) setError(error.message);
       return;
     }
     await load();
-  }
+  }, [load]);
 
-  async function remove(passkeyId: string) {
+  const remove = useCallback(async (passkeyId: string) => {
     setBusy(true);
     setError(null);
-    const supabase = supabaseBrowser();
-    const { error } = await supabase.auth.passkey.delete({ passkeyId });
+    const { error } = await supabaseBrowser().auth.passkey.delete({ passkeyId });
     setBusy(false);
     if (error) {
       setError(error.message);
       return;
     }
     await load();
-  }
+  }, [load]);
 
-  if (unsupported || webauthn === false) {
-    return (
-      <Alert>
-        <KeyRound />
-        <AlertTitle>Passkeys are not available</AlertTitle>
-        <AlertDescription>
-          Either this browser has no authenticator, or passkeys are turned off on the server. Enable
-          <code className="mx-1">[auth.passkey]</code> in <code>supabase/config.toml</code> (or the hosted
-          dashboard) and restart.
-        </AlertDescription>
-      </Alert>
-    );
-  }
+  const status = unsupported || webauthn === false ? "unsupported" : passkeys === null ? "checking" : "ready";
+  return { status, passkeys: passkeys ?? [], busy, error, register, remove };
+}
 
-  if (passkeys === null) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Spinner /> Checking for passkeys…
-      </div>
-    );
-  }
-
+/** One passkey, a record on the field. */
+export function PasskeyRecord({ passkey, busy, onRemove }: { passkey: Passkey; busy: boolean; onRemove: () => void }) {
   return (
-    <div className="flex flex-col gap-4">
-      {error ? (
-        <Alert variant="destructive">
-          <AlertTitle>Something went wrong</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
-
-      {passkeys.length === 0 ? (
-        <Empty className="border border-dashed">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <KeyRound />
-            </EmptyMedia>
-            <EmptyTitle>No passkeys yet</EmptyTitle>
-            <EmptyDescription>Register one and sign in with a tap next time — no email round-trip.</EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {passkeys.map((pk) => (
-            <Item key={pk.id} variant="outline" size="sm">
-              <ItemMedia variant="icon">
-                <KeyRound />
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle>{pk.friendly_name || "Passkey"}</ItemTitle>
-                <ItemDescription>Added {new Date(pk.created_at).toLocaleDateString()}</ItemDescription>
-              </ItemContent>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Remove passkey"
-                disabled={busy}
-                onClick={() => remove(pk.id)}
-              >
-                <Trash2 />
-              </Button>
-            </Item>
-          ))}
+    <RecordBox className="flex-row items-center justify-between py-0">
+      <div className="flex min-w-0 items-center gap-3">
+        <KeyRound className="text-muted-foreground size-4 shrink-0" />
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <Text role="body" as="span" className="truncate">{passkey.friendly_name || "Passkey"}</Text>
+          <Text role="caption" as="span" className="truncate">Added {new Date(passkey.created_at).toLocaleDateString()}</Text>
         </div>
-      )}
-
-      <Button variant="outline" onClick={register} disabled={busy}>
-        {busy ? "Waiting for your device…" : "Register a passkey"}
+      </div>
+      <Button variant="ghost" size="icon-sm" aria-label="Remove passkey" disabled={busy} onClick={onRemove}>
+        <Trash2 />
       </Button>
-    </div>
+    </RecordBox>
   );
 }

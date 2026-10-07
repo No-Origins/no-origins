@@ -248,7 +248,9 @@ buckets (`assets`, `publish`); Orbit's server asking for the owner; and gates th
    invitation now admits an address the allowlist does not hold, so until step 5 the Invitations page is the way in.
    Seventeen database tests pass beside the sixty-two before; through the pages, signed in as him, a role was made, a
    permission ticked, the role deleted, an address invited and revoked, each on the audit log, no console error.
-   The pages are version 1, the Settings page's frame, and the screens are his to design.
+   The pages were built in the Settings page's frame, a column that scrolled, off the grid; **on 2026-10-07 they were
+   put on the grid** (his: "I really made it very clear from the beginning that the grid is the base layout for the
+   whole application"), with Settings, a record a box. Version 1; the screens are his to design.
    **Due before step 5, beside the motion studio's read path (step 3)**: the admin's second factor and asking again
    before the gravest actions (A6, his, agreed), not built yet.
 5. **Only then does sign-up open** (the login host, Admin.md §8.4): the allowlist's refusal goes and the default role
