@@ -284,8 +284,8 @@ Each step is a migration and a pull request; each hosted push is his.
 
 ## A12. The admin's second factor
 
-*Proposed 2026-10-08, for approval. What it rests on is his (A6, 2026-10-06: agreed); this is how it works, the order it
-is built in, and three things for him to decide (at the end).*
+*Proposed 2026-10-08; **his answers the same day, every one as proposed** ("Let's go with your suggestion", then
+"Yes" to each). What it rests on is his (A6, 2026-10-06: agreed); this is how it works and the order it is built in.*
 
 An `admin.*` permission counts only in a session that has passed a second factor: Supabase's assurance level `aal2`,
 carried in the token as `aal`. Every other permission is unchanged — the motion studio, Home and Orbit open on one
@@ -303,7 +303,7 @@ factor, as today.
 - **Asking again.** The gravest actions need the code entered within the last five minutes, read from the token's
   record of when it was (`amr`), so a session left open is not enough: (1) ticking an `admin.*` permission into a
   role, (2) giving someone a role that holds one, (3) removing an account, (4) rotating an agent's credential (step
-  6). A6 named three; (2) is the power of (1) given another way, so it is added — his to confirm. The database
+  6). A6 named three; (2) is the power of (1) given another way, so it is added (his, 2026-10-08). The database
   refuses with a sentence the page knows; the page asks for the code and saves again, the draft kept.
 - **Where it is checked**, as every permission is (A6). The gate reads `aal` beside `perms` from the token `getUser()`
   has verified: an `admin.*` permission without `aal2` is not held, and a session at `aal1` is sent to the code step,
@@ -312,7 +312,7 @@ factor, as today.
   The asking again is a database helper (`noo_second_factor_within(interval)`) that the functions behind the four
   actions call.
 - **Agents.** An agent signs in as a person does (A5) but has no phone to read a code from, and a code the harness
-  computed from a stored secret would only be a second password. **Proposed: the admin is people's** — a role holding
+  computed from a stored secret would only be a second password. **The admin is people's** (his, 2026-10-08) — a role holding
   an `admin.*` permission is never given to an agent, a guard in the database like the Owner's. Agents act through the
   other apps' permissions and delegations (step 6).
 - **The screens are the package's.** The code step and enrolling are `@no-origins/auth` screens on the sign-in page's
@@ -331,12 +331,12 @@ database. Three ways back, not exclusive:
   (`delete from auth.mfa_factors where user_id = …`, through `npx supabase db query --linked`), sign in, enroll again.
   The CLI's own login is the root all of this rests on; it is written here so it is found when it is needed.
 
-Proposed: the second authenticator and the break-glass, and recovery codes too if the server has them.
+**His, 2026-10-08: the second authenticator and the break-glass, and recovery codes too if the server has them.**
 
 **A passkey.** A passkey sign-in is already two things — the device and its unlock (Face ID, Touch ID) — and a phishing
 page cannot replay it, which it can a six-digit code. Whether it counts as the second factor by itself, so a passkey
 sign-in opens the admin with no code, depends on what Supabase writes in the token for it (`amr`), checked while
-building. Proposed: yes, if the token tells it apart from the other ways in; else the code after it, as after a magic
+building. **His, 2026-10-08: yes** — if the token tells it apart from the other ways in; else the code after it, as after a magic
 link. Supabase now also offers a passkey as a second factor proper (`[auth.mfa.web_authn]`), A6's "when Supabase
 offers it" — a later option, not needed for this.
 
@@ -353,10 +353,9 @@ Database tests for each: one factor reads and changes nothing in the admin's tab
 than five minutes is asked again; an agent is never given an `admin.*` role. The admin's local helper scripts enroll a
 factor for the test account and compute its codes.
 
-**His to decide.** (1) **The ways back**: the second authenticator and the break-glass, recovery codes if offered — or
-other. (2) **Whether giving a role with an `admin.*` permission asks again**, beside the three A6 named. (3) **Whether
-a passkey sign-in counts as both factors.** And, proposed with them: **the admin is people's** — no agent holds an
-`admin.*` permission.
+**His answers, 2026-10-08.** (1) The ways back: the second authenticator and the break-glass, and recovery codes if
+the server offers them. (2) Giving a role with an `admin.*` permission asks again. (3) A passkey sign-in counts as both
+factors, if the token tells it apart. (4) The admin is people's: no agent holds an `admin.*` permission.
 
 ## Open
 
@@ -365,7 +364,7 @@ a passkey sign-in counts as both factors.** And, proposed with them: **the admin
   Member starts with the motion studio, and Home waits for a role he makes (A4).
 - **To prove while building**: that a revoked session closes the gate before its access token runs out (A11 step 3);
   how an agent's request names its delegation to the database (step 6).
-- **His, for the second factor (A12, proposed 2026-10-08)**: the ways back if the phone is lost; whether giving a role
-  with an `admin.*` permission asks again; whether a passkey sign-in counts as both factors; and that the admin is
-  people's — no agent holds an `admin.*` permission. To check while building: that Supabase asks for `aal2` to add a
-  factor once one exists, whether the hosted server offers recovery codes, and what a passkey sign-in writes in `amr`.
+- **Settled, his, 2026-10-08 (A12)**: the ways back if the phone is lost (a second authenticator, the break-glass,
+  recovery codes if offered); giving a role with an `admin.*` permission asks again; a passkey sign-in counts as both
+  factors; the admin is people's. To check while building: that Supabase asks for `aal2` to add a factor once one
+  exists, whether the hosted server offers recovery codes, and what a passkey sign-in writes in `amr`.
