@@ -118,7 +118,10 @@ Three places, as today (Admin.md §8.3), each closer to the data:
   rewritten then.
 - **The token shows, the database decides.** Buttons appear from the token's list; the refusal is the server's and the
   database's, which are live — a permission taken away stops a save at once, even while an older token still opens the
-  app. Taking a role in the admin also ends the person's sessions, so the gates close too.
+  app. Taking a role in the admin also ends the person's sessions, so the gates close too. **The admin's pages read it
+  so since 2026-10-07** (`shown()` in `@no-origins/auth/server`): which page, card and button, from the token the gate
+  verified on the same request, with no request of their own — they asked `noo_can()` three or four times a page
+  before, each a round trip; an action still asks `can()`, and the page's data still comes through the rules.
 - **Two tokens, as Supabase issues them** (his, 2026-10-06: *"we can have both refresh token and access token if you
   have better auth ideas then we can explore them too"*). The **access token** is short and carries the permissions the
   gates read; the **refresh token** is long, lives in the session cookie, and quietly gets a new access token — the
@@ -147,7 +150,12 @@ His, 2026-10-06: **in the admin, with invitations**. The admin's pages, each beh
   take roles (`admin.people.assign`), end sessions and remove (`admin.people.remove`), make and retire agents and rotate
   their credentials (`admin.agents.manage`).
 - **Roles** (`admin.roles.manage`): every role, who holds it and its permissions, ticked by app with each one's
-  sentence; make, rename, delete (a role still held asks where its holders go); move the default.
+  sentence; make, rename, delete (a role still held asks where its holders go); move the default. **A role is ticked
+  and then saved** (his, 2026-10-07: *"we don't have to call the API every time some permission is enabled or
+  disabled … select and then click on save so that we can push all the changes together"*): a box a
+  permission, nothing written until Save, and then its name, sentence and permissions in one transaction. Leaving the
+  page with changes not saved asks first. **A person's roles are ticked and then saved the same way**, in the People
+  page's dialog, in one transaction.
 - **Invitations** (`admin.invitations.manage`): an address, its roles and an expiry. Signing up with that address gives
   those roles instead of the default. Today's allowlist rows become invitations.
 - **Audit** (`admin.audit.view`): A8, by who, what and when.
@@ -250,7 +258,20 @@ buckets (`assets`, `publish`); Orbit's server asking for the owner; and gates th
    permission ticked, the role deleted, an address invited and revoked, each on the audit log, no console error.
    The pages were built in the Settings page's frame, a column that scrolled, off the grid; **on 2026-10-07 they were
    put on the grid** (his: "I really made it very clear from the beginning that the grid is the base layout for the
-   whole application"), with Settings, a record a box. Version 1; the screens are his to design.
+   whole application"), with Settings, a record a box. Version 1; the screens are his to design. **2026-10-07, his: a
+   role is ticked and then saved** (A7; `…_access_save_role.sql`): `noo_save_role` takes the role's name, sentence and
+   whole set of permissions and writes only what changed, as the asker (`security invoker`), so the rules and guards
+   run row by row as they did for each tick and the record keeps a line a tick; a refusal anywhere leaves the role as
+   it was. Fourteen database tests (`access_save_role_test.sql`). The page holds the draft: a changed permission's box
+   is tinted (`muted`), and the name's row — Name, For, the count of changes, Discard and Save — repeats on every page
+   the role spills onto, so Save is always in reach; the way back followed with changes not saved asks "Leave without
+   saving?", a reload or a closed tab the browser's own question. **The People dialog saves together too**
+   (`…_access_set_roles.sql`): `noo_set_roles` takes the whole set of roles a person should hold and takes, then gives,
+   each through `noo_take_role` and `noo_give_role`, so their checks and guards run and a role taken ends the sessions;
+   a refusal leaves the person as they were and shows in the dialog. Twelve database tests
+   (`access_set_roles_test.sql`). The same day the pages stopped asking `noo_can()` for what they show (A6) and a
+   role's page loads that role alone: the admin home makes one call to the database where it made five, People five
+   where nine, Roles and a role four where seven.
    **Due before step 5, beside the motion studio's read path (step 3)**: the admin's second factor and asking again
    before the gravest actions (A6, his, agreed), not built yet.
 5. **Only then does sign-up open** (the login host, Admin.md §8.4): the allowlist's refusal goes and the default role

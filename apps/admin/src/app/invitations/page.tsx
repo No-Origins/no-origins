@@ -7,7 +7,7 @@ export const metadata = { title: "Invitations" };
 
 /** Invitations (Access.md A7). */
 export default async function InvitationsPage() {
-  const may = await mayAll(["admin.invitations.manage"] as const);
+  const { may } = await mayAll(["admin.invitations.manage"] as const);
   if (!may["admin.invitations.manage"]) {
     return <NoAccessPage title="Invitations" line="An address and the roles it gets when it signs up." permission="admin.invitations.manage" />;
   }

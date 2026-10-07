@@ -1,6 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
+import { tokenClaims } from "./claims";
 import { sessionCookieOptions } from "./cookies";
 import { requireSupabaseEnv } from "./env";
 import type { Permission } from "./permissions";
@@ -56,4 +57,26 @@ export async function can(permission: Permission, item?: string): Promise<boolea
   const supabase = await supabaseServer();
   const { data, error } = await supabase.rpc("noo_can", { p_permission: permission, p_item: item ?? null });
   return !error && data === true;
+}
+
+/**
+ * What the signed-in principal's token shows (Access.md A6, "the token shows, the database decides"): their id, and
+ * which of `permissions` it carries — read from the session cookie, with no request to anyone. The gate had the auth
+ * server verify this token on this same request (`getUser()`), and refreshed it if it had run out, before the page ran.
+ *
+ * **For what a page shows** — which page, which card, which button — **never for what it may change**: an action asks
+ * `can()`, and the database's rules decide, live. A token can be ten minutes behind a role's permissions; taking a role
+ * ends the sessions at once. A token from before the hook carries no list, and then each is asked of the database.
+ */
+export async function shown<P extends Permission>(permissions: readonly P[]): Promise<{ id: string | null; may: Record<P, boolean> }> {
+  const supabase = await supabaseServer();
+  const { data: { session } } = await supabase.auth.getSession();
+  const claims = session ? tokenClaims(session.access_token) : null;
+  const perms = claims?.perms;
+  const answers = !claims?.sub
+    ? permissions.map(() => false)
+    : perms
+      ? permissions.map((p) => perms.includes(p))
+      : await Promise.all(permissions.map((p) => can(p)));
+  return { id: claims?.sub ?? null, may: Object.fromEntries(permissions.map((p, i) => [p, answers[i]])) as Record<P, boolean> };
 }

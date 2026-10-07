@@ -7,7 +7,7 @@ export const metadata = { title: "Audit" };
 
 /** Audit (Access.md A8): the record, fifty to a read, by the kind of change. */
 export default async function AuditPage({ searchParams }: PageProps<"/audit">) {
-  const may = await mayAll(["admin.audit.view"] as const);
+  const { may } = await mayAll(["admin.audit.view"] as const);
   if (!may["admin.audit.view"]) {
     return <NoAccessPage title="Audit" line="Every change to who may do what." permission="admin.audit.view" />;
   }

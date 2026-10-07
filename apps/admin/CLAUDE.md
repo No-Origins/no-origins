@@ -77,6 +77,13 @@ screen "his to design" is still on the grid; what is his to design is what sits 
   bypasses RLS entirely; it belongs to the publish pipeline and must never be imported into a page.
 - **Middleware is not the security boundary** — RLS is. Middleware decides which screen you land on. A hole
   there shows an empty admin, not someone else's data.
-- **`getUser()`, never `getSession()`.** `getSession` reads the cookie and believes it.
+- **`getUser()`, never `getSession()`, to learn who is signed in.** `getSession` reads the cookie and believes it. The
+  one reader of the session past the gate is `shown()` (`@no-origins/auth/server`, through `mayAll` in
+  `src/lib/access.ts`): it decodes the token the gate's `getUser()` verified on the same request, for which page and
+  button to show and nothing else (Access.md A6). An action asks `can()`; the database's rules decide.
+- **Ticks save together** (Access.md A7, 2026-10-07, his): a role's page and the People page's roles dialog hold a
+  draft until Save, which sends the whole set in one transaction — `noo_save_role` (name, sentence, permissions) and
+  `noo_set_roles` (a person's roles). The role page asks before it is left with changes not saved. Do not bring back a
+  write per tick.
 - **The sign-in page says the same thing whatever happens.** The allowlist is the membership rule, so a page
   that distinguished "not on the list" from "link sent" would be a membership oracle for anyone with the URL.

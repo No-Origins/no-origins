@@ -30,18 +30,15 @@ async function asking(permission: Permission) {
 const DAY = 24 * 60 * 60 * 1000;
 
 // ── People ───────────────────────────────────────────────────────────────────
-export async function giveRole(principal: string, role: string): Promise<Done> {
+/**
+ * A person's roles, saved in one go (Access.md A7, his, 2026-10-07): the whole set they should hold, as the dialog holds
+ * it when Save is pressed. One transaction in the database (`noo_set_roles`), each role given or taken through
+ * `noo_give_role` and `noo_take_role`; a role taken ends their sessions, and a refusal leaves them as they were.
+ */
+export async function setRoles(principal: string, roles: string[]): Promise<Done> {
   const db = await asking("admin.people.assign");
-  if (!db) return refused("Giving roles needs admin.people.assign.");
-  const result = said((await db.rpc("noo_give_role", { p_principal: principal, p_role: role })).error);
-  revalidatePath("/people");
-  return result;
-}
-
-export async function takeRole(principal: string, role: string): Promise<Done> {
-  const db = await asking("admin.people.assign");
-  if (!db) return refused("Taking roles needs admin.people.assign.");
-  const result = said((await db.rpc("noo_take_role", { p_principal: principal, p_role: role })).error);
+  if (!db) return refused("Giving and taking roles needs admin.people.assign.");
+  const result = said((await db.rpc("noo_set_roles", { p_principal: principal, p_roles: roles })).error);
   revalidatePath("/people");
   return result;
 }
@@ -70,14 +67,26 @@ export async function createRole(name: string, sentence: string): Promise<Done &
   return error ? said(error) : { ok: true, id: data.id as string };
 }
 
-export async function renameRole(role: string, name: string, sentence: string): Promise<Done> {
+/**
+ * A role, saved in one go (Access.md A7, his, 2026-10-07): its name, its sentence and the whole set of its permissions,
+ * as the page holds them when Save is pressed. One transaction in the database (`noo_save_role`): a refusal anywhere
+ * leaves the role as it was.
+ */
+export async function saveRole(role: string, change: { name: string; sentence: string; permissions: string[] }): Promise<Done> {
   const db = await asking("admin.roles.manage");
   if (!db) return refused("Changing roles needs admin.roles.manage.");
-  if (!name.trim()) return refused("A role needs a name.");
-  const result = said((await db.from("roles").update({ name: name.trim(), sentence: sentence.trim() }).eq("id", role)).error);
+  if (!change.name.trim()) return refused("A role needs a name.");
+  const unknown = change.permissions.find((p) => !(p in PERMISSIONS));
+  if (unknown) return refused(`There is no permission called ${unknown}.`);
+  const { error } = await db.rpc("noo_save_role", {
+    p_role: role,
+    p_name: change.name,
+    p_sentence: change.sentence,
+    p_permissions: change.permissions,
+  });
   revalidatePath("/roles");
   revalidatePath(`/roles/${role}`);
-  return result;
+  return error?.code === "23505" ? refused("Another role has that name.") : said(error);
 }
 
 export async function deleteRole(role: string): Promise<Done> {
@@ -87,18 +96,6 @@ export async function deleteRole(role: string): Promise<Done> {
   revalidatePath("/roles");
   if (error?.code === "23503") return refused("Someone still holds this role. Take it from them first.");
   return said(error);
-}
-
-export async function setPermission(role: string, permission: string, on: boolean): Promise<Done> {
-  const db = await asking("admin.roles.manage");
-  if (!db) return refused("Changing a role's permissions needs admin.roles.manage.");
-  if (!(permission in PERMISSIONS)) return refused("No such permission.");
-  const { error } = on
-    ? await db.from("role_permissions").insert({ role_id: role, permission })
-    : await db.from("role_permissions").delete().eq("role_id", role).eq("permission", permission);
-  revalidatePath(`/roles/${role}`);
-  revalidatePath("/roles");
-  return error?.code === "23505" ? { ok: true } : said(error);
 }
 
 export async function makeDefault(role: string): Promise<Done> {

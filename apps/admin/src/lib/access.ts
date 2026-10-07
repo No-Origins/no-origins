@@ -1,4 +1,4 @@
-import { can, supabaseServer } from "@no-origins/auth/server";
+import { shown, supabaseServer } from "@no-origins/auth/server";
 import type { Permission } from "@no-origins/auth/permissions";
 
 /**
@@ -50,17 +50,14 @@ export type AuditEvent = {
   item: string | null;
 };
 
-/** Which of `permissions` the signed-in person holds, asked of the database in one go. */
-export async function mayAll<P extends Permission>(permissions: readonly P[]): Promise<Record<P, boolean>> {
-  const answers = await Promise.all(permissions.map((p) => can(p)));
-  return Object.fromEntries(permissions.map((p, i) => [p, answers[i]])) as Record<P, boolean>;
-}
-
-/** Who is asking: the signed-in person's id, or null. */
-export async function myId(): Promise<string | null> {
-  const db = await supabaseServer();
-  const { data } = await db.auth.getUser();
-  return data.user?.id ?? null;
+/**
+ * Which of `permissions` the signed-in person's token carries, and who they are (Access.md A6: the token shows, the
+ * database decides). No request: it decides which page, card and button to show, and the data on the page still comes
+ * through the database's rules, so a page shown on a stale token shows nothing it should not.
+ */
+export async function mayAll<P extends Permission>(permissions: readonly P[]): Promise<{ me: string | null; may: Record<P, boolean> }> {
+  const { id, may } = await shown(permissions);
+  return { me: id, may };
 }
 
 export async function loadPeople(): Promise<Person[]> {
@@ -95,6 +92,27 @@ export async function loadRoles(): Promise<Role[]> {
     permissions: (grants.data ?? []).filter((g) => g.role_id === r.id).map((g) => g.permission as Permission),
     holders: (held.data ?? []).filter((h) => h.role_id === r.id).length,
   }));
+}
+
+/** One role, for its page: the role, its permissions and how many hold it, and nothing of the others. */
+export async function loadRole(id: string): Promise<Role | null> {
+  const db = await supabaseServer();
+  const [role, grants, held] = await Promise.all([
+    db.from("roles").select("id, name, sentence, built_in, is_default").eq("id", id).maybeSingle(),
+    db.from("role_permissions").select("permission").eq("role_id", id),
+    db.from("role_assignments").select("role_id", { count: "exact", head: true }).eq("role_id", id),
+  ]);
+  if (role.error || !role.data) return null;
+  const r = role.data;
+  return {
+    id: r.id as string,
+    name: r.name as string,
+    sentence: (r.sentence as string) ?? "",
+    builtIn: (r.built_in as Role["builtIn"]) ?? null,
+    isDefault: r.is_default as boolean,
+    permissions: (grants.data ?? []).map((g) => g.permission as Permission),
+    holders: held.count ?? 0,
+  };
 }
 
 export async function loadInvitations(): Promise<Invitation[]> {
