@@ -8,7 +8,7 @@ export const metadata = { title: "Roles" };
 
 /** Roles (Access.md A4, A7). */
 export default async function RolesPage() {
-  const may = await mayAll(["admin.roles.manage", "admin.people.view", "admin.invitations.manage"] as const);
+  const { may } = await mayAll(["admin.roles.manage", "admin.people.view", "admin.invitations.manage"] as const);
   if (!may["admin.roles.manage"] && !may["admin.people.view"] && !may["admin.invitations.manage"]) {
     return <NoAccessPage title="Roles" line="A role is a set of permissions you make here." permission="admin.roles.manage" />;
   }

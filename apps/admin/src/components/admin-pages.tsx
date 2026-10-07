@@ -132,11 +132,17 @@ function PageTitle({ title, line, refusal }: { title: string; line: string; refu
 /**
  * One record of a list: a card, its parts stacked on six columns and, from 600px of the box's own width (eight
  * columns), laid out by `className` — a container-query grid template the list's `ColumnNames` shares, so the columns
- * line up from record to record. `interactive` lights its edge on a hover, for a record that is a link.
+ * line up from record to record. `interactive` lights its edge on a hover, for a record that is a link. `fill` is
+ * `muted` for a record changed and not saved yet (a role's permissions, Access.md A7).
  */
-export function RecordBox({ className, interactive, children }: { className?: string; interactive?: boolean; children: React.ReactNode }) {
+export function RecordBox({ className, interactive, fill = "card", children }: {
+  className?: string;
+  interactive?: boolean;
+  fill?: "card" | "muted";
+  children: React.ReactNode;
+}) {
   return (
-    <Slot fill="card" inset={0} className={cn("@container", interactive && "group-hover:border-foreground group-focus-visible:border-foreground transition-colors")}>
+    <Slot fill={fill} inset={0} className={cn("@container", interactive && "group-hover:border-foreground group-focus-visible:border-foreground transition-colors")}>
       <div className={cn("flex min-w-0 flex-col justify-center gap-2 px-6 py-3 @min-[600px]:grid @min-[600px]:content-center @min-[600px]:items-center @min-[600px]:gap-4 @min-[600px]:py-0", className)}>
         {children}
       </div>

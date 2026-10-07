@@ -372,14 +372,21 @@ carry the same commands since 2026-09-23; if they drift again, the file still wi
 
 ```json
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "pnpm run build",
-  "installCommand": "pnpm install --frozen-lockfile"
+  "installCommand": "pnpm install --frozen-lockfile",
+  "regions": ["bom1"]
 }
 ```
 
 `pnpm run build` rather than `pnpm --filter <app> build` so no app name is embedded and renaming a package breaks
 nothing. `--frozen-lockfile` so a stale lockfile fails the build loudly instead of resolving something else — the
-failure that produced the engineering lockfile PRs.
+failure that produced the engineering lockfile PRs. **`bom1` (Mumbai) since 2026-10-08, his**: the functions ran in
+`iad1` (Washington), the default, while the hosted Supabase is in `ap-south-1` (Mumbai) and he is in India, so every
+database call a page or an action waited on crossed the world twice — about 200 ms each, and the admin's pages and
+ticks took seconds. Keep the functions beside the database: if the database moves, `regions` moves with it. The one
+thing still in `iad1` is Home's Blob store, `home-house`, which Home reads once a visit; moving it means a new store
+in `bom1` and a `publish:house`, his call.
 
 **Which apps a push builds is Vercel's call, not a command's.** All four projects have *Skip deployments for
 unaffected projects* on (`enableAffectedProjectsDeployments` in the project API): Vercel reads the pnpm workspace

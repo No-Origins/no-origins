@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { tokenClaims } from "./claims";
 import { sessionCookieOptions } from "./cookies";
 import { supabaseEnv } from "./env";
 import type { Permission } from "./permissions";
@@ -55,23 +56,10 @@ export type GateOptions = {
  */
 async function holds(supabase: SupabaseClient, permission: Permission): Promise<boolean> {
   const { data: { session } } = await supabase.auth.getSession();
-  const perms = session ? claimedPermissions(session.access_token) : null;
+  const perms = session ? (tokenClaims(session.access_token)?.perms ?? null) : null;
   if (perms) return perms.includes(permission);
   const { data, error } = await supabase.rpc("noo_can", { p_permission: permission });
   return !error && data === true;
-}
-
-/** The `perms` claim of a token, or null when it has none. Decoding only: the token was verified before this is read. */
-function claimedPermissions(token: string): string[] | null {
-  try {
-    const part = token.split(".")[1];
-    if (!part) return null;
-    const json = atob(part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "="));
-    const perms = (JSON.parse(json) as { perms?: unknown }).perms;
-    return Array.isArray(perms) && perms.every((p) => typeof p === "string") ? perms : null;
-  } catch {
-    return null;
-  }
 }
 
 export async function authGate(

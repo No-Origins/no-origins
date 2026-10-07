@@ -2,16 +2,17 @@
 
 import * as React from "react";
 
+import { Alert, AlertDescription, AlertTitle } from "@no-origins/ui/components/alert";
 import { Badge } from "@no-origins/ui/components/badge";
 import { Button } from "@no-origins/ui/components/button";
 import { Checkbox } from "@no-origins/ui/components/checkbox";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@no-origins/ui/components/dialog";
 import { Field, FieldGroup, FieldLabel } from "@no-origins/ui/components/field";
 import { Text } from "@no-origins/ui/components/text";
 
-import { endSessions, giveRole, removeAccount, takeRole } from "@/app/access/actions";
+import { endSessions, removeAccount, setRoles } from "@/app/access/actions";
 import { AdminPages, band, ColumnNames, RecordBox, wideOnly, type AdminItem } from "@/components/admin-pages";
 import { Confirm, useChange } from "@/components/outcome";
 
@@ -98,7 +99,7 @@ function Person({ person, roles, me, actable, mayAssign, mayRemove, cols }: {
       </div>
       {actable ? (
         <div className="flex flex-wrap gap-2 @min-[600px]:justify-end">
-          {mayAssign ? <RolesDialog person={person} roles={roles} pending={pending} run={run} /> : null}
+          {mayAssign ? <RolesDialog person={person} roles={roles} /> : null}
           {mayRemove ? (
             <>
               <Confirm
@@ -124,38 +125,80 @@ function Person({ person, roles, me, actable, mayAssign, mayRemove, cols }: {
   );
 }
 
-function RolesDialog({ person, roles, pending, run }: {
-  person: PersonRow;
-  roles: RoleChoice[];
-  pending: boolean;
-  run: ReturnType<typeof useChange>["run"];
-}) {
+/**
+ * A person's roles (Access.md A7), ticked and then saved (his, 2026-10-07): the dialog holds the draft, opening it
+ * starts again from what they hold, and Save sends the whole set, which the database gives and takes in one transaction
+ * (`noo_set_roles`). Roles the dialog does not list (the Owner) are sent as held, so a save never takes one unseen. A
+ * refusal is shown in the dialog, which stays open over the page's name, where the other changes show theirs.
+ */
+function RolesDialog({ person, roles }: { person: PersonRow; roles: RoleChoice[] }) {
   const held = new Set(person.roles.map((r) => r.id));
+  const [open, setOpen] = React.useState(false);
+  const [ticked, setTicked] = React.useState<ReadonlySet<string>>(held);
+  const [refusal, setRefusal] = React.useState<string | null>(null);
+  const [pending, start] = React.useTransition();
+  const changes = roles.filter((r) => ticked.has(r.id) !== held.has(r.id));
+  const taking = changes.some((r) => held.has(r.id));
+  const unlisted = person.roles.filter((r) => !roles.some((listed) => listed.id === r.id)).map((r) => r.id);
+  const status = pending
+    ? "Saving…"
+    : !changes.length
+      ? "Nothing to save."
+      : `${changes.length} ${changes.length === 1 ? "change" : "changes"} unsaved.${taking ? " Taking a role signs them out at once." : ""}`;
+  const save = () => {
+    setRefusal(null);
+    start(async () => {
+      const result = await setRoles(person.id, [...roles.filter((r) => ticked.has(r.id)).map((r) => r.id), ...unlisted]);
+      if (result.ok) setOpen(false);
+      else setRefusal(result.message);
+    });
+  };
   return (
-    <Dialog>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (next) {
+          setTicked(new Set(held));
+          setRefusal(null);
+        }
+        setOpen(next);
+      }}
+    >
       <DialogTrigger asChild>
         <Button size="xs" variant="outline">Roles</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{person.name ?? person.email}</DialogTitle>
-          <DialogDescription>Tick a role to give it, untick to take it. Taking one ends their sessions.</DialogDescription>
+          <DialogDescription>Tick the roles they should hold, then save. Taking one ends their sessions.</DialogDescription>
         </DialogHeader>
+        {refusal ? (
+          <Alert variant="destructive">
+            <AlertTitle>Not done</AlertTitle>
+            <AlertDescription>{refusal}</AlertDescription>
+          </Alert>
+        ) : null}
         <FieldGroup>
           {roles.map((role) => (
             <Field key={role.id} orientation="horizontal">
               <Checkbox
                 id={`role-${person.id}-${role.id}`}
-                checked={held.has(role.id)}
+                checked={ticked.has(role.id)}
                 disabled={pending}
-                onCheckedChange={(on) => run(() => (on ? giveRole(person.id, role.id) : takeRole(person.id, role.id)))}
+                onCheckedChange={(on) => setTicked(new Set([...ticked].filter((id) => id !== role.id).concat(on === true ? [role.id] : [])))}
               />
               <FieldLabel htmlFor={`role-${person.id}-${role.id}`}>{role.name}</FieldLabel>
             </Field>
           ))}
         </FieldGroup>
-        <DialogFooter>
-          <Text role="caption">Changes are saved as you tick.</Text>
+        <DialogFooter className="sm:items-center sm:justify-between">
+          <Text role="caption" aria-live="polite">{status}</Text>
+          <div className="flex justify-end gap-2">
+            <DialogClose asChild>
+              <Button variant="outline" disabled={pending}>Cancel</Button>
+            </DialogClose>
+            <Button disabled={!changes.length || pending} onClick={save}>Save</Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
