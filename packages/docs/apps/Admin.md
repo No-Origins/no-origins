@@ -627,7 +627,9 @@ with nowhere to return to, a person sees every subdomain they may open; the admi
 admin keeps a login of its own (a second door for him if the auth app is down, at the cost of two login pages to keep
 in step and to secure) he asked about; the proposal still says no.
 
-**What sign-up changes (open, his).** Today the allowlist is the whole membership rule (above), and every gate asks
+**What sign-up changes** (*settled by Access.md, 2026-10-06 to -08: a new account gets the built-in Member role, which
+opens the motion studio to try; every gate asks for its app's `<app>.open`; the admin needs a second factor, A12. What
+follows is the reasoning as it stood that morning.*) Today the allowlist is the whole membership rule (above), and every gate asks
 only whether someone is signed in: the admin's, the motion studio's and Home's. Open sign-up makes "signed in" and
 "invited" two different things, and a stranger with an account would pass all three gates — Home's included, whose
 house is private (Home.md H4). So sign-up brings roles forward, from "later" to now:
@@ -655,6 +657,62 @@ invitations that carry a role; a member tries every control in the motion studio
 visitors do; there is one owner, him; a member may delete their own account. Not yet decided: what a role is made of
 (his view points at permissions bundled into roles he creates), and whether there is an editor at all. The roles
 architecture is **Access.md** (proposed 2026-10-06, with his answers); nothing is built until it is approved.
+
+**Step 5: opening the login host and sign-up (2026-10-08; his answers the same day, every one as proposed).** Everything step 5 waited on is in
+production: roles and permissions, every gate asking for its app's permission, the admin's second factor (Access.md
+A12) and the motion studio a member can try. What the hosted project already has, read from its settings on
+2026-10-08:
+
+- **Email goes through Resend** (`smtp.resend.com`, from agents@no-origins.com as "No Origins"), not Supabase's own
+  sender, so mail is not the blocker it would have been. The caps: Supabase sends at most **30 a hour** (its setting,
+  raisable), and Resend's free plan **100 a day, 3,000 a month**, pausing at the cap rather than charging. A sign-up is
+  one mail, and so is every magic-link sign-in; a password, a passkey or an authenticator's code sends none.
+- **Sign-up is on in Supabase** (`disable_signup` false, addresses confirmed by mail); only the allowlist's trigger
+  refuses an address nobody invited. Opening sign-up is taking that refusal away (Access.md A11 step 5).
+- **No challenge is on** (`security_captcha_enabled` false; hCaptcha is selected, unused).
+
+**How one signs up (his, 2026-10-08)**: asked whether it must be the magic link alone — *"do we really have to allow
+users only to sign up using magic link?"* — and shown the doors Supabase has, he chose **email and a password, or an
+email link or code**; no Google, Apple or GitHub for now. What that brings:
+
+- **Email and a password** (`signUp`): one mail to confirm the address, then signing in with the password sends none.
+  At least eight characters, as the admin's Settings already asks (Supabase's `password_min_length`, set to match).
+  Supabase answers a sign-up for an address that already has an account as it answers any other, so the form is no
+  oracle of who is here — the same rule as the sign-in's.
+- **Forgot your password** comes with it: a mail with a link to set a new one. An account with an authenticator is
+  asked for its code before the new password is taken — Supabase refuses a password change on one factor once a
+  factor exists — so the reset page has the code step (A12's, already in the package).
+- **An email link or a 6-digit code**, both in the same mail, for an address with or without an account: the link for
+  this device, the code for another.
+- **A passkey** cannot make an account (Supabase registers one only for an account that exists), so the auth app
+  offers one straight after a first sign-in.
+
+What is left for him to decide:
+
+1. **Launch on Resend's free plan?** Proposed: yes — 100 mails a day is room for a launch, and the passkey and password
+   doors spare mail; move up a plan when a week's sign-ups near the cap. His to say.
+2. **The challenge on the form: Cloudflare Turnstile** (this section's choice above) **or hCaptcha.** Proposed:
+   Turnstile — free and usually invisible. Supabase checks it on every sign-in and sign-up call once switched on, so the
+   shared login card (`@no-origins/auth`) carries the widget everywhere, and it is switched on only once every app's
+   card sends it. **His to make**: a Turnstile site for `auth.no-origins.com` and `localhost`, its secret in Supabase's
+   dashboard, its site key in the auth app's environment.
+3. **The page for someone signed in with nowhere to go** — the apps they may open (Access.md A7: the public ones, and
+   each gated app whose `<app>.open` they hold; the admin only with `admin.open`) and their account. Proposed: on the
+   grid, a card an app as on the admin's home, version 1, his to design.
+4. **The account page** moves to the auth app: password, passkeys and authenticator apps (A12's screens, in the
+   package already) — and **deleting one's own account** (A2's self right, his: a member may). Proposed: a confirming
+   dialog, and a fresh code first when the account has an authenticator, as the admin's gravest actions ask (A12).
+5. **A line on the sign-up card of what is kept** — the address, the roles, when one signed in, the record of changes
+   (Access.md A8) — and that deleting the account removes all but the record. Proposed wording: *"We keep your email
+   address and when you sign in, so you can sign in again. Delete your account any time from your account page."*
+   His to word.
+
+**His answers, 2026-10-08**: (1) *"Yes. Let's use Resend"* — the free plan for the launch; (2) **Turnstile**; (3) the
+page of apps one may open, on the grid, as proposed; (4) the account page with deleting one's own account, a fresh code
+first where there is an authenticator; (5) the line on what is kept, as worded.
+
+Settled before and standing: sign-up is open to everyone; a new account is a Member; the admin keeps no login of its own (his, 2026-10-06). The order is this section's five steps above, with
+the challenge switched on before the allowlist's refusal goes, and sign-up last.
 
 ---
 
