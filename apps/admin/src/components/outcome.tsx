@@ -9,23 +9,29 @@ import {
 import { Button } from "@no-origins/ui/components/button";
 
 import type { Done } from "@/app/access/actions";
-import { useRefuse } from "@/components/admin-pages";
+import { useRefuse, useStepUp } from "@/components/admin-pages";
 
 /**
  * A change's answer, for the access pages: run it in a transition, and when the database refuses, show its sentence
- * under the page's name (admin-pages.tsx), where every record of the list can reach it.
+ * under the page's name (admin-pages.tsx), where every record of the list can reach it. When it asks for a fresh code
+ * (Access.md A12, the gravest changes), ask for one and run the same change again.
  */
 export function useChange() {
   const refuse = useRefuse();
+  const stepUp = useStepUp();
   const [pending, start] = React.useTransition();
   const run = React.useCallback((change: () => Promise<Done>, then?: () => void) => {
-    refuse(null);
-    start(async () => {
-      const done = await change();
-      if (done.ok) then?.();
-      else refuse(done.message);
-    });
-  }, [refuse]);
+    const attempt = () => {
+      refuse(null);
+      start(async () => {
+        const done = await change();
+        if (done.ok) then?.();
+        else if (done.secondFactor) stepUp(attempt);
+        else refuse(done.message);
+      });
+    };
+    attempt();
+  }, [refuse, stepUp]);
   return { pending, run };
 }
 

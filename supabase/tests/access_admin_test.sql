@@ -22,7 +22,7 @@ insert into public.role_assignments (principal_id, role_id) values
 insert into auth.sessions (id, user_id) values ('00000000-0000-4000-d000-0000000000e1', '00000000-0000-4000-d000-000000000031');
 
 -- ── the owner ────────────────────────────────────────────────────────────────
-do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2')::text, true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 set local role authenticated;
 select ok((select count(*) from public.noo_people()) >= 3, 'the owner sees every person');
 select ok((select roles from public.noo_people() where id = '00000000-0000-4000-d000-000000000031') @> '[{"name":"Member"}]',
@@ -33,14 +33,14 @@ reset role;
 select is((select granted_by from public.role_assignments where principal_id = '00000000-0000-4000-d000-000000000031'
   and role_id = '00000000-0000-4000-d000-0000000000d1'), (select id from public.profiles where role = 'owner'),
   'stamped as given by the owner');
-do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2')::text, true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 set local role authenticated;
 select lives_ok($$select public.noo_take_role('00000000-0000-4000-d000-000000000031', '00000000-0000-4000-d000-0000000000d1')$$,
   'and takes it');
 reset role;
 select is((select count(*)::int from auth.sessions where user_id = '00000000-0000-4000-d000-000000000031'), 0,
   'taking a role ends the person''s sessions');
-do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2')::text, true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 set local role authenticated;
 select throws_ok($$select public.noo_end_sessions((select id from public.profiles where role = 'owner'))$$, '42501', null,
   'never one''s own sessions from here');
@@ -56,11 +56,11 @@ reset role;
 do $$ begin perform set_config('request.jwt.claims', '', true); end $$;
 insert into public.role_assignments (principal_id, role_id) values
   ('00000000-0000-4000-d000-000000000031', '00000000-0000-4000-d000-0000000000d1');
-do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-d000-000000000031","role":"authenticated","aal":"aal2"}', true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-4000-d000-000000000031', 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 set local role authenticated;
 select throws_ok($$select public.noo_people()$$, '42501', null, 'a member sees no list of people');
 reset role;
-do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-d000-000000000032","role":"authenticated","aal":"aal2"}', true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-4000-d000-000000000032', 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 set local role authenticated;
 select throws_ok($$select public.noo_end_sessions('00000000-0000-4000-d000-000000000031')$$, '42501', null,
   'a remover acts on nobody who holds a permission it lacks');

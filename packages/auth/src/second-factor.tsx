@@ -93,6 +93,7 @@ async function prove(code: string): Promise<string | null> {
   const mfa = supabaseBrowser().auth.mfa;
   const factors = await mfa.listFactors();
   if (factors.error) return factors.error.message;
+  if (!factors.data.totp.length) return "This account has no authenticator app yet: add one in Settings, then use its code.";
   // Any verified authenticator's code will do; Supabase checks it against the one named, so try each.
   for (const factor of factors.data.totp) {
     const { error } = await mfa.challengeAndVerify({ factorId: factor.id, code });

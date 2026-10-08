@@ -11,6 +11,7 @@ import { countFor, DEFAULT_GRID_CONFIG, GRID_REFERENCE_BOX, specFor, type Respon
 import { GridPages } from "@no-origins/ui/components/grid-pages";
 import { Slot } from "@no-origins/ui/components/slot";
 import { Text } from "@no-origins/ui/components/text";
+import { CodeDialog } from "@no-origins/auth/second-factor";
 import type { GridLayout, GridLayoutItem } from "@no-origins/ui/lib/grid-layout";
 
 import { arrange, BAND, type AdminField, type Arrangeable, type Span } from "@/lib/arrange";
@@ -59,11 +60,26 @@ export function useRefuse() {
   return React.useContext(RefusalContext);
 }
 
+// ── a fresh code (Access.md A12) ──────────────────────────────────────────────────────────────────────────────
+
+const StepUpContext = React.createContext<(again: () => void) => void>(() => {});
+
+/**
+ * Ask for a code from the authenticator and then run `again`: the database refused one of the gravest changes for want
+ * of a code from the last five minutes (A12) — ticking an admin permission into a role, giving or inviting with a role
+ * that holds one, removing an account. One dialog for the page, over whatever asked.
+ */
+export function useStepUp() {
+  return React.useContext(StepUpContext);
+}
+
 // ── the page ──────────────────────────────────────────────────────────────────────────────────────────────────
 
 export function AdminPages({ title, line, back = HOME, items }: { title: string; line: string; back?: Back; items: readonly AdminItem[] }) {
   const [field, setField] = React.useState<AdminField | null>(null);
   const [refusal, setRefusal] = React.useState<string | null>(null);
+  const [again, setAgain] = React.useState<(() => void) | null>(null);
+  const stepUp = React.useCallback((next: () => void) => setAgain(() => next), []);
 
   const all = React.useMemo<AdminItem[]>(() => [
     { id: "back", repeat: true, span: { base: { cols: 1, rows: 1 } }, render: () => <BackCell back={back} /> },
@@ -82,13 +98,28 @@ export function AdminPages({ title, line, back = HOME, items }: { title: string;
 
   return (
     <RefusalContext.Provider value={setRefusal}>
-      <GridPages
-        layout={layout}
-        overlay
-        className="h-dvh"
-        onMetrics={(m) => setField((prev) => (prev && prev.cols === m.cols && prev.rows === m.rows && prev.bp === m.bp ? prev : { bp: m.bp, cols: m.cols, rows: m.rows }))}
-        renderItem={renderItem}
-      />
+      <StepUpContext.Provider value={stepUp}>
+        <GridPages
+          layout={layout}
+          overlay
+          className="h-dvh"
+          onMetrics={(m) => setField((prev) => (prev && prev.cols === m.cols && prev.rows === m.rows && prev.bp === m.bp ? prev : { bp: m.bp, cols: m.cols, rows: m.rows }))}
+          renderItem={renderItem}
+        />
+        <CodeDialog
+          open={again !== null}
+          onOpenChange={(open) => {
+            if (!open) setAgain(null);
+          }}
+          title="A code, to confirm it's you"
+          line="Giving admin powers and removing an account need a code from your authenticator from the last five minutes."
+          then={() => {
+            const next = again;
+            setAgain(null);
+            next?.();
+          }}
+        />
+      </StepUpContext.Provider>
     </RefusalContext.Provider>
   );
 }

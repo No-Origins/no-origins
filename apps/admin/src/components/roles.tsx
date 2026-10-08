@@ -17,7 +17,7 @@ import { Slot } from "@no-origins/ui/components/slot";
 import { Text } from "@no-origins/ui/components/text";
 
 import { createRole, deleteRole, makeDefault, saveRole } from "@/app/access/actions";
-import { AdminPages, band, ColumnNames, NoteBox, RecordBox, useRefuse, wideOnly, type AdminItem } from "@/components/admin-pages";
+import { AdminPages, band, ColumnNames, NoteBox, RecordBox, useRefuse, useStepUp, wideOnly, type AdminItem } from "@/components/admin-pages";
 import { Confirm, useChange } from "@/components/outcome";
 
 export type RoleRow = {
@@ -124,7 +124,7 @@ type Draft = {
   setSentence: (sentence: string) => void;
   tick: (permission: string, on: boolean) => void;
   discard: () => void;
-  save: (refuse: (message: string | null) => void) => void;
+  save: (refuse: (message: string | null) => void, stepUp: (again: () => void) => void) => void;
 };
 
 const DraftContext = React.createContext<Draft | null>(null);
@@ -175,14 +175,19 @@ function useRoleDraft(role: RoleRow, catalogue: CatalogueEntry[], editable: bool
       setTicked(new Set(role.permissions));
     },
     // One transaction (`noo_save_role`): a refusal leaves the role as it was, and the draft as it is to try again.
-    save: (refuse) => {
-      refuse(null);
-      start(async () => {
-        const permissions = catalogue.filter((p) => ticked.has(p.name)).map((p) => p.name);
-        const result = await saveRole(role.id, { name, sentence, permissions });
-        if (result.ok) setDone(true);
-        else refuse(result.message);
-      });
+    // Ticking an admin permission in needs a fresh code (Access.md A12): asked for, then the same save again.
+    save: (refuse, stepUp) => {
+      const attempt = () => {
+        refuse(null);
+        start(async () => {
+          const permissions = catalogue.filter((p) => ticked.has(p.name)).map((p) => p.name);
+          const result = await saveRole(role.id, { name, sentence, permissions });
+          if (result.ok) setDone(true);
+          else if (result.secondFactor) stepUp(attempt);
+          else refuse(result.message);
+        });
+      };
+      attempt();
     },
   };
 }
@@ -230,6 +235,7 @@ export function RoleView({ role, catalogue, mayManage, line }: { role: RoleRow; 
 function RoleForm() {
   const draft = useDraft();
   const refuse = useRefuse();
+  const stepUp = useStepUp();
   const status = draft.pending
     ? "Saving…"
     : draft.changes
@@ -242,7 +248,7 @@ function RoleForm() {
       className="size-full"
       onSubmit={(event) => {
         event.preventDefault();
-        if (draft.changes) draft.save(refuse);
+        if (draft.changes) draft.save(refuse, stepUp);
       }}
     >
       <RecordBox className={FORM_COLS}>

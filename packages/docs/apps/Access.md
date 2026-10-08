@@ -369,7 +369,19 @@ offers it" — a later option, not needed for this.
    wrong code is refused and the right one lands there; a passkey sign-in goes straight in, and changing the
    authenticators from it still asks for a code; a member opens the motion studio and gets the no-access card at the
    admin.
-4. Asking again on the four actions, and the agents' guard. A migration and a pull request.
+4. Asking again on the four actions, and the agents' guard. A migration and a pull request. **Built 2026-10-08**
+   (`…_access_step_up.sql`): `noo_second_factor_within(interval)` reads when a code was entered — or a passkey used —
+   from the token's `amr`, and the guards of the tables the gravest changes write ask it, so no page, function or
+   direct request goes round them: ticking an `admin.*` permission into a role (`role_permissions`), giving a role that
+   holds one (`role_assignments`) or inviting with it (`invitation_roles`), removing someone else's account (a guard
+   on deleting a profile, which `noo_remove_account` reaches). Five minutes; a request with no session behind it is
+   not asked. The refusal's code is `NOAAL`: the admin's pages ask for the code — one dialog for the page,
+   `useStepUp()` in `admin-pages.tsx`, used by `useChange`, the role page's Save and the People dialog — and run the
+   same change again. A second code in a two-factor session moves the code's time in `amr` on (proven locally). The
+   agents' guard: a role holding an `admin.*` permission is never given to an agent, no such permission is ticked into
+   a role an agent holds, and an account holding one never becomes an agent. Rotating an agent's credential asks
+   through `noo_require_fresh_second_factor` when agents are built (A11 step 6). Sixteen database tests (134 in all;
+   the others now enter their code just before they act).
 
 Database tests for each: one factor reads and changes nothing in the admin's tables and two factors do; a code older
 than five minutes is asked again; an agent is never given an `admin.*` role. The admin's local helper scripts enroll a
