@@ -658,7 +658,7 @@ visitors do; there is one owner, him; a member may delete their own account. Not
 (his view points at permissions bundled into roles he creates), and whether there is an editor at all. The roles
 architecture is **Access.md** (proposed 2026-10-06, with his answers); nothing is built until it is approved.
 
-**Step 5: opening the login host and sign-up (2026-10-08, proposed; his to answer).** Everything step 5 waited on is in
+**Step 5: opening the login host and sign-up (2026-10-08; his answers the same day, every one as proposed).** Everything step 5 waited on is in
 production: roles and permissions, every gate asking for its app's permission, the admin's second factor (Access.md
 A12) and the motion studio a member can try. What the hosted project already has, read from its settings on
 2026-10-08:
@@ -706,6 +706,10 @@ What is left for him to decide:
    (Access.md A8) — and that deleting the account removes all but the record. Proposed wording: *"We keep your email
    address and when you sign in, so you can sign in again. Delete your account any time from your account page."*
    His to word.
+
+**His answers, 2026-10-08**: (1) *"Yes. Let's use Resend"* — the free plan for the launch; (2) **Turnstile**; (3) the
+page of apps one may open, on the grid, as proposed; (4) the account page with deleting one's own account, a fresh code
+first where there is an authenticator; (5) the line on what is kept, as worded.
 
 Settled before and standing: sign-up is open to everyone; a new account is a Member; the admin keeps no login of its own (his, 2026-10-06). The order is this section's five steps above, with
 the challenge switched on before the allowlist's refusal goes, and sign-up last.
