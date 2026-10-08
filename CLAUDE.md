@@ -376,7 +376,13 @@ carry the same commands since 2026-09-23; if they drift again, the file still wi
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "pnpm run build",
   "installCommand": "pnpm install --frozen-lockfile",
-  "regions": ["bom1"]
+  "regions": ["bom1"],
+  "git": {
+    "deploymentEnabled": {
+      "**": false,
+      "main": true
+    }
+  }
 }
 ```
 
@@ -387,7 +393,10 @@ failure that produced the engineering lockfile PRs. **`bom1` (Mumbai) since 2026
 database call a page or an action waited on crossed the world twice — about 200 ms each, and the admin's pages and
 ticks took seconds. Keep the functions beside the database: if the database moves, `regions` moves with it. The one
 thing still in `iad1` is Home's Blob store, `home-house`, which Home reads once a visit; moving it means a new store
-in `bom1` and a `publish:house`, his call.
+in `bom1` and a `publish:house`, his call. **Only `main` deploys, since 2026-10-08, his**: no preview deployment of a
+pull request's branch — CI builds every app on every PR, and the previews were what used up the free plan's daily
+deployments ("Deployment rate limited — retry in 24 hours", which holds production deploys too). A branch that matches
+several patterns deploys if any is `true`; `**`, not `*`, because a branch name here has a `/` and `*` stops at one.
 
 **Which apps a push builds is Vercel's call, not a command's.** All eight projects have *Skip deployments for
 unaffected projects* on (`enableAffectedProjectsDeployments` in the project API): Vercel reads the pnpm workspace
@@ -424,8 +433,8 @@ connected project stays on its last manual deployment until something lands on `
 
 The last two run only when their folder (or the workflow) changed (his, 2026-10-08): a small `What changed` job diffs
 the change, and a job its `if` skips reports success, so the required check passes; when it cannot tell, or fails,
-both run. Warnings pass; errors fail. Vercel's own checks are not required: it skips an app a change does not touch,
-reporting "Skipped - Not affected". **Node is 24
+both run. Warnings pass; errors fail. Vercel's own checks are not required, and since pull requests no longer deploy
+previews (above) they report only on `main`. **Node is 24
 everywhere**: `.nvmrc` for fnm and CI, `engines.node` (`24.x`) in the root and every app's `package.json` for Vercel,
 which reads it from the project's root directory and prefers it to the dashboard.
 
