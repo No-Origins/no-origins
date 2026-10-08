@@ -6,8 +6,9 @@ surface, :3002), `engineering` (engineering.no-origins.com, the engineering publ
 (motion.no-origins.com, the motion studio, :3004, since 2026-09-27), `orbit` (orbit.no-origins.com, :3005, since
 2026-09-30: the agents' appearance, Orbit.md) and `home` (home.no-origins.com, :3006, since 2026-10-02: the model of
 the house he is building, Home.md — the app is in the repository and the house is not: it lives in
-`apps/home/src/content`, gitignored, and in a private Vercel Blob store the site reads behind the sign-in, H4) and `status` (status.no-origins.com, :3007, since 2026-10-03: where every app
-stands, public, Status.md), all Next.js 16; the shared design
+`apps/home/src/content`, gitignored, and in a private Vercel Blob store the site reads behind the sign-in, H4), `status` (status.no-origins.com, :3007, since 2026-10-03: where every app
+stands, public, Status.md) and `auth` (auth.no-origins.com, :3008, since 2026-10-08: the login — signing in, making
+an account, the apps one may open and one's account, Admin.md §8.4 step 5, `apps/auth/CLAUDE.md`), all Next.js 16; the shared design
 system is `packages/ui` (`@no-origins/ui`, **2.0.0** since 2026-09-16), consumed from source. Each app has its own
 CLAUDE.md / AGENTS.md; read them before editing app code.
 
@@ -37,7 +38,8 @@ A page's structure is baked at Publish from the public `publish` bucket and serv
 visit; a component that needs live data declares it, fetches with the anon key through a per-table RLS policy, and has
 a fallback state. The showcase and engineering (Layer A) have no database anywhere near them, and that is deliberate.
 
-`packages/auth` (`@no-origins/auth`) is **the one sign-in** (Admin.md §8.4, amended 2026-09-30, his: "the same auth
+`packages/auth` (`@no-origins/auth`) is **the one sign-in**, and `apps/auth` its one door (step 5 of Access.md A11, being built:
+the app is in; the gates still send people to their own `/sign-in` until each points at it) (Admin.md §8.4, amended 2026-09-30, his: "the same auth
 because it should be same across no origins"): the Supabase clients, the gate (`authGate`, called from each app's
 `proxy.ts`), the callback, the sign-out, the login card and the sign-in screen, consumed from source. One session for
 every app — the cookie is written for `.no-origins.com` — one allowlist, and **roles and permissions being built**
@@ -332,7 +334,7 @@ composer and nothing is edited in place.
 
 ## What builds
 
-**All eight apps build** — `pnpm -r build` is green, and CI's **Build** job builds all eight on every PR. The admin
+**All nine apps build** — `pnpm -r build` is green, and CI's **Build** job builds all nine on every PR. The admin
 builds with no Supabase keys, since its clients are made per request; it stays out of the **review sweep** because
 every route is behind auth and needs a running Supabase, which `pnpm review` does not boot. The motion studio is
 behind the same sign-in since 2026-09-30 and stays in the sweep: its dev server opens when it has no keys (CI, a fresh
@@ -349,27 +351,29 @@ in `.legacy/`, were deleted on 2026-09-23 — git history keeps them.
 
 ## Deploying
 
-Eight Vercel projects under the `no-origins` team, one per app, each with its **Root Directory** set to `apps/<app>`:
+Nine Vercel projects under the `no-origins` team, one per app, each with its **Root Directory** set to `apps/<app>`:
 `no-origins` → portfolio, `design`, `admin`, `engineering`, since 2026-10-03 `status` (status.no-origins.com, by the
 same recipe, with no environment variables: it has no database) and `home` (home.no-origins.com, the same recipe, the
 two `NEXT_PUBLIC_SUPABASE_*` variables as the studios', and the private Blob store `home-house` connected to it, which
 holds the house — Home.md H4; `pnpm --filter home publish:house` fills it), and since 2026-09-30 `motion` and `character` (Orbit's,
 named before it was; since 2026-10-01 its root directory is `apps/orbit` and its domain `orbit.no-origins.com`, with
-`character.no-origins.com` still attached and 308ing to it from `apps/orbit/next.config.ts`), made with
+`character.no-origins.com` still attached and 308ing to it from `apps/orbit/next.config.ts`), and since 2026-10-08
+`auth` (auth.no-origins.com, the login, the same recipe and the same two variables; Turnstile's site key joins them when
+he has made the site; it has no deployment until the PR that brings `apps/auth` merges), made with
 the CLI the night PR #14 merged (`vercel link` from the app's folder creates the project; `vercel project update
 --root-directory`, because link leaves it at `.`; `vercel git connect`; `vercel domains add`; `vercel env add
 --type config` for the two `NEXT_PUBLIC_SUPABASE_*` variables, copied from the admin's — without them production
 answers 503). Production is `main`. The hosted Supabase carries every studio's domain and Home's among its redirect URLs, pushed from `config.toml`
 (supabase/README.md; `orbit.no-origins.com` and `home.no-origins.com` on 2026-10-03 — `config.toml` declares
 production's pooler and storage-analytics values under `[remotes.production]` so a push changes only what was meant).
-*Skip deployments for unaffected projects* is on for all eight; motion, character, status and home had it set on
-2026-10-03, through the project API (`vercel api -X PATCH /v9/projects/<name> --input -` with `enableAffectedProjectsDeployments`) — the CLI
+*Skip deployments for unaffected projects* is on for all nine; motion, character, status and home had it set on
+2026-10-03, and auth on 2026-10-08, through the project API (`vercel api -X PATCH /v9/projects/<name> --input -` with `enableAffectedProjectsDeployments`) — the CLI
 has no flag for it.
 
 **`apps/<app>/vercel.json` is the source of truth, not the dashboard.** A `vercel.json` in a project's root directory
 **overrides** the dashboard's fields, so the commands live in the repo, travel through review, and cannot quietly
 drift apart the way they did through 2026-09-22 (three projects, three different install commands). The dashboards
-carry the same commands since 2026-09-23; if they drift again, the file still wins. All eight files are byte-identical on purpose:
+carry the same commands since 2026-09-23; if they drift again, the file still wins. All nine files are byte-identical on purpose:
 
 ```json
 {
@@ -398,14 +402,14 @@ pull request's branch — CI builds every app on every PR, and the previews were
 deployments ("Deployment rate limited — retry in 24 hours", which holds production deploys too). A branch that matches
 several patterns deploys if any is `true`; `**`, not `*`, because a branch name here has a `/` and `*` stops at one.
 
-**Which apps a push builds is Vercel's call, not a command's.** All eight projects have *Skip deployments for
+**Which apps a push builds is Vercel's call, not a command's.** All nine projects have *Skip deployments for
 unaffected projects* on (`enableAffectedProjectsDeployments` in the project API): Vercel reads the pnpm workspace
 graph and compares against the last deployed commit. A project builds when its own folder changed, when a workspace
-package it depends on changed — `packages/ui` rebuilds all eight, `packages/auth` the admin, motion, Orbit and Home,
+package it depends on changed — `packages/ui` rebuilds all nine, `packages/auth` the admin, motion, Orbit, Home and the login,
 `packages/docs` none — or when a lockfile change moved its own dependencies. PR #5 and PR #7 deployed engineering and
 nothing else, #27 the admin and nothing else, #29 (documents only) nothing. A skipped project shows as *Canceled*,
 "the commit didn't affect this project", not as a missing deployment. **A change outside the workspace is global and
-rebuilds all eight** — Vercel's rule for anything `pnpm-workspace.yaml` does not match: the root's own files
+rebuilds all nine** — Vercel's rule for anything `pnpm-workspace.yaml` does not match: the root's own files
 (`CLAUDE.md`, `AGENTS.md`, `playwright.config.ts`), `.github/`, `.changeset/`, `e2e/`, `services/`. Until 2026-10-08
 `supabase/` was one of them, so nearly every Access PR, because it carried a migration, rebuilt all eight apps
 whatever else it touched (#26, #30, #31), and the builds run one at a time: #31's admin waited in the queue while
@@ -426,7 +430,7 @@ connected project stays on its last manual deployment until something lands on `
 | Job | What it runs |
 |---|---|
 | **Typecheck and lint** | frozen install, `pnpm -r typecheck` (`packages/ui` on its own too), `pnpm -r lint` — `next build` stopped linting in Next 16 |
-| **Build** | `pnpm -r build`, all eight apps, with no env — the one build check a merge can require |
+| **Build** | `pnpm -r build`, all nine apps, with no env — the one build check a merge can require |
 | **Visual review** | `pnpm review` (below); the screenshots and report are uploaded as the run's `review-screenshots` artifact |
 | **Agents tests** | `mix test` in `services/agents`, which no Vercel project builds — **only when `services/agents` changed** |
 | **Database tests** | `supabase start` (the database and auth only), an Owner made through the allowlist, `supabase test db` — the access rules (Access.md), **only when `supabase/` changed** |
@@ -458,8 +462,9 @@ anchored with a leading slash on purpose, because an unanchored `supabase` would
 After any UI change, look at the result before reporting done.
 
 1. `pnpm review` boots the portfolio on :3000, the showcase on :3001, engineering on :3003, the motion studio on
-   :3004, Orbit on :3005, Home on :3006 and Status on :3007 (or reuses running ones), visits every route in `ROUTES`,
-   `DESIGN_ROUTES`, `ENGINEERING_ROUTES`, `MOTION_ROUTES`, `ORBIT_ROUTES`, `HOME_ROUTES` and `STATUS_ROUTES` in
+   :3004, Orbit on :3005, Home on :3006, Status on :3007 and the login on :3008 (or reuses running ones), visits every
+   route in `ROUTES`, `DESIGN_ROUTES`, `ENGINEERING_ROUTES`, `MOTION_ROUTES`, `ORBIT_ROUTES`, `HOME_ROUTES`,
+   `STATUS_ROUTES` and `AUTH_ROUTES` in
    `e2e/review.spec.ts` on desktop
    (1440x900) and mobile (Pixel 7) in both themes, waits for a grid's intro (D50) to hand over, fails on a route that
    answers 400+ or throws, echoes

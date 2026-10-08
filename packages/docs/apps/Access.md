@@ -284,6 +284,12 @@ buckets (`assets`, `publish`); Orbit's server asking for the owner; and gates th
    same day (step 3).
 5. **Only then does sign-up open** (the login host, Admin.md §8.4): the allowlist's refusal goes and the default role
    is given. Never before step 3, or a stranger's account would pass the old gates, which ask only for a session.
+   **Its first part is built (2026-10-08)**: `apps/auth` on :3008, auth.no-origins.com — signing in, making an account
+   (a password, or an email link or code), a forgotten password, the apps one may open (A7) and the account page,
+   with **deleting one's own account** (A2): `…_access_own_account.sql`, `noo_delete_own_account()` — never the Owner's
+   or an agent's, and with an authenticator only after a code from the last five minutes (A12) — and a role going with
+   the account it belonged to, which the guard on `role_assignments` had refused for a role its holder could not grant.
+   The allowlist's refusal still stands: until it goes, only an invited address makes an account.
 6. **Agents**: their accounts, their credentials in the harness, delegations.
 7. **The old goes**: `noo_role`, `profiles.role`, `noo_is`, the allowlist — once nothing reads them.
 

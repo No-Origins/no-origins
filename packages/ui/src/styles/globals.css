@@ -8,9 +8,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Tailwind scans the package's own components and every app that consumes them. Paths are relative to this file. */
+/* Tailwind scans the package's own components, every app that consumes them, and the shared sign-in's screens
+   (`@no-origins/auth`), which every gated app renders — a class only they use was never generated until 2026-10-08.
+   Paths are relative to this file. */
 @source "../**/*.{ts,tsx}";
 @source "../../../../apps/**/*.{ts,tsx}";
+@source "../../../auth/src/**/*.{ts,tsx}";
 
 /* The light tokens are also on `.light`, so a subtree can wear the light theme inside a dark page — the grid's
    theme flip (grid.tsx, Grid.md D28) paints its tiles in the theme being switched TO, before the page has switched.

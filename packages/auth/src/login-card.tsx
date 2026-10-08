@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@no-origins/ui/components/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@no-origins/ui/components/tabs";
@@ -7,18 +7,16 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@no-origins/ui/
 import { Input } from "@no-origins/ui/components/input";
 import { Button } from "@no-origins/ui/components/button";
 import { Alert, AlertDescription, AlertTitle } from "@no-origins/ui/components/alert";
-import { Spinner } from "@no-origins/ui/components/spinner";
-import { FieldSeparator } from "@no-origins/ui/components/field";
-import { KeyRound } from "lucide-react";
+import { ConfirmCard, DeniedCard, PasskeyButton, useNext } from "./cards";
 import { supabaseBrowser } from "./client";
 import { supabaseEnv } from "./env";
-import { safeNext } from "./safe-next";
 import { SecondFactorCard } from "./second-factor";
-import { useWebAuthn } from "./webauthn";
 
 /**
  * The login card (Admin.md §8.4) — composed entirely from `@no-origins/ui`, centered on the grid. Every no-origins
- * app signs in through it, named by `app`, into the one session they share (`cookies.ts`).
+ * app signs in through it, named by `app`, into the one session they share (`cookies.ts`). **Until the gates send
+ * everyone to the auth app** (`auth.no-origins.com`, step 5): its own cards are `cards.tsx`, which this borrows the
+ * link's last step, the no-access card and the passkey from, and this goes with the apps' own sign-in pages.
  *
  * Two ways in, one door:
  * - **Magic link** is the membership path. It says the same thing whatever happens — the allowlist IS the
@@ -33,8 +31,9 @@ import { useWebAuthn } from "./webauthn";
  */
 function LoginCardInner({ app }: { app: string }) {
   const params = useSearchParams();
-  const next = safeNext(params.get("next"));
+  const { next } = useNext();
   const linkFailed = params.get("error") === "link";
+  if (!next) return null;
   const tokenHash = params.get("token_hash");
   const tokenType = params.get("type");
 
@@ -112,110 +111,6 @@ function LoginCardInner({ app }: { app: string }) {
         <PasskeyButton next={next} />
       </CardContent>
     </Card>
-  );
-}
-
-/**
- * Signed in, without the app's permission (Access.md A6). A sign-out is a POST to the app's own `/auth/sign-out`, which
- * signs out of every app and lands on this page's form; the owner gives access from the admin's People page.
- */
-function DeniedCard({ app }: { app: string }) {
-  return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle>No access to {app}</CardTitle>
-        <CardDescription>No Origins · {app}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <FieldGroup>
-          <Alert>
-            <AlertTitle>This account cannot open {app}</AlertTitle>
-            <AlertDescription>
-              You are signed in, but your roles do not include {app}. Sign out to use another account, or ask the owner
-              for access.
-            </AlertDescription>
-          </Alert>
-          <form action="/auth/sign-out" method="post">
-            <Button type="submit" className="w-full">Sign out</Button>
-          </form>
-        </FieldGroup>
-      </CardContent>
-    </Card>
-  );
-}
-
-/**
- * The last step of a magic link: a form that posts the token hash to the callback, submitted the moment it mounts,
- * with its button there for a browser that did not run the script. The action carries the hash in its query, the
- * same place the GET read it, so `authConfirm` reads one shape.
- */
-function ConfirmCard({ app, tokenHash, type, next }: { app: string; tokenHash: string; type: string; next: string }) {
-  const form = useRef<HTMLFormElement>(null);
-  const submitted = useRef(false);
-  const action = `/auth/callback?token_hash=${encodeURIComponent(tokenHash)}&type=${encodeURIComponent(type)}&next=${encodeURIComponent(next)}`;
-
-  useEffect(() => {
-    // Once, whatever React does with effects in development: a second POST would find the hash already spent.
-    if (submitted.current) return;
-    submitted.current = true;
-    form.current?.requestSubmit();
-  }, []);
-
-  return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle>Signing you in</CardTitle>
-        <CardDescription>No Origins · {app}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form ref={form} method="post" action={action}>
-          <FieldGroup>
-            <Button type="submit">
-              <Spinner /> Sign in
-            </Button>
-          </FieldGroup>
-        </form>
-      </CardContent>
-    </Card>
-  );
-}
-
-function PasskeyButton({ next }: { next: string }) {
-  // Only offer the door if the browser can open it. The server may still have passkeys off — that surfaces as
-  // an error on click, not a missing button, which is the right failure for a rare case.
-  const available = useWebAuthn();
-  const [state, setState] = useState<"idle" | "signing">("idle");
-  const [error, setError] = useState<string | null>(null);
-
-  if (!available) return null;
-
-  async function signIn() {
-    setState("signing");
-    setError(null);
-    const supabase = supabaseBrowser();
-    const { error } = await supabase.auth.signInWithPasskey();
-    if (error) {
-      if (!/cancel|abort|NotAllowed/i.test(error.message)) setError("No passkey worked. Use a link or password.");
-      setState("idle");
-      return;
-    }
-    window.location.assign(next);
-  }
-
-  return (
-    <>
-      <FieldSeparator className="my-6">or</FieldSeparator>
-      {error ? (
-        <Alert variant="destructive" className="mb-4">
-          <AlertTitle>Passkey sign-in failed</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
-      <Button variant="outline" className="w-full" onClick={signIn} disabled={state === "signing"}>
-        <KeyRound />
-        {state === "signing" ? "Waiting for your device…" : "Sign in with a passkey"}
-      </Button>
-    </>
   );
 }
 

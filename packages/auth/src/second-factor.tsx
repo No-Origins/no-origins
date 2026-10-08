@@ -14,6 +14,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@no-origins/ui/components
 import { Text } from "@no-origins/ui/components/text";
 
 import { supabaseBrowser } from "./client";
+import { supabaseEnv } from "./env";
 
 /**
  * The second factor (Access.md A12): an authenticator app's six-digit code, which takes a session from `aal1` to
@@ -47,6 +48,11 @@ export function useSecondFactor(): SecondFactor {
   const [state, setState] = React.useState<Omit<SecondFactor, "refresh">>({ status: "checking", authenticators: [], proven: false, locked: false });
 
   const refresh = React.useCallback(async () => {
+    // A development server with no keys has no account to ask about.
+    if (!supabaseEnv()) {
+      setState({ status: "signed-out", authenticators: [], proven: false, locked: false });
+      return;
+    }
     const auth = supabaseBrowser().auth;
     // Nobody signed in is not "authenticator apps are off": say which.
     if (!(await auth.getSession()).data.session) {

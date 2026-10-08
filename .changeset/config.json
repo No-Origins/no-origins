@@ -15,6 +15,7 @@
     "motion",
     "@no-origins/docs",
     "status",
-    "home"
+    "home",
+    "auth"
   ]
 }

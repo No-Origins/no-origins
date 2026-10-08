@@ -37,6 +37,14 @@ export const HOME_ROUTES = ["/"];
 export const STATUS = "http://localhost:3007";
 export const STATUS_ROUTES = ["/"];
 
+/**
+ * The login (Admin.md §8.4, step 5), an eighth, on :3008. With no keys (CI, a fresh clone) its doors say there is
+ * nothing to sign in to and its own pages show nobody; signed in by global-setup.ts, the doors send the browser on to
+ * the apps, which is the screenshot.
+ */
+export const AUTH = "http://localhost:3008";
+export const AUTH_ROUTES = ["/", "/sign-in", "/sign-up", "/forgot", "/account"];
+
 const APPS = [
   { name: "", base: "", routes: ROUTES },
   { name: "design", base: DESIGN, routes: DESIGN_ROUTES },
@@ -45,6 +53,7 @@ const APPS = [
   { name: "orbit", base: ORBIT, routes: ORBIT_ROUTES },
   { name: "home", base: HOME, routes: HOME_ROUTES },
   { name: "status", base: STATUS, routes: STATUS_ROUTES },
+  { name: "auth", base: AUTH, routes: AUTH_ROUTES },
 ];
 
 const slug = (route: string) => (route === "/" ? "home" : route.slice(1).replace(/\//g, "__"));
