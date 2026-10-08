@@ -1,7 +1,7 @@
 "use server";
 
 import { supabaseEnv } from "@no-origins/auth/env";
-import { supabaseServer } from "@no-origins/auth/server";
+import { shown, supabaseServer } from "@no-origins/auth/server";
 import { agentAction, checkActionValues } from "@no-origins/ui/lib/agent-actions";
 import { checkCharacter, resolveCharacter, type CharacterLook } from "@no-origins/ui/lib/agent-body";
 import { checkDrawing, isUploaded, UPLOADED, type DrawingData } from "@no-origins/ui/lib/agent-face";
@@ -24,6 +24,11 @@ import type { PropertyValues } from "@no-origins/ui/lib/properties";
  * The motions that were here (M19, M20) went with M24: their rows, their tabs and their saving.
  *
  * With no Supabase keys every call says `offline`, and the studio keeps an action's values in the browser.
+ *
+ * **An account that may open the studio but not save** (`motion.open` alone — Member, Access.md A4) tries every control
+ * and saves nothing, as Orbit's visitors do (Orbit.md C24): it cannot read drafts, so it is shown each action as it is
+ * published, and each agent as Orbit publishes it; `may` says so, read from the token (Access.md A6), and the
+ * database's rules refuse a write whatever a page does.
  */
 
 export type ActionVersion = { id: string; major: number; minor: number; publishedAt: string };
@@ -43,6 +48,9 @@ export type SavedAction = {
   currentId: string | null;
   current: PropertyValues | null;
 };
+
+/** What this session may do with an action (Access.md A3): save its draft, and publish it. */
+export type ActionsMay = { save: boolean; publish: boolean };
 
 /** What a publish adds to the latest version (C19): one to its minor, or one to its major, at .0. */
 export type PublishStep = "minor" | "major";
@@ -93,16 +101,18 @@ async function readAll(db: Db, only?: string): Promise<Outcome<SavedAction[]>> {
   if (drafts.error) return refused(drafts.error.message);
   if (versions.error) return refused(versions.error.message);
   const actions = items.data.flatMap((item): SavedAction[] => {
-    const draft = drafts.data.find((d) => d.item_id === item.id);
-    const read = draft ? readDraft(draft.data) : null;
-    if (!draft || !read) return [];
     const own = versions.data.filter((v) => v.item_id === item.id);
     const current = own.find((v) => v.id === item.current_version_id);
+    // No draft to read — an account that may not save, by RLS — is the version pages play, or else the newest.
+    const draft = drafts.data.find((d) => d.item_id === item.id);
+    const shownVersion = current ?? own[0];
+    const read = draft ? readDraft(draft.data) : shownVersion ? readDraft(shownVersion.data) : null;
+    if (!read) return [];
     return [{
       id: item.id,
       action: read.action,
       values: read.values,
-      rev: draft.rev,
+      rev: draft ? draft.rev : -1,
       versions: own.map((v) => ({ id: v.id, major: v.number, minor: v.minor, publishedAt: v.published_at })),
       currentId: item.current_version_id,
       current: current ? readDraft(current.data)?.values ?? null : null,
@@ -111,10 +121,13 @@ async function readAll(db: Db, only?: string): Promise<Outcome<SavedAction[]>> {
   return { ok: true, value: actions };
 }
 
-/** The actions as they are saved. */
-export async function loadActions(): Promise<Outcome<SavedAction[]>> {
+/** The actions as they are saved — or, for an account that may not save, as they are published — and what it may do. */
+export async function loadActions(): Promise<Outcome<{ actions: SavedAction[]; may: ActionsMay }>> {
   const { db, error } = await database();
-  return error ?? readAll(db);
+  if (error) return error;
+  const [all, { may }] = await Promise.all([readAll(db), shown(["motion.draft.save", "motion.version.publish"] as const)]);
+  if (!all.ok) return all;
+  return { ok: true, value: { actions: all.value, may: { save: may["motion.draft.save"], publish: may["motion.version.publish"] } } };
 }
 
 /**
@@ -127,12 +140,24 @@ export type PreviewAgent = { id: string; name: string; look: CharacterLook; draw
 export async function loadAgents(): Promise<Outcome<PreviewAgent[]>> {
   const { db, error } = await database();
   if (error) return error;
-  const items = await db.from("studio_items").select("id, name").eq("kind", "character").order("name");
+  const items = await db.from("studio_items").select("id, name, current_version_id").eq("kind", "character").order("name");
   if (items.error) return refused(items.error.message);
   if (!items.data.length) return { ok: true, value: [] };
   const drafts = await db.from("studio_drafts").select("item_id, data").in("item_id", items.data.map((i) => i.id));
   if (drafts.error) return refused(drafts.error.message);
-  const looks = new Map(drafts.data.map((d) => [d.item_id, resolveCharacter(checkCharacter(d.data))]));
+  // Anyone without Orbit's drafts — an account that may only open this studio — sees each agent as Orbit publishes it (C24).
+  const unread = items.data.filter((i) => i.current_version_id && !drafts.data.some((d) => d.item_id === i.id));
+  const published = unread.length
+    ? await db.from("studio_versions").select("id, data").in("id", unread.map((i) => i.current_version_id!))
+    : { data: [] as { id: string; data: unknown }[], error: null };
+  if (published.error) return refused(published.error.message);
+  const looks = new Map([
+    ...drafts.data.map((d) => [d.item_id, resolveCharacter(checkCharacter(d.data))] as const),
+    ...unread.flatMap((i) => {
+      const version = published.data.find((v) => v.id === i.current_version_id);
+      return version ? [[i.id, resolveCharacter(checkCharacter(version.data))] as const] : [];
+    }),
+  ]);
   const wornBy = (look: CharacterLook) =>
     Object.values(look.face).flatMap((wear) => (isUploaded(wear?.style) ? [wear.style.slice(UPLOADED.length)] : []));
   const worn = [...new Set([...looks.values()].flatMap(wornBy))];
