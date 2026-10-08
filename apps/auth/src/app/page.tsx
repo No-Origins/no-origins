@@ -15,7 +15,7 @@ export const metadata = { title: "Your apps" };
 export default async function Apps() {
   const origin = await here();
   const me = supabaseEnv() ? await signedIn() : null;
-  // A token from before the access hook carries no list (none does since 2026-10-06): then the public apps only.
+  // A token with no list of permissions: then the public apps only.
   const perms = me?.perms ?? [];
   const apps: ShownApp[] = NO_ORIGINS_APPS
     .filter((app) => !app.permission || perms.includes(app.permission))

@@ -263,12 +263,10 @@ const ROWS = [
 ];
 
 /**
- * The molecule card — his call, 2026-09-22: "a Responsive card that takes full width in small screens and maybe around
- * 8 cols in large. And then each molecule can be displayed on the card." One width for every molecule: the whole band
- * on a phone and a tablet, two to a row from `lg` up — six columns there, eight (564px) on `xl`. Only the rows differ,
- * so the page reads as two columns of cards instead of boxes of three widths. Each sits in a `card` slot, like the atoms.
- * A molecule keeps its rows on a phone (unlike a `half` of controls, which wraps and takes one more): a card mostly
- * stacks what it holds already, and the probe says which one needs a row there.
+ * The molecule card, his: one width for every molecule — the whole band on a phone and a tablet, two to a row from `lg`
+ * up, six columns there and eight (564px) on `xl`. Only the rows differ, so the page reads as two columns of cards
+ * instead of boxes of three widths. Each sits in a `card` slot, like the atoms. On a phone its rows are `onPhone`'s, the
+ * same height on the phone's narrower cell.
  */
 const CARD = (rows: number): Responsive<Span> => ({
   base: { cols: 6, rows: onPhone(rows) },
@@ -332,7 +330,7 @@ export const MOLECULES: PageContent = {
         id: "header",
         span: band(1),
         variant: "none",
-        render: (placed) => <SectionHeader index="02" label="Molecules · 45 components" title="Atoms with a job to do" cols={placed.colSpan} />,
+        render: (placed) => <SectionHeader index="02" label="Molecules · 46 components" title="Atoms with a job to do" cols={placed.colSpan} />,
       },
       {
         id: "Accordion",
@@ -342,11 +340,11 @@ export const MOLECULES: PageContent = {
             <Accordion type="single" collapsible className="w-full max-w-lg">
               <AccordionItem value="a">
                 <AccordionTrigger>What is in the package?</AccordionTrigger>
-                <AccordionContent>Sixty-three components, the theme, and the `cn` helper. Nothing else.</AccordionContent>
+                <AccordionContent>The components, the grid, the theme, the motion tokens and the `cn` helper.</AccordionContent>
               </AccordionItem>
               <AccordionItem value="b">
                 <AccordionTrigger>Who consumes it?</AccordionTrigger>
-                <AccordionContent>The portfolio, the showcase and the admin — from source, never from a build.</AccordionContent>
+                <AccordionContent>Every app — from source, never from a build.</AccordionContent>
               </AccordionItem>
             </Accordion>
           </Specimen>
@@ -368,12 +366,12 @@ export const MOLECULES: PageContent = {
           <Specimen name="Alert" note="A standing message on the page, not a transient one.">
             <Alert className="max-w-lg">
               <BellIcon />
-              <AlertTitle>The design system was rebuilt</AlertTitle>
-              <AlertDescription>Every component below now comes from shadcn/ui.</AlertDescription>
+              <AlertTitle>Every component here is the one the apps use</AlertTitle>
+              <AlertDescription>Each is imported from @no-origins/ui by its own path.</AlertDescription>
             </Alert>
             <Alert variant="destructive" className="max-w-lg">
-              <AlertTitle>Three apps do not build</AlertTitle>
-              <AlertDescription>Their pages still import the old system.</AlertDescription>
+              <AlertTitle>This block has no content</AlertTitle>
+              <AlertDescription>Add something to it before you publish.</AlertDescription>
               <AlertAction>
                 <Button size="xs" variant="outline">
                   Fix
@@ -416,14 +414,14 @@ export const MOLECULES: PageContent = {
             <AttachmentGroup className="max-w-md">
               <Attachment>
                 <AttachmentContent>
-                  <AttachmentTitle>Design-System.md</AttachmentTitle>
-                  <AttachmentDescription>98 KB</AttachmentDescription>
+                  <AttachmentTitle>Brand.md</AttachmentTitle>
+                  <AttachmentDescription>Markdown</AttachmentDescription>
                 </AttachmentContent>
               </Attachment>
               <Attachment>
                 <AttachmentContent>
-                  <AttachmentTitle>Atomic.md</AttachmentTitle>
-                  <AttachmentDescription>37 KB</AttachmentDescription>
+                  <AttachmentTitle>Grid.md</AttachmentTitle>
+                  <AttachmentDescription>Markdown</AttachmentDescription>
                 </AttachmentContent>
               </Attachment>
             </AttachmentGroup>
@@ -460,10 +458,10 @@ export const MOLECULES: PageContent = {
           <Specimen name="Bubble" note="One turn of a conversation.">
             <BubbleGroup className="w-full max-w-md">
               <Bubble variant="secondary">
-                <BubbleContent>Rebuild the design system on shadcn.</BubbleContent>
+                <BubbleContent>Where do new components come from?</BubbleContent>
               </Bubble>
               <Bubble>
-                <BubbleContent>Sixty-three components installed. Take a look.</BubbleContent>
+                <BubbleContent>The shadcn CLI, run in packages/ui. Never by hand.</BubbleContent>
               </Bubble>
             </BubbleGroup>
           </Specimen>
@@ -505,7 +503,7 @@ export const MOLECULES: PageContent = {
             <Card className="w-80">
               <CardHeader>
                 <CardTitle>Portfolio</CardTitle>
-                <CardDescription>bhargav.no-origins.com</CardDescription>
+                <CardDescription>hiddenstack.no-origins.com</CardDescription>
                 <CardAction>
                   <Badge variant="secondary">Live</Badge>
                 </CardAction>
@@ -858,8 +856,8 @@ export const MOLECULES: PageContent = {
                   <FileTextIcon />
                 </ItemMedia>
                 <ItemContent>
-                  <ItemTitle>Design-System.md</ItemTitle>
-                  <ItemDescription>Updated 16 September</ItemDescription>
+                  <ItemTitle>Brand.md</ItemTitle>
+                  <ItemDescription>The brand</ItemDescription>
                 </ItemContent>
                 <ItemActions>
                   <Button variant="ghost" size="icon-sm" aria-label="More">
@@ -872,8 +870,8 @@ export const MOLECULES: PageContent = {
                   <FileTextIcon />
                 </ItemMedia>
                 <ItemContent>
-                  <ItemTitle>Atomic.md</ItemTitle>
-                  <ItemDescription>Updated 16 September</ItemDescription>
+                  <ItemTitle>Grid.md</ItemTitle>
+                  <ItemDescription>The base layout</ItemDescription>
                 </ItemContent>
                 <ItemActions>
                   <Button variant="ghost" size="icon-sm" aria-label="More">
@@ -1234,7 +1232,7 @@ export const MOLECULES: PageContent = {
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
               <TabsContent value="overview" className="pt-4 text-sm">
-                Three apps, one package, sixty-three components.
+                Nine apps, one package, every component from source.
               </TabsContent>
               <TabsContent value="routes" className="pt-4 text-sm">
                 <code className="font-mono text-xs">/ · /atoms · /molecules</code>

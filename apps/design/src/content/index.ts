@@ -27,16 +27,15 @@ export type SpecimenSection = { id: string; items: SpecimenItem[] };
 
 /**
  * What a showcase page is made of: its sections of specimens with their spans and the box variant they default to.
- * The page is ARRANGED on the field it is shown on, the portfolio's way (Portfolio.md P2, `src/lib/arrange.ts`),
- * since 2026-09-22.
+ * The page is ARRANGED on the field it is shown on, the portfolio's way (Portfolio.md P2, `src/lib/arrange.ts`).
  */
 export type PageContent = {
   title: string;
   sections: SpecimenSection[];
   variant: SlotFill;
   /**
-   * A narrower band than the default 4 · 6 · 8 · 12 · 16 (Portfolio.md P8), per breakpoint, for a page whose items
-   * tile a narrower measure — the overview's three cards divide 12 and not 16. Never wider than the default.
+   * A narrower band than the default 6 · 6 · 8 · 12 · 16 (Portfolio.md P8), per breakpoint, for a page whose items
+   * tile a narrower measure — the overview's two cards divide 12 and not 16. Never wider than the default.
    */
   band?: Partial<Record<GridBreakpoint, number>>;
 };

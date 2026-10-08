@@ -1,12 +1,11 @@
 /**
- * Where the model, its name and the tour's bar stand on the field (Home.md H3: the screen is his to design; this is
- * version 3's placing, nothing decided). The stage takes the field above the two, a column of air each side where the
+ * Where the model, its name and the tour's bar stand on the field (Home.md H3: the screen is his to design; this
+ * placing decides nothing). The stage takes the field above the two, a column of air each side where the
  * field has room and a row of air under it where the field is tall; the name — one `hero`, a row where the field is
  * wide and two where a stop's name wraps — stands right over the bar (his: "keep it right above the player"), and the
  * bar — play, the stops, the speed and the plan — on the last row or rows, all centred. The bar's span is the room its
  * pill may take; the pill itself is as wide as its controls. Counts are even (Grid.md D26), so an even span is
- * centred on a grid line. Version 2 had the guide's card here, two rows of the stop's line and the tour's progress;
- * his, 2026-10-03: the name alone, large.
+ * centred on a grid line.
  */
 
 export type Rect = { col: number; row: number; colSpan: number; rowSpan: number };

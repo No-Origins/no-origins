@@ -5,12 +5,12 @@ import { cn } from "@no-origins/ui/lib/utils";
 import type { Company } from "@/content/resume";
 
 /**
- * A company's mark, straight on the cells it is given — no tile, no ring, no card (Portfolio.md P12, amended
- * 2026-09-25). It fills its box and keeps its proportion inside it: a square mark takes the whole box, a wide wordmark
- * (Radise) its whole width, centred down.
+ * A company's mark, straight on the cells it is given — no tile, no ring, no card (Portfolio.md P12). It fills its box
+ * and keeps its proportion inside it: a square mark takes the whole box, a wide wordmark (Radise) its whole width,
+ * centred down.
  *
- * Where the name is printed beside it (the Work screen) the image is decoration and has no alt of its own; where it
- * is not (the first screen's row of marks, P4), `label` names it.
+ * Where the name is printed beside it (the work) the image is decoration and has no alt of its own; where it is not,
+ * `label` names it.
  */
 export function CompanyLogo({ company, label, className, style }: { company: Company; label?: string; className?: string; style?: CSSProperties }) {
   return (

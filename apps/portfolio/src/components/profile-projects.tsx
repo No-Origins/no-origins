@@ -12,19 +12,12 @@ import { SectionCell, type SectionLabel } from "@/components/cards";
 import { CARD_LINK, LINK_CARD } from "@/components/profile-card";
 import { DUMMY_PROJECTS, PROJECTS, type Project } from "@/content/resume";
 
-/**
- * A project's rows, every project's the same (his, 2026-09-28: "all cards should be of the same height"): its image's
- * two and its name's one (his, 2026-10-01: "expand the card to another row and then in that row we will just place the
- * name of the project"). It was two, the image square at the card's left end and the words beside it.
- */
+/** A project's rows, every project's the same: its image's two and its name's one. */
 const CARD_ROWS = 3;
-/** A project's cells across (his, 2026-10-01: "only two columns width"). */
+/** A project's cells across. */
 const CARD_COLS = 2;
 
-/**
- * The projects that are out first, as the recruiter quick view had them, then the rest as the résumé lists them, then
- * the two dummies (2026-10-01).
- */
+/** The projects that are out first, then the rest as the résumé lists them, then the two dummies. */
 const SHOWN = [...[...PROJECTS].sort((a, b) => Number(!!b.href) - Number(!!a.href)), ...DUMMY_PROJECTS];
 
 /** The section's rows: its label's (with the carousel's arrows, when it turns) and the cards'. */
@@ -36,17 +29,14 @@ const INSET = GRID_SPACING[2];
 const NAME_FOOT = GRID_SPACING[3];
 
 /**
- * The image's radius: the card's, less the inset (his, 2026-09-28: "the border radius of the image and the border
- * radius of the card is not aligning … reduce the border radius a little for the image", then "increase by 1 px" from
- * the card's less the inset and the border's pixel, 21px on a pointer's cell, to 22). Derived from the one radius,
- * never a number of its own (Grid.md D39's second exception).
+ * The image's radius: the card's, less the inset. Derived from the one radius, never a number of its own (Grid.md
+ * D39's second exception).
  */
 const IMAGE_RADIUS = `calc(var(--radius) - ${INSET}px)`;
 
 /**
  * What stands in the image until there are pictures: lime and violet, the two accents, one card's lime over violet and
- * the next's the other way round (his, 2026-09-28: "instead of skeleton, fill it with nice lime and violet
- * gradients" — the no-gradient rule's one exception, Portfolio.md P4). Mixed in oklab through a pale step of each, so
+ * the next's the other way round — the no-gradient rule's one exception, his (Portfolio.md P4). Mixed in oklab through a pale step of each, so
  * the middle is light rather than the grey the two make straight; on the tokens, so they follow the accents.
  */
 const FILLS = [
@@ -55,27 +45,21 @@ const FILLS = [
 ];
 
 /**
- * Grain over the gradient (his, 2026-09-28: "add noise to the gradient"): fractal noise, grey, a 160px tile that
+ * Grain over the gradient: fractal noise, grey, a 160px tile that
  * stitches, at 0.6 and blended `overlay`, so it lightens and darkens the fill around its own colour rather than greying
  * it. An SVG in a data URI, drawn once and tiled.
  */
 const NOISE = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E")`;
 
 /**
- * The projects (Portfolio.md P4, amended 2026-09-28, his: "I also liked what happened with projects cards … we'll add
- * a slot for image but for now use a skeleton", then "the image should be part of the card … inside the border of the
- * card", then "a project card's image will always be same width and height … all cards should be of the same
- * height"): cards two cells wide and three rows tall, each its image over its name (2026-10-01, his: "I did not like
- * the cards … we will keep the image in the cards but remove the text in it, and then let's just expand the card to
- * another row and then in that row we will just place the name of the project", then "I want the cards to take only
- * two columns width and three rows height"), side by side from the column's start **in a carousel** (his, the same
- * hour: "these projects have to be like a carousel not vertically stacked"), the system's `Carousel`, as many at a
- * time as the column holds. Over the cards is the section's label, its first row. **Where there are more cards than
- * the column holds**, the carousel's ‹ and › stand on that row's first and last cells, circles, the label between
- * them; with no label (the phone's tab, which names it) they stand on the row under the cards, with which of how many
- * is first between them. The arrows, a swipe and a drag turn it; ← and → do not, since they move the page's focus
- * (Grid.md D45). Four cards, his two and two dummies, are more than any column holds. The image is a lime and violet
- * gradient until there are pictures (`FILLS`). Where the rows do not hold the label, it goes and the cards stay (P5).
+ * The projects (Portfolio.md P4): cards two cells wide and three rows tall, each its image over its name, all the same
+ * size, side by side from the column's start **in a carousel**, the system's `Carousel`, as many at a time as the
+ * column holds. Over the cards is the section's label, its first row. **Where there are more cards than the column
+ * holds**, the carousel's ‹ and › stand on that row's first and last cells, circles, the label between them; with no
+ * label they stand on the row under the cards, with which of how many is first between them. The arrows, a swipe and
+ * a drag turn it; ← and → do not, since they move the page's focus (Grid.md D45). Four cards, his two and two dummies,
+ * are more than any column holds. The image is a lime and violet gradient until there are pictures (`FILLS`). Where
+ * the rows do not hold the label, it goes and the cards stay (P5).
  */
 export function ProfileProjects({ cols, rows, lead }: { cols: number; rows: number; lead?: SectionLabel }) {
   const m = useGridMetrics();
@@ -155,10 +139,7 @@ function ProjectCount() {
 /**
  * A project's card, `height` tall: its image a step inside the border at the top and the sides — `fill` under `NOISE`
  * for now — and its name under it, centred, a step (`INSET`) from it and `NAME_FOOT` from the card's foot; the image
- * takes the rest. The name stood centred on the card's third row until his note the same day ("there's a lot of space
- * between the image and the title … reduce that gap"), which left the image ending where the second row did and 28px
- * of air over the name. The line, the way out ("Explore the system ↗") and "Not published yet" went (2026-10-01). **A
- * project with a URL is its card**: the card is the link, in a new tab, its border lime under the pointer and the keys'
+ * takes the rest. **A project with a URL is its card**: the card is the link, in a new tab, its border lime under the pointer and the keys'
  * focus, as the address's and GitHub's are (`LINK_CARD`); one without is its image and its name, not a Tab stop.
  */
 function ProjectCard({ project, height, fill }: { project: Project; height: number; fill: string }) {
@@ -170,8 +151,7 @@ function ProjectCard({ project, height, fill }: { project: Project; height: numb
         className="min-h-0 flex-1"
         style={{ borderRadius: IMAGE_RADIUS, backgroundImage: `${NOISE}, ${fill}`, backgroundBlendMode: "overlay, normal" }}
       />
-      {/* The name in `heading` (his, 2026-10-01: "make the titles font in projects a little bigger and bolder"; it was
-          `body`), the next role up. On a card narrower than No Origins needs at it, 109px and its air — a phone's two
+      {/* The name in `heading`. On a card narrower than No Origins needs at it, 109px and its air — a phone's two
           cells — it steps back to the body's size, still semibold, as the address and the degree step (P5). */}
       <div className="@container flex shrink-0 items-center justify-center">
         <Text as="h3" role="heading" className="truncate @max-[112px]:text-sm">

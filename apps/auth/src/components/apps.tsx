@@ -33,8 +33,7 @@ const ICONS: Record<string, LucideIcon> = {
 const CARD: Responsive<Span> = { base: { cols: 3, rows: 2 }, md: { cols: 4, rows: 2 } };
 
 /**
- * The apps a signed-in person may open (Admin.md §8.4 step 5, his: "once they login, we can show all the subdomains to
- * go to"; Access.md A7): the public ones and each gated one whose `<app>.open` they hold — the admin only with
+ * The apps a signed-in person may open (Admin.md §8.4 step 5; Access.md A7): the public ones and each gated one whose `<app>.open` they hold — the admin only with
  * `admin.open`. A card an app on the grid, and their account's. Version 1, his to design.
  *
  * A passkey cannot make an account, so this is where one is offered: straight after a first sign-in, and until the
@@ -62,7 +61,7 @@ export function AppsView({ email, apps }: { email: string | null; apps: readonly
               </div>
             </div>
             <Button variant="outline" onClick={() => void register()} disabled={busy}>
-              {busy ? "Waiting for your device…" : "Add a passkey"}
+              {busy ? "Waiting for your device…" : "Register a passkey"}
             </Button>
           </RecordBox>
         ),

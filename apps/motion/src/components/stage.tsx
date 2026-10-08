@@ -388,7 +388,7 @@ function LoadStage({ family, cols, rows }: StageProps) {
 
   const paint = React.useCallback(
     (frames: LoadFrame[]) => {
-      // The package's painters, which the grid's loader painted with until no page loaded (Grid.md D49): the ring, and the card inside it.
+      // The package's painters (`lib/load-motion`): the ring, and the card inside it.
       frames.forEach((f, j) => {
         paintLoadRing(rings.current[j] ?? null, f, cell);
         const target = targets[j];

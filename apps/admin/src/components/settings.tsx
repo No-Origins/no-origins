@@ -17,8 +17,8 @@ const ROW_COLS = "@min-[600px]:grid-cols-[minmax(0,1fr)_auto_auto]";
 const HEAD_COLS = "@min-[600px]:grid-cols-[minmax(0,1fr)_auto]";
 
 /**
- * Settings (Admin.md §0.5) — the account controls that used to be the whole signed-in landing, on the field: who you
- * are and the way out, your password, then your passkeys and your authenticator apps (Access.md A12), a record each.
+ * Settings (Admin.md §0.5) — the account controls, on the field: who you are and the way out, your password, then your
+ * passkeys and your authenticator apps (Access.md A12), a record each.
  * The self rights of Access.md A2: no permission is asked for any of it.
  */
 export function SettingsView({ email, roles }: { email: string; roles: string[] }) {
@@ -73,8 +73,7 @@ export function SettingsView({ email, roles }: { email: string; roles: string[] 
         span: band(1, 2, 3),
         render: () => (
           <NoteBox title="Passkeys are not available">
-            Either this browser has no authenticator, or passkeys are turned off on the server: enable [auth.passkey] in
-            supabase/config.toml (or the hosted dashboard) and restart.
+            This browser has no authenticator, or the server has passkeys turned off.
           </NoteBox>
         ),
       });
@@ -91,7 +90,7 @@ export function SettingsView({ email, roles }: { email: string; roles: string[] 
         span: band(1, 2, 3),
         render: () => (
           <NoteBox title="Authenticator apps are not available">
-            The server has them off: enable [auth.mfa.totp] in supabase/config.toml (or the hosted dashboard) and restart.
+            The server has them turned off.
           </NoteBox>
         ),
       });

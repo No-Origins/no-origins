@@ -1,34 +1,32 @@
 # No Origins — Brand
 
-*Written 2026-09-09 from the brand interview. Bhargav's words are quoted. Everything else is interpretation — accept, edit or strike it. Nothing visual gets drawn until this is agreed.*
+What No Origins is, its name, who it is for, its character and voice, the five principles every block is checked
+against, and the brand's decisions. Everything visual is downstream of it.
+
+Current as of 2026-10-08. Earlier versions and what they decided are in git history.
 
 ---
 
 ## 1. What No Origins is
 
-**No Origins is Bhargav's playground on the internet — a platform where his ideas, tools, writing and experiments are built as blocks, over time, in the open.**
+**No Origins is Bhargav's playground on the internet — a platform where his ideas, tools, writing and experiments are
+built as blocks, over time, in the open.** It has no fixed list of features; it grows by adding blocks.
 
-In his words:
+Three consequences:
 
-> "A place on the internet for myself to bring together my ideas. It is dreamt to be a playground for all my ideas, products, stories, blogs, articles. The goal is not to have a fixed list of features. But the goal is to create multiple blocks over time on the platform."
-
-> "I want to explore, be curious, create a platform for me that works as my playground, a lab, a concept, experiments, products, tools."
-
-Three consequences that change everything downstream:
-
-1. **The brand is No Origins, not Bhargav.** The portfolio at `bhargav.no-origins.com` is the first block on the platform — not the brand itself.
-2. **The design system is the real product of this exercise.** "Once the design is set in motion, it will be easy for everything else on No Origins to not bother about design."
-3. **Blocks are open-ended.** A portfolio, an article editor, an agents harness, tools for friends. The system has to make a new block feel native on day one, without a new design conversation.
+1. **The brand is No Origins, not Bhargav.** His portfolio, at `hiddenstack.no-origins.com`, is a block on the
+   platform — the first — not the brand itself.
+2. **The design system is the real product.** Once it is set, nothing else built on No Origins has to think about
+   design.
+3. **Blocks are open-ended.** A portfolio, an article editor, an agents harness, tools for friends. The system has to
+   make a new block feel native on the day it ships, without a new design conversation.
 
 ## 2. The name
 
-Bhargav didn't define the name — he described what it's *for*. An offered reading, mine:
+**Open:** what the name means. He has not picked a reading; the work defines it for now (§11, decision 1).
 
-**No Origins means nothing here needs a pedigree.** An idea doesn't need a source, a plan, or permission to start. Anything can begin from anywhere. This fits "not a fixed list of features," fits "explore, be curious," and fits a platform that grows by addition rather than by plan.
-
-The reading I used earlier — void, absence, emergence from darkness — was wrong and is discarded. The name is about **openness**, not emptiness.
-
-> **Decision 1:** does this reading hold? If the name means something else to you, that meaning goes here.
+The reading on offer: **nothing here needs a pedigree.** An idea needs no source, plan or permission to start;
+anything can begin from anywhere. The name is about openness, not emptiness.
 
 ## 3. Who it's for
 
@@ -44,7 +42,8 @@ What all of them should believe within thirty seconds:
 
 > "No Origins is an experiment, playground and a platform of mine. A platform for my curiosity and exploration."
 
-The next action depends on who's looking — "communicate, follow, hire, collaborate or just remember me." So the site does **not** push one call to action. It makes each path visible and low-friction, and lets the visitor pick.
+The next action depends on who is looking — communicate, follow, hire, collaborate or just remember him. So the site
+does **not** push one call to action. It makes each path visible and low-friction, and lets the visitor pick.
 
 ## 4. Character
 
@@ -60,27 +59,34 @@ From the semantic-differential sliders (0 = left pole, 100 = right pole):
 | Craftsperson | **50** | Systems thinker | Both — the tension is the point |
 | Approachable | **0** | Formidable | Maximally approachable |
 
-**Read together: warm, playful, expressive — and quiet.** *Amended 2026-09-09: "bold" and "passion" were added explicitly, which pulls the quiet/loud and restrained/expressive readings toward the louder, more saturated end. Quiet now means uncluttered, not muted.* This is the confidence of something well made, not something loud. Expressiveness goes into colour, shape and motion; quietness governs volume, density and pacing. Approachable at the absolute maximum — nothing intimidates, nothing gatekeeps, nothing shows off.
+**Read together: warm, playful, expressive — and quiet**, where quiet means uncluttered, not muted: *bold* and
+*passion* pull the expressive side toward the louder, more saturated end. This is the confidence of something well
+made, not something loud. Expressiveness goes into colour, shape and motion; quietness governs volume, density and
+pacing. Approachable at the absolute maximum — nothing intimidates, nothing gatekeeps, nothing shows off.
 
-Craft and systems at dead centre is not indecision. Things are made carefully *and* they compose. That is what a block is.
+Craft and systems at dead centre is not indecision. Things are made carefully *and* they compose. That is what a block
+is.
 
 Three words:
 
 - A close friend would say: **Curious, Creative, Happy.**
 - A stranger should leave with: **Love, Curiosity, Warmth.**
-- Added 2026-09-09, in his words, for the brand to display: **Passion, Bold, Curious.**
+- For the brand to display, his: **Passion, Bold, Curious.**
 
-What a visitor should feel on arrival: *"happy, calm, confident, curious — and a feeling of sharing."*
+What a visitor should feel on arrival: happy, calm, confident, curious — and a feeling of sharing.
 
 **Never:** arrogant, mischievous, irresponsible, pessimistic, closed-minded, inconsistent.
 
-Which rules out a lot of what "playful" means on the internet. Here, playful is never ironic, snarky, edgy or self-deprecating-as-humour. Curiosity is generous, not clever. And consistency is a brand value, not a nicety — it's in the anti-list.
+Which rules out a lot of what "playful" means on the internet. Here, playful is never ironic, snarky, edgy or
+self-deprecating-as-humour. Curiosity is generous, not clever. And consistency is a brand value, not a nicety — it is
+in the anti-list.
 
 ## 5. Voice
 
 - **First person, present tense.** "I'm building…" — never "Bhargav is a…"
 - **Plain and warm.** Short sentences. Say what the thing is.
-- **Optimistic by default.** Unfinished things are *in progress*, never apologised for.
+- **Optimistic by default.** Unfinished things are *in progress*, never apologised for, and never "coming soon": say
+  what will be there and why it isn't yet, in plain words, or say nothing.
 - **Invitational.** "Try it." "Tell me what you think." "Come back — this grows."
 - **No hype vocabulary.** No "revolutionary," no "unleash," no "10x." No emoji as punctuation.
 
@@ -95,98 +101,63 @@ Which rules out a lot of what "playful" means on the internet. Here, playful is 
 
 Five, and every block is checked against them.
 
-1. **Blocks, not pages.** Everything on No Origins is a block that can be added, moved or retired. Design so a new block looks native the day it ships.
-2. **Warm by default.** Light, warm ground. A dark theme exists and is cared for, but the brand is a lit room, not a terminal.
-3. **Play without noise.** Expressive colour, soft shapes, motion that delights — at low volume in density, contrast and pace. Confidence, not spectacle.
-4. **Make the making visible.** Process, tools, roadmap, even what's unfinished — show it. Shared curiosity *is* the brand.
-5. **One system, every block.** Same tokens, type, motion and components everywhere. Inconsistency is the one thing this brand can't afford.
+1. **Blocks, not pages.** Everything on No Origins is a block that can be added, moved or retired. Design so a new
+   block looks native the day it ships.
+2. **Warm by default.** Light, warm ground. A dark theme exists and is cared for, but the brand is a lit room, not a
+   terminal. **Open:** the system's ground is shadcn's neutral and the theme follows the device
+   (`defaultTheme="system"`); whether the brand is still light-first is his to say.
+3. **Play without noise.** Expressive colour, soft shapes, motion that delights — at low volume in density, contrast
+   and pace. Confidence, not spectacle.
+4. **Make the making visible.** Process, tools, roadmap, even what is unfinished — show it. Shared curiosity *is* the
+   brand.
+5. **One system, every block.** Same tokens, type, motion and components everywhere. Inconsistency is the one thing
+   this brand can't afford.
 
 ## 7. What the references say
 
-Three things you love, decoded:
+Three sites he loves, and what each says about No Origins:
 
-**[keyavadgama.com](https://keyavadgama.com/)** — *"I like the aesthetics."* Palette and posture. Warm cream ground `#F7F0DF`; a deep plum ink `#190A26`; soft, saturated accents — lime `#E3FF9C`, plums `#FAE7FF` / `#F7CEFF`, peach `#FFAE9E`. One humanist sans throughout. A single left-aligned column with generous space. First-person copy. She shows her own typeface. **Expressive palette, quiet layout** — the exact tension your sliders describe.
+- **[keyavadgama.com](https://keyavadgama.com/)**, for its aesthetics: an expressive palette in a quiet layout, and
+  first-person copy — the tension §4's sliders describe.
+- **[akshitmanik.vercel.app](https://akshitmanik.vercel.app/)**, for its layout and scroll animations: motion is a
+  brand asset, not decoration. And a designer who shipped his own product with AI tools — the maker's story, made
+  visible.
+- **[brober.xyz](https://www.brober.xyz/home)**, for the infinite canvas idea with beautiful components: a navigable
+  space of components rather than a linear page, and a companion who guides visitors through the work.
 
-**[akshitmanik.vercel.app](https://akshitmanik.vercel.app/)** — *"Loved the layout and scroll animations."* Motion is a brand asset to you, not decoration: a page that moves and reveals as you go. Also, a designer who shipped his own product with AI tools — the maker's story, made visible.
+What they share: component-rich, personal and in motion — makers showing their making. None is austere; none is
+ironic.
 
-**[brober.xyz](https://www.brober.xyz/home)** — *"The infinite canvas idea with beautiful components."* A navigable space of components rather than a linear page, and a persona (broberbot) that guides recruiters through the work. Component richness, diagrams, a companion.
+## 8. The visual system, and the agents
 
-**The pattern:** light, warm, component-rich, personal, and in motion. All three are makers showing their making. None are austere; none are dark; none are ironic. This is precisely why the four earlier directions missed — every one of them was dark or severe.
+**The visual system is the design system**, `@no-origins/ui` on shadcn/ui: its rules are the root CLAUDE.md's, and
+its documents are Grid.md (the base layout), Slots.md (the boxes on it), Type.md (text) and Motion.md (how it moves).
+Its accents are lime and violet over shadcn's neutral, and every corner is one cell's circle (Grid.md D39). Fonts are
+each app's to declare, and every app declares the same three: **Inter** (`--font-sans`), **Montserrat**
+(`--font-heading`) and **Geist Mono** (`--font-mono`); the portfolio adds **Anton** as its own `--font-display`.
+**Open:** the fonts were never decided in a document.
 
-## 8. Visual hypotheses
+**Motion is a brand asset, and so it is rationed**: deliberate, never motion for its own sake, and
+`prefers-reduced-motion` is respected everywhere.
 
-"If the brand is this, then…" — direction for the design system, not the system itself.
-
-**Ground.** Warm off-white, light-first. Ink is never pure black — a deep warm plum or charcoal.
-
-**Accent family, not accent colour.** Four or five hues at the *same* lightness and chroma (oklch), varying only in hue. **Each block owns one hue.** Portfolio, editor, agents harness — siblings in one family, told apart by colour. This makes Principle 1 and Principle 5 the same mechanism.
-
-> **Under review (2026-09-09):** "I need more options to choose from." Round 2 of the decision board shows six palette directions, including a duotone and a single-accent option that abandon the family idea. The family is a hypothesis, not a decision.
-
-**Type.** Display: **Bowlby One** — decided 2026-09-09 after Bricolage Grotesque (Claude's recommendation) was rejected. Bhargav's own direction was Phosphate Solid — the blob's shape as letters; macOS-only and licence-bound — and Bowlby One is its closest free relative with more bite: poster-heavy, slightly narrow, retro. One weight, so it lives only at h2 size and above and in the wordmark. Body and UI: **Hanken Grotesk** — decided 2026-09-09; also carries h3 and h4. Code: **JetBrains Mono** (you write code; it will appear). Never Inter, Geist or Arial defaults.
-
-**Shape.** Soft radii (10–16px), generous padding, blocks that are visibly blocks. One shadow level, used sparingly. Not a pill on everything.
-
-**Motion.** Deliberate and a brand asset. Scroll-driven reveals, springy hovers, one orchestrated arrival per block. `prefers-reduced-motion` respected everywhere. Never parallax noise, never motion for its own sake.
-
-**Mark — decided by Bhargav's own sketch, 2026-09-09: the blob.** A pill (rounded rectangle, fully rounded ends) with two dark circular eyes. Outlined in ink it is the logotype — the two O's of the caps wordmark **N[blob]RIGINS** are the blob itself. Filled with a colour it is a character: one per block, one per agent. It is approachable at the maximum, curious by construction (it is *looking*), and it scales from favicon to a canvas full of them. Every mark Claude proposed across two rounds was rejected; this one came from him. **The host — Bhargav himself — has no fill: he is clear glass, refracting the dot grid (Figma: light −45° @ 80%, refraction 80, depth 20, dispersion 50, frost 2). Everyone else is a colour; you can tell which one is him because he is made of the platform.**
-
-**The home screen — from the same sketch.** A dot-grid canvas populated by blob characters in the family colours, speaking in bubbles ("Hey there!!", "What are we doing today?"), with a single chat input at the bottom ("Hey! What's on your mind today?") and the wordmark bottom-right. The blobs are the agents; the canvas is the platform; the input is how you talk to it. This is the agents-harness concept and the brand's front door in one image. **Answered 2026-09-09: both, and it is more than a home.** The canvas is the base layout of every block (Design-System.md §8). The portfolio at `bhargav.no-origins.com` lives entirely on it — about, work, roadmap and contact are panels on a map, not pages — and the same shell carries the agents harness at `no-origins.com`, where this cluster becomes the hub's own scene.
-
-## 9. The portfolio block, v1
-
-**Content reality** (from the matrix): About and Résumé exist. Projects, Writing, Contact, Talks and Visual work are wanted, not yet real. No personal projects ship yet — everything was deliberately deleted for a clean slate.
-
-**What you do have is a strong through-line you said you didn't have.** Reading your work history:
-
-- **Terrible Tiny Tales** — set up the Fambase frontend; built and maintained a tiptap WYSIWYG editor.
-- **Hashnode** — owned Neptune, the tiptap editor, with foundational blocks and an OpenAI integration; core team on the design system.
-- **Dataflix** — GenIQ: full-stack RAG applications; agentic apps with Langchain, Langgraph, Atomic Agents, Autogen.
-- **Radise** — NextAuth migration, Express → Nest, Project Vault (Azure Blob storage layer and file explorer), licensing, LabVIEW/.NET migration using Claude, Next.js performance.
-
-The through-line: **editors, design systems, agent systems, and shipping full-stack.** Your next two blocks — an article editor with publishing, and a cloud agents harness / agent society — sit exactly on that line. That's the story.
-
-**v1 scope — superseded 2026-09-10.** It was: About · Work · Roadmap · Contact, with *Projects* held back until the first one shipped.
-
-**v1 scope — seven sections, 2026-09-10.** Told from the centre outward, because the portfolio is a map (Design-System.md §8.3):
-
-1. **Me** — name, who I am, where I'm based. The centre of the map.
-2. **Current Status** — what I'm looking for, ending in the four ways to reach me. *Contact was folded in here:* "what I want" and "how to reach me" are one thought, not two sections.
-3. **Work Experience** — the four roles.
-4. **Case Studies** — chosen pieces of that work, told as problem → approach → outcome.
-5. **Projects** — my own, once they exist.
-6. **Interests** — what I'm curious about outside the work.
-7. **Philosophy** — how I think about building things.
-
-**Retired: Roadmap.** The editor and the agents harness are *No Origins'* roadmap, not Bhargav's portfolio, and the platform is no longer this domain's job. The content stays in the repo for whenever `no-origins.com` gets built.
-
-**Amended: the empty-section rule.** §9 used to say "no empty section, no 'coming soon.'" Case Studies and Projects now ship **with honest empty states** — Principle 4 says make the making visible *including what is unfinished*, and a portfolio that names the shape of what's coming is more honest than one that hides it. The rule that survives is narrower and still binding: **never "coming soon."** Say what will be there and why it isn't yet, in plain words, or say nothing.
-
-**The ground is a grid of boxes (2026-09-10, evening).** The dot grid of the sketch became large grid lines — boxes of 160 — and every bento cell snaps into a box with a little padding. Layout and ground are the same grid, which is what makes the map feel placed rather than floated. The one blob sits on the origin crosshair.
-
-**Widgets are bento grids (2026-09-10, evening).** From a distance a section is a bento — a grid of cells where every cell does one job: a figure (`4` roles, `0` shipped yet), a word, a glyph, a short list, chips, a photo when there is one. Visual weight comes from scale and colour, never from paragraphs, so the map is something to be curious about rather than something to squint at. **One loud cell per widget**, in the section's hue; the rest recede. The references that set this direction are in `Creatives/Inspirations`; the discipline they share is the purple one's — the eye lands once per grid.
-
-**Pictures are code (2026-09-10, late) — and since 2026-09-11, photographs are allowed alongside them (Bhargav).** The rule that remains is about *illustrations*: a drawing on this platform is written, not drawn by hand and exported. A photograph is a photograph and now has an `Image` component. Illustrations are soft, single-hue, dimensional objects drawn by functions — one hue as a ramp of tones, lit like the blob, matte, no outlines — and the principles, the grammar and the growing library live in **Patterns.md**. A new picture is a few lines against that grammar, never a generated image; one day the blob will be able to draw against it too.
-
-**One blob, not eighteen.** A visitor met eighteen blobs across the old four sections. The blob is the mark for an *agent*, and this portfolio has none — so it is now a single blob: Bhargav's, clear glass, at the centre of the map. It is not decoration held in reserve. A fine-tuned small model will run in the browser to help visitors navigate and ask about him, and that blob is its body: it will travel the canvas, call tools and answer. Everything else that carried a blob (the work cards, the roadmap items, the family row) carries its hue instead.
+**The agents are characters** (Agents.md): each has a name, a paint, a shape and a face of its own, and together they
+are Orbit (§11). They are how a visitor meets the platform and talks to it. What runs behind them is the agents
+harness, `services/agents`: their lifecycle stays on the BEAM, and the browser presents it.
 
 ## 10. Ruled out
 
-Dark-first. Austere monospace-on-black. Irony or edge. Everything centred. Generic dashboard patterns. Per-block redesigns. Placeholder sections.
+Dark-first. Austere monospace-on-black. Irony or edge. Generic dashboard patterns. Per-block redesigns. "Coming soon"
+(§5).
 
 ## 11. Decisions
 
-Round 1 on the decision board, 2026-09-09.
-
-| # | Decision | Status |
+| # | Decision | What stands |
 |---|---|---|
-| 1 | Name reading | **Left open.** Not picked in two rounds; "the work will define it" is the effective decision. Revisit when there is a second block. |
-| 2 | Mark | **The blob — Bhargav's sketch.** Pill with two eyes (96 × 64, eyes 16px, gap 10 — from his Figma); outlined = logotype, filled = character, **clear glass = the host**. Both Claude rounds rejected. Decided. |
-| 3 | Typefaces | **Bowlby One** display (h2+, wordmark) — replaced Bricolage Grotesque 2026-09-09 · **Hanken Grotesk** body, UI, h3/h4 · **JetBrains Mono** code, labels. |
-| 4 | Domain shape · repo shape | **Portfolio first** — ship `bhargav.no-origins.com` now; the platform root and other blocks come when there is a second block. **Monorepo (option B, 2026-09-09):** one `no-origins` workspace; apps are blocks, `packages/ui` is the system, consumed as `workspace:*` inside and published to npm for anything outside — an Elixir + React project included. |
-| 5 | v1 scope | **About · Work · Roadmap · Contact.** Projects, Writing, Talks and Visual wait for their content. Résumé lives inside Work as a download. |
-| + | Colour | **Sketch — decided 2026-09-09.** His own pastels on warm grey: pink, green, grey, lavender, peach, yellow, blue; ink does the pointing. The softest of the eight offered — so *bold* and *passion* come from scale, shape, character and material, not saturation. |
-| + | The agents' name | **Orbit — his, 2026-10-01:** *"Orbit is what we collectively call agents as each agent will have its own name."* Each agent has a name of its own (Agents.md); together they are Orbit, and so is the app where they are made (Orbit.md C21). |
-| + | Material | **Liquid glass — "leaning towards," 2026-09-09.** Translucent frosted surfaces over the dot-grid ground: bubbles, input, nav, panels. Our own warm, soft glass — not a clone of anyone's. Specified in Design-System.md §3. **Superseded 2026-09-16:** *"No more glass effects."* The material is now one flat surface — `--surface`, a `--rule` hairline, one of three elevations — and Design-System.md §3 is the record of both. The interview decision stands as what he said in 2026-09-09; this is what replaced it. |
-
-Everything the system needs is now decided. **Design-System.md** (repo root) specifies it: tokens in oklch with hex fallbacks, the glass material, the blob geometry, type scale, spacing, motion, components, and the `@no-origins/ui` package in the No Origins monorepo.
+| 1 | Name reading | **Open** (§2). The work defines it. |
+| 2 | Mark | **The blob, from his own sketch**: a pill — a rounded rectangle with fully rounded ends — with two dark circular eyes, 96 × 64, eyes 16px, gap 10. Outlined in ink it is the logotype: every app's favicon (`src/app/icon.svg`), and the two O's of the caps wordmark **N[blob]RIGINS**. |
+| 3 | Typefaces | The fonts in use are §8's. **Open:** never decided in a document. |
+| 4 | Domain shape · repo shape | **Each block is an app on its own subdomain of `no-origins.com`** (the root CLAUDE.md lists them); the portfolio was the first. **One monorepo**, the `no-origins` pnpm workspace: apps are blocks and `packages/ui` is the system, consumed from source inside the workspace; anything outside it, an Elixir + React project included, takes it from npm once it is published (it is `private` until then). |
+| 5 | The résumé | **A download**, offered by the portfolio. What else the portfolio holds is Portfolio.md's. |
+| + | Colour | **Lime and violet** are the system's accents (§8); the agents have paints of their own, which nothing else paints with (Orbit.md C20). Widening the system's palette is his call. |
+| + | The agents' name | **Orbit.** Each agent has a name of its own (Agents.md); together they are Orbit, and so is the app where they are made (Orbit.md C21). |
+| + | Material | **Flat.** No glass (his, 2026-09-16): no backdrop blur, frost, refraction or rim light. No gradients (2026-09-16). His exceptions are named where they stand: hyper focus's blur and focus mode's veil, in the motion studio only (Motion.md M13, M14), and the portfolio's project-picture placeholder (Portfolio.md P4). **Open:** translucency over the grid — the dialogs' 20% black overlay — is his to decide. |

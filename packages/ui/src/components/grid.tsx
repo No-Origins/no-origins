@@ -21,7 +21,7 @@ import {
 const GridIntro = React.lazy(() => import("@no-origins/ui/components/grid-intro").then((m) => ({ default: m.GridIntro })))
 
 /**
- * The base layout (Grid.md — v2 since 2026-09-21).
+ * The base layout (Grid.md).
  *
  * One square cell is the unit, and THE CELL IS DECIDED: a breakpoint is two numbers, `cell · gap` (D13, D15). The
  * counts are not decided by anyone — a field is as many whole cells as fit across and down the box it is given
@@ -29,9 +29,8 @@ const GridIntro = React.lazy(() => import("@no-origins/ui/components/grid-intro"
  * own padding is one gutter, so the edge of the screen is one more grid line (D15). When a layout holds more than the
  * field can, the surplus goes to another PAGE (grid-pages.tsx) — never off the edge.
  *
- * The grid is always its box: the viewport (D11). There is no `fill`, because nothing
- * ever holds a grid as a block in a page — "everything will always be on the grid once we are out of the grid
- * editor" — and no `pad`, because the pad IS the gutter.
+ * The grid is always its box: the viewport. There is no `fill`, because nothing ever holds a grid as a block in a
+ * page, and no `pad`, because the pad IS the gutter.
  */
 
 export type GridBreakpoint = "base" | "sm" | "md" | "lg" | "xl"
@@ -50,9 +49,9 @@ export const GRID_BREAKPOINTS: Record<GridBreakpoint, number> = {
 export const BREAKPOINT_ORDER: GridBreakpoint[] = ["base", "sm", "md", "lg", "xl"]
 
 /**
- * Each breakpoint's reference box — Grid-v1.md §4's `Reference box` column, verbatim. A breakpoint is a RANGE, so
- * these are starting points, not the only sizes a page meets: since v2 every width in between is a different field
- * (D12). A page that has to lay itself out before the grid has measured its box assumes one of these.
+ * Each breakpoint's reference box (Grid.md D11). A breakpoint is a RANGE, so these are starting points, not the only
+ * sizes a page meets: every width in between is a different field (D12). A page that has to lay itself out before the
+ * grid has measured its box assumes one of these.
  */
 export const GRID_REFERENCE_BOX: Record<GridBreakpoint, { width: number; height: number }> = {
   base: { width: 390, height: 844 },
@@ -73,8 +72,8 @@ export const GRID_SPACING = [0, 4, 8, 12, 16] as const
 
 /**
  * The pager bar's width in cells when a breakpoint does not name one (Grid.md D27, D29): four cells then ↑ ↓. It
- * lives here rather than in the model because since D29 the width is a config decision like `cell · gap`, checked
- * against §5's principles and recorded in D29. The model imports it from here, as it already imports
+ * lives here rather than in the model because the width is a config decision like `cell · gap`, checked against
+ * Grid.md §5's principles and recorded in D29. The model imports it from here, as it already imports
  * BREAKPOINT_ORDER — the other direction would be a cycle.
  */
 export const PAGER_CELLS = 6
@@ -106,8 +105,8 @@ export const DEFAULT_GRID_CONFIG: GridConfig = {
 export type GridField = {
   /**
    * The breakpoint whose config supplied the cell and gap — the config key, walking down, so a viewport that is `xl`
-   * by width on a config with no `xl` row reports `lg`. It keys the cell (D13) and, until authoring is redecided
-   * (Grid-v2.md §7), the layout's authored pages (v1 D6). It does NOT decide the counts: the box does.
+   * by width on a config with no `xl` row reports `lg`. It keys the cell (D13) and, while authoring is open (Grid.md
+   * §7), the layout's authored pages. It does NOT decide the counts: the box does.
    */
   bp: GridBreakpoint
   /** The side of one square cell, in px — this breakpoint's, from the config (D13), or smaller on a box too narrow for MIN_COLS of them (D33). */
@@ -174,8 +173,7 @@ export function countFor(span: number, cell: number, gap: number) {
 }
 
 /**
- * The fewest columns a field has (Grid-v2.md D33, his, 2026-09-25: "minimum number of columns in any screen should be
- * six"). Four 72px cells on a phone "feel pretty off". Where the decided cell would give fewer, the count is held at
+ * The fewest columns a field has (Grid.md D33): six. Where the decided cell would give fewer, the count is held at
  * six and the cell derives from the width instead — as big as six cells and seven gutters allow, floored, so the
  * field still sits a whole gutter from each edge — and the rows are counted with that cell. The gutter never changes
  * (D13: one texture). Below MIN_CELL the cell stops giving way, so a sliver of a box keeps whatever count fits.
@@ -186,8 +184,8 @@ const MIN_CELL = 24
 /**
  * The field a box of this size gets (D12). Width picks the breakpoint, the breakpoint supplies the cell and gap
  * (D13), and both axes are then simply how many cells fit — except that a field is never fewer than MIN_COLS across
- * (D33), where the cell derives from the width instead. A phone on its side gets more columns than rows with no rule
- * for it — v1's transposition fell out. There is no way to name a breakpoint outright: the box decides (D11).
+ * (D33), where the cell derives from the width instead. A phone on its side gets more columns than rows, with no rule
+ * for it. There is no way to name a breakpoint outright: the box decides (D11).
  */
 export function resolveField(config: GridConfig, width: number, height: number): GridField {
   const spec = specFor(config, breakpointFor(width))
@@ -236,8 +234,7 @@ export type GridProps = Omit<React.ComponentProps<"div">, "children"> & {
   /** Draw the cells behind the items. */
   overlay?: boolean
   /**
-   * Open the page with its agents (Grid.md D50, version 8, 2026-10-01): `introAgents` stand side by side in a row on the
-   * field's middle, in a random order, and those that `bounces` Bounce, each at its own random times, for two seconds;
+   * Open the page with its agents (Grid.md D50): `introAgents` stand side by side in a row on the field's middle, in a random order, and those that `bounces` Bounce, each at its own random times, for two seconds;
    * then each Jumps or Dives, at random, to the centre of the boxes it opens, a small ripple of lit cells spreading round
    * it as it lands; then each Dives home, to its cell of the middle ones in the field's last column, and the boxes it
    * opens fade in once it is gone (Motion.md M22). Each box names the agents that open it (`data-intro-by`, their ids). The
@@ -250,23 +247,22 @@ export type GridProps = Omit<React.ComponentProps<"div">, "children"> & {
   /** How the cast bounces, jumps and dives: each action's values as he published them (M24). One left out, its defaults. */
   introActions?: IntroActions
   /**
-   * The agent in focus, by its id (D50, version 9, 2026-10-03): the page's boxes are its section alone, and it is under
-   * them. The intro ends with it diving into its section's centre and the rest at home; a new one turns the page — the
+   * The agent in focus, by its id (D50): the page's boxes are its section alone, and it is under them. The intro ends with it diving into its section's centre and the rest at home; a new one turns the page — the
    * section fades away as its agent comes home, `onIntroFocus` asks for the next section, and its agent dives out of its
-   * cell, into the centre of those boxes, and they fade in. While a page turns the grid carries `data-intro-turn`. None,
-   * version 8: every agent opens its own boxes and they all go home.
+   * cell, into the centre of those boxes, and they fade in. While a page turns the grid carries `data-intro-turn`. None:
+   * every agent opens its own boxes and they all go home.
    */
   introFocus?: string
-  /** The field is clear for `introFocus`'s section: put its boxes on the field now (version 9). */
+  /** The field is clear for `introFocus`'s section: put its boxes on the field now. */
   onIntroFocus?: (agent: string) => void
   /**
-   * Where the agent in focus stands, a cell placed as a box is, 1-based (version 9, 2026-10-03, his: "put the agent in
-   * the bottom third row in the large screen"). None, the cell below its section, at its centre.
+   * Where the agent in focus stands, a cell placed as a box is, 1-based (D50). None, the cell below its section, at its
+   * centre.
    */
   introFocusAt?: { col: number; row: number }
   /**
-   * An action for an agent to play where it rests, played each time `key` changes (version 9, 2026-10-03, his: "When we
-   * click on the agent, add bounce"): once the intro is over, when no page is turning and the agent is not in the air.
+   * An action for an agent to play where it rests, played each time `key` changes (D50): once the intro is over, when no
+   * page is turning and the agent is not in the air.
    */
   introAct?: { agent: string; action: IntroActionId; key: number }
   /**
@@ -395,8 +391,8 @@ function Grid({
             >
               {children}
             </div>
-            {/* The intro's agents (D50): over the page's boxes, on the field, as it plays and, since version 8, resting
-                in their cells in the last column once it is over. */}
+            {/* The intro's agents (D50): over the page's boxes, on the field, as it plays, and resting in their cells
+                at home once it is over. */}
             {(intro.phase || intro.settled) && root ? (
               <React.Suspense fallback={null}>
                 <GridIntro
@@ -424,25 +420,20 @@ function Grid({
   )
 }
 
-// ── the field (Grid-v2.md D38, 2026-09-25) ──────────────────────────────────────────────────────────────────────
+// ── the field (Grid.md D38) ─────────────────────────────────────────────────────────────────────────────────────
 
-/**
- * How long a lit cell takes to fade back, in ms: the pointer's cell when the pointer leaves it (D34). It was the intro's
- * lines' fade (D31), his 500ms, until the drawing went (D48).
- */
+/** How long a lit cell takes to fade back, in ms: the pointer's cell when the pointer leaves it (D34), and a ripple's. */
 const LIT_FADE_MS = 500
 /**
- * The field's painter still takes the lace (grid-field.ts, D40): the gap between a cell's disc and its tile in the
- * intro's reveal. Nothing sends it a reveal since D48, so it cuts nothing.
+ * The field's painter still takes the lace (grid-field.ts, D40): the gap between a cell's disc and its tile in a
+ * reveal. Nothing sends it a reveal, so it cuts nothing.
  */
 const LACE_MS = 90
 
 /**
- * The field's paint (Grid-v2.md D38, 2026-09-25): the overlay's dashes, the pointer's cell and the intro's ripples
- * (D50, version 3), on canvases one painter draws (`lib/grid-field.ts`), in a worker wherever the browser can hand it a
- * canvas. They were about 1,300 elements; the ripple between pages was painted here too, until D48 took it out. The
- * grid tells the painter the field, the theme's colours, the pointer's cell and the intro's passes; the painter keeps
- * time itself.
+ * The field's paint (Grid.md D38): the overlay's dashes, the pointer's cell and the intro's ripples (D50), on canvases
+ * one painter draws (`lib/grid-field.ts`), in a worker wherever the browser can hand it a canvas. The grid tells the
+ * painter the field, the theme's colours, the pointer's cell and the intro's passes; the painter keeps time itself.
  */
 function useGridField(enabled: boolean, metrics: GridMetrics | null, rootRef: React.RefObject<HTMLDivElement | null>, overlay: boolean) {
   const on = enabled && !!metrics
@@ -532,8 +523,8 @@ function useGridField(enabled: boolean, metrics: GridMetrics | null, rootRef: Re
       },
       /**
        * Light the field's cells in one of the painter's colours (0 lime, 1 violet): each at `zero + delays[i]`, epoch
-       * ms — Infinity, never — fading over LIT_FADE_MS as the pointer's does: the intro's ripples (D50; version 1's rings
-       * out to the far corner, version 3's a few round each agent's nest).
+       * ms — Infinity, never — fading over LIT_FADE_MS as the pointer's does: the intro's ripples (D50), a few cells
+       * round each agent's nest.
        */
       pass(delays: Float64Array, span: number, zero: number, layer: number) {
         painter.current?.post({ type: "pass", layer, delays, span, zero })
@@ -565,8 +556,8 @@ function useDevicePixelRatio() {
 /**
  * The painter's colours, from the theme's tokens as the grid resolves them: the overlay's dashes are `--border` at 70%
  * (its `border-border/70`), the pointer's cell `--violet` (D43), and the page's own `--background`. The lines (`--lime`,
- * `--violet`) and their glow are what the painter drew the intro's passes in; it still takes them. A canvas takes any
- * colour CSS can write, and a pixel of one turns each into plain RGBA to send.
+ * `--violet`) are the painter's two pass colours, the intro's ripples among them; the glow is 0, since nothing on the
+ * field glows. A canvas takes any colour CSS can write, and a pixel of one turns each into plain RGBA to send.
  */
 let colourProbe: CanvasRenderingContext2D | null = null
 function readFieldColours(root: HTMLElement): FieldColours {
@@ -591,10 +582,10 @@ function readFieldColours(root: HTMLElement): FieldColours {
   }
 }
 
-// ── the intro (Grid-v2.md D50, 2026-09-30) ─────────────────────────────────────────────────────────────────────
+// ── the intro (Grid.md D50) ────────────────────────────────────────────────────────────────────────────────────
 
 /**
- * Once per document load (D31's rule, kept): a navigation that mounts another grid does not play it again; a reload
+ * Once per document load (D50): a navigation that mounts another grid does not play it again; a reload
  * does. Set only in the browser, so the server's render always holds the page back.
  */
 let introPlayed = false
@@ -602,12 +593,12 @@ let introPlayed = false
 type IntroPhase = "agent" | "reveal"
 
 /**
- * The intro's state (D50, his, 2026-09-30; versions 2 and 3 2026-10-01): "agent" from the server's first render on — the page's
- * boxes held back by globals.css, but for the ones the agents are opening — while they play (`GridIntro`), then
- * "reveal" as the grid lets go of the boxes (at once, since version 2: they came in as they opened), then over. Reduced motion, or a
- * document that has played it, skips it before the first measured frame paints. A new box mid-intro — a phone's bar
- * sliding away, a window resized — hands straight over rather than going on on a field it did not start on. Over or
- * skipped, it is `settled` (version 8): the agents rest in their cells on whatever field the grid has.
+ * The intro's state (D50): "agent" from the server's first render on — the page's boxes held back by globals.css, but
+ * for the ones the agents are opening — while they play (`GridIntro`), then "reveal" as the grid lets go of the boxes
+ * (at once: each came in as it opened), then over. Reduced motion, or a document that has played it, skips it before
+ * the first measured frame paints. A new box mid-intro — a phone's bar sliding away, a window resized — hands straight
+ * over rather than going on on a field it did not start on. Over or skipped, it is `settled`: the agents rest in their
+ * cells on whatever field the grid has.
  */
 function useGridIntro(enabled: boolean, metrics: GridMetrics | null) {
   // The same on the server and in the browser's first render, so hydration matches.
@@ -638,26 +629,20 @@ function useGridIntro(enabled: boolean, metrics: GridMetrics | null) {
   const done = React.useCallback(() => setPhase(null), [])
   // How long the boxes take to come in, for globals.css.
   const style = phase === "reveal" ? ({ "--grid-intro-reveal": `${revealMs}ms` } as React.CSSProperties) : undefined
-  // Over, or skipped: the agents rest in their cells (version 8).
+  // Over, or skipped: the agents rest in their cells.
   const settled = enabled && !phase
   return { phase, reveal, done, style, settled }
 }
 
-// ── the cursor (Grid-v2.md D34, 2026-09-25) ──────────────────────────────────────────────────────────────────────
+// ── the cursor (Grid.md D34) ─────────────────────────────────────────────────────────────────────────────────────
 
 /**
- * His ask: "make the cursor transparent line bordered circle and it should fill when clicked. Every cell on the grid
- * should turn its border to line. Whenever the cursor is on it." Asked, "line" was lime. A solid line for an afternoon,
- * then the cell's own dashes (his, the same day: "we should still have it dashed border for cells when cursor is over
- * them. Like what we have as default for cells"). Violet since D43 (2026-09-26), the ring's colour and then the cell's.
- * A cell the pointer leaves fades back over LIT_FADE_MS, the way a line the intro drew did (D31); the one it is on is
- * lit at once.
+ * The pointer is a ring with a violet line that fills while pressed, and the cell under it turns its own dashes violet
+ * (D34, D43). A cell the pointer leaves fades back over LIT_FADE_MS; the one it is on is lit at once.
  *
- * The ring is the system's cursor, drawn from an image (globals.css), since the evening it was built. It was a div the
- * page moved on every pointer move, and each move cost the main thread a whole-page layerize — about 1ms on an
- * M-series Mac, several on a slower laptop (measured 2026-09-25, looking into his report of a jitter over the avatar)
- * — and it trailed the hand by at least a frame, more whenever the page was busy. An image cursor is drawn by the
- * system, where the hand is, and costs the page nothing.
+ * The ring is the system's cursor, drawn from an image (globals.css), never a div moved on every pointer move: that
+ * cost the main thread a whole-page layerize a move and trailed the hand by at least a frame. An image cursor is drawn
+ * by the system, where the hand is, and costs the page nothing.
  */
 
 /**
@@ -666,7 +651,7 @@ function useGridIntro(enabled: boolean, metrics: GridMetrics | null) {
  * page: the painter has the field's numbers, paints in a worker, and draws the cell's ring in violet, over the lines and
  * under the page's boxes (D38, D40). The cell is found from the field's numbers,
  * not by hit-testing, so it lights under a card as well (where the card hides it); the gutter between two cells lights
- * nothing, and since D40 nor do the corners of a cell's square outside its circle. Only where the device can hover with
+ * nothing, nor do the corners of a cell's square outside its circle (D40). Only where the device can hover with
  * a fine pointer; a touch on a hybrid screen is ignored.
  */
 function useGridCursor(enabled: boolean, metrics: GridMetrics | null, rootRef: React.RefObject<HTMLDivElement | null>, field: FieldHandle) {
@@ -713,9 +698,9 @@ function useGridCursor(enabled: boolean, metrics: GridMetrics | null, rootRef: R
       const dx = x - col * pitch - cell / 2
       const dy = y - row * pitch - cell / 2
       const inCell = x >= 0 && y >= 0 && x < gridW && y < gridH && dx * dx + dy * dy < (cell / 2) * (cell / 2)
-      // A page may still the pointer's cell while `data-cursor-still` is on the grid: the portfolio's card in focus
-      // (Portfolio.md P18), whose blur over the field would smear a lit cell and be redrawn whole for every frame of its
-      // fade (Motion.md M13). The ring is still the pointer.
+      // A page may still the pointer's cell while `data-cursor-still` is on the grid: the motion studio's hyper focus
+      // and focus mode (Motion.md M13, M14), whose blur over the field would smear a lit cell and be redrawn whole for
+      // every frame of its fade. The ring is still the pointer.
       light(inCell && !root.hasAttribute("data-cursor-still") ? row * cols + col : -1)
     }
     const leave = () => light(-1)
@@ -736,8 +721,8 @@ function useGridCursor(enabled: boolean, metrics: GridMetrics | null, rootRef: R
 /**
  * The sheet's fall, in seconds — the one beat, down over the field. Mine; `FLIP_TEMPO` stretches it (1 is the
  * designed pace; raise it to watch slowly). The wave on the sheet's leading and trailing edge: its full height in px,
- * how many crests it may have — "we should just have 2 to 5 different sized crests", 2026-09-22 — and how it moves:
- * it drifts one full width sideways in `1 / WAVE_DRIFT` beats and breathes in height every `WAVE_BREATH` seconds.
+ * how many crests it may have — two to five, of different sizes (D28) — and how it moves: it drifts one full width
+ * sideways in `1 / WAVE_DRIFT` beats and breathes in height every `WAVE_BREATH` seconds.
  */
 const FLIP_TEMPO = 1
 const FALL_MS = 0.9 * FLIP_TEMPO
@@ -775,23 +760,14 @@ function wavePath(crests: Crest[]) {
 }
 
 /**
- * The theme change as a SHEET OF PAINT falling down the field (Grid-v2.md D28). It began on 2026-09-21 as cells
- * flipping row by row, became a wave of columns with gutters filling to the average of their neighbours, then cells
- * filling from the top — and on 2026-09-22, having watched that slowed down: "I didn't like this too. I'm thinking we
- * should just make it like a paint sheet falling down."
- *
- * So: one sheet, the size of the grid's box, in the NEW theme's colours — the layer wears that theme's class, and
- * globals.css puts the light tokens on `.light` as well as `:root` for exactly this. The sheet is PLAIN paint: it
- * carried the new theme's empty field for a day, the cells drawn on it, and he took that off ("looks like the sheet
- * has grids on it. It should not", 2026-09-22) — the grid is what the paint reveals, not what it carries. Its
- * bottom edge is a WAVE, sharp — "instead of blurred edge, make it sharp; instead of straight bottom, let's make it
- * like a wave", 2026-09-22 — two to five crests of different sizes, drawn afresh at every toggle, moving as it falls
- * ("dynamic waves"); its top edge is the same wave turned over, for the moment it shows. ONE beat: the sheet falls from
- * above the box until it covers it, gathering speed the way a thing falls; the theme is committed under the cover and
- * the sheet DISSOLVES — it is the new page's own background, so its fade is the content coming through. It kept
- * falling off the bottom for a second beat at first, and the wait read as broken; then it was removed on the spot,
- * and he asked for the dissolve (2026-09-22). One element moves, on a transform and then opacity, so nothing lays
- * out and nothing repaints.
+ * The theme change as a SHEET OF PAINT falling down the field (Grid.md D28). One sheet, the size of the grid's box, in
+ * the NEW theme's colours — the layer wears that theme's class, and globals.css puts the light tokens on `.light` as
+ * well as `:root` for exactly this. The sheet is PLAIN paint, no cells drawn on it: the grid is what the paint reveals,
+ * not what it carries. Its bottom edge is a sharp WAVE, two to five crests of different sizes, drawn afresh at every
+ * toggle and moving as it falls; its top edge is the same wave turned over, for the moment it shows. ONE beat: the
+ * sheet falls from above the box until it covers it, gathering speed the way a thing falls; the theme is committed
+ * under the cover and the sheet DISSOLVES — it is the new page's own background, so its fade is the content coming
+ * through. One element moves, on a transform and then opacity, so nothing lays out and nothing repaints.
  * GSAP drives it (packages/ui/CLAUDE.md rule 7). Reduced motion switches at once; a toggle during a fall is ignored.
  * The names here — flip, flipper — keep the word he first used for the whole motion.
  */
@@ -844,9 +820,8 @@ function GridThemeFlip() {
       },
     })
     // One fall, then a dissolve: the moment the sheet covers the box the theme is committed under it, and the sheet
-    // fades away — "instead of immediately removing, dissolve it", 2026-09-22 — so the new page comes through the
-    // paint. It used to keep falling off the bottom for a second beat: "it feels like something is broken as the user
-    // is waiting". The sheet is the new page's own background, so the dissolve is the content fading in.
+    // fades away, so the new page comes through the paint. The sheet is the new page's own background, so the dissolve
+    // is the content fading in.
     tl.set(el, { y: -m.boxH - WAVE_H, opacity: 1 })
       .to(el, { y: 0, duration: FALL_MS, ease: "power2.in" })
       .call(() => {

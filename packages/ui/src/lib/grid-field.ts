@@ -1,30 +1,21 @@
 /**
- * The field's paint (Grid-v2.md D38, 2026-09-25): the cells' dashes (the overlay), the lines the intro and the ripple
- * light (D31, D32) and the cell under the pointer (D34) — drawn on two canvases by ONE painter, in a worker wherever the
- * browser can hand a canvas to one, else on the main thread. The intro's cover stays in the DOM (grid.tsx): it has to
- * be there before any script runs, and its tiles are cheap.
- *
- * Until D38 each of those was hundreds of elements: a div per cell for the overlay, two per cell for each of the two
- * line colours and one per cell for the cursor — about 1,300 on a desktop — and every cell the intro or a ripple drew
- * was a CSS animation, so a pass was 216 new compositor layers at once, in the page's
- * busiest second, and every pass after the first was handed out cell by cell from a frame loop on the main thread. On
- * a cold load in WebKit that cost 100–250ms of the main thread's frames (measured, `e2e/.mcp/intro-cost.mjs`), and a
- * busy main thread made the handed-out cells miss their turn: the front went missing in the middle and came back at the
- * end (his report, the same day). Painted, the field is two canvases, and a pass is one message: the painter keeps
- * its own clock, and from a worker it keeps it whatever the main thread is doing.
+ * The field's paint (Grid.md D38): the cells' dashes (the overlay), the cells the intro's ripples light (D50) and the
+ * cell under the pointer (D34) — drawn on two canvases by ONE painter, in a worker wherever the browser can hand a
+ * canvas to one, else on the main thread, so the page's own loading on the main thread cannot stall it. A pass of lit
+ * cells is one message, and the painter keeps its own clock.
  *
  * `gridFieldPainter` must stay SELF-CONTAINED — no imports, nothing from this module's scope — because the worker runs
- * it from its own source text (`workerSource`). What it needs arrives in messages: the field, the colours, the timing
- * of each pass as the per-cell delays the main thread's plan computed (grid.tsx, `ripplePlan`), so the lines, the
- * cover and the wash (D37) share one plan and one clock — the epoch in ms (`timeOrigin + now`), the same in a worker.
+ * it from its own source text (`workerSource`). What it needs arrives in messages: the field, the colours, and each
+ * pass as per-cell delays on one clock — the epoch in ms (`timeOrigin + now`), the same in a worker.
  *
- * A cell is a circle (D40, 2026-09-26): its dashes run round the circle inside its square, and what the front reaches
- * first is that circle — the intro uncovers a disc, then, `lace` ms later, the rest of the cell's tile, so the front
- * leaves a lace of round holes behind it, as the wash does (grid.tsx, `washAway`). A circle cannot tile the box, and
- * the second step is what leaves nothing of the cover behind.
+ * A cell is a circle (D40): its dashes run round the circle inside its square. The painter still takes a reveal — each
+ * cell's disc uncovered first, then, `lace` ms later, the rest of its tile — which nothing sends today.
  */
 
-/** How far the lines' canvas runs past the field on every side, in px: room for the glow, 16px on light (D31). */
+/**
+ * How far the lines' canvas runs past the field on every side, in px: the margin each lit cell's sprite is drawn with
+ * (`makeSprites`), room for a glow the grid sets to 0.
+ */
 export const FIELD_PAD = 32
 
 export type FieldGeometry = {
@@ -34,7 +25,7 @@ export type FieldGeometry = {
   gap: number
   gridW: number
   gridH: number
-  /** The grid's box, and where the field sits in it: the dashes' canvas is the box, the intro reveals all of it. */
+  /** The grid's box, and where the field sits in it: the dashes' canvas is the box, and a reveal uncovers all of it. */
   boxW: number
   boxH: number
   fx: number
@@ -50,11 +41,11 @@ export type FieldColours = {
   dash: FieldRgba
   /** The lit lines, one per pass colour, turn about: `--lime`, `--violet`. */
   lines: FieldRgba[]
-  /** The glow's blur, in px: `--grid-intro-glow`. */
+  /** The lit cells' glow, its blur in px. The grid sends 0: nothing on the field glows. */
   glow: number
   /** The pointer's cell (D34, D43): `--violet`. */
   cursor: FieldRgba
-  /** The page's own colour, `--background`: what the intro reveals, tile by tile, over the grid's cover colour. */
+  /** The page's own colour, `--background`: what a reveal paints, tile by tile. */
   ground: FieldRgba
 }
 
@@ -66,15 +57,13 @@ export type FieldMessage =
   | { type: "overlay"; on: boolean }
   /**
    * One pass on a colour: each cell is lit at `zero + delays[i]` and fades over `fade`; a cell whose delay is Infinity
-   * is not lit (the intro's ripples, D50 version 3, light a few cells round a nest).
+   * is not lit (the intro's ripples, D50, light a few cells round a nest).
    */
   | { type: "pass"; layer: number; delays: Float64Array; span: number; zero: number }
   /**
-   * The intro's reveal (D31): while it runs the grid wears the cover's colour (`--grid-intro-from`, globals.css), and at
-   * `zero + delays[i]` each cell's disc is painted back in the page's own colour and its dashes drawn, and `lace` ms
-   * later the rest of its tile (D40) — the cover lifting, on the painter's clock, with nothing from the main thread in
-   * the way. `delays` omitted: the intro is over and the grid has its own colour again, so what was painted for it need
-   * not be any more.
+   * A reveal, which nothing sends today: at `zero + delays[i]` each cell's disc is painted in the page's own colour and
+   * its dashes drawn, and `lace` ms later the rest of its tile (D40), on the painter's clock. `delays` omitted: the
+   * reveal is over, and what was painted for it is cleared.
    */
   | { type: "reveal"; delays?: Float64Array; span?: number; zero?: number }
   /** The pointer's cell, −1 for none; the one it leaves fades over `fade` ms from `at`. */
@@ -114,7 +103,7 @@ export function gridFieldPainter(scope: PainterScope) {
       return at(y1, y2, s)
     }
   }
-  // The lines' fade, as their keyframes had it (globals.css until D38), and the cursor's `ease-out`.
+  // The lit cells' fade, and the cursor's `ease-out`.
   const lineEase = bezier(0.37, 0, 0.63, 1)
   const cursorEase = bezier(0, 0, 0.58, 1)
 
@@ -149,8 +138,7 @@ export function gridFieldPainter(scope: PainterScope) {
   /**
    * One cell's ring, added to the current path in device px (D40): the circle through the middle of the cell's
    * outermost pixel ring, where a 1px border would have run, starting half a dash before the top so a dash is centred
-   * there. Stroked with `strokeRings`. Until D40 it was the square's own 3px dashes, as the engines draw a `dashed`
-   * border, each edge snapped to a device pixel; a circle has no pixel to snap to and is drawn antialiased.
+   * there. Stroked with `strokeRings`; a circle has no pixel to snap to, so it is drawn antialiased.
    */
   const ring = (ctx: Ctx, x: number, y: number, s: number) => {
     const dpr = g!.dpr
@@ -180,7 +168,7 @@ export function gridFieldPainter(scope: PainterScope) {
 
   /**
    * A cell's tile in the box, in device px: the cell and half the gutter round it, the outer ones running to the box's
-   * edge, snapped so neighbours share an edge and no seam shows. The intro reveals the box a tile at a time.
+   * edge, snapped so neighbours share an edge and no seam shows. A reveal uncovers the box a tile at a time.
    */
   const tile = (i: number) => {
     const { cols, rows, cell, gap, boxW, boxH, fx, fy, dpr } = g!
@@ -194,7 +182,7 @@ export function gridFieldPainter(scope: PainterScope) {
     return [x0, y0, px(edge(c + 1, cols, fx, boxW)) - x0, px(edge(r + 1, rows, fy, boxH)) - y0] as const
   }
   /**
-   * A cell's disc in the box, in device px — centre and radius: the circle the front uncovers first (D40), half a pitch
+   * A cell's disc in the box, in device px — centre and radius: the circle a reveal uncovers first (D40), half a pitch
    * across so neighbouring discs touch in the middle of the gutter, and inside the cell's tile.
    */
   const disc = (i: number) => {
@@ -210,7 +198,7 @@ export function gridFieldPainter(scope: PainterScope) {
   const shownCells = () => (reveal && g && reveal.shown.length === g.cols * g.rows ? reveal.shown : null)
 
   /**
-   * Paint these cells: while the intro is on, the discs of `discs` and the tiles of `tiles` in the page's colour; then
+   * Paint these cells: while a reveal is on, the discs of `discs` and the tiles of `tiles` in the page's colour; then
    * all their rings, if the overlay is on. A tile covers its own ring, so a ring is drawn again after its tile, and
    * neither a disc nor a tile reaches another cell's ring.
    */
@@ -232,7 +220,7 @@ export function gridFieldPainter(scope: PainterScope) {
 
   /**
    * The field's canvas, whole — the box: every cell's ring at rest, when the field, the colours or the overlay change;
-   * while the intro is on, only what it has revealed, the rest as its moment comes (`paintReveal`).
+   * while a reveal is on, only what it has revealed, the rest as its moment comes (`paintReveal`).
    */
   const paintField = () => {
     if (!fieldCv || !g) return
@@ -251,7 +239,7 @@ export function gridFieldPainter(scope: PainterScope) {
     paintCells(ctx, discs, tiles)
   }
 
-  /** The intro's reveal, this frame: every disc and every tile whose moment has come since the last. True until the last. */
+  /** A reveal, this frame: every disc and every tile whose moment has come since the last. True until the last. */
   const paintReveal = (now: number) => {
     if (!reveal || reveal.done) return false
     const t = now - reveal.zero
@@ -279,11 +267,10 @@ export function gridFieldPainter(scope: PainterScope) {
   }
 
   /**
-   * One lit cell per line colour, painted once and stamped wherever the cell is lit: the glow as the cell's box-shadows
-   * had it (globals.css until D38) — outside the cell, 1/3 of the blur at 12% and the whole blur at 30%, and the same two
-   * inside it — and the ring in the line's colour on top. Since D40 the cell the glow is cast by is its circle, so it
-   * glows round, as a ring does. A shadow is cast by a shape thrown off the sprite, so only the shadow lands on it; the
-   * outer ones are clipped to outside the circle and the inset ones to inside its line.
+   * One lit cell per line colour, painted once and stamped wherever the cell is lit: its glow, when `glow` is above 0 —
+   * outside the cell's circle, 1/3 of the blur at 12% and the whole blur at 30%, and the same two inside it — and the
+   * ring in the line's colour on top. A shadow is cast by a shape thrown off the sprite, so only the shadow lands on it;
+   * the outer ones are clipped to outside the circle and the inset ones to inside its line.
    */
   const makeSprites = () => {
     if (!g || !colours) return
@@ -347,8 +334,8 @@ export function gridFieldPainter(scope: PainterScope) {
     const { cols, rows, dpr } = g
     const pitch = g.cell + g.gap
     let busy = false
-    // While the intro reveals the box, a line and its glow show only on the discs and tiles already revealed, as they
-    // did when the cover was over them: nothing lights the cover's colour ahead of the front.
+    // While a reveal is on, a lit cell shows only on the discs and tiles already revealed: nothing lights ahead of the
+    // front.
     const shown = reveal && !reveal.done ? shownCells() : null
     ctx.save()
     if (shown) {
@@ -367,7 +354,7 @@ export function gridFieldPainter(scope: PainterScope) {
       ctx.clip()
     }
     // Each colour as its own layer, lime under violet; a cell shows the youngest lighting on its colour — the intro's
-    // ripples are a pass an agent, sent together, and two that cross each light their cells (D50, version 3).
+    // ripples are a pass an agent, sent together, and two that cross each light their cells (D50).
     for (let k = 0; k < passes.length; k++) {
       const list = passes[k]!
       for (let p = list.length - 1; p >= 0; p--) if (now > list[p]!.zero + list[p]!.span + fade) list.splice(p, 1)

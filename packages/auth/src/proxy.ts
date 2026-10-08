@@ -23,11 +23,11 @@ import { safeReturn } from "./safe-next";
  * lost its keys is a closed door, not an open one. On a development server an app may ask to open without them
  * (`openWithoutKeys`, the motion studio), so CI's visual review and a laptop offline still see it.
  *
- * **An open app** (`open`; Orbit since 2026-10-03, Orbit.md C24, his: "make the controls in Orbit public, and only
- * when I log in as an admin should I be able to publish"): every path is everyone's, and the gate only refreshes the
- * session, so the page can ask who is signed in and RLS can decide what they may write. Nobody is sent to the sign-in;
- * the sign-in is still there for the one who publishes. Without keys it opens everywhere, production included: there is
- * nothing to sign in to, and nothing a visitor could reach that a sign-in guards.
+ * **An open app** (`open`; Orbit, Orbit.md C24: the controls are everyone's, publishing is his): every path is
+ * everyone's, and the gate only refreshes the session, so the page can ask who is signed in and RLS can decide what
+ * they may write. Nobody is sent to the sign-in; the sign-in is still there for the one who publishes. Without keys it
+ * opens everywhere, production included: there is nothing to sign in to, and nothing a visitor could reach that a
+ * sign-in guards.
  *
  * **An app's permission** (`permission`, Access.md A6, 2026-10-06): a session is not enough — the account must hold the
  * app's `<app>.open`. Without it the gate sends the person to the sign-in page, which says the account cannot open the

@@ -1,7 +1,7 @@
 import type { IntroActions } from "@no-origins/ui/lib/intro-motion";
 
 /**
- * How the six bounce, jump and dive in the intro (Grid.md D50, Motion.md M22 version 3, M24, Portfolio.md P23): each
+ * How the six bounce, jump and dive in the intro (Grid.md D50, Motion.md M22, M24, Portfolio.md P23): each
  * action's CURRENT version in the motion studio, copied here whole, because this page holds no database key for anything
  * it renders (Admin.md §0.6: the page is static), as `agents.ts` copies their looks. A snapshot, not a link: when he
  * publishes a new version of one, copy it again — `node e2e/.mcp/intro-snapshot.mjs` copies the `values` in

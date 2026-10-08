@@ -4,8 +4,8 @@ import { findFreeRect, usedBlock, type GridLayoutItem, type GridPage, type GridR
 /**
  * The login's arrangement — the admin's (`apps/admin/src/lib/arrange.ts`), itself the showcase's and the portfolio's
  * (Portfolio.md P2, P8), for pages that are lists: the apps one may open, the account's records. A copy and not a
- * package export for the reason the showcase gives: the packer is one of Grid-v2.md's open questions and the package
- * must not decide it. When it is decided, the copies become one.
+ * package export for the reason the showcase gives: the packer is one of the grid's open questions (Grid.md) and the
+ * package must not decide it. When it is decided, the copies become one.
  *
  * What differs from the showcase's: a page is one list of boxes, not sections; a box may be `repeat`, placed where the
  * list puts it on the first page and first on every later one — the way home and the page's name, a list's column

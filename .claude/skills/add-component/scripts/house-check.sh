@@ -47,7 +47,7 @@ for f in "$@"; do
   hit FIX  radius "${B}rounded([[:space:]\"'\`]|$)" "$f"
   hit LOOK radius "${B}rounded(-(t|b|l|r|s|e|tl|tr|bl|br|ss|se|es|ee))?-(full|\[[^]i][^]]*\])" "$f"
 
-  # 2 fields — outlined pills, never sera's underline (D39 amended, 2026-09-29)
+  # 2 fields — outlined pills, never sera's underline (Grid.md D39)
   hit FIX  field  "${B}(border-b-input|border-transparent border-b|(focus-visible|aria-invalid|dark:aria-invalid):border-b-[a-z/0-9-]+)" "$f"
 
   # 3 motion — tokens, never literals (Motion.md M3, M4)
@@ -75,7 +75,7 @@ for f in "$@"; do
   # 6 colour — lime text is ~1.3:1 on white
   hit LOOK colour "${B}text-primary([[:space:]\"'\`/]|$)" "$f"
 
-  # 7 blending — isolate the root, or it becomes a cloth's backdrop root (avatar, 2026-09-29)
+  # 7 blending — isolate the root, or it becomes a cloth's backdrop root (avatar.tsx)
   if grep -qE 'mix-blend-' "$f" && ! grep -qE "${B}isolate" "$f"; then
     hit FIX blend "${B}mix-blend-[a-z-]+" "$f"
   fi

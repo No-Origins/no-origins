@@ -5,74 +5,44 @@ import { drawTexture, isAgentTexture, SPHERE_PATCH, type AgentTexture, type Text
 import { checkValue, COLOUR_NAMES, type ColourName } from "./properties"
 
 /**
- * The sphere (Motion.md M17, his, 2026-09-30): a character, "an energetic and calm, 3D sphere that travels by diving
- * from one cell to another". Pure: the motion studio paints any moment of it from here, and a page that shows it will
- * read the same `--motion-sphere-*` tokens off its element.
- *
- * **Version 6, sitting in its nest** (his, on version 5: *"the head is not properly resting on the circle … it should
- * properly rest on the bottom of the circle. As if it's sitting there and then it's spread a little … because it is
- * where the pressure is applied … And then instead of showing the tail outside of the circle, it should be behind the
- * screen. So it's only visible when it's jumping."*). So it is seen from the side, and down is down the screen:
+ * The sphere (Motion.md M17): the agent's body, an energetic and calm 3D sphere that travels by diving from one cell to
+ * another. Pure: the motion studio paints any moment of it from here, and a page that shows it reads the same
+ * `--motion-sphere-*` tokens off its element. It is seen from the side, and down is down the screen:
  *
  * - **A nest is a cell's circle, and its floor is the circle's bottom.** The head sits inside it on the bottom, spread a
- *   little where its weight presses (`spread`), breathing slowly (`breath`).
+ *   little where its weight presses (`spread`), breathing slowly (`breath`). It settles into its nest as into a bowl: its
+ *   outline is a circle cut by the nest's circle, so its underside follows the ring's curve and it never leaves it; it
+ *   keeps its size as it spreads (the circle grows until what is inside the nest is as much as the head), so more spread
+ *   is a wider, flatter puddle along the bottom; and its edge is smoothed. What it is made of is `body`: a ball barely
+ *   settles and keeps its edge crisp, jelly settles and softens, slime settles deep and pools.
  * - **The tail is behind the screen while it sits**: it points straight back into the page, and only what is in front
  *   of the page is drawn. When it leaps the tail swings out behind it and trails; as it settles it goes back in.
  * - **A jump**: it crouches, squashing down on the floor and drawing back (`crouch`, `squat`); leaps on an arc up over
  *   the page and down into the next nest (`height`, above the higher of its two nests, and `hang`), the arc a thrown
- *   thing's, under one gravity, so it rises fast and slows, and falls faster and faster; lands on the bottom of the
- *   nest it reaches with a squash (`squash`) and bounces there under the same gravity, each bounce lower than the last
- *   (`bounces`, `first`, `bounciness`); jiggles as it settles (`wobble`, `wobbleSpeed`); and the nest dips under each
- *   landing and the push of leaving, springing back (`give`).
+ *   thing's, under one gravity, so it rises fast and slows, and falls faster and faster; jiggles as it settles
+ *   (`wobble`, `wobbleSpeed`); and the nest dips under each landing and the push of leaving, springing back (`give`).
  * - **The tail is rubbery**: a chain of springs following the head, stepped at a fixed rate from the start of the jump
  *   so any moment of it is the same frame however it is reached; pulled to its shape by `stiffness`, swinging on for
  *   as long as `swing` says, longer at speed (`stretch`), drooping under the gravity.
+ * - **A landing carries on**: a ball in a bowl, simulated at a fixed step from the moment it lands. It touches down on
+ *   the bowl where `landAt` says — on the side it comes from — with a squash (`squash`), bounces off the bowl's curve
+ *   (`bounces`, `first`, `bounciness`), and keeps `slippery` of its speed along the bowl, so its fall turns into a slide
+ *   the way it was going or the way it is told (`slideWay`), down through the bottom and up the far side. It never
+ *   leaves the bowl: far up the side the bowl is a soft wall it squishes into, flattening against it (`squeeze`, which
+ *   it also does as it brakes), losing its speed there rather than bouncing off. How lively it is in the bowl is
+ *   `energy`, and how long it takes from landing to rest is `comeBack` — together they say whether it glides back once
+ *   or rocks. Its jelly leans against every push and wobbles back (`sway`, on the wobble's spring).
  *
- * **Version 7, a body that settles** (his, on version 6, the spread turned all the way up: *"it became some random shape
- * instead of a slime … I also need control on the type of the body because there's no smoothness to it … it is not
- * even resting inside the circle on the surface it just got extended outside"*). Sitting, it settles into its nest as
- * into a bowl: its outline is a circle cut by the nest's circle, so its underside follows the ring's curve and it never
- * leaves it; it keeps its size as it spreads (the circle grows until what is inside the nest is as much as the head),
- * so more spread is a wider, flatter puddle along the bottom; and its edge is smoothed. What it is made of is `body`:
- * a ball barely settles and keeps its edge crisp, jelly settles and softens, slime settles deep and pools.
+ * **3D without a gradient** (no gradients, no glass): one flat colour with a flat darker band down the side away from a
+ * fixed light at the top left.
  *
- * **Version 8, a landing that carries on** (his, on version 7: *"when it's landing … the bounce is either too stiff or
- * … it just came there and got stuck. Instead of … continuation of the motion … if it's coming from left to right, it
- * might fall into the right circle and then slide over in the clockwise direction which can be the control and also
- * body could … squeeze a little and then come back like a jelly action"*). Landing is a ball in a bowl, simulated at a
- * fixed step from the moment it lands: it bounces off the bowl's curve (`bounces`, `first`, `bounciness`), rides round
- * it the way it was going or the way it is told (`slide`, `slideWay`), rocks back and forth, each rock a share of the
- * one before (`rocking`), and comes to rest at the bottom; its jelly leans against every push and wobbles back
- * (`sway`, on the wobble's spring).
- *
- * **Version 9, falling into it and sliding** (his, on version 8: *"the sphere falls into the other circle and then it
- * sticks to the place that it falls in and then only the body feels like it is trying to slide … the ball … because
- * it's flying and it's softy and it is slippery it will fall and then it will slide and then slowly come back"*).
- * Version 8 cut its speed round the bowl to what `slide` asked the moment it landed, so it braked there. Now it touches
- * down on the bowl where `landAt` says — on the side it comes from — and keeps `slippery` of its speed along the bowl,
- * so its fall turns into a slide down through the bottom and up the far side, and it rocks back slowly, as heavy in the
- * bowl as `weight` says.
- *
- * **Version 10, slippery and soft** (his, on version 9: *"I kept the slippery to maximum one … it slides, but then it
- * hits the wall … and then slowly reaches back to the center … if the slippery is maximum, it should be almost like
- * fluid level slippery … the body should also not be so stiff that it hits the wall and then bounces back … it should
- * just fall, slide and … get squeezed … in the direction … then slide back … I should define energy levels … if the
- * energy is high, it falls, it slips, and it comes back … immediately … smoothly … defined by time"*). Sliding, it never
- * leaves the bowl: far up the side the bowl is a soft wall it squishes into, flattening against it (`squeeze`, which it
- * also does as it brakes), losing its speed there rather than bouncing off; how lively it is in the bowl is `energy`,
- * and how long it takes from landing to rest is `comeBack` — together they say whether it glides back once or rocks.
- *
- * **3D without a gradient** (the no-gradient and no-glass rules, 2026-09-16): one flat colour, lime or violet, with a
- * flat darker band down the side away from a fixed light at the top left.
- *
- * It is designed version by version (his, 2026-09-30), and none of its tokens is in globals.css yet, so the fallbacks
- * here are the version's, and the studio's family (`apps/motion/src/content/sphere.ts`) carries the same. Change one,
- * change both.
+ * None of its tokens is in globals.css yet, so the fallbacks here are his values, and the studio's family
+ * (`apps/motion/src/content/sphere.ts`) carries the same. Change one, change both.
  */
 
 export type SphereBody = "ball" | "jelly" | "slime"
 
-/** The face's styles (version 13, Motion.md M20's face version 1), as `./agent-face` declares them. */
+/** The face's styles (Motion.md M20), as `./agent-face` declares them. */
 export type SpherePupils = "none" | "dot" | "shine"
 export type SphereUpperLids = "plain" | "heavy"
 export type SphereLowerLids = "none" | "plain"
@@ -91,7 +61,7 @@ export type SphereMotion = {
   /** The head's diameter, as a share of the cell. */
   size: number
   /**
-   * Its colour: `lime` (the system's primary), `violet` (its secondary), or since 2026-09-30 one of the agent's own
+   * Its colour: `lime` (the system's primary), `violet` (its secondary), or one of the agent's own
    * (`AGENT_PAINTS`, `./agent-colours`; a paint that went is read as the one it became, `RENAMED_PAINTS`).
    */
   paint: string
@@ -105,7 +75,7 @@ export type SphereMotion = {
    */
   shape: AgentShape
   /**
-   * How it is turned, degrees (C10, version 2, his: "control over rotation in 3D axis"): X toward you or away, Y about
+   * How it is turned, degrees (Orbit.md C10): X toward you or away, Y about
    * its upright, Z about the way you look. A shape turns whole; the sphere turns its face. Look only, but a number, so a
    * motion's row may ease it.
    */
@@ -199,7 +169,7 @@ export type SphereMotion = {
   /** How far its marks stand out from the body: their colour mixed this much into the paint, 0 unseen, 1 as named (flat, not see-through). */
   textureOpacity: number
   depth: number
-  // ── Eyes (version 11: the sphere is the agent) ──
+  // ── Eyes ──
   /** An eye's diameter, as a share of the head across. Its size never changes, whatever the head does. */
   eyeSize: number
   /** How far apart the eyes' centres are, as a share of the head across. */
@@ -215,7 +185,7 @@ export type SphereMotion = {
   blink: number
   /** How far a landing squeezes them shut, 0 not at all to 1 shut, easing open as its jiggle dies. */
   squint: number
-  // ── The face (version 13: Motion.md M20's face version 1, declared in `./agent-face`) ──
+  // ── The face (Motion.md M20, declared in `./agent-face`) ──
   /** Where they look, left −1 … right 1 and down −1 … up 1: a pupil moves in its eye; an eye with none, on the face. */
   lookX: number
   lookY: number
@@ -261,18 +231,11 @@ export type SphereMotion = {
 export type SphereUploadWear = { id: string; x: number; y: number; turn: number; size: number }
 
 /**
- * Version 12's values (2026-09-30): **his**, the settings he fixed upon for the agent from version 11 (*"the settings that
- * I have currently fixed upon for the agent, so let's use that and we'll continue our state machines from there"*) —
- * a violet slime head three fifths of a cell across, deeply shaded, with a short limp tail and no squash, spread or sway;
- * jumping one column and six rows on a 60ms crouch, 550ms in the air; touching down 30° up its near side, keeping all of
- * its speed along the bowl, squeezing 40%; breathing every 4s; its eyes a quarter of the head across and 0.3 up, looking
- * 0.8 of its radius where it goes, squinting 60%. **Version 13, tuned** (his, the same night, sent back from version 13:
- * *"This becomes the rest state of the motion"*) is the same but for Come back, 1000ms where it was 1200: it is these
- * values, and the face's parts left off. **Version 14** (his, sent back as *"Agent — Version 13, tuned, tuned"*) comes back
- * to rest in half a second and settles a little into its nest (Spread 0.05). **Version 15** is version 14 as it looks,
- * with slime spreading at 1.2 where it spread at 2.6 (his "Yes", 2026-09-30, to the whole of Spread doing something on
- * slime: at 2.6 the puddle filled the bowl by 0.3 and the rest of the slider moved nothing): Spread 0.11 is version
- * 14's 0.05. It is these values.
+ * His values for the agent (2026-09-30): a violet slime head three fifths of a cell across, deeply shaded, with a short
+ * limp tail and no squash or sway; jumping one column and six rows on a 60ms crouch, 550ms in the air; touching down 30°
+ * up its near side, keeping all of its speed along the bowl, squeezing 40% and coming back to rest in half a second;
+ * settled a little into its nest (Spread 0.11); breathing every 4s; its eyes a quarter of the head across and 0.3 up,
+ * looking 0.8 of its radius where it goes, squinting 60%; and the face's other parts left off.
  */
 export const SPHERE_START = {
   size: 0.6,
@@ -313,7 +276,7 @@ export const SPHERE_START = {
   spread: 0.11,
   breath: 4000,
   breathDepth: 0.1,
-  // Its shape and surface (2026-09-30): the sphere, plain, as every version before drew it.
+  // Its shape and surface: the sphere, plain.
   shape: "sphere",
   rotateX: 0,
   rotateY: 0,
@@ -332,7 +295,7 @@ export const SPHERE_START = {
   blinkEvery: 3600,
   blink: 170,
   squint: 0.6,
-  // Version 13's face: every part as version 12 draws it — solid eyes, plain upper lids open wide, nothing else.
+  // The face: solid eyes, plain upper lids open wide, nothing else.
   lookX: 0,
   lookY: 0,
   pupils: "none",
@@ -380,8 +343,7 @@ const SINK: Record<SphereBody, number> = { ball: 0.5, jelly: 1, slime: 1.4 }
 const SOFT: Record<SphereBody, number> = { ball: 0, jelly: 3, slime: 7 }
 
 /**
- * What each body is made of, against jelly, which moves by the numbers as they are set (his, on version 9: "I don't see
- * any difference between jelly ball and slime"). A **ball** is firm: it sits nearly round, squashes and stretches
+ * What each body is made of, against jelly, which moves by the numbers as they are set. A **ball** is firm: it sits nearly round, squashes and stretches
  * little, jiggles quick and small, bounces higher and slides further. **Slime** is soft: it pools, squashes and
  * stretches far, leans more, sticks to the bowl, hardly bounces, and oozes back from a squash where jelly wobbles
  * (`jiggle`, the sway's damping in `landing`). Each is a share of the value set on the jig.
@@ -394,8 +356,8 @@ const MATERIAL: Record<SphereBody, { squash: number; spread: number; wobble: num
 
 /**
  * `v` up to `cap`, eased where it was cut: itself up to `from`, then nearing `cap` as it grows and never reaching it, so
- * every further inch still moves it (2026-09-30, with version 15: a deep spread on slime sank no further past 0.95).
- * Below `from` nothing changes, so no version set there moves.
+ * every further inch still moves it (a deep spread on slime would otherwise sink no further past 0.95). Below `from`
+ * nothing changes, so no published version set there moves.
  */
 const knee = (v: number, from: number, cap: number) =>
   v <= from ? Math.max(0, v) : from + (cap - from) * Math.tanh((v - from) / (cap - from))
@@ -520,7 +482,7 @@ export function sphereMotionFrom(src: SphereSource): SphereMotion {
   })
 }
 
-/** The fields the face's version 13 added, read by their declaration; version 11's eyes are read above. */
+/** The face's fields, read by their declaration; the eyes are read above. */
 type Face13 = Pick<
   SphereMotion,
   | "lookX" | "lookY" | "pupils" | "eyeColour" | "pupilSize" | "shineSize" | "shineAngle" | "upperLids" | "lidOpen" | "lidSlant"
@@ -539,8 +501,8 @@ const LOOK_ONLY = new Set(["shape", "rotateX", "rotateY", "rotateZ", "texture", 
 const camel = (id: string) => id.replace(/-(\w)/g, (_, c: string) => c.toUpperCase())
 
 /**
- * The face from `src`: each of version 13's settings checked by its declaration (`./agent-face`), and every pair's right
- * side where one is set apart. Version 11's eyes are read with the rest, as they were.
+ * The face from `src`: each of its settings checked by its declaration (`./agent-face`), and every pair's right side
+ * where one is set apart. The eyes are read with the rest.
  */
 function faceFrom(src: SphereSource): Face13 {
   const out: Record<string, unknown> = {}
@@ -1351,7 +1313,7 @@ const matrixOf = (k: { a: number; b: number; c: number; d: number }, at: { x: nu
   `matrix(${[k.a, k.b, k.c, k.d, at.x, at.y].map((n) => (Math.round(n * 10000) / 10000).toString()).join(" ")})`
 
 /**
- * Where the sphere's face is once turned (C10, version 2): its front, the point of the head that faced you, turned by
+ * Where the sphere's face is once turned (Orbit.md C10): its front, the point of the head that faced you, turned by
  * Y, then X, then Z, and seen straight on — its across and its down turned with it, so the face is laid on the head's
  * curve there as on a flat patch. Shown while that point still faces you.
  */
@@ -1404,7 +1366,7 @@ function sphereFacing(turn: { x: number; y: number; z: number }, centre: { x: nu
 
 /**
  * The room the sphere's head takes at a frame, as a box: what it covers settled, else its stretched or squashed
- * circle, square to the page (a shape does not turn with its stretch in version 1).
+ * circle, square to the page (a shape does not turn with its stretch).
  */
 function roomOf(sat: { x: number; y: number }[] | null, top: { x: number; y: number }, axis: { x: number; y: number }, long: number, short: number) {
   if (sat) {
@@ -1449,11 +1411,11 @@ export type SphereFrame = {
    */
   opening: { x: number; y: number; r: number } | null
   nests: [SphereNest, SphereNest]
-  /** Its eyes (version 11), left and right as you see it: each a circle, and what its lids leave open of it. */
+  /** Its eyes, left and right as you see it: each a circle, and what its lids leave open of it. */
   eyes: [SphereEye, SphereEye]
-  /** Its brows (version 13), left and right as you see it; null when it wears none. */
+  /** Its brows, left and right as you see it; null when it wears none. */
   brows: [SphereBrow, SphereBrow] | null
-  /** The symbol a mood pops up by its head (version 13); null for none. Outside the head: it is not cut to it. */
+  /** The symbol a mood pops up by its head; null for none. Outside the head: it is not cut to it. */
   symbol: SphereSymbolFrame | null
   /** The uploaded drawings it wears, each placed on its slot's anchor: a pair's two parts, else one. */
   uploads: SphereUploadFrame[]
@@ -1472,7 +1434,7 @@ export type SphereFrame = {
   /** Its texture, drawn on the sphere (C15): marks by tone, on the box; a shape's is on its `shape`. */
   texture?: TextureGroup[]
   /**
-   * Where the face is laid when it is turned (C10, version 2): an SVG matrix from the face's own px — drawn about 0,0 —
+   * Where the face is laid when it is turned (Orbit.md C10): an SVG matrix from the face's own px — drawn about 0,0 —
    * to the box. Absent when nothing is turned: the face is then drawn on the box as it always was.
    */
   faceTransform?: string
@@ -1592,7 +1554,7 @@ export function sphereFrame(course: SphereCourse, t: number, blinkAt = t): Spher
   // The body's outline about the face's centre, by direction, for laying the sphere's texture on it as it is drawn.
   const rim = m.shape === "sphere" && m.texture !== "none" && sat ? radialOf(sat, sat ? onPuddle(sat, top, R) : top) : null
   const solid = m.shape === "sphere" ? null : shapeFrame(m.shape, roomOf(sat, top, axis, long, short), R, turn, home ?? null, m.depth, textureLook)
-  // A shape's face is drawn about 0,0 and laid on its front (version 2); the sphere's is drawn where it always was
+  // A shape's face is drawn about 0,0 and laid on its front; the sphere's is drawn where it always was
   // unless it is turned, when it is drawn about 0,0 and laid on the sphere where its front has turned to.
   const faceAtRest = sat ? onPuddle(sat, top, R) : top
   const facing = solid ? null : turned ? sphereFacing(turn, faceAtRest, R) : null
@@ -1668,7 +1630,7 @@ export function sphereFrame(course: SphereCourse, t: number, blinkAt = t): Spher
   }
 }
 
-// ── the eyes (version 11) ───────────────────────────────────────────────────────────────────────────────────────
+// ── the eyes ────────────────────────────────────────────────────────────────────────────────────────────────────
 
 /** The share of a blink spent closing; it opens over the rest. */
 const CLOSING = 0.4
@@ -1750,7 +1712,7 @@ function lidEdges(
     const x = lerp(-w, w, u)
     const bow = 4 * u * (1 - u)
     const tilt = (x / w) * inner * r * 0.5
-    // The upper lid sags as it comes down, as a lid over a round eye does (version 11's sag, its curve 0.5).
+    // The upper lid sags as it comes down, as a lid over a round eye does (its curve 0.5).
     let a = high + bow * r * top.curve * upper + tilt * top.slant
     let b = low - bow * r * 0.6 * bottom.curve - tilt * bottom.slant
     if (b < a) a = b = (a + b) / 2
@@ -1964,7 +1926,7 @@ function browOf(style: Exclude<SphereBrows, "none">, at: { x: number; y: number 
 }
 
 /**
- * The symbol a mood pops up by its head (version 13): drawn as manga draws them, flat, `symbolSize` of the head across,
+ * The symbol a mood pops up by its head: drawn as manga draws them, flat, `symbolSize` of the head across,
  * standing off the head `symbolAt` degrees round from straight up. The cross of anger, a sweat drop, a Zzz, a sparkle,
  * a question mark. Null for none.
  */
@@ -2029,7 +1991,7 @@ const FACE_SINK = 0.1
  * Where a settled head's face rides: its centre, but never lower than a little under the middle of the puddle it is
  * seen as. The course's centre sinks into the bowl as the head spreads while the puddle it draws stays in the bowl's
  * mouth, so past a little spread the eyes went down with it and were cut by the bowl (a Spread of 0.4 on slime, found in
- * Orbit). A little spread (version 14's) is under the bound and moves nothing.
+ * Orbit). A little spread (0.05) is under the bound and moves nothing.
  */
 function onPuddle(pts: readonly Point[], head: Point, R: number): Point {
   let lo = Infinity

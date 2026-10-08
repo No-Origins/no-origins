@@ -71,7 +71,7 @@ export type Transport = {
   seek: (t: number) => void;
   /** A stage leaving (a page turned): its play is over. */
   release: (family: FamilyId) => void;
-  /** Let go of the frame held, keeping the play: the stage is its own again (Motion.md M19, a row let go of). */
+  /** Let go of the frame held, keeping the play: the stage is its own again. */
   live: () => void;
   setLoop: (loop: boolean) => void;
 };

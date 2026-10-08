@@ -19,7 +19,7 @@ const HEAD_COLS = "@min-[600px]:grid-cols-[minmax(0,1fr)_auto]";
 
 /**
  * The second factor's heading on the account page (Access.md A12): what it is, whether this session has given a code,
- * and adding an authenticator. The admin's Settings had it until the account moved here (step 5).
+ * and adding an authenticator. The admin's Settings shows the same.
  */
 export function AuthenticatorsHead({ secondFactor }: { secondFactor: SecondFactor }) {
   const [adding, setAdding] = React.useState(false);

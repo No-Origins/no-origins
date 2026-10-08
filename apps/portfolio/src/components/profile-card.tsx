@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { preload } from "react-dom";
-import { ArrowUpRightIcon, CheckIcon, CopyIcon, DownloadIcon, GraduationCapIcon, MailIcon, MapPinIcon } from "lucide-react";
+import { ArrowUpRightIcon, CheckIcon, CopyIcon, GraduationCapIcon, MapPinIcon } from "lucide-react";
 import { siDiscord, siGithub, siInstagram, siX, siYoutube, type SimpleIcon } from "simple-icons";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@no-origins/ui/components/avatar";
@@ -16,38 +16,14 @@ import { cn } from "@no-origins/ui/lib/utils";
 import { HEY_MOTIONS, HeyOverlay, type HeyMotion, type HeyOrigin } from "@/components/hey-overlay";
 import { EDUCATION, LINKS, profile, type Link } from "@/content/resume";
 
-/** A link with a value, and the way it is drawn: mail gets the envelope, a file the arrow down, the web the arrow out. */
-export function LinkButtons({ ids, size }: { ids: Link["id"][]; size: "xs" | "sm" | "default" }) {
-  const links = LINKS.filter((link): link is Link & { href: string } => !!link.href && ids.includes(link.id));
-  return (
-    <>
-      {links.map((link) => {
-        const kind = link.href.startsWith("mailto:") ? "mail" : link.href.startsWith("/") ? "file" : "web";
-        return (
-          <Button key={link.id} asChild variant="outline" size={size}>
-            <a href={link.href} target={kind === "web" ? "_blank" : undefined} rel={kind === "web" ? "noreferrer" : undefined} download={kind === "file" ? "" : undefined}>
-              {kind === "mail" ? <MailIcon data-icon="inline-start" /> : null}
-              {kind === "file" ? <DownloadIcon data-icon="inline-start" /> : null}
-              {link.label}
-              {kind === "web" ? <ArrowUpRightIcon data-icon="inline-end" /> : null}
-            </a>
-          </Button>
-        );
-      })}
-    </>
-  );
-}
-
 // The two motions on trial take turns, the new slap first, until he picks one (hey-overlay.tsx, HEY_MOTIONS) — one count
-// for the page, so the face and the handle share it.
+// for the page.
 let heys = 0;
 
 /**
- * The avatar's HEY! (hey-overlay.tsx), for anything that can set it off: the face itself, and the @hiddenstack under
- * the tagline. The face always leaps from the avatar — the overlay measures the box it is given — so `pop` takes the
- * element to leap from, and the handle hands it the avatar (`data-hey-face`), or itself if there is no avatar on the
- * page. A HEY face is picked at random per pop; both are preloaded, at low priority, so the one picked is already
- * there when it is flung rather than showing the initials mid-leap.
+ * The avatar's HEY! (hey-overlay.tsx), set off by the face. The face leaps from the element `pop` is given — the
+ * overlay measures its box. A HEY face is picked at random per pop; both are preloaded, at low priority, so the one
+ * picked is already there when it is flung rather than showing the initials mid-leap.
  */
 function useHey() {
   for (const face of profile.heyFaces) preload(face.src, { as: "image", fetchPriority: "low" });
@@ -69,29 +45,25 @@ function useHey() {
   return { pop, overlay };
 }
 
-/** How many cells square the avatar's card is (Portfolio.md P4, 2026-09-27: "the two by two card"). */
+/** How many cells square the avatar's card is (Portfolio.md P4). */
 const AVATAR_CELLS = 2;
 
 /**
  * The profile — the first thing on the portfolio (Portfolio.md P4): two cards side by side, **his avatar in a card two
- * cells square and his name with the role line under it in the card beside it** (his, 2026-09-27: "divide the avatar
- * and name section into two cards … put the avatar in the two by two card which is above Hyderabad and then keep the
- * text in another card"). One item on the grid, the way the facts under it are: each card on the field's own cells,
- * a gutter between them, so the avatar's card stands over the pill under it and the name's card over the rest. An
- * app-specific island composed from the design system and nothing else. A Card is already a box, so it goes on the
- * grid unwrapped (Grid.md D21).
+ * cells square and his name with the role line under it in the card beside it**. One item on the grid: each card on
+ * the field's own cells, a gutter between them. An app-specific island composed from the design system and nothing
+ * else. A Card is already a box, so it goes on the grid unwrapped (Grid.md D21).
  *
- * **No company marks here** — his call, 2026-09-21 (P9): the first screen is who he is, and the four marks say where
- * he has been, which is what the work column is for.
+ * **No company marks here** (P9): the profile is who he is, and the work's page says where he has been.
  *
  * It is sized by the slot it is in, and a slot clips (Slots.md), so it reads its own size off the grid (P5). The face
  * fills its card less a gutter all round, ring and all — 96px on a pointer, 120 on touch, 78 on a phone. The name
  * steps down as its card narrows: `display` on a pointer's six cells, `title` on a tablet's four, `heading` on a
  * phone's four, where it would otherwise run to two lines and the role to two more. Nothing in it scrolls. The name
  * and the role are centred in their card, so what the span has over them is split either side rather than pooled at
- * their end (his mock, 2026-09-26).
+ * their end.
  *
- * The role line is the role alone, in lime (his mock, 2026-09-26): the company it named went to the work column.
+ * The role line is the role alone, in lime.
  */
 export function ProfileCard({ colSpan, rowSpan }: { colSpan: number; rowSpan: number }) {
   const m = useGridMetrics();
@@ -104,10 +76,9 @@ export function ProfileCard({ colSpan, rowSpan }: { colSpan: number; rowSpan: nu
   const name = nameWidth >= 400 ? "display" : nameWidth >= 300 ? "title" : "heading";
   const narrow = nameWidth < 300;
 
-  // A ring round the face: one unbroken circle of line in lime (his, 2026-09-25 — "we don't need a violet there"; it
-  // was lime 70% and violet 25% with two gaps, 2026-09-24). A circle in an SVG inside the Avatar, 3px clear of its
+  // A ring round the face: one unbroken circle of line in lime. A circle in an SVG inside the Avatar, 3px clear of its
   // edge, so the box the overlay measures is still the face's. The stroke is the design system's `--stroke-accent`
-  // (3px — his, after a pass at 5), and everything is laid out from it in CSS: the SVG is the ring's centre line (the
+  // (3px), and everything is laid out from it in CSS: the SVG is the ring's centre line (the
   // face, the 3px clearance and half a stroke each side) and the circle is 50% of it. The focus outline sits 3px
   // outside the ring. So the face is the card less a gutter each side, less the clearance and the stroke each side.
   const face = `calc(${side - 2 * gap - 6}px - 2 * var(--stroke-accent))`;
@@ -164,168 +135,23 @@ export function ProfileCard({ colSpan, rowSpan }: { colSpan: number; rowSpan: nu
   );
 }
 
-/**
- * His tagline, behind the field (Portfolio.md P4, amended 2026-09-27, his: "move the tagline from the top of the card
- * to just above the nav bar, make it much more bigger. Instead of making it part of the grid it should look like it's
- * behind the cells"). It is no box on the grid: the first page keeps rows free for it over the pager's
- * (`PortfolioItem.backdrop`), and the renderer draws it there before the grid, so the field's dashes and the pointer's
- * ring are drawn over its letters and the cards stand in front of it.
- *
- * **A letter a cell, and a space an empty cell** (his, 2026-09-27: "divide each letter between each cell, and space
- * will be an empty cell") — `TaglineCells`, wherever the backdrop's cells hold it: every word whole on a row, a sentence
- * starting a row. Where they do not — a word longer than the band, more rows than the page keeps — it is two lines of
- * text, a sentence a line (`TaglineText`). Either way it is the role line's text, `label` — the heading face, bold, in
- * capitals, at its own size — and keeps the `faint` tone (his, the same day: "use the text that is used for senior full
- * stack developer. Do not change the text color … I wanted the same font size too"); it was Anton, the HEY!'s face,
- * scaled to the box.
- *
- * After the last line, on its baseline, **— @hiddenstack** in `caption` and the `lime` tone (Type.md T4): a button
- * that sets off the avatar's HEY! (`useHey`). It is the one thing in the tagline that is drawn over the grid, so it
- * can be pressed.
- */
-export function ProfileTagline({ cols, rows }: { cols: number; rows: number }) {
-  const { pop, overlay } = useHey();
-  const [first, second] = profile.tagline;
-  const lines = taglineRows([`“${first}`, `${second}”`], cols, rows);
-  const press = (e: MouseEvent<HTMLElement>) => pop(document.querySelector<HTMLElement>("[data-hey-face]") ?? e.currentTarget);
-  return (
-    <>
-      {lines ? <TaglineCells lines={lines} cols={cols} onPress={press} /> : <TaglineText first={first} second={second} onPress={press} />}
-      {overlay}
-    </>
-  );
-}
-
-/**
- * The tagline's words on rows of `cols` cells, first-fit, every sentence starting a row — or null where the cells do
- * not hold it: a word longer than a row, more rows than `rows`, or a last row with no cell after it for the handle.
- */
-function taglineRows(sentences: string[], cols: number, rows: number): string[] | null {
-  const out: string[] = [];
-  for (const sentence of sentences) {
-    let line = "";
-    for (const word of sentence.split(" ")) {
-      if (word.length > cols) return null;
-      if (line && line.length + 1 + word.length > cols) {
-        out.push(line);
-        line = word;
-      } else line = line ? `${line} ${word}` : word;
-    }
-    out.push(line);
-  }
-  return out.length <= rows && out[out.length - 1].length < cols ? out : null;
-}
-
-/**
- * A letter a cell: the backdrop is laid out on the field's own cells (the renderer hands it `--grid-cell` and
- * `--grid-gap`), each row centred on the band — an odd remainder leans left, as `arrange` centres a block — and the rows
- * at its foot, over the pager's. Each letter is centred in its cell. The letters are hidden from assistive technology
- * and the sentence is read once, whole.
- */
-function TaglineCells({ lines, cols, onPress }: { lines: string[]; cols: number; onPress: (e: MouseEvent<HTMLElement>) => void }) {
-  const from = (line: string) => Math.floor((cols - line.length) / 2) + 1;
-  const last = lines[lines.length - 1];
-  return (
-    <Text
-      role="label"
-      tone="faint"
-      as="blockquote"
-      // The label's own tracking is dropped: a letter alone in a cell is spaced by the grid, and the tracking after it
-      // would only push it off its cell's centre.
-      className="grid size-full content-end tracking-normal"
-      style={{ gridTemplateColumns: `repeat(${cols}, var(--grid-cell))`, gridAutoRows: "var(--grid-cell)", gap: "var(--grid-gap)" }}
-    >
-      <span className="sr-only">{lines.join(" ")}</span>
-      {lines.flatMap((line, row) =>
-        [...line].map((letter, i) =>
-          letter === " " ? null : (
-            <span key={`${row}-${i}`} aria-hidden className="flex items-center justify-center" style={{ gridRow: row + 1, gridColumn: from(line) + i }}>
-              {letter}
-            </span>
-          ),
-        ),
-      )}
-      {/* From the cell after the last letter to the row's end. Its inner line is the letters' — the label's, centred in
-          the cell — so the handle sits on their baseline. */}
-      <span className="flex items-center" style={{ gridRow: lines.length, gridColumn: `${from(last) + last.length} / -1` }}>
-        <span className="whitespace-nowrap">
-          <TaglineHandle onPress={onPress} />
-        </span>
-      </span>
-    </Text>
-  );
-}
-
-/**
- * The tagline as two lines of text where its cells do not hold it: in quotes, a sentence a line, centred, at the foot
- * of its rows. The handle takes no width in the second line, so the two lines are centred on each other and it hangs
- * past the second (his, 2026-09-27: "text align center the portfolio tagline"); where the box has no room for it
- * there, under TAGLINE_NARROW, it takes its own line under the second.
- */
-function TaglineText({ first, second, onPress }: { first: string; second: string; onPress: (e: MouseEvent<HTMLElement>) => void }) {
-  return (
-    <div className="@container flex size-full flex-col items-center justify-end">
-      <Text role="label" tone="faint" as="blockquote" align="center">
-        <span className="block whitespace-nowrap">&ldquo;{first}</span>
-        <span className="block whitespace-nowrap">
-          {second}&rdquo;
-          {/* No width of its own, so the line alone is centred and the handle hangs past its end, on its baseline. */}
-          <span className="inline-block w-0 @max-[420px]:block @max-[420px]:w-auto">
-            {/* A step of the spacing scale after the quote (ms-2, ICON_GAP); its own line where the box is narrow. */}
-            <TaglineHandle onPress={onPress} className="ms-2 @max-[420px]:mx-auto @max-[420px]:mt-1 @max-[420px]:block" />
-          </span>
-        </span>
-      </Text>
-    </div>
-  );
-}
-
-/**
- * **— @hiddenstack**, the tagline's one pressable piece. Its own tracking, weight and case: the tagline's are the
- * label's, and its wide tracking is an em of the tagline's size that inherits as a length, and a button inherits its
- * bold (and its capitals, where the browser's own style does not take them off).
- */
-function TaglineHandle({ onPress, className }: { onPress: (e: MouseEvent<HTMLElement>) => void; className?: string }) {
-  return (
-    <Text
-      as="button"
-      data-handle
-      role="caption"
-      tone="lime"
-      aria-label={`Say hi to ${profile.name}`}
-      onClick={onPress}
-      className={cn(
-        "pointer-events-auto relative z-10 inline-block cursor-pointer font-normal tracking-normal normal-case whitespace-nowrap underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-        className,
-      )}
-    >
-      &mdash; @{profile.handle}
-    </Text>
-  );
-}
-
 /** The width of a run of `n` cells and the gutters between them. */
 const cells = (n: number, cell: number, gap: number) => n * cell + (n - 1) * gap;
 
 /**
- * The first screen's line icons — the pin, the briefcase and the résumé's arrow — are one size, 20px, the line of the
- * `body` text they sit with, and so one weight: lucide's line grows with its box, and at the marks' 26px the briefcase
- * drew a 2.17px line where the pin's 16px drew 1.33 (his, 2026-09-26: "they are inconsistent"). The lines between the
- * marks are as tall as an icon, and an icon and its words are a step of the spacing scale apart. The size is an inline
- * style so that it wins over a Button's own icon size. The row of marks (`profile-work.tsx`) shares them.
+ * The portfolio's line icons — the pin, the briefcase and the résumé's arrow — are one size, 20px, the line of the
+ * `body` text they sit with, and so one weight: lucide's line grows with its box. An icon and its words are a step of
+ * the spacing scale apart. The size is an inline style so that it wins over a Button's own icon size.
  */
 export const ICON = 20;
 export const icon = { width: ICON, height: ICON };
 export const ICON_GAP = GRID_SPACING[2];
 
 /**
- * The row under the address (Portfolio.md P4, amended 2026-09-27, his: "underneath that we will have education and
- * location"): the degree's pill taking what the city leaves, and a pin and Hyderabad on two cells, each a Card one row
- * tall, which the radius (Grid.md D39) makes a pill, its content centred. One row at every size: the degree is six
- * cells on a pointer's eight, four on six. GitHub's mark stood on a cell at the row's start from 2026-09-28 (his:
- * "shrink the width of the education and on the left of it add GitHub link button") until it went between the address
- * and the résumé (2026-10-01, `ProfileLinks`). The pin and the city are about 100px, which two of a phone's cells (108
- * to 114px) only touch, so there the city goes without its pin (P5): the word alone is 66px.
+ * The row under the links (Portfolio.md P4): the degree's pill taking what the city leaves, and a pin and Hyderabad on
+ * two cells, each a Card one row tall, which the radius (Grid.md D39) makes a pill, its content centred. One row at
+ * every size: the degree is six cells on a pointer's eight, four on six. The pin and the city are about 100px, which
+ * two of a phone's cells (108 to 114px) only touch, so there the city goes without its pin (P5): the word alone is 66px.
  */
 export function ProfileFacts() {
   const m = useGridMetrics();
@@ -345,14 +171,11 @@ export function ProfileFacts() {
 
 /**
  * The degree under its cap, and the school and the years under the degree in `caption`, the two lines centred in a
- * pill a row tall (2026-09-27, his: "increase the Btech card to two rows and add LPU and years", then "can we fit the
- * same in 1 row?"). Two lines are 36px, which a row's pill holds inside its round ends. It says the subject alone
- * (his, the same day: "remove B.Tech in and put in only computer science honors"), and it is in the profile's column
- * since then, with no section label beside it, so it keeps its cap. **Denser as it narrows** (P5, 2026-09-28, when
- * GitHub took a cell of its row): the subject is 175px and 203 with its cap, so under 228px (three cells of 60) the cap
- * goes, and under 190 (three of a phone's cells) the subject steps down to the caption's size. Since GitHub left the
- * row (2026-10-01) it is four cells or more at every size, which keeps its size everywhere and its cap everywhere but
- * an iPhone SE (four of its cells are 228px).
+ * pill a row tall: two lines are 36px, which a row's pill holds inside its round ends. It says the subject alone, with
+ * no section label beside it, so it keeps its cap. **Denser as it narrows** (P5): the subject is 175px and 203 with its
+ * cap, so under 228px (three cells of 60) the cap goes, and under 190 (three of a phone's cells) the subject steps down
+ * to the caption's size. It is four cells or more at every size, which keeps its size everywhere and its cap everywhere
+ * but an iPhone SE (four of its cells are 228px).
  */
 export function EducationPill({ className }: { className?: string }) {
   return (
@@ -383,8 +206,7 @@ export function FactCard({ className, style, children }: { className?: string; s
 
 /**
  * The résumé: Résumé ↗ on a lime button two cells wide and one row tall — the system's own Button, filled with the
- * primary (2026-09-28, his, from the recruiter quick view: "I also like the resume button with filled lime color"; it
- * was the lime word on a card, the muted fill under the pointer). It opens in a new tab, as the arrow says.
+ * primary. It opens in a new tab, as the arrow says.
  */
 function ResumeButton({ width }: { width?: number }) {
   const link = LINKS.find((each) => each.id === "resume");
@@ -402,12 +224,10 @@ function ResumeButton({ width }: { width?: number }) {
 }
 
 /**
- * The address, GitHub and the résumé, under his words (his, 2026-09-27: "under that we will have resume email and
- * GitHub"): his address in a card with a button that copies it (`EmailCard`), then GitHub (2026-10-01, his: "place
- * GitHub between email and resume … give it the size of the resume button and also put the text GitHub in it") and
- * Résumé ↗ (2026-09-28, his: "place it on the right side of email"), two cells each. On eight cells that is one row,
- * 4 · 2 · 2, the address taking what the two leave. Six cells do not hold it — the address and its button need four —
- * so there it is two rows (his pick, 2026-10-01): the address alone, then GitHub · Résumé, three cells each.
+ * The address, GitHub and the résumé, under his words: his address in a card with a button that copies it
+ * (`EmailCard`), then GitHub and Résumé ↗, two cells each. On eight cells that is one row, 4 · 2 · 2, the address taking
+ * what the two leave. Six cells do not hold it — the address and its button need four — so there it is two rows: the
+ * address alone, then GitHub · Résumé, three cells each.
  */
 export function ProfileLinks({ cols }: { cols: number }) {
   const m = useGridMetrics();
@@ -440,9 +260,8 @@ export const LINK_CARD = "relative transition-colors hover:border-lime has-[a:fo
 export const CARD_LINK = "outline-none after:absolute after:inset-0 after:content-['']";
 
 /**
- * GitHub: its mark and its name on a pill the résumé's size (2026-10-01, his: "give it the size of the resume button
- * and also put the text GitHub in it"), outlined as the address's card is, in the text's colour, its border lime under
- * the pointer (his pick, the same day) — the résumé stays the one lime button. It opens in a new tab.
+ * GitHub: its mark and its name on a pill the résumé's size, outlined as the address's card is, in the text's colour,
+ * its border lime under the pointer — the résumé is the one lime button. It opens in a new tab.
  */
 function GitHubCard({ width }: { width?: number }) {
   const link = LINKS.find((each) => each.id === "github");
@@ -483,13 +302,10 @@ const SOCIAL_MARKS: Partial<Record<Link["id"], Pick<SimpleIcon, "path">>> = {
 
 /**
  * One social link's mark on the cell it is given: a Card the radius makes a circle, as the company marks are, the mark
- * in the text's colour — as the tech's marks and the cap and the pin are (his, 2026-09-27: "why are the social icons
- * lime color? It looks very inconsistent"; they were lime, as the links are) — and its name as its tooltip. **One with
- * a URL is a link out in a new tab; one without is its mark alone**, not pressed and not a Tab stop, until he gives it
- * (his, the same day: "add them too, we'll add the URLs later" — LinkedIn and Discord, then YouTube; the one exception
- * to P6's "a link with no value is not rendered"). X, Instagram, YouTube, LinkedIn and Discord stand in the socials
- * section (`SOCIALS`, `site.tsx`) since 2026-10-01, where LinkedIn and Discord were a row under the degree; GitHub's
- * mark is in its own pill (`GitHubCard`).
+ * in the text's colour — as the tech's marks and the cap and the pin are — and its name as its tooltip. **One with a
+ * URL is a link out in a new tab; one without is its mark alone**, not pressed and not a Tab stop, until he gives it
+ * (the one exception to P6's "a link with no value is not rendered"). X, Instagram, YouTube, LinkedIn and Discord stand
+ * in the socials section (`SOCIALS`, `site.tsx`); GitHub's mark is in its own pill (`GitHubCard`).
  */
 export function SocialMark({ id }: { id: Link["id"] }) {
   const link = LINKS.find((each) => each.id === id);
@@ -528,12 +344,10 @@ export function SocialMark({ id }: { id: Link["id"] }) {
 const COPIED_MS = 1600;
 
 /**
- * His address and a button that copies it (2026-09-27, his: "replace Email button with card containing my email …
- * and copy button to copy email to clipboard"): the address in the text's colour and the button in lime, the colour of
- * what is pressed here. **The card is the address's `mailto:`** (2026-10-01, his: "when someone is hovering on the
- * email … it should have a hover effect of turning the border to lime and … when clicked on it we can open mail"): the
- * link's hit area is the whole card, its border lime under the pointer and while the link has the keys' focus, and the
- * copy button stands over it, so a press there copies and opens nothing. A copy swaps the button's icon for a check
+ * His address and a button that copies it: the address in the text's colour and the button in lime, the colour of
+ * what is pressed here. **The card is the address's `mailto:`**: the link's hit area is the whole card, its border lime
+ * under the pointer and while the link has the keys' focus, and the copy button stands over it, so a press there copies
+ * and opens nothing. A copy swaps the button's icon for a check
  * for a moment; where the browser refuses the clipboard, the address is selected instead, for the keys to copy.
  */
 function EmailCard({ className }: { className?: string }) {
@@ -554,10 +368,9 @@ function EmailCard({ className }: { className?: string }) {
   };
   return (
     <Card size="sm" className={cn(LINK_CARD, "@container h-full min-h-0 min-w-0 justify-center py-0", className)}>
-      {/* The address and its button a step of the spacing scale apart, as an icon and its words are everywhere on the
-          first screen (`ICON_GAP`, gap-2; his, 2026-09-27: "add some spacing between email and copy icon, feels too
-          tight"). It was a half step, which a card too narrow for the step keeps — an iPhone SE's four cells, 228px,
-          where the step would push the address into the card's round ends. */}
+      {/* The address and its button a step of the spacing scale apart, as an icon and its words are everywhere here
+          (`ICON_GAP`, gap-2) — a half step in a card too narrow for the step, an iPhone SE's four cells, 228px, where
+          the step would push the address into the card's round ends. */}
       <CardContent className="flex items-center justify-center gap-2 px-0 whitespace-nowrap @max-[235px]:gap-1">
         {/* A step down in a card as narrow as an SE's or narrower, as the education pill's subject steps: a 360px
             phone's card is 220px, and the address, the gap and the button need 223 — at the body size they ran past it. */}

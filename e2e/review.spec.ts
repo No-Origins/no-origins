@@ -7,9 +7,6 @@ import { test, expect } from "@playwright/test";
  * them with every run.
  *
  * The admin is not here: every route is behind auth and needs a running Supabase (apps/admin/CLAUDE.md).
- *
- * `probe12` went with the Bento it policed, and `growForTool` with the Tool that owned its own scroll. Both were
- * rules about components that no longer exist; neither is re-added until there is something new to hold them to.
  */
 export const ROUTES: string[] = ["/"];
 
@@ -72,10 +69,10 @@ for (const app of APPS) {
       const response = await page.goto(`${app.base}${route}`, { waitUntil: "networkidle" });
       expect(response, `no response for ${title}`).not.toBeNull();
       expect(response!.status(), `${title} returned ${response!.status()}`).toBeLessThan(400);
-      // No page loads behind a loader (Grid.md D49), but a grid with an intro opens with its agents (D50, version 2): they
-      // gather, leap to the boxes they open and open them, and it hands over in about 4.5 s. The screenshot is of the page it hands over to; a page stuck in it fails here. Then a
-      // moment for the grid to lay its page out; the screenshot fast-forwards what is still moving, the portfolio's wake
-      // (Portfolio.md P16) among it.
+      // No page loads behind a loader (Grid.md D49), but a grid with an intro opens with its agents (D50): they play,
+      // leap to the boxes they open, open them and go home, and the grid hands over within a few seconds. The screenshot
+      // is of the page it hands over to; a page stuck in it fails here. Then a moment for the grid to lay its page out;
+      // the screenshot fast-forwards what is still moving.
       await page.waitForFunction(() => !document.querySelector('[data-slot="grid"][data-intro]'), null, { timeout: 10_000 });
       // Home opens on its tour's long shot (Home.md H9); a model standing at a stop with a picture fades it in over
       // 0.6 s, and the screenshot is of the picture hung. Nothing to wait for on a page with no model.

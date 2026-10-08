@@ -13,12 +13,11 @@ import { isUploadSlot, MAX_FILE, strictDrawing, type UploadSlot } from "@/lib/dr
  * `supabase/migrations/…_studio_versions.sql`). Server functions, as every read and write in the apps goes through the
  * server (`@no-origins/auth/server`): the session, if there is one, and RLS deciding what it may do.
  *
- * **Reading is everyone's; writing is the owner's** (C24, his, 2026-10-03: "only when I log in as an admin should I be
- * able to publish, so that users can experiment and play around"). A visitor — nobody signed in, or someone signed in
+ * **Reading is everyone's; writing is the owner's** (C24). A visitor — nobody signed in, or someone signed in
  * who is not the owner — loads each agent as its current published version (`…_studio_public_read.sql`), never the
  * draft, and `editable` is false: the page is theirs to play with and nothing is saved. The owner loads the draft and
- * saves, publishes, goes back, makes agents and uploads as before. Since Access.md A11 step 3 (2026-10-06) each of those
- * is a permission rather than the owner's role — `orbit.draft.save`, `orbit.version.publish`, `orbit.agent.create`,
+ * saves, publishes, goes back, makes agents and uploads. Each of those is a permission (Access.md A11) rather than the
+ * owner's role — `orbit.draft.save`, `orbit.version.publish`, `orbit.agent.create`,
  * `orbit.style.upload` — which he holds as the Owner and may give in a role. Every write asks for its own, since a
  * server function can be reached by a POST from anywhere; RLS would refuse anyway.
  *
@@ -29,7 +28,7 @@ import { isUploadSlot, MAX_FILE, strictDrawing, type UploadSlot } from "@/lib/dr
  * the studio works on the page alone.
  */
 
-/** The character the studio opens on: Bali, the Guide of the six (Agents.md; his name, 2026-09-30), the Agent until then, stored with version 12 as its first. */
+/** The character the studio opens on: Bali, the Guide of the six (Agents.md), stored with version 12 as its first. */
 const CHARACTER = "Bali";
 
 /** A character there is: what the studio's chooser lists (Orbit.md C13). */

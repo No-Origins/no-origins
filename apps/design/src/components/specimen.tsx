@@ -13,16 +13,16 @@ import { findItem, type PageContent, type ShowcaseField, type Span, type Specime
 import { arrange, BAND } from "@/lib/arrange";
 
 /**
- * The showcase on the grid — his rule, 2026-09-21: "the grid is the viewport", so the reading pages stopped scrolling
- * and became boxes on the field. Since 2026-09-22 it is arranged **the portfolio's way** (Portfolio.md P2, P7, P8):
- * a page is sections, each starting a page and spilling onto more; every specimen has a span per breakpoint; the
- * specimens pack first-fit inside a centred band of 4 · 6 · 8 · 12 · 16 columns, above the pager's row, and a page's
- * block is centred in the band and in the room. Overflow goes to the next page, never off the edge.
+ * The showcase on the grid: the grid is the viewport, so no reading page scrolls and every specimen is a box on the
+ * field. It is arranged **the portfolio's way** (Portfolio.md P2, P7, P8): a page is sections, each starting a page and
+ * spilling onto more; every specimen has a span per breakpoint; the specimens pack first-fit inside a centred band of
+ * 6 · 6 · 8 · 12 · 16 columns, above the pager's row, and a page's block is centred in the band and in the room.
+ * Overflow goes to the next page, never off the edge.
  *
  * Why the live field and not a reference one: a layout packed onto one shape and then derived onto another treats
- * every packed page as a hard break (v1 D6), so a screen one row shorter than the reference got each page's last
- * row on a page of its own — "multiple pages without filling the first" (his report, 2026-09-21). A list of
- * sizes has no page breaks worth keeping, so it is arranged fresh for whatever shape the grid reports.
+ * every packed page as a hard break, so a screen one row shorter than the reference would get each page's last row on
+ * a page of its own. A list of sizes has no page breaks worth keeping, so it is arranged fresh for whatever shape the
+ * grid reports.
  */
 
 /** The nav bar's height, which the grid sits under (see showcase-nav.tsx). */
@@ -39,20 +39,19 @@ const FIRST_FIELD: ShowcaseField = {
 
 // ── spans ─────────────────────────────────────────────────────────────────────────────────────────────────────
 //
-// Spans per breakpoint, read against the decided cell (Grid.md D13) and the band (Portfolio.md P8: 4 · 6 · 8 · 12 · 16
+// Spans per breakpoint, read against the decided cell (Grid.md D13) and the band (Portfolio.md P8: 6 · 6 · 8 · 12 · 16
 // columns). Two widths, both dividing the band on every pointer field so rows tile without holes: a HALF is two to a
 // row from `lg` up (564px on xl, 420 on lg) and a QUARTER is four to a row on xl (276px) and two on lg (420 — a
 // third, 204px, is not a specimen). Under `lg` the band is one specimen wide except on a tablet, where a quarter is
 // two to a row (324px). The rows are the same at every breakpoint — a touch cell is 72 to a pointer's 60, so the same
 // count is a fifth taller where the columns are fewer and the content wraps more — except that a tall HALF squeezed to
-// a phone's four columns takes one more, since its rows of controls wrap to twice as many. A specimen whose rows
+// a phone takes more (`onPhone`), since its rows of controls wrap to twice as many. A specimen whose rows
 // wrap on one breakpoint only spreads the preset and sets that breakpoint by hand.
 
 /**
- * A phone's rows for a span measured on a touch cell. Since every field is six across (Grid.md D33, 2026-09-25) a
- * phone's cell gives way — 51px on a 390 phone, where it was 72 — so one step down is 63px, three quarters of the 84
- * the rows were counted in, and a phone span takes a third more of them to stay the height it was. Its six columns are
- * wider than the four it had (366px to 324), so it wraps a little less and the round up is the margin.
+ * A phone's rows for a span measured on a touch cell. Every field is six across (Grid.md D33), so a phone's cell gives
+ * way — 51px on a 390 phone against a touch cell's 72 — and one step down is 63px, three quarters of the 84 the rows
+ * were counted in: a phone span takes a third more of them to stay the same height, rounded up.
  */
 export const onPhone = (rows: number) => Math.ceil((rows * 4) / 3);
 
@@ -115,9 +114,8 @@ export function SpecimenPages({ content }: { content: PageContent }) {
 // ── the boxes ─────────────────────────────────────────────────────────────────────────────────────────────────
 
 /**
- * A section's name, on the row above its specimens — the portfolio's header (Portfolio.md P7): the number and the
- * section in small caps, the title under them. The title steps down a role on a narrow slot (a phone's four columns)
- * so it stays one line.
+ * A section's name, on the row above its specimens (Portfolio.md P7): the number and the section in small caps, the
+ * title under them. The title steps down a role on a narrow slot (a phone's) so it stays one line.
  */
 export function SectionHeader({ index, label, title, cols }: { index: string; label: string; title: string; cols: number }) {
   const m = useGridMetrics();

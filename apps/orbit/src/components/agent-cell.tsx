@@ -27,9 +27,7 @@ import { coveredCells, stageDiameter } from "@/lib/stage";
  * look as it stands (`sphereMotionOf`, `@no-origins/ui/lib/agent-body`): its draft, every setting round the cell moving
  * it (C6). Its size is a share of its nest, as it always was, and the nest is this cell.
  *
- * **It plays its rest** (his, 2026-09-30, sending "Version 13, tuned": *"This becomes the rest state of the motion. So,
- * in character studio also, let's use the rest phase motion"*; until then it stood still, his "the agent will not have
- * any movements"). It sits on the bottom of its nest, its tail behind the page, breathing — its Breath and Breath depth
+ * **It plays its rest**: the rest state of its motion. It sits on the bottom of its nest, its tail behind the page, breathing — its Breath and Breath depth
  * spreading it a little and back — and blinking on its own clock, its Blink every and Blink: a still course of the
  * model (`sphereStill`), a frame of it (`sphereFrame`) painted through the `Agent`'s painter on every animation frame,
  * as the motion studio's stage paints it live. It never jumps here. Its clock starts at 0 when the cell mounts, so its

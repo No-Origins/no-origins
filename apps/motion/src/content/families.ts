@@ -6,15 +6,12 @@ import { LIQUID_FAMILY } from "./liquid";
 
 /**
  * The studio's content (Motion.md M6, M9): each motion on the bench, the tokens it is made of, and five presets to
- * start from. A family is a page of the studio. **The bench holds only what he names** (his, 2026-09-27: "Remove the
- * exisiting components that you put in the studio. Because I'll tell you what we will work on and then you can add
- * them") — the first is movement, the second loading (M10, the same night), the third enter and exit, movement's first
- * primitive (M11, the next morning).
+ * start from. A family is a page of the studio. **The bench holds only what he names** (M9).
  *
  * A family whose tokens are already in globals.css starts from what the page says ("Today", read off it, never copied
  * here). A family still being designed has no tokens there yet, so its preset A carries the values it starts from.
- * Movement's and loading's are in globals.css since his picks (2026-09-27), hyper focus's since 2026-09-28 (picked again
- * 2026-09-29) and focus mode's since 2026-09-29, so each A is "Today"; B–E are the other four of each one's last round.
+ * Movement's, loading's, hyper focus's and focus mode's are in globals.css, his picks, so each A is "Today"; B–E are
+ * the other four of each one's last round.
  */
 
 /**
@@ -79,7 +76,7 @@ export type Family = {
   hint: string;
   /**
    * The specimen's block, in the stage's cells: how many columns and rows it takes to start with, and the most either
-   * can be (his, 2026-09-27: "Replace Across and Down options labels with Rows and Columns. Treat them as common").
+   * can be.
    * Every specimen is a block of cells, so every family has one — movement's elements fill it, loading's page is laid in
    * it — and one that would not fit the stage is trimmed to it.
    */
@@ -87,8 +84,7 @@ export type Family = {
   tokens: Token[];
   presets: Preset[];
   /**
-   * A family designed version by version, not from presets (his, 2026-09-30: "I don't want the jigs to give me presets
-   * … you give me phase one, I will try on that … then you can create version two"): the version its one start is. It
+   * A family designed version by version, not from presets: the version its one start is. It
    * offers nothing to pick — its preset A is that version's values — and the head names the version where the preset
    * select stands. Its block is not drawn: a versioned family says in its own tokens what it is made of.
    */
@@ -568,12 +564,9 @@ export const FAMILIES: Family[] = [
       },
     ],
   },
-  // His, the same night (Motion.md M21): the slider's steps — a dot over each, a tick as the value lands on one.
+  // The slider's steps (Motion.md M21): a dot over each, a tick as the value lands on one.
   STEP_FAMILY,
   LIQUID_FAMILY,
-  // The eighth, his, the same night (Motion.md M17): a character, a 3D sphere that travels by diving from cell to cell,
-  // whose page went when its motions became every agent's (M23, 2026-10-01): Agents, a page of actions since M24.
+  // The agents' actions (Motion.md M23, M24): a page of actions every agent plays.
   AGENTS_FAMILY,
 ];
-
-export const familyById = (id: string) => FAMILIES.find((f) => f.id === id);

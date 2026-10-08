@@ -18,19 +18,16 @@ import { Text } from "@no-origins/ui/components/text";
 import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-group";
 
 /**
- * The accent jig (2026-09-27, his: "for the questions that you have, give me a jig so that I can tweak and check").
- * Dev only, on `?jig`: a panel that retunes the live page — the design system's primary, secondary, the hover-and-
- * active fill (`--muted`) and the menus' highlight (`--accent`) as neutral, lime or violet, and the work column's
- * active tab (Portfolio.md P4) — by writing one stylesheet over globals.css, and prints the settings to send back.
- * `d` still flips the theme, so both can be checked.
+ * The accent jig. Dev only, on `?jig`: a panel that retunes the live page — the design system's primary, secondary,
+ * the hover-and-active fill (`--muted`) and the menus' highlight (`--accent`) as neutral, lime or violet — by writing
+ * one stylesheet over globals.css, and prints the settings to send back. `d` still flips the theme, so both can be
+ * checked.
  *
- * His settings from it are what shipped the same day (globals.css, `profile-work.tsx`), and they are its `DEFAULTS`,
- * so an untouched jig changes nothing. **It stays** (his: "do not remove the jig. I want them to be showcased later in
- * experiments"). "Neutral" writes shadcn's neutral greys back, per theme, so the old system is one press away.
+ * Its `DEFAULTS` are the values in globals.css, so an untouched jig changes nothing. **It stays**, to be showcased
+ * later in experiments. "Neutral" writes shadcn's neutral greys back, per theme.
  */
 
 type Hue = "neutral" | "lime" | "violet";
-type NameOnLight = "lime" | "dark" | "deep";
 type Settings = {
   primary: Hue;
   secondary: Hue;
@@ -38,13 +35,9 @@ type Settings = {
   fillStrength: number;
   menu: Hue;
   menuStrength: number;
-  tabFill: number;
-  tabRing: "1" | "3";
-  tabNameLight: NameOnLight;
-  deepL: number;
 };
 
-/** What shipped on 2026-09-27, his settings from this jig. */
+/** The values in globals.css. */
 const DEFAULTS: Settings = {
   primary: "lime",
   secondary: "violet",
@@ -52,13 +45,9 @@ const DEFAULTS: Settings = {
   fillStrength: 14,
   menu: "lime",
   menuStrength: 4,
-  tabFill: 12,
-  tabRing: "1",
-  tabNameLight: "dark",
-  deepL: 0.62,
 };
 
-/** shadcn's neutral values, as globals.css had them until 2026-09-27: [colour, ink] per theme. */
+/** shadcn's neutral values: [colour, ink] per theme. */
 const NEUTRAL = {
   light: { primary: ["oklch(0.205 0 0)", "oklch(0.985 0 0)"], secondary: ["oklch(0.97 0 0)", "oklch(0.205 0 0)"], muted: "oklch(0.97 0 0)", accent: "oklch(0.97 0 0)" },
   dark: { primary: ["oklch(0.922 0 0)", "oklch(0.205 0 0)"], secondary: ["oklch(0.269 0 0)", "oklch(0.985 0 0)"], muted: "oklch(0.269 0 0)", accent: "oklch(0.269 0 0)" },
@@ -84,24 +73,16 @@ function stylesheet(s: Settings) {
       `--accent: ${s.menu === "neutral" ? n.accent : tint(s.menu, s.menuStrength, "--popover")};`,
     ].join(" ");
   };
-  const nameOnLight = { lime: "var(--lime)", dark: "var(--foreground)", deep: `oklch(${s.deepL} 0.196 119.552)` }[s.tabNameLight];
-  return [
-    `:root:not(.dark), .light { ${tokens("light")} }`,
-    `.dark { ${tokens("dark")} }`,
-    `[data-tab][aria-selected="true"] { background-color: ${tint("lime", s.tabFill, "--card")} !important; border-width: ${s.tabRing}px !important; }`,
-    `:root:not(.dark) [data-tab][aria-selected="true"] [data-name] { color: ${nameOnLight} !important; }`,
-  ].join("\n");
+  return [`:root:not(.dark), .light { ${tokens("light")} }`, `.dark { ${tokens("dark")} }`].join("\n");
 }
 
 function settingsText(s: Settings) {
   const hue = (h: Hue, strength?: number) => (h === "neutral" ? "neutral (shadcn)" : strength === undefined ? h : `${h} ${strength}%`);
-  const name = { lime: "lime", dark: "dark ink", deep: `deeper lime, L ${s.deepL.toFixed(2)}` }[s.tabNameLight];
   return [
     `primary: ${hue(s.primary)}`,
     `secondary: ${hue(s.secondary)}`,
     `hover and active fill (--muted): ${hue(s.fill, s.fillStrength)}`,
     `menu highlight (--accent): ${hue(s.menu, s.menuStrength)}`,
-    `work tab: lime ring ${s.tabRing}px, lime fill ${s.tabFill}%, name on light ${name}`,
   ].join("\n");
 }
 
@@ -176,7 +157,7 @@ function JigPanel() {
         <HueControl label="Secondary" touches="Secondary buttons, bubbles" value={s.secondary} onChange={(secondary) => set({ secondary })} />
         <HueControl
           label="Hover and active fill"
-          touches="--muted: the gray on toggles, outline and ghost hovers, the work tabs' hover"
+          touches="--muted: the gray on toggles, outline and ghost hovers"
           value={s.fill}
           onChange={(fill) => set({ fill })}
           strength={s.fillStrength}
@@ -190,33 +171,6 @@ function JigPanel() {
           strength={s.menuStrength}
           onStrength={(menuStrength) => set({ menuStrength })}
         />
-
-        <Separator />
-        <Text role="label">Work tab, active</Text>
-        <Control label="Ring" touches="Lime outline width">
-          <ToggleGroup type="single" variant="outline" size="sm" value={s.tabRing} onValueChange={(v) => v && set({ tabRing: v as Settings["tabRing"] })}>
-            <ToggleGroupItem value="1">1px</ToggleGroupItem>
-            <ToggleGroupItem value="3">3px (accent stroke)</ToggleGroupItem>
-          </ToggleGroup>
-        </Control>
-        <Control label={`Lime fill ${s.tabFill}%`} touches="Lime mixed into the card, opaque">
-          <Slider min={0} max={40} step={1} value={[s.tabFill]} onValueChange={([v]) => set({ tabFill: v ?? 0 })} />
-        </Control>
-        <Control label="Name on light" touches="Lime is about 1.3 : 1 on white">
-          <ColourPicker
-            aria-label="Name on light"
-            value={s.tabNameLight}
-            onValueChange={(v) => set({ tabNameLight: v as NameOnLight })}
-            options={[
-              { value: "lime", label: "Lime", colour: "var(--lime)" },
-              { value: "dark", label: "Dark", colour: "var(--foreground)" },
-              { value: "deep", label: "Deeper lime", colour: `oklch(${s.deepL} 0.196 119.552)` },
-            ]}
-          />
-          {s.tabNameLight === "deep" ? (
-            <Slider min={0.4} max={0.85} step={0.01} value={[s.deepL]} onValueChange={([v]) => set({ deepL: v ?? DEFAULTS.deepL })} />
-          ) : null}
-        </Control>
 
         <Separator />
         <Text role="label">What the tokens touch</Text>

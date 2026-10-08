@@ -35,7 +35,7 @@ export default defineConfig({
       name: "mobile",
       use: { ...devices["Pixel 7"] },
     },
-    // the design system has two themes (Design-System.md §2.5); review both
+    // the design system has two themes, light and dark (`.dark`); review both
     {
       name: "desktop-dark",
       use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 }, colorScheme: "dark" },

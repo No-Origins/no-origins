@@ -8,7 +8,7 @@ import { Placed } from "@no-origins/ui/components/registry"
 import { resolveSubSlots, type GridLayoutItem, type SlotAlign, type SlotFill, type SlotInset } from "@no-origins/ui/lib/grid-layout"
 
 /**
- * A SLOT (Slots.md) — the box on the grid that holds a component or sub-slots. It was `GridBox` for an afternoon.
+ * A SLOT (Slots.md) — the box on the grid that holds a component or sub-slots.
  *
  * Tokens (S3): `fill` — nothing, the page background (a mask over the grid lines), the muted surface, or the card
  * surface with a hairline (Grid.md D21); `inset` — a step of the spacing scale, none for `transparent`/`background`

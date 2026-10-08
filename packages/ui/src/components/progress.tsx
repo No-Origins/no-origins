@@ -20,9 +20,9 @@ import { motionEase, motionMs } from "@no-origins/ui/lib/motion"
  * happens here. The transition class is dropped while GSAP drives, because a CSS transition on a property something
  * else writes every frame fights it.
  *
- * Its numbers are the grow family's tokens (Motion.md M4, 2026-09-27), read off the indicator when a growth starts, so
+ * Its numbers are the grow family's tokens (Motion.md M4), read off the indicator when a growth starts, so
  * the motion studio's stage can retune them: `--motion-grow` for the first growth, `--motion-grow-change` for a move
- * to a new value, one curve for both (`--motion-grow-ease`; the change was power2.out until then). The fallbacks are
+ * to a new value, one curve for both (`--motion-grow-ease`). The fallbacks are
  * globals.css's values.
  */
 function Progress({

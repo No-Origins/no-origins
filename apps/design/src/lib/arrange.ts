@@ -4,17 +4,14 @@ import { findFreeRect, usedBlock, type GridLayoutItem, type GridPage, type GridR
 import type { PageContent, ShowcaseField, Span } from "@/content";
 
 /**
- * The portfolio's arrangement, on the showcase — his ask, 2026-09-22: "similar to how portfolio is designed, update
- * the design app too." This is `apps/portfolio/src/lib/arrange.ts` (Portfolio.md P2, P3, P7, P8) with one
- * difference, the top row. It is a copy and not a package export on purpose: which field is authored on and the
- * packer itself are Grid-v2.md's open questions, and the package must not decide them in code. When they are
- * decided, both copies become one.
+ * The portfolio's way of arranging a page (Portfolio.md P2, P7, P8), on the showcase: sections packed first-fit into a
+ * centred band. It is the showcase's own and not a package export on purpose: which field is authored on and the packer
+ * itself are the grid's open questions (Grid.md), and the package must not decide them in code.
  */
 
 /**
- * The empty row above the content, per breakpoint. The portfolio keeps one on `lg` and `xl` (Portfolio.md P3) because
- * it has no chrome above the grid; the showcase has the nav there (Grid.md D17 — every page has a Compose button,
- * and D28 names the theme button), so the air above the content is the nav's own and no row is reserved anywhere.
+ * The empty row above the content, per breakpoint: none. The showcase has its nav above the grid (with the theme
+ * button, Grid.md D28), so the air above the content is the nav's own and no row is reserved anywhere.
  */
 export const TOP_ROWS: Record<GridBreakpoint, number> = { base: 0, sm: 0, md: 0, lg: 0, xl: 0 };
 
@@ -26,7 +23,7 @@ export const BAND = 999;
  * even count (Grid.md D12, D26); the content keeps a measure it was designed for and the rest is margin, so a 26-column
  * monitor gets the 16-column page with air around it rather than specimens stretched to the edges.
  */
-// A phone's band is six, the whole field, since every field is at least six across (Grid.md D33, 2026-09-25); it was four.
+// A phone's band is six, the whole field: every field is at least six across (Grid.md D33).
 export const BAND_COLS: Record<GridBreakpoint, number> = { base: 6, sm: 6, md: 8, lg: 12, xl: 16 };
 
 /**

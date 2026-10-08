@@ -19,8 +19,8 @@ const HEAD_COLS = "@min-[600px]:grid-cols-[minmax(0,1fr)_auto]";
 
 /**
  * The account (Admin.md §8.4 step 5; Access.md A2, A7): who you are and the way out, your password, your passkeys and
- * your authenticator apps, a record each, and deleting the account — the self rights, which no permission gates. The
- * admin's Settings, moved to the login, where everyone with an account has one.
+ * your authenticator apps, a record each, and deleting the account — the self rights, which no permission gates. It is
+ * on the login, where everyone with an account has one.
  */
 export function AccountView({ email, roles, owner }: { email: string; roles: string[]; owner: boolean }) {
   const { status, passkeys, busy, error, register, remove } = usePasskeys();
@@ -74,8 +74,7 @@ export function AccountView({ email, roles, owner }: { email: string; roles: str
         span: band(1, 2, 3),
         render: () => (
           <NoteBox title="Passkeys are not available">
-            Either this browser has no authenticator, or passkeys are turned off on the server: enable [auth.passkey] in
-            supabase/config.toml (or the hosted dashboard) and restart.
+            This browser has no authenticator, or the server has passkeys turned off.
           </NoteBox>
         ),
       });
@@ -92,7 +91,7 @@ export function AccountView({ email, roles, owner }: { email: string; roles: str
         span: band(1, 2, 3),
         render: () => (
           <NoteBox title="Authenticator apps are not available">
-            The server has them off: enable [auth.mfa.totp] in supabase/config.toml (or the hosted dashboard) and restart.
+            The server has them turned off.
           </NoteBox>
         ),
       });

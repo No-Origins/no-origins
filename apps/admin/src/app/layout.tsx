@@ -27,8 +27,8 @@ export const viewport: Viewport = {
 /**
  * admin.no-origins.com — the control surface (Admin.md §4).
  *
- * The shell it used to wear (`Tool`, `Menu`) went with the old design system. Until the new shell is designed,
- * the layout is fonts, the theme and nothing else; each route renders itself.
+ * The layout is the fonts, the theme and nothing else; each route renders itself, on the grid. A shell is not
+ * designed yet.
  */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

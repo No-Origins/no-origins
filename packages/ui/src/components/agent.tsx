@@ -7,11 +7,9 @@ import { checkDrawing, type DrawingData } from "@no-origins/ui/lib/agent-face"
 import { sphereBowl, type SphereFrame, type SphereMotion } from "@no-origins/ui/lib/sphere-motion"
 
 /**
- * THE AGENT, drawn (Motion.md M17, Orbit.md C3): one frame of the sphere — the agent since version 11 — as
- * the package's `sphereFrame` gives it. Written by hand, not from a registry: no registry has it, and he approved it
- * into the system on 2026-09-30 (his: "Yes", to making the agent a design-system component rather than a copy in each
- * app). Until then the motion studio and Orbit each painted it, and Orbit's copy had
- * already missed the eyes.
+ * THE AGENT, drawn (Motion.md M17, Orbit.md C3): one frame of the sphere, the agent's body, as the package's
+ * `sphereFrame` gives it. Written by hand, not from a registry: no registry has it, and he approved it into the system
+ * (2026-09-30) so the motion studio and Orbit paint one agent rather than each its own copy.
  *
  * **It draws, it does not move.** The model is `@no-origins/ui/lib/sphere-motion`, pure; a caller makes the frame and
  * hands it over, so how the agent moves (a course, a timeline, a blink clock) stays with whoever moves it. Two ways in:
@@ -28,11 +26,10 @@ import { sphereBowl, type SphereFrame, type SphereMotion } from "@no-origins/ui/
  * toward black by `shade`, then its lit side in its paint cut to its outline, which leaves one dark band down its side
  * away from the light. The tail is cut to the nest's circle while it sits in one (`frame.opening`), since what is
  * outside it is behind the page. **The face is a layer of its own** inside the body's cut, so it rides the head and is
- * cut where the head squashes or leans past it: the eyes (version 11), each a circle cut to what its lids leave open,
- * and since version 13 the face's parts (Motion.md M20, the face version 1): a pupil or a catchlight in each eye, a heavy
- * upper lid's band over it, and the brows. **Colours by name** (`ColourName`): its `paint`; the `shade` of its dark
+ * cut where the head squashes or leans past it: the eyes, each a circle cut to what its lids leave open, and the
+ * face's parts (Motion.md M20): a pupil or a catchlight in each eye, a heavy upper lid's band over it, and the brows. **Colours by name** (`ColourName`): its `paint`; the `shade` of its dark
  * side; `deep`, its paint most of the way to black; the `ink` its eyes have always been; `light`, the page's white; and
- * the accents. **The eyes are drawn in their Colour** (2026-10-01): a solid eye is it; a Dot is a pupil in it on a
+ * the accents. **The eyes are drawn in their Colour** (Orbit.md C16): a solid eye is it; a Dot is a pupil in it on a
  * `light` eye; a Shine is a `light` catchlight on an eye in it. Ink, its default, is what they always were — the
  * paint's ink on a solid eye, `deep` with a pupil or a catchlight (`eyeColours`). **The symbol** a mood plays is drawn
  * over the head, not cut to it.
@@ -41,13 +38,13 @@ import { sphereBowl, type SphereFrame, type SphereMotion } from "@no-origins/ui/
  * — the caller loads the ones its look wears and passes them, checked again here (`checkDrawing`) — placed on the slot's
  * anchor as the frame says, a pair's right part its mirror; in the face layer, or over the head for a symbol.
  *
- * **A shape** (Orbit.md C10, 2026-09-30): where the head is not the sphere, the frame's `shape` gives its
+ * **A shape** (Orbit.md C10): where the head is not the sphere, the frame's `shape` gives its
  * faces, each painted in its tone (`toneCss`: its paint, toward black on the side away from the light, toward white on
  * top), over its outline in its dark side's colour and cut to it; the face layer is cut to it the same way. Resting in
  * a nest, it stands on the floor, and the body is cut to the nest's bowl, where its rigid bottom passes the ring the
  * sphere's would follow. **A texture**
  * is a tile of flat shapes repeated over each face, in that face's tone, fixed to the head (`frame.head`) so it rides
- * it: `<pattern>`s, one a face, their colour and tile written each frame. The sphere plain draws exactly as it did.
+ * it: `<pattern>`s, one a face, their colour and tile written each frame. The plain sphere draws none of it.
  *
  * The `data-sphere-*` attributes are the motion studio's specs' (e2e/agents.spec.ts): keep them.
  */
@@ -183,15 +180,15 @@ function Agent({ ref, frame, look, drawings, ...props }: AgentProps) {
       el.style.stroke = group?.stroke ? c : "none"
       el.style.strokeWidth = (group?.stroke ?? 0).toFixed(2)
     }
-    // Its face, laid where it has turned to (C10, version 2); nothing written while it is not turned.
+    // Its face, laid where it has turned to (Orbit.md C10); nothing written while it is not turned.
     const layer = faceLayer.current
     if (layer) {
       if (f.faceTransform) layer.setAttribute("transform", f.faceTransform)
       else layer.removeAttribute("transform")
       layer.style.display = f.faceHidden ? "none" : ""
     }
-    // Its eyes (version 11): circles cut to what their lids leave open — in their colour, or with a pupil in it or a
-    // catchlight on it (version 13; the colour 2026-10-01) — and over each a heavy upper lid's band, where it wears one.
+    // Its eyes: circles cut to what their lids leave open — in their colour, or with a pupil in it or a catchlight on
+    // it — and over each a heavy upper lid's band, where it wears one.
     const iris = eyeColours(m)[m.eyeColour]
     const eye = m.pupils === "dot" ? colour.light : iris
     f.eyes.forEach((e, i) => {
@@ -217,7 +214,7 @@ function Agent({ ref, frame, look, drawings, ...props }: AgentProps) {
         edge.style.strokeWidth = (e.lid?.width ?? 0).toFixed(2)
       }
     })
-    // Its brows (version 13): a line stroked round, or an arch or bushy brow filled.
+    // Its brows: a line stroked round, or an arch or bushy brow filled.
     ;[0, 1].forEach((i) => {
       const el = brows.current[i]
       const b = f.brows?.[i]
@@ -228,7 +225,7 @@ function Agent({ ref, frame, look, drawings, ...props }: AgentProps) {
       el.style.stroke = b && b.width !== null ? c : "none"
       el.style.strokeWidth = (b?.width ?? 0).toFixed(2)
     })
-    // The symbol a mood plays (version 13), over the head.
+    // The symbol a mood plays, over the head.
     const sc = colour[m.symbolColour]
     const stroke = symbolStroke.current
     if (stroke) {

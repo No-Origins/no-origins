@@ -2,9 +2,9 @@ import { resolveResponsive, type GridBreakpoint, type Responsive } from "@no-ori
 import { findFreeRect, usedBlock, type GridLayoutItem, type GridPage, type GridRect } from "@no-origins/ui/lib/grid-layout";
 
 /**
- * The admin's arrangement — the showcase's (`apps/design/src/lib/arrange.ts`, itself the portfolio's, Portfolio.md P2,
- * P8) for pages that are lists. It is a copy and not a package export for the reason the showcase gives: the packer is
- * one of Grid-v2.md's open questions and the package must not decide it. When it is decided, the copies become one.
+ * The admin's arrangement — the showcase's (`apps/design/src/lib/arrange.ts`, Portfolio.md P2, P8) for pages that are
+ * lists. It is a copy and not a package export for the reason the showcase gives: the packer is one of the grid's open
+ * questions (Grid.md) and the package must not decide it. When it is decided, the copies become one.
  *
  * What differs from the showcase's: a page is one list of boxes, not sections; a box may be `repeat`, placed where the
  * list puts it on the first page and first on every later one — the way home and the page's name, a list's column

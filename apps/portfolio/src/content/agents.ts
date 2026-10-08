@@ -1,7 +1,7 @@
 import type { IntroAgent } from "@no-origins/ui/lib/intro-motion";
 
 /**
- * The six agents (brand/Agents.md), as the intro plays them (Grid.md D50, Motion.md M22, version 5, Portfolio.md P23):
+ * The six agents (Agents.md), as the intro plays them (Grid.md D50, Motion.md M22, Portfolio.md P23):
  * each its CURRENT version in Orbit, copied here whole, because this page holds no database key for
  * anything it renders (Admin.md §0.6: the page is static). A snapshot, not a link: when he publishes a new version of
  * one, copy it again — `node e2e/.mcp/intro-snapshot.mjs` copies every look in `studio_versions.data` of its

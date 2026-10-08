@@ -6,14 +6,13 @@ import type { SphereMotion } from "./sphere-motion"
  * a part as the agent does uses — Orbit's preview of an upload. Flat, every one (2026-09-16).
  *
  * `paint` is its body's colour; `shade` the same mixed toward black by its shade, its dark side; `deep` the paint most
- * of the way to black; `ink` the eyes' colour since version 11, drawn for each paint to stand out on it; `light` the
+ * of the way to black; `ink` the eyes' default colour, drawn for each paint to stand out on it; `light` the
  * page's white.
  */
 
 /**
  * The paints a body can be (Orbit.md C10, C20): the two accents, and the agent's own (`--agent-*` in
- * globals.css), each with its ink, round the wheel from pink to blue. Version 2 (2026-10-01): peach, yellow and grey
- * went for red, orange, gold, green and teal, which stand out from the page in both themes.
+ * globals.css), each with its ink, round the wheel from pink to blue, each standing out from the page in both themes.
  */
 export const AGENT_PAINTS = [
   { value: "lime", label: "Lime", fill: "var(--lime)", ink: "var(--primary-foreground)" },
@@ -59,10 +58,10 @@ export function agentColours(look: Pick<SphereMotion, "paint" | "shade">): Recor
 }
 
 /**
- * The agent's colours as its eyes are drawn in them (2026-10-01, the eyes' Colour): its colours, but for `ink` with a
- * pupil or a catchlight, which is `deep`. Ink is the colour the eyes have always been — the paint's ink on a solid eye,
- * `deep` for a pupil on a light eye and for an eye under a catchlight (version 13) — so a look saved before the eyes had
- * a colour of their own draws as it did, and a pupil in ink never vanishes into the light eye it is on.
+ * The agent's colours as its eyes are drawn in them (Orbit.md C16): its colours, but for `ink` with a pupil or a
+ * catchlight, which is `deep`. Ink is the eyes' default — the paint's ink on a solid eye, `deep` for a pupil on a light
+ * eye and for an eye under a catchlight — so a look saved before the eyes had a colour of their own draws as it did,
+ * and a pupil in ink never vanishes into the light eye it is on.
  */
 export function eyeColours(look: Pick<SphereMotion, "paint" | "shade" | "pupils">): Record<ColourName, string> {
   const colours = agentColours(look)

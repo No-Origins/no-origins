@@ -1,6 +1,6 @@
 # The gate in front of production: branch protection requires every job below but `changes`. Vercel still builds and
 # deploys each app on its own (apps/<app>/vercel.json), skipping apps a change does not touch, and its checks are not
-# required. This workflow builds all eight instead, and runs what a Vercel build does not: types across the whole
+# required. This workflow builds all nine instead, and runs what a Vercel build does not: types across the whole
 # workspace, including packages/ui on its own; lint, which `next build` stopped running in Next 16; the visual review;
 # the agents harness, which no Vercel project builds; and the database's tests, the access rules (Access.md).
 # Warnings pass, errors fail. Node comes from .nvmrc, the same 24 that engines.node pins for Vercel.
@@ -93,8 +93,8 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm exec playwright install --with-deps chromium
-      # The sweep of CLAUDE.md: portfolio, showcase, engineering, the motion studio and Orbit on their dev servers, every route
-      # on desktop and mobile in both themes. It fails on a route that answers 400+ or throws; the screenshots are for
+      # The sweep of CLAUDE.md: every app but the admin on its dev server (playwright.config.ts), every route on desktop
+      # and mobile in both themes. It fails on a route that answers 400+ or throws; the screenshots are for
       # looking at.
       - run: pnpm review
       - if: always()

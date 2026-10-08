@@ -2,7 +2,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 
-/* Diverged from radix-sera (2026-09-26, Grid-v2.md D39): the accent on the start edge is the border itself, 2px wide,
+/* Diverged from radix-sera (2026-09-26, Grid.md D39): the accent on the start edge is the border itself, 2px wide,
    where sera draws a straight `after:` bar over a square edge. On a rounded box — a one-line alert is a pill — a
    straight bar runs off the curve, and a border follows it. */
 const alertVariants = cva(

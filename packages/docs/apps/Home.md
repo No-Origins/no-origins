@@ -1,92 +1,60 @@
 # No Origins — Home
 
-*Opened 2026-10-02. The 3D model of the house Bhargav is building — the fifth floor, before its walls go up — and
-the realistic pictures to be made from it. The app `apps/home` on `home.no-origins.com` (H3), behind the one sign-in
-of **Admin.md** §8.4, built the same evening. Its three.js follows the avatar viewer's in `packages/ui` (H2). Since
-2026-10-03 the model gives **the home tour** (H9): fixed cameras through the house, a walk between them at a press of
-Play, and the realistic pictures hanging in its rooms where they were taken.*
+The 3D model of the house Bhargav is building — its fifth floor, before the walls go up — the home tour through it,
+and the realistic pictures image models make from it. The app is `apps/home` on `home.no-origins.com` (H3), behind
+the one sign-in (Admin.md §8.4). This document decides what the app is for and how it works. **The house itself is not
+here** (H4): its plan, every version of it and the tour's stops are in `Home-plan.md`, which lives beside the
+description on his machine and in no repository.
 
-*This document is the app's: what it is for and how it works. **The house itself is not here** (H4): its plan and
-every version of it (H7, H8), and the tour's stops and versions, are recorded in `Home-plan.md`, which lives beside the
-description on his machine and in no repository.*
+Current as of 2026-10-08. Earlier versions and what they decided are in git history.
 
 ## H1. What it is for
 
-His brief, 2026-10-02:
-
-> "I want to create a 3D model of my house before the construction begin"
-
-> "right now, I only have uh, dimensions and ideas in my head. So yeah, we'll build the model. And then I will use uh,
-> AI models to generate realistic images from the model."
-
-So:
-
-- **There are no architect's drawings.** No plan, no CAD file. The model starts from his dimensions and ideas: in
-  words, and since the same evening in his own wireframes (H7). **Construction has begun**: the wireframes show the
-  pillars and this floor's ceiling as "currently constructed", so the model is made before the walls go up, not
-  before the first brick.
-- **The plan is the fifth floor, and the model is that floor alone** (his, the same evening: *"this plan is for the
-  fifth floor. But we don't want all the floors below, so we can just have pillars extending down for like one
-  floor, and then have steps to it."*). Under it stands a bare frame of pillars one storey tall, for the floors
+- **There are no architect's drawings.** The model starts from his dimensions and ideas, in words and in his own
+  wireframes (H7). The pillars and this floor's ceiling are built; the model is made before the walls go up.
+- **The model is the fifth floor alone.** Under it stands a bare frame of pillars one storey tall, for the floors
   below, with the steps rising from it to the plan; over it, its own ceiling.
-- **Two things come out of it.** The model itself, to look at, walk round and change. And realistic pictures of the
+- **Two things come out of it**: the model itself, to look at, walk round and change; and realistic pictures of the
   house, which image models make from the model (H5). The model does not try to be realistic itself.
 
 ## H2. Three.js, and the house is written as code
 
-His pick, the same day: *"let's go with uh, three J's"*.
-
-**OpenPlan3D** was his first thought and is not the base. It is real, free and MIT-licensed: a browser editor where
-you draw walls, doors and windows in 2D and look at them in 3D. It was set aside because:
-
-- it lays out rooms. Its documentation shows no multi-floor support, no roof and no plot, and those are most of what
-  a house before construction is;
-- it is a SvelteKit app, and every app here is Next.js built from the design system, so it cannot sit inside the
-  workspace;
-- the house would be drawn by hand in its editor, with no versions.
-
-Its JSON export stays a way in if a room is ever sketched there. **That Open Engine** (IFC in the browser) was the
-other candidate, for showing an architect's BIM model. There is no such model, so it is not needed.
-
-**So the house is a description**: typed data from which three.js builds every wall, slab and opening.
+**The house is a description**: typed data from which three.js builds every wall, slab and opening. Not a room
+editor such as OpenPlan3D, which lays out rooms only, is not Next.js, and keeps no versions.
 
 - **Claude writes it** from his dimensions and ideas. **He corrects it in words**, like "move the kitchen window 40 cm
-  left" or "make the landing deeper".
-- **Every change is a version**: he looks, says what is wrong, and gets the next one. That is how the studios work
-  (versions, not presets).
-- **Three.js is already in the system.** `packages/ui`'s avatar viewer (`mountHiddenstackViewer`) mounts plain three.js
-  on a canvas, and the house viewer follows that pattern, with no React renderer on top. The viewer belongs to the
-  app (`apps/home/src/lib`), not the package, until a second app needs it.
+  left".
+- **Every change is a version**: he looks, says what is wrong, and gets the next one — versions, not presets, as in
+  the studios.
+- **Plain three.js, mounted the way the design system mounts its avatar viewer** (`mountHiddenstackViewer` in
+  `packages/ui`): a canvas, rendering on demand, no React renderer on top. The viewer belongs to the app
+  (`apps/home/src/lib/viewer.ts`), not the package, until a second app needs it.
 
 ## H3. Where it lives
 
-His, the first message: *"I'm not sure if I want to put that and a part of no origins and deploy it on a subdomain
-um, I think that also should be good"*; then, the same evening, *"name that as home. And you know now you can
-proceed."* So:
+- **`apps/home` on `home.no-origins.com`**, port 3006. The Vercel project `home`, made by the root CLAUDE.md's recipe;
+  production is `main`. It needs the two `NEXT_PUBLIC_SUPABASE_*` variables every gated app has, and the private Blob
+  store of H4.
+- **Behind the one sign-in** (`packages/auth`), asking for `home.open` (Access.md A6), because a house is private (H4).
+  Only the Owner holds it until he gives it in a role (Access.md A4). The app opens with no login only on a development
+  server with no Supabase keys, so the review sweep and CI see it — the sample house, there.
+- **Its screen is his to design**: where the 3D view sits on the grid and what stands round it. What is placed today
+  (`src/lib/layout.ts`) is mine.
 
-- **`apps/home` on `home.no-origins.com`**, port 3006, since 2026-10-02. **Home** is his name for it; it was "house"
-  for an evening. The Vercel project `home` was made on 2026-10-03 by the recipe in the root CLAUDE.md; production is
-  `main`. It needs the two `NEXT_PUBLIC_SUPABASE_*` variables every gated app has, and the private Blob store of H4.
-- **Behind the one sign-in** (`packages/auth`), like the admin and the motion studio, because a house is private
-  (H4); open on a development server with no keys, so the review sweep and CI see it — the sample house, there.
-- **Its screen is his to design**: where the 3D view sits on the grid and what stands round it. Orbit's stage was
-  designed the same way.
+## H4. The house is private; the repo is public
 
-## H4. The house is private; the repo is public (built 2026-10-06)
-
-`No-Origins/no-origins` is public. The app's code can be public. The house should not be: its plan, its dimensions,
-its plot, and above all where the plot is. So the house is never committed, and the app is:
+`No-Origins/no-origins` is public. The app's code is public. The house is not: its plan, its dimensions, its plot, and
+above all where the plot is. So the house is never committed:
 
 - **On his machine** the house is `apps/home/src/content/`, gitignored and kept out of every Vercel upload by
   `.vercelignore`: the description (`home.ts` and its parts), the tour (`tour.ts`), the tour's pictures (`pictures/`)
-  and its record (`Home-plan.md`). Every version is written there, as before; the app imports it as `@house`.
-- **Deployed**, it is in a **private Vercel Blob store**, `home-house`, connected to the `home` project (his ask,
-  2026-10-03: *"Can we host images for free on vercel"*, then *"Proceed"* — it was to be a Supabase bucket when this
-  was proposed). The page reads `house.json` — the description and the tour, evaluated from the TypeScript — and the
-  route `/tour/<name>.webp` reads each picture, at each request and behind the sign-in, asked twice: by the gate in
-  `proxy.ts`, which exempts no image, and again where the house is read (`lib/store.ts`). A private store is never
-  readable by its URL: the SDK reads it with the project's own short-lived OIDC token. The free Hobby allowance is
-  1 GB stored and 10 GB sent a month, and the house is under 2 MB.
+  and its record (`Home-plan.md`). Every version is written there; the app imports it as `@house`.
+- **Deployed**, it is in a **private Vercel Blob store**, `home-house`, connected to the `home` project. The page
+  reads `house.json` — the description and the tour, evaluated from the TypeScript — and the route
+  `/tour/<name>.webp` reads each picture, at each request and behind the sign-in, asked twice: by the gate in
+  `proxy.ts`, which exempts no image, and again where the house is read (`signedIn()` in `lib/store.ts`). A private
+  store is never readable by its URL: the SDK reads it with the project's own short-lived OIDC token. The house is
+  under 2 MB, inside the free plan's 1 GB stored and 10 GB sent a month.
 - **Publishing is his step, from his machine**: `pnpm --filter home publish:house` (`--dry` to check without
   uploading) evaluates the description, checks every picture the tour names is there, and uploads them and the
   description over what was in the store. A visit after it shows the new version within a minute. Editing the files
@@ -96,89 +64,73 @@ its plot, and above all where the plot is. So the house is never committed, and 
   a fresh clone and Vercel's build see. `@house` is the house folder where it exists and the sample where it does not
   (`next.config.ts`); on Vercel the page reads the store instead, so a build there never holds the house.
 
-**The record of the decision.** Proposed 2026-10-02 as above, with a Supabase bucket. On 2026-10-03 his *"I want all
-of that to be deployed"* and *"I don't see home.no-origins.com"* were first read as making the plan public, and the
-commit that would have put the description in the repository was refused by the session's own permission check as a
-publication of the house; the store was built instead, and this section is what stands.
-
 ## H5. The model is exact; realism is the image models' job
 
-The model is built to be the reference the pictures are made from:
+The model is the reference the pictures are made from:
 
 - **Exact geometry, plain surfaces.** Every dimension as he gave it. Each material has a name and one flat colour:
-  no textures, no lighting tricks, no attempt at realism in three.js.
-- **Named cameras**, like "the street, from the gate" or "the kitchen, from the door", saved with the house. The same
-  view can be rendered again after every change, and two versions of a picture compared.
-- **From a camera, the app exports what an image model is guided by**: the plain render, a line drawing of the edges,
-  a depth map and a mask of which material is where. With them goes a written description of the materials, for the
-  prompt.
-- **Which image model is open, and his.** Any model that keeps a reference image's layout will do, or a diffusion
-  model guided by depth or edges. Also open: whether the pictures are made in the app later, or whether he takes the
-  exports to a model himself, which is what happens first.
+  no textures, no glass, no lighting tricks, no attempt at realism in three.js.
+- **Named views**, saved with the house (`views` in the description): `plan`, from straight above with everything
+  from `cut` up taken off, and a `look` from a point at another. The same view can be rendered again after every
+  change, and two versions of a picture compared.
+- **From a view, the app is to export what an image model is guided by**: the plain render, a line drawing of the
+  edges, a depth map and a mask of which material is where, with a written description of the materials for the
+  prompt. Not built yet; until it is, he takes renders to a model himself.
+- **Open:** which image model, and whether pictures are made in the app later. Any model that keeps a reference
+  image's layout will do, or a diffusion model guided by depth or edges. His to decide.
 
-## H6. What the description holds (proposed)
+## H6. What the description holds
 
-Version 1:
+Typed by `src/lib/house.ts`, in feet throughout, plan coordinates as the wireframes are read (x across to the right,
+y down the page), a level a height above the model's ground:
 
-- **The plot**: its outline, which way is north, which side the road is on, and the setbacks.
-- **The floors**: one level each, with its height floor to floor and its slab's thickness.
-- **The walls**: each a line on a floor, from one point to another, with a thickness and a height. External walls are
-  thicker.
-- **The openings**: a door or window in a wall, at an offset along it, with a width, a height and a sill.
-- **The rooms**: named spaces bounded by walls, for labels, floor finishes and the materials list.
-- **The stairs, the roof** (flat or pitched, with or without a parapet), **and the columns and beams** if the
-  structure is a frame.
-- **The materials**: a name and a flat colour for each surface, meaning wall faces, floors, the roof and frames.
+- **Materials**: a name and one flat colour each (H5). A door leaf is painted `door`, a window's frame `frame`.
+- **Pillars**, **walls** by their centre lines (a thickness, a base and a height), and each wall's **openings** — a
+  door (one leaf or two, or sliding) or a window (with a sill) at a distance along it.
+- **Slabs** by their outline, with holes; **blocks**; **stairs** in a well and free-standing **flights**; **railings**.
+- **Views** (H5).
 
-The description uses one unit throughout, his choice.
-
-**The order it is built in:** the frame and the floor's walls first (H7), seen from above and from around. Then
-the openings. Then the stairs, the ceiling and whatever is above it. Then the materials and the cameras. Then the
-exports.
+Not in it yet: the plot (its outline, north, the road, the setbacks) and a roof. What the description cannot yet say
+is added to its type, and to `src/sample` if the sample should show it — never drawn in three.js by hand.
 
 ## H7, H8. The plan and its versions — in `Home-plan.md`
 
-The wireframes read into the first description (H7), version 1 and every version since (H8), with every number he
-gave and every guess beside it, are the house: they are in `Home-plan.md` beside the description (H4), not here.
+The wireframes read into the description (H7) and every version since (H8), with every number he gave and every
+guess beside it, are the house: they are in `Home-plan.md` beside the description (H4), not here.
 
-## H9. The home tour (2026-10-03)
-
-His brief, after the realistic pictures were made:
-
-> "Fix different cameras in the house … we need an auto traveling path where if I just play I should be able to
-> start from this steps … basically I need a home tour guide … I'm not sure if we can exactly replicate what was
-> created in the images … if that is not possible only then I would want some workaround like every place that I go
-> in the house we should map the images of that area and show them like AR floating window images within the 3D
-> space."
+## H9. The home tour
 
 **The pictures cannot be put back into the model, so the tour hangs them in it.** A picture is what an image model
-made *from* a camera of the model, and everything that makes it a picture — the finishes, the furniture's fabric, the
-light — is the image model's proposal, not a surface the description has. The model is exact and plain on purpose
-(H5), so the workaround he named is the design. The tour is a description, like the house (`content/tour.ts`, typed by
-`lib/tour.ts`), and the viewer plays it:
+made *from* a view of the model, and its finishes, fabric and light are the image model's proposal, not a surface the
+description has. The model is exact and plain on purpose (H5), so each picture hangs in the room it shows, an "AR
+floating window" (his words). The tour is a description, like the house (`content/tour.ts`, typed by `lib/tour.ts`),
+and the viewer plays it:
 
-- **The opening** is the long shot the page stands on before the tour, the whole house from afar, no stop pressed.
-  Play glides in from it over its own time, the house in view all the way, to the first stop.
-- **A stop is a fixed camera** — where it stands, what it looks at, its field of view, in the description's feet —
-  with the guide's line (kept as the stop's description; nothing says or shows it since tour version 7, his: the voice
-  went) and, where an image model has made one, the picture of that place. A stop with a picture *is* the picture's
-  camera, copied from its capture, so the picture lines up with the room behind it.
+- **The opening** is the long shot the page stands on before the tour: the whole house from afar, no stop pressed.
+  Play glides in from it over its own time (`approach`), the house in view all the way, to the first stop.
+- **A stop is a fixed camera** — where it stands, what it looks at, its field of view, in feet — with the guide's line
+  (kept in the description; nothing shows it) and, where an image model has made one, the picture of that place. A
+  stop with a picture *is* the picture's camera, copied from its capture, so the picture lines up with the room behind
+  it.
 - **A leg is the way to the next stop**: the points the camera passes, two feet before and after each door on its
   axis, so it goes through doors and never walls, and the doors it opens. The camera walks a smooth curve through them
-  at about four and a half feet a second, up to speed over the first three tenths and slowing over the last, its look
-  turning at sixty degrees a second at the most and onto the stop's over the second half; it waits three seconds at a
-  stop. A drag pauses the walk, and the next leg starts from wherever the camera is. A door within nine feet swings
-  open over 0.7 s, away from the side the camera comes from.
-- **The picture is a window hanging in the room**, his "AR floating window": on the camera's axis, upright, fitted to
-  78% of the view, with the system's corners and a drawn edge, drawn over the model so no wall cuts it. It fades in
-  over 0.6 s once it has loaded and the camera has arrived, and out over 0.35 s as it leaves; a picture that does not
-  come (not published, or the sign-in lapsed) leaves the stop showing its room alone.
-- **The name, the player and the end.** The view's name stands right over the player as one `hero` (Type.md T5): the
+  at 4.5 feet a second, up to speed over the first three tenths and slowing over the last, its look turning at sixty
+  degrees a second at the most and onto the stop's over the second half; it waits three seconds at a stop. A drag
+  pauses the walk, and the next leg starts from wherever the camera is. A door within nine feet swings open over
+  0.7 s, away from the side the camera comes from.
+- **The picture is a window hanging in the room**: on the camera's axis, upright, fitted to 78% of the view, with the
+  system's corners and a drawn edge, drawn over the model so no wall cuts it. It fades in over 0.6 s once it has loaded
+  and the camera has arrived, and out over 0.35 s as it leaves; a picture that does not come (not published, or the
+  sign-in lapsed) leaves the stop showing its room alone.
+- **The name and the player.** The view's name stands right over the player as one `hero` (Type.md T5): the
   opening's, the stop's, or "Plan", and a new name arrives as a surface does. The player is a pill as wide as its
   controls: back, play or pause, forward, the stops as numbered circles (the one the camera is at pressed, its name on
-  hover), the speed — 1× or 2× — and Plan. At the tour's end the plan settles and the farewell plays (Motion.md, the
-  farewell tokens).
+  hover), the speed — 1× or 2× — and Plan.
+- **The farewell.** At the tour's end the camera pulls back into the plan over eight seconds, and the plan settles in
+  a box five cells across. Then a heavy `hero`, "Thanks for visiting, have a good day", and four links on the field's
+  cells — Design, Portfolio, Motion, Orbit — come in, by the `--motion-farewell-*` tokens in globals.css
+  (`useFarewellMotion`, `farewellLayout` in `lib/layout.ts`). The player stays under them where the field has room.
 
-The tour's numbers are `TOUR_MOTION` in `lib/tour.ts`, the viewer's and not `--motion-*` tokens — the intro's are the
-same (Grid.md D50) — and his to tune once he has walked it. **Which stops, in what order, with which pictures, and
-every version of the tour** are the house's (H4): in `Home-plan.md`.
+The tour's numbers are `TOUR_MOTION` in `lib/tour.ts`, the viewer's and not `--motion-*` tokens, and his to tune once
+he has walked it. **Which stops, in what order, with which pictures, and every version of the tour** are the house's
+(H4): in `Home-plan.md`.

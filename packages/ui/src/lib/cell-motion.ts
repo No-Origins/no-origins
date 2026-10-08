@@ -1,9 +1,6 @@
 /**
- * How one-cell elements move on the grid when one of them grows (Motion.md M9, 2026-09-27, his: "I want to experiment
- * on how one cell elements will move … the work menu and tech stack verticals. The elements expand and move when
- * something is active … the circles in the second and third cells will scale down while moving towards next cell and
- * start at the border and move towards the center in the next cell while scaling up … a fluid, transportation style
- * animation").
+ * How one-cell elements move on the grid when one of them grows (Motion.md M9): the portfolio's tech column and the
+ * numbered pager bar, where the active element expands and the others move along to make room.
  *
  * Pure, but for reading the tokens (`readCellMotion`): a frame is a function of where each element was, where it is
  * going, the motion's numbers and the time since it started. `useCellMotion` (`hooks/use-cell-motion.ts`) plays it: the
@@ -12,21 +9,18 @@
  *
  * The elements FLOW onto a block of cells, along rows or down columns, `line` cells to a line; the active one spans two
  * cells along the flow — or as many as its caller asks, a name's worth — and one that no longer fits its line wraps to
- * the next (his, the same evening: "an option to have both rows and columns … it can overflow to the next column"). An
- * element is a RING — its box, one cell or a pill of several — and a DOT, its icon, on the element's first cell.
+ * the next. An element is a RING — its box, one cell or a pill of several — and a DOT, its icon, on the element's first
+ * cell.
  *
- * **Only the dot travels** ("we don't need the circles also to move, it's only the element inside the circles"). A
- * ring is a cell and never slides: one that changes cells lights on its new cells in the first half of the move and
- * goes out on its old ones in the second, so a cell that hands over and takes over at once never dips; a ring that only
- * grows or shrinks — one edge changing — glides that edge. **Only the active ring wears the accent** ("Only the element
- * that is active should have lime border"), and it comes and goes on the ring's own curve.
+ * **Only the dot travels.** A ring is a cell and never slides: one that changes cells lights on its new cells in the
+ * first half of the move and goes out on its old ones in the second, so a cell that hands over and takes over at once
+ * never dips; a ring that only grows or shrinks — one edge changing — glides that edge. **Only the active ring wears
+ * the accent**, and it comes and goes on the ring's own curve.
  *
  * The dot's size is a function of where it is on the grid, not of the clock: whole at a cell's centre, smallest on the
  * gutter between two cells, so a dot moving one cell shrinks into the border and grows out of it, and a move
- * interrupted half way still reads right. **A dot is seen only on the cell it leaves and the cell it reaches** (his,
- * later the same night: "once the cell is moving from one cell to another, once it shrinks down and exits its first
- * cell, it should not be visible anywhere else again except where it reached its destination cell"): a dot going
- * further than a cell drowns once, leaving, and floats up once, arriving, and is not drawn over the cells between
+ * interrupted half way still reads right. **A dot is seen only on the cell it leaves and the cell it reaches**: a dot
+ * going further than a cell drowns once, leaving, and floats up once, arriving, and is not drawn over the cells between
  * (`travelScale`). A dot that has to change lines goes by the motion's `wrap`.
  */
 

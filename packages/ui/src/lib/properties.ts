@@ -40,7 +40,7 @@ type PropertyBase = {
 export type NumberProperty = PropertyBase & { type: "number"; min: number; max: number; step: number; unit?: NumberUnit; default: number }
 /** Degrees. */
 export type AngleProperty = PropertyBase & { type: "angle"; min: number; max: number; step: number; default: number }
-/** Milliseconds, shown in M19's units. */
+/** Milliseconds. */
 export type DurationProperty = PropertyBase & { type: "duration"; min: number; max: number; step: number; default: number }
 export type ColourProperty = PropertyBase & { type: "colour"; options: readonly ColourName[]; default: ColourName }
 export type ChoiceProperty = PropertyBase & {

@@ -5,15 +5,15 @@ import { SPHERE_START, sphereMotionFrom, type SphereMotion } from "./sphere-moti
 
 /**
  * THE AGENT'S BODY, declared (Motion.md M20): the head, its tail, and how it hops, lands and rests, as typed properties
- * (`./properties`), in the groups the motion studio's jigs have had since version 8. The face is `./agent-face`; the two
+ * (`./properties`), in the groups the motion studio's jigs show. The face is `./agent-face`; the two
  * together are what a character is (`CharacterLook`).
  *
  * `set` says where each rest is designed: what it looks like still — its size, paint, shade and material, its tail's
  * length and taper, how far it settles into its nest — is the **look**, in Orbit; everything that shows
- * only as it moves is **motion**, every agent's alike (Motion.md M23). A look marked `pose` — how it is turned, how far
- * it settles — is one a motion's row may move for a while; no motion touches the rest of the look. The defaults are
- * version 15's, his settings (`SPHERE_START`). Ids are the tokens' names without `--motion-sphere-`, unique with the
- * face's, so a motion's row keys any of them alone.
+ * only as it moves is **motion**, every agent's alike, set by an action's controls (Motion.md M24). A look marked
+ * `pose` — how it is turned, how far it settles — is one a motion may move for a while; no motion touches the rest of
+ * the look. The defaults are his settings (`SPHERE_START`). Ids are the tokens' names without `--motion-sphere-`,
+ * unique with the face's, so a motion keys any of them alone.
  */
 
 export type BodyGroup = { id: string; label: string; settings: readonly Setting[] }
@@ -35,8 +35,7 @@ export const AGENT_BODY: readonly BodyGroup[] = [
         id: "body", label: "Body", touches: "Ball firm, jelly as set, slime soft and oozing", type: "choice",
         options: [{ value: "ball", label: "Ball" }, { value: "jelly", label: "Jelly" }, { value: "slime", label: "Slime" }], default: S.body, set: "look",
       },
-      // Orbit.md C10 (his, 2026-09-30: "create shapes for basic shapes like cube, pyramid, hemi sphere,
-      // cyclinder, hexagonal prism, cone"). Version 1.
+      // Orbit.md C10: the sphere, or one of six basic solids.
       {
         id: "shape", label: "Shape", touches: "What its head is: the sphere, or a solid that moves and rests as it would", type: "choice",
         options: [
@@ -53,8 +52,8 @@ export const AGENT_BODY: readonly BodyGroup[] = [
     ],
   },
   {
-    // Orbit.md C10, version 2 (his, 2026-09-30: "I will also need control over rotation in 3D axis"): a shape
-    // turns whole, the sphere its face. Its rest is the look's; a motion's row may ease it, as any number.
+    // Orbit.md C10: a shape turns whole, the sphere its face. Its rest is the look's; a motion may ease it, as any
+    // number.
     id: "rotation",
     label: "Rotation",
     settings: [
@@ -265,7 +264,7 @@ const SLOT_OF = new Map<string, FaceSlotId>(
  * rather than writing tokens (Orbit). Read through the one reader the tokens go through
  * (`sphereMotionFrom`), so a look and the same values written as tokens draw the same agent. An uploaded style is not
  * drawn yet: its slot draws its default. How it moves is `motion`'s where given — an action's values
- * (`lib/agent-actions`), which the portfolio's intro plays its six by (Motion.md M22, version 3) — and else the
+ * (`lib/agent-actions`), which the portfolio's intro plays its six by (Motion.md M22) — and else the
  * declaration's defaults.
  */
 export function sphereMotionOf(look: CharacterLook, motion: PropertyValues = {}): SphereMotion {

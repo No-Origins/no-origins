@@ -2,8 +2,8 @@ import * as React from "react"
 import { cn } from "cn"
 
 /* Diverged from shadcn (2026-09-25, his ask): the card wears the page's own background — `--card` is `--background`
-   in both themes now, globals.css — and a `border` in the system's border colour, where shadcn draws a
-   `ring-1 ring-foreground/5`. A border is inside the box, so the grid's turn clip cannot take it off (Grid.md D27). */
+   in both themes, globals.css — and a `border` in the system's border colour, where shadcn draws a
+   `ring-1 ring-foreground/5`. */
 function Card({
   className,
   size = "default",

@@ -15,31 +15,26 @@ import { Text } from "@no-origins/ui/components/text";
 import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-group";
 import { cn } from "@no-origins/ui/lib/utils";
 
-import { EASES, PRESET_IDS, type Family, type PresetId, type Token } from "@/content/families";
+import type { Family } from "@/content/families";
 import { TEMPOS, useStudio, type Phase, type Tempo } from "@/components/studio-context";
 import { FOCUS_SAMPLE_COUNT } from "@/components/focus-stage";
 import { useJigHandle } from "@/components/jig-columns";
-import { settingsText, tokenLabel } from "@/lib/tokens";
 
 /**
- * The jigs (Motion.md M5, M6): slots on the grid around the stage, each a Card. Every control names the token it moves
- * and what it touches; the specimen and the presets sit left of the stage, the tokens and the settings right of it.
- * A jig is sized by its slot and clips like everything on the grid — a jig that is cut off is in a slot too small.
+ * The stage's timeline and the specimen's jig (Motion.md M5, M6), and the jig primitives they are built from: slots on
+ * the grid around the stage, each a Card. A jig is sized by its slot and clips like everything on the grid — a jig that
+ * is cut off is in a slot too small. The tokens' and the settings' jigs are `studio-jigs.tsx`.
  *
- * **Each control lives with what it is about** (his, 2026-09-27: "Organise the controls that specifically belong to
- * timeline should be in time[line] and across all the motions"). The timeline under the stage holds how a play runs —
- * Play, Loop, Tempo, and the phases that are settings (the hold, dragged; loading's page time) — the same on every
- * motion. The specimen's jig holds what plays: its block's Columns and Rows, every family's, then its own. The tokens
- * are the motion.
+ * **Each control lives with what it is about.** The timeline under the stage holds how a play runs — Play, Loop, Tempo,
+ * and the phases that are settings (the hold, dragged; loading's page time) — the same on every motion. The specimen's
+ * jig holds what plays: its block's Columns and Rows, every family's, then its own.
  *
- * **One rhythm** (his, 2026-09-27: "no spacing is being followed among the controls in the jigs, it's very
- * confusing"): everything in a jig is 12 apart down — its head and its content, one control and the next — and two
+ * **One rhythm**: everything in a jig is 12 apart down — its head and its content, one control and the next — and two
  * controls side by side are 24 apart, so each reads as its own; a control sits 8 under its own head. A control is the
  * same three parts every time: its label with its value right after it (never at the far edge, where it read as the
- * next control's), a caption on the next line where it has one (a token's, saying what it moves: one line, never
- * wrapping), then the control in a band as tall as the tallest control in its row — a toggle group's or a select's
- * 36, a slider's 20 — centred, so a slider beside a select stands level with it. A jig's groups are split by a
- * separator.
+ * next control's), a caption on the next line where it has one (one line, never wrapping), then the control in a band
+ * as tall as the tallest control in its row — a toggle group's or a select's 36, a slider's 20 — centred, so a slider
+ * beside a select stands level with it. A jig's groups are split by a separator.
  */
 
 /** A jig: a card filling its slot, a label for a head, and the grip it is dragged by where it stands in a column. */
@@ -89,43 +84,22 @@ export function Controls({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-2 gap-x-6 gap-y-3">{children}</div>;
 }
 
-// ── the header ────────────────────────────────────────────────────────────────────────────────────────────────
-
-/** The row over the stage: the family's number and name. The tempo it is slowed by is on the timeline. */
-export function Header({ family, index }: { family: Family; index: number }) {
-  return (
-    <Slot fill="transparent" alignY="end">
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <Text role="label" tone="muted">
-          {String(index + 1).padStart(2, "0")} — {family.label}
-        </Text>
-        <Text role="heading" as="h1" className="truncate">{family.title}</Text>
-      </div>
-    </Slot>
-  );
-}
-
 // ── the timeline ──────────────────────────────────────────────────────────────────────────────────────────────
 
 const lengthOf = (phases: readonly Phase[]) => phases.reduce((sum, p) => sum + p.ms, 0);
 
 /**
- * The timeline (Motion.md M6; his, 2026-09-27: "While playing for any jiggle motion show a timeline bar", then "I don't
- * think we need scrub we can just have timeline but I also want control over the timeline … a slider on every frame
- * and … information on milliseconds at each section", then "Play, Loop, Tempo should be part of the timeline
- * controls"): the row under the stage, holding every control of how a play runs, the same on every motion. Play from
+ * The timeline (Motion.md M6): the row under the stage, holding every control of how a play runs, the same on every motion. Play from
  * the start and play or pause from the playhead; one play of the motion as a slider — drag it to any frame and the
  * stage holds there — and the time so far; then Loop and Tempo. Under the slider, the play's phases (`Phases`), where a
  * phase that is a setting is dragged. It reads the transport every frame; nothing else on the page does.
  *
- * **Drawn as his player** (2026-09-29, his: "I like … the player control designs … place it in the right half, under
- * preview"): ↺ in an outline circle and play or pause in a lime one, the time, the slider with a violet thumb over the
+ * **Drawn as his player**: ↺ in an outline circle and play or pause in a lime one, the time, the slider with a violet thumb over the
  * phases, each a pill with its name and its ms, the one the playhead is in lime, and a violet line from the thumb down
  * through them; Loop a switch, Tempo a select. The slider and the phases are one axis: the phases stand a thumb's
  * half in from the slider's ends, where its centre is at the play's start and end, so the line crosses each phase at
- * the moment the thumb is at. Since 2026-09-30 the slider is the system's thick bar and the thumb its square head, the
- * bar's height (his), so the half is half `--slider-height` (4px since his second tuning of the grip; 8 at his pick, 12 before) and the line starts at
- * the bar's middle, behind the head. Both are reckoned from the token, never a number, so a new height moves them too.
+ * the moment the thumb is at. The slider is the system's bar and the thumb its head, the bar's height, so the half is
+ * half `--slider-height` (4px) and the line starts at the bar's middle, behind the head. Both are reckoned from the token, never a number, so a new height moves them too.
  *
  * Docked — the studio's transport, a half field wide and two rows tall — the buttons, the time, Loop and Tempo are the
  * first line, and the slider and the phases the second, from under the time to the end. Undocked — a
@@ -240,8 +214,7 @@ export function Timeline({ family, extra, dock = false }: { family: Family; extr
  * The play's phases under the slider, each as long as it lasts: a pill with its name and its ms, the one the playhead
  * is in lime (the muted tint), the rest the slider's grey. Each pill stands 2px in from its share on each side, so the
  * gaps between them do not bend the axis the playhead reads. Tall, docked, the name stands over the ms; otherwise they
- * share a line. **A phase that is a setting of the play is dragged** (his, 2026-09-27: "Hold should also be a hold and drag
- * on the time line"): the hold on every motion, and loading's page time on loading's. It wears a grip at its end; press
+ * share a line. **A phase that is a setting of the play is dragged**: the hold on every motion, and loading's page time on loading's. It wears a grip at its end; press
  * it anywhere and drag, right to lengthen it, left to shorten it. The timeline holds its scale for the drag (`onGrip`),
  * so the phase's end moves with the pointer, a step at a time. From the keyboard the arrows move it a step, Page Up
  * and Page Down ten, Home and End to its ends.
@@ -385,8 +358,7 @@ function Phases({
 
 /**
  * The specimen's jig: what plays on the stage, which is not motion and never goes into the settings (Motion.md M6).
- * Every specimen is a block of the stage's cells, so its Columns and Rows come first on every family's (his, 2026-09-27:
- * "Replace Across and Down options labels with Rows and Columns. Treat them as common"): movement's elements fill the
+ * Every specimen is a block of the stage's cells, so its Columns and Rows come first on every family's: movement's elements fill the
  * block, loading's page is laid in it. The family's own options follow, past a separator. How a play runs is the
  * timeline's.
  */
@@ -423,8 +395,8 @@ const SPECIMEN: Partial<Record<Family["id"], (props: { family: Family }) => Reac
 };
 
 /**
- * The liquid's own option (Motion.md M25): how full it is. The status page's cells are 40% (his: "Fill only 40% of the
- * liquid"); a new level pours from the one before.
+ * The liquid's own option (Motion.md M25): how full it is. The status page's cells are 40%; a new level pours from the
+ * one before.
  */
 function LiquidOptions({ family }: { family: Family }) {
   const studio = useStudio();
@@ -439,9 +411,8 @@ function LiquidOptions({ family }: { family: Family }) {
 }
 
 /**
- * Which way movement's elements fill the block (his, 2026-09-27: "an option to have both rows and columns … it can
- * overflow to the next column"): along rows, a full row going on to the next, as the tech column's marks fill, or down
- * columns. A row of cells is a block one row high; the tech verticals, one column wide filling down. Arrows, so the
+ * Which way movement's elements fill the block: along rows, a full row going on to the next, as the tech stack's marks
+ * fill, or down columns. A row of cells is a block one row high; the tech verticals, one column wide filling down. Arrows, so the
  * choice does not read as the block's Rows and Columns.
  */
 function MoveOptions({ family }: { family: Family }) {
@@ -465,8 +436,7 @@ function MoveOptions({ family }: { family: Family }) {
 
 /**
  * The loading specimen's own options (Motion.md M10): which page — the sample, or a random one, dealt afresh by every
- * press of Random (his: "give me option to randomized layouts of cells") — and how many sections it has; the loader has
- * a cell for each, his "the x is defined by the number of cards or sections in the page". How long the page takes to
+ * press of Random — and how many sections it has; the loader has a cell for each. How long the page takes to
  * be ready is the play's first phase, dragged on the timeline.
  */
 function LoadOptions({ family }: { family: Family }) {
@@ -474,8 +444,7 @@ function LoadOptions({ family }: { family: Family }) {
   const sections = studio.optionOf(family, "sections", 6);
   const layout = studio.optionOf(family, "layout", "sample");
   const seed = studio.optionOf(family, "seed", 1);
-  // Every press of Random deals a new page: another seed, never the one on the stage (his: "every time I click on random
-  // button, I would want the layout to be randomized").
+  // Every press of Random deals a new page: another seed, never the one on the stage.
   const deal = () => {
     let next = seed;
     while (next === seed) next = 1 + Math.floor(Math.random() * 9999);
@@ -546,156 +515,5 @@ function ModeOptions({ family }: { family: Family }) {
         <Switch checked={rings} onCheckedChange={(on) => studio.setOption(family, "rings", on)} aria-label="Rings" />
       </Control>
     </Controls>
-  );
-}
-
-// ── the presets ───────────────────────────────────────────────────────────────────────────────────────────────
-
-export function Presets({ family }: { family: Family }) {
-  const studio = useStudio();
-  const matched = studio.presetOf(family);
-  const shown = family.presets.find((p) => p.id === (matched ?? studio.fromOf(family))) ?? family.presets[0]!;
-  return (
-    <Jig title="Presets" note="Round 1: five mechanisms. Pick one, then tune it.">
-      <ToggleGroup
-        type="single"
-        variant="outline"
-        size="sm"
-        value={matched ?? ""}
-        onValueChange={(v) => v && studio.applyPreset(family, v as PresetId)}
-        aria-label="Presets"
-      >
-        {PRESET_IDS.map((id) => (
-          <ToggleGroupItem key={id} value={id}>{id}</ToggleGroupItem>
-        ))}
-      </ToggleGroup>
-      <div className="flex flex-col gap-1">
-        <Text role="heading" as="p">
-          {shown.id} · {shown.name}
-          {matched ? "" : ", tuned"}
-        </Text>
-        <Text role="body">{shown.why}</Text>
-        <Text role="caption">Could fail: {shown.risk}</Text>
-      </div>
-    </Jig>
-  );
-}
-
-// ── the tokens ────────────────────────────────────────────────────────────────────────────────────────────────
-
-export function Tokens({ family }: { family: Family }) {
-  const studio = useStudio();
-  const values = studio.values(family);
-  // A family whose tokens are grouped shows one group at a time, picked from a select: focus's, and focus mode's.
-  const groups = [...new Set(family.tokens.flatMap((t) => (t.group ? [t.group] : [])))];
-  const savedGroup = studio.optionOf(family, "jig", groups[0] ?? "");
-  const group = groups.includes(savedGroup) ? savedGroup : groups[0];
-  return (
-    <Jig title="Tokens">
-      {groups.length ? <Select value={group} onValueChange={(v) => studio.setOption(family, "jig", v)}>
-        <SelectTrigger size="sm" className="w-full" aria-label="Token group"><SelectValue /></SelectTrigger>
-        <SelectContent>{groups.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent>
-      </Select> : null}
-      {/* Two columns: a token marked half sits beside its pair, an in beside its out; any other takes the row. */}
-      <Controls>
-        {family.tokens.filter((token) => !token.group || token.group === group).map((token) => (
-          <TokenControl key={token.name} token={token} value={values[token.name]} onChange={(v) => studio.setValue(family, token.name, v)} />
-        ))}
-      </Controls>
-    </Jig>
-  );
-}
-
-function TokenControl({ token, value, onChange }: { token: Token; value: number | string | undefined; onChange: (v: number | string) => void }) {
-  if (value === undefined) return null;
-  const span = token.half ? "col-span-1" : "col-span-2";
-  if (token.kind === "ease") {
-    const known = EASES.some((e) => e.value === value);
-    return (
-      <Control label={token.label} touches={token.touches} className={span}>
-        <Select value={String(value)} onValueChange={onChange}>
-          <SelectTrigger className="w-full" aria-label={token.label} size="sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {known ? null : <SelectItem value={String(value)}>{String(value)}</SelectItem>}
-            {EASES.map((e) => (
-              <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </Control>
-    );
-  }
-  if (token.kind === "choice" && token.half) {
-    // Half a jig is too narrow for a row of toggles: a half choice is a select, like an ease.
-    return (
-      <Control label={token.label} touches={token.touches} className={span}>
-        <Select value={String(value)} onValueChange={onChange}>
-          <SelectTrigger className="w-full" aria-label={token.label} size="sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {token.choices?.map((c) => (
-              <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </Control>
-    );
-  }
-  if (token.kind === "choice") {
-    return (
-      <Control label={token.label} touches={token.touches} className={span}>
-        <ToggleGroup type="single" variant="outline" size="sm" value={String(value)} onValueChange={(v) => v && onChange(v)} aria-label={token.label}>
-          {token.choices?.map((c) => (
-            <ToggleGroupItem key={c.value} value={c.value}>{c.label}</ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </Control>
-    );
-  }
-  return (
-    <Control label={token.label} value={tokenLabel(token, value)} touches={token.touches} className={span}>
-      <Slider min={token.min} max={token.max} step={token.step} value={[Number(value)]} onValueChange={([v]) => v !== undefined && onChange(v)} aria-label={token.label} />
-    </Control>
-  );
-}
-
-// ── the settings ──────────────────────────────────────────────────────────────────────────────────────────────
-
-export function Settings({ family }: { family: Family }) {
-  const studio = useStudio();
-  const [copied, setCopied] = React.useState(false);
-  const matched = studio.presetOf(family);
-  const from = family.presets.find((p) => p.id === (matched ?? studio.fromOf(family))) ?? family.presets[0]!;
-  const css = settingsText(family, studio.values(family), studio.decided?.[family.id] ?? {}, `${from.id} ${from.name}${matched ? "" : ", tuned"}`);
-  // A grouped family's block is longer than the jig: it shows the group on the tokens' jig, and Copy takes every group.
-  const groups = [...new Set(family.tokens.flatMap((t) => (t.group ? [t.group] : [])))];
-  const savedGroup = studio.optionOf(family, "jig", groups[0] ?? "");
-  const group = groups.includes(savedGroup) ? savedGroup : groups[0];
-  const shownCss = group
-    ? css.split("\n").filter((line, i) => i === 0 || family.tokens.some((t) => t.group === group && line.startsWith(`${t.name}:`))).join("\n")
-    : css;
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(css);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1500);
-    } catch {}
-  };
-  return (
-    <Jig
-      title="Settings"
-      action={
-        <div className="flex shrink-0 gap-1">
-          <Button size="xs" variant="outline" onClick={copy}>{copied ? "Copied" : "Copy"}</Button>
-          <Button size="xs" variant="ghost" onClick={() => studio.reset(family)}>Reset</Button>
-        </div>
-      }
-    >
-      <Text role="mono" as="pre" className="whitespace-pre-wrap">{shownCss}</Text>
-      {group ? <Text role="caption">{group} shown. Copy takes all {family.tokens.length}.</Text> : null}
-    </Jig>
   );
 }

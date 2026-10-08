@@ -20,9 +20,9 @@ import { cardBlock, type Section } from "@/components/section";
  * whole, the sphere its face.
  *
  * **Only the look is here** (C22, Motion.md M23): Rest is Spread, how far it settles into its nest. Its Breath, Breath
- * depth and Squeeze, here until 2026-10-01, are how every agent moves, and went to the motion studio with the rest of
- * its motion. **Material** (what it is made of) is a line of Shape, and the **Tail** (its Length and Taper) a section
- * of its own: the look the motion studio's Agent page alone edited until it went. The tail is behind the page at rest,
+ * depth and Squeeze are how every agent moves, and are the motion studio's with the rest of its motion. **Material**
+ * (what it is made of) is a line of Shape, and the **Tail** (its Length and Taper) a section of its own. The tail is
+ * behind the page at rest,
  * so the agent here does not show it. **Its first line is whether it has one** (C23, his, 2026-10-01: *"an option to
  * have a tail or not"*): a switch, and off, the section is that line alone.
  */

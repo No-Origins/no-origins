@@ -20,9 +20,11 @@ except (subprocess.CalledProcessError, FileNotFoundError):
 COMPONENTS = ROOT / "packages/ui/src/components"
 CONTENT = ROOT / "apps/design/src/content"
 
-# The package's own files, not shadcn's — the grid layer, the slot and registry, Text, the portal, the theme.
-# A new house file (not from the CLI) belongs here too, or it is counted as a shadcn component.
-OURS = {"grid", "grid-pages", "grid-pager", "slot", "registry", "text", "portal", "theme-provider"}
+# The package's own files, not shadcn's — the grid layer, the slot and registry, Text, the portal, the theme, the agent,
+# the colour picker, the liquid and his 3D figure. A new house file (not from the CLI) belongs here too, or it is
+# counted as a shadcn component.
+OURS = {"grid", "grid-pages", "grid-pager", "grid-intro", "slot", "registry", "text", "portal", "theme-provider",
+        "agent", "colour-picker", "liquid", "hiddenstack-avatar"}
 
 # Items on a showcase page that are not a component's specimen.
 NOT_SPECIMENS = {"atoms", "molecules", "header", "not-shown"}
@@ -45,6 +47,8 @@ def footnote() -> list[str]:
 
 
 installed = sorted(p.stem for p in COMPONENTS.glob("*.tsx") if p.stem not in OURS)
+# Every component file, the house's included: a house component's specimen is a specimen like any other.
+every = {p.stem for p in COMPONENTS.glob("*.tsx")}
 atoms, molecules, hidden = specimens("atoms"), specimens("molecules"), footnote()
 
 print(f"installed  {len(installed)} shadcn components in packages/ui/src/components (not counting {', '.join(sorted(OURS))})")
@@ -57,7 +61,7 @@ for page, ids in (("atoms", atoms), ("molecules", molecules)):
     for i in ids:
         shown.setdefault(kebab(i), []).append(f"{page}:{i}")
 
-extra = {k: v for k, v in shown.items() if k not in installed}
+extra = {k: v for k, v in shown.items() if k not in every}
 twice = {k: v for k, v in shown.items() if k in installed and len(v) > 1}
 both = sorted(set(hidden) & set(shown))
 missing = sorted(set(installed) - set(shown) - set(hidden))
@@ -78,14 +82,15 @@ if missing:
 if ghost:
     print(f"\nin the footnote, not installed: {', '.join(ghost)}")
 
-shown_atoms = len({kebab(i) for i in atoms} & set(installed))
-shown_molecules = len({kebab(i) for i in molecules} & set(installed))
-print(f"\n→ the true numbers: {len(installed)} components; atoms {shown_atoms}; "
+shown_atoms = len({kebab(i) for i in atoms} & every)
+shown_molecules = len({kebab(i) for i in molecules} & every)
+print(f"\n→ the true numbers: {len(every)} components ({len(installed)} from shadcn, {len(every) - len(installed)} the house's); "
+      f"atoms {shown_atoms}; "
       f"molecules {shown_molecules} shown + {len(hidden)} not shown = {shown_molecules + len(hidden)}")
 
-# Every line that writes a count down. The archive is history and is left alone. A bare "N components" is the
-# system's total only when N is that big (the 1.0 docs say "two components" about other things), so small ones are
-# skipped; the showcase's own phrasings are always reported.
+# Every line that writes a count down. A bare "N components" is the system's total only when N is that big (prose
+# says "two components" about other things), so small ones are skipped; the showcase's own phrasings are always
+# reported.
 SMALL = r"(?:one|two|three|four|five|six|seven|eight|nine|ten)"
 BIG = r"(?:fifty|sixty|seventy|eighty)(?:-[a-z]+)?"
 PATTERNS = [
@@ -96,11 +101,9 @@ PATTERNS = [
     rf"\bAll\s+(?:\d+|{SMALL})\s+are installed",
 ]
 rx = re.compile("|".join(PATTERNS), re.I)
-# The 1.0 documents describe the deleted system (repo-root CLAUDE.md); their counts are history too.
-OLD = {"Design-System.md", "Atomic.md", "Patterns.md"}
 files = [ROOT / "CLAUDE.md", ROOT / "packages/ui/CLAUDE.md", ROOT / "apps/design/CLAUDE.md",
          *sorted(CONTENT.glob("*.tsx")),
-         *sorted(p for p in (ROOT / "packages/docs").rglob("*.md") if "archive" not in p.parts and p.name not in OLD)]
+         *sorted((ROOT / "packages/docs").rglob("*.md"))]
 
 print("\nlines that state a count — make each one true:")
 for f in files:

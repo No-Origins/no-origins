@@ -9,14 +9,14 @@
 @custom-variant dark (&:is(.dark *));
 
 /* Tailwind scans the package's own components, every app that consumes them, and the shared sign-in's screens
-   (`@no-origins/auth`), which every gated app renders — a class only they use was never generated until 2026-10-08.
-   Paths are relative to this file. */
+   (`@no-origins/auth`), which every gated app renders — a class only they use is generated only from here. Paths are
+   relative to this file. */
 @source "../**/*.{ts,tsx}";
 @source "../../../../apps/**/*.{ts,tsx}";
 @source "../../../auth/src/**/*.{ts,tsx}";
 
 /* The light tokens are also on `.light`, so a subtree can wear the light theme inside a dark page — the grid's
-   theme flip (grid.tsx, Grid.md D28) paints its tiles in the theme being switched TO, before the page has switched.
+   theme flip (grid.tsx, Grid.md D28) paints its sheet in the theme being switched TO, before the page has switched.
    next-themes puts `light` or `dark` on <html>, so on a light page the second selector is simply the first. */
 :root,
 .light {
@@ -66,18 +66,14 @@
      not where they are used, so they can be used again. One value in both themes, so `.dark` does not repeat them. */
   --lime: oklch(0.896 0.196 119.552);
   --violet: oklch(0.619 0.208 294.842);
-  /* Ink on lime (his, 2026-09-25: an icon on a lime band "doesn't have much contrast"): the dark the pager's arrow
-     wore on the ripple's lime fill (D32, until D48), one value in both themes — lime is light in both, so the dark
+  /* Ink on lime: the dark an icon on a lime band wears, one value in both themes — lime is light in both, so the dark
      theme's white on it is 1.3 : 1 and this is 15 : 1. */
   --lime-foreground: oklch(0.145 0 0);
-  /* The agent's paints beside the two accents (Orbit.md C10, 2026-09-30, his: "I also need colors … options"):
-     the agent's own, not the system's palette: nothing else paints with them. Each has the ink its eyes are drawn in,
-     dark on every one. One value in both themes, as the accents are.
-     Pink and blue are the pastels of his sketch (Brand.md, colour), version 1. Peach, yellow and grey went on
-     2026-10-01 (C20, his: "remove peach yellow and gray … replace them with better colors … high contrast"): on the
-     light page they stood at 1.7, 1.3 and 2.5 : 1. Red, orange, gold, green and teal took their place, each a mid-tone
-     that stands at least 3.3 : 1 from the page and from its nest in both themes, its eyes at least 5.3 : 1 on it
-     (WCAG 2's ratio; 3 : 1 is a shape's minimum). No yellow does both: gold is as near as one comes. Version 2. */
+  /* The agent's paints beside the two accents (Orbit.md C10, C20): the agent's own, not the system's palette: nothing
+     else paints with them. Each has the ink its eyes are drawn in, dark on every one. One value in both themes, as the
+     accents are. Pink and blue are the pastels of his sketch (Brand.md, colour); red, orange, gold, green and teal are
+     mid-tones that stand at least 3.3 : 1 from the page and from its nest in both themes, their eyes at least 5.3 : 1
+     on them (WCAG 2's ratio; 3 : 1 is a shape's minimum). No yellow does both: gold is as near as one comes. */
   --agent-pink: oklch(0.8 0.13 355);
   --agent-pink-ink: oklch(0.145 0 0);
   --agent-red: oklch(0.642 0.207 27);
@@ -95,16 +91,15 @@
   /* The first width token (his, 2026-09-24): the stroke of an accent ring — the portfolio's lime-and-violet ring round
      the avatar was the first. Every other width in the system is a Tailwind step written where it is used (1px
      hairlines, 2px focus rings). Tailwind has no theme namespace for widths, and `stroke-accent` is already the accent
-     colour's stroke, so this has no utility of its own: read it as `var(--stroke-accent)`. One value in both themes.
-     3px — his, the same day, back from a 5px pass. */
+     colour's stroke, so this has no utility of its own: read it as `var(--stroke-accent)`. One value in both themes:
+     3px, his. */
   --stroke-accent: 3px;
 }
 
-/* The corner (Grid.md D39, 2026-09-26, his: "change the design system from zero border radius to hundred percent
-   border radius, I mean like circular design") is ONE radius, half the grid's cell, on every box. A box's radius
+/* The corner (Grid.md D39) is ONE radius, half the grid's cell, on every box. A box's radius
    can never exceed half its shorter side — the browser scales the corners down to fit — so one number makes a 1×1
    a circle, a box one cell tall a pill, and a bigger box a rectangle whose every corner is a quarter of one cell's
-   circle: the same curve as the field's cells (D40). It was 0 from the rebuild of 2026-09-16 to here.
+   circle: the same curve as the field's cells (D40).
 
    The cell is the grid's, so the grid writes its own on its root (`--grid-cell`, grid.tsx) and everything on it
    takes the exact number. Anything outside a grid — a dialog or a menu in a portal, an app with no grid — takes the
@@ -180,16 +175,15 @@
   --motion-move-dot-min: 0;
   --motion-move-dot-from: 0;
   --motion-move-dot-lag: -0.1;
-  /* load — how a page loads (M10, `lib/load-motion.ts`): his, 2026-09-27, the settings he sent back from the studio,
-     verbatim. The page stands folded at the centre, one dashed lime ring a section, turning; when it is ready every
-     ring is pressed to 0.5 at once (a constant, his), its dashes closing into a full circle as it shrinks (his,
-     2026-09-28), goes straight to its section in one move of MOVEMENT's dot (the
-     move tokens above: its curve, its duration, its size — none of its own) and all land at once, and are released
-     into plain borders that open, each from its section's top-left corner. Turn is how the rings turn (spin · gears ·
-     chase · relay) — chase since his note the same night, "the turn style that I chose is chase", spin in the settings
-     he sent; lap, once round, speed only; press, the press and the release, each; open, smooth or by whole cells; duration, the opening; reveal, the
-     last share of the opening the section comes in over — 1, the whole of it. No page plays it since 2026-09-30
-     (Grid.md D49, his: "remove all the current loaders"): the motion studio's Loading page alone. */
+  /* load — how a page loads (M10, `lib/load-motion.ts`): his settings, sent back from the studio. The page stands
+     folded at the centre, one dashed lime ring a section, turning; when it is ready every ring is pressed to 0.5 at
+     once (a constant, his), its dashes closing into a full circle as it shrinks, goes straight to its section in one
+     move of MOVEMENT's dot (the move tokens above: its curve, its duration, its size — none of its own) and all land
+     at once, and are released into plain borders that open, each from its section's top-left corner. Turn is how the
+     rings turn (spin · gears · chase · relay), chase his pick; lap, once round, speed only; press, the press and the
+     release, each; open, smooth or by whole cells; duration, the opening; reveal, the last share of the opening the
+     section comes in over — 1, the whole of it. No page plays it (Grid.md D49): the motion studio's Loading page
+     alone. */
   --motion-load-turn: chase;
   --motion-load-lap: 6000ms;
   --motion-load-press: 200ms;
@@ -197,14 +191,13 @@
   --motion-load-duration: 1200ms;
   --motion-load-reveal: 1;
   /* focus — hyper focus: a card in focus and the page blurring round it (M13, `lib/focus-motion.ts`,
-     `useFocusMotion`): his, 2026-09-29, the settings he sent back from the studio, verbatim — "C Unroll, tuned", which
-     replaced round 1's Tide of 2026-09-28. The blur is a field of rings on the card, measured from the circle through
+     `useFocusMotion`): his settings, sent back from the studio. The blur is a field of rings on the card, measured from the circle through
      its corners: 1px next to it, sharp in all but that for a clear ring one cell wide, then rising on ease-in to 16px
      over 21 cells, in ten rings (near, far, fold and shadow in px; clear, reach and hem in cells). The cloth fades in
      over 80ms rather than being drawn out, so pull and its twelve-cell hem are kept but play no part, and there is no
      fold; the card lifts over it in 300ms, with no shadow. Off every card it holds 120ms and fades over 400ms; from
-     card to card the cloth glides in 80ms. Every curve is cubic in-out. The portfolio's hyper focus plays it
-     (Portfolio.md P18, P20). */
+     card to card the cloth glides in 80ms. Every curve is cubic in-out. The motion studio's Hyper focus page plays
+     it; no page in any app blurs. */
   --motion-focus-way: fade;
   --motion-focus-in: 80ms;
   --motion-focus-in-ease: cubic-bezier(0.65, 0, 0.35, 1);
@@ -230,23 +223,18 @@
   --motion-focus-glide: 80ms;
   --motion-focus-glide-ease: cubic-bezier(0.65, 0, 0.35, 1);
   /* mode — focus mode: one vertical at a time, a panel over it and a cloth of blur over the rest (M14,
-     `lib/mode-motion.ts`, `useModeMotion`): his, 2026-09-29, the settings he sent back from the studio, verbatim — "A As
-     described, tuned". The panel rises straight out of the page over the vertical, its whole line there from the start
-     (his, the same day: "without that border animation"; the line drawn round it in 700ms, cubic in-out, before it
-     lifted, went), in 90ms on ease-out, 80px towards the eye through an 800px perspective, swinging -3° on the way, its
+     `lib/mode-motion.ts`, `useModeMotion`): his settings, sent back from the studio. The panel rises straight out of
+     the page over the vertical, its whole line there from the start, in 90ms on ease-out, 80px towards the eye through an 800px perspective, swinging -3° on the way, its
      line 0.5px on the page and 2px once up, with a 40px shadow and a 16px margin round the vertical. The cloth is
      measured from the panel's edges with no clear margin: 2px at the panel, rising on expo out to 7px over at most 16
      cells, in seven rings, under a veil of the page's colour at 60%. It swells in over 250ms on ease-in, 120ms after the
-     panel starts to rise. Going is those steps backward (his: "the vertical in focus will repeat the steps backward"):
-     the cloth thins out over 1000ms on cubic in-out, and 120ms after it the panel sinks back into the page. Vertical to
-     vertical, nothing slides (his, the same day: "we should just unfocus while refocusing on the next one"): the one
-     left goes and the next comes, from the same moment, so the switch has no tokens of its own; his slide, 500ms on
-     cubic in-out with no dip, went with it. Pad, border and fine are px; perspective and depth px; tilt degrees;
-     veil 0 to 1. The portfolio's focus mode plays it (Portfolio.md P20). */
+     panel starts to rise. Going is those steps backward: the cloth thins out over 1000ms on cubic in-out, and 120ms
+     after it the panel sinks back into the page. Vertical to vertical, nothing slides: the one left goes and the next
+     comes, from the same moment, so the switch has no tokens of its own. Pad, border and fine are px; perspective and
+     depth px; tilt degrees; veil 0 to 1. The motion studio's Focus mode page plays it. */
   --motion-mode-lift: 90ms;
   --motion-mode-lift-ease: ease-out;
-  /* The drop, the panel going back into the page, timed on its own since his ask the same day ("controls to control
-     the lift and drop timings"). Mine until he tunes it: the lift's values, so it drops as it did. */
+  /* The drop, the panel going back into the page, timed on its own. Mine until he tunes it: the lift's values. */
   --motion-mode-drop: 90ms;
   --motion-mode-drop-ease: ease-out;
   --motion-mode-depth: 80;
@@ -270,8 +258,7 @@
   --motion-mode-out-ease: cubic-bezier(0.65, 0, 0.35, 1);
   --motion-mode-stagger: 120ms;
   /* grip — the slider: its head detaching into the cursor while it is held, and its body following the head (M16,
-     `lib/grip-motion.ts`, `useGripMotion`): his, 2026-09-30, the settings he sent back from the studio, verbatim — "A
-     Today, tuned", his second tuning of his pick ("A As described, tuned", the same night). The bar is 8px, a third of
+     `lib/grip-motion.ts`, `useGripMotion`): his settings, sent back from the studio. The bar is 8px, a third of
      the cursor's 24px ring, so the ring stands 8px proud of it on each side. Held, the head is in the cursor at once
      (0ms), an 8px dot, the bar's own size; let go, the bar closes and the head comes back after it, over 240ms, each for
      half the time (a lead of −0.5), on cubic out. The body follows the head on a quick spring, 180ms with a bounce of
@@ -422,12 +409,9 @@
    defaults below sit on the grid. The front advances with the hand; once the page has turned the back advances
    instead, so the fill leaves the way it came.
 
-   The boxes do NOT follow the hand (D37, 2026-09-25, his: "let's not shrink the cards"). A committed turn FADES the
-   page away — opacity only, nothing squeezed, nothing grown — over the wash's own length, and the next page is put on
-   the field and fades in over the same (D49, 2026-09-30, his: "remove all the current loaders … let the components
-   load quickly"), as the page the hand brings the turn back to does. From D48 the grid's loader brought a page with
-   images still to come in out of dashed rings, and until D48 the ripple washed the page away, one clip animation a box
-   cut cell by cell as its front crossed it (D32, D37). The pager is a box on the tracks too, and it stays. Reduced
+   The boxes do NOT follow the hand (D37). A committed turn FADES the page away — opacity only, nothing squeezed,
+   nothing grown — over the wash's own length, and the next page is put on the field and fades in over the same (D49),
+   as the page the hand brings the turn back to does. The pager is a box on the tracks too, and it stays. Reduced
    motion: no fade — the page swaps at once. */
 [data-slot="grid"] {
   --grid-turn-fill-front: 0;
@@ -464,12 +448,11 @@
 }
 
 /* ── the intro (grid.tsx, grid-intro.tsx, Grid.md D50) ────────────────────────────────────────────────────────────
-   The page opens with its agents (D50, version 5, 2026-10-01, his): they stand in a row on the field's middle, leap to the
-   centre of the boxes they open, and the boxes come in with each one's ripple. While it plays (`data-intro` is "agent",
+   The page opens with its agents (D50): they stand in a row on the field's middle, leap to the centre of the boxes
+   they open, and dive home, and each one's boxes fade in once it is gone. While it plays (`data-intro` is "agent",
    from the server's first paint, before any script) the page's boxes are held back here — laid out, so the agents can
-   find them, but unseen and out of the pointer's way — and each is shown by the intro as the ripple crosses it, its own
-   opacity and clip written over this. When the last is in the grid
-   lets go of them ("reveal", over a `--grid-intro-reveal` of 0ms since version 2). What an app draws
+   find them, but unseen and out of the pointer's way — and each is shown by the intro, its own opacity written over
+   this. When the last is in the grid lets go of them ("reveal", over a `--grid-intro-reveal` of 0ms). What an app draws
    behind the grid (the portfolio's tagline) is held with them by carrying the grid's phase as `data-intro-held` and
    the same custom property. It never plays under reduced motion, so nothing here needs a reduced form. */
 @keyframes grid-intro-in {
@@ -489,7 +472,7 @@
   animation: grid-intro-in var(--grid-intro-reveal) cubic-bezier(0.33, 1, 0.68, 1) backwards;
 }
 
-/* A page turning by its agents (D50, version 9): the section on the field fades away and the next comes in as its agent
+/* A page turning by its agents (D50): the section on the field fades away and the next comes in as its agent
    dives into it, each box shown by the intro's own fade written over this; any box it has not shown yet is held back and
    out of the pointer's way, as while the intro plays. A fixture (`data-intro-fixed`: the portfolio's status pill, the
    agents' cells to click) is no box of the page — a turn leaves it where it is, and the intro neither measures it nor
@@ -501,9 +484,9 @@
 
 /* The grid's own pointer (grid.tsx, Grid.md D34, D43): a 24px ring, a 2px violet line on nothing, filled violet while pressed —
    the system's cursor, drawn from an image, over the whole field: a link's hand and a button's included, because the
-   ring is the pointer. The system draws it where the hand is, so it never trails and costs the page nothing; it was a
-   div moved on every pointer move until the evening it was built, which cost a whole-page layerize a move and lagged.
-   The colour is `--violet` as sRGB (146 98 243, his, D43; lime until then), because an image cannot read a custom property; the 2x image is the
+   ring is the pointer. The system draws it where the hand is, so it never trails and costs the page nothing; a div
+   moved on every pointer move would cost a whole-page layerize a move and lag. The colour is `--violet` as sRGB
+   (146 98 243, D43), because an image cannot read a custom property; the 2x image is the
    same drawing at twice the pixels, and a browser without `image-set` for cursors takes the first line. The hotspot is
    the centre. The grid only sets `data-cursor` where the device hovers with a fine pointer, so a phone keeps its own. */
 [data-slot="grid"][data-cursor],
@@ -520,8 +503,8 @@
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%239262f3' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 2x) 12 12, auto;
 }
 
-/* A slider's head held (slider.tsx, Motion.md M16, his, 2026-09-30: "when I click the cursor doesn't need to fill, the
-   head should detach and fit into the cursor"): the pressed cursor stays the ring, and the head goes into it. From the
+/* A slider's head held (slider.tsx, Motion.md M16): the pressed cursor stays the ring, and the head detaches into
+   it. From the
    press to the release, wherever the pointer is, so a drag off the bar keeps it. */
 [data-slot="grid"][data-cursor]:has([data-slot="slider-thumb"][data-held]),
 [data-slot="grid"][data-cursor]:has([data-slot="slider-thumb"][data-held]) * {

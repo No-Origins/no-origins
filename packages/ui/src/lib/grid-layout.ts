@@ -4,10 +4,10 @@ import { BREAKPOINT_ORDER, GRID_SPACING, PAGER_CELLS, pagerWidth, type GridBreak
  * The layout model, as pure functions. Nothing here renders; grid-pages.tsx calls it.
  *
  * A LAYOUT is a set of PAGES, authored per breakpoint. A breakpoint with no authored pages of its own is DERIVED from
- * the nearest authored one — narrower first, else wider (Grid-v2.md D22, mobile-first) — by packing, page by page.
+ * the nearest authored one — narrower first, else wider (Grid.md D22, mobile-first) — by packing, page by page.
  *
- * Since v2 (D12) the counts are not the breakpoint's but the box's, so two boxes in the same breakpoint can have
- * different fields. Authored pages therefore carry the SHAPE — the cols × rows — they were written on, and when the
+ * The counts are not the breakpoint's but the box's (D12), so two boxes in the same breakpoint can have different
+ * fields. Authored pages therefore carry the SHAPE — the cols × rows — they were written on, and when the
  * field on show has another shape the same packer runs on them, exactly as it does across breakpoints.
  */
 
@@ -21,7 +21,7 @@ export type SlotInset = (typeof GRID_SPACING)[number]
 /** A slot's tokens (Slots.md S3): fill, padding, and the alignment of the component in it. No margin. */
 export type SlotSpec = { fill?: SlotFill; inset?: SlotInset; alignX?: SlotAlign; alignY?: SlotAlign }
 
-/** The component a slot holds: a registry kind and the props the inspector may have set (Slots.md S4). */
+/** The component a slot holds: a registry kind and its props (Slots.md S4). */
 export type SlotComponent = { kind: string; props?: Record<string, unknown> }
 
 /**
@@ -59,7 +59,7 @@ export type GridLayout = {
   authored: Partial<Record<GridBreakpoint, GridPage[]>>
   /**
    * The shape each authored breakpoint's pages were written on. Absent for a layout saved before 2026-09-21, which
-   * was written on v1's fixed counts (LEGACY_SHAPES).
+   * was written on the fixed counts of that time (LEGACY_SHAPES).
    */
   shapes?: Partial<Record<GridBreakpoint, GridShape>>
   /**
@@ -70,7 +70,7 @@ export type GridLayout = {
   bar?: GridLayout
 }
 
-/** v1's `DEFAULT_GRID_CONFIG` counts, so a layout saved before v2 still knows the field it was authored on. */
+/** The fixed counts a layout saved before 2026-09-21 was authored on, so it still knows its field. */
 export const LEGACY_SHAPES: Record<GridBreakpoint, GridShape> = {
   base: { cols: 4, rows: 8 },
   sm: { cols: 6, rows: 8 },
@@ -157,12 +157,10 @@ const widthOf = (pager: PagerWidth | undefined, cols: number): number => {
 }
 
 /**
- * The cells the pager occupies on a page — the same on every page (Grid.md D27, 2026-09-21): one row of 1×1 cells at
- * the bottom centre of the field, by default four then the ↑ and ↓ that turn it. Since D29 (2026-09-23) the width is
- * the breakpoint's, carried on the field as `pager`; it is even so the bar is centred on a grid line, and a field too
- * narrow gets as many cells as it has. Nothing may be placed here, on any page, and the packer never puts anything
- * here. (D23 had taken the corner buttons off and left this returning nothing; the pager came back as a fixture on
- * the bottom row.)
+ * The cells the pager occupies on a page — the same on every page (Grid.md D27): one row of 1×1 cells at the bottom
+ * centre of the field, by default four then the ↑ and ↓ that turn it. The width is the breakpoint's (D29), carried on
+ * the field as `pager`; it is even so the bar is centred on a grid line, and a field too narrow gets as many cells as
+ * it has. Nothing may be placed here, on any page, and the packer never puts anything here.
  */
 export function pagerCells(_pageIndex: number, _pageCount: number, cols: number, rows: number, pager: PagerWidth = true): GridRect[] {
   const n = widthOf(pager, cols)
@@ -275,8 +273,6 @@ export function derivePages(sourcePages: readonly GridPage[], cols: number, rows
     if (kept) out.push({ ...page, items: kept })
     else out.push(...packSourcePage(page.items, cols, rows, out.length, page.id, pager).map((packed) => ({ ...packed, title: page.title })))
   }
-  // (Until D23 the true last page was re-packed here without its › corner. There is no corner now, and re-packing
-  // undid D25's centring of a kept page.)
   return out.length ? out : [{ id: "page-1", items: [] }]
 }
 
@@ -286,8 +282,6 @@ export function derivePages(sourcePages: readonly GridPage[], cols: number, rows
  * The nearest authored breakpoint to derive from: the closest NARROWER one, else the closest wider (Grid.md D22,
  * 2026-09-21). Mobile-first: a layout made on a small field adapts upward into more room, which never spills onto
  * extra pages; packing a wide layout down is the lossy direction, and is only taken when nothing narrower exists.
- * (It was widest-first before — v1 D6 — and he asked for the reverse: "whenever a design is done at a lower
- * breakpoint, that should be adapted automatically to higher breakpoints.")
  */
 function nearestAuthored(layout: GridLayout, bp: GridBreakpoint): GridBreakpoint | null {
   const at = BREAKPOINT_ORDER.indexOf(bp)

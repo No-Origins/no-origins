@@ -12,9 +12,8 @@ const COLS = "@min-[600px]:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto]";
 /**
  * Set (or change) the account password, while signed in — a record on the Settings page's field.
  *
- * This is the only place a password is ever created. The membership path is the magic link — you get in with a
- * link first, then set a password here if you want the faster door next time. `updateUser` runs against the
- * live session, so there is no address to type and no oracle to leak.
+ * The login makes one too, when an account is made with a password and from a reset link. Here, `updateUser` runs
+ * against the live session, so there is no address to type and no oracle to leak.
  */
 export function SetPassword() {
   const [password, setPassword] = useState("");

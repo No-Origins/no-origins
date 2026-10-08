@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 
 /**
  * motion.no-origins.com — the motion studio (Motion.md). The shell is the theme, the fonts and the tooltips' provider;
- * the page is one GridPages that takes the whole viewport, so there is no nav, footer or container here.
+ * the page is one Grid that takes the whole viewport, so there is no nav, footer or container here.
  */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

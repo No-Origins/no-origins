@@ -20,7 +20,7 @@ const LAYERS = [
   {
     href: "/molecules",
     title: "Molecules",
-    count: 42,
+    count: 46,
     note: "Two or more atoms with a job between them.",
   },
 ] as const;
@@ -39,8 +39,8 @@ const Code = ({ children }: { children: string }) => (
 );
 
 /**
- * The overview, on the grid (2026-09-21) and arranged the portfolio's way (2026-09-22): one section, one screen where
- * it fits, on a 12-column band. The text sits in transparent boxes as `Text` roles, as wide as the band; the two
+ * The overview, arranged the portfolio's way (Portfolio.md P2): one section, one screen where it fits, on a 12-column
+ * band. The text sits in transparent boxes as `Text` roles, as wide as the band; the two
  * layer cards go on the field unwrapped — a Card is already a box. It reads top to bottom: intro, the cards in a row,
  * the notes.
  */
@@ -66,9 +66,9 @@ export const OVERVIEW: PageContent = {
                 The design system
               </Text>
               <Text role="body" tone="muted" className="max-w-3xl">
-                Rebuilt on shadcn/ui — style <Code>radix-sera</Code>, base <Code>radix</Code>, base colour <Code>neutral</Code>, square
-                corners, RTL on. Sixty-three components live in <Code>@no-origins/ui</Code>, plus the theme provider, and every app
-                consumes them from source.
+                Built on shadcn/ui — style <Code>radix-sera</Code>, base <Code>radix</Code>, base colour <Code>neutral</Code>, RTL
+                on, one radius: half a grid cell. Seventy-four components live in <Code>@no-origins/ui</Code>, sixty-one from
+                shadcn/ui and thirteen of our own, and every app consumes them from source.
               </Text>
             </div>
           ),
@@ -109,8 +109,7 @@ export const OVERVIEW: PageContent = {
                 The grid is the base layout: everything an app lays out snaps onto it, this page included.
               </Text>
               <Text role="body" tone="muted">
-                Organisms and templates are not here yet. The old ones went with the old system; the new ones get designed on top
-                of this layer.
+                Organisms and templates are not here yet; they get designed on top of this layer.
               </Text>
               <Text role="body" tone="muted">
                 Press <Code>d</Code> to switch theme; scroll, ↑ ↓ or ← → to turn the page.

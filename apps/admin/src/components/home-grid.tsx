@@ -33,7 +33,6 @@ const FEATURES: Record<string, Feature> = {
     blurb: "Every component and token, live in both themes.",
     href: "https://design.no-origins.com",
     icon: PaletteIcon,
-    soon: true,
   },
   products: {
     title: "Products",
@@ -44,7 +43,7 @@ const FEATURES: Record<string, Feature> = {
   },
   settings: {
     title: "Settings",
-    blurb: "Your account, passkeys and password.",
+    blurb: "Your account, password, passkeys and authenticators.",
     href: "/settings",
     icon: SettingsIcon,
   },
