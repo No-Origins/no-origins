@@ -31,8 +31,8 @@ import { supabaseBrowser } from "./client";
 export type Authenticator = { id: string; name: string; createdAt: string };
 
 export type SecondFactor = {
-  /** `unavailable` when the server has authenticator apps off (`[auth.mfa.totp]`), or nobody is signed in. */
-  status: "checking" | "ready" | "unavailable";
+  /** `unavailable` when the server has authenticator apps off (`[auth.mfa.totp]`); `signed-out` with no session. */
+  status: "checking" | "ready" | "unavailable" | "signed-out";
   authenticators: Authenticator[];
   /** This session has given a code (`aal2`). */
   proven: boolean;
@@ -47,7 +47,13 @@ export function useSecondFactor(): SecondFactor {
   const [state, setState] = React.useState<Omit<SecondFactor, "refresh">>({ status: "checking", authenticators: [], proven: false, locked: false });
 
   const refresh = React.useCallback(async () => {
-    const mfa = supabaseBrowser().auth.mfa;
+    const auth = supabaseBrowser().auth;
+    // Nobody signed in is not "authenticator apps are off": say which.
+    if (!(await auth.getSession()).data.session) {
+      setState({ status: "signed-out", authenticators: [], proven: false, locked: false });
+      return;
+    }
+    const mfa = auth.mfa;
     const [factors, level] = await Promise.all([mfa.listFactors(), mfa.getAuthenticatorAssuranceLevel()]);
     if (factors.error || level.error) {
       setState({ status: "unavailable", authenticators: [], proven: false, locked: false });
@@ -293,6 +299,10 @@ export function CodeDialog({ open, onOpenChange, title, line, then }: {
 export function SecondFactorCard({ app, next }: { app: string; next: string }) {
   const secondFactor = useSecondFactor();
   const go = () => window.location.assign(next);
+  // Signed out here — an old link, a session that ended on this step — is the sign-in form's, still going to `next`.
+  React.useEffect(() => {
+    if (secondFactor.status === "signed-out") window.location.replace(`/sign-in?next=${encodeURIComponent(next)}`);
+  }, [secondFactor.status, next]);
   const none = secondFactor.status === "ready" && !secondFactor.authenticators.length;
   return (
     <Card className="w-full max-w-sm">
@@ -302,8 +312,8 @@ export function SecondFactorCard({ app, next }: { app: string; next: string }) {
       </CardHeader>
       <CardContent>
         <FieldGroup>
-          {secondFactor.status === "checking" ? (
-            <Text role="body" tone="muted">Checking your authenticators…</Text>
+          {secondFactor.status === "checking" || secondFactor.status === "signed-out" ? (
+            <Text role="body" tone="muted">{secondFactor.status === "checking" ? "Checking your authenticators…" : "Your session has ended. Taking you to sign in…"}</Text>
           ) : secondFactor.status === "unavailable" ? (
             <Alert>
               <AlertTitle>Authenticator apps are off</AlertTitle>
