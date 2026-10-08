@@ -357,7 +357,18 @@ offers it" — a later option, not needed for this.
    then, if so.
 2. **He enrolls on production** — the phone and the second authenticator — and keeps the recovery codes, if any.
 3. The requirement: `noo_can()`, the gate and `shown()` ask for `aal2` on `admin.*`; the code step after sign-in. A
-   migration and a pull request; the hosted push his, **after step 2, never before**.
+   migration and a pull request; the hosted push his, **after step 2, never before**. **Built 2026-10-08**
+   (`…_access_second_factor.sql`): `noo_second_factor()` — `aal2`, or `amr` holding `passkey` — and `noo_can()` asking
+   it for every `admin.*` permission, the Owner's included; the gate reading `aal` and `amr` beside `perms`
+   (`claims.ts`: `secondFactorPassed`, `needsSecondFactor`) and sending a one-factor session that holds the app's
+   `admin.*` permission to `/sign-in?second=1&next=…`, never to the no-access card; `shown()` the same; the sign-in
+   page's `SecondFactorCard` — the code, or adding an authenticator when there is none — and on to `next`. The
+   database's tests run their sessions at `aal2` now, and thirteen new ones prove one factor holds no `admin.*`
+   permission, two factors and a passkey do, and a member's motion studio is as before (118 in all). Through the gate
+   on the local admin: an admin with no authenticator is sent to add one and lands where it was going; with one, a
+   wrong code is refused and the right one lands there; a passkey sign-in goes straight in, and changing the
+   authenticators from it still asks for a code; a member opens the motion studio and gets the no-access card at the
+   admin.
 4. Asking again on the four actions, and the agents' guard. A migration and a pull request.
 
 Database tests for each: one factor reads and changes nothing in the admin's tables and two factors do; a code older

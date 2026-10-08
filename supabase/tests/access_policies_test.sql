@@ -40,7 +40,7 @@ create temporary table counts on commit drop as select
 grant select on counts to authenticated, anon;
 
 -- ── the owner: nothing he could do before is lost ────────────────────────────
-do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated')::text, true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2')::text, true); end $$;
 set local role authenticated;
 select is((select count(*)::int from public.studio_drafts), (select drafts from counts), 'the owner reads every draft');
 select is((select count(*)::int from public.profiles), (select profiles from counts), 'the owner reads every profile');
@@ -51,7 +51,7 @@ select lives_ok($$select public.studio_publish('00000000-0000-4000-b000-00000000
 
 -- ── a member: the published actions, no drafts, no saving ────────────────────
 reset role;
-do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-b000-000000000011","role":"authenticated"}', true); end $$;
+do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-b000-000000000011","role":"authenticated","aal":"aal2"}', true); end $$;
 set local role authenticated;
 select is((select count(*)::int from public.studio_items where kind in ('action', 'motion')), (select actions from counts),
   'a member sees every action');
@@ -71,7 +71,7 @@ select throws_ok($$insert into storage.objects (bucket_id, name) values ('assets
 
 -- ── a motion editor: the motion studio's drafts and versions, not Orbit's ────
 reset role;
-do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-b000-000000000012","role":"authenticated"}', true); end $$;
+do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-b000-000000000012","role":"authenticated","aal":"aal2"}', true); end $$;
 set local role authenticated;
 select lives_ok($$insert into public.studio_items (id, kind, name) values ('00000000-0000-4000-b000-0000000000c3', 'action', 'Access test action two');
   insert into public.studio_drafts (item_id, data) values ('00000000-0000-4000-b000-0000000000c3', '{}')$$,
@@ -86,7 +86,7 @@ select is_empty($$update public.studio_drafts set data = '{}' where item_id = '0
 
 -- ── an Orbit drafter: saves a look, publishes none, makes no agent ──────────
 reset role;
-do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-b000-000000000013","role":"authenticated"}', true); end $$;
+do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-b000-000000000013","role":"authenticated","aal":"aal2"}', true); end $$;
 set local role authenticated;
 select isnt_empty($$update public.studio_drafts set data = '{"paint":"teal"}' where item_id = '00000000-0000-4000-b000-0000000000c2' returning 1$$,
   'an Orbit drafter saves a look''s draft');

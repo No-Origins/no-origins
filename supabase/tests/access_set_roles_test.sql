@@ -32,7 +32,7 @@ create function pg_temp.sessions() returns int language sql as $$
 $$;
 
 -- ── the owner: gives and takes in one save ───────────────────────────────────
-do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated')::text, true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2')::text, true); end $$;
 set local role authenticated;
 select lives_ok($$select public.noo_set_roles('00000000-0000-4000-e100-000000000051', array[
   (select id from public.roles where built_in = 'member'), '00000000-0000-4000-e100-0000000000a1', '00000000-0000-4000-e100-0000000000a2']::uuid[])$$,
@@ -41,7 +41,7 @@ reset role;
 select is(pg_temp.holds(), 'Editor, Friend, Member', 'beside the one held');
 select is(pg_temp.sessions(), 1, 'giving ends no session');
 
-do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated')::text, true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2')::text, true); end $$;
 set local role authenticated;
 select lives_ok($$select public.noo_set_roles('00000000-0000-4000-e100-000000000051', array['00000000-0000-4000-e100-0000000000a1']::uuid[])$$,
   'and takes two in another');
@@ -50,7 +50,7 @@ select is(pg_temp.holds(), 'Friend', 'leaving the one named');
 select is(pg_temp.sessions(), 0, 'and taking ends the person''s sessions');
 
 insert into counted select count(*) from public.audit_events;
-do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated')::text, true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2')::text, true); end $$;
 set local role authenticated;
 select lives_ok($$select public.noo_set_roles('00000000-0000-4000-e100-000000000051',
   array['00000000-0000-4000-e100-0000000000a1', '00000000-0000-4000-e100-0000000000a1']::uuid[])$$, 'saving the same set, twice named');
@@ -60,7 +60,7 @@ select is((select count(*)::int from public.audit_events), (select n from counte
 -- ── an assigner: all or nothing ──────────────────────────────────────────────
 do $$ begin perform set_config('request.jwt.claims', '', true); end $$;
 insert into auth.sessions (id, user_id) values ('00000000-0000-4000-e100-0000000000e2', '00000000-0000-4000-e100-000000000051');
-do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-e100-000000000052","role":"authenticated"}', true); end $$;
+do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-e100-000000000052","role":"authenticated","aal":"aal2"}', true); end $$;
 set local role authenticated;
 select throws_ok($$select public.noo_set_roles('00000000-0000-4000-e100-000000000051', array['00000000-0000-4000-e100-0000000000a3']::uuid[])$$,
   '42501', null, 'an assigner never gives a role with a permission only the owner gives');
@@ -69,12 +69,12 @@ select is(pg_temp.holds() || ' / ' || pg_temp.sessions(), 'Friend / 1',
   'and the refused save took nothing, ended nothing: Friend is still held and the session still open');
 
 -- ── never ────────────────────────────────────────────────────────────────────
-do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-e100-000000000051","role":"authenticated"}', true); end $$;
+do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-e100-000000000051","role":"authenticated","aal":"aal2"}', true); end $$;
 set local role authenticated;
 select throws_ok($$select public.noo_set_roles('00000000-0000-4000-e100-000000000052', array[]::uuid[])$$,
   '42501', null, 'someone without admin.people.assign sets nobody''s roles');
 reset role;
-do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-e100-000000000052","role":"authenticated"}', true); end $$;
+do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-e100-000000000052","role":"authenticated","aal":"aal2"}', true); end $$;
 set local role authenticated;
 select throws_ok($$select public.noo_set_roles(null, array[]::uuid[])$$, '22023', null, 'and a save that names nobody is refused out loud');
 
