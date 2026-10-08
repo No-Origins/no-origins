@@ -297,7 +297,7 @@ factor, as today.
   device, a sign-out, a role taken — asks again.
 - **Enrolling.** On the first visit with no factor, the admin shows the authenticator's QR code and asks for a code to
   prove it took; the session is `aal2` there and then. After that, adding or removing a factor needs `aal2` (Supabase's
-  rule, to confirm while building), so a stolen magic link cannot add its own authenticator once he has one. **Until
+  rule, proven on the local stack on 2026-10-08: `insufficient_aal` both ways), so a stolen magic link cannot add its own authenticator once he has one. **Until
   he has enrolled, it could** — so he enrolls the day the screens ship, before the requirement is switched on (the
   order, below).
 - **Asking again.** The gravest actions need the code entered within the last five minutes, read from the token's
@@ -337,13 +337,24 @@ database. Three ways back, not exclusive:
 page cannot replay it, which it can a six-digit code. Whether it counts as the second factor by itself, so a passkey
 sign-in opens the admin with no code, depends on what Supabase writes in the token for it (`amr`), checked while
 building. **His, 2026-10-08: yes** — if the token tells it apart from the other ways in; else the code after it, as after a magic
-link. Supabase now also offers a passkey as a second factor proper (`[auth.mfa.web_authn]`), A6's "when Supabase
+link. **It does** (checked 2026-10-08, a virtual authenticator on the local stack): a passkey sign-in is `aal1` to
+Supabase with `amr` `[{ method: "passkey" }]`, where a password is `password` and a code `totp`. So step 3's rule is
+**`aal2`, or a session signed in with a passkey**, and for the gravest actions a code or a passkey within five
+minutes. Supabase now also offers a passkey as a second factor proper (`[auth.mfa.web_authn]`), A6's "when Supabase
 offers it" — a later option, not needed for this.
 
 **The order, each step leaving him able to sign in:**
 
 1. Locally, TOTP switched on in `supabase/config.toml` (the hosted project has it already); the package's enrolling and
-   code screens; the factors in Settings. Nothing required yet. A pull request.
+   code screens; the factors in Settings. Nothing required yet. A pull request. **Built 2026-10-08**:
+   `@no-origins/auth/second-factor` — `useSecondFactor()` (the authenticators, whether this session gave a code, and
+   whether changing them needs one), `AddAuthenticatorDialog` (a code from one already added when the session has not
+   given one, then a name, the QR code and its key, and a code to prove it took; closed half way, the half-added one is
+   removed) and `CodeDialog` (a code before something that needs it) — and the admin's Settings: an "Authenticator
+   apps" record with Add, a record an authenticator with Remove (a code first when the session has not given one).
+   **Recovery codes are not in it**: the local Auth server (v2.196) does not know them, so they could not be built and
+   proven here; the hosted one runs v2.197, and whether it offers them is checked when he enrolls — they are added
+   then, if so.
 2. **He enrolls on production** — the phone and the second authenticator — and keeps the recovery codes, if any.
 3. The requirement: `noo_can()`, the gate and `shown()` ask for `aal2` on `admin.*`; the code step after sign-in. A
    migration and a pull request; the hosted push his, **after step 2, never before**.
@@ -366,5 +377,6 @@ factors, if the token tells it apart. (4) The admin is people's: no agent holds 
   how an agent's request names its delegation to the database (step 6).
 - **Settled, his, 2026-10-08 (A12)**: the ways back if the phone is lost (a second authenticator, the break-glass,
   recovery codes if offered); giving a role with an `admin.*` permission asks again; a passkey sign-in counts as both
-  factors; the admin is people's. To check while building: that Supabase asks for `aal2` to add a factor once one
-  exists, whether the hosted server offers recovery codes, and what a passkey sign-in writes in `amr`.
+  factors; the admin is people's. Checked 2026-10-08: Supabase asks for `aal2` to add or remove a factor once one
+  exists, and a passkey sign-in writes `passkey` in `amr`. Still to check: whether the hosted server offers recovery
+  codes (when he enrolls, step 2).
