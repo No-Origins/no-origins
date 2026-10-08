@@ -671,6 +671,22 @@ A12) and the motion studio a member can try. What the hosted project already has
   refuses an address nobody invited. Opening sign-up is taking that refusal away (Access.md A11 step 5).
 - **No challenge is on** (`security_captcha_enabled` false; hCaptcha is selected, unused).
 
+**How one signs up (his, 2026-10-08)**: asked whether it must be the magic link alone — *"do we really have to allow
+users only to sign up using magic link?"* — and shown the doors Supabase has, he chose **email and a password, or an
+email link or code**; no Google, Apple or GitHub for now. What that brings:
+
+- **Email and a password** (`signUp`): one mail to confirm the address, then signing in with the password sends none.
+  At least eight characters, as the admin's Settings already asks (Supabase's `password_min_length`, set to match).
+  Supabase answers a sign-up for an address that already has an account as it answers any other, so the form is no
+  oracle of who is here — the same rule as the sign-in's.
+- **Forgot your password** comes with it: a mail with a link to set a new one. An account with an authenticator is
+  asked for its code before the new password is taken — Supabase refuses a password change on one factor once a
+  factor exists — so the reset page has the code step (A12's, already in the package).
+- **An email link or a 6-digit code**, both in the same mail, for an address with or without an account: the link for
+  this device, the code for another.
+- **A passkey** cannot make an account (Supabase registers one only for an account that exists), so the auth app
+  offers one straight after a first sign-in.
+
 What is left for him to decide:
 
 1. **Launch on Resend's free plan?** Proposed: yes — 100 mails a day is room for a launch, and the passkey and password
@@ -691,8 +707,7 @@ What is left for him to decide:
    address and when you sign in, so you can sign in again. Delete your account any time from your account page."*
    His to word.
 
-Settled before and standing: sign-up is open to everyone; a sign-up is the magic link for a new address; a new account
-is a Member; the admin keeps no login of its own (his, 2026-10-06). The order is this section's five steps above, with
+Settled before and standing: sign-up is open to everyone; a new account is a Member; the admin keeps no login of its own (his, 2026-10-06). The order is this section's five steps above, with
 the challenge switched on before the allowlist's refusal goes, and sign-up last.
 
 ---
