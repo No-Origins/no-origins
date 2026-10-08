@@ -14,8 +14,8 @@ filename (`Brand.md §1`, `Atomic.md D11`), never by path, and so do the ~50 sou
 keep it that way.
 
 `services/agents` is the agents harness (Brand.md §1, §8): a Mix application on Jido, OTP app `:agents`,
-supervised as `Agents.Jido`. It is not a pnpm package. `pnpm-workspace.yaml` matches `apps/*` and `packages/*`
-only, and this directory has no `package.json`, so `pnpm build` does not compile it. Run it with
+supervised as `Agents.Jido`. It is not a pnpm package. `pnpm-workspace.yaml` matches `apps/*`, `packages/*` and
+`supabase` only, and this directory has no `package.json`, so `pnpm build` does not compile it. Run it with
 `cd services/agents && mix test`. The Next apps do not import it. A screen for the harness, when one exists,
 is a block on the grid that talks to this runtime. Agent lifecycle stays on the BEAM. The swarm does not write
 `packages/ui`, the portfolio, or the publish bucket.
@@ -278,11 +278,20 @@ carry the same commands since 2026-09-23; if they drift again, the file still wi
 nothing. `--frozen-lockfile` so a stale lockfile fails the build loudly instead of resolving something else — the
 failure that produced the engineering lockfile PRs.
 
-**Which apps a push builds is Vercel's call, not a command's.** All four projects have *Skip deployments for
+**Which apps a push builds is Vercel's call, not a command's.** All eight projects have *Skip deployments for
 unaffected projects* on (`enableAffectedProjectsDeployments` in the project API): Vercel reads the pnpm workspace
-graph and compares against the last deployed commit, so a change to `packages/ui` rebuilds all four and an
-engineering-only change rebuilds engineering — PR #5 and PR #7 deployed engineering and nothing else. **There is no
-`ignoreCommand`, and there should not be one.** One was written on 2026-09-23 (`git diff --quiet HEAD^ HEAD -- .
+graph and compares against the last deployed commit. A project builds when its own folder changed, when a workspace
+package it depends on changed — `packages/ui` rebuilds all eight, `packages/auth` the admin, motion, Orbit and Home,
+`packages/docs` none — or when a lockfile change moved its own dependencies. PR #5 and PR #7 deployed engineering and
+nothing else, #27 the admin and nothing else, #29 (documents only) nothing. A skipped project shows as *Canceled*,
+"the commit didn't affect this project", not as a missing deployment. **A change outside the workspace is global and
+rebuilds all eight** — Vercel's rule for anything `pnpm-workspace.yaml` does not match: the root's own files
+(`CLAUDE.md`, `AGENTS.md`, `playwright.config.ts`), `.github/`, `.changeset/`, `e2e/`, `services/`. Until 2026-10-08
+`supabase/` was one of them, so nearly every Access PR, because it carried a migration, rebuilt all eight apps
+whatever else it touched (#26, #30, #31), and the builds run one at a time: #31's admin waited in the queue while
+status, which #31 did not touch, built ahead of it. Since then `supabase/` is a workspace package no app depends on,
+and a change there rebuilds nothing. A new top-level folder that no app reads costs the same until it is one. **There
+is no `ignoreCommand`, and there should not be one.** One was written on 2026-09-23 (`git diff --quiet HEAD^ HEAD -- .
 ../../packages/ui ../../pnpm-lock.yaml`) and taken out the same day: it compared only a push's last commit, so a push
 whose `packages/ui` commit was not the tip skipped every app it touched, and it rebuilt all four on any lockfile
 change where the graph rebuilds only the apps whose dependencies moved.
@@ -297,7 +306,7 @@ connected project stays on its last manual deployment until something lands on `
 | Job | What it runs |
 |---|---|
 | **Typecheck and lint** | frozen install, `pnpm -r typecheck` (`packages/ui` on its own too), `pnpm -r lint` — `next build` stopped linting in Next 16 |
-| **Build** | `pnpm -r build`, all five apps, with no env — the one build check a merge can require |
+| **Build** | `pnpm -r build`, all eight apps, with no env — the one build check a merge can require |
 | **Visual review** | `pnpm review` (below); the screenshots and report are uploaded as the run's `review-screenshots` artifact |
 | **Agents tests** | `mix test` in `services/agents`, which no Vercel project builds |
 

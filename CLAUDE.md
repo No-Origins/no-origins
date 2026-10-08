@@ -23,18 +23,19 @@ filename (`Brand.md §1`, `Atomic.md D11`), never by path, and so do the ~50 sou
 keep it that way.
 
 `services/agents` is the agents harness (Brand.md §1, §8): a Mix application on Jido, OTP app `:agents`,
-supervised as `Agents.Jido`. It is not a pnpm package. `pnpm-workspace.yaml` matches `apps/*` and `packages/*`
-only, and this directory has no `package.json`, so `pnpm build` does not compile it. Run it with
+supervised as `Agents.Jido`. It is not a pnpm package. `pnpm-workspace.yaml` matches `apps/*`, `packages/*` and
+`supabase` only, and this directory has no `package.json`, so `pnpm build` does not compile it. Run it with
 `cd services/agents && mix test`. The Next apps do not import it. A screen for the harness, when one exists,
 is a block on the grid that talks to this runtime. Agent lifecycle stays on the BEAM. The swarm does not write
 `packages/ui`, the portfolio, or the publish bucket.
 
 `supabase/` is the admin's database — schema, RLS, the allowlist gate and both buckets. `supabase/README.md` says how
-to run it and what has been verified. The portfolio and the showcase hold no database key for anything they render:
-**the page is static, a component may be live** (Admin.md §0.6, 2026-09-18). A page's structure is baked at Publish
-from the public `publish` bucket and served from the edge, never queried at visit; a component that needs live data
-declares it, fetches with the anon key through a per-table RLS policy, and has a fallback state. The showcase and
-engineering (Layer A) have no database anywhere near them, and that is deliberate.
+to run it and what has been verified. It is a workspace package, `@no-origins/supabase`, a `package.json` and nothing
+else, only so that a migration rebuilds no app on Vercel (Deploying, 2026-10-08). The portfolio and the showcase hold
+no database key for anything they render: **the page is static, a component may be live** (Admin.md §0.6, 2026-09-18).
+A page's structure is baked at Publish from the public `publish` bucket and served from the edge, never queried at
+visit; a component that needs live data declares it, fetches with the anon key through a per-table RLS policy, and has
+a fallback state. The showcase and engineering (Layer A) have no database anywhere near them, and that is deliberate.
 
 `packages/auth` (`@no-origins/auth`) is **the one sign-in** (Admin.md §8.4, amended 2026-09-30, his: "the same auth
 because it should be same across no origins"): the Supabase clients, the gate (`authGate`, called from each app's
@@ -361,8 +362,8 @@ the CLI the night PR #14 merged (`vercel link` from the app's folder creates the
 answers 503). Production is `main`. The hosted Supabase carries every studio's domain and Home's among its redirect URLs, pushed from `config.toml`
 (supabase/README.md; `orbit.no-origins.com` and `home.no-origins.com` on 2026-10-03 — `config.toml` declares
 production's pooler and storage-analytics values under `[remotes.production]` so a push changes only what was meant).
-*Skip deployments for unaffected projects* is on for motion, character, status and home since 2026-10-03, set through
-the project API (`vercel api -X PATCH /v9/projects/<name> --input -` with `enableAffectedProjectsDeployments`) — the CLI
+*Skip deployments for unaffected projects* is on for all eight; motion, character, status and home had it set on
+2026-10-03, through the project API (`vercel api -X PATCH /v9/projects/<name> --input -` with `enableAffectedProjectsDeployments`) — the CLI
 has no flag for it.
 
 **`apps/<app>/vercel.json` is the source of truth, not the dashboard.** A `vercel.json` in a project's root directory
@@ -388,11 +389,20 @@ ticks took seconds. Keep the functions beside the database: if the database move
 thing still in `iad1` is Home's Blob store, `home-house`, which Home reads once a visit; moving it means a new store
 in `bom1` and a `publish:house`, his call.
 
-**Which apps a push builds is Vercel's call, not a command's.** All four projects have *Skip deployments for
+**Which apps a push builds is Vercel's call, not a command's.** All eight projects have *Skip deployments for
 unaffected projects* on (`enableAffectedProjectsDeployments` in the project API): Vercel reads the pnpm workspace
-graph and compares against the last deployed commit, so a change to `packages/ui` rebuilds all four and an
-engineering-only change rebuilds engineering — PR #5 and PR #7 deployed engineering and nothing else. **There is no
-`ignoreCommand`, and there should not be one.** One was written on 2026-09-23 (`git diff --quiet HEAD^ HEAD -- .
+graph and compares against the last deployed commit. A project builds when its own folder changed, when a workspace
+package it depends on changed — `packages/ui` rebuilds all eight, `packages/auth` the admin, motion, Orbit and Home,
+`packages/docs` none — or when a lockfile change moved its own dependencies. PR #5 and PR #7 deployed engineering and
+nothing else, #27 the admin and nothing else, #29 (documents only) nothing. A skipped project shows as *Canceled*,
+"the commit didn't affect this project", not as a missing deployment. **A change outside the workspace is global and
+rebuilds all eight** — Vercel's rule for anything `pnpm-workspace.yaml` does not match: the root's own files
+(`CLAUDE.md`, `AGENTS.md`, `playwright.config.ts`), `.github/`, `.changeset/`, `e2e/`, `services/`. Until 2026-10-08
+`supabase/` was one of them, so nearly every Access PR, because it carried a migration, rebuilt all eight apps
+whatever else it touched (#26, #30, #31), and the builds run one at a time: #31's admin waited in the queue while
+status, which #31 did not touch, built ahead of it. Since then `supabase/` is a workspace package no app depends on,
+and a change there rebuilds nothing. A new top-level folder that no app reads costs the same until it is one. **There
+is no `ignoreCommand`, and there should not be one.** One was written on 2026-09-23 (`git diff --quiet HEAD^ HEAD -- .
 ../../packages/ui ../../pnpm-lock.yaml`) and taken out the same day: it compared only a push's last commit, so a push
 whose `packages/ui` commit was not the tip skipped every app it touched, and it rebuilt all four on any lockfile
 change where the graph rebuilds only the apps whose dependencies moved.
@@ -407,7 +417,7 @@ connected project stays on its last manual deployment until something lands on `
 | Job | What it runs |
 |---|---|
 | **Typecheck and lint** | frozen install, `pnpm -r typecheck` (`packages/ui` on its own too), `pnpm -r lint` — `next build` stopped linting in Next 16 |
-| **Build** | `pnpm -r build`, all five apps, with no env — the one build check a merge can require |
+| **Build** | `pnpm -r build`, all eight apps, with no env — the one build check a merge can require |
 | **Visual review** | `pnpm review` (below); the screenshots and report are uploaded as the run's `review-screenshots` artifact |
 | **Agents tests** | `mix test` in `services/agents`, which no Vercel project builds |
 
