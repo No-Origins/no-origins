@@ -6,6 +6,7 @@ import { needsSecondFactor, secondFactorPassed, tokenClaims } from "./claims";
 import { sessionCookieOptions } from "./cookies";
 import { supabaseEnv } from "./env";
 import type { Permission } from "./permissions";
+import { safeReturn } from "./safe-next";
 
 /**
  * The gate, and the session refresh, in one pass (Admin.md §8.4) — every app's `proxy.ts` calls it.
@@ -50,6 +51,12 @@ export type GateOptions = {
    * opens it.
    */
   permission?: Permission;
+  /**
+   * The pages a signed-in person has no business on — the sign-in, and on the auth app the sign-up and the forgotten
+   * password: they go on to `next`, or the home. Never with a step still to take on the page (the code, the no-access
+   * card, a link's last step).
+   */
+  entries?: readonly string[];
 };
 
 /**
@@ -73,7 +80,7 @@ async function holds(supabase: SupabaseClient, permission: Permission): Promise<
 
 export async function authGate(
   request: NextRequest,
-  { publicPaths = ["/sign-in", "/auth"], openWithoutKeys = false, open = false, permission }: GateOptions = {},
+  { publicPaths = ["/sign-in", "/auth"], openWithoutKeys = false, open = false, permission, entries = ["/sign-in"] }: GateOptions = {},
 ) {
   const env = supabaseEnv();
   if (!env) {
@@ -108,7 +115,7 @@ export async function authGate(
     const url = request.nextUrl.clone();
     url.pathname = "/sign-in";
     // Where they were going, so the link lands there rather than at the home.
-    url.search = pathname === "/" ? "" : `?next=${encodeURIComponent(pathname)}`;
+    url.search = pathname === "/" ? "" : `?next=${encodeURIComponent(pathname + request.nextUrl.search)}`;
     return NextResponse.redirect(url);
   }
 
@@ -121,11 +128,9 @@ export async function authGate(
     return NextResponse.redirect(url);
   }
 
-  if (user && allowed && pathname === "/sign-in") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    url.search = "";
-    return NextResponse.redirect(url);
+  const params = request.nextUrl.searchParams;
+  if (user && allowed && entries.includes(pathname) && !["second", "denied", "token_hash"].some((step) => params.has(step))) {
+    return NextResponse.redirect(safeReturn(params.get("next"), request.nextUrl.origin));
   }
 
   return response;

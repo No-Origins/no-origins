@@ -7,12 +7,17 @@
   "exports": {
     "./env": "./src/env.ts",
     "./cookies": "./src/cookies.ts",
+    "./apps": "./src/apps.ts",
+    "./safe-next": "./src/safe-next.ts",
+    "./claims": "./src/claims.ts",
     "./server": "./src/server.ts",
     "./client": "./src/client.ts",
     "./proxy": "./src/proxy.ts",
     "./routes": "./src/routes.ts",
     "./webauthn": "./src/webauthn.ts",
+    "./challenge": "./src/challenge.tsx",
     "./second-factor": "./src/second-factor.tsx",
+    "./cards": "./src/cards.tsx",
     "./login-card": "./src/login-card.tsx",
     "./sign-in": "./src/sign-in.tsx",
     "./permissions": "./src/permissions.ts"

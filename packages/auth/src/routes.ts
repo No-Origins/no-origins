@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { sessionCookieOptions } from "./cookies";
 import { supabaseEnv } from "./env";
-import { safeNext } from "./safe-next";
+import { safeReturn } from "./safe-next";
 import { supabaseServer } from "./server";
 
 /**
@@ -26,13 +26,13 @@ import { supabaseServer } from "./server";
  */
 export async function authCallback(request: Request) {
   const { searchParams, origin } = new URL(request.url);
-  const next = safeNext(searchParams.get("next"));
+  const next = safeReturn(searchParams.get("next"), origin);
 
   const code = searchParams.get("code");
   if (code) {
     const supabase = await supabaseServer();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(`${origin}${next}`, { status: 303 });
+    if (!error) return NextResponse.redirect(next, { status: 303 });
   }
 
   const tokenHash = searchParams.get("token_hash");
@@ -41,17 +41,17 @@ export async function authCallback(request: Request) {
     const confirm = new URL("/sign-in", origin);
     confirm.searchParams.set("token_hash", tokenHash);
     confirm.searchParams.set("type", type);
-    if (next !== "/") confirm.searchParams.set("next", next);
+    if (next !== `${origin}/`) confirm.searchParams.set("next", next);
     return withoutHostOnlySession(request, NextResponse.redirect(confirm, { status: 303 }));
   }
 
-  return NextResponse.redirect(`${origin}/sign-in?error=link`, { status: 303 });
+  return NextResponse.redirect(failed(origin, next), { status: 303 });
 }
 
 /** POST only: the card's form, carrying the token hash the GET handed it. This is the request that signs in. */
 export async function authConfirm(request: Request) {
   const { searchParams, origin } = new URL(request.url);
-  const next = safeNext(searchParams.get("next"));
+  const next = safeReturn(searchParams.get("next"), origin);
   const tokenHash = searchParams.get("token_hash");
   const type = tokenType(searchParams.get("type"));
 
@@ -59,10 +59,18 @@ export async function authConfirm(request: Request) {
     const supabase = await supabaseServer();
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     // 303, so a browser that arrived by POST leaves by GET.
-    if (!error) return NextResponse.redirect(`${origin}${next}`, { status: 303 });
+    if (!error) return NextResponse.redirect(next, { status: 303 });
   }
 
-  return NextResponse.redirect(`${origin}/sign-in?error=link`, { status: 303 });
+  return NextResponse.redirect(failed(origin, next), { status: 303 });
+}
+
+/** The sign-in page saying the link did not work, still on its way to `next`. */
+function failed(origin: string, next: string) {
+  const url = new URL("/sign-in", origin);
+  url.searchParams.set("error", "link");
+  if (next !== `${origin}/`) url.searchParams.set("next", next);
+  return url;
 }
 
 /** POST only: a sign-out on GET is a sign-out any prefetch or image tag can perform. It signs out of every app. */
@@ -72,8 +80,15 @@ export async function signOut(request: Request) {
   return NextResponse.redirect(new URL("/sign-in", request.url), { status: 303 });
 }
 
-function tokenType(value: string | null): "magiclink" | "email" | null {
-  return value === "magiclink" || value === "email" ? value : null;
+/**
+ * The links a mail may carry (`supabase/templates`): a sign-in (`magiclink`, and `email` for the link that signs in or
+ * signs up alike), an address confirmed at sign-up (`signup`), and a forgotten password (`recovery`, whose `next` is the
+ * page that sets the new one).
+ */
+const TOKEN_TYPES = ["magiclink", "email", "signup", "recovery"] as const;
+
+function tokenType(value: string | null): (typeof TOKEN_TYPES)[number] | null {
+  return TOKEN_TYPES.find((type) => type === value) ?? null;
 }
 
 /**
