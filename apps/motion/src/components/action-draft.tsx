@@ -11,7 +11,7 @@ import { cn } from "@no-origins/ui/lib/utils";
 
 import {
   createAction, loadActions, publishAction, restoreAction, saveAction,
-  type ActionVersion, type Outcome, type PublishStep, type SavedAction,
+  type ActionsMay, type ActionVersion, type Outcome, type PublishStep, type SavedAction,
 } from "@/app/actions";
 import { actionStageValues, actionValuesOf } from "@/content/agent-actions";
 import type { Family } from "@/content/families";
@@ -25,9 +25,11 @@ import { JigCard } from "@/components/studio-jigs";
  * change on the `rev` it was loaded at, and published as versions, `major`.`minor` (Orbit.md C19): Publish makes the
  * latest's next minor, the versions' dialog the next major, and going back to a version makes it the one pages play and
  * the draft its values. Another device's save first stops the saving until he loads it. With no keys, or signed out,
- * the values are the browser's, as every family's are.
+ * the values are the browser's, as every family's are. **An account that may not save** (`motion.open` alone, Access.md
+ * A4) is `trying`: the action as it is published, every control its to move, nothing saved and nothing made (Orbit.md
+ * C24's way).
  */
-export type SaveStatus = "loading" | "saved" | "unsaved" | "saving" | "conflict" | "offline" | "signed-out" | "error";
+export type SaveStatus = "loading" | "saved" | "unsaved" | "saving" | "conflict" | "offline" | "signed-out" | "trying" | "error";
 
 type Draft = {
   action: AgentAction;
@@ -39,6 +41,8 @@ type Draft = {
   currentId: string | null;
   /** Whether the draft is the version pages play: there is nothing new to publish. */
   published: boolean;
+  /** What this session may do (Access.md A3); null until loaded. */
+  may: ActionsMay | null;
   publish: (step: PublishStep) => Promise<boolean>;
   restore: (versionId: string) => Promise<boolean>;
   reload: () => Promise<void>;
@@ -67,6 +71,7 @@ export function ActionDraftProvider({ family, children }: { family: Family; chil
   const [savedJson, setSavedJson] = React.useState<string | null>(null);
   const [versions, setVersions] = React.useState<ActionVersion[]>([]);
   const [current, setCurrent] = React.useState<{ id: string | null; json: string | null }>({ id: null, json: null });
+  const [may, setMay] = React.useState<ActionsMay | null>(null);
   // What the saver works from: refs, so a save in flight reads the newest values, not the render's.
   const kept = React.useRef<Kept | null>(null);
   const latest = React.useRef(json);
@@ -103,12 +108,25 @@ export function ActionDraftProvider({ family, children }: { family: Family; chil
     setMessage(null);
   }, [family]);
 
+  /** The action as it is published, on the jigs, to try: nothing kept, so nothing is ever saved or made. */
+  const tryOut = React.useCallback((published: SavedAction | undefined) => {
+    kept.current = null;
+    setSavedJson(null);
+    setVersions(published?.versions ?? []);
+    setCurrent({ id: published?.currentId ?? null, json: published?.current ? JSON.stringify(published.current) : null });
+    if (published) studioRef.current.replaceValues(family, actionStageValues(published.values));
+    setBase("trying");
+    setMessage(null);
+  }, [family]);
+
   const load = React.useCallback((): Promise<void> => {
     if (loading.current) return loading.current;
     const run = async () => {
       const outcome = await loadActions();
       if (!outcome.ok) return failed(outcome);
-      const found = outcome.value.find((a) => a.action === action.id);
+      setMay(outcome.value.may);
+      const found = outcome.value.actions.find((a) => a.action === action.id);
+      if (!outcome.value.may.save) return tryOut(found);
       if (found) return apply(found);
       // The first time: made in the database from the values on the jigs.
       const made = await createAction(action.id, JSON.parse(latest.current));
@@ -119,7 +137,7 @@ export function ActionDraftProvider({ family, children }: { family: Family; chil
       loading.current = null;
     });
     return loading.current;
-  }, [action.id, apply, failed]);
+  }, [action.id, apply, failed, tryOut]);
 
   React.useEffect(() => {
     void load();
@@ -200,10 +218,11 @@ export function ActionDraftProvider({ family, children }: { family: Family; chil
     versions,
     currentId: current.id,
     published: current.json !== null && current.json === json,
+    may,
     publish,
     restore,
     reload,
-  }), [action, status, message, versions, current, json, publish, restore, reload]);
+  }), [action, status, message, versions, current, json, may, publish, restore, reload]);
   return <DraftContext.Provider value={draft}>{children}</DraftContext.Provider>;
 }
 
@@ -215,6 +234,7 @@ const STATUS: Record<SaveStatus, string> = {
   conflict: "Changed elsewhere",
   offline: "In this browser",
   "signed-out": "Signed out",
+  trying: "Trying",
   error: "Not saved",
 };
 
@@ -237,7 +257,8 @@ export function ActionCard() {
   const { action, status, versions } = draft;
   const shown = versions.find((v) => v.id === draft.currentId);
   const next = nextVersions(versions);
-  const kept = status !== "loading" && status !== "offline" && status !== "signed-out" && status !== "conflict";
+  const kept = status !== "loading" && status !== "offline" && status !== "signed-out" && status !== "conflict" && status !== "trying";
+  const mayPublish = draft.may?.publish ?? false;
   const run = async (fn: () => Promise<unknown>) => {
     setBusy(true);
     try {
@@ -246,24 +267,31 @@ export function ActionCard() {
       setBusy(false);
     }
   };
-  const state = !kept ? null : shown ? `Version ${versionName(shown)}${draft.published ? "" : ", changed since"}` : "Not published yet";
+  const state = status === "trying"
+    ? shown ? `Version ${versionName(shown)}, as published` : "Not published yet"
+    : !kept ? null : shown ? `Version ${versionName(shown)}${draft.published ? "" : ", changed since"}` : "Not published yet";
   return <JigCard title={action.label} action={<Text role="caption" className="shrink-0" data-save-status={status}>{STATUS[status]}</Text>}>
     <Text role="caption">{action.touches}</Text>
     {state ? <Text role="body" data-action-version={shown ? versionName(shown) : ""}>{state}</Text> : null}
     {draft.message ? <Text role="caption">{draft.message}</Text> : null}
-    <div className="flex flex-wrap items-center gap-2">
-      {status === "conflict" ? (
-        <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(draft.reload)}>Load</Button>
-      ) : (
-        <Button size="sm" disabled={!kept || busy || draft.published} onClick={() => void run(() => draft.publish("minor"))}>Publish {next.minor}</Button>
-      )}
-      <Versions disabled={!kept || busy} run={run} />
-    </div>
+    {status === "trying" ? (
+      <Text role="caption" data-trying="">Your roles open the studio to try every control. Nothing you change is saved.</Text>
+    ) : (
+      <div className="flex flex-wrap items-center gap-2">
+        {status === "conflict" ? (
+          <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(draft.reload)}>Load</Button>
+        ) : (
+          <Button size="sm" disabled={!kept || busy || draft.published || !mayPublish} onClick={() => void run(() => draft.publish("minor"))}>Publish {next.minor}</Button>
+        )}
+        <Versions disabled={!kept || busy} mayPublish={mayPublish} run={run} />
+      </div>
+    )}
+    {kept && !mayPublish ? <Text role="caption">Your changes are saved; publishing needs motion.version.publish.</Text> : null}
   </JigCard>;
 }
 
 /** Every version of the action, newest first: the one pages play, going back to another, and the next major. */
-function Versions({ disabled, run }: { disabled: boolean; run: (fn: () => Promise<unknown>) => Promise<void> }) {
+function Versions({ disabled, mayPublish, run }: { disabled: boolean; mayPublish: boolean; run: (fn: () => Promise<unknown>) => Promise<void> }) {
   const draft = useActionDraft()!;
   const [open, setOpen] = React.useState(false);
   const next = nextVersions(draft.versions);
@@ -283,12 +311,12 @@ function Versions({ disabled, run }: { disabled: boolean; run: (fn: () => Promis
               <Text role="caption">{new Date(v.publishedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}</Text>
             </div>
             {v.id === draft.currentId ? <Text role="caption">Pages play this</Text>
-              : <Button size="sm" variant="outline" onClick={() => void run(async () => { if (await draft.restore(v.id)) setOpen(false); })}>Go back</Button>}
+              : <Button size="sm" variant="outline" disabled={!mayPublish} onClick={() => void run(async () => { if (await draft.restore(v.id)) setOpen(false); })}>Go back</Button>}
           </div>
         </React.Fragment>)}
       </div> : <Text role="body">Not published yet. Publish makes 1.0.</Text>}
       {draft.versions.length ? <DialogFooter>
-        <Button onClick={() => void run(async () => { if (await draft.publish("major")) setOpen(false); })}>Publish {next.major}</Button>
+        <Button disabled={!mayPublish} onClick={() => void run(async () => { if (await draft.publish("major")) setOpen(false); })}>Publish {next.major}</Button>
       </DialogFooter> : null}
     </DialogContent>
   </Dialog>;

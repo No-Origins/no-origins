@@ -59,7 +59,7 @@ async function saved(page: Page) {
   if (await fold.isVisible()) await fold.click();
   const status = page.locator("[data-save-status]");
   if (!(await status.count())) return;
-  await expect.poll(() => status.first().getAttribute("data-save-status"), { timeout: 10_000 }).toMatch(/^(saved|offline|signed-out)$/);
+  await expect.poll(() => status.first().getAttribute("data-save-status"), { timeout: 10_000 }).toMatch(/^(saved|offline|signed-out|trying)$/);
 }
 
 async function open(page: Page) {
@@ -82,7 +82,7 @@ test("motion agents: Bounce, on the agent previewed", async ({ page }, testInfo)
   await open(page);
   const cell = await page.locator('[data-slot="grid"]').first().evaluate((g) => parseFloat(getComputedStyle(g).getPropertyValue("--grid-cell")));
   // His draft, in the database: read, never written. Only the browser's values — no keys, or signed out — are edited.
-  const his = !/^(offline|signed-out)$/.test((await page.locator("[data-save-status]").first().getAttribute("data-save-status")) ?? "");
+  const his = !/^(offline|signed-out|trying)$/.test((await page.locator("[data-save-status]").first().getAttribute("data-save-status")) ?? "");
 
   // Its timeline is its phases, as long as its controls make them (his: "length should follow from the controls").
   await page.getByRole("button", { name: "Play from the start", exact: true }).click();

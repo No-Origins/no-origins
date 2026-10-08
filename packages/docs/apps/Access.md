@@ -243,7 +243,13 @@ buckets (`assets`, `publish`); Orbit's server asking for the owner; and gates th
    database tests of the hook pass beside the sixty-two before. **On the hosted project the order is `db push`, then
    `config push`**: a hook enabled before its function exists refuses every sign-in. **Due before step 5**: the motion
    studio reads every action from its draft, so an account with only `motion.open` sees an empty studio; it must read
-   the published versions and save nothing, as Orbit does for a visitor (C24).
+   the published versions and save nothing, as Orbit does for a visitor (C24). **Built 2026-10-08**: the studio reads
+   what the account may do from the token (`motion.draft.save`, `motion.version.publish`); one that may not save is
+   *trying* — each action as it is published (or its newest version), each agent as Orbit publishes it, every control
+   its to move, no save sent, no item made, Publish and Versions not shown. One that may save but not publish keeps its
+   draft and is told publishing needs `motion.version.publish`. No rule changed: a member could always read the actions,
+   their versions and the published looks. Proven on the local stack with a Member: Bali in his published look,
+   Version 1.1 as published, a control moved and nothing saved, the published value back on reload.
 4. **The admin's pages**: people, roles, invitations, audit. The allowlist's rows become invitations. **Built
    2026-10-06, version 1** (`…_access_admin.sql`, `apps/admin`): People (`/people`: everyone and every agent, their
    roles, joined and last signed in; give or take a role, which ends the person's sessions; end sessions; remove),
@@ -274,7 +280,8 @@ buckets (`assets`, `publish`); Orbit's server asking for the owner; and gates th
    role's page loads that role alone: the admin home makes one call to the database where it made five, People five
    where nine, Roles and a role four where seven.
    **Due before step 5, beside the motion studio's read path (step 3)**: the admin's second factor and asking again
-   before the gravest actions (A6, his, agreed), not built yet; proposed in A12, 2026-10-08.
+   before the gravest actions (A6, his, agreed) — **both built and live on 2026-10-08** (A12), and the read path the
+   same day (step 3).
 5. **Only then does sign-up open** (the login host, Admin.md §8.4): the allowlist's refusal goes and the default role
    is given. Never before step 3, or a stranger's account would pass the old gates, which ask only for a session.
 6. **Agents**: their accounts, their credentials in the harness, delegations.

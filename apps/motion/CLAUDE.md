@@ -162,7 +162,10 @@ then the grip, give way in a thin pill. **A phase that is a setting carries `dra
 - **A half-width choice token is a select**, since half a jig is too narrow for a row of toggles (none on the bench today; loading's Settle was one until it went).
 - **The specimen is abstract geometry, by his spec**: lime rings and dots, not a component. That is the one kind of
   element here that is not `@no-origins/ui`. Everything the jigs are made of is.
-- **The studio is behind the sign-in** since 2026-09-30 (Motion.md M20, his: "lock the motion studio behind authentication, let's use the same auth"): `src/proxy.ts` calls the shared gate (`@no-origins/auth`), `/sign-in` is the shared login card, and the session is the admin's. **On a development server with no Supabase keys it opens without a login** — that is how `pnpm review`, CI and a laptop offline see it; `.env.example` says what to set to lock it locally. Production never opens without them. It had no database near it until that night; his versions will live in the admin's Supabase once their design (M20) is agreed. Nothing reads a table yet.
+- **The studio is behind the sign-in** since 2026-09-30 (Motion.md M20, his: "lock the motion studio behind authentication, let's use the same auth"): `src/proxy.ts` calls the shared gate (`@no-origins/auth`), `/sign-in` is the shared login card, and the session is the admin's. **On a development server with no Supabase keys it opens without a login** — that is how `pnpm review`, CI and a laptop offline see it; `.env.example` says what to set to lock it locally. Production never opens without them. It had no database near it until that night; his versions will live in the admin's Supabase once their design (M20) is agreed. Nothing reads a table yet. **Since 2026-10-08 an account that may open the studio but not save** (`motion.open` alone, a Member — Access.md A4) is
+  **trying** (`SaveStatus`): `loadActions` says what the session may do (`may`, from the token), it reads each action
+  as published and each agent as Orbit publishes it, and `ActionDraftProvider` never saves or makes an item for it; the
+  action's card shows the version and "Nothing you change is saved", without Publish or Versions.
 
 ## Reviewing it
 
