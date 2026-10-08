@@ -412,17 +412,20 @@ builds, whatever changed. And connecting a project does not backfill: the hooks 
 connected project stays on its last manual deployment until something lands on `main`.
 
 **CI is `.github/workflows/ci.yml`**, on every pull request and every push to `main`, and **branch protection on
-`main` requires all four of its jobs**, admins included — nothing reaches production without them:
+`main` requires all five of its checks**, admins included — nothing reaches production without them:
 
 | Job | What it runs |
 |---|---|
 | **Typecheck and lint** | frozen install, `pnpm -r typecheck` (`packages/ui` on its own too), `pnpm -r lint` — `next build` stopped linting in Next 16 |
 | **Build** | `pnpm -r build`, all eight apps, with no env — the one build check a merge can require |
 | **Visual review** | `pnpm review` (below); the screenshots and report are uploaded as the run's `review-screenshots` artifact |
-| **Agents tests** | `mix test` in `services/agents`, which no Vercel project builds |
+| **Agents tests** | `mix test` in `services/agents`, which no Vercel project builds — **only when `services/agents` changed** |
+| **Database tests** | `supabase start` (the database and auth only), an Owner made through the allowlist, `supabase test db` — the access rules (Access.md), **only when `supabase/` changed** |
 
-Warnings pass; errors fail. Vercel's own checks are not required and cannot be: it skips an app a change does not
-touch, and a skipped app reports no status, so a required Vercel check would hold every such PR open. **Node is 24
+The last two run only when their folder (or the workflow) changed (his, 2026-10-08): a small `What changed` job diffs
+the change, and a job its `if` skips reports success, so the required check passes; when it cannot tell, or fails,
+both run. Warnings pass; errors fail. Vercel's own checks are not required: it skips an app a change does not touch,
+reporting "Skipped - Not affected". **Node is 24
 everywhere**: `.nvmrc` for fnm and CI, `engines.node` (`24.x`) in the root and every app's `package.json` for Vercel,
 which reads it from the project's root directory and prefers it to the dashboard.
 
