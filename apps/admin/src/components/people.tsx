@@ -13,7 +13,7 @@ import { Field, FieldGroup, FieldLabel } from "@no-origins/ui/components/field";
 import { Text } from "@no-origins/ui/components/text";
 
 import { endSessions, removeAccount, setRoles } from "@/app/access/actions";
-import { AdminPages, band, ColumnNames, RecordBox, wideOnly, type AdminItem } from "@/components/admin-pages";
+import { AdminPages, band, ColumnNames, RecordBox, useStepUp, wideOnly, type AdminItem } from "@/components/admin-pages";
 import { Confirm, useChange } from "@/components/outcome";
 
 export type PersonRow = {
@@ -145,11 +145,14 @@ function RolesDialog({ person, roles }: { person: PersonRow; roles: RoleChoice[]
     : !changes.length
       ? "Nothing to save."
       : `${changes.length} ${changes.length === 1 ? "change" : "changes"} unsaved.${taking ? " Taking a role signs them out at once." : ""}`;
+  const stepUp = useStepUp();
+  // Giving a role that holds an admin permission needs a fresh code (Access.md A12): asked for, then the same save again.
   const save = () => {
     setRefusal(null);
     start(async () => {
       const result = await setRoles(person.id, [...roles.filter((r) => ticked.has(r.id)).map((r) => r.id), ...unlisted]);
       if (result.ok) setOpen(false);
+      else if (result.secondFactor) stepUp(save);
       else setRefusal(result.message);
     });
   };

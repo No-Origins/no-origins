@@ -11,15 +11,20 @@ import { can, supabaseServer } from "@no-origins/auth/server";
  * ends or removes more than they hold, and the Owner is never touched. A refusal comes back as a sentence for the page.
  */
 
-export type Done = { ok: true } | { ok: false; message: string };
+/**
+ * A change's answer. `secondFactor`: the database asked for a code from the last five minutes (Access.md A12, the gravest
+ * changes); the page asks for one and tries the same change again.
+ */
+export type Done = { ok: true } | { ok: false; message: string; secondFactor?: boolean };
 
 const refused = (message: string): Done => ({ ok: false, message });
 
-/** The database's own sentence, without its table's prefix. */
-function said(error: { message: string } | null): Done {
+/** The database's own sentence, without its table's prefix; `NOAAL` is its code for "a fresh code, please" (A12). */
+function said(error: { message: string; code?: string } | null): Done {
   if (!error) return { ok: true };
   const text = error.message.replace(/^[a-z_ ]+: /, "");
-  return refused(text.charAt(0).toUpperCase() + text.slice(1));
+  const message = text.charAt(0).toUpperCase() + text.slice(1);
+  return error.code === "NOAAL" ? { ok: false, message, secondFactor: true } : refused(message);
 }
 
 async function asking(permission: Permission) {

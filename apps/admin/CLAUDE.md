@@ -92,5 +92,11 @@ screen "his to design" is still on the grid; what is his to design is what sits 
   `AddAuthenticatorDialog`, `CodeDialog`), so they move to the auth app unchanged. **Locally too**: an account with no
   authenticator adds one at its first admin visit, and a review script on a one-factor session (`admin-state.json`)
   lands on the code step — `e2e/.mcp/second-factor-gate-check.mjs` shows how to compute codes from the key.
+- **The gravest changes ask again** (A12, step 4): ticking an admin permission into a role, giving or inviting with a
+  role that holds one, and removing an account need a code from the last five minutes. The database refuses with
+  `NOAAL`; a change answered `secondFactor` (`Done` in `app/access/actions.ts`) opens the page's one code dialog
+  (`useStepUp()`) and runs again. `useChange` does it for every change; a change written outside it must ask
+  `useStepUp()` itself, as the role page's Save and the People dialog do. `e2e/.mcp/step-up-check.mjs` waits the five
+  minutes out.
 - **The sign-in page says the same thing whatever happens.** The allowlist is the membership rule, so a page
   that distinguished "not on the list" from "link sent" would be a membership oracle for anyone with the URL.

@@ -63,7 +63,7 @@ select throws_ok($$insert into public.role_permissions (role_id, permission)
 
 -- ── as the owner ─────────────────────────────────────────────────────────────
 -- Who the request is, set while still the database: as `authenticated`, row security would hide the owner's profile.
-do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2')::text, true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 set local role authenticated;
 select ok(public.noo_can('home.open') and public.noo_can('admin.roles.manage'), 'the owner may do anything');
 select lives_ok($$insert into public.role_assignments (principal_id, role_id) values
@@ -77,7 +77,7 @@ select ok(exists (select 1 from public.audit_events where action = 'role.given'
   and actor_id = (select id from public.profiles where role = 'owner')), 'a role given is on the record, by who gave it');
 
 -- ── as the member (Member and, since just now, Friend) ───────────────────────
-do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-a000-000000000001","role":"authenticated","aal":"aal2"}', true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-4000-a000-000000000001', 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 select ok(public.noo_can('motion.open') and public.noo_can('home.open'), 'a member holds what their roles grant');
 select ok(not public.noo_can('admin.open'), 'and nothing else');
 select throws_ok($$insert into public.role_permissions (role_id, permission)
@@ -92,7 +92,7 @@ select throws_ok($$insert into public.delegations (agent_id, on_behalf_of, purpo
   '42501', null, 'but never for someone else');
 
 -- ── as the helper (Helper: invitations and the motion studio) ────────────────
-do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-a000-000000000002","role":"authenticated","aal":"aal2"}', true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-4000-a000-000000000002', 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 select lives_ok($$insert into public.invitations (email) values ('access-next@example.test');
   insert into public.invitation_roles (email, role_id) select 'access-next@example.test', id from public.roles where built_in = 'member'$$,
   'a helper invites with a role it holds all of');

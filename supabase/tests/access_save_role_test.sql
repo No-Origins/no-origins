@@ -26,7 +26,7 @@ create function pg_temp.friend_holds() returns text[] language sql as $$
 $$;
 
 -- ── the owner: one save, every change ────────────────────────────────────────
-do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2')::text, true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 set local role authenticated;
 select lives_ok($$select public.noo_save_role('00000000-0000-4000-e000-0000000000f1', '  Friends ', 'Family who may see the house',
   array['home.open', 'motion.open', 'admin.people.assign'])$$, 'the owner saves a name, a sentence and a permission at once');
@@ -36,14 +36,14 @@ select is((select name || ' / ' || sentence from public.roles where id = '000000
 select is(pg_temp.friend_holds(), array['admin.people.assign', 'home.open', 'motion.open'], 'and the permission ticked in');
 
 insert into counted select count(*) from public.audit_events;
-do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2')::text, true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 set local role authenticated;
 select lives_ok($$select public.noo_save_role('00000000-0000-4000-e000-0000000000f1', 'Friends', 'Family who may see the house',
   array['motion.open', 'home.open', 'admin.people.assign', 'home.open'])$$, 'saving it again, in another order, twice named');
 reset role;
 select is((select count(*)::int from public.audit_events), (select n from counted), 'a save that changes nothing writes nothing');
 
-do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2')::text, true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', (select id from public.profiles where role = 'owner'), 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 set local role authenticated;
 select lives_ok($$select public.noo_save_role('00000000-0000-4000-e000-0000000000f1', 'Friends', 'Family who may see the house',
   array['admin.people.assign', 'home.open'])$$, 'the owner unticks one');
@@ -53,7 +53,7 @@ select is((select count(*)::int from public.audit_events where action = 'role.pe
   and detail -> 'before' ->> 'role_id' = '00000000-0000-4000-e000-0000000000f1'), 1, 'on the record, as a tick was');
 
 -- ── a helper: all or nothing ─────────────────────────────────────────────────
-do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-e000-000000000041","role":"authenticated","aal":"aal2"}', true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-4000-e000-000000000041', 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 set local role authenticated;
 select lives_ok($$select public.noo_save_role('00000000-0000-4000-e000-0000000000f1', 'Friends', 'Family who may see the house',
   array['admin.people.assign', 'home.open', 'motion.open'])$$,
@@ -65,14 +65,14 @@ select is((select name from public.roles where id = '00000000-0000-4000-e000-000
   'Friends admin.people.assign,home.open,motion.open', 'and a refused save leaves the role as it was, name and all');
 
 -- ── never ────────────────────────────────────────────────────────────────────
-do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-e000-000000000041","role":"authenticated","aal":"aal2"}', true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-4000-e000-000000000041', 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 set local role authenticated;
 select throws_ok($$select public.noo_save_role((select id from public.roles where built_in = 'owner'), 'Owner', '', array['home.open'])$$,
   '42501', null, 'the Owner is not saved here');
 select throws_ok($$select public.noo_save_role('00000000-0000-4000-e000-0000000000f1', '   ', '', array['home.open'])$$,
   '23514', null, 'a role needs a name');
 reset role;
-do $$ begin perform set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-e000-000000000042","role":"authenticated","aal":"aal2"}', true); end $$;
+do $$ begin perform set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-4000-e000-000000000042', 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true); end $$;
 set local role authenticated;
 select throws_ok($$select public.noo_save_role('00000000-0000-4000-e000-0000000000f1', 'Friends', '', array[]::text[])$$,
   '42501', null, 'a member saves no role');
