@@ -1,9 +1,13 @@
-# The gate in front of production: branch protection requires every job below. Vercel still builds and deploys each
-# app on its own (apps/<app>/vercel.json), but it skips apps a change does not touch, and a skipped app reports no
-# status, so a Vercel check cannot be required. This workflow builds all five instead, and runs what a Vercel build
-# does not: types across the whole workspace, including packages/ui on its own; lint, which `next build` stopped
-# running in Next 16; the visual review; and the agents harness, which no Vercel project builds. Warnings pass,
-# errors fail. Node comes from .nvmrc, the same 24 that engines.node pins for Vercel.
+# The gate in front of production: branch protection requires every job below but `changes`. Vercel still builds and
+# deploys each app on its own (apps/<app>/vercel.json), skipping apps a change does not touch, and its checks are not
+# required. This workflow builds all eight instead, and runs what a Vercel build does not: types across the whole
+# workspace, including packages/ui on its own; lint, which `next build` stopped running in Next 16; the visual review;
+# the agents harness, which no Vercel project builds; and the database's tests, the access rules (Access.md).
+# Warnings pass, errors fail. Node comes from .nvmrc, the same 24 that engines.node pins for Vercel.
+#
+# The agents' and the database's jobs run only when their folder (or this file) changed (his, 2026-10-08): a job
+# skipped by its `if` reports success, so the required check still passes. When `changes` cannot tell — a new branch,
+# a force-push, an error — both run.
 name: CI
 
 on:
@@ -19,6 +23,27 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    name: What changed
+    runs-on: ubuntu-latest
+    outputs:
+      agents: ${{ steps.diff.outputs.agents }}
+      database: ${{ steps.diff.outputs.database }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: diff
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          everything() { echo "agents=true" >> "$GITHUB_OUTPUT"; echo "database=true" >> "$GITHUB_OUTPUT"; exit 0; }
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then everything; fi
+          files=$(git diff --name-only "$BASE...$GITHUB_SHA") || everything
+          touched() { if printf '%s\n' "$files" | grep -qE "$1"; then echo true; else echo false; fi; }
+          echo "agents=$(touched '^(services/agents/|\.github/workflows/ci\.yml$)')" >> "$GITHUB_OUTPUT"
+          echo "database=$(touched '^(supabase/|\.github/workflows/ci\.yml$)')" >> "$GITHUB_OUTPUT"
+
   web:
     name: Typecheck and lint
     runs-on: ubuntu-latest
@@ -83,6 +108,8 @@ jobs:
 
   agents:
     name: Agents tests
+    needs: changes
+    if: always() && (needs.changes.result != 'success' || needs.changes.outputs.agents == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -98,10 +125,32 @@ jobs:
           elixir-version: "1.20"
       - uses: actions/cache@v6
         with:
+          # ~/.hex holds Hex's registry cache: without it a slow hex.pm fails `mix deps.get` (2026-10-08, websockex).
           path: |
+            ~/.hex
             services/agents/deps
             services/agents/_build
           key: mix-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles('services/agents/mix.lock') }}
           restore-keys: mix-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-
-      - run: mix deps.get
+      # One retry: a registry timeout is the network's, not the code's.
+      - run: mix deps.get || (sleep 15 && mix deps.get)
       - run: mix test
+
+  database:
+    name: Database tests
+    needs: changes
+    if: always() && (needs.changes.result != 'success' || needs.changes.outputs.database == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.120.0
+      # The database and the auth server (its schema, the token hook) are all the tests need.
+      - run: supabase start -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      # The tests find the Owner by `profiles.role = 'owner'`, as on his machine: an address the allowlist invites as
+      # owner becomes the Owner on sign-up when there is none (noo_handle_new_user).
+      - run: supabase db query "insert into public.allowlist (email, role) values ('ci-owner@example.test', 'owner')"
+      - run: supabase db query "insert into auth.users (id, email, aud, role, instance_id) values (gen_random_uuid(), 'ci-owner@example.test', 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000')"
+      - run: supabase test db
