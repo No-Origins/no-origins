@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { tokenClaims } from "./claims";
+import { needsSecondFactor, secondFactorPassed, tokenClaims } from "./claims";
 import { sessionCookieOptions } from "./cookies";
 import { supabaseEnv } from "./env";
 import type { Permission } from "./permissions";
@@ -31,6 +31,11 @@ import type { Permission } from "./permissions";
  * **An app's permission** (`permission`, Access.md A6, 2026-10-06): a session is not enough — the account must hold the
  * app's `<app>.open`. Without it the gate sends the person to the sign-in page, which says the account cannot open the
  * app and offers a sign-out; it never sends them to the app.
+ *
+ * **The admin's second factor** (Access.md A12, step 3): an `admin.*` permission counts only after an authenticator
+ * app's code (`aal2`) or a passkey sign-in, read from the same token. A session that holds the permission on one factor
+ * is sent to the sign-in page's code step (`?second=1`) — or, with no authenticator yet, to adding one — and then on to
+ * where it was going; never to the no-access card, which is for an account that does not hold the permission at all.
  */
 export type GateOptions = {
   /** Paths anyone may reach: the sign-in page and the callback. */
@@ -48,18 +53,22 @@ export type GateOptions = {
 };
 
 /**
- * Whether the signed-in principal holds `permission` (Access.md A6). The token shows: its `perms` claim, written by the
- * database when the token was issued (`noo_access_token_hook`), read from the token `getUser()` has just had the auth
- * server verify — so it is never a claim the browser wrote. A token from before the hook has no such claim, and then
- * the database is asked, live (`noo_can`). Either way a change reaches the gate within the token's ten minutes, and at
- * once when the person's sessions are ended.
+ * Whether the signed-in principal holds `permission` (Access.md A6): `held`, `no`, or `second` — held, but only after a
+ * second factor this session has not passed (A12). The token shows: its `perms` claim, written by the database when the
+ * token was issued (`noo_access_token_hook`), and its `aal` and `amr`, read from the token `getUser()` has just had the
+ * auth server verify — so never a claim the browser wrote. A token from before the hook has no `perms`, and then the
+ * database is asked, live (`noo_can`, which asks for the second factor itself). Either way a change reaches the gate
+ * within the token's ten minutes, and at once when the person's sessions are ended.
  */
-async function holds(supabase: SupabaseClient, permission: Permission): Promise<boolean> {
+async function holds(supabase: SupabaseClient, permission: Permission): Promise<"held" | "second" | "no"> {
   const { data: { session } } = await supabase.auth.getSession();
-  const perms = session ? (tokenClaims(session.access_token)?.perms ?? null) : null;
-  if (perms) return perms.includes(permission);
+  const claims = session ? tokenClaims(session.access_token) : null;
+  if (claims?.perms) {
+    if (!claims.perms.includes(permission)) return "no";
+    return needsSecondFactor(permission) && !secondFactorPassed(claims) ? "second" : "held";
+  }
   const { data, error } = await supabase.rpc("noo_can", { p_permission: permission });
-  return !error && data === true;
+  return !error && data === true ? "held" : "no";
 }
 
 export async function authGate(
@@ -91,8 +100,9 @@ export async function authGate(
   const { data: { user } } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
   const reachable = open || publicPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
-  // Signed in, and whether this account may open the app (Access.md A6). Asked once a request, only where it matters.
-  const allowed = !user || !permission || (await holds(supabase, permission));
+  // Signed in, and whether this account may open the app (Access.md A6, A12). Asked once a request, only where it matters.
+  const access = !user || !permission ? "held" : await holds(supabase, permission);
+  const allowed = access === "held";
 
   if (!user && !reachable) {
     const url = request.nextUrl.clone();
@@ -103,10 +113,11 @@ export async function authGate(
   }
 
   // Signed in without the app's permission: the sign-in page, saying so — and only it and the auth routes (sign-out).
+  // Holding it on one factor (A12): the code step, and then where they were going.
   if (user && !allowed && !reachable) {
     const url = request.nextUrl.clone();
     url.pathname = "/sign-in";
-    url.search = "?denied=1";
+    url.search = access === "second" ? `?second=1${pathname === "/" ? "" : `&next=${encodeURIComponent(pathname)}`}` : "?denied=1";
     return NextResponse.redirect(url);
   }
 

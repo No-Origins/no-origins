@@ -13,6 +13,7 @@ import { KeyRound } from "lucide-react";
 import { supabaseBrowser } from "./client";
 import { supabaseEnv } from "./env";
 import { safeNext } from "./safe-next";
+import { SecondFactorCard } from "./second-factor";
 import { useWebAuthn } from "./webauthn";
 
 /**
@@ -46,6 +47,10 @@ function LoginCardInner({ app }: { app: string }) {
   // Signed in, but this account cannot open the app (Access.md A6): the gate sent it here. Say so, and offer the way out —
   // never a sign-in form, which would only sign the same account in again.
   if (params.get("denied")) return <DeniedCard app={app} />;
+
+  // Signed in on one factor, holding a permission that needs two (Access.md A12): the gate sent it here for the code,
+  // or for adding an authenticator when it has none, and then on to `next`.
+  if (params.get("second")) return <SecondFactorCard app={app} next={next} />;
 
   // A development server with no Supabase keys has nothing to sign in to: an app that opens without them (the motion
   // studio and Orbit, `openWithoutKeys`) is already open, so the card says so rather than a form that cannot send.
