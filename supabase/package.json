@@ -1,0 +1,6 @@
+{
+  "name": "@no-origins/supabase",
+  "version": "0.0.0",
+  "description": "The admin's database — schema, RLS, tests and config, run with the Supabase CLI. A workspace package only so Vercel reads a change here as one no app depends on, rather than a global change that rebuilds them all. No build, no exports.",
+  "private": true
+}
