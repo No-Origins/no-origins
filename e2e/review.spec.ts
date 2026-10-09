@@ -45,6 +45,13 @@ export const STATUS_ROUTES = ["/"];
 export const AUTH = "http://localhost:3008";
 export const AUTH_ROUTES = ["/", "/sign-in", "/sign-up", "/forgot", "/account"];
 
+/**
+ * The Cinema Studio (Cinema-Engine.md E1), a ninth, on :3009, run on his machine only. Without his private folder (CI,
+ * a fresh clone) it shows the made-up sample shot. `/render` is the renderer's canvas, not a page, and is not swept.
+ */
+export const CINEMA = "http://localhost:3009";
+export const CINEMA_ROUTES = ["/", "/shots"];
+
 const APPS = [
   { name: "", base: "", routes: ROUTES },
   { name: "design", base: DESIGN, routes: DESIGN_ROUTES },
@@ -54,6 +61,7 @@ const APPS = [
   { name: "home", base: HOME, routes: HOME_ROUTES },
   { name: "status", base: STATUS, routes: STATUS_ROUTES },
   { name: "auth", base: AUTH, routes: AUTH_ROUTES },
+  { name: "cinema", base: CINEMA, routes: CINEMA_ROUTES },
 ];
 
 const slug = (route: string) => (route === "/" ? "home" : route.slice(1).replace(/\//g, "__"));

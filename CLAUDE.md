@@ -7,8 +7,11 @@ surface, :3002), `engineering` (engineering.no-origins.com, the engineering publ
 2026-09-30: the agents' appearance, Orbit.md) and `home` (home.no-origins.com, :3006, since 2026-10-02: the model of
 the house he is building, Home.md — the app is in the repository and the house is not: it lives in
 `apps/home/src/content`, gitignored, and in a private Vercel Blob store the site reads behind the sign-in, H4), `status` (status.no-origins.com, :3007, since 2026-10-03: where every app
-stands, public, Status.md) and `auth` (auth.no-origins.com, :3008, since 2026-10-08: the login — signing in, making
-an account, the apps one may open and one's account, Admin.md §8.4 step 5, `apps/auth/CLAUDE.md`), all Next.js 16; the shared design
+stands, public, Status.md), `auth` (auth.no-origins.com, :3008, since 2026-10-08: the login — signing in, making
+an account, the apps one may open and one's account, Admin.md §8.4 step 5, `apps/auth/CLAUDE.md`) and `cinema` (no
+host and no Vercel project: his machine only, :3009, since 2026-10-09: the Cinema Studio's engine, Cinema-Engine.md —
+the app is in the repository and his library, shots and agents are not: they live in `apps/cinema/src/content`,
+gitignored, E5), all Next.js 16; the shared design
 system is `packages/ui` (`@no-origins/ui`, **2.0.0** since 2026-09-16), consumed from source. Each app has its own
 CLAUDE.md / AGENTS.md; read them before editing app code.
 
@@ -334,7 +337,8 @@ composer and nothing is edited in place.
 
 ## What builds
 
-**All nine apps build** — `pnpm -r build` is green, and CI's **Build** job builds all nine on every PR. The admin
+**All ten apps build** — `pnpm -r build` is green, and CI's **Build** job builds all ten on every PR (the Cinema
+Studio against its public sample). The admin
 builds with no Supabase keys, since its clients are made per request; it stays out of the **review sweep** because
 every route is behind auth and needs a running Supabase, which `pnpm review` does not boot. The motion studio is
 behind the same sign-in since 2026-09-30 and stays in the sweep: its dev server opens when it has no keys (CI, a fresh
@@ -430,7 +434,7 @@ connected project stays on its last manual deployment until something lands on `
 | Job | What it runs |
 |---|---|
 | **Typecheck and lint** | frozen install, `pnpm -r typecheck` (`packages/ui` on its own too), `pnpm -r lint` — `next build` stopped linting in Next 16 |
-| **Build** | `pnpm -r build`, all nine apps, with no env — the one build check a merge can require |
+| **Build** | `pnpm -r build`, all ten apps, with no env — the one build check a merge can require |
 | **Visual review** | `pnpm review` (below); the screenshots and report are uploaded as the run's `review-screenshots` artifact |
 | **Agents tests** | `mix test` in `services/agents`, which no Vercel project builds — **only when `services/agents` changed** |
 | **Database tests** | `supabase start` (the database and auth only), an Owner made through the allowlist, `supabase test db` — the access rules (Access.md), **only when `supabase/` changed** |
@@ -462,9 +466,9 @@ anchored with a leading slash on purpose, because an unanchored `supabase` would
 After any UI change, look at the result before reporting done.
 
 1. `pnpm review` boots the portfolio on :3000, the showcase on :3001, engineering on :3003, the motion studio on
-   :3004, Orbit on :3005, Home on :3006, Status on :3007 and the login on :3008 (or reuses running ones), visits every
-   route in `ROUTES`, `DESIGN_ROUTES`, `ENGINEERING_ROUTES`, `MOTION_ROUTES`, `ORBIT_ROUTES`, `HOME_ROUTES`,
-   `STATUS_ROUTES` and `AUTH_ROUTES` in
+   :3004, Orbit on :3005, Home on :3006, Status on :3007, the login on :3008 and the Cinema Studio on :3009 (or reuses
+   running ones), visits every route in `ROUTES`, `DESIGN_ROUTES`, `ENGINEERING_ROUTES`, `MOTION_ROUTES`,
+   `ORBIT_ROUTES`, `HOME_ROUTES`, `STATUS_ROUTES`, `AUTH_ROUTES` and `CINEMA_ROUTES` in
    `e2e/review.spec.ts` on desktop
    (1440x900) and mobile (Pixel 7) in both themes, waits for a grid's intro (D50) to hand over, fails on a route that
    answers 400+ or throws, echoes

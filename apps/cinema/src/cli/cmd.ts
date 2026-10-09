@@ -1,0 +1,680 @@
+import { existsSync, readdirSync } from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+
+import { check, parse, resolve } from "../engine/controls.ts";
+import { pinAssets } from "../engine/assets.ts";
+import { keepable } from "../engine/bench.ts";
+import { setCell, setControls } from "../engine/edit.ts";
+import { makeLibrary, type Library } from "../engine/library.ts";
+import { frameTimes, itemsOf, newShot, nextId, shotLength } from "../engine/shot.ts";
+import { DEPARTMENTS, TRACK_DEPARTMENT } from "../engine/types.ts";
+import type { Aspect, Department, Entry, Frame, Placement, Shot, TrackKind, Use, Values } from "../engine/types.ts";
+import { agentDir, appendSession, closeSession, DATA, departmentOf, frontmatter, isId, listAgents, listShots, makeAgent, openSession, openSessions, outputDir, PRIVATE, publish, readAgentFile, readAssets, readDraft, readTemplate, readVersion, relative, saveAsset, saveDraft, sessionsOf, versionsOf } from "../data/store.ts";
+import { scaled, sheet, still, video } from "./render.ts";
+
+/**
+ * The commands (Cinema-Engine.md E6): the only way a shot changes. He, Claude and every agent use the same ones, and
+ * the screen calls them too. Each checks before it writes (the values against their controls, the work against the
+ * calling agent's department, Cinema-Agents.md R5) and a refusal changes nothing. Given an agent and its session, each
+ * writes its own line in the session (R6), so the record never misses a control.
+ *
+ *   pnpm --filter cinema cmd help
+ */
+
+const HELP = `The Cinema Studio's commands (Cinema-Engine.md E6).
+
+  pnpm --filter cinema cmd <command> … [--agent <id> --session <id> [--department <department>]] [--director]
+  (while an agent's session is open on a shot, every command on it is that agent's and recorded in its session;
+   --director acts as him or Claude instead)
+
+Reading
+  shots                                   the shots, their revisions and versions
+  show <shot> [--version n]               a shot as data
+  entries [environment|cast|camera|light] the library: each entry and its controls
+  assets                                  his saved assets and their versions
+  describe <shot> [--version n]           the world in words and numbers: focus, size, heights, what stands where,
+                                          and the shot's frame, length, camera and lights (for planning a camera)
+
+Changing a shot (each needs its department when an agent runs it)
+  new <shot> [--title t] [--aspect wide|vertical] [--size px] [--fps n]           direction
+  world <shot> <entry[@version]> [control=value …] [--keep]                       art
+      (--keep carries over every value the new entry takes from the world before)
+  cell <shot> <[layer:]column,row> [--asset <id>|none|rules] [control=value …] [--clear]   art
+      (a layer's cell is named with its layer: clouds:2,3)
+  asset save "<name>" --from <shot> [--description "<when to use it>"]
+                                          saves the shot's world as a configuration under his name, with what it
+                                          is for (the code calls a configuration an asset, from before Cinema.md F11)   art
+  place <shot> <entry[@version]> --at x,z [--facing deg] [--name n] [control=value …]   direction, cast
+  add <shot> <entry[@version]> --start s --length s [control=value …]             the track's (camera, light)
+  set <shot> <world|cast id|item id> [control=value …] [--at x,z] [--facing deg]  the thing's department
+  move <shot> <item> --start s · trim <shot> <item> --length s · remove <shot> <cast id|item>
+  frame <shot> [--aspect wide|vertical] [--size px] [--fps n]                     direction, camera
+  publish <shot>                                                                  direction
+
+Rendering (a published version with --version n; the draft otherwise; --aspect to see the other frame)
+  still <shot> --at s                      a still at a moment
+  sheet <shot> [--count 12] [--columns 4]  stills across the shot, tiled
+  clip <shot> [--from s] [--to s] [--scale 0.5]   a quick video to check
+  export <shot> [--version n] [--aspect wide|vertical|both] [--at s]   the final video and a still   direction
+
+The agents (Cinema-Agents.md), the director's and Claude's
+  agents                                  the agents, their departments and how many sessions each has had
+  agent new <id> --department <d> --name "<his name>"      the factory: makes an agent from its department's template
+  agent brief <id> --session <s> --shot <shot> --job "<his words>" [--from director] [--note "<Claude's own word>"]
+                                          opens a session, records the instruction, prints the agent's brief
+  agent say|close <id> --session <s> "<words>"             the agent's own lines: a note, and what it did
+  agent feedback <id> --session <s> "<his words>" [--artifact <file>] [--verdict kept|changed|dropped]
+
+Departments: ${DEPARTMENTS.join(", ")}. Times are in seconds, places in metres, angles in degrees.`;
+
+class Refusal extends Error {}
+const refuse = (why: string): never => {
+  throw new Refusal(why);
+};
+
+// ── The words on the line ────────────────────────────────────────────────────────────────────────────────────────────
+const [command = "help", ...rest] = process.argv.slice(2);
+const flags: Record<string, string> = {};
+/** Flags that take no value. */
+const SWITCHES = new Set(["keep", "clear", "director"]);
+const pairs: Record<string, string> = {};
+const positional: string[] = [];
+for (let i = 0; i < rest.length; i++) {
+  const word = rest[i]!;
+  if (word.startsWith("--")) {
+    const body = word.slice(2);
+    const equals = body.indexOf("=");
+    if (equals >= 0) flags[body.slice(0, equals)] = body.slice(equals + 1);
+    else if (SWITCHES.has(body)) flags[body] = "true";
+    else flags[body] = rest[++i] ?? "";
+  } else if (/^[a-z][a-z0-9-]*=/.test(word)) {
+    const at = word.indexOf("=");
+    pairs[word.slice(0, at)] = word.slice(at + 1);
+  } else positional.push(word);
+}
+
+const number = (name: string, fallback?: number) => {
+  if (!(name in flags)) return fallback ?? refuse(`--${name} is needed`);
+  const value = Number(flags[name]);
+  return Number.isFinite(value) ? value : refuse(`--${name} takes a number, not "${flags[name]}"`);
+};
+const aspectFlag = (): Aspect | undefined => {
+  const value = flags.aspect;
+  if (value === undefined) return undefined;
+  return value === "wide" || value === "vertical" ? value : refuse(`--aspect is wide or vertical, not "${value}"`);
+};
+
+// ── Who is asking ────────────────────────────────────────────────────────────────────────────────────────────────────
+let agent = flags.agent;
+let session = flags.session;
+let department: Department | "director" = "director";
+/** He and Claude are the director; an agent is its department, from --department or its profile (Cinema-Agents.md R2). */
+function identify(shot: string | undefined) {
+  if (Boolean(agent) !== Boolean(session)) refuse("an agent's command names both --agent and --session");
+  // An agent's session open on this shot makes the command that agent's, named or not (R6); he and Claude act as
+  // themselves with --director.
+  if (!agent && shot && !("director" in flags)) {
+    const held = openSessions()[shot];
+    if (held) {
+      agent = held.agent;
+      session = held.session;
+      process.stderr.write(`(${held.agent}'s session ${held.session} is open on ${shot}: recorded there; --director to act as yourself)\n`);
+    }
+  }
+  if (!agent) return;
+  if (!isId(agent) || !isId(session!)) refuse("an agent's id and its session's are lower case letters, digits and dashes");
+  const named = flags.department ?? departmentOf(agent) ?? refuse(`${agent} has no department: give --department`);
+  department = (DEPARTMENTS as readonly string[]).includes(named) ? (named as Department) : refuse(`no department called ${named}`);
+}
+/** He and Claude may do anything; an agent only its own department's work. */
+function allow(...departments: Department[]) {
+  if (department !== "director" && !departments.includes(department))
+    refuse(`${agent} works in ${department}; this is ${departments.join(" or ")}'s work`);
+}
+function record(line: Record<string, unknown>) {
+  if (agent && session) appendSession(agent, session, line);
+}
+
+// ── The library ──────────────────────────────────────────────────────────────────────────────────────────────────────
+let library: Library;
+async function open() {
+  const content = (await import(pathToFileURL(path.join(DATA, "index.ts")).href)) as { ENTRIES: Entry[] };
+  library = makeLibrary(content.ENTRIES);
+}
+
+/** `orbit` is the newest version; `orbit@1` that one. */
+function entryNamed(name: string | undefined) {
+  if (!name) return refuse("name an entry (see `entries`)");
+  const [id, version] = name.split("@") as [string, string | undefined];
+  const entry = version ? library.find(id, Number(version)) : library.latest(id);
+  return entry ?? refuse(`the library has no ${name} (see \`entries\`)`);
+}
+function valuesFor(entry: Entry, raw: Record<string, string>): Values {
+  const byId = new Map(entry.controls.map((control) => [control.id, control]));
+  const values: Values = {};
+  for (const [id, text] of Object.entries(raw)) {
+    const control = byId.get(id) ?? refuse(`${entry.id} has no control called ${id}; it has ${entry.controls.map((c) => c.id).join(", ")}`);
+    values[id] = parse(control, text);
+  }
+  const problems = check(entry.controls, values);
+  return problems.length ? refuse(problems.join("; ")) : values;
+}
+/** The screen's change and the command's are one (`engine/edit.ts`); its reasons become a refusal. */
+function edited(shot: Shot, target: string, values: Values) {
+  try {
+    return setControls(shot, target, values, library);
+  } catch (error) {
+    return refuse(error instanceof Error ? error.message : String(error));
+  }
+}
+/** `control=value` pairs read against the controls of the asset standing in a cell (or about to). */
+function valuesForCell(shot: Shot, key: string): Values {
+  const world = shot.world ?? refuse(`${shot.id} has no world yet`);
+  const entry = entryOf(world);
+  if (entry.kind !== "environment" || !entry.grid) return refuse(`${tag(world)} is not a grid: it has no cells`);
+  const [layerId, place] = key.includes(":") ? (key.split(":") as [string, string]) : [undefined, key];
+  const [column, row] = place.split(",").map(Number);
+  const spec = entry.grid(resolve(entry.controls, world.values));
+  const layer = layerId ? (spec.layers?.find((l) => l.id === layerId) ?? refuse(`the grid has no layer called ${layerId}`)) : undefined;
+  const rule = (layer?.rule ?? spec.rule)(column ?? 0, row ?? 0);
+  const ref = "asset" in flags ? (flags.asset === "none" ? "" : flags.asset) : (world.cells?.[key]?.asset ?? rule);
+  const book = readAssets();
+  const [id, version] = (ref ?? "").split("@");
+  const standing = id ? (version ? book[id]?.find((v) => v.version === Number(version)) : book[id]?.at(-1)) : undefined;
+  if (!standing) return refuse(`no asset stands in ${key} to tune`);
+  return valuesFor(library.find(standing.use.entry, standing.use.version) ?? refuse(`${standing.use.entry}@${standing.use.version} is not in the library`), pairs);
+}
+
+/** The values an entry's controls still take, from a use of another version of it. */
+const entryOf = (use: Use) => library.find(use.entry, use.version) ?? refuse(`${use.entry}@${use.version} is not in the library`);
+const tag = (use: Use) => `${library.idOf(use.entry)}@${use.version}`;
+
+// ── The shot ─────────────────────────────────────────────────────────────────────────────────────────────────────────
+function draftOf(id: string | undefined) {
+  if (!id) return refuse("name a shot (see `shots`)");
+  return readDraft(id) ?? refuse(`there is no shot called ${id} (see \`shots\`)`);
+}
+function save(shot: Shot, line: Record<string, unknown>) {
+  const saved = saveDraft(shot);
+  record({ type: "command", command, shot: shot.id, rev: saved.rev, ...line });
+  return saved;
+}
+/** The shot a render draws: a published version, or the draft; in another frame if asked. */
+function toRender(id: string | undefined) {
+  const version = "version" in flags ? number("version") : undefined;
+  const shot = version === undefined ? draftOf(id) : (readVersion(id ?? "", version) ?? refuse(`${id} has no version ${version}`));
+  const aspect = aspectFlag();
+  return { shot: aspect ? { ...shot, frame: { ...shot.frame, aspect } } : shot, version: version ?? "draft" };
+}
+const placeOf = (shot: Shot, id: string) => shot.cast.find((placement) => placement.id === id);
+const at = (): [number, number] => {
+  const [x, z] = (flags.at ?? refuse("--at x,z is needed")).split(",").map(Number);
+  return Number.isFinite(x) && Number.isFinite(z) ? [x!, z!] : refuse(`--at is two numbers, x,z, not "${flags.at}"`);
+};
+const output = (kind: "renders" | "exports", shot: Shot) => outputDir(kind, shot.id, agent && session ? { id: agent, session } : undefined);
+const seconds = (t: number) => `${Number(t.toFixed(2))}s`;
+
+/** The world in words and numbers (`describe`), for an agent planning in it: focus, size, heights, what stands where. */
+function describeShot(shot: Shot, version: number | string): string[] {
+  const lines = [`${shot.id} "${shot.title}" (${version === "draft" ? `draft, revision ${shot.rev}` : `version ${version}`}): ${shot.frame.aspect} ${shot.frame.size}px at ${shot.frame.fps} fps, ${seconds(shotLength(shot))} long.`];
+  const world = shot.world;
+  if (!world) return [...lines, "No world yet."];
+  const entry = entryOf(world);
+  if (entry.kind !== "environment") return [...lines, `${tag(world)} is not an environment.`];
+  const piece = entry.build(resolve(entry.controls, world.values), { library, assets: readAssets(), cells: world.cells ?? {} });
+  const w = piece.world;
+  const r = w.radius;
+  const at = (n: number) => Number(n.toFixed(1));
+  lines.push(`World: ${tag(world)}. Focus (where a camera aims by default) at (${w.focus.map(at).join(", ")}). It reaches about ${at(r)} m from the focus${w.footprint ? `; it stands on a square ${at(w.footprint)} m across` : ""}. Sky ${w.sky}, haze ${w.haze}.`);
+  lines.push("Axes: x across, z along, y up, in metres; the ground is at y = 0.");
+  let top = { h: -Infinity, x: 0, z: 0 };
+  const fine = 81;
+  for (let i = 0; i < fine; i++)
+    for (let j = 0; j < fine; j++) {
+      const x = w.focus[0] - r + (2 * r * i) / (fine - 1), z = w.focus[2] - r + (2 * r * j) / (fine - 1);
+      const h = w.heightAt(x, z);
+      if (h > top.h) top = { h, x, z };
+    }
+  lines.push(`Highest ground: ${at(top.h)} m, at (${at(top.x)}, ${at(top.z)}).`);
+  // The highest ground in each patch of a 9 by 9 split of the world, so nothing narrow hides between samples.
+  const n = 9;
+  const patch = (2 * r) / n;
+  const highest = (x0: number, z0: number) => {
+    let h = 0;
+    for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) h = Math.max(h, w.heightAt(x0 + ((i + 0.5) * patch) / 8, z0 + ((j + 0.5) * patch) / 8));
+    return h;
+  };
+  const x0 = w.focus[0] - r, z0 = w.focus[2] - r;
+  lines.push(`Highest ground in each patch (m): ${n} by ${n} patches, each ${at(patch)} m square; x across from ${at(x0)} to ${at(x0 + 2 * r)}, z down from ${at(z0)} to ${at(z0 + 2 * r)}:`);
+  for (let j = 0; j < n; j++) lines.push("  " + Array.from({ length: n }, (_, i) => String(Math.round(highest(x0 + i * patch, z0 + j * patch))).padStart(4)).join(""));
+  for (const note of w.notes ?? []) lines.push(`- ${note}`);
+  for (const track of shot.tracks)
+    for (const item of track.items)
+      lines.push(`${track.kind} ${item.id}: ${tag(item)} from ${seconds(item.start)} for ${seconds(item.length)} ${JSON.stringify(item.values)}`);
+  piece.dispose?.();
+  return lines;
+}
+
+/** A section of a Markdown text: what stands under `## <heading>` up to the next `## `. */
+function section(text: string, heading: string) {
+  const at = text.indexOf(`## ${heading}`);
+  if (at < 0) return "";
+  const body = text.slice(text.indexOf("\n", at) + 1);
+  const next = body.search(/^## /m);
+  return (next < 0 ? body : body.slice(0, next)).trim();
+}
+/** Which version of its core an agent works from: how many the day's review has saved (0 for none yet). */
+function coreVersion(id: string) {
+  const dir = path.join(agentDir(id), "core");
+  return existsSync(dir) ? readdirSync(dir).filter((name) => /^\d+\.md$/.test(name)).length : 0;
+}
+/** A session in a few lines (Cinema-Agents.md R4): what it was asked, what it did, what he thought. */
+function summarize(session: { id: string; lines: Record<string, unknown>[] }) {
+  const of = (type: string) => session.lines.filter((line) => line.type === type);
+  const asked = of("instruction").map((line) => `"${String(line.words)}"`).join("; ");
+  const closed = of("close").map((line) => String(line.words)).join(" ");
+  const notes = of("feedback").map((line) => `"${String(line.words)}"`).join("; ");
+  const verdicts = of("verdict").map((line) => String(line.verdict)).join(", ");
+  return `- ${session.id}: asked ${asked || "nothing recorded"}; ${of("command").length} commands, ${of("render").length} renders.${closed ? ` Did: ${closed}` : ""}${notes ? ` His notes: ${notes}.` : ""}${verdicts ? ` Verdicts: ${verdicts}.` : ""}`;
+}
+
+// ── The commands ─────────────────────────────────────────────────────────────────────────────────────────────────────
+async function run(): Promise<string> {
+  // The agent commands are Claude's and his (the director's): they make, brief and answer agents, and name the agent
+  // and session themselves.
+  if (command !== "agent" && command !== "agents") identify(positional[0]);
+  await open();
+  const [shotId, target] = positional;
+  switch (command) {
+    case "help":
+      return HELP;
+
+    case "shots": {
+      const shots = listShots();
+      const where = PRIVATE ? "his private folder" : "the sample (no private folder here)";
+      if (!shots.length) return `No shots yet in ${where}.`;
+      return [`Shots in ${where}:`, ...shots.map((s) => `  ${s.id}  "${s.title}"  draft rev ${s.rev}  versions ${s.versions.join(", ") || "none"}`)].join("\n");
+    }
+
+    case "show": {
+      const shot = "version" in flags ? readVersion(shotId ?? "", number("version")) : draftOf(shotId);
+      return JSON.stringify(shot ?? refuse(`${shotId} has no such version`), null, 2);
+    }
+
+    case "entries": {
+      const kinds = (shotId ? [shotId] : ["environment", "cast", "camera", "light"]) as Entry["kind"][];
+      return kinds.flatMap((kind) => library.ofKind(kind).map((entry) => [
+        `${entry.id}@${entry.version}  ${entry.kind}  ${entry.label}: ${entry.description}`,
+        ...entry.controls.map((c) => {
+          const range = c.kind === "number" || c.kind === "angle" ? `${c.min}…${c.max}${c.kind === "number" && c.unit ? ` ${c.unit}` : c.kind === "angle" ? "°" : ""}` : c.kind === "choice" ? c.options.join(" | ") : c.kind;
+          return `    ${c.id} = ${String(c.default)}   (${range})${c.help ? `  ${c.help}` : ""}`;
+        }),
+      ].join("\n"))).join("\n\n");
+    }
+
+    case "new": {
+      allow("direction");
+      if (!shotId || !isId(shotId)) refuse("a shot's id is lower case letters, digits and dashes");
+      if (readDraft(shotId!)) refuse(`there is already a shot called ${shotId}`);
+      const frame: Partial<Frame> = {};
+      const aspect = aspectFlag();
+      if (aspect) frame.aspect = aspect;
+      if ("size" in flags) frame.size = number("size");
+      if ("fps" in flags) frame.fps = number("fps");
+      const shot = save({ ...newShot(shotId!, flags.title ?? shotId!, frame), rev: -1 }, { frame });
+      return `made ${shot.id}, "${shot.title}", ${shot.frame.aspect} at ${shot.frame.size}px, ${shot.frame.fps} fps`;
+    }
+
+    case "world": {
+      allow("art");
+      const shot = draftOf(shotId);
+      const entry = entryNamed(target);
+      if (entry.kind !== "environment") refuse(`${entry.id} is a ${entry.kind}, not an environment`);
+      const values = valuesFor(entry, pairs);
+      // The same entry, at this version or another, keeps every value its controls still take (E4: a shot moved on to
+      // an entry's next version keeps what was tuned).
+      const previous = shot.world && (library.idOf(shot.world.entry) === entry.id || "keep" in flags) ? shot.world : undefined;
+      const kept = previous ? keepable(entry, previous.values) : {};
+      const world: Use = { entry: entry.id, version: entry.version, values: { ...kept, ...values } };
+      // A grid keeps the cells he set by hand when it moves on to its next version.
+      if (previous?.cells && entry.kind === "environment" && entry.grid) world.cells = previous.cells;
+      const changed = previous && tag(previous) !== tag(world);
+      const saved = save({ ...shot, world }, { target: "world", entry: tag(world), values, ...(changed ? { from: tag(previous) } : {}) });
+      const moved = changed ? `, moved on from ${tag(previous)} keeping ${Object.keys(kept).length} of its ${Object.keys(previous.values).length} values` : "";
+      return `${shot.id}'s world is ${tag(world)}${moved}${Object.keys(values).length ? `, with ${Object.keys(values).join(", ")} set` : ""} · rev ${saved.rev}`;
+    }
+
+    case "describe": {
+      const { shot, version } = toRender(shotId);
+      return describeShot(shot, version).join("\n");
+    }
+
+    case "agents": {
+      const agents = listAgents();
+      if (!agents.length) return 'No agents yet: `agent new <id> --department <department> --name "<his name>"`.';
+      return agents.map((a) => `  ${a.id}  "${a.profile.name}"  ${a.profile.kind ?? "crew"}, ${a.profile.department ?? a.profile.role ?? "?"}  (template ${a.profile.template})  ${a.sessions} session${a.sessions === 1 ? "" : "s"}`).join("\n");
+    }
+
+    case "agent": {
+      const sub = shotId;
+      const id = target ?? refuse("name the agent");
+      if (!isId(id)) refuse("an agent's id is lower case letters, digits and dashes");
+      const words = positional[2];
+      if (sub === "new") {
+        const named = flags.department ?? refuse("--department: which department it works in");
+        if (!(DEPARTMENTS as readonly string[]).includes(named)) refuse(`no department called ${named} (${DEPARTMENTS.join(", ")})`);
+        const name = flags.name ?? refuse('--name "<his name for it>": he names every agent (Cinema-Agents.md R3)');
+        const template = readTemplate("departments", named) ?? refuse(`the factory has no template for the ${named} department yet`);
+        const meta = frontmatter(template);
+        const made = new Date().toISOString().slice(0, 10);
+        makeAgent(id, {
+          "profile.md": `---\nid: ${id}\nname: ${name}\nkind: crew\ndepartment: ${named}\ntemplate: ${named}@${meta.version}\nmade: ${made}\nby: the factory; named by him\n---\n\n# ${name}\n\nThe ${named} department's agent (Cinema.md F6), made from the factory's ${named} template, version ${meta.version}.\n\n## Character\n\n${section(template, "Starting character")}\n`,
+          "controls.json": `${JSON.stringify({ model: meta.model ?? "inherit", effort: meta.effort ?? "high", "core-cap-words": Number(meta["core-cap"] ?? 600), rounds: Number(meta.rounds ?? 3) }, null, 2)}\n`,
+          "look.json": "{}\n",
+          "core.md": `# ${name}'s core\n\nEmpty: ${name} is new. The day's review writes it (Cinema-Agents.md R7).\n`,
+          "learnings.md": `# ${name}'s learnings\n\nNone yet. Each will cite the sessions it came from.\n`,
+          "memories/index.md": "# Memories\n\nNone yet.\n",
+        });
+        return `made ${name} (${id}): crew, the ${named} department, from its template version ${meta.version}, in ${relative(agentDir(id))}`;
+      }
+      const profile = readAgentFile(id, "profile.md") ?? refuse(`there is no agent called ${id} (see \`agents\`)`);
+      const meta = frontmatter(profile);
+      const session = flags.session ?? refuse("--session: the session's id, like 2026-10-09-1");
+      if (!isId(session)) refuse("a session's id is lower case letters, digits and dashes");
+      switch (sub) {
+        case "brief": {
+          const shot = draftOf(flags.shot);
+          const job = flags.job ?? refuse('--job "<his words>"');
+          const from = flags.from ?? "director";
+          const template = readTemplate("departments", meta.department ?? "") ?? "";
+          const controls = JSON.parse(readAgentFile(id, "controls.json") ?? "{}") as Record<string, unknown>;
+          const past = sessionsOf(id).filter((s) => s.id !== session).slice(-10);
+          appendSession(id, session, { type: "open", record: 1, agent: id, template: meta.template, core: coreVersion(id), from, shot: shot.id, rev: shot.rev });
+          openSession(shot.id, id, session);
+          appendSession(id, session, { type: "instruction", from, words: job });
+          // Claude's own word beside his, kept apart from his in the record: what changed in the studio, never his intent.
+          if (flags.note) appendSession(id, session, { type: "instruction", from: "claude", words: flags.note });
+          const run = (rest: string) => `\`pnpm -s cmd ${rest} --agent ${id} --session ${session}\``;
+          return [
+            `# The brief of ${meta.name}, session ${session}`,
+            "",
+            `You are ${meta.name}, an agent of the Cinema Studio's crew, in its ${meta.department} department (made ${meta.made}, from template ${meta.template}). This brief is everything you start from.`,
+            "",
+            "## Who you are",
+            section(profile, "Character") || "(no character written yet)",
+            "",
+            "## Your controls",
+            Object.entries(controls).map(([k, v]) => `- ${k}: ${String(v)}`).join("\n"),
+            "",
+            "## Your core: what you always remember",
+            readAgentFile(id, "core.md") ?? "Empty.",
+            "",
+            "## What you have learnt",
+            readAgentFile(id, "learnings.md") ?? "Nothing yet.",
+            "",
+            "## Your recent sessions",
+            past.length ? past.map(summarize).join("\n") : "None: this is your first.",
+            "",
+            "## The job",
+            `From the ${from}: "${job}"`,
+            ...(flags.note ? [`From Claude: ${flags.note}`] : []),
+            `The shot: ${shot.id} "${shot.title}", its draft at revision ${shot.rev}.`,
+            "",
+            "## The world, described",
+            ...describeShot(shot, "draft"),
+            "",
+            "## Your department's work",
+            section(template, "The work") || "(the template says nothing more)",
+            "",
+            "## How you work",
+            `- Run every command from \`${process.cwd()}\`. Every command that changes the shot or renders it carries \`--agent ${id} --session ${session}\`: that is what writes your session's record. Never leave them off.`,
+            `- The library: \`pnpm -s cmd entries\` (every entry and its controls; \`entries camera\` for the camera's). Read the shot: \`pnpm -s cmd show ${shot.id}\`, \`pnpm -s cmd describe ${shot.id}\`.`,
+            `- Change only your department's work, through the commands (\`add\`, \`set\`, \`move\`, \`trim\`, \`remove\`, \`frame\`); another department's is refused, and a refusal changes nothing. For example ${run(`add ${shot.id} move --start 0 --length 6 from-x=0 from-y=12 from-z=60`)}.`,
+            `- Look at what you made: ${run(`sheet ${shot.id}`)} renders a contact sheet; ${run(`clip ${shot.id}`)} a short video; ${run(`still ${shot.id} --at 3`)} one frame. Each prints the file: open the pictures with the Read tool and judge them against his words. At most ${String(controls.rounds ?? 3)} rounds of change and look.`,
+            `- Write as you go: ${"`"}pnpm -s cmd agent say ${id} --session ${session} "<a decision worth remembering>"${"`"}; at the end ${"`"}pnpm -s cmd agent close ${id} --session ${session} "<what you did, in a few lines>"${"`"}.`,
+            "- Never edit a file by hand, never publish or export (that is direction's), never touch another shot.",
+            "- Answer at the end with what you did and why, the artifacts to look at (their paths), and what you could not do (a move the library lacks: name it, and what it would need).",
+          ].join("\n");
+        }
+        case "say":
+        case "close": {
+          const said = words ?? refuse(`say it: agent ${sub} ${id} --session ${session} "<words>"`);
+          appendSession(id, session, { type: sub, words: said });
+          if (sub === "close") closeSession(id, session);
+          return `${sub === "say" ? "noted" : "closed"} in ${id}'s session ${session}`;
+        }
+        case "feedback": {
+          const said = words ?? refuse('his words: agent feedback <id> --session <s> "<his words>"');
+          const verdict = flags.verdict;
+          if (verdict && !["kept", "changed", "dropped"].includes(verdict)) refuse("--verdict is kept, changed or dropped");
+          appendSession(id, session, { type: "feedback", from: "director", words: said, ...(flags.artifact ? { artifact: flags.artifact } : {}) });
+          if (verdict) appendSession(id, session, { type: "verdict", verdict, ...(flags.artifact ? { artifact: flags.artifact } : {}) });
+          return `his feedback${verdict ? ` (${verdict})` : ""} recorded in ${id}'s session ${session}`;
+        }
+        default:
+          return refuse("agent new, brief, say, close or feedback");
+      }
+    }
+
+    case "assets": {
+      const book = readAssets();
+      const ids = Object.keys(book).sort();
+      if (!ids.length) return "No assets saved yet: tune a world, then `asset save \"<name>\" --from <shot>`.";
+      return ids.map((id) => {
+        const versions = book[id]!;
+        const newest = versions.at(-1)!;
+        const line = `  ${id}  "${newest.name}"  ${library.idOf(newest.use.entry)}@${newest.use.version}  versions ${versions.map((v) => v.version).join(", ")}  (newest saved ${newest.saved.slice(0, 16).replace("T", " ")})`;
+        // What it is for, in his words, so an agent knows when to use it.
+        return newest.description ? `${line}\n      ${newest.description}` : line;
+      }).join("\n");
+    }
+
+    case "asset": {
+      if (shotId !== "save") refuse("say `asset save \"<name>\" --from <shot>`");
+      allow("art");
+      const name = target ?? refuse("name the asset: `asset save \"<name>\" --from <shot>`");
+      const from = draftOf(flags.from);
+      const world = from.world ?? refuse(`${from.id} has no world to save`);
+      const its = entryOf(world);
+      if (its.kind === "environment" && its.grid) refuse(`${from.id}'s world is a grid of assets; an asset is one tile`);
+      const asset = saveAsset(name, world, flags.description);
+      record({ type: "command", command: "asset save", shot: from.id, rev: from.rev, asset: `${asset.id}@${asset.version}`, name: asset.name, ...(asset.description ? { description: asset.description } : {}) });
+      return `saved "${asset.name}" as ${asset.id} version ${asset.version} (${tag(world)}, ${Object.keys(world.values).length} values)`;
+    }
+
+    case "cell": {
+      allow("art");
+      const shot = draftOf(shotId);
+      const key = target ?? refuse("name a cell: column,row, like 2,3");
+      const change = {
+        ...("asset" in flags ? { asset: flags.asset === "none" ? "" : flags.asset } : {}),
+        ...(Object.keys(pairs).length ? { values: valuesForCell(shot, key) } : {}),
+        ...("clear" in flags ? { clear: true } : {}),
+      };
+      let next: Shot;
+      try {
+        next = setCell(shot, key, change, library, readAssets());
+      } catch (error) {
+        return refuse(error instanceof Error ? error.message : String(error));
+      }
+      const saved = save(next, { target: `cell ${key}`, ...change });
+      const cell = saved.world?.cells?.[key];
+      return `cell ${key}: ${cell ? `${cell.asset === undefined ? "the rules' asset" : cell.asset || "empty"}${cell.values ? `, with ${Object.keys(cell.values).join(", ")} tuned` : ""}` : "back to the rules"} · rev ${saved.rev}`;
+    }
+
+    case "place": {
+      allow("direction", "cast");
+      const shot = draftOf(shotId);
+      const entry = entryNamed(target);
+      if (entry.kind !== "cast") refuse(`${entry.id} is a ${entry.kind}, not a cast member`);
+      const id = flags.id ?? nextId(shot.cast.map((p) => p.id), entry.id);
+      if (!isId(id) || placeOf(shot, id)) refuse(`${id} is taken or not an id`);
+      const placement: Placement = { id, name: flags.name ?? entry.label, entry: entry.id, version: entry.version, values: valuesFor(entry, pairs), at: at(), facing: number("facing", 0) };
+      const saved = save({ ...shot, cast: [...shot.cast, placement] }, { target: id, entry: tag(placement), values: placement.values, at: placement.at, facing: placement.facing });
+      return `placed ${id} (${tag(placement)}) at ${placement.at.join(", ")} facing ${placement.facing}° · rev ${saved.rev}`;
+    }
+
+    case "add": {
+      const shot = draftOf(shotId);
+      const entry = entryNamed(target);
+      if (entry.kind !== "camera" && entry.kind !== "light") refuse(`${entry.id} is ${entry.kind === "environment" ? "the world (use \`world\`)" : "cast (use \`place\`)"}`);
+      const kind = entry.kind as TrackKind;
+      allow(TRACK_DEPARTMENT[kind]);
+      const start = number("start");
+      const length = number("length");
+      if (start < 0 || length <= 0) refuse("--start is 0 or more, --length more than 0");
+      const id = nextId(itemsOf(shot).keys(), kind);
+      const item = { id, entry: entry.id, version: entry.version, start, length, values: valuesFor(entry, pairs) };
+      const tracks = shot.tracks.some((track) => track.kind === kind)
+        ? shot.tracks.map((track) => (track.kind === kind ? { ...track, items: [...track.items, item] } : track))
+        : [...shot.tracks, { id: kind, kind, items: [item] }];
+      const saved = save({ ...shot, tracks }, { target: id, entry: tag(item), start, length, values: item.values });
+      return `added ${id} (${tag(item)}) to ${kind} from ${seconds(start)} for ${seconds(length)} · shot is ${seconds(shotLength(saved))} · rev ${saved.rev}`;
+    }
+
+    case "set": {
+      const shot = draftOf(shotId);
+      if (!target) refuse("say what to set: world, a cast member's id, or an item's id");
+      if (target === "world") {
+        allow("art");
+        const use = shot.world ?? refuse(`${shot.id} has no world yet (use \`world\`)`);
+        const values = valuesFor(entryOf(use), pairs);
+        const saved = save(edited(shot, target, values), { target, entry: tag(use), values });
+        return `set the world's ${Object.keys(values).join(", ") || "nothing"} · rev ${saved.rev}`;
+      }
+      const placement = placeOf(shot, target!);
+      if (placement) {
+        allow("direction", "cast");
+        const values = valuesFor(entryOf(placement), pairs);
+        const withValues = edited(shot, target!, values);
+        const next = { ...placeOf(withValues, target!)!, ...("at" in flags ? { at: at() } : {}), ...("facing" in flags ? { facing: number("facing") } : {}) };
+        const saved = save({ ...withValues, cast: withValues.cast.map((p) => (p.id === target ? next : p)) }, { target, entry: tag(next), values, at: next.at, facing: next.facing });
+        return `set ${target}: ${[...Object.keys(values), ...("at" in flags ? ["at"] : []), ...("facing" in flags ? ["facing"] : [])].join(", ") || "nothing"} · rev ${saved.rev}`;
+      }
+      const found = itemsOf(shot).get(target!) ?? refuse(`${shot.id} has no ${target}`);
+      allow(TRACK_DEPARTMENT[found.track.kind]);
+      const values = valuesFor(entryOf(found.item), pairs);
+      const saved = save(edited(shot, target!, values), { target, entry: tag(found.item), values });
+      return `set ${target}'s ${Object.keys(values).join(", ") || "nothing"} · rev ${saved.rev}`;
+    }
+
+    case "move":
+    case "trim": {
+      const shot = draftOf(shotId);
+      const found = itemsOf(shot).get(target ?? "") ?? refuse(`${shotId} has no item ${target}`);
+      allow(TRACK_DEPARTMENT[found.track.kind]);
+      const change: { start?: number; length?: number } = command === "move" ? { start: number("start") } : { length: number("length") };
+      if ((change.start ?? 0) < 0 || (change.length ?? 1) <= 0) refuse("a start is 0 or more, a length more than 0");
+      const tracks = shot.tracks.map((track) => ({ ...track, items: track.items.map((item) => (item.id === target ? { ...item, ...change } : item)) }));
+      const saved = save({ ...shot, tracks }, { target, ...change });
+      return `${command === "move" ? "moved" : "trimmed"} ${target} · shot is ${seconds(shotLength(saved))} · rev ${saved.rev}`;
+    }
+
+    case "remove": {
+      const shot = draftOf(shotId);
+      if (placeOf(shot, target ?? "")) {
+        allow("direction", "cast");
+        const saved = save({ ...shot, cast: shot.cast.filter((p) => p.id !== target) }, { target });
+        return `removed ${target} · rev ${saved.rev}`;
+      }
+      const found = itemsOf(shot).get(target ?? "") ?? refuse(`${shotId} has no ${target}`);
+      allow(TRACK_DEPARTMENT[found.track.kind]);
+      const tracks = shot.tracks.map((track) => ({ ...track, items: track.items.filter((item) => item.id !== target) })).filter((track) => track.items.length);
+      const saved = save({ ...shot, tracks }, { target });
+      return `removed ${target} · rev ${saved.rev}`;
+    }
+
+    case "frame": {
+      allow("direction", "camera");
+      const shot = draftOf(shotId);
+      const frame: Frame = { ...shot.frame, ...(aspectFlag() ? { aspect: aspectFlag()! } : {}), ...("size" in flags ? { size: number("size") } : {}), ...("fps" in flags ? { fps: number("fps") } : {}) };
+      if (frame.size < 90 || frame.size > 4320 || frame.fps < 1 || frame.fps > 120) refuse("a frame's size runs 90 to 4320px, its rate 1 to 120 fps");
+      const saved = save({ ...shot, frame }, { frame });
+      return `${shot.id} is ${frame.aspect} at ${frame.size}px, ${frame.fps} fps · rev ${saved.rev}`;
+    }
+
+    case "publish": {
+      allow("direction");
+      const shot = draftOf(shotId);
+      const version = publish(shot.id, pinAssets(shot, library, readAssets()));
+      record({ type: "command", command, shot: shot.id, rev: shot.rev, version });
+      return `published ${shot.id} version ${version} (draft rev ${shot.rev})`;
+    }
+
+    case "still": {
+      const { shot, version } = toRender(shotId);
+      const t = number("at");
+      const file = path.join(output("renders", shot), `${shot.id}-${version === "draft" ? `r${shot.rev}` : `v${version}`}-${shot.frame.aspect}-${t.toFixed(2)}s.png`);
+      await still(shot, t, file, readAssets());
+      record({ type: "render", kind: "still", shot: shot.id, version, rev: shot.rev, frame: shot.frame, t, artifact: relative(file) });
+      return relative(file);
+    }
+
+    case "sheet": {
+      const { shot, version } = toRender(shotId);
+      const count = Math.max(2, Math.min(48, number("count", 12)));
+      const columns = Math.max(1, Math.min(count, number("columns", 4)));
+      const length = shotLength(shot);
+      const times = Array.from({ length: count }, (_, i) => (length * (i + 0.5)) / count);
+      const small = { ...shot, frame: scaled(shot.frame, 0.3) };
+      const file = path.join(output("renders", shot), `${shot.id}-${version === "draft" ? `r${shot.rev}` : `v${version}`}-${shot.frame.aspect}-sheet.png`);
+      await sheet(small, times, columns, file, readAssets());
+      record({ type: "render", kind: "sheet", shot: shot.id, version, rev: shot.rev, frame: shot.frame, times, artifact: relative(file) });
+      return `${relative(file)}  (${count} stills, at ${times.map(seconds).join(" ")})`;
+    }
+
+    case "clip": {
+      const { shot, version } = toRender(shotId);
+      const from = number("from", 0);
+      const to = Math.min(number("to", shotLength(shot)), shotLength(shot));
+      if (to <= from) refuse("--to comes after --from");
+      const small = { ...shot, frame: scaled(shot.frame, Math.max(0.1, Math.min(1, number("scale", 0.5)))) };
+      const file = path.join(output("renders", shot), `${shot.id}-${version === "draft" ? `r${shot.rev}` : `v${version}`}-${shot.frame.aspect}-${from}-${to}s.mp4`);
+      await video(small, frameTimes(shot.frame.fps, from, to), file, "check", readAssets());
+      record({ type: "render", kind: "clip", shot: shot.id, version, rev: shot.rev, frame: small.frame, from, to, artifact: relative(file) });
+      return relative(file);
+    }
+
+    case "export": {
+      allow("direction");
+      const id = shotId ?? refuse("name a shot");
+      const published = versionsOf(id);
+      const version = "version" in flags ? number("version") : (published.at(-1) ?? refuse(`${id} has no published version yet: publish it first`));
+      const shot = readVersion(id, version) ?? refuse(`${id} has no version ${version}`);
+      const which = flags.aspect ?? shot.frame.aspect;
+      const aspects: Aspect[] = which === "both" ? ["wide", "vertical"] : which === "wide" || which === "vertical" ? [which] : refuse("--aspect is wide, vertical or both");
+      const length = shotLength(shot);
+      const moment = number("at", length / 2);
+      const made: string[] = [];
+      for (const aspect of aspects) {
+        const framed = { ...shot, frame: { ...shot.frame, aspect } };
+        const name = path.join(output("exports", shot), `${shot.id}-v${version}-${aspect}`);
+        const times = frameTimes(shot.frame.fps, 0, length);
+        process.stderr.write(`exporting ${shot.id} v${version} ${aspect}: ${times.length} frames…\n`);
+        await video(framed, times, `${name}.mp4`, "final", readAssets(), (done) => {
+          if (done % 30 === 0 || done === times.length) process.stderr.write(`  ${done}/${times.length}\r`);
+        });
+        process.stderr.write("\n");
+        await still(framed, moment, `${name}.png`, readAssets());
+        made.push(relative(`${name}.mp4`), relative(`${name}.png`));
+        record({ type: "render", kind: "export", shot: shot.id, version, frame: framed.frame, artifact: [relative(`${name}.mp4`), relative(`${name}.png`)] });
+      }
+      return made.join("\n");
+    }
+
+    default:
+      return refuse(`no command called ${command} (see \`help\`)`);
+  }
+}
+
+try {
+  console.log(await run());
+} catch (error) {
+  if (error instanceof Refusal) {
+    console.error(`refused: ${error.message}`);
+    process.exit(2);
+  }
+  console.error(`error: ${error instanceof Error ? error.message : String(error)}`);
+  process.exit(1);
+}
