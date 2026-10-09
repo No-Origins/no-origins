@@ -250,8 +250,8 @@ as it goes** (his).
 - **For a set, the art department's agents bring the assets it needs together and configure each for it** (his: "when
   I describe a set, relevant or necessary assets can be brought together by the agents").
 - **The studio opens on a home page, its sections there; the first is Assets** (his, 2026-10-09). *Mine:* an asset
-  opens on its **page**: the asset alone in the middle, standing in white (its sky and its ground not its own, his note
-  of the same day), looked round freely, its controls either side, what he sets kept until he changes it. The shots' screen stays, off the home page until he names it a section.
+  opens on its **page**: the asset alone in the middle, standing on the page's own background, white or dark with the
+  theme (its sky and its ground not its own, his notes of the same day), looked round freely, its controls either side, what he sets kept until he changes it. The shots' screen stays, off the home page until he names it a section.
 - **A configuration he likes he saves** (his, 2026-10-09): every value of the asset as he left it, under a name, with
   **what it is for, so the agents know when to use it**, and kept to be used many ways: chosen by the art department
   for a set, and **loaded to start new configurations from**. *Mine:* the asset's page shows the configuration as code, to read

@@ -21,6 +21,30 @@ const TURN = 0.006;
 const STEP = 0.12;
 
 /**
+ * The page's background as the theme has it now (the system's `--background`), as a hex three.js can take: the token
+ * is an oklch, which a canvas turns to the colour it paints. Kept until the token changes. Watched by the theme's
+ * class on the root, which the theme's sheet changes as it falls (Grid.md D28).
+ */
+let paper = { token: "", hex: "#ffffff" };
+function pageBackground() {
+  const token = getComputedStyle(document.documentElement).getPropertyValue("--background").trim();
+  if (token === paper.token) return paper.hex;
+  const probe = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+  if (!probe || !token) return paper.hex;
+  probe.fillStyle = "#ffffff";
+  probe.fillStyle = token;
+  probe.fillRect(0, 0, 1, 1);
+  const [r, g, b] = probe.getImageData(0, 0, 1, 1).data;
+  paper = { token, hex: `#${[r, g, b].map((c) => (c ?? 255).toString(16).padStart(2, "0")).join("")}` };
+  return paper.hex;
+}
+function watchTheme(change: () => void) {
+  const observer = new MutationObserver(change);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "style", "data-theme"] });
+  return () => observer.disconnect();
+}
+
+/**
  * The shot in its box (Cinema-Engine.md E1, E2): a canvas the engine draws on, fitted to the frame's shape (wide or
  * vertical) inside the box, the rest of the box left plain. three.js loads only when this mounts, as Home's model does.
  *
@@ -31,7 +55,8 @@ const STEP = 0.12;
  * goes nearer or further, the arrow keys and + − do the same when the picture has focus, and Escape goes back. It
  * starts from wherever the shot's camera is, and `onFree` says it has; renders always use the shot's camera. With
  * `overview` (an asset's bench, which has no camera and frames nothing) it fills its box, starts from a view of the
- * whole world, and Escape goes back there.
+ * whole world, and Escape goes back there; behind it is the page's own background, dark in the dark theme, not the
+ * world's sky (an entry's page shows the entry, not a sky).
  */
 export function Picture({ shot, assets, aspect, length, playing, seek, free, onFree, onTime, onProblems, overview = false }: {
   shot: Shot;
@@ -58,6 +83,7 @@ export function Picture({ shot, assets, aspect, length, playing, seek, free, onF
   const time = React.useRef(seek.t);
   const orbit = React.useRef<Orbit | null>(null);
   const latest = React.useRef({ onTime, onProblems, onFree, length });
+  const backdrop = React.useSyncExternalStore(watchTheme, pageBackground, () => "#ffffff");
   React.useEffect(() => {
     latest.current = { onTime, onProblems, onFree, length };
   }, [onTime, onProblems, onFree, length]);
@@ -80,6 +106,12 @@ export function Picture({ shot, assets, aspect, length, playing, seek, free, onF
     };
     // A picture is a page's for its life: `overview` never changes under it.
   }, [overview]);
+
+  React.useEffect(() => {
+    if (!engine) return;
+    engine.backdrop(overview ? backdrop : undefined);
+    paint();
+  }, [engine, overview, backdrop, paint]);
 
   // The canvas takes the largest rectangle of the frame's shape that fits the box.
   const fit = React.useCallback(() => {

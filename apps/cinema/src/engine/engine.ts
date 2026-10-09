@@ -22,6 +22,12 @@ export type Engine = {
   overview: () => CameraPose;
   /** Whether anything built moves by itself (a cloud's gas), so a page that only looks at it still lets time run. */
   moves: () => boolean;
+  /**
+   * The colour behind the world in place of its sky, or nothing for its sky: on a page that only looks at an entry, the
+   * page's own background, which follows the theme (his, 2026-10-09: "when I changed to dark background, the canvas
+   * should also turn dark").
+   */
+  backdrop: (colour?: string) => void;
   /** The drawing's size in pixels, and how many device pixels to a pixel. */
   size: (width: number, height: number, pixelRatio?: number) => void;
   dispose: () => void;
@@ -50,6 +56,7 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
   let world = EMPTY_WORLD;
   let built: Built[] = [];
   let worldObject: THREE.Object3D | undefined;
+  let backdrop: string | undefined;
   /** Each light and when it is lit: from its start, until its end or, if nothing follows it on its track, for good. */
   let lights: { item: Item; object: THREE.Object3D; until: number }[] = [];
 
@@ -107,7 +114,7 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
       floor.renderOrder = -1;
       add({ object: floor, dispose: () => (geometry.dispose(), material.dispose()) });
     }
-    scene.background = new THREE.Color(world.sky);
+    scene.background = new THREE.Color(backdrop ?? world.sky);
     scene.fog = world.haze > 0 ? new THREE.FogExp2(world.sky, world.haze) : null;
     camera.far = Math.max(1000, world.radius * 40);
 
@@ -200,6 +207,10 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
     poseAt,
     overview,
     moves: () => built.some((piece) => piece.at !== undefined),
+    backdrop(colour) {
+      backdrop = colour;
+      scene.background = new THREE.Color(colour ?? world.sky);
+    },
     size(width, height, pixelRatio = 1) {
       renderer.setPixelRatio(pixelRatio);
       renderer.setSize(width, height, false);

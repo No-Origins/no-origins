@@ -36,7 +36,8 @@ Current as of 2026-10-09.
   opens on the page a section starts on. An asset's card opens `/asset/<id>`, an effect's `/effect/<id>`, the same page,
   its page: the asset as the world at the field's centre, filling its box, looked round freely from a view that fits
   the whole of it (no camera; time runs only for an asset that moves by itself, a cloud's gas), lit by the plain sun,
-  on a floor that shows only its shadow and hides nothing (the page's, not the asset's); the card that says which asset it is at the top left, a back arrow before its name (his, 2026-10-09)
+  on a floor that shows only its shadow and hides nothing, in front of the page's own background, not the world's sky,
+  so it turns dark with the theme (both the page's, not the asset's; his, 2026-10-09); the card that says which asset it is at the top left, a back arrow before its name (his, 2026-10-09)
   home to its section's page, its controls under it and on the right, a card a group, the groups split in their order
   where the taller column is shortest; a change saved once the jigs stand still to
   `benches/<id>.json` in his folder, from the revision the screen last saw (the code calls an asset's page its bench,
