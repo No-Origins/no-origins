@@ -9,7 +9,7 @@ import { makeLibrary, type Library } from "../engine/library.ts";
 import { frameTimes, itemsOf, newShot, nextId, shotLength } from "../engine/shot.ts";
 import { DEPARTMENTS, TRACK_DEPARTMENT } from "../engine/types.ts";
 import type { Aspect, Department, Entry, Frame, Placement, Shot, TrackKind, Use, Values } from "../engine/types.ts";
-import { agentDir, appendSession, DATA, departmentOf, frontmatter, isId, listAgents, listShots, makeAgent, outputDir, PRIVATE, publish, readAgentFile, readAssets, readDraft, readTemplate, readVersion, relative, saveAsset, saveDraft, sessionsOf, versionsOf } from "../data/store.ts";
+import { agentDir, appendSession, closeSession, DATA, departmentOf, frontmatter, isId, listAgents, listShots, makeAgent, openSession, openSessions, outputDir, PRIVATE, publish, readAgentFile, readAssets, readDraft, readTemplate, readVersion, relative, saveAsset, saveDraft, sessionsOf, versionsOf } from "../data/store.ts";
 import { scaled, sheet, still, video } from "./render.ts";
 
 /**
@@ -23,7 +23,9 @@ import { scaled, sheet, still, video } from "./render.ts";
 
 const HELP = `The Cinema Studio's commands (Cinema-Engine.md E6).
 
-  pnpm --filter cinema cmd <command> … [--agent <id> --session <id> [--department <department>]]
+  pnpm --filter cinema cmd <command> … [--agent <id> --session <id> [--department <department>]] [--director]
+  (while an agent's session is open on a shot, every command on it is that agent's and recorded in its session;
+   --director acts as him or Claude instead)
 
 Reading
   shots                                   the shots, their revisions and versions
@@ -56,7 +58,7 @@ Rendering (a published version with --version n; the draft otherwise; --aspect t
 The agents (Cinema-Agents.md), the director's and Claude's
   agents                                  the agents, their departments and how many sessions each has had
   agent new <id> --department <d> --name "<his name>"      the factory: makes an agent from its department's template
-  agent brief <id> --session <s> --shot <shot> --job "<his words>" [--from director]
+  agent brief <id> --session <s> --shot <shot> --job "<his words>" [--from director] [--note "<Claude's own word>"]
                                           opens a session, records the instruction, prints the agent's brief
   agent say|close <id> --session <s> "<words>"             the agent's own lines: a note, and what it did
   agent feedback <id> --session <s> "<his words>" [--artifact <file>] [--verdict kept|changed|dropped]
@@ -72,7 +74,7 @@ const refuse = (why: string): never => {
 const [command = "help", ...rest] = process.argv.slice(2);
 const flags: Record<string, string> = {};
 /** Flags that take no value. */
-const SWITCHES = new Set(["keep", "clear"]);
+const SWITCHES = new Set(["keep", "clear", "director"]);
 const pairs: Record<string, string> = {};
 const positional: string[] = [];
 for (let i = 0; i < rest.length; i++) {
@@ -101,12 +103,22 @@ const aspectFlag = (): Aspect | undefined => {
 };
 
 // ── Who is asking ────────────────────────────────────────────────────────────────────────────────────────────────────
-const agent = flags.agent;
-const session = flags.session;
+let agent = flags.agent;
+let session = flags.session;
 let department: Department | "director" = "director";
 /** He and Claude are the director; an agent is its department, from --department or its profile (Cinema-Agents.md R2). */
-function identify() {
+function identify(shot: string | undefined) {
   if (Boolean(agent) !== Boolean(session)) refuse("an agent's command names both --agent and --session");
+  // An agent's session open on this shot makes the command that agent's, named or not (R6); he and Claude act as
+  // themselves with --director.
+  if (!agent && shot && !("director" in flags)) {
+    const held = openSessions()[shot];
+    if (held) {
+      agent = held.agent;
+      session = held.session;
+      process.stderr.write(`(${held.agent}'s session ${held.session} is open on ${shot}: recorded there; --director to act as yourself)\n`);
+    }
+  }
   if (!agent) return;
   if (!isId(agent) || !isId(session!)) refuse("an agent's id and its session's are lower case letters, digits and dashes");
   const named = flags.department ?? departmentOf(agent) ?? refuse(`${agent} has no department: give --department`);
@@ -276,7 +288,7 @@ function summarize(session: { id: string; lines: Record<string, unknown>[] }) {
 async function run(): Promise<string> {
   // The agent commands are Claude's and his (the director's): they make, brief and answer agents, and name the agent
   // and session themselves.
-  if (command !== "agent" && command !== "agents") identify();
+  if (command !== "agent" && command !== "agents") identify(positional[0]);
   await open();
   const [shotId, target] = positional;
   switch (command) {
@@ -384,7 +396,10 @@ async function run(): Promise<string> {
           const controls = JSON.parse(readAgentFile(id, "controls.json") ?? "{}") as Record<string, unknown>;
           const past = sessionsOf(id).filter((s) => s.id !== session).slice(-10);
           appendSession(id, session, { type: "open", record: 1, agent: id, template: meta.template, core: coreVersion(id), from, shot: shot.id, rev: shot.rev });
+          openSession(shot.id, id, session);
           appendSession(id, session, { type: "instruction", from, words: job });
+          // Claude's own word beside his, kept apart from his in the record: what changed in the studio, never his intent.
+          if (flags.note) appendSession(id, session, { type: "instruction", from: "claude", words: flags.note });
           const run = (rest: string) => `\`pnpm -s cmd ${rest} --agent ${id} --session ${session}\``;
           return [
             `# The brief of ${meta.name}, session ${session}`,
@@ -408,6 +423,7 @@ async function run(): Promise<string> {
             "",
             "## The job",
             `From the ${from}: "${job}"`,
+            ...(flags.note ? [`From Claude: ${flags.note}`] : []),
             `The shot: ${shot.id} "${shot.title}", its draft at revision ${shot.rev}.`,
             "",
             "## The world, described",
@@ -430,6 +446,7 @@ async function run(): Promise<string> {
         case "close": {
           const said = words ?? refuse(`say it: agent ${sub} ${id} --session ${session} "<words>"`);
           appendSession(id, session, { type: sub, words: said });
+          if (sub === "close") closeSession(id, session);
           return `${sub === "say" ? "noted" : "closed"} in ${id}'s session ${session}`;
         }
         case "feedback": {

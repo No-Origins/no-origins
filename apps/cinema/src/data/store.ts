@@ -195,3 +195,22 @@ export function sessionsOf(id: string) {
       lines: readFileSync(path.join(dir, name), "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line) as Record<string, unknown>),
     }));
 }
+
+/**
+ * The sessions open now, by shot (Cinema-Agents.md R6): from an agent's brief until its closing line, a command on that
+ * shot is that agent's, recorded in its session whether or not it names itself, so the record never depends on an agent
+ * remembering its flags.
+ */
+type Open = Record<string, { agent: string; session: string; opened: string }>;
+const openFile = () => path.join(DATA, "agents", ".open.json");
+export function openSessions(): Open {
+  return existsSync(openFile()) ? (readJson<Open>(openFile())) : {};
+}
+export function openSession(shot: string, agent: string, session: string) {
+  writeJson(openFile(), { ...openSessions(), [shot]: { agent, session, opened: new Date().toISOString() } });
+}
+export function closeSession(agent: string, session: string) {
+  const open = openSessions();
+  for (const [shot, held] of Object.entries(open)) if (held.agent === agent && held.session === session) delete open[shot];
+  writeJson(openFile(), open);
+}

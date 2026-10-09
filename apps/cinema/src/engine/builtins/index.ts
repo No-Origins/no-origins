@@ -164,6 +164,157 @@ const move: CameraEntry = {
   },
 };
 
+/** How many points a Path may pass through. */
+const PATH_POINTS = 6;
+
+/**
+ * A point on a centripetal Catmull–Rom curve through p1 and p2 (p0 and p3 the points either side): a curve that passes
+ * through every point, never loops or overshoots between close ones, and has no corner at a point.
+ */
+function curve(p0: Vec3, p1: Vec3, p2: Vec3, p3: Vec3, t: number): Vec3 {
+  const gap = (a: Vec3, b: Vec3) => Math.max(1e-4, Math.sqrt(Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2])));
+  const t1 = gap(p0, p1), t2 = t1 + gap(p1, p2), t3 = t2 + gap(p2, p3);
+  const at = t1 + (t2 - t1) * t;
+  const mix = (a: Vec3, b: Vec3, ta: number, tb: number) => a.map((v, i) => ((tb - at) * v + (at - ta) * b[i]!) / (tb - ta)) as Vec3;
+  const a1 = mix(p0, p1, 0, t1), a2 = mix(p1, p2, t1, t2), a3 = mix(p2, p3, t2, t3);
+  return mix(mix(a1, a2, 0, t2), mix(a2, a3, t1, t3), t1, t2);
+}
+
+/** A curve through all the points: where it is at segment `i` (0 to points − 2), `t` (0 to 1) through it. */
+function through(points: Vec3[], i: number, t: number): Vec3 {
+  const at = (k: number): Vec3 => {
+    if (k < 0) return points[0]!.map((v, j) => 2 * v - points[1]![j]!) as Vec3;
+    if (k >= points.length) return points.at(-1)!.map((v, j) => 2 * v - points.at(-2)![j]!) as Vec3;
+    return points[k]!;
+  };
+  return curve(at(i - 1), at(i), at(i + 1), at(i + 2), t);
+}
+
+const pointControls = Array.from({ length: PATH_POINTS }, (_, n) => {
+  const i = n + 1;
+  const group = `Point ${i}`;
+  const lead = [[0, 3, 120], [0, 3, 50], [0, 10, 25], [0, 18, 12], [0, 18, 6], [0, 18, 3]][n]!;
+  return [
+    { kind: "number", id: `p${i}-x`, label: "x", group, min: -1000, max: 1000, step: 0.1, unit: "m", default: lead[0]! },
+    { kind: "number", id: `p${i}-y`, label: "y", group, min: -50, max: 1000, step: 0.1, unit: "m", default: lead[1]! },
+    { kind: "number", id: `p${i}-z`, label: "z", group, min: -1000, max: 1000, step: 0.1, unit: "m", default: lead[2]! },
+    { kind: "number", id: `aim${i}-x`, label: "Aim x", group, min: -1000, max: 1000, step: 0.1, unit: "m", default: 0 },
+    { kind: "number", id: `aim${i}-y`, label: "Aim y", group, min: -50, max: 1000, step: 0.1, unit: "m", default: 8 },
+    { kind: "number", id: `aim${i}-z`, label: "Aim z", group, min: -1000, max: 1000, step: 0.1, unit: "m", default: 0 },
+    { kind: "number", id: `lens${i}`, label: "Lens", group, min: 10, max: 300, step: 1, unit: "mm", default: 28 },
+  ] as const;
+}).flat();
+
+/**
+ * A camera that passes through points, 2 to 6, on one smooth curve (his note on the first camera shot: "the motion is
+ * not smooth and continuous"): each point a place, an aim and a lens, the camera never stopping at one, its pace one
+ * ease over the whole way. "Even speed" keeps the pace the same along the curve however far apart the points are;
+ * "even points" gives each stretch between points the same time. The lens and the aim turn smoothly from point to
+ * point, so a lens widening as it nears the last point is a zoom out while it arrives.
+ */
+const pathV1: CameraEntry = {
+  kind: "camera",
+  id: "path",
+  label: "Path",
+  version: 1,
+  description: "Passes through 2 to 6 points on one smooth curve, each with an aim and a lens, never stopping between them.",
+  controls: [
+    { kind: "number", id: "points", label: "Points", group: "Way", min: 2, max: PATH_POINTS, step: 1, default: 4, help: "How many of the points it passes through, from Point 1." },
+    { kind: "choice", id: "ease", label: "Ease", group: "Way", options: EASES, default: "ease in out", help: "One ease for the whole way: it gathers speed once and slows once." },
+    { kind: "choice", id: "timing", label: "Timing", group: "Way", options: ["even speed", "even points"], default: "even speed" },
+    ...pointControls,
+  ],
+  pose(values, u) {
+    const count = Math.round(num(values, "points"));
+    const read = (prefix: string) => Array.from({ length: count }, (_, n) => [0, 1, 2].map((k) => num(values, `${prefix}${n + 1}-${"xyz"[k]}`)) as Vec3);
+    const places = read("p");
+    const aims = read("aim");
+    const lenses = Array.from({ length: count }, (_, n) => num(values, `lens${n + 1}`));
+    const e = ease(str(values, "ease"), u);
+    let segment: number, t: number;
+    if (str(values, "timing") === "even points") {
+      const along = e * (count - 1);
+      segment = Math.min(count - 2, Math.floor(along));
+      t = along - segment;
+    } else {
+      // Even speed: the distance along the curve is what the ease shares out.
+      const steps = 48;
+      const lengths: number[] = [0];
+      let last = places[0]!;
+      for (let i = 0; i < count - 1; i++)
+        for (let k = 1; k <= steps; k++) {
+          const next = through(places, i, k / steps);
+          lengths.push(lengths.at(-1)! + Math.hypot(next[0] - last[0], next[1] - last[1], next[2] - last[2]));
+          last = next;
+        }
+      const goal = e * lengths.at(-1)!;
+      let at = lengths.findIndex((l) => l >= goal);
+      if (at <= 0) at = 1;
+      const within = (goal - lengths[at - 1]!) / Math.max(1e-6, lengths[at]! - lengths[at - 1]!);
+      const sample = at - 1 + Math.min(1, Math.max(0, within));
+      segment = Math.min(count - 2, Math.floor(sample / steps));
+      t = sample / steps - segment;
+    }
+    const smooth = t * t * (3 - 2 * t);
+    return {
+      position: through(places, segment, t),
+      target: through(aims, segment, t),
+      lens: lerp(lenses[segment]!, lenses[segment + 1]!, smooth),
+    };
+  },
+};
+
+/** Each point's Look ahead (version 2): 0 looks at the point's aim, 1 along the way the camera is going. */
+const aheadControls = Array.from({ length: PATH_POINTS }, (_, n) => ({
+  kind: "number", id: `ahead${n + 1}`, label: "Look ahead", group: `Point ${n + 1}`, min: 0, max: 1, step: 0.01, default: 0,
+  help: "0 looks at this point's aim; 1 looks where the camera is going, so climbing a slope it tilts with the slope.",
+}) as const);
+
+/**
+ * Path, version 2 (his note on the second camera shot: "while moving up the mountain, the camera angle should also
+ * follow the inclination of the mountain"): each point may look ahead, along the way the camera is going, instead of
+ * at its aim, and anything between; climbing the face of a mountain on a path laid along it, the camera tilts with the
+ * slope. Look ahead turns smoothly from point to point, as the lens does. Version 1, without it, is kept for the shots
+ * made with it.
+ */
+const path: CameraEntry = {
+  ...pathV1,
+  version: 2,
+  description: "Passes through 2 to 6 points on one smooth curve, each with an aim, a lens and how far it looks ahead along the way.",
+  controls: [...pathV1.controls, ...aheadControls],
+  pose(values, u, world, t) {
+    const at = pathV1.pose(values, u, world, t);
+    // Where it is going: a little further along the curve.
+    const ahead = pathV1.pose(values, Math.min(1, u + 0.004), world, t).position;
+    const back = pathV1.pose(values, Math.max(0, u - 0.004), world, t).position;
+    const way = [ahead[0] - back[0], ahead[1] - back[1], ahead[2] - back[2]];
+    const length = Math.hypot(way[0]!, way[1]!, way[2]!);
+    if (length < 1e-6) return at;
+    // How much this moment looks ahead: the points' values, turned smoothly from one to the next as the lens is.
+    const count = Math.round(num(values, "points"));
+    const aheads = Array.from({ length: count }, (_, n) => num(values, `ahead${n + 1}`));
+    const near = nearestStretch(values, count, at.position);
+    const smooth = near.t * near.t * (3 - 2 * near.t);
+    const share = lerp(aheads[near.i]!, aheads[Math.min(count - 1, near.i + 1)]!, smooth);
+    const reach = Math.hypot(at.target[0] - at.position[0], at.target[1] - at.position[1], at.target[2] - at.position[2]) || 10;
+    const forward: Vec3 = [at.position[0] + (way[0]! / length) * reach, at.position[1] + (way[1]! / length) * reach, at.position[2] + (way[2]! / length) * reach];
+    return { ...at, target: [0, 1, 2].map((k) => lerp(at.target[k]!, forward[k]!, share)) as Vec3 };
+  },
+};
+
+/** Which stretch between points a place on the path is in, and how far through it (by the nearest of its samples). */
+function nearestStretch(values: Values, count: number, place: Vec3) {
+  const places = Array.from({ length: count }, (_, n) => [0, 1, 2].map((k) => num(values, `p${n + 1}-${"xyz"[k]}`)) as Vec3);
+  let best = { i: 0, t: 0, d: Infinity };
+  for (let i = 0; i < count - 1; i++)
+    for (let k = 0; k <= 32; k++) {
+      const p = through(places, i, k / 32);
+      const d = Math.hypot(p[0] - place[0], p[1] - place[1], p[2] - place[2]);
+      if (d < best.d) best = { i, t: k / 32, d };
+    }
+  return best;
+}
+
 /** One sun and the sky's light: a direction, a colour, a strength, and its shadows. */
 const sun: LightEntry = {
   kind: "light",
@@ -210,4 +361,4 @@ const sun: LightEntry = {
   },
 };
 
-export const STAND_INS: readonly Entry[] = [standIn, orbit, push, move, sun];
+export const STAND_INS: readonly Entry[] = [standIn, orbit, push, move, pathV1, path, sun];

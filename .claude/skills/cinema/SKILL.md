@@ -28,8 +28,12 @@ him. Everything goes through Claude for now: he does not speak to an agent direc
 1. **The shot.** His draft, by id (`pnpm -s cmd shots`). For a test of the machinery, a copy under a `zz-` id, so his
    studio, which opens the first shot alphabetically, never opens it; delete it after.
 2. **The session.** `<yyyy-mm-dd>-<n>`, the next free number for that agent that day.
-3. **The brief.** `pnpm -s cmd agent brief <id> --session <s> --shot <shot> --job "<his words, as he said them>"`. It
-   records the session's opening and his instruction, and prints the brief: who the agent is, its core, its learnings,
+3. **The brief.** `pnpm -s cmd agent brief <id> --session <s> --shot <shot> --job "<his words, as he said them>"
+   [--note "<Claude's own word>"]`. His words go in as he said them; what Claude adds (a move new to the library,
+   what to keep from the last version) goes in `--note`, recorded apart from his. It opens the session on the shot
+   (until the agent's closing line, every command on that shot is the agent's: recorded in its session and held to its
+   department, flags or not; Claude acts as itself there with `--director`), records his instruction, and prints the
+   brief: who the agent is, its core, its learnings,
    its recent sessions, the job, the world described (`describe`), its department's work, and how it works.
 4. **Start it** with the Agent tool (`general-purpose`), and **put the whole brief in its prompt**, between clear
    markers, after a few ground rules: work only through the commands the brief names, from the folder it gives; edit no
