@@ -28,7 +28,11 @@ export type Engine = {
 /** A world when the shot has none yet: a plain floor's worth of space. */
 const EMPTY_WORLD: World = { focus: [0, 1, 0], radius: 10, heightAt: () => 0, sky: "#e7e5e4", haze: 0 };
 
-export function createEngine(canvas: HTMLCanvasElement, library: Library, options: { preserve?: boolean } = {}): Engine {
+/**
+ * `floor` lays under the world a floor that shows only the shadows on it, for looking at an asset on its page (his,
+ * 2026-10-09: an asset stands in white, its sky and ground not its own): what it stands on is seen, and nothing else.
+ */
+export function createEngine(canvas: HTMLCanvasElement, library: Library, options: { preserve?: boolean; floor?: boolean } = {}): Engine {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: options.preserve ?? false, powerPreference: "high-performance" });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -89,6 +93,15 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
         world = piece.world;
       }
     }
+    if (options.floor) {
+      const geometry = new THREE.PlaneGeometry(world.radius * 12, world.radius * 12);
+      const material = new THREE.ShadowMaterial({ opacity: 0.12 });
+      const floor = new THREE.Mesh(geometry, material);
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = -0.01;
+      floor.receiveShadow = true;
+      add({ object: floor, dispose: () => (geometry.dispose(), material.dispose()) });
+    }
     scene.background = new THREE.Color(world.sky);
     scene.fog = world.haze > 0 ? new THREE.FogExp2(world.sky, world.haze) : null;
     camera.far = Math.max(1000, world.radius * 40);
@@ -136,15 +149,26 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
     const box = worldObject ? new THREE.Box3().setFromObject(worldObject) : new THREE.Box3();
     if (box.isEmpty()) box.setFromCenterAndSize(new THREE.Vector3(...world.focus), new THREE.Vector3(world.radius * 2, world.radius, world.radius * 2));
     const centre = box.getCenter(new THREE.Vector3());
-    const reach = box.getSize(new THREE.Vector3()).length() / 2;
     const lens = 35;
-    // Far enough that the whole of it fits the frame's narrower angle, from 35° round and 22° up.
-    const narrow = Math.min(radians(fieldOfView(lens, aspect)), 2 * Math.atan(Math.tan(radians(fieldOfView(lens, aspect)) / 2) * aspect));
-    // The box's round reach overstates a flat thing, so a little nearer than the sphere round it.
-    const distance = (reach / Math.sin(narrow / 2)) * 0.9;
+    // From 35° round and 22° up, as near as lets every corner of the world's box stand inside the frame, with air.
     const yaw = radians(35), pitch = radians(22);
+    const back = new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
+    const right = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), back).normalize();
+    const up = new THREE.Vector3().crossVectors(back, right);
+    const tall = Math.tan(radians(fieldOfView(lens, aspect)) / 2) * 0.75;
+    const wide = tall * aspect;
+    let distance = 0;
+    const corner = new THREE.Vector3();
+    for (const x of [box.min.x, box.max.x])
+      for (const y of [box.min.y, box.max.y])
+        for (const z of [box.min.z, box.max.z]) {
+          corner.set(x, y, z).sub(centre);
+          const toward = corner.dot(back);
+          distance = Math.max(distance, toward + Math.abs(corner.dot(right)) / wide, toward + Math.abs(corner.dot(up)) / tall);
+        }
+    distance = Math.max(distance, 0.5);
     return {
-      position: [centre.x + Math.sin(yaw) * Math.cos(pitch) * distance, centre.y + Math.sin(pitch) * distance, centre.z + Math.cos(yaw) * Math.cos(pitch) * distance],
+      position: [centre.x + back.x * distance, centre.y + back.y * distance, centre.z + back.z * distance],
       target: [centre.x, centre.y, centre.z],
       lens,
     };

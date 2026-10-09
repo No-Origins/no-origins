@@ -30,14 +30,16 @@ Current as of 2026-10-09.
   change the `set` command makes (E6), from the revision the screen last saw: a command run meanwhile wins. Under the
   picture its name and a bar of play, the time to scrub, and **free look**: a drag turns round what the camera looks
   at, the wheel or a pinch goes nearer, and renders always use the shot's camera.
-- **A home page, its first section Assets, and each asset on its bench** (his, Cinema.md F11). *Mine:* `/` is the home:
+- **A home page, its first section Assets, and each asset on its page** (his, Cinema.md F11). *Mine:* `/` is the home:
   the studio's name, then each section, a heading row with its cards under it; an asset's card opens `/asset/<id>`,
-  its bench: the asset as the world at the field's centre, filling its box, looked round freely from a view of the
-  whole of it (no camera, no time), lit by the plain sun; the card that says which asset it is at the top left, a
-  back arrow before its name (his, 2026-10-09), its controls under it and on the right, a card a group; a change saved once the jigs stand still to
-  `benches/<id>.json` in his folder, from the revision the screen last saw. The Assets section lists the entries his
-  folder names (`ASSETS`), in his order; a bench moves on to its asset's newest version keeping every value its
-  controls still take. The shots' screen is `/shots`.
+  its page: the asset as the world at the field's centre, filling its box, looked round freely from a view that fits
+  the whole of it (no camera, no time), lit by the plain sun, on a floor that shows only its shadow (the page's, not
+  the asset's); the card that says which asset it is at the top left, a back arrow before its name (his, 2026-10-09),
+  its controls under it and on the right, a card a group; a change saved once the jigs stand still to
+  `benches/<id>.json` in his folder, from the revision the screen last saw (the code calls an asset's page its bench,
+  from before he had an asset called Bench). The Assets section lists the entries his folder names (`ASSETS`), in his
+  order; a page moves on to its asset's newest version keeping every value its controls still take. The shots'
+  screen is `/shots`.
 
 ## E2. The engine
 
@@ -179,7 +181,7 @@ It is done when an agent, given his words, makes that shot through the commands 
   description to the saved configuration so that agents can understand when to use it"). It is an entry, its version
   and its values, kept in his private folder (E5); saving under a name he has used makes its next version. *Mine:* the
   code still calls a configuration an asset (`AssetVersion`, `assets/<id>/<n>.json`, the `asset` and `assets`
-  commands), from before F11 made an asset the thing itself; from a bench every value is saved, resolved, and a name
+  commands), from before F11 made an asset the thing itself; from an asset's page every value is saved, resolved, and a name
   already given to a configuration of another asset is refused.
 - *Mine:* **a draft uses a configuration's newest version; publishing pins it** to the version in use, so a published
   shot plays as it was made whatever he saves later (E3).
@@ -198,7 +200,7 @@ It is done when an agent, given his words, makes that shot through the commands 
   *Mine:* it reads the scene's sun and sky as they are when it is drawn, and its picture goes through the same tone
   mapping as the rest.
 - *Mine:* **the screen** offers a world that is one tile a "Save as configuration" card, where he types the name, and
-  an asset control is a list of his configurations by name, of the kind it takes. An asset's bench (E1) has the same
+  an asset control is a list of his configurations by name, of the kind it takes. An asset's page (E1) has the same
   in its Configuration window, with the description and the code. A grid's world has a map of its cells, seen from above,
   a layer at a time: a cell picked shows
   what stands there and takes another asset, empty, or back to the rules, and its copy's controls follow the map.

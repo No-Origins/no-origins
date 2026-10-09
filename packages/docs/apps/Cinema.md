@@ -250,13 +250,14 @@ as it goes** (his).
 - **For a set, the art department's agents bring the assets it needs together and configure each for it** (his: "when
   I describe a set, relevant or necessary assets can be brought together by the agents").
 - **The studio opens on a home page, its sections there; the first is Assets** (his, 2026-10-09). *Mine:* an asset
-  opens on its **bench**: the asset alone in the middle, looked round freely, its controls either side, what he sets
-  kept until he changes it. The shots' screen stays, off the home page until he names it a section.
+  opens on its **page**: the asset alone in the middle, standing in white (its sky and its ground not its own, his note
+  of the same day), looked round freely, its controls either side, what he sets kept until he changes it. The shots' screen stays, off the home page until he names it a section.
 - **A configuration he likes he saves** (his, 2026-10-09): every value of the asset as he left it, under a name, with
   **what it is for, so the agents know when to use it**, and kept to be used many ways: chosen by the art department
-  for a set, and **loaded to start new configurations from**. *Mine:* the bench shows the configuration as code, to read
+  for a set, and **loaded to start new configurations from**. *Mine:* the asset's page shows the configuration as code, to read
   and copy, beside the form that saves it and the list of those saved; the same name saves its next version.
-- **His first asset is Illusion Mountain** (his, 2026-10-09), made from the mountain he had tuned before.
+- **His assets so far** (his, 2026-10-09): **Illusion Mountain**, made from the mountain he had tuned before, and
+  **Bench**, a block with a glowing circle on its top where a cast member sits.
 
 ## Open
 

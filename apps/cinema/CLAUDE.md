@@ -39,9 +39,9 @@ sun; tools, not his ideas), the commands, the renderer, the screen and the sampl
 - `src/data/store.ts`: shots on disk (`shots/<id>/draft.json`, `versions/<n>.json`), renders, exports and the agents'
   session lines (Cinema-Agents.md R6).
 - `src/app/page.tsx` + `src/components/home.tsx`: the home page (Cinema.md F11), its sections, Assets first (the
-  entries his folder lists in `ASSETS`). `src/app/asset/[id]` + `src/components/bench.tsx`: an asset's bench, the
-  asset alone, looked round freely, its controls either side, saved to `benches/<id>.json` (`engine/bench.ts`,
-  `/asset/<id>/bench`).
+  entries his folder lists in `ASSETS`). `src/app/asset/[id]` + `src/components/bench.tsx`: an asset's page (its
+  "bench" in the code, from before his asset Bench), the asset alone, looked round freely, its controls either side,
+  saved to `benches/<id>.json` (`engine/bench.ts`, `/asset/<id>/bench`); `configuration.tsx`, its configurations.
 - `src/components/studio.tsx`: the shots' screen at `/shots`, one `Grid` (E1): the picture at the centre, the jigs
   either side (`jigs.tsx`, drawn from the entries' declarations), saved through `PATCH /shot/<id>`; `picture.tsx`: the
   shot in its box, playing from its own clock, with free look; `render-target.tsx`: the canvas the renderer drives, at

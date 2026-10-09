@@ -71,14 +71,15 @@ export function Picture({ shot, assets, aspect, length, playing, seek, free, onF
     let mounted: Engine | undefined;
     Promise.all([import("@/engine/engine"), import("@/engine/library"), import("@cinema/content")]).then(([{ createEngine }, { makeLibrary }, { ENTRIES }]) => {
       if (cancelled || !canvas.current) return;
-      mounted = createEngine(canvas.current, makeLibrary(ENTRIES));
+      mounted = createEngine(canvas.current, makeLibrary(ENTRIES), { floor: overview });
       setEngine(mounted);
     });
     return () => {
       cancelled = true;
       mounted?.dispose();
     };
-  }, []);
+    // A picture is a page's for its life: `overview` never changes under it.
+  }, [overview]);
 
   // The canvas takes the largest rectangle of the frame's shape that fits the box.
   const fit = React.useCallback(() => {
