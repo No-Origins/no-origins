@@ -4,7 +4,7 @@ import { resolve } from "./controls.ts";
 import type { Library } from "./library.ts";
 import { fieldOfView, radians } from "./math.ts";
 import { holding } from "./shot.ts";
-import type { Built, CameraEntry, CameraPose, Entry, EntryKind, Item, Shot, Use, World } from "./types.ts";
+import type { AssetBook, Built, CameraEntry, CameraPose, Entry, EntryKind, Item, Shot, Use, World } from "./types.ts";
 
 /**
  * The engine (Cinema-Engine.md E2): plain three.js on a canvas, mounted as Home's viewer is. It is asked one thing,
@@ -12,8 +12,8 @@ import type { Built, CameraEntry, CameraPose, Entry, EntryKind, Item, Shot, Use,
  * The screen drives t from its own clock to play; the renderer steps t frame by frame (E7).
  */
 export type Engine = {
-  /** Builds a shot's world, cast and lights. Says what it could not build; the rest is drawn. */
-  load: (shot: Shot) => string[];
+  /** Builds a shot's world, cast and lights, with his saved assets to hand. Says what it could not build. */
+  load: (shot: Shot, assets?: AssetBook) => string[];
   /** Draws the moment `t`, through the shot's camera, or through `pose` when one is given (the screen's free look). */
   draw: (t: number, pose?: CameraPose) => void;
   /** Where the shot's camera is at `t`. */
@@ -71,14 +71,14 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
     lights = [];
   }
 
-  function load(next: Shot) {
+  function load(next: Shot, assets: AssetBook = {}) {
     clear();
     const problems: string[] = [];
     world = EMPTY_WORLD;
     if (next.world) {
       const entry = entryFor(next.world, "environment", problems);
       if (entry) {
-        const piece = entry.build(resolve(entry.controls, next.world.values));
+        const piece = entry.build(resolve(entry.controls, next.world.values), { library, assets, cells: next.world.cells ?? {} });
         add(piece);
         world = piece.world;
       }

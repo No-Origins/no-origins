@@ -20,6 +20,9 @@ command line and the server read shots from the same folder (`src/data/store.ts`
 clone) both use the made-up **`src/sample/`**. The folder is in the tree that runs the app: moving the app to another
 checkout means moving the folder by hand, never through git.
 
+**His assets** are there too (`assets/<id>/<n>.json`, E9): configurations he saved under his own names. An asset's name
+is his: never save one for him under a name he did not give, and a test saves its own probe and deletes it after.
+
 **His palette** is there too: `PALETTE` in `src/content/index.ts`, the colours he has named, offered first by every
 colour control on the screen. A colour joins it when he names one.
 
@@ -38,7 +41,9 @@ sun; tools, not his ideas), the commands, the renderer, the screen and the sampl
 - `src/components/studio.tsx`: the screen, one `Grid` (E1): the picture at the centre, the jigs either side
   (`jigs.tsx`, drawn from the entries' declarations), saved through `PATCH /shot/<id>`; `picture.tsx`: the shot in its
   box, playing from its own clock, with free look; `render-target.tsx`: the canvas the renderer drives, at `/render`.
-- `src/engine/edit.ts`: setting controls, the one change the screen and the `set` command share.
+- `src/engine/edit.ts`: setting controls and a grid's cells, the changes the screen and the `set` and `cell` commands
+  share. `src/engine/assets.ts`: his assets (E9): finding one by `id` or `id@n`, and pinning them when a shot is
+  published. `src/components/world-jigs.tsx`: "Save as asset" and a grid's map of cells.
 
 ## What is true here and easy to get wrong
 

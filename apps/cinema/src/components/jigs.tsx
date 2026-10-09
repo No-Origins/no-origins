@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader } from "@no-origins/ui/components/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@no-origins/ui/components/collapsible";
 import { ColourPicker, type ColourOption } from "@no-origins/ui/components/colour-picker";
 import { Label } from "@no-origins/ui/components/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@no-origins/ui/components/select";
 import { Slider } from "@no-origins/ui/components/slider";
 import { Switch } from "@no-origins/ui/components/switch";
 import { Text } from "@no-origins/ui/components/text";
@@ -15,14 +16,14 @@ import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-g
 import { cn } from "@no-origins/ui/lib/utils";
 
 import { resolve } from "@/engine/controls";
-import type { Control as ControlSpec, Entry, Value, Values } from "@/engine/types";
+import type { AssetBook, Control as ControlSpec, Entry, Value, Values } from "@/engine/types";
 
 /**
  * The jigs (Cinema-Engine.md E1, E4): every control an entry declares, drawn from its declaration, so a new control in
  * code is on the screen with nothing else written. The grammar is the motion studio's, so the studios read as one
  * system: a card a group, its label for a head; each control its label and value on a line and its widget under it,
- * two to a row; one widget a kind — a slider for a number or an angle, a toggle group for a choice, a switch, and the
- * colour picker for a colour. A card folds to its head.
+ * two to a row; one widget a kind — a slider for a number or an angle, a toggle group for a choice, a switch, the
+ * colour picker for a colour, and a list of his saved assets, by name, for an asset. A card folds to its head.
  */
 
 export function Jig({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
@@ -59,9 +60,40 @@ function shown(control: ControlSpec, value: Value) {
   return undefined;
 }
 
-function ControlRow({ control, value, palette, onChange }: { control: ControlSpec; value: Value; palette: readonly ColourOption[]; onChange: (value: Value) => void }) {
+/** The asset list's entry for none. */
+const NONE = "none";
+
+/** A list of his saved assets by name, the newest version of each; `none` for nothing. */
+export function AssetSelect({ id, label, value, assets, onChange, extra }: {
+  id?: string;
+  label: string;
+  value: string;
+  assets: AssetBook;
+  onChange: (value: string) => void;
+  /** Choices before the assets, as [value, label]. */
+  extra?: readonly (readonly [string, string])[];
+}) {
+  const named = Object.values(assets).map((versions) => versions.at(-1)!).sort((a, b) => a.name.localeCompare(b.name));
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger id={id} size="sm" aria-label={label} className="w-full">
+        <SelectValue placeholder="No asset" />
+      </SelectTrigger>
+      <SelectContent>
+        {(extra ?? [[NONE, "No asset"]]).map(([v, text]) => (
+          <SelectItem key={v} value={v}>{text}</SelectItem>
+        ))}
+        {named.map((asset) => (
+          <SelectItem key={asset.id} value={asset.id}>{`${asset.name} · v${asset.version}`}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function ControlRow({ control, value, palette, assets, onChange }: { control: ControlSpec; value: Value; palette: readonly ColourOption[]; assets: AssetBook; onChange: (value: Value) => void }) {
   const id = React.useId();
-  const wide = control.kind === "choice" || control.kind === "colour";
+  const wide = control.kind === "choice" || control.kind === "colour" || control.kind === "asset";
   let widget: React.ReactNode;
   switch (control.kind) {
     case "number":
@@ -81,6 +113,11 @@ function ControlRow({ control, value, palette, onChange }: { control: ControlSpe
       break;
     case "switch":
       widget = <Switch id={id} aria-label={control.label} checked={value as boolean} onCheckedChange={onChange} />;
+      break;
+    case "asset":
+      widget = (
+        <AssetSelect id={id} label={control.label} value={String(value).split("@")[0] || NONE} assets={assets} onChange={(next) => onChange(next === NONE ? "" : next)} />
+      );
       break;
     case "colour": {
       const options = palette.some((option) => option.value === value) ? palette : [...palette, { value: String(value), label: String(value), colour: String(value) }];
@@ -110,12 +147,13 @@ export function Field({ label, wide = true, children }: { label: string; wide?: 
 }
 
 /** An entry's controls as jigs, a card for each of its groups; `title` heads a card when the entry has no groups. */
-export function EntryJigs({ entry, values, title, note, palette, onChange }: {
+export function EntryJigs({ entry, values, title, note, palette, assets, onChange }: {
   entry: Entry;
   values: Values;
   title: string;
   note?: string;
   palette: readonly ColourOption[];
+  assets: AssetBook;
   onChange: (control: string, value: Value) => void;
 }) {
   const resolved = resolve(entry.controls, values);
@@ -129,7 +167,7 @@ export function EntryJigs({ entry, values, title, note, palette, onChange }: {
       {[...groups].map(([group, controls], index) => (
         <Jig key={group} title={group === title ? title : `${title} · ${group}`} note={index === 0 ? note : undefined}>
           {controls.map((control) => (
-            <ControlRow key={control.id} control={control} value={resolved[control.id]!} palette={palette} onChange={(value) => onChange(control.id, value)} />
+            <ControlRow key={control.id} control={control} value={resolved[control.id]!} palette={palette} assets={assets} onChange={(value) => onChange(control.id, value)} />
           ))}
         </Jig>
       ))}

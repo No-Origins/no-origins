@@ -102,7 +102,9 @@ line in the app, `pnpm --filter cinema cmd <command> …`, which every agent can
 | Command | What it does | Department |
 |---|---|---|
 | `new` | Starts a shot: its title and its frame | Direction |
-| `world` | Sets the shot's environment and its controls | Set |
+| `world` | Sets the shot's environment and its controls (`--keep` carries over what the new one takes) | Set |
+| `asset save`, `assets` | Saves the shot's world as an asset under his name; lists his assets (E9) | Set; anyone |
+| `cell` | Changes one cell of a grid: its asset, empty, back to the rules, or its copy's values (E9) | Set |
 | `place` | Puts a cast member on the ground, facing a way | Direction, cast |
 | `add` | Puts an entry or a preset on a track, at a time, with its values | The track's |
 | `set` | Changes an item's values | The track's |
@@ -148,6 +150,22 @@ line in the app, `pnpm --filter cinema cmd <command> …`, which every agent can
 4. The shot exported as a video and a still, wide and vertical.
 
 It is done when an agent, given his words, makes that shot through the commands alone, and its session is recorded.
+
+## E9. Assets, and worlds built from them
+
+- **An asset is a configuration he saves under a name of his own** (his, 2026-10-09: "I want to call this an asset…
+  save this configuration… when saving, I will save with the name I want to"). It is an entry, its version and its
+  values, kept in his private folder (E5). Saving under a name he has used makes the asset's next version.
+- *Mine:* **a draft uses an asset's newest version; publishing pins it** to the version in use, so a published shot
+  plays as it was made whatever he saves later (E3).
+- **A world can be a grid of assets** (his: "use this asset to build a grid of assets which will create a world"),
+  **filled by rules, then changed by hand** (his). *Mine:* such an environment declares its grid (its size, and which
+  asset its rules put in each cell), and its cells, "column,row" from 1, are part of the shot's world: a cell may hold
+  another asset, stay empty, or tune its own copy over the asset's values. The engine, the `cell` command and the
+  screen all read the grid from the declaration, so the rules are written once.
+- *Mine:* **the screen** offers a world that is one tile a "Save as asset" card, where he types the name, and an asset
+  control is a list of his assets by name. A grid's world has a map of its cells, seen from above: a cell picked shows
+  what stands there and takes another asset, empty, or back to the rules, and its copy's controls follow the map.
 
 ## Open
 

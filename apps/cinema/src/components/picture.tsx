@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import type { Engine } from "@/engine/engine";
-import type { Aspect, CameraPose, Shot, Vec3 } from "@/engine/types";
+import type { Aspect, AssetBook, CameraPose, Shot, Vec3 } from "@/engine/types";
 
 /** A free look: round a point, by a bearing and a pitch, from a distance, through a lens. */
 type Orbit = { target: Vec3; yaw: number; pitch: number; distance: number; lens: number };
@@ -31,8 +31,10 @@ const STEP = 0.12;
  * goes nearer or further, the arrow keys and + − do the same when the picture has focus, and Escape goes back. It
  * starts from wherever the shot's camera is, and `onFree` says it has; renders always use the shot's camera.
  */
-export function Picture({ shot, aspect, length, playing, seek, free, onFree, onTime, onProblems }: {
+export function Picture({ shot, assets, aspect, length, playing, seek, free, onFree, onTime, onProblems }: {
   shot: Shot;
+  /** His saved assets, for a world built from them. */
+  assets: AssetBook;
   aspect: Aspect;
   /** The shot's length in seconds. */
   length: number;
@@ -90,9 +92,9 @@ export function Picture({ shot, aspect, length, playing, seek, free, onFree, onT
 
   React.useEffect(() => {
     if (!engine) return;
-    latest.current.onProblems(engine.load(shot));
+    latest.current.onProblems(engine.load(shot, assets));
     fit();
-  }, [engine, shot, fit]);
+  }, [engine, shot, assets, fit]);
 
   React.useEffect(() => {
     const host = box.current;

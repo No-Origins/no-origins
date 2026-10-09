@@ -1,13 +1,14 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { check, parse, problem } from "../engine/controls.ts";
-import { setControls } from "../engine/edit.ts";
+import { check, parse, problem, resolve } from "../engine/controls.ts";
+import { pinAssets } from "../engine/assets.ts";
+import { setCell, setControls } from "../engine/edit.ts";
 import { makeLibrary, type Library } from "../engine/library.ts";
 import { frameTimes, itemsOf, newShot, nextId, shotLength } from "../engine/shot.ts";
 import { DEPARTMENTS, TRACK_DEPARTMENT } from "../engine/types.ts";
 import type { Aspect, Department, Entry, Frame, Placement, Shot, TrackKind, Use, Values } from "../engine/types.ts";
-import { appendSession, DATA, departmentOf, isId, listShots, outputDir, PRIVATE, publish, readDraft, readVersion, relative, saveDraft, versionsOf } from "../data/store.ts";
+import { appendSession, DATA, departmentOf, isId, listShots, outputDir, PRIVATE, publish, readAssets, readDraft, readVersion, relative, saveAsset, saveDraft, versionsOf } from "../data/store.ts";
 import { scaled, sheet, still, video } from "./render.ts";
 
 /**
@@ -27,10 +28,14 @@ Reading
   shots                                   the shots, their revisions and versions
   show <shot> [--version n]               a shot as data
   entries [environment|cast|camera|light] the library: each entry and its controls
+  assets                                  his saved assets and their versions
 
 Changing a shot (each needs its department when an agent runs it)
   new <shot> [--title t] [--aspect wide|vertical] [--size px] [--fps n]           direction
-  world <shot> <entry[@version]> [control=value …]                                set
+  world <shot> <entry[@version]> [control=value …] [--keep]                       set
+      (--keep carries over every value the new entry takes from the world before)
+  cell <shot> <column,row> [--asset <id>|none|rules] [control=value …] [--clear]  set
+  asset save "<name>" --from <shot>       saves the shot's world as an asset under his name   set
   place <shot> <entry[@version]> --at x,z [--facing deg] [--name n] [control=value …]   direction, cast
   add <shot> <entry[@version]> --start s --length s [control=value …]             the track's (camera, light)
   set <shot> <world|cast id|item id> [control=value …] [--at x,z] [--facing deg]  the thing's department
@@ -54,6 +59,8 @@ const refuse = (why: string): never => {
 // ── The words on the line ────────────────────────────────────────────────────────────────────────────────────────────
 const [command = "help", ...rest] = process.argv.slice(2);
 const flags: Record<string, string> = {};
+/** Flags that take no value. */
+const SWITCHES = new Set(["keep", "clear"]);
 const pairs: Record<string, string> = {};
 const positional: string[] = [];
 for (let i = 0; i < rest.length; i++) {
@@ -62,6 +69,7 @@ for (let i = 0; i < rest.length; i++) {
     const body = word.slice(2);
     const equals = body.indexOf("=");
     if (equals >= 0) flags[body.slice(0, equals)] = body.slice(equals + 1);
+    else if (SWITCHES.has(body)) flags[body] = "true";
     else flags[body] = rest[++i] ?? "";
   } else if (/^[a-z][a-z0-9-]*=/.test(word)) {
     const at = word.indexOf("=");
@@ -133,6 +141,21 @@ function edited(shot: Shot, target: string, values: Values) {
     return refuse(error instanceof Error ? error.message : String(error));
   }
 }
+/** `control=value` pairs read against the controls of the asset standing in a cell (or about to). */
+function valuesForCell(shot: Shot, key: string): Values {
+  const world = shot.world ?? refuse(`${shot.id} has no world yet`);
+  const entry = entryOf(world);
+  if (entry.kind !== "environment" || !entry.grid) return refuse(`${tag(world)} is not a grid: it has no cells`);
+  const [column, row] = key.split(",").map(Number);
+  const rule = entry.grid(resolve(entry.controls, world.values)).rule(column ?? 0, row ?? 0);
+  const ref = "asset" in flags ? (flags.asset === "none" ? "" : flags.asset) : (world.cells?.[key]?.asset ?? rule);
+  const book = readAssets();
+  const [id, version] = (ref ?? "").split("@");
+  const standing = id ? (version ? book[id]?.find((v) => v.version === Number(version)) : book[id]?.at(-1)) : undefined;
+  if (!standing) return refuse(`no asset stands in ${key} to tune`);
+  return valuesFor(library.find(standing.use.entry, standing.use.version) ?? refuse(`${standing.use.entry}@${standing.use.version} is not in the library`), pairs);
+}
+
 /** The values an entry's controls still take, from a use of another version of it. */
 function keepable(entry: Entry, values: Values): Values {
   return Object.fromEntries(
@@ -223,12 +246,57 @@ async function run(): Promise<string> {
       const values = valuesFor(entry, pairs);
       // The same entry, at this version or another, keeps every value its controls still take (E4: a shot moved on to
       // an entry's next version keeps what was tuned).
-      const previous = shot.world?.entry === entry.id ? shot.world : undefined;
+      const previous = shot.world && (shot.world.entry === entry.id || "keep" in flags) ? shot.world : undefined;
       const kept = previous ? keepable(entry, previous.values) : {};
       const world: Use = { entry: entry.id, version: entry.version, values: { ...kept, ...values } };
-      const saved = save({ ...shot, world }, { target: "world", entry: tag(world), values, ...(previous && previous.version !== entry.version ? { from: tag(previous) } : {}) });
-      const moved = previous && previous.version !== entry.version ? `, moved on from ${tag(previous)} keeping ${Object.keys(kept).length} of its ${Object.keys(previous.values).length} values` : "";
+      const changed = previous && tag(previous) !== tag(world);
+      const saved = save({ ...shot, world }, { target: "world", entry: tag(world), values, ...(changed ? { from: tag(previous) } : {}) });
+      const moved = changed ? `, moved on from ${tag(previous)} keeping ${Object.keys(kept).length} of its ${Object.keys(previous.values).length} values` : "";
       return `${shot.id}'s world is ${tag(world)}${moved}${Object.keys(values).length ? `, with ${Object.keys(values).join(", ")} set` : ""} · rev ${saved.rev}`;
+    }
+
+    case "assets": {
+      const book = readAssets();
+      const ids = Object.keys(book).sort();
+      if (!ids.length) return "No assets saved yet: tune a world, then `asset save \"<name>\" --from <shot>`.";
+      return ids.map((id) => {
+        const versions = book[id]!;
+        const newest = versions.at(-1)!;
+        return `  ${id}  "${newest.name}"  ${newest.use.entry}@${newest.use.version}  versions ${versions.map((v) => v.version).join(", ")}  (newest saved ${newest.saved.slice(0, 16).replace("T", " ")})`;
+      }).join("\n");
+    }
+
+    case "asset": {
+      if (shotId !== "save") refuse("say `asset save \"<name>\" --from <shot>`");
+      allow("set");
+      const name = target ?? refuse("name the asset: `asset save \"<name>\" --from <shot>`");
+      const from = draftOf(flags.from);
+      const world = from.world ?? refuse(`${from.id} has no world to save`);
+      const its = entryOf(world);
+      if (its.kind === "environment" && its.grid) refuse(`${from.id}'s world is a grid of assets; an asset is one tile`);
+      const asset = saveAsset(name, world);
+      record({ type: "command", command: "asset save", shot: from.id, rev: from.rev, asset: `${asset.id}@${asset.version}`, name: asset.name });
+      return `saved "${asset.name}" as ${asset.id} version ${asset.version} (${tag(world)}, ${Object.keys(world.values).length} values)`;
+    }
+
+    case "cell": {
+      allow("set");
+      const shot = draftOf(shotId);
+      const key = target ?? refuse("name a cell: column,row, like 2,3");
+      const change = {
+        ...("asset" in flags ? { asset: flags.asset === "none" ? "" : flags.asset } : {}),
+        ...(Object.keys(pairs).length ? { values: valuesForCell(shot, key) } : {}),
+        ...("clear" in flags ? { clear: true } : {}),
+      };
+      let next: Shot;
+      try {
+        next = setCell(shot, key, change, library, readAssets());
+      } catch (error) {
+        return refuse(error instanceof Error ? error.message : String(error));
+      }
+      const saved = save(next, { target: `cell ${key}`, ...change });
+      const cell = saved.world?.cells?.[key];
+      return `cell ${key}: ${cell ? `${cell.asset === undefined ? "the rules' asset" : cell.asset || "empty"}${cell.values ? `, with ${Object.keys(cell.values).join(", ")} tuned` : ""}` : "back to the rules"} · rev ${saved.rev}`;
     }
 
     case "place": {
@@ -325,7 +393,7 @@ async function run(): Promise<string> {
     case "publish": {
       allow("direction");
       const shot = draftOf(shotId);
-      const version = publish(shot.id);
+      const version = publish(shot.id, pinAssets(shot, library, readAssets()));
       record({ type: "command", command, shot: shot.id, rev: shot.rev, version });
       return `published ${shot.id} version ${version} (draft rev ${shot.rev})`;
     }
@@ -334,7 +402,7 @@ async function run(): Promise<string> {
       const { shot, version } = toRender(shotId);
       const t = number("at");
       const file = path.join(output("renders", shot), `${shot.id}-${version === "draft" ? `r${shot.rev}` : `v${version}`}-${shot.frame.aspect}-${t.toFixed(2)}s.png`);
-      await still(shot, t, file);
+      await still(shot, t, file, readAssets());
       record({ type: "render", kind: "still", shot: shot.id, version, rev: shot.rev, frame: shot.frame, t, artifact: relative(file) });
       return relative(file);
     }
@@ -347,7 +415,7 @@ async function run(): Promise<string> {
       const times = Array.from({ length: count }, (_, i) => (length * (i + 0.5)) / count);
       const small = { ...shot, frame: scaled(shot.frame, 0.3) };
       const file = path.join(output("renders", shot), `${shot.id}-${version === "draft" ? `r${shot.rev}` : `v${version}`}-${shot.frame.aspect}-sheet.png`);
-      await sheet(small, times, columns, file);
+      await sheet(small, times, columns, file, readAssets());
       record({ type: "render", kind: "sheet", shot: shot.id, version, rev: shot.rev, frame: shot.frame, times, artifact: relative(file) });
       return `${relative(file)}  (${count} stills, at ${times.map(seconds).join(" ")})`;
     }
@@ -359,7 +427,7 @@ async function run(): Promise<string> {
       if (to <= from) refuse("--to comes after --from");
       const small = { ...shot, frame: scaled(shot.frame, Math.max(0.1, Math.min(1, number("scale", 0.5)))) };
       const file = path.join(output("renders", shot), `${shot.id}-${version === "draft" ? `r${shot.rev}` : `v${version}`}-${shot.frame.aspect}-${from}-${to}s.mp4`);
-      await video(small, frameTimes(shot.frame.fps, from, to), file, "check");
+      await video(small, frameTimes(shot.frame.fps, from, to), file, "check", readAssets());
       record({ type: "render", kind: "clip", shot: shot.id, version, rev: shot.rev, frame: small.frame, from, to, artifact: relative(file) });
       return relative(file);
     }
@@ -380,11 +448,11 @@ async function run(): Promise<string> {
         const name = path.join(output("exports", shot), `${shot.id}-v${version}-${aspect}`);
         const times = frameTimes(shot.frame.fps, 0, length);
         process.stderr.write(`exporting ${shot.id} v${version} ${aspect}: ${times.length} frames…\n`);
-        await video(framed, times, `${name}.mp4`, "final", (done) => {
+        await video(framed, times, `${name}.mp4`, "final", readAssets(), (done) => {
           if (done % 30 === 0 || done === times.length) process.stderr.write(`  ${done}/${times.length}\r`);
         });
         process.stderr.write("\n");
-        await still(framed, moment, `${name}.png`);
+        await still(framed, moment, `${name}.png`, readAssets());
         made.push(relative(`${name}.mp4`), relative(`${name}.png`));
         record({ type: "render", kind: "export", shot: shot.id, version, frame: framed.frame, artifact: [relative(`${name}.mp4`), relative(`${name}.png`)] });
       }

@@ -1,5 +1,7 @@
 import type { Object3D } from "three";
 
+import type { Library } from "./library.ts";
+
 /**
  * The Cinema Studio's shapes (Cinema-Engine.md): a shot as data (E3) and a library entry as a declaration and a builder
  * (E4). Public: the types are what his private entries and shots are written against (E5).
@@ -21,7 +23,9 @@ export type Control =
   | (ControlBase & { kind: "angle"; min: number; max: number; step: number; default: number })
   | (ControlBase & { kind: "choice"; options: readonly string[]; default: string })
   | (ControlBase & { kind: "switch"; default: boolean })
-  | (ControlBase & { kind: "colour"; default: string });
+  | (ControlBase & { kind: "colour"; default: string })
+  /** One of his saved assets, by id (the newest version) or `id@n` (that one); "" for none. */
+  | (ControlBase & { kind: "asset"; default: string });
 export type Value = number | string | boolean;
 export type Values = Record<string, Value>;
 
@@ -36,6 +40,8 @@ type Declaration = { id: string; label: string; version: number; description: st
 
 /** What an environment tells the rest of the shot about its world. */
 export type World = {
+  /** The side of the square it stands on, when it is a tile that can sit beside others on a grid (an asset). */
+  footprint?: number;
   /** Where the eye goes by default: a camera move frames this unless told otherwise. */
   focus: Vec3;
   /** How far out the world reaches from its focus, so lights and cameras can be sized to it. */
@@ -50,7 +56,16 @@ export type World = {
 export type Built = { object: Object3D; dispose?: () => void };
 export type CameraPose = { position: Vec3; target: Vec3; /** The lens, in millimetres of a full-frame camera. */ lens: number };
 
-export type EnvironmentEntry = Declaration & { kind: "environment"; build: (values: Values) => Built & { world: World } };
+/** What an environment may draw on besides its values: the library, his saved assets, and its cells (a grid's). */
+export type BuildContext = { library: Library; assets: AssetBook; cells: Record<string, Cell> };
+/** A grid of assets, as an environment declares it: its size, and which asset its rules put in a cell ("" for none). */
+export type GridSpec = { columns: number; rows: number; rule: (column: number, row: number) => string };
+export type EnvironmentEntry = Declaration & {
+  kind: "environment";
+  build: (values: Values, context: BuildContext) => Built & { world: World };
+  /** Present when the world is a grid of assets: the builder, the cell edits and the screen's map all ask it. */
+  grid?: (values: Values) => GridSpec;
+};
 /** A cast member stands at its origin, its feet on the ground, facing +z. */
 export type CastEntry = Declaration & { kind: "cast"; build: (values: Values) => Built };
 /** A camera move: where the camera is at `u`, 0 to 1 through the move. Pure: the same `u` is the same pose. */
@@ -59,7 +74,22 @@ export type LightEntry = Declaration & { kind: "light"; build: (values: Values, 
 export type Entry = EnvironmentEntry | CastEntry | CameraEntry | LightEntry;
 
 /** A use of an entry: which one, the version it was set against (E4), and its controls' values. */
-export type Use = { entry: string; version: number; values: Values };
+export type Use = { entry: string; version: number; values: Values; cells?: Record<string, Cell> };
+
+/**
+ * A cell of a grid, by "column,row" from 1 (his, 2026-10-09: rules fill the grid, then he changes cells by hand). With
+ * no `asset` the rules decide what stands there; "" keeps it empty; an asset's id puts that asset there. `values` tune
+ * that one copy over the asset's own.
+ */
+export type Cell = { asset?: string; values?: Values };
+
+/**
+ * An asset (his word, 2026-10-09): a configuration of an entry he saved under a name of his own, versioned. Saving
+ * under a name he has used makes its next version; a draft uses the newest, a published shot the one it was made with.
+ */
+export type AssetVersion = { id: string; name: string; version: number; saved: string; use: { entry: string; version: number; values: Values } };
+/** Every asset he has saved, by id, its versions oldest first. */
+export type AssetBook = Record<string, AssetVersion[]>;
 /** An item on a track (E3): an entry on a timeline, when it starts and how long it lasts, in seconds. */
 export type Item = Use & { id: string; start: number; length: number };
 export type TrackKind = "camera" | "light";

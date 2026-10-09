@@ -6,7 +6,7 @@ import path from "node:path";
 import { chromium, type Page } from "@playwright/test";
 
 import { frameSize } from "../engine/shot.ts";
-import type { Frame, Shot } from "../engine/types.ts";
+import type { AssetBook, Frame, Shot } from "../engine/types.ts";
 
 /**
  * Rendering (Cinema-Engine.md E7). A headless browser opens the engine's page, `/render`, and asks it to draw the shot
@@ -25,7 +25,7 @@ async function studioIsUp() {
 }
 
 /** Opens the engine on a shot at its frame, runs `work`, and closes. The GPU on a Mac (Metal), else SwiftShader. */
-export async function withEngine<T>(shot: Shot, work: (draw: (t: number, format: "png" | "jpeg") => Promise<Buffer>) => Promise<T>) {
+export async function withEngine<T>(shot: Shot, assets: AssetBook, work: (draw: (t: number, format: "png" | "jpeg") => Promise<Buffer>) => Promise<T>) {
   if (!(await studioIsUp())) throw new Error(`The studio is not running at ${STUDIO}: start it with \`pnpm --filter cinema dev\`.`);
   const browser = await chromium.launch({ args: process.platform === "darwin" ? ["--use-angle=metal"] : ["--enable-unsafe-swiftshader"] });
   try {
@@ -33,7 +33,7 @@ export async function withEngine<T>(shot: Shot, work: (draw: (t: number, format:
     const page: Page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
     await page.goto(`${STUDIO}/render`);
     await page.waitForFunction(() => window.cinema?.ready === true, undefined, { timeout: 60_000 });
-    const problems = await page.evaluate((loaded) => window.cinema!.load(loaded), shot);
+    const problems = await page.evaluate(([loaded, book]) => window.cinema!.load(loaded, book), [shot, assets] as const);
     if (problems.length) throw new Error(`The shot did not load: ${problems.join("; ")}.`);
     return await work(async (t, format) => {
       const url = await page.evaluate(([at, type]) => window.cinema!.draw(at, type, 0.92), [t, `image/${format}`] as const);
@@ -59,15 +59,15 @@ function ffmpeg(args: string[], feed?: (stdin: NodeJS.WritableStream) => Promise
 /** A frame scaled down for quick looks; its sides kept even for the encoder. */
 export const scaled = (frame: Frame, scale: number): Frame => ({ ...frame, size: Math.max(90, Math.round((frame.size * scale) / 2) * 2) });
 
-export async function still(shot: Shot, t: number, file: string) {
-  await withEngine(shot, async (draw) => writeFileSync(file, await draw(t, "png")));
+export async function still(shot: Shot, t: number, file: string, assets: AssetBook) {
+  await withEngine(shot, assets, async (draw) => writeFileSync(file, await draw(t, "png")));
 }
 
 /** A contact sheet: stills across the shot, tiled in rows (E6). */
-export async function sheet(shot: Shot, times: number[], columns: number, file: string) {
+export async function sheet(shot: Shot, times: number[], columns: number, file: string, assets: AssetBook) {
   const dir = mkdtempSync(path.join(tmpdir(), "cinema-sheet-"));
   try {
-    await withEngine(shot, async (draw) => {
+    await withEngine(shot, assets, async (draw) => {
       for (const [index, t] of times.entries()) writeFileSync(path.join(dir, `${String(index).padStart(3, "0")}.png`), await draw(t, "png"));
     });
     const rows = Math.ceil(times.length / columns);
@@ -81,8 +81,8 @@ export async function sheet(shot: Shot, times: number[], columns: number, file: 
  * A video of the shot at `times`, at the shot's frame rate. A clip for checking is quick (JPEG frames, a fast preset);
  * an export is at full quality (PNG frames, a slow preset) and takes as long as it takes.
  */
-export async function video(shot: Shot, times: number[], file: string, quality: "check" | "final", progress?: (done: number) => void) {
-  await withEngine(shot, async (draw) => {
+export async function video(shot: Shot, times: number[], file: string, quality: "check" | "final", assets: AssetBook, progress?: (done: number) => void) {
+  await withEngine(shot, assets, async (draw) => {
     const format = quality === "final" ? "png" : "jpeg";
     await ffmpeg(
       [

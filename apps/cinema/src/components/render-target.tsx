@@ -19,10 +19,10 @@ export function RenderTarget() {
         const engine = createEngine(target, makeLibrary(ENTRIES));
         window.cinema = {
           ready: true,
-          load(shot) {
+          load(shot, assets) {
             const { width, height } = frameSize(shot.frame);
             engine.size(width, height, 1);
-            return engine.load(shot);
+            return engine.load(shot, assets);
           },
           draw(t, type, quality) {
             engine.draw(t);

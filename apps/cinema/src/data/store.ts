@@ -1,7 +1,8 @@
 import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
-import type { Shot } from "../engine/types.ts";
+import { assetId } from "../engine/assets.ts";
+import type { AssetBook, AssetVersion, Shot, Use } from "../engine/types.ts";
 
 /**
  * Where a shot is kept (Cinema-Engine.md E3, E5): in his private folder, `src/content`, on his machine, and in the
@@ -71,13 +72,44 @@ export function readVersion(id: string, version: number): Shot | undefined {
   return existsSync(file) ? readJson<Shot>(file) : undefined;
 }
 
-/** Publishing makes the draft the shot's next version, which never changes (E3). */
-export function publish(id: string) {
-  const draft = readDraft(id);
+/**
+ * Publishing makes the draft the shot's next version, which never changes (E3). `as` is the draft as it is published,
+ * its assets pinned to the versions it uses now (`engine/assets.ts`).
+ */
+export function publish(id: string, as?: Shot) {
+  const draft = as ?? readDraft(id);
   if (!draft) throw new Error(`There is no shot called ${id}.`);
   const version = (versionsOf(id).at(-1) ?? 0) + 1;
   writeJson(path.join(shotDir(id), "versions", `${version}.json`), draft);
   return version;
+}
+
+/** Every asset he has saved (`assets/<id>/<version>.json`), its versions oldest first. */
+export function readAssets(): AssetBook {
+  const root = path.join(DATA, "assets");
+  if (!existsSync(root)) return {};
+  const book: AssetBook = {};
+  for (const folder of readdirSync(root, { withFileTypes: true })) {
+    if (!folder.isDirectory() || !isId(folder.name)) continue;
+    const versions = readdirSync(path.join(root, folder.name))
+      .map((name) => /^(\d+)\.json$/.exec(name)?.[1])
+      .filter(Boolean)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .map((n) => readJson<AssetVersion>(path.join(root, folder.name, `${n}.json`)));
+    if (versions.length) book[folder.name] = versions;
+  }
+  return book;
+}
+
+/** Saves a configuration under his name for it: a new asset, or the next version of the one with that name. */
+export function saveAsset(name: string, use: Use): AssetVersion {
+  const id = assetId(name);
+  if (!id || !isId(id)) throw new Error("An asset needs a name with a letter or a digit in it.");
+  const version = (readAssets()[id]?.at(-1)?.version ?? 0) + 1;
+  const asset: AssetVersion = { id, name: name.trim(), version, saved: new Date().toISOString(), use: { entry: use.entry, version: use.version, values: use.values } };
+  writeJson(path.join(DATA, "assets", id, `${version}.json`), asset);
+  return asset;
 }
 
 /** Where renders and exports land (E7): an agent's artifacts, or the shot's own renders, or the exports. */

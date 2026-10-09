@@ -28,6 +28,8 @@ export function problem(control: Control, value: Value): string | undefined {
       return typeof value === "boolean" ? undefined : `${control.id} is true or false`;
     case "colour":
       return typeof value === "string" && COLOUR.test(value) ? undefined : `${control.id} is a colour like #a3e635`;
+    case "asset":
+      return typeof value === "string" && /^([a-z0-9][a-z0-9-]*(@\d+)?)?$/.test(value) ? undefined : `${control.id} is an asset's id (see \`assets\`), or nothing`;
   }
 }
 

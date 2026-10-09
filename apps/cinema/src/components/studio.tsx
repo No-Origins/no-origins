@@ -19,10 +19,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@no-origins/ui/componen
 
 import { EntryJigs, Field, Jig } from "@/components/jigs";
 import { Picture } from "@/components/picture";
-import { setControls } from "@/engine/edit";
+import { CellsJig, SaveAsset } from "@/components/world-jigs";
+import { findAsset } from "@/engine/assets";
+import { resolve } from "@/engine/controls";
+import { setCell, setControls, type CellChange } from "@/engine/edit";
 import { makeLibrary, type Library } from "@/engine/library";
 import { shotLength } from "@/engine/shot";
-import type { Aspect, PaletteColour, Shot, Use, Value, Values } from "@/engine/types";
+import type { Aspect, AssetBook, PaletteColour, Shot, Use, Value, Values } from "@/engine/types";
 import { studioLayout } from "@/lib/layout";
 
 const library = makeLibrary(ENTRIES);
@@ -55,18 +58,23 @@ function paletteOf(lib: Library, shot: Shot | null, his: readonly PaletteColour[
 }
 
 type Save = { state: "idle" | "saving" | "saved" | "refused"; note?: string };
+/** A change waiting to be saved: a target's values, or one cell of the world's grid. */
+type Change = { key: string; body: { target: string; values: Values } | { cell: CellChange & { key: string } } };
 
 /**
- * The studio's screen (Cinema-Engine.md E1), version 2. The shot at the centre, with its name and a bar of play, the
- * time to scrub and free look. The jigs either side: the world's controls on the left; on the right the shot (which
- * one, and the frame to see it in, wide or vertical: the screen's view; the shot's own frame is a command's), then its
- * camera, lights and cast, every control its entry declares. A change shows at once and is saved to the
- * draft once the jigs stand still, from the revision the screen last saw; a command run meanwhile wins, and the screen
+ * The studio's screen (Cinema-Engine.md E1), version 3. The shot at the centre, with its name and a bar of play, the
+ * time to scrub and free look. The jigs either side: on the left the world: saving it as an asset under his name when
+ * it is one tile, and when it is a grid of assets its rules, then its cells as a map, then the copy in the cell picked;
+ * on the right the shot (which one, and the frame to see it in: the screen's view; the shot's own frame is a
+ * command's), then its camera, lights and cast. A change shows at once; a value is saved once the jigs stand still and a
+ * cell's asset at once, in order, from the revision the screen last saw: a command run meanwhile wins, and the screen
  * shows what it did. Built from the system (F2); the placing is mine.
  */
-function Workspace({ shots, initial }: { shots: { id: string; title: string }[]; initial: Shot | null }) {
+function Workspace({ shots: initialShots, initial, assets: initialAssets }: { shots: { id: string; title: string }[]; initial: Shot | null; assets: AssetBook }) {
   const metrics = useGridMetrics();
+  const [shots] = React.useState(initialShots);
   const [shot, setShot] = React.useState(initial);
+  const [assets, setAssets] = React.useState(initialAssets);
   const [aspect, setAspect] = React.useState<Aspect>(initial?.frame.aspect ?? "wide");
   const [playing, setPlaying] = React.useState(false);
   const [free, setFree] = React.useState(false);
@@ -74,15 +82,16 @@ function Workspace({ shots, initial }: { shots: { id: string; title: string }[];
   const [seek, setSeek] = React.useState({ t: 0, n: 0 });
   const [problems, setProblems] = React.useState<string[]>([]);
   const [save, setSave] = React.useState<Save>({ state: "idle" });
+  const [picked, setPicked] = React.useState<string | null>(null);
   const rev = React.useRef(initial?.rev ?? 0);
-  const pending = React.useRef(new Map<string, Values>());
+  const queue = React.useRef<Change[]>([]);
   const timer = React.useRef<ReturnType<typeof setTimeout>>(undefined);
   const busy = React.useRef(false);
   const id = shot?.id;
 
   /** Takes a shot as the server has it, dropping whatever was waiting to be saved. */
   const adopt = React.useCallback((next: Shot) => {
-    pending.current.clear();
+    queue.current = [];
     rev.current = next.rev;
     setShot(next);
   }, []);
@@ -90,9 +99,9 @@ function Workspace({ shots, initial }: { shots: { id: string; title: string }[];
   React.useEffect(() => {
     if (!id) return;
     const watch = setInterval(async () => {
-      if (busy.current || pending.current.size) return;
+      if (busy.current || queue.current.length) return;
       const response = await fetch(`/shot/${id}`, { cache: "no-store" }).catch(() => undefined);
-      if (!response?.ok || busy.current || pending.current.size) return;
+      if (!response?.ok || busy.current || queue.current.length) return;
       const next = (await response.json()) as Shot;
       if (next.id === id && next.rev !== rev.current) adopt(next);
     }, WATCH_MS);
@@ -104,13 +113,12 @@ function Workspace({ shots, initial }: { shots: { id: string; title: string }[];
     busy.current = true;
     setSave({ state: "saving" });
     try {
-      while (pending.current.size) {
-        const [target, values] = pending.current.entries().next().value!;
-        pending.current.delete(target);
+      while (queue.current.length) {
+        const change = queue.current.shift()!;
         const response = await fetch(`/shot/${id}`, {
           method: "PATCH",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ rev: rev.current, target, values }),
+          body: JSON.stringify({ rev: rev.current, ...change.body }),
         });
         const body = await response.json();
         if (response.ok) {
@@ -118,7 +126,7 @@ function Workspace({ shots, initial }: { shots: { id: string; title: string }[];
           setShot((current) => (current ? { ...current, rev: rev.current } : current));
         } else {
           if (response.status === 409) adopt(body.shot as Shot);
-          else pending.current.clear();
+          else queue.current = [];
           setSave({ state: "refused", note: response.status === 409 ? "The shot changed while you tuned it; here it is as it is now." : String(body.refused) });
           return;
         }
@@ -129,6 +137,19 @@ function Workspace({ shots, initial }: { shots: { id: string; title: string }[];
     }
   }, [id, adopt]);
 
+  /** Queues a change, merging it into the one before when that one is the same target's and can take it. */
+  const enqueue = (next: Change, wait: number) => {
+    const last = queue.current.at(-1);
+    if (last && last.key === next.key && "values" in last.body && "values" in next.body) last.body.values = { ...last.body.values, ...next.body.values };
+    else if (last && last.key === next.key && "cell" in last.body && "cell" in next.body && !last.body.cell.clear && !next.body.cell.clear) {
+      const merged = { ...last.body.cell, ...next.body.cell };
+      if (last.body.cell.values || next.body.cell.values) merged.values = { ...last.body.cell.values, ...next.body.cell.values };
+      last.body.cell = merged;
+    } else queue.current.push(next);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(flush, wait);
+  };
+
   const change = (target: string, control: string, value: Value) => {
     setShot((current) => {
       if (!current) return current;
@@ -138,9 +159,31 @@ function Workspace({ shots, initial }: { shots: { id: string; title: string }[];
         return current;
       }
     });
-    pending.current.set(target, { ...pending.current.get(target), [control]: value });
+    enqueue({ key: `values ${target}`, body: { target, values: { [control]: value } } }, SAVE_MS);
+  };
+
+  const changeCell = (key: string, cell: CellChange, wait: number) => {
+    setShot((current) => {
+      if (!current) return current;
+      try {
+        return setCell(current, key, cell, library, assets);
+      } catch {
+        return current;
+      }
+    });
+    enqueue({ key: `cell ${key}`, body: { cell: { key, ...cell } } }, wait);
+  };
+
+  /** Saves the world as it is now as an asset under his name, once what is waiting has been saved. */
+  const saveAsset = async (name: string) => {
+    if (!id) return "There is no shot to save from.";
     clearTimeout(timer.current);
-    timer.current = setTimeout(flush, SAVE_MS);
+    await flush();
+    const response = await fetch("/assets", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, from: id }) });
+    const body = await response.json();
+    if (!response.ok) return String(body.refused);
+    setAssets(body.assets as AssetBook);
+    return `Saved “${body.asset.name}” as version ${body.asset.version}.`;
   };
 
   const open = async (next: string) => {
@@ -149,6 +192,7 @@ function Workspace({ shots, initial }: { shots: { id: string; title: string }[];
     const loaded = (await response.json()) as Shot;
     setPlaying(false);
     setFree(false);
+    setPicked(null);
     adopt(loaded);
     setAspect(loaded.frame.aspect);
     setTime(0);
@@ -168,8 +212,39 @@ function Workspace({ shots, initial }: { shots: { id: string; title: string }[];
   };
 
   const entryOf = (use: Use) => library.find(use.entry, use.version);
-  const worldJigs = shot?.world && entryOf(shot.world) ? (
-    <EntryJigs entry={entryOf(shot.world)!} values={shot.world.values} title={entryOf(shot.world)!.label} note="The world" palette={palette} onChange={(c, v) => change("world", c, v)} />
+  const world = shot?.world;
+  const worldEntry = world ? entryOf(world) : undefined;
+  const spec = world && worldEntry?.kind === "environment" && worldEntry.grid ? worldEntry.grid(resolve(worldEntry.controls, world.values)) : undefined;
+  const pickedCell = spec && picked ? world?.cells?.[picked] : undefined;
+  const pickedAsset = spec && picked ? findAsset(assets, pickedCell?.asset ?? spec.rule(...(picked.split(",").map(Number) as [number, number]))) : undefined;
+  const pickedEntry = pickedAsset ? library.find(pickedAsset.use.entry, pickedAsset.use.version) : undefined;
+  const worldJigs = world && worldEntry ? (
+    <>
+      {!spec && <SaveAsset assets={assets} onSave={saveAsset} />}
+      <EntryJigs entry={worldEntry} values={world.values} title={worldEntry.label} note="The world" palette={palette} assets={assets} onChange={(c, v) => change("world", c, v)} />
+      {spec && (
+        <CellsJig
+          spec={spec}
+          cells={world.cells ?? {}}
+          assets={assets}
+          selected={picked}
+          onSelect={setPicked}
+          onAsset={(key, asset) => changeCell(key, { asset }, 0)}
+          onClear={(key) => changeCell(key, { clear: true }, 0)}
+        />
+      )}
+      {spec && picked && pickedAsset && pickedEntry && (
+        <EntryJigs
+          entry={pickedEntry}
+          values={{ ...pickedAsset.use.values, ...pickedCell?.values }}
+          title={`Cell ${picked} · ${pickedAsset.name}`}
+          note="This copy only"
+          palette={palette}
+          assets={assets}
+          onChange={(c, v) => changeCell(picked, { values: { [c]: v } }, SAVE_MS)}
+        />
+      )}
+    </>
   ) : null;
   const shotJigs = shot ? (
     <>
@@ -197,14 +272,14 @@ function Workspace({ shots, initial }: { shots: { id: string; title: string }[];
         track.items.map((item) => {
           const entry = entryOf(item);
           return entry ? (
-            <EntryJigs key={item.id} entry={entry} values={item.values} title={`${track.kind === "camera" ? "Camera" : "Light"} · ${entry.label}`} note={`${item.id}, from ${seconds(item.start)} for ${seconds(item.length)}`} palette={palette} onChange={(c, v) => change(item.id, c, v)} />
+            <EntryJigs key={item.id} entry={entry} values={item.values} title={`${track.kind === "camera" ? "Camera" : "Light"} · ${entry.label}`} note={`${item.id}, from ${seconds(item.start)} for ${seconds(item.length)}`} palette={palette} assets={assets} onChange={(c, v) => change(item.id, c, v)} />
           ) : null;
         }),
       )}
       {shot.cast.map((placement) => {
         const entry = entryOf(placement);
         return entry ? (
-          <EntryJigs key={placement.id} entry={entry} values={placement.values} title={`Cast · ${placement.name}`} note={`${placement.id}, at ${placement.at.join(", ")}`} palette={palette} onChange={(c, v) => change(placement.id, c, v)} />
+          <EntryJigs key={placement.id} entry={entry} values={placement.values} title={`Cast · ${placement.name}`} note={`${placement.id}, at ${placement.at.join(", ")}`} palette={palette} assets={assets} onChange={(c, v) => change(placement.id, c, v)} />
         ) : null;
       })}
     </>
@@ -222,7 +297,7 @@ function Workspace({ shots, initial }: { shots: { id: string; title: string }[];
       <GridItem {...layout.picture} data-cinema-part="picture">
         <Slot fill="background" inset={0}>
           {shot ? (
-            <Picture shot={shot} aspect={aspect} length={length} playing={playing} seek={seek} free={free} onFree={setFree} onTime={setTime} onProblems={setProblems} />
+            <Picture shot={shot} assets={assets} aspect={aspect} length={length} playing={playing} seek={seek} free={free} onFree={setFree} onTime={setTime} onProblems={setProblems} />
           ) : (
             <div className="flex size-full items-center justify-center p-4">
               <Text role="body" tone="muted" align="center">No shots yet. Tell Claude what to make.</Text>
@@ -280,11 +355,11 @@ function Workspace({ shots, initial }: { shots: { id: string; title: string }[];
 }
 
 /** The studios' grid: the field drawn, the pointer a violet ring, no intro (Grid.md D49). */
-export function Studio({ shots, initial }: { shots: { id: string; title: string }[]; initial: Shot | null }) {
+export function Studio({ shots, initial, assets }: { shots: { id: string; title: string }[]; initial: Shot | null; assets: AssetBook }) {
   return (
     <Grid overlay cursor>
       <h1 className="sr-only">Cinema</h1>
-      <Workspace shots={shots} initial={initial} />
+      <Workspace shots={shots} initial={initial} assets={assets} />
     </Grid>
   );
 }

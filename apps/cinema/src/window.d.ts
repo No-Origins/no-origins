@@ -5,7 +5,7 @@
 interface Window {
   cinema?: {
     ready: boolean;
-    load: (shot: import("@/engine/types").Shot) => string[];
+    load: (shot: import("@/engine/types").Shot, assets: import("@/engine/types").AssetBook) => string[];
     draw: (t: number, type: string, quality?: number) => string;
   };
 }
