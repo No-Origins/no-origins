@@ -23,9 +23,10 @@ import type { AssetBook, AssetVersion, Control as ControlSpec, Entry, Value, Val
  * The jigs (Cinema-Engine.md E1, E4): every control an entry declares, drawn from its declaration, so a new control in
  * code is on the screen with nothing else written. The grammar is the motion studio's, so the studios read as one
  * system: a card a group, its label for a head; each control its label and value on a line and its widget under it,
- * two to a row; one widget a kind — a slider for a number or an angle, a toggle group for a choice, a switch, the
- * colour picker for a colour (a row of swatches a palette, his named colours first), and a list of his saved assets,
- * by name, for an asset. A card folds to its head.
+ * two to a row; one widget a kind — a slider for a number or an angle (marked over each step, across the card, when
+ * its steps are few enough to draw), a toggle group for a choice, a switch, the colour picker for a colour (a row of
+ * swatches a palette, his named colours first), and a list of his saved assets, by name, for an asset. A card folds to
+ * its head.
  */
 
 /** A row of swatches a colour control offers: his named colours first, then each further palette under its name. */
@@ -54,6 +55,14 @@ export function Jig({ title, note, children }: { title: string; note?: string; c
     </Collapsible>
   );
 }
+
+/**
+ * The most steps a slider marks one by one: a dot over each step's place, the system's steps (Motion.md M21; his,
+ * 2026-10-09: "for steps, in a slider, we have a different view of it"). A marked slider spans its card, so twenty fit
+ * apart; one with more steps than that is drawn without marks, as a slider that runs smoothly.
+ */
+const MARKED_STEPS = 20;
+const marked = (control: ControlSpec) => (control.kind === "number" || control.kind === "angle") && Math.round((control.max - control.min) / control.step) <= MARKED_STEPS;
 
 const decimals = (step: number) => (step >= 1 ? 0 : Math.min(4, Math.ceil(-Math.log10(step))));
 const capital = (word: string) => word.charAt(0).toUpperCase() + word.slice(1);
@@ -101,13 +110,13 @@ export function AssetSelect({ id, label, value, assets, onChange, extra, accept,
 
 function ControlRow({ control, value, palettes, assets, library, disabled, onChange }: { control: ControlSpec; value: Value; palettes: readonly ColourRow[]; assets: AssetBook; library: Library; disabled?: boolean; onChange: (value: Value) => void }) {
   const id = React.useId();
-  const wide = control.kind === "choice" || control.kind === "colour" || control.kind === "asset";
+  const wide = control.kind === "choice" || control.kind === "colour" || control.kind === "asset" || marked(control);
   let widget: React.ReactNode;
   switch (control.kind) {
     case "number":
     case "angle":
       widget = (
-        <Slider id={id} aria-label={control.label} min={control.min} max={control.max} step={control.step} value={[value as number]} onValueChange={([next]) => next !== undefined && onChange(next)} disabled={disabled} />
+        <Slider id={id} aria-label={control.label} min={control.min} max={control.max} step={control.step} marks={marked(control) || undefined} value={[value as number]} onValueChange={([next]) => next !== undefined && onChange(next)} disabled={disabled} />
       );
       break;
     case "choice":
