@@ -37,7 +37,8 @@ Current as of 2026-10-09.
 - **Every frame is a function of time** (Cinema.md F5). *Mine:* nothing in a shot reads the clock; the engine asks
   "draw the shot at second *t*", and the same *t* is the same picture every time, however it is reached. Anything that
   simulates, such as an agent's landing, is stepped from the start of its action at a fixed step, as the agent's motion
-  already is (Motion.md M17). That is what lets a shot be scrubbed, rendered at any frame, and exported frame by frame.
+  already is (Motion.md M17). *Mine:* a thing in a world that moves by itself (a cloud the wind carries) is moved to
+  the moment asked for, by the moment alone. That is what lets a shot be scrubbed, rendered at any frame, and exported frame by frame.
 
 ## E3. A shot is a description
 
@@ -163,8 +164,13 @@ It is done when an agent, given his words, makes that shot through the commands 
   asset its rules put in each cell), and its cells, "column,row" from 1, are part of the shot's world: a cell may hold
   another asset, stay empty, or tune its own copy over the asset's values. The engine, the `cell` command and the
   screen all read the grid from the declaration, so the rules are written once.
+- **A grid can have layers over its ground** (his, 2026-10-09: clouds as "a layer over the grid", and "we need
+  controls to define the movements of clouds"). *Mine:* each layer has rules of its own and takes assets of one kind
+  only; its cells are keyed "<layer>:column,row" and change by hand as the ground's do. What moves the layer (a wind)
+  is the grid's controls; what each thing does by itself (a cloud billowing) is its asset's.
 - *Mine:* **the screen** offers a world that is one tile a "Save as asset" card, where he types the name, and an asset
-  control is a list of his assets by name. A grid's world has a map of its cells, seen from above: a cell picked shows
+  control is a list of his assets by name, of the kind it takes. A grid's world has a map of its cells, seen from above,
+  a layer at a time: a cell picked shows
   what stands there and takes another asset, empty, or back to the rules, and its copy's controls follow the map.
 
 ## Open

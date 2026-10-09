@@ -1,18 +1,19 @@
 "use client";
 
 import * as React from "react";
-import { Mountain } from "lucide-react";
+import { Cloud as CloudIcon, Mountain } from "lucide-react";
 
 import { Button } from "@no-origins/ui/components/button";
 import { Input } from "@no-origins/ui/components/input";
 import { Label } from "@no-origins/ui/components/label";
 import { Text } from "@no-origins/ui/components/text";
 import { Toggle } from "@no-origins/ui/components/toggle";
+import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-group";
 import { cn } from "@no-origins/ui/lib/utils";
 
 import { AssetSelect, Field, Jig } from "@/components/jigs";
 import { findAsset } from "@/engine/assets";
-import type { AssetBook, Cell, GridSpec } from "@/engine/types";
+import type { AssetBook, AssetVersion, Cell, GridSpec } from "@/engine/types";
 
 /**
  * The world's own jigs, beside its controls (his, 2026-10-09: "I want to call this an asset… save this configuration…
@@ -59,9 +60,10 @@ export function SaveAsset({ assets, onSave }: { assets: AssetBook; onSave: (name
 }
 
 /**
- * The grid's cells as a map seen from above, a cell a square: a mountain where an asset stands, lime where he set the
- * cell by hand. A cell picked shows what stands there: from the rules, empty, or any of his assets; and gives it back
- * to the rules. Its copy's own values are the jigs that follow (the screen puts them under this card).
+ * The grid's cells as a map seen from above, a cell a square, one layer at a time (the ground, and the layers over it,
+ * as the clouds): a mark where an asset stands, lime where he set the cell by hand. A cell picked shows what stands
+ * there: from the rules, empty, or any of his assets of the layer's kind; and gives it back to the rules. Its copy's own
+ * values are the jigs that follow (the screen puts them under this card). A layer's cell is keyed "<layer>:column,row".
  */
 export function CellsJig({ spec, cells, assets, selected, onSelect, onAsset, onClear }: {
   spec: GridSpec;
@@ -72,19 +74,42 @@ export function CellsJig({ spec, cells, assets, selected, onSelect, onAsset, onC
   onAsset: (key: string, asset: string) => void;
   onClear: (key: string) => void;
 }) {
-  const keys: string[] = [];
-  for (let row = 1; row <= spec.rows; row++) for (let column = 1; column <= spec.columns; column++) keys.push(`${column},${row}`);
-  const standing = (key: string) => {
-    const [column, row] = key.split(",").map(Number) as [number, number];
-    return findAsset(assets, cells[key]?.asset ?? spec.rule(column, row));
-  };
+  const layers = layersOf(spec);
+  const [layerId, setLayerId] = React.useState(selected?.includes(":") ? selected.split(":")[0]! : "ground");
+  const layer = layers.find((l) => l.id === layerId) ?? layers[0]!;
+  const keyOf = (column: number, row: number) => (layer.id === "ground" ? `${column},${row}` : `${layer.id}:${column},${row}`);
+  const places: [number, number][] = [];
+  for (let row = 1; row <= spec.rows; row++) for (let column = 1; column <= spec.columns; column++) places.push([column, row]);
+  const Mark = layer.id === "ground" ? Mountain : CloudIcon;
   const cell = selected ? cells[selected] : undefined;
   const choice = !cell || cell.asset === undefined ? "rules" : cell.asset === "" ? "none" : cell.asset.split("@")[0]!;
+  const where = selected ? selected.split(":").at(-1)! : "";
   return (
     <Jig title="Cells" note={`${spec.columns} by ${spec.rows}; pick a cell to change it by hand`}>
-      <div role="group" aria-label="The grid's cells, seen from above" className="col-span-2 grid gap-1" style={{ gridTemplateColumns: `repeat(${spec.columns}, minmax(0, 1fr))` }}>
-        {keys.map((key) => {
-          const asset = standing(key);
+      {layers.length > 1 ? (
+        <Field label="Layer">
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            size="sm"
+            aria-label="Layer"
+            value={layer.id}
+            onValueChange={(next) => {
+              if (!next) return;
+              setLayerId(next);
+              onSelect(null);
+            }}
+          >
+            {layers.map((l) => (
+              <ToggleGroupItem key={l.id} value={l.id}>{l.label}</ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </Field>
+      ) : null}
+      <div role="group" aria-label={`The grid's cells, seen from above: ${layer.label.toLowerCase()}`} className="col-span-2 grid gap-1" style={{ gridTemplateColumns: `repeat(${spec.columns}, minmax(0, 1fr))` }}>
+        {places.map(([column, row]) => {
+          const key = keyOf(column, row);
+          const asset = findAsset(assets, cells[key]?.asset ?? layer.rule(column, row));
           const byHand = cells[key] !== undefined;
           return (
             <Toggle
@@ -93,22 +118,23 @@ export function CellsJig({ spec, cells, assets, selected, onSelect, onAsset, onC
               size="sm"
               pressed={selected === key}
               onPressedChange={(on) => onSelect(on ? key : null)}
-              aria-label={`Cell ${key}: ${asset ? asset.name : "empty"}${byHand ? ", set by hand" : ""}`}
-              title={`${key}: ${asset ? asset.name : "empty"}${byHand ? " (by hand)" : ""}`}
+              aria-label={`Cell ${column},${row}: ${asset ? asset.name : "empty"}${byHand ? ", set by hand" : ""}`}
+              title={`${column},${row}: ${asset ? asset.name : "empty"}${byHand ? " (by hand)" : ""}`}
               className="aspect-square h-auto min-h-0 min-w-0 px-0"
             >
-              {asset ? <Mountain className={cn(byHand && "text-primary")} /> : null}
+              {asset ? <Mark className={cn(byHand && "text-primary")} /> : null}
             </Toggle>
           );
         })}
       </div>
       {selected ? (
         <>
-          <Field label={`Cell ${selected}`}>
+          <Field label={`Cell ${where}`}>
             <AssetSelect
-              label={`What stands in cell ${selected}`}
+              label={`What stands in cell ${where}`}
               value={choice}
               assets={assets}
+              accept={layer.accept}
               extra={[["rules", "From the rules"], ["none", "Empty"]]}
               onChange={(next) => onAsset(selected, next === "rules" ? "rules" : next === "none" ? "" : next)}
             />
@@ -122,4 +148,14 @@ export function CellsJig({ spec, cells, assets, selected, onSelect, onAsset, onC
       ) : null}
     </Jig>
   );
+}
+
+/** The ground and the layers over it, each with its rule and the assets it takes. */
+export function layersOf(spec: GridSpec) {
+  const over = spec.layers ?? [];
+  const taken = new Set(over.map((l) => l.of).filter(Boolean));
+  return [
+    { id: "ground", label: "Ground", rule: spec.rule, accept: (a: AssetVersion) => !taken.has(a.use.entry) },
+    ...over.map((l) => ({ id: l.id, label: l.label, rule: l.rule, accept: l.of ? (a: AssetVersion) => a.use.entry === l.of : undefined })),
+  ];
 }

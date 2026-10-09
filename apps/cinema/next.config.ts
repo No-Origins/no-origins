@@ -8,7 +8,10 @@ import type { NextConfig } from "next";
 // `@cinema/content` is his private folder (E5): `src/content` where it is (his machine, gitignored) and the made-up
 // sample in `src/sample` anywhere else, as Home's `@house` is (Home.md H4). Its types are `src/content.d.ts`; the
 // shots on disk are found by the same rule (`src/data/store.ts`).
-const CONTENT = existsSync(path.resolve(process.cwd(), "src/content/index.ts")) ? "./src/content/index.ts" : "./src/sample/index.ts";
+// `CINEMA_SAMPLE=1` builds against the sample even on his machine, so CI's build can be checked there without moving
+// his folder aside under a running studio.
+const SAMPLE = process.env.CINEMA_SAMPLE === "1";
+const CONTENT = !SAMPLE && existsSync(path.resolve(process.cwd(), "src/content/index.ts")) ? "./src/content/index.ts" : "./src/sample/index.ts";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@no-origins/ui"],

@@ -19,7 +19,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@no-origins/ui/componen
 
 import { EntryJigs, Field, Jig } from "@/components/jigs";
 import { Picture } from "@/components/picture";
-import { CellsJig, SaveAsset } from "@/components/world-jigs";
+import { CellsJig, layersOf, SaveAsset } from "@/components/world-jigs";
 import { findAsset } from "@/engine/assets";
 import { resolve } from "@/engine/controls";
 import { setCell, setControls, type CellChange } from "@/engine/edit";
@@ -216,7 +216,9 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
   const worldEntry = world ? entryOf(world) : undefined;
   const spec = world && worldEntry?.kind === "environment" && worldEntry.grid ? worldEntry.grid(resolve(worldEntry.controls, world.values)) : undefined;
   const pickedCell = spec && picked ? world?.cells?.[picked] : undefined;
-  const pickedAsset = spec && picked ? findAsset(assets, pickedCell?.asset ?? spec.rule(...(picked.split(",").map(Number) as [number, number]))) : undefined;
+  const pickedLayer = spec && picked ? layersOf(spec).find((l) => l.id === (picked.includes(":") ? picked.split(":")[0] : "ground")) : undefined;
+  const pickedPlace = picked ? (picked.split(":").at(-1)!.split(",").map(Number) as [number, number]) : undefined;
+  const pickedAsset = pickedLayer && pickedPlace ? findAsset(assets, pickedCell?.asset ?? pickedLayer.rule(...pickedPlace)) : undefined;
   const pickedEntry = pickedAsset ? library.find(pickedAsset.use.entry, pickedAsset.use.version) : undefined;
   const worldJigs = world && worldEntry ? (
     <>
@@ -237,7 +239,7 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
         <EntryJigs
           entry={pickedEntry}
           values={{ ...pickedAsset.use.values, ...pickedCell?.values }}
-          title={`Cell ${picked} · ${pickedAsset.name}`}
+          title={`Cell ${picked.split(":").at(-1)} · ${pickedAsset.name}`}
           note="This copy only"
           palette={palette}
           assets={assets}

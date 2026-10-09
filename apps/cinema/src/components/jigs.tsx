@@ -16,7 +16,7 @@ import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-g
 import { cn } from "@no-origins/ui/lib/utils";
 
 import { resolve } from "@/engine/controls";
-import type { AssetBook, Control as ControlSpec, Entry, Value, Values } from "@/engine/types";
+import type { AssetBook, AssetVersion, Control as ControlSpec, Entry, Value, Values } from "@/engine/types";
 
 /**
  * The jigs (Cinema-Engine.md E1, E4): every control an entry declares, drawn from its declaration, so a new control in
@@ -64,7 +64,7 @@ function shown(control: ControlSpec, value: Value) {
 const NONE = "none";
 
 /** A list of his saved assets by name, the newest version of each; `none` for nothing. */
-export function AssetSelect({ id, label, value, assets, onChange, extra }: {
+export function AssetSelect({ id, label, value, assets, onChange, extra, accept }: {
   id?: string;
   label: string;
   value: string;
@@ -72,8 +72,10 @@ export function AssetSelect({ id, label, value, assets, onChange, extra }: {
   onChange: (value: string) => void;
   /** Choices before the assets, as [value, label]. */
   extra?: readonly (readonly [string, string])[];
+  /** Which assets it offers: by default, all of them. */
+  accept?: (asset: AssetVersion) => boolean;
 }) {
-  const named = Object.values(assets).map((versions) => versions.at(-1)!).sort((a, b) => a.name.localeCompare(b.name));
+  const named = Object.values(assets).map((versions) => versions.at(-1)!).filter((a) => accept?.(a) ?? true).sort((a, b) => a.name.localeCompare(b.name));
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger id={id} size="sm" aria-label={label} className="w-full">
@@ -116,7 +118,14 @@ function ControlRow({ control, value, palette, assets, onChange }: { control: Co
       break;
     case "asset":
       widget = (
-        <AssetSelect id={id} label={control.label} value={String(value).split("@")[0] || NONE} assets={assets} onChange={(next) => onChange(next === NONE ? "" : next)} />
+        <AssetSelect
+          id={id}
+          label={control.label}
+          value={String(value).split("@")[0] || NONE}
+          assets={assets}
+          accept={control.of ? (asset) => asset.use.entry === control.of : undefined}
+          onChange={(next) => onChange(next === NONE ? "" : next)}
+        />
       );
       break;
     case "colour": {

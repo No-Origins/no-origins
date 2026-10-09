@@ -125,6 +125,7 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
 
   function draw(t: number, override?: CameraPose) {
     if (!shot) return;
+    for (const piece of built) piece.at?.(t);
     for (const light of lights) light.object.visible = light.item.start <= t && t <= light.item.start + light.item.length;
 
     const pose = override ?? poseAt(t);

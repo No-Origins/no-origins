@@ -17,7 +17,8 @@ const APP = process.cwd();
 const fromApp = (...parts: string[]) => path.join(/*turbopackIgnore: true*/ APP, ...parts);
 if (!existsSync(fromApp("src/engine/types.ts"))) throw new Error(`Run this from apps/cinema (pnpm --filter cinema …), not ${APP}.`);
 
-export const PRIVATE = existsSync(fromApp("src/content/index.ts"));
+/** His folder, unless `CINEMA_SAMPLE=1` asks for the sample (as `next.config.ts` does). */
+export const PRIVATE = process.env.CINEMA_SAMPLE !== "1" && existsSync(fromApp("src/content/index.ts"));
 export const DATA = fromApp(PRIVATE ? "src/content" : "src/sample");
 
 const ID = /^[a-z0-9][a-z0-9-]{0,63}$/;

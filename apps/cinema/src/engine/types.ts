@@ -24,8 +24,9 @@ export type Control =
   | (ControlBase & { kind: "choice"; options: readonly string[]; default: string })
   | (ControlBase & { kind: "switch"; default: boolean })
   | (ControlBase & { kind: "colour"; default: string })
-  /** One of his saved assets, by id (the newest version) or `id@n` (that one); "" for none. */
-  | (ControlBase & { kind: "asset"; default: string });
+  /** One of his saved assets, by id (the newest version) or `id@n` (that one); "" for none. `of` keeps it to assets of
+   *  one entry (clouds for a cloud layer). */
+  | (ControlBase & { kind: "asset"; of?: string; default: string });
 export type Value = number | string | boolean;
 export type Values = Record<string, Value>;
 
@@ -53,13 +54,21 @@ export type World = {
   haze: number;
 };
 
-export type Built = { object: Object3D; dispose?: () => void };
+/**
+ * What a builder hands the engine. `at` moves what it built to the moment `t` (a drifting cloud), and must be a pure
+ * function of `t`, as everything the engine draws is (Cinema-Engine.md E2).
+ */
+export type Built = { object: Object3D; dispose?: () => void; at?: (t: number) => void };
 export type CameraPose = { position: Vec3; target: Vec3; /** The lens, in millimetres of a full-frame camera. */ lens: number };
 
 /** What an environment may draw on besides its values: the library, his saved assets, and its cells (a grid's). */
 export type BuildContext = { library: Library; assets: AssetBook; cells: Record<string, Cell> };
-/** A grid of assets, as an environment declares it: its size, and which asset its rules put in a cell ("" for none). */
-export type GridSpec = { columns: number; rows: number; rule: (column: number, row: number) => string };
+/**
+ * A grid of assets, as an environment declares it: its size, and which asset its rules put in a cell ("" for none).
+ * `layers` are layers over the ground (clouds), each with its rules; a cell of one is keyed "<layer>:column,row".
+ */
+export type GridSpec = { columns: number; rows: number; rule: (column: number, row: number) => string; layers?: GridLayer[] };
+export type GridLayer = { id: string; label: string; of?: string; rule: (column: number, row: number) => string };
 export type EnvironmentEntry = Declaration & {
   kind: "environment";
   build: (values: Values, context: BuildContext) => Built & { world: World };

@@ -34,7 +34,8 @@ Changing a shot (each needs its department when an agent runs it)
   new <shot> [--title t] [--aspect wide|vertical] [--size px] [--fps n]           direction
   world <shot> <entry[@version]> [control=value …] [--keep]                       set
       (--keep carries over every value the new entry takes from the world before)
-  cell <shot> <column,row> [--asset <id>|none|rules] [control=value …] [--clear]  set
+  cell <shot> <[layer:]column,row> [--asset <id>|none|rules] [control=value …] [--clear]   set
+      (a layer's cell is named with its layer: clouds:2,3)
   asset save "<name>" --from <shot>       saves the shot's world as an asset under his name   set
   place <shot> <entry[@version]> --at x,z [--facing deg] [--name n] [control=value …]   direction, cast
   add <shot> <entry[@version]> --start s --length s [control=value …]             the track's (camera, light)
@@ -146,8 +147,11 @@ function valuesForCell(shot: Shot, key: string): Values {
   const world = shot.world ?? refuse(`${shot.id} has no world yet`);
   const entry = entryOf(world);
   if (entry.kind !== "environment" || !entry.grid) return refuse(`${tag(world)} is not a grid: it has no cells`);
-  const [column, row] = key.split(",").map(Number);
-  const rule = entry.grid(resolve(entry.controls, world.values)).rule(column ?? 0, row ?? 0);
+  const [layerId, place] = key.includes(":") ? (key.split(":") as [string, string]) : [undefined, key];
+  const [column, row] = place.split(",").map(Number);
+  const spec = entry.grid(resolve(entry.controls, world.values));
+  const layer = layerId ? (spec.layers?.find((l) => l.id === layerId) ?? refuse(`the grid has no layer called ${layerId}`)) : undefined;
+  const rule = (layer?.rule ?? spec.rule)(column ?? 0, row ?? 0);
   const ref = "asset" in flags ? (flags.asset === "none" ? "" : flags.asset) : (world.cells?.[key]?.asset ?? rule);
   const book = readAssets();
   const [id, version] = (ref ?? "").split("@");
@@ -249,6 +253,8 @@ async function run(): Promise<string> {
       const previous = shot.world && (shot.world.entry === entry.id || "keep" in flags) ? shot.world : undefined;
       const kept = previous ? keepable(entry, previous.values) : {};
       const world: Use = { entry: entry.id, version: entry.version, values: { ...kept, ...values } };
+      // A grid keeps the cells he set by hand when it moves on to its next version.
+      if (previous?.cells && entry.kind === "environment" && entry.grid) world.cells = previous.cells;
       const changed = previous && tag(previous) !== tag(world);
       const saved = save({ ...shot, world }, { target: "world", entry: tag(world), values, ...(changed ? { from: tag(previous) } : {}) });
       const moved = changed ? `, moved on from ${tag(previous)} keeping ${Object.keys(kept).length} of its ${Object.keys(previous.values).length} values` : "";

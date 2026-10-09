@@ -48,7 +48,8 @@ sun; tools, not his ideas), the commands, the renderer, the screen and the sampl
 ## What is true here and easy to get wrong
 
 - **Every frame is a function of time** (E2). Nothing in the engine or an entry reads the clock or `Math.random`: use
-  `random`/`noise` from `engine/math.ts` with a seed. Only the screen's player reads the clock, to move `t` on.
+  `random`/`noise` from `engine/math.ts` with a seed. Only the screen's player reads the clock, to move `t` on. A thing
+  that moves by itself does it in its `at(t)` (`Built`), set from `t` alone, never from the frame before.
 - **Node runs the engine as it is** (`node src/cli/cmd.ts`). Every import in `engine/`, `cli/`, `data/`, `sample/` and
   `content/` names its file with `.ts`, and only erasable TypeScript is allowed: no enums, no parameter properties.
 - **An entry's version goes up when its code changes after a shot has used it** (E4): keep the old version beside the
@@ -63,6 +64,9 @@ sun; tools, not his ideas), the commands, the renderer, the screen and the sampl
 - **The frame is free** (Cinema.md F2): light, fog and later effects in the picture. The screen round it is the system.
 
 ## Reviewing it
+
+To check CI's build on his machine without touching his folder: `CINEMA_SAMPLE=1 pnpm --filter cinema build` (the
+sample instead of `src/content`, for the build and the store alike). Never move his folder aside under a running studio.
 
 In the sweep: `pnpm review review.spec.ts -g cinema` screenshots `/` (`CINEMA_ROUTES`) on desktop and mobile in both
 themes, the sample in CI. With the dev server up, `node e2e/.mcp/cinema-look.mjs <prefix>` (gitignored) does the same
