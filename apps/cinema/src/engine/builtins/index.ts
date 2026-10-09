@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 import { bool, num, str } from "../controls.ts";
-import { EASES, ease, lerp, radians } from "../math.ts";
+import { EASES, ease, lerp, noise, radians } from "../math.ts";
 import type { CameraEntry, CameraPose, CastEntry, Entry, LightEntry, Values, Vec3, World } from "../types.ts";
 
 /**
@@ -111,6 +111,59 @@ const push: CameraEntry = {
   },
 };
 
+/**
+ * A camera that goes from one place to another, turning from one aim to another, in world metres: the general move an
+ * agent builds a path from, one Move after another on the camera's track. Its way may bow sideways into a curve (Bend),
+ * its lens may change (a zoom), and a hand may hold it (Shake, on the shot's own clock).
+ */
+const move: CameraEntry = {
+  kind: "camera",
+  id: "move",
+  label: "Move",
+  version: 1,
+  description: "Goes from one place to another, turning from one aim to another (world metres); chain Moves for any path.",
+  controls: [
+    { kind: "number", id: "from-x", label: "From x", group: "From", min: -1000, max: 1000, step: 0.1, unit: "m", default: 0 },
+    { kind: "number", id: "from-y", label: "From y", group: "From", min: -50, max: 1000, step: 0.1, unit: "m", default: 12 },
+    { kind: "number", id: "from-z", label: "From z", group: "From", min: -1000, max: 1000, step: 0.1, unit: "m", default: 60 },
+    { kind: "number", id: "aim-from-x", label: "Aim x", group: "From", min: -1000, max: 1000, step: 0.1, unit: "m", default: 0 },
+    { kind: "number", id: "aim-from-y", label: "Aim y", group: "From", min: -50, max: 1000, step: 0.1, unit: "m", default: 6 },
+    { kind: "number", id: "aim-from-z", label: "Aim z", group: "From", min: -1000, max: 1000, step: 0.1, unit: "m", default: 0 },
+    { kind: "number", id: "lens-from", label: "Lens", group: "From", min: 12, max: 300, step: 1, unit: "mm", default: 35 },
+    { kind: "number", id: "to-x", label: "To x", group: "To", min: -1000, max: 1000, step: 0.1, unit: "m", default: 0 },
+    { kind: "number", id: "to-y", label: "To y", group: "To", min: -50, max: 1000, step: 0.1, unit: "m", default: 12 },
+    { kind: "number", id: "to-z", label: "To z", group: "To", min: -1000, max: 1000, step: 0.1, unit: "m", default: 40 },
+    { kind: "number", id: "aim-to-x", label: "Aim x", group: "To", min: -1000, max: 1000, step: 0.1, unit: "m", default: 0 },
+    { kind: "number", id: "aim-to-y", label: "Aim y", group: "To", min: -50, max: 1000, step: 0.1, unit: "m", default: 6 },
+    { kind: "number", id: "aim-to-z", label: "Aim z", group: "To", min: -1000, max: 1000, step: 0.1, unit: "m", default: 0 },
+    { kind: "number", id: "lens-to", label: "Lens", group: "To", min: 12, max: 300, step: 1, unit: "mm", default: 35 },
+    { kind: "choice", id: "ease", label: "Ease", group: "Way", options: EASES, default: "ease in out" },
+    { kind: "number", id: "bend", label: "Bend", group: "Way", min: -500, max: 500, step: 0.5, unit: "m", default: 0, help: "How far the way bows to the side, at its middle: a curve instead of a line." },
+    { kind: "number", id: "shake", label: "Shake", group: "Way", min: 0, max: 2, step: 0.01, unit: "m", default: 0, help: "A hand holding the camera." },
+    { kind: "number", id: "shake-speed", label: "Shake speed", group: "Way", min: 0.1, max: 6, step: 0.1, unit: "a s", default: 1 },
+  ],
+  pose(values, u, _world, t) {
+    const e = ease(str(values, "ease"), u);
+    const from: Vec3 = [num(values, "from-x"), num(values, "from-y"), num(values, "from-z")];
+    const to: Vec3 = [num(values, "to-x"), num(values, "to-y"), num(values, "to-z")];
+    const position = from.map((a, i) => lerp(a, to[i]!, e)) as Vec3;
+    // The bend bows the way sideways, most at its middle, at right angles to it on the ground.
+    const across = [to[2] - from[2], -(to[0] - from[0])];
+    const reachAcross = Math.hypot(across[0]!, across[1]!) || 1;
+    const bow = num(values, "bend") * Math.sin(Math.PI * e);
+    position[0] += (across[0]! / reachAcross) * bow;
+    position[2] += (across[1]! / reachAcross) * bow;
+    const target = [0, 1, 2].map((i) => lerp(num(values, `aim-from-${"xyz"[i]}`), num(values, `aim-to-${"xyz"[i]}`), e)) as Vec3;
+    const shake = num(values, "shake");
+    if (shake > 0) {
+      const at = t * num(values, "shake-speed");
+      for (let i = 0; i < 3; i++) position[i] += (noise(17 + i, at, i * 7.3) - 0.5) * 2 * shake;
+      for (let i = 0; i < 3; i++) target[i] += (noise(31 + i, at, i * 5.1) - 0.5) * 2 * shake * 0.6;
+    }
+    return { position, target, lens: lerp(num(values, "lens-from"), num(values, "lens-to"), e) };
+  },
+};
+
 /** One sun and the sky's light: a direction, a colour, a strength, and its shadows. */
 const sun: LightEntry = {
   kind: "light",
@@ -157,4 +210,4 @@ const sun: LightEntry = {
   },
 };
 
-export const STAND_INS: readonly Entry[] = [standIn, orbit, push, sun];
+export const STAND_INS: readonly Entry[] = [standIn, orbit, push, move, sun];

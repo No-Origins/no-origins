@@ -52,6 +52,8 @@ export type World = {
   sky: string;
   /** Fog's density, 0 for none. */
   haze: number;
+  /** Facts about the world in words, for an agent planning in it (`describe`): where things stand, how big, how high. */
+  notes?: string[];
 };
 
 /**
@@ -83,8 +85,11 @@ export type EnvironmentEntry = Declaration & {
 };
 /** A cast member stands at its origin, its feet on the ground, facing +z. */
 export type CastEntry = Declaration & { kind: "cast"; build: (values: Values) => Built };
-/** A camera move: where the camera is at `u`, 0 to 1 through the move. Pure: the same `u` is the same pose. */
-export type CameraEntry = Declaration & { kind: "camera"; pose: (values: Values, u: number, world: World) => CameraPose };
+/**
+ * A camera move: where the camera is at `u`, 0 to 1 through the move, `t` the shot's second (for what runs on its own
+ * clock, a hand's shake). Pure: the same `u` and `t` are the same pose.
+ */
+export type CameraEntry = Declaration & { kind: "camera"; pose: (values: Values, u: number, world: World, t: number) => CameraPose };
 export type LightEntry = Declaration & { kind: "light"; build: (values: Values, world: World) => Built };
 export type Entry = EnvironmentEntry | CastEntry | CameraEntry | LightEntry;
 

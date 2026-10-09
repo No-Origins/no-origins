@@ -41,7 +41,8 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
   let shot: Shot | null = null;
   let world = EMPTY_WORLD;
   let built: Built[] = [];
-  let lights: { item: Item; object: THREE.Object3D }[] = [];
+  /** Each light and when it is lit: from its start, until its end or, if nothing follows it on its track, for good. */
+  let lights: { item: Item; object: THREE.Object3D; until: number }[] = [];
 
   function entryFor<K extends EntryKind>(use: Use, kind: K, problems: string[]): Extract<Entry, { kind: K }> | undefined {
     const entry = library.find(use.entry, use.version);
@@ -103,7 +104,10 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
       for (const item of track.items) {
         const entry = entryFor(item, "light", problems);
         if (!entry) continue;
-        lights.push({ item, object: add(entry.build(resolve(entry.controls, item.values), world)) });
+        // A light nothing follows on its track stays lit to the end of the shot, however long the shot grows (a camera
+        // move that runs past the sun's end must not turn the land black).
+        const followed = track.items.some((other) => other !== item && other.start >= item.start + item.length);
+        lights.push({ item, object: add(entry.build(resolve(entry.controls, item.values), world)), until: followed ? item.start + item.length : Infinity });
         lit = true;
       }
     }
@@ -120,14 +124,14 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
     const track = shot?.tracks.find((candidate) => candidate.kind === "camera");
     const held = track ? holding(track, t) : undefined;
     const entry = held ? library.find(held.item.entry, held.item.version) : undefined;
-    if (held && entry?.kind === "camera") return (entry as CameraEntry).pose(resolve(entry.controls, held.item.values), held.u, world);
+    if (held && entry?.kind === "camera") return (entry as CameraEntry).pose(resolve(entry.controls, held.item.values), held.u, world, t);
     return { position: [world.focus[0], world.focus[1] + world.radius * 0.5, world.focus[2] + world.radius * 1.9], target: world.focus, lens: 35 };
   }
 
   function draw(t: number, override?: CameraPose) {
     if (!shot) return;
     for (const piece of built) piece.at?.(t);
-    for (const light of lights) light.object.visible = light.item.start <= t && t <= light.item.start + light.item.length;
+    for (const light of lights) light.object.visible = light.item.start <= t && t <= light.until;
 
     const pose = override ?? poseAt(t);
     camera.position.set(...pose.position);

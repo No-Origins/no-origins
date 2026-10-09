@@ -140,3 +140,58 @@ export function departmentOf(agent: string) {
 }
 
 export const relative = (file: string) => path.relative(APP, file);
+
+// ── The agents (Cinema-Agents.md R2): a folder each, in his private folder ─────────────────────────────────────────
+
+export const agentDir = (id: string) => {
+  if (!isId(id)) throw new Error(`"${id}" is not an agent's id: lower case letters, digits and dashes.`);
+  return path.join(DATA, "agents", id);
+};
+
+/** A template of the factory (R3): `factory/departments/<department>.md` (crew) or `factory/roles/<role>.md` (cast). */
+export function readTemplate(kind: "departments" | "roles", name: string) {
+  const file = path.join(DATA, "factory", kind, `${name}.md`);
+  return isId(name) && existsSync(file) ? readFileSync(file, "utf8") : undefined;
+}
+
+/** The frontmatter of a Markdown file, as plain key: value lines. */
+export function frontmatter(text: string): Record<string, string> {
+  const block = /^---\n([\s\S]*?)\n---/.exec(text)?.[1] ?? "";
+  return Object.fromEntries(block.split("\n").map((line) => /^([a-z-]+):\s*(.*)$/.exec(line)).filter(Boolean).map((m) => [m![1]!, m![2]!.trim()]));
+}
+
+/** Makes an agent's folder from what the factory gives it (R3): its files, written once. Refuses one that exists. */
+export function makeAgent(id: string, files: Record<string, string>) {
+  const dir = agentDir(id);
+  if (existsSync(dir)) throw new Error(`There is already an agent called ${id}.`);
+  for (const sub of ["core", "memories", "sessions", "reviews", "artifacts"]) mkdirSync(path.join(dir, sub), { recursive: true });
+  for (const [name, text] of Object.entries(files)) writeFileSync(path.join(dir, name), text);
+  return dir;
+}
+
+export function readAgentFile(id: string, name: string) {
+  const file = path.join(agentDir(id), name);
+  return existsSync(file) ? readFileSync(file, "utf8") : undefined;
+}
+
+/** Every agent: its id, its profile's frontmatter (name, kind, department, template…), and how many sessions it has had. */
+export function listAgents(): { id: string; profile: Record<string, string>; sessions: number }[] {
+  const root = path.join(DATA, "agents");
+  if (!existsSync(root)) return [];
+  return readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && isId(entry.name) && existsSync(path.join(root, entry.name, "profile.md")))
+    .map((entry) => ({ id: entry.name, profile: frontmatter(readFileSync(path.join(root, entry.name, "profile.md"), "utf8")), sessions: sessionsOf(entry.name).length }));
+}
+
+/** An agent's sessions, oldest first, each its lines. */
+export function sessionsOf(id: string) {
+  const dir = path.join(agentDir(id), "sessions");
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((name) => name.endsWith(".jsonl"))
+    .sort()
+    .map((name) => ({
+      id: name.replace(/\.jsonl$/, ""),
+      lines: readFileSync(path.join(dir, name), "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line) as Record<string, unknown>),
+    }));
+}

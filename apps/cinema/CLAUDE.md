@@ -63,6 +63,15 @@ sun; tools, not his ideas), the commands, the renderer, the screen and the sampl
   and not in the sweep. Every page anyone visits is on the grid.
 - **The frame is free** (Cinema.md F2): light, fog and later effects in the picture. The screen round it is the system.
 
+## The agents
+
+Cinema-Agents.md, built: the procedure is the **`cinema` skill** (`.claude/skills/cinema/SKILL.md`): making an agent
+from the factory once he has named it, briefing it (`cmd agent brief`), starting it as a subagent with the whole brief
+in its prompt, looking at what it made, recording his feedback, and the day's review. Each agent is a folder in his
+private folder (`agents/<id>/`, R2), the factory's templates are `factory/departments/<department>.md`, and `describe`
+tells an agent the world it works in. A camera agent's vocabulary is the camera library: `move` (any path, chained),
+`orbit`, `push`.
+
 ## Reviewing it
 
 To check CI's build on his machine without touching his folder: `CINEMA_SAMPLE=1 pnpm --filter cinema build` (the

@@ -53,7 +53,8 @@ Current as of 2026-10-09.
 | **Item** | An entry or a preset (Cinema.md F5) on a track: when it starts, how long it lasts, its controls' values |
 
 - *Mine:* **a shot's length follows from its items**, as an action's does (Motion.md M24): nothing is placed after the
-  last one ends.
+  last one ends. A camera holds where its last move ended, and a light that nothing follows on its track stays lit to
+  the shot's end, however long the camera makes it (found by the first camera agent's test: the land went black).
 - *Mine:* **a shot has a draft and published versions**, as a character has (Motion.md M20): the crew work on the
   draft; publishing makes a version that never changes; an export names the version it was made from.
 - *Mine:* **a scene is a list of shot versions with their cuts** (Cinema.md F5), and a film a list of scenes.
@@ -112,6 +113,8 @@ line in the app, `pnpm --filter cinema cmd <command> …`, which every agent can
 | `move`, `trim`, `remove` | Moves an item in time, changes its length, takes it off | The track's |
 | `frame` | Wide or vertical, the size, the frame rate | Direction, camera |
 | `shots`, `show`, `entries` | Read the shots, a shot as data, and the library with every entry's controls | Anyone |
+| `describe` | The world in words and numbers for an agent planning in it: its focus and size, the highest ground in each patch, the world's own notes (what stands where, how tall, the clouds and the wind), the shot's camera and lights | Anyone |
+| `agents`, `agent new · brief · say · close · feedback` | The agents (Cinema-Agents.md): the factory, the brief that opens a session and records his instruction, the agent's own lines, his feedback and verdicts | Him and Claude; `say` and `close` the agent's own |
 | `still` | Renders the shot at a moment | Anyone |
 | `sheet` | Renders a contact sheet: a still every so often across the shot | Anyone |
 | `clip` | Renders a stretch of the shot as a short video | Anyone |

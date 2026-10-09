@@ -1,3 +1,4 @@
+import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -8,7 +9,7 @@ import { makeLibrary, type Library } from "../engine/library.ts";
 import { frameTimes, itemsOf, newShot, nextId, shotLength } from "../engine/shot.ts";
 import { DEPARTMENTS, TRACK_DEPARTMENT } from "../engine/types.ts";
 import type { Aspect, Department, Entry, Frame, Placement, Shot, TrackKind, Use, Values } from "../engine/types.ts";
-import { appendSession, DATA, departmentOf, isId, listShots, outputDir, PRIVATE, publish, readAssets, readDraft, readVersion, relative, saveAsset, saveDraft, versionsOf } from "../data/store.ts";
+import { agentDir, appendSession, DATA, departmentOf, frontmatter, isId, listAgents, listShots, makeAgent, outputDir, PRIVATE, publish, readAgentFile, readAssets, readDraft, readTemplate, readVersion, relative, saveAsset, saveDraft, sessionsOf, versionsOf } from "../data/store.ts";
 import { scaled, sheet, still, video } from "./render.ts";
 
 /**
@@ -29,6 +30,8 @@ Reading
   show <shot> [--version n]               a shot as data
   entries [environment|cast|camera|light] the library: each entry and its controls
   assets                                  his saved assets and their versions
+  describe <shot> [--version n]           the world in words and numbers: focus, size, heights, what stands where,
+                                          and the shot's frame, length, camera and lights (for planning a camera)
 
 Changing a shot (each needs its department when an agent runs it)
   new <shot> [--title t] [--aspect wide|vertical] [--size px] [--fps n]           direction
@@ -49,6 +52,14 @@ Rendering (a published version with --version n; the draft otherwise; --aspect t
   sheet <shot> [--count 12] [--columns 4]  stills across the shot, tiled
   clip <shot> [--from s] [--to s] [--scale 0.5]   a quick video to check
   export <shot> [--version n] [--aspect wide|vertical|both] [--at s]   the final video and a still   direction
+
+The agents (Cinema-Agents.md), the director's and Claude's
+  agents                                  the agents, their departments and how many sessions each has had
+  agent new <id> --department <d> --name "<his name>"      the factory: makes an agent from its department's template
+  agent brief <id> --session <s> --shot <shot> --job "<his words>" [--from director]
+                                          opens a session, records the instruction, prints the agent's brief
+  agent say|close <id> --session <s> "<words>"             the agent's own lines: a note, and what it did
+  agent feedback <id> --session <s> "<his words>" [--artifact <file>] [--verdict kept|changed|dropped]
 
 Departments: ${DEPARTMENTS.join(", ")}. Times are in seconds, places in metres, angles in degrees.`;
 
@@ -197,9 +208,75 @@ const at = (): [number, number] => {
 const output = (kind: "renders" | "exports", shot: Shot) => outputDir(kind, shot.id, agent && session ? { id: agent, session } : undefined);
 const seconds = (t: number) => `${Number(t.toFixed(2))}s`;
 
+/** The world in words and numbers (`describe`), for an agent planning in it: focus, size, heights, what stands where. */
+function describeShot(shot: Shot, version: number | string): string[] {
+  const lines = [`${shot.id} "${shot.title}" (${version === "draft" ? `draft, revision ${shot.rev}` : `version ${version}`}): ${shot.frame.aspect} ${shot.frame.size}px at ${shot.frame.fps} fps, ${seconds(shotLength(shot))} long.`];
+  const world = shot.world;
+  if (!world) return [...lines, "No world yet."];
+  const entry = entryOf(world);
+  if (entry.kind !== "environment") return [...lines, `${tag(world)} is not an environment.`];
+  const piece = entry.build(resolve(entry.controls, world.values), { library, assets: readAssets(), cells: world.cells ?? {} });
+  const w = piece.world;
+  const r = w.radius;
+  const at = (n: number) => Number(n.toFixed(1));
+  lines.push(`World: ${tag(world)}. Focus (where a camera aims by default) at (${w.focus.map(at).join(", ")}). It reaches about ${at(r)} m from the focus${w.footprint ? `; it stands on a square ${at(w.footprint)} m across` : ""}. Sky ${w.sky}, haze ${w.haze}.`);
+  lines.push("Axes: x across, z along, y up, in metres; the ground is at y = 0.");
+  let top = { h: -Infinity, x: 0, z: 0 };
+  const fine = 81;
+  for (let i = 0; i < fine; i++)
+    for (let j = 0; j < fine; j++) {
+      const x = w.focus[0] - r + (2 * r * i) / (fine - 1), z = w.focus[2] - r + (2 * r * j) / (fine - 1);
+      const h = w.heightAt(x, z);
+      if (h > top.h) top = { h, x, z };
+    }
+  lines.push(`Highest ground: ${at(top.h)} m, at (${at(top.x)}, ${at(top.z)}).`);
+  // The highest ground in each patch of a 9 by 9 split of the world, so nothing narrow hides between samples.
+  const n = 9;
+  const patch = (2 * r) / n;
+  const highest = (x0: number, z0: number) => {
+    let h = 0;
+    for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) h = Math.max(h, w.heightAt(x0 + ((i + 0.5) * patch) / 8, z0 + ((j + 0.5) * patch) / 8));
+    return h;
+  };
+  const x0 = w.focus[0] - r, z0 = w.focus[2] - r;
+  lines.push(`Highest ground in each patch (m): ${n} by ${n} patches, each ${at(patch)} m square; x across from ${at(x0)} to ${at(x0 + 2 * r)}, z down from ${at(z0)} to ${at(z0 + 2 * r)}:`);
+  for (let j = 0; j < n; j++) lines.push("  " + Array.from({ length: n }, (_, i) => String(Math.round(highest(x0 + i * patch, z0 + j * patch))).padStart(4)).join(""));
+  for (const note of w.notes ?? []) lines.push(`- ${note}`);
+  for (const track of shot.tracks)
+    for (const item of track.items)
+      lines.push(`${track.kind} ${item.id}: ${tag(item)} from ${seconds(item.start)} for ${seconds(item.length)} ${JSON.stringify(item.values)}`);
+  piece.dispose?.();
+  return lines;
+}
+
+/** A section of a Markdown text: what stands under `## <heading>` up to the next `## `. */
+function section(text: string, heading: string) {
+  const at = text.indexOf(`## ${heading}`);
+  if (at < 0) return "";
+  const body = text.slice(text.indexOf("\n", at) + 1);
+  const next = body.search(/^## /m);
+  return (next < 0 ? body : body.slice(0, next)).trim();
+}
+/** Which version of its core an agent works from: how many the day's review has saved (0 for none yet). */
+function coreVersion(id: string) {
+  const dir = path.join(agentDir(id), "core");
+  return existsSync(dir) ? readdirSync(dir).filter((name) => /^\d+\.md$/.test(name)).length : 0;
+}
+/** A session in a few lines (Cinema-Agents.md R4): what it was asked, what it did, what he thought. */
+function summarize(session: { id: string; lines: Record<string, unknown>[] }) {
+  const of = (type: string) => session.lines.filter((line) => line.type === type);
+  const asked = of("instruction").map((line) => `"${String(line.words)}"`).join("; ");
+  const closed = of("close").map((line) => String(line.words)).join(" ");
+  const notes = of("feedback").map((line) => `"${String(line.words)}"`).join("; ");
+  const verdicts = of("verdict").map((line) => String(line.verdict)).join(", ");
+  return `- ${session.id}: asked ${asked || "nothing recorded"}; ${of("command").length} commands, ${of("render").length} renders.${closed ? ` Did: ${closed}` : ""}${notes ? ` His notes: ${notes}.` : ""}${verdicts ? ` Verdicts: ${verdicts}.` : ""}`;
+}
+
 // ── The commands ─────────────────────────────────────────────────────────────────────────────────────────────────────
 async function run(): Promise<string> {
-  identify();
+  // The agent commands are Claude's and his (the director's): they make, brief and answer agents, and name the agent
+  // and session themselves.
+  if (command !== "agent" && command !== "agents") identify();
   await open();
   const [shotId, target] = positional;
   switch (command) {
@@ -259,6 +336,113 @@ async function run(): Promise<string> {
       const saved = save({ ...shot, world }, { target: "world", entry: tag(world), values, ...(changed ? { from: tag(previous) } : {}) });
       const moved = changed ? `, moved on from ${tag(previous)} keeping ${Object.keys(kept).length} of its ${Object.keys(previous.values).length} values` : "";
       return `${shot.id}'s world is ${tag(world)}${moved}${Object.keys(values).length ? `, with ${Object.keys(values).join(", ")} set` : ""} · rev ${saved.rev}`;
+    }
+
+    case "describe": {
+      const { shot, version } = toRender(shotId);
+      return describeShot(shot, version).join("\n");
+    }
+
+    case "agents": {
+      const agents = listAgents();
+      if (!agents.length) return 'No agents yet: `agent new <id> --department <department> --name "<his name>"`.';
+      return agents.map((a) => `  ${a.id}  "${a.profile.name}"  ${a.profile.kind ?? "crew"}, ${a.profile.department ?? a.profile.role ?? "?"}  (template ${a.profile.template})  ${a.sessions} session${a.sessions === 1 ? "" : "s"}`).join("\n");
+    }
+
+    case "agent": {
+      const sub = shotId;
+      const id = target ?? refuse("name the agent");
+      if (!isId(id)) refuse("an agent's id is lower case letters, digits and dashes");
+      const words = positional[2];
+      if (sub === "new") {
+        const named = flags.department ?? refuse("--department: which department it works in");
+        if (!(DEPARTMENTS as readonly string[]).includes(named)) refuse(`no department called ${named} (${DEPARTMENTS.join(", ")})`);
+        const name = flags.name ?? refuse('--name "<his name for it>": he names every agent (Cinema-Agents.md R3)');
+        const template = readTemplate("departments", named) ?? refuse(`the factory has no template for the ${named} department yet`);
+        const meta = frontmatter(template);
+        const made = new Date().toISOString().slice(0, 10);
+        makeAgent(id, {
+          "profile.md": `---\nid: ${id}\nname: ${name}\nkind: crew\ndepartment: ${named}\ntemplate: ${named}@${meta.version}\nmade: ${made}\nby: the factory; named by him\n---\n\n# ${name}\n\nThe ${named} department's agent (Cinema.md F6), made from the factory's ${named} template, version ${meta.version}.\n\n## Character\n\n${section(template, "Starting character")}\n`,
+          "controls.json": `${JSON.stringify({ model: meta.model ?? "inherit", effort: meta.effort ?? "high", "core-cap-words": Number(meta["core-cap"] ?? 600), rounds: Number(meta.rounds ?? 3) }, null, 2)}\n`,
+          "look.json": "{}\n",
+          "core.md": `# ${name}'s core\n\nEmpty: ${name} is new. The day's review writes it (Cinema-Agents.md R7).\n`,
+          "learnings.md": `# ${name}'s learnings\n\nNone yet. Each will cite the sessions it came from.\n`,
+          "memories/index.md": "# Memories\n\nNone yet.\n",
+        });
+        return `made ${name} (${id}): crew, the ${named} department, from its template version ${meta.version}, in ${relative(agentDir(id))}`;
+      }
+      const profile = readAgentFile(id, "profile.md") ?? refuse(`there is no agent called ${id} (see \`agents\`)`);
+      const meta = frontmatter(profile);
+      const session = flags.session ?? refuse("--session: the session's id, like 2026-10-09-1");
+      if (!isId(session)) refuse("a session's id is lower case letters, digits and dashes");
+      switch (sub) {
+        case "brief": {
+          const shot = draftOf(flags.shot);
+          const job = flags.job ?? refuse('--job "<his words>"');
+          const from = flags.from ?? "director";
+          const template = readTemplate("departments", meta.department ?? "") ?? "";
+          const controls = JSON.parse(readAgentFile(id, "controls.json") ?? "{}") as Record<string, unknown>;
+          const past = sessionsOf(id).filter((s) => s.id !== session).slice(-10);
+          appendSession(id, session, { type: "open", record: 1, agent: id, template: meta.template, core: coreVersion(id), from, shot: shot.id, rev: shot.rev });
+          appendSession(id, session, { type: "instruction", from, words: job });
+          const run = (rest: string) => `\`pnpm -s cmd ${rest} --agent ${id} --session ${session}\``;
+          return [
+            `# The brief of ${meta.name}, session ${session}`,
+            "",
+            `You are ${meta.name}, an agent of the Cinema Studio's crew, in its ${meta.department} department (made ${meta.made}, from template ${meta.template}). This brief is everything you start from.`,
+            "",
+            "## Who you are",
+            section(profile, "Character") || "(no character written yet)",
+            "",
+            "## Your controls",
+            Object.entries(controls).map(([k, v]) => `- ${k}: ${String(v)}`).join("\n"),
+            "",
+            "## Your core: what you always remember",
+            readAgentFile(id, "core.md") ?? "Empty.",
+            "",
+            "## What you have learnt",
+            readAgentFile(id, "learnings.md") ?? "Nothing yet.",
+            "",
+            "## Your recent sessions",
+            past.length ? past.map(summarize).join("\n") : "None: this is your first.",
+            "",
+            "## The job",
+            `From the ${from}: "${job}"`,
+            `The shot: ${shot.id} "${shot.title}", its draft at revision ${shot.rev}.`,
+            "",
+            "## The world, described",
+            ...describeShot(shot, "draft"),
+            "",
+            "## Your department's work",
+            section(template, "The work") || "(the template says nothing more)",
+            "",
+            "## How you work",
+            `- Run every command from \`${process.cwd()}\`. Every command that changes the shot or renders it carries \`--agent ${id} --session ${session}\`: that is what writes your session's record. Never leave them off.`,
+            `- The library: \`pnpm -s cmd entries\` (every entry and its controls; \`entries camera\` for the camera's). Read the shot: \`pnpm -s cmd show ${shot.id}\`, \`pnpm -s cmd describe ${shot.id}\`.`,
+            `- Change only your department's work, through the commands (\`add\`, \`set\`, \`move\`, \`trim\`, \`remove\`, \`frame\`); another department's is refused, and a refusal changes nothing. For example ${run(`add ${shot.id} move --start 0 --length 6 from-x=0 from-y=12 from-z=60`)}.`,
+            `- Look at what you made: ${run(`sheet ${shot.id}`)} renders a contact sheet; ${run(`clip ${shot.id}`)} a short video; ${run(`still ${shot.id} --at 3`)} one frame. Each prints the file: open the pictures with the Read tool and judge them against his words. At most ${String(controls.rounds ?? 3)} rounds of change and look.`,
+            `- Write as you go: ${"`"}pnpm -s cmd agent say ${id} --session ${session} "<a decision worth remembering>"${"`"}; at the end ${"`"}pnpm -s cmd agent close ${id} --session ${session} "<what you did, in a few lines>"${"`"}.`,
+            "- Never edit a file by hand, never publish or export (that is direction's), never touch another shot.",
+            "- Answer at the end with what you did and why, the artifacts to look at (their paths), and what you could not do (a move the library lacks: name it, and what it would need).",
+          ].join("\n");
+        }
+        case "say":
+        case "close": {
+          const said = words ?? refuse(`say it: agent ${sub} ${id} --session ${session} "<words>"`);
+          appendSession(id, session, { type: sub, words: said });
+          return `${sub === "say" ? "noted" : "closed"} in ${id}'s session ${session}`;
+        }
+        case "feedback": {
+          const said = words ?? refuse('his words: agent feedback <id> --session <s> "<his words>"');
+          const verdict = flags.verdict;
+          if (verdict && !["kept", "changed", "dropped"].includes(verdict)) refuse("--verdict is kept, changed or dropped");
+          appendSession(id, session, { type: "feedback", from: "director", words: said, ...(flags.artifact ? { artifact: flags.artifact } : {}) });
+          if (verdict) appendSession(id, session, { type: "verdict", verdict, ...(flags.artifact ? { artifact: flags.artifact } : {}) });
+          return `his feedback${verdict ? ` (${verdict})` : ""} recorded in ${id}'s session ${session}`;
+        }
+        default:
+          return refuse("agent new, brief, say, close or feedback");
+      }
     }
 
     case "assets": {
