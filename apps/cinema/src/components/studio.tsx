@@ -2,11 +2,10 @@
 
 import * as React from "react";
 import { Move3d, Pause, Play } from "lucide-react";
-import { ENTRIES, PALETTE } from "@cinema/content";
+import { ENTRIES, PALETTE, PALETTES } from "@cinema/content";
 
 import { Button } from "@no-origins/ui/components/button";
 import { Card } from "@no-origins/ui/components/card";
-import type { ColourOption } from "@no-origins/ui/components/colour-picker";
 import { Grid, GridItem, GRID_SPACING, useGridMetrics } from "@no-origins/ui/components/grid";
 import { ScrollArea } from "@no-origins/ui/components/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@no-origins/ui/components/select";
@@ -17,7 +16,7 @@ import { Toggle } from "@no-origins/ui/components/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@no-origins/ui/components/tooltip";
 
-import { EntryJigs, Field, Jig } from "@/components/jigs";
+import { EntryJigs, Field, Jig, type ColourRow } from "@/components/jigs";
 import { Picture } from "@/components/picture";
 import { CellsJig, layersOf, SaveAsset } from "@/components/world-jigs";
 import { findAsset } from "@/engine/assets";
@@ -25,7 +24,7 @@ import { resolve } from "@/engine/controls";
 import { setCell, setControls, type CellChange } from "@/engine/edit";
 import { makeLibrary, type Library } from "@/engine/library";
 import { shotLength } from "@/engine/shot";
-import type { Aspect, AssetBook, PaletteColour, Shot, Use, Value, Values } from "@/engine/types";
+import type { Aspect, AssetBook, Palette, PaletteColour, Shot, Use, Value, Values } from "@/engine/types";
 import { studioLayout } from "@/lib/layout";
 
 const library = makeLibrary(ENTRIES);
@@ -40,11 +39,13 @@ const clock = (t: number) => `${Math.floor(t / 60)}:${(t % 60).toFixed(1).padSta
 const seconds = (t: number) => `${Number(t.toFixed(2))}s`;
 
 /**
- * The palette as it stands (Cinema.md F10: it grows with the scenes): the colours he has named first (`PALETTE`, in
- * his private folder), then every colour the library's entries start from, named by what it colours, then every
- * colour the shot already uses. A new colour is added by naming it.
+ * The palette as it stands (Cinema.md F10: it grows with the scenes), a row of swatches each: first the colours he has
+ * named (`PALETTE`, in his private folder), then every colour the library's entries start from, named by what it
+ * colours, then every colour the shot already uses; after it, each further palette of his (`PALETTES`: the vibrant
+ * ones, his ask of 2026-10-09), a row of its own. A colour stands in one row only, the first that has it.
  */
-function paletteOf(lib: Library, shot: Shot | null, his: readonly PaletteColour[]): ColourOption[] {
+function palettesOf(lib: Library, shot: Shot | null, his: readonly PaletteColour[], more: readonly Palette[]): ColourRow[] {
+  const elsewhere = new Set(more.flatMap((palette) => palette.colours.map((colour) => colour.value.toLowerCase())));
   const named = new Map<string, string>();
   for (const colour of his) if (!named.has(colour.value.toLowerCase())) named.set(colour.value.toLowerCase(), colour.label);
   for (const entry of lib.entries)
@@ -54,7 +55,15 @@ function paletteOf(lib: Library, shot: Shot | null, his: readonly PaletteColour[
   for (const use of uses)
     for (const value of Object.values(use.values))
       if (typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) && !named.has(value.toLowerCase())) named.set(value.toLowerCase(), value);
-  return [...named].map(([value, label]) => ({ value, label, colour: value }));
+  const first = [...named].filter(([value]) => !elsewhere.has(value) || his.some((colour) => colour.value.toLowerCase() === value));
+  const taken = new Set(first.map(([value]) => value));
+  return [
+    { label: "Palette", options: first.map(([value, label]) => ({ value, label, colour: value })) },
+    ...more.map((palette) => ({
+      label: palette.label,
+      options: palette.colours.filter((colour) => !taken.has(colour.value.toLowerCase())).map((colour) => ({ value: colour.value.toLowerCase(), label: colour.label, colour: colour.value })),
+    })).filter((row) => row.options.length),
+  ];
 }
 
 type Save = { state: "idle" | "saving" | "saved" | "refused" | "note"; note?: string };
@@ -240,7 +249,7 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
     }
   };
 
-  const palette = React.useMemo(() => paletteOf(library, shot, PALETTE), [shot]);
+  const palettes = React.useMemo(() => palettesOf(library, shot, PALETTE, PALETTES), [shot]);
   if (!metrics) return null;
   const layout = studioLayout(metrics.cols, metrics.rows);
   const length = shot ? shotLength(shot) : 0;
@@ -256,19 +265,20 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
   const worldEntry = world ? entryOf(world) : undefined;
   const spec = world && worldEntry?.kind === "environment" && worldEntry.grid ? worldEntry.grid(resolve(worldEntry.controls, world.values)) : undefined;
   const pickedCell = spec && picked ? world?.cells?.[picked] : undefined;
-  const pickedLayer = spec && picked ? layersOf(spec).find((l) => l.id === (picked.includes(":") ? picked.split(":")[0] : "ground")) : undefined;
+  const pickedLayer = spec && picked ? layersOf(spec, library).find((l) => l.id === (picked.includes(":") ? picked.split(":")[0] : "ground")) : undefined;
   const pickedPlace = picked ? (picked.split(":").at(-1)!.split(",").map(Number) as [number, number]) : undefined;
   const pickedAsset = pickedLayer && pickedPlace ? findAsset(assets, pickedCell?.asset ?? pickedLayer.rule(...pickedPlace)) : undefined;
   const pickedEntry = pickedAsset ? library.find(pickedAsset.use.entry, pickedAsset.use.version) : undefined;
   const worldJigs = world && worldEntry ? (
     <>
       {!spec && viewing === null && <SaveAsset assets={assets} onSave={saveAsset} />}
-      <EntryJigs entry={worldEntry} values={world.values} title={worldEntry.label} note={viewing === null ? "The world" : `The world, as published in version ${viewing}`} palette={palette} assets={assets} disabled={viewing !== null} onChange={(c, v) => change("world", c, v)} />
+      <EntryJigs entry={worldEntry} values={world.values} title={worldEntry.label} note={viewing === null ? "The world" : `The world, as published in version ${viewing}`} palettes={palettes} assets={assets} library={library} disabled={viewing !== null} onChange={(c, v) => change("world", c, v)} />
       {spec && (
         <CellsJig
           spec={spec}
           cells={world.cells ?? {}}
           assets={assets}
+          library={library}
           selected={picked}
           onSelect={setPicked}
           onAsset={(key, asset) => changeCell(key, { asset }, 0)}
@@ -282,8 +292,9 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
           values={{ ...pickedAsset.use.values, ...pickedCell?.values }}
           title={`Cell ${picked.split(":").at(-1)} · ${pickedAsset.name}`}
           note="This copy only"
-          palette={palette}
+          palettes={palettes}
           assets={assets}
+          library={library}
           disabled={viewing !== null}
           onChange={(c, v) => changeCell(picked, { values: { [c]: v } }, SAVE_MS)}
         />
@@ -334,14 +345,14 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
         track.items.map((item) => {
           const entry = entryOf(item);
           return entry ? (
-            <EntryJigs key={item.id} entry={entry} values={item.values} title={`${track.kind === "camera" ? "Camera" : "Light"} · ${entry.label}`} note={`${item.id}, from ${seconds(item.start)} for ${seconds(item.length)}`} palette={palette} assets={assets} disabled={viewing !== null} onChange={(c, v) => change(item.id, c, v)} />
+            <EntryJigs key={item.id} entry={entry} values={item.values} title={`${track.kind === "camera" ? "Camera" : "Light"} · ${entry.label}`} note={`${item.id}, from ${seconds(item.start)} for ${seconds(item.length)}`} palettes={palettes} assets={assets} library={library} disabled={viewing !== null} onChange={(c, v) => change(item.id, c, v)} />
           ) : null;
         }),
       )}
       {shot.cast.map((placement) => {
         const entry = entryOf(placement);
         return entry ? (
-          <EntryJigs key={placement.id} entry={entry} values={placement.values} title={`Cast · ${placement.name}`} note={`${placement.id}, at ${placement.at.join(", ")}`} palette={palette} assets={assets} disabled={viewing !== null} onChange={(c, v) => change(placement.id, c, v)} />
+          <EntryJigs key={placement.id} entry={entry} values={placement.values} title={`Cast · ${placement.name}`} note={`${placement.id}, at ${placement.at.join(", ")}`} palettes={palettes} assets={assets} library={library} disabled={viewing !== null} onChange={(c, v) => change(placement.id, c, v)} />
         ) : null;
       })}
     </>

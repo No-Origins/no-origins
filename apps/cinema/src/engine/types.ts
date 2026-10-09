@@ -32,12 +32,17 @@ export type Values = Record<string, Value>;
 
 /** A colour of his palette (Cinema.md F10: it grows with the scenes): what it is, and what it is called. */
 export type PaletteColour = { value: string; label: string };
+/** A further row of colours every colour control offers after his named ones, under its own name. */
+export type Palette = { label: string; colours: PaletteColour[] };
 
 /** The kinds of library this version builds (Cinema.md F4); effects, grades, sound, music, props and titles come later. */
 export type EntryKind = "environment" | "cast" | "camera" | "light";
 
-/** What every entry declares (E4): its id, its version (up when its code changes), and its controls. */
-type Declaration = { id: string; label: string; version: number; description: string; controls: readonly Control[] };
+/**
+ * What every entry declares (E4): its id, its version (up when its code changes), and its controls. `formerly` holds
+ * the ids it had before he renamed it, so a shot or an asset saved under one still finds it.
+ */
+type Declaration = { id: string; label: string; version: number; description: string; controls: readonly Control[]; formerly?: readonly string[] };
 
 /** What an environment tells the rest of the shot about its world. */
 export type World = {

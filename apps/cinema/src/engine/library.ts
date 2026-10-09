@@ -8,6 +8,8 @@ import type { Entry, EntryKind } from "./types.ts";
  */
 export type Library = {
   entries: readonly Entry[];
+  /** An entry's id now, from any id it has had: what a shot or an asset saved before he renamed it says. */
+  idOf: (id: string) => string;
   find: (id: string, version: number) => Entry | undefined;
   latest: (id: string) => Entry | undefined;
   versions: (id: string) => number[];
@@ -22,13 +24,18 @@ export function makeLibrary(his: readonly Entry[]): Library {
     if (seen.has(key)) throw new Error(`The library has ${key} twice.`);
     seen.add(key);
   }
-  const versions = (id: string) => entries.filter((entry) => entry.id === id).map((entry) => entry.version).sort((a, b) => a - b);
+  // Renamed entries (his names change): the old id reads as the new one, as a retired paint's name does.
+  const renamed = new Map<string, string>();
+  for (const entry of entries) for (const old of entry.formerly ?? []) renamed.set(old, entry.id);
+  const idOf = (id: string) => renamed.get(id) ?? id;
+  const versions = (id: string) => entries.filter((entry) => entry.id === idOf(id)).map((entry) => entry.version).sort((a, b) => a - b);
   return {
     entries,
-    find: (id, version) => entries.find((entry) => entry.id === id && entry.version === version),
+    idOf,
+    find: (id, version) => entries.find((entry) => entry.id === idOf(id) && entry.version === version),
     latest: (id) => {
       const newest = versions(id).at(-1);
-      return newest === undefined ? undefined : entries.find((entry) => entry.id === id && entry.version === newest);
+      return newest === undefined ? undefined : entries.find((entry) => entry.id === idOf(id) && entry.version === newest);
     },
     versions,
     // The newest version of each, for listing what can be used.

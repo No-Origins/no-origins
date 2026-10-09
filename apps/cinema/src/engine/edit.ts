@@ -73,10 +73,11 @@ export function setCell(shot: Shot, key: string, change: CellChange, library: Li
     else {
       const asset = findAsset(book, change.asset);
       if (!asset) throw new Error(`there is no asset called ${change.asset} (see \`assets\`)`);
-      if (layer?.of && asset.use.entry !== layer.of) throw new Error(`the ${layer.label.toLowerCase()} layer takes ${layer.of} assets; ${asset.name} is ${asset.use.entry === "asset" ? "an" : "a"} ${asset.use.entry}`);
+      const kind = library.idOf(asset.use.entry);
+      if (layer?.of && kind !== library.idOf(layer.of)) throw new Error(`the ${layer.label.toLowerCase()} layer takes ${library.idOf(layer.of)} assets; ${asset.name} is of ${kind}`);
       // The ground takes no asset a layer over it is for: a cloud stands in the clouds, never on the ground.
-      const over = !layer ? spec.layers?.find((l) => l.of === asset.use.entry) : undefined;
-      if (over) throw new Error(`${asset.name} is a ${asset.use.entry}: it goes in the ${over.label.toLowerCase()} layer (${over.id}:${column},${row})`);
+      const over = !layer ? spec.layers?.find((l) => l.of && library.idOf(l.of) === kind) : undefined;
+      if (over) throw new Error(`${asset.name} is of ${kind}: it goes in the ${over.label.toLowerCase()} layer (${over.id}:${column},${row})`);
       cell.asset = change.asset;
     }
   }

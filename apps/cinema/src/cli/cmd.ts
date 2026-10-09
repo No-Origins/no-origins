@@ -193,7 +193,7 @@ function keepable(entry: Entry, values: Values): Values {
   );
 }
 const entryOf = (use: Use) => library.find(use.entry, use.version) ?? refuse(`${use.entry}@${use.version} is not in the library`);
-const tag = (use: Use) => `${use.entry}@${use.version}`;
+const tag = (use: Use) => `${library.idOf(use.entry)}@${use.version}`;
 
 // ── The shot ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 function draftOf(id: string | undefined) {
@@ -339,7 +339,7 @@ async function run(): Promise<string> {
       const values = valuesFor(entry, pairs);
       // The same entry, at this version or another, keeps every value its controls still take (E4: a shot moved on to
       // an entry's next version keeps what was tuned).
-      const previous = shot.world && (shot.world.entry === entry.id || "keep" in flags) ? shot.world : undefined;
+      const previous = shot.world && (library.idOf(shot.world.entry) === entry.id || "keep" in flags) ? shot.world : undefined;
       const kept = previous ? keepable(entry, previous.values) : {};
       const world: Use = { entry: entry.id, version: entry.version, values: { ...kept, ...values } };
       // A grid keeps the cells he set by hand when it moves on to its next version.
@@ -469,7 +469,7 @@ async function run(): Promise<string> {
       return ids.map((id) => {
         const versions = book[id]!;
         const newest = versions.at(-1)!;
-        return `  ${id}  "${newest.name}"  ${newest.use.entry}@${newest.use.version}  versions ${versions.map((v) => v.version).join(", ")}  (newest saved ${newest.saved.slice(0, 16).replace("T", " ")})`;
+        return `  ${id}  "${newest.name}"  ${library.idOf(newest.use.entry)}@${newest.use.version}  versions ${versions.map((v) => v.version).join(", ")}  (newest saved ${newest.saved.slice(0, 16).replace("T", " ")})`;
       }).join("\n");
     }
 

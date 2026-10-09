@@ -13,6 +13,7 @@ import { cn } from "@no-origins/ui/lib/utils";
 
 import { AssetSelect, Field, Jig } from "@/components/jigs";
 import { findAsset } from "@/engine/assets";
+import type { Library } from "@/engine/library";
 import type { AssetBook, AssetVersion, Cell, GridSpec } from "@/engine/types";
 
 /**
@@ -65,18 +66,19 @@ export function SaveAsset({ assets, onSave }: { assets: AssetBook; onSave: (name
  * there: from the rules, empty, or any of his assets of the layer's kind; and gives it back to the rules. Its copy's own
  * values are the jigs that follow (the screen puts them under this card). A layer's cell is keyed "<layer>:column,row".
  */
-export function CellsJig({ spec, cells, assets, selected, onSelect, onAsset, onClear, disabled }: {
+export function CellsJig({ spec, cells, assets, library, selected, onSelect, onAsset, onClear, disabled }: {
   /** Read-only, as a published version is: cells can be picked to see them, not changed. */
   disabled?: boolean;
   spec: GridSpec;
   cells: Record<string, Cell>;
   assets: AssetBook;
+  library: Library;
   selected: string | null;
   onSelect: (key: string | null) => void;
   onAsset: (key: string, asset: string) => void;
   onClear: (key: string) => void;
 }) {
-  const layers = layersOf(spec);
+  const layers = layersOf(spec, library);
   const [layerId, setLayerId] = React.useState(selected?.includes(":") ? selected.split(":")[0]! : "ground");
   const layer = layers.find((l) => l.id === layerId) ?? layers[0]!;
   const keyOf = (column: number, row: number) => (layer.id === "ground" ? `${column},${row}` : `${layer.id}:${column},${row}`);
@@ -154,11 +156,11 @@ export function CellsJig({ spec, cells, assets, selected, onSelect, onAsset, onC
 }
 
 /** The ground and the layers over it, each with its rule and the assets it takes. */
-export function layersOf(spec: GridSpec) {
+export function layersOf(spec: GridSpec, library: Library) {
   const over = spec.layers ?? [];
-  const taken = new Set(over.map((l) => l.of).filter(Boolean));
+  const taken = new Set(over.flatMap((l) => (l.of ? [library.idOf(l.of)] : [])));
   return [
-    { id: "ground", label: "Ground", rule: spec.rule, accept: (a: AssetVersion) => !taken.has(a.use.entry) },
-    ...over.map((l) => ({ id: l.id, label: l.label, rule: l.rule, accept: l.of ? (a: AssetVersion) => a.use.entry === l.of : undefined })),
+    { id: "ground", label: "Ground", rule: spec.rule, accept: (a: AssetVersion) => !taken.has(library.idOf(a.use.entry)) },
+    ...over.map((l) => ({ id: l.id, label: l.label, rule: l.rule, accept: l.of ? (a: AssetVersion) => library.idOf(a.use.entry) === library.idOf(l.of!) : undefined })),
   ];
 }

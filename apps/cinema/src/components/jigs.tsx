@@ -16,6 +16,7 @@ import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-g
 import { cn } from "@no-origins/ui/lib/utils";
 
 import { resolve } from "@/engine/controls";
+import type { Library } from "@/engine/library";
 import type { AssetBook, AssetVersion, Control as ControlSpec, Entry, Value, Values } from "@/engine/types";
 
 /**
@@ -23,8 +24,12 @@ import type { AssetBook, AssetVersion, Control as ControlSpec, Entry, Value, Val
  * code is on the screen with nothing else written. The grammar is the motion studio's, so the studios read as one
  * system: a card a group, its label for a head; each control its label and value on a line and its widget under it,
  * two to a row; one widget a kind — a slider for a number or an angle, a toggle group for a choice, a switch, the
- * colour picker for a colour, and a list of his saved assets, by name, for an asset. A card folds to its head.
+ * colour picker for a colour (a row of swatches a palette, his named colours first), and a list of his saved assets,
+ * by name, for an asset. A card folds to its head.
  */
+
+/** A row of swatches a colour control offers: his named colours first, then each further palette under its name. */
+export type ColourRow = { label: string; options: readonly ColourOption[] };
 
 export function Jig({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
   const [open, setOpen] = React.useState(true);
@@ -94,7 +99,7 @@ export function AssetSelect({ id, label, value, assets, onChange, extra, accept,
   );
 }
 
-function ControlRow({ control, value, palette, assets, disabled, onChange }: { control: ControlSpec; value: Value; palette: readonly ColourOption[]; assets: AssetBook; disabled?: boolean; onChange: (value: Value) => void }) {
+function ControlRow({ control, value, palettes, assets, library, disabled, onChange }: { control: ControlSpec; value: Value; palettes: readonly ColourRow[]; assets: AssetBook; library: Library; disabled?: boolean; onChange: (value: Value) => void }) {
   const id = React.useId();
   const wide = control.kind === "choice" || control.kind === "colour" || control.kind === "asset";
   let widget: React.ReactNode;
@@ -124,15 +129,31 @@ function ControlRow({ control, value, palette, assets, disabled, onChange }: { c
           label={control.label}
           value={String(value).split("@")[0] || NONE}
           assets={assets}
-          accept={control.of ? (asset) => asset.use.entry === control.of : undefined}
+          accept={control.of ? (asset) => library.idOf(asset.use.entry) === library.idOf(control.of!) : undefined}
           disabled={disabled}
           onChange={(next) => onChange(next === NONE ? "" : next)}
         />
       );
       break;
     case "colour": {
-      const options = palette.some((option) => option.value === value) ? palette : [...palette, { value: String(value), label: String(value), colour: String(value) }];
-      widget = <ColourPicker aria-label={control.label} options={options} value={String(value)} onValueChange={onChange} disabled={disabled} className="w-full" />;
+      // A row a palette, each a picker of its own so none grows past one row; a colour in none joins the first.
+      const colour = String(value).toLowerCase();
+      const found = palettes.some((row) => row.options.some((option) => option.value.toLowerCase() === colour));
+      widget = (
+        <div className="flex w-full min-w-0 flex-col gap-1">
+          {palettes.map((row, index) => (
+            <ColourPicker
+              key={row.label}
+              aria-label={index === 0 ? control.label : `${control.label}: ${row.label}`}
+              options={index === 0 && !found ? [...row.options, { value: colour, label: colour, colour }] : row.options}
+              value={colour}
+              onValueChange={onChange}
+              disabled={disabled}
+              className="w-full"
+            />
+          ))}
+        </div>
+      );
       break;
     }
   }
@@ -158,13 +179,14 @@ export function Field({ label, wide = true, children }: { label: string; wide?: 
 }
 
 /** An entry's controls as jigs, a card for each of its groups; `title` heads a card when the entry has no groups. */
-export function EntryJigs({ entry, values, title, note, palette, assets, disabled, onChange }: {
+export function EntryJigs({ entry, values, title, note, palettes, assets, library, disabled, onChange }: {
   entry: Entry;
   values: Values;
   title: string;
   note?: string;
-  palette: readonly ColourOption[];
+  palettes: readonly ColourRow[];
   assets: AssetBook;
+  library: Library;
   /** Read-only, as a published version is. */
   disabled?: boolean;
   onChange: (control: string, value: Value) => void;
@@ -180,7 +202,7 @@ export function EntryJigs({ entry, values, title, note, palette, assets, disable
       {[...groups].map(([group, controls], index) => (
         <Jig key={group} title={group === title ? title : `${title} · ${group}`} note={index === 0 ? note : undefined}>
           {controls.map((control) => (
-            <ControlRow key={control.id} control={control} value={resolved[control.id]!} palette={palette} assets={assets} disabled={disabled} onChange={(value) => onChange(control.id, value)} />
+            <ControlRow key={control.id} control={control} value={resolved[control.id]!} palettes={palettes} assets={assets} library={library} disabled={disabled} onChange={(value) => onChange(control.id, value)} />
           ))}
         </Jig>
       ))}
