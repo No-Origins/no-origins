@@ -166,6 +166,8 @@ is his, behind the sign-in (`cinema.open`, Access.md); a live world (F1) is open
 - *Mine:* **for now the agents are Claude Code agents**: Claude starts each one from its core and its recent sessions
   (F9) and instructs it, it works through the commands of F6, and its session is recorded as it goes.
 - **A harness of its own comes later, if this works** (his): built for the Cinema Studio.
+- **How it works, step by step**, is **Cinema-Agents.md**: how an agent is made, kept, started, instructed, recorded
+  and reviewed.
 - **It is kept out of git, for now** (his): his ideas, the worlds, the shots, the libraries' data and every agent are in
   a gitignored folder, as Home's house is (Home.md H4), since the repository is public. *Mine:* that folder is
   `apps/cinema/src/content/`, also in `.vercelignore`. The code is public and written against its types.
