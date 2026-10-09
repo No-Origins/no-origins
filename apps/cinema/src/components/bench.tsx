@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { ENTRIES, PALETTE, PALETTES } from "@cinema/content";
 
 import { Button } from "@no-origins/ui/components/button";
@@ -32,9 +33,10 @@ type Save = { state: "idle" | "saving" | "saved" | "refused"; note?: string };
 /**
  * An asset's bench (Cinema.md F11, Cinema-Engine.md E1; his, 2026-10-09: "I should just be able to see the asset in
  * the 3D space and look at it and play around with it"): the asset alone at the centre, looked round freely from a
- * view of the whole of it, lit by the plain sun; at the top left the card that says which asset it is (his, the same
- * day: "that's where we usually put the cards that define the asset"), then its controls either side, a card a
- * group, as the studio draws them.
+ * view of the whole of it (Escape goes back to it), lit by the plain sun; at the top left the card that says which
+ * asset it is, a back arrow before its name (his, the same day: "that's where we usually put the cards that define
+ * the asset"; "a back arrow button before the asset name"), then its controls either side, a card a group, as the
+ * studio draws them.
  * A change shows at once and is saved to the bench once the jigs stand still. No camera, no time, no shot. The
  * asset's card opens the configuration: the values as code, saved under his name with what it is for, and the ones he
  * saved before, loaded to start a new one from (`configuration.tsx`).
@@ -124,15 +126,20 @@ function Workbench({ initial, configurations: saved }: { initial: Bench; configu
     ) : null;
 
   const card = (
-    <Jig title={entry.label} note={`Asset · version ${entry.version} · ${entry.controls.length} controls`}>
+    <Jig
+      title={entry.label}
+      note={`Asset · version ${entry.version} · ${entry.controls.length} controls`}
+      lead={
+        // His (2026-10-09): a back arrow before the asset's name, in place of an "All assets" button.
+        <Button asChild variant="outline" size="icon-sm" aria-label="Back to the assets">
+          <Link href="/">
+            <ArrowLeft />
+          </Link>
+        </Button>
+      }
+    >
       <Text role="caption" tone="muted" className="col-span-2">{entry.description}</Text>
       <div className="col-span-2 flex flex-wrap gap-2">
-        <Button asChild variant="outline" size="sm">
-          <Link href="/">All assets</Link>
-        </Button>
-        <Button variant="outline" size="sm" disabled={!free} onClick={() => setFree(false)}>
-          Look from the start
-        </Button>
         <Configuration asset={bench.asset} entry={entry} values={bench.values} configurations={configurations} onSaved={setConfigurations} onLoad={replace} />
       </div>
     </Jig>

@@ -32,15 +32,25 @@ import type { AssetBook, AssetVersion, Control as ControlSpec, Entry, Value, Val
 /** A row of swatches a colour control offers: his named colours first, then each further palette under its name. */
 export type ColourRow = { label: string; options: readonly ColourOption[] };
 
-export function Jig({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
+export function Jig({ title, note, lead, children }: {
+  title: string;
+  note?: string;
+  /** Before the title, in its row: a way back (an asset's card on its bench). */
+  lead?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = React.useState(true);
   return (
     <Collapsible open={open} onOpenChange={setOpen} asChild>
       <Card size="sm" data-cinema-jig={title} className="shrink-0 gap-3 shadow-none">
         <CardHeader className="flex items-center justify-between gap-2">
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <Text role="label" as="h2" className="truncate">{title}</Text>
-            {note ? <Text role="caption" className="truncate">{note}</Text> : null}
+          <div className="flex min-w-0 items-center gap-2">
+            {lead}
+            {/* A card with a way back is the page's own: its name wraps rather than being cut short. */}
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <Text role="label" as="h2" className={lead ? "break-words" : "truncate"}>{title}</Text>
+              {note ? <Text role="caption" className={lead ? "break-words" : "truncate"}>{note}</Text> : null}
+            </div>
           </div>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="icon-sm" aria-label={open ? `Fold ${title}` : `Open ${title}`}>
