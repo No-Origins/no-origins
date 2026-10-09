@@ -167,7 +167,12 @@ It is done when an agent, given his words, makes that shot through the commands 
 - **A grid can have layers over its ground** (his, 2026-10-09: clouds as "a layer over the grid", and "we need
   controls to define the movements of clouds"). *Mine:* each layer has rules of its own and takes assets of one kind
   only; its cells are keyed "<layer>:column,row" and change by hand as the ground's do. What moves the layer (a wind)
-  is the grid's controls; what each thing does by itself (a cloud billowing) is its asset's.
+  is the grid's controls; what each thing does by itself (a cloud churning) is its asset's. *Mine:* a grid hands its
+  wind (velocity, turbulence, shear) to what it carries, so the wind can work inside a thing as well as move it; a
+  wind made of noise, not a fluid simulation, so every moment stays a function of the time alone (E2).
+- **An entry may be drawn by a shader of its own** (his pick, 2026-10-09: clouds as a real volume of gas, not balls).
+  *Mine:* it reads the scene's sun and sky as they are when it is drawn, and its picture goes through the same tone
+  mapping as the rest.
 - *Mine:* **the screen** offers a world that is one tile a "Save as asset" card, where he types the name, and an asset
   control is a list of his assets by name, of the kind it takes. A grid's world has a map of its cells, seen from above,
   a layer at a time: a cell picked shows

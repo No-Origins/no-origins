@@ -32,7 +32,8 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // three r186 has no PCFSoftShadowMap any more (it falls back to this, with a warning).
+  renderer.shadowMap.type = THREE.PCFShadowMap;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(35, 16 / 9, 0.1, 5000);

@@ -58,7 +58,13 @@ export type World = {
  * What a builder hands the engine. `at` moves what it built to the moment `t` (a drifting cloud), and must be a pure
  * function of `t`, as everything the engine draws is (Cinema-Engine.md E2).
  */
-export type Built = { object: Object3D; dispose?: () => void; at?: (t: number) => void };
+export type Built = { object: Object3D; dispose?: () => void; at?: (t: number) => void; wind?: (wind: Wind) => void };
+
+/**
+ * The wind a grid blows over what it carries (a cloud's gas): its velocity across the ground in metres a second (x, z),
+ * how much it stirs the gas (turbulence, 0 to 1), and how much faster it runs higher up (shear, 0 to 1).
+ */
+export type Wind = { velocity: [number, number]; turbulence: number; shear: number };
 export type CameraPose = { position: Vec3; target: Vec3; /** The lens, in millimetres of a full-frame camera. */ lens: number };
 
 /** What an environment may draw on besides its values: the library, his saved assets, and its cells (a grid's). */
