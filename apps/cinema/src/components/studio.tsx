@@ -16,15 +16,16 @@ import { Toggle } from "@no-origins/ui/components/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@no-origins/ui/components/tooltip";
 
-import { EntryJigs, Field, Jig, type ColourRow } from "@/components/jigs";
+import { EntryJigs, Field, Jig } from "@/components/jigs";
+import { palettesOf } from "@/components/palettes";
 import { Picture } from "@/components/picture";
 import { CellsJig, layersOf, SaveAsset } from "@/components/world-jigs";
 import { findAsset } from "@/engine/assets";
 import { resolve } from "@/engine/controls";
 import { setCell, setControls, type CellChange } from "@/engine/edit";
-import { makeLibrary, type Library } from "@/engine/library";
+import { makeLibrary } from "@/engine/library";
 import { shotLength } from "@/engine/shot";
-import type { Aspect, AssetBook, Palette, PaletteColour, Shot, Use, Value, Values } from "@/engine/types";
+import type { Aspect, AssetBook, Shot, Use, Value, Values } from "@/engine/types";
 import { studioLayout } from "@/lib/layout";
 
 const library = makeLibrary(ENTRIES);
@@ -37,34 +38,6 @@ const SAVE_MS = 500;
 
 const clock = (t: number) => `${Math.floor(t / 60)}:${(t % 60).toFixed(1).padStart(4, "0")}`;
 const seconds = (t: number) => `${Number(t.toFixed(2))}s`;
-
-/**
- * The palette as it stands (Cinema.md F10: it grows with the scenes), a row of swatches each: first the colours he has
- * named (`PALETTE`, in his private folder), then every colour the library's entries start from, named by what it
- * colours, then every colour the shot already uses; after it, each further palette of his (`PALETTES`: the vibrant
- * ones, his ask of 2026-10-09), a row of its own. A colour stands in one row only, the first that has it.
- */
-function palettesOf(lib: Library, shot: Shot | null, his: readonly PaletteColour[], more: readonly Palette[]): ColourRow[] {
-  const elsewhere = new Set(more.flatMap((palette) => palette.colours.map((colour) => colour.value.toLowerCase())));
-  const named = new Map<string, string>();
-  for (const colour of his) if (!named.has(colour.value.toLowerCase())) named.set(colour.value.toLowerCase(), colour.label);
-  for (const entry of lib.entries)
-    for (const control of entry.controls)
-      if (control.kind === "colour" && !named.has(control.default.toLowerCase())) named.set(control.default.toLowerCase(), `${entry.label} ${control.label.toLowerCase()}`);
-  const uses: Use[] = shot ? [...(shot.world ? [shot.world] : []), ...shot.cast, ...shot.tracks.flatMap((t) => t.items)] : [];
-  for (const use of uses)
-    for (const value of Object.values(use.values))
-      if (typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) && !named.has(value.toLowerCase())) named.set(value.toLowerCase(), value);
-  const first = [...named].filter(([value]) => !elsewhere.has(value) || his.some((colour) => colour.value.toLowerCase() === value));
-  const taken = new Set(first.map(([value]) => value));
-  return [
-    { label: "Palette", options: first.map(([value, label]) => ({ value, label, colour: value })) },
-    ...more.map((palette) => ({
-      label: palette.label,
-      options: palette.colours.filter((colour) => !taken.has(colour.value.toLowerCase())).map((colour) => ({ value: colour.value.toLowerCase(), label: colour.label, colour: colour.value })),
-    })).filter((row) => row.options.length),
-  ];
-}
 
 type Save = { state: "idle" | "saving" | "saved" | "refused" | "note"; note?: string };
 /** A change waiting to be saved: a target's values, or one cell of the world's grid. */
@@ -249,7 +222,7 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
     }
   };
 
-  const palettes = React.useMemo(() => palettesOf(library, shot, PALETTE, PALETTES), [shot]);
+  const palettes = React.useMemo(() => palettesOf(library, shot ? [...(shot.world ? [shot.world] : []), ...shot.cast, ...shot.tracks.flatMap((t) => t.items)] : [], PALETTE, PALETTES), [shot]);
   if (!metrics) return null;
   const layout = studioLayout(metrics.cols, metrics.rows);
   const length = shot ? shotLength(shot) : 0;

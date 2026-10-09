@@ -113,6 +113,12 @@ export type Cell = { asset?: string; values?: Values };
  * under a name he has used makes its next version; a draft uses the newest, a published shot the one it was made with.
  */
 export type AssetVersion = { id: string; name: string; version: number; saved: string; use: { entry: string; version: number; values: Values } };
+/**
+ * An asset's bench (his, 2026-10-09: "I should just be able to see the asset in the 3D space, look at it and play
+ * around with it"): the values he is trying it at, apart from any shot. `asset` is the library entry it holds (an
+ * asset of the Assets section, Cinema.md F11), at `version`; `rev` goes up with every change, as a draft's does.
+ */
+export type Bench = { asset: string; version: number; rev: number; values: Values };
 /** Every asset he has saved, by id, its versions oldest first. */
 export type AssetBook = Record<string, AssetVersion[]>;
 /** An item on a track (E3): an entry on a timeline, when it starts and how long it lasts, in seconds. */
@@ -135,6 +141,6 @@ export type Shot = {
 };
 
 /** The departments (Cinema.md F6), and the one that writes each kind of work (Cinema-Agents.md R5). */
-export const DEPARTMENTS = ["direction", "set", "cast", "camera", "light", "sound", "effects", "colour"] as const;
+export const DEPARTMENTS = ["direction", "art", "cast", "camera", "light", "sound", "effects", "colour"] as const;
 export type Department = (typeof DEPARTMENTS)[number];
 export const TRACK_DEPARTMENT: Record<TrackKind, Department> = { camera: "camera", light: "light" };

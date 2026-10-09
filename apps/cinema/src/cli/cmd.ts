@@ -2,8 +2,9 @@ import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { check, parse, problem, resolve } from "../engine/controls.ts";
+import { check, parse, resolve } from "../engine/controls.ts";
 import { pinAssets } from "../engine/assets.ts";
+import { keepable } from "../engine/bench.ts";
 import { setCell, setControls } from "../engine/edit.ts";
 import { makeLibrary, type Library } from "../engine/library.ts";
 import { frameTimes, itemsOf, newShot, nextId, shotLength } from "../engine/shot.ts";
@@ -184,14 +185,6 @@ function valuesForCell(shot: Shot, key: string): Values {
 }
 
 /** The values an entry's controls still take, from a use of another version of it. */
-function keepable(entry: Entry, values: Values): Values {
-  return Object.fromEntries(
-    Object.entries(values).filter(([id, value]) => {
-      const control = entry.controls.find((c) => c.id === id);
-      return control !== undefined && problem(control, value) === undefined;
-    }),
-  );
-}
 const entryOf = (use: Use) => library.find(use.entry, use.version) ?? refuse(`${use.entry}@${use.version} is not in the library`);
 const tag = (use: Use) => `${library.idOf(use.entry)}@${use.version}`;
 
@@ -332,7 +325,7 @@ async function run(): Promise<string> {
     }
 
     case "world": {
-      allow("set");
+      allow("art");
       const shot = draftOf(shotId);
       const entry = entryNamed(target);
       if (entry.kind !== "environment") refuse(`${entry.id} is a ${entry.kind}, not an environment`);
@@ -475,7 +468,7 @@ async function run(): Promise<string> {
 
     case "asset": {
       if (shotId !== "save") refuse("say `asset save \"<name>\" --from <shot>`");
-      allow("set");
+      allow("art");
       const name = target ?? refuse("name the asset: `asset save \"<name>\" --from <shot>`");
       const from = draftOf(flags.from);
       const world = from.world ?? refuse(`${from.id} has no world to save`);
@@ -487,7 +480,7 @@ async function run(): Promise<string> {
     }
 
     case "cell": {
-      allow("set");
+      allow("art");
       const shot = draftOf(shotId);
       const key = target ?? refuse("name a cell: column,row, like 2,3");
       const change = {
@@ -540,7 +533,7 @@ async function run(): Promise<string> {
       const shot = draftOf(shotId);
       if (!target) refuse("say what to set: world, a cast member's id, or an item's id");
       if (target === "world") {
-        allow("set");
+        allow("art");
         const use = shot.world ?? refuse(`${shot.id} has no world yet (use \`world\`)`);
         const values = valuesFor(entryOf(use), pairs);
         const saved = save(edited(shot, target, values), { target, entry: tag(use), values });

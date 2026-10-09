@@ -2,7 +2,8 @@
 
 **Where he directs, and a cast and crew of agents build 3D sets and shoot cinematic shots in them**: artistic,
 animatic, cinematic. This document decides what the studio is for, what comes out of it, who is cast, the libraries a
-shot is made from and how they combine, the crew, how he directs them, what an agent is made of, and the factory that makes them.
+shot is made from and how they combine, the crew, how he directs them, what an agent is made of, the factory that makes
+them, and the library of assets that comes first.
 
 **Signed off by him on 2026-10-09.** What is marked *his* he said in his own words; what is marked *mine* Claude
 proposed and he agreed to, and it stays his to change.
@@ -22,8 +23,10 @@ Current as of 2026-10-09.
   stay live** (his), so that visitors can explore them later.
 - **The frame is a control: wide or vertical** (his), and the crew set it as he and Claude instruct. *Mine:* the size,
   the frame rate and the length are controls too, and one shot can be exported in both frames.
-- **The goal now is to make films** (his). Where the studio is hosted, its name and who may explore a world come later
-  (his, F7).
+- **The goal is to make films; the first step is a library of assets** (his, 2026-10-09: "first I will build the
+  environments… I want to have a library of assets to be built first. We don't need camera motion and all of that",
+  F11). Sets, shots and the camera come after. Where the studio is hosted, its name and who may explore a world come
+  later (his, F7).
 - *Mine:* so **a world is one description, played two ways**: live in the browser, and rendered frame by frame to a
   file. A video and a still are the same frames as the live world, never a second build of it (F5: every frame is a
   function of time).
@@ -133,7 +136,7 @@ Beside them:
 - **A crew agent has a look, and is made in the factory from its department** (his, F10). *Mine:* its look shows on
   the studio's screen, beside its sessions and in the day's review, and never in a shot.
 - **The crew work in departments** (his), with the agents of their own department and with other departments. **A
-  department has its own libraries and its own tracks** (his): set (environments, props), cast (states, actions),
+  department has its own libraries and its own tracks** (his): art (the assets: environments, props, F11), cast (states, actions),
   camera, light, sound (sound effects, music), effects, colour (grades), and direction, which puts the shot together. A
   department writes only its own tracks, so two departments never write the same thing; inside one, its agents pass
   work between them.
@@ -235,9 +238,27 @@ as it goes** (his).
   need them are built, not in advance. Orbit.md C20 keeps its paints to Orbit's agents; the studio's palette is its
   own.
 
+## F11. Assets first
+
+- **An asset is a thing a set is built from, made with its controls** (his, 2026-10-09): world-building elements such
+  as mountains, clouds, roads and houses, "any sort of assets that we need to create our set". **The art department
+  handles them** (his).
+- **He asks for an asset, then plays with it** (his): once it is built he looks at it in 3D, on its own, and tries its
+  controls; he asks for more controls, drops the ones not needed, or changes it. No camera, no shot.
+- **When he has decided on an asset, its schema is fixed** (his): the controls, or configurations, the art department
+  works with. Each version of an asset answers his notes, one at a time, as a character or a motion does.
+- **For a set, the art department's agents bring the assets it needs together and configure each for it** (his: "when
+  I describe a set, relevant or necessary assets can be brought together by the agents").
+- **The studio opens on a home page, its sections there; the first is Assets** (his, 2026-10-09). *Mine:* an asset
+  opens on its **bench**: the asset alone in the middle, looked round freely, its controls either side, what he sets
+  kept until he changes it. The shots' screen stays, off the home page until he names it a section.
+- **His first asset is Illusion Mountain** (his, 2026-10-09), made from the mountain he had tuned before.
+
 ## Open
 
 1. **Where the music and the sounds come from** (F4).
 2. **The cast in 3D** (F3), the next document's to decide, version by version, as he looks at them: whether light
    shades them smoothly or in flat steps as Orbit draws them, how the face stays on a body the camera can go round, how
    they stand and land on a floor instead of in a nest, and how the tail moves in space.
+3. **What his saved configurations are called** (F11). The code still calls a configuration he saved under a name
+   ("Suckers Mountain") an asset, from before F11; an asset is now the thing itself, and the word for those is his.

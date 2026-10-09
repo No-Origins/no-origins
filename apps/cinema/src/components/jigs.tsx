@@ -179,10 +179,12 @@ export function Field({ label, wide = true, children }: { label: string; wide?: 
 }
 
 /** An entry's controls as jigs, a card for each of its groups; `title` heads a card when the entry has no groups. */
-export function EntryJigs({ entry, values, title, note, palettes, assets, library, disabled, onChange }: {
+export function EntryJigs({ entry, values, title, note, palettes, assets, library, disabled, bare, onChange }: {
   entry: Entry;
   values: Values;
   title: string;
+  /** Head each card with its group alone, where the page already says whose controls they are (a bench). */
+  bare?: boolean;
   note?: string;
   palettes: readonly ColourRow[];
   assets: AssetBook;
@@ -200,7 +202,7 @@ export function EntryJigs({ entry, values, title, note, palettes, assets, librar
   return (
     <>
       {[...groups].map(([group, controls], index) => (
-        <Jig key={group} title={group === title ? title : `${title} · ${group}`} note={index === 0 ? note : undefined}>
+        <Jig key={group} title={group === title || bare ? group : `${title} · ${group}`} note={index === 0 ? note : undefined}>
           {controls.map((control) => (
             <ControlRow key={control.id} control={control} value={resolved[control.id]!} palettes={palettes} assets={assets} library={library} disabled={disabled} onChange={(value) => onChange(control.id, value)} />
           ))}

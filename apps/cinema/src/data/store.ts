@@ -2,7 +2,7 @@ import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renam
 import path from "node:path";
 
 import { assetId } from "../engine/assets.ts";
-import type { AssetBook, AssetVersion, Shot, Use } from "../engine/types.ts";
+import type { AssetBook, AssetVersion, Bench, Shot, Use } from "../engine/types.ts";
 
 /**
  * Where a shot is kept (Cinema-Engine.md E3, E5): in his private folder, `src/content`, on his machine, and in the
@@ -83,6 +83,21 @@ export function publish(id: string, as?: Shot) {
   const version = (versionsOf(id).at(-1) ?? 0) + 1;
   writeJson(path.join(shotDir(id), "versions", `${version}.json`), draft);
   return version;
+}
+
+/** An asset's bench (`benches/<asset>.json`): the values he is trying it at, or nothing until he first changes one. */
+export function readBench(asset: string): Bench | undefined {
+  if (!isId(asset)) throw new Error(`"${asset}" is not an asset's id: lower case letters, digits and dashes.`);
+  const file = path.join(DATA, "benches", `${asset}.json`);
+  return existsSync(file) ? readJson<Bench>(file) : undefined;
+}
+
+/** Saves a bench one revision on from the one it was read at. */
+export function saveBench(bench: Bench): Bench {
+  if (!isId(bench.asset)) throw new Error(`"${bench.asset}" is not an asset's id.`);
+  const saved = { ...bench, rev: bench.rev + 1 };
+  writeJson(path.join(DATA, "benches", `${bench.asset}.json`), saved);
+  return saved;
 }
 
 /** Every asset he has saved (`assets/<id>/<version>.json`), its versions oldest first. */

@@ -1,191 +1,262 @@
-# No Origins — The Cinema Studio's engine
+# No Origins — Cinema Studio
 
-The engine is where a world is described, played and rendered, and the commands that change it. It is the only thing
-the agents touch (Cinema.md F6, Cinema-Agents.md R5), and the first thing to build (Cinema-Agents.md R8). This
-document decides what a shot is as data, how a library entry is built, the commands, how a shot plays and how it
-becomes a still or a video.
+**Where he directs, and a cast and crew of agents build 3D sets and shoot cinematic shots in them**: artistic,
+animatic, cinematic. This document decides what the studio is for, what comes out of it, who is cast, the libraries a
+shot is made from and how they combine, the crew, how he directs them, what an agent is made of, the factory that makes
+them, and the library of assets that comes first.
 
-**Signed off by him on 2026-10-09**, with "Start building". What is marked *his* he said in his own words; what is
-marked *mine* Claude proposed and he agreed to, and it stays his to change.
+**Signed off by him on 2026-10-09.** What is marked *his* he said in his own words; what is marked *mine* Claude
+proposed and he agreed to, and it stays his to change.
 
 Current as of 2026-10-09.
 
-## E1. Where it runs
+## F1. What it is for
 
-- **On a page on his machine, until the studio's app is hosted** (his, Cinema-Agents.md R8; Cinema.md F7).
-- *Mine:* **that page is the studio's app, run only locally**: `apps/cinema`, a Next app in the workspace like the
-  others, on port 3009, started with `pnpm --filter cinema dev`. It has no Vercel project and is deployed nowhere until
-  he says. CI builds it like every app, against the sample (E5).
-- **Its screen follows the system** (his, Cinema.md F2): one `Grid`, the picture in a box, and round it the controls
-  built from `@no-origins/ui`.
-- **He plays with the controls himself, and moves round the world** (his, 2026-10-09: "I don't see any controls for me
-  to play around"). *Mine:* the picture at the field's centre, as every studio has it (Motion.md M15); in a column
-  either side the jigs, every control of the world on the left and of the shot on the right (which shot, the frame to
-  see it in, then its camera, lights and cast), drawn from the entries' declarations, so a control added in code is on
-  the screen at once. A change shows at once and is saved to the draft once the jigs stand still, through the same
-  change the `set` command makes (E6), from the revision the screen last saw: a command run meanwhile wins. Under the
-  picture its name and a bar of play, the time to scrub, and **free look**: a drag turns round what the camera looks
-  at, the wheel or a pinch goes nearer, and renders always use the shot's camera.
+- **3D sets, defined with him, from which shots are made** (his): artistic, animatic and cinematic.
+- **Intense motion, music, design, colour and emotion over minimal three.js environments** (his). The environment is
+  kept spare so that the motion, the music and the colour carry the shot.
+- **He is the director; a cast and a crew of agents make the shot** (his, F8), each agent working through the controls
+  of what is in the libraries (F4, F6).
+- **He keeps what he likes as presets** (his): combinations taken across the libraries, which the crew then use, repeat
+  and improve (F5).
+- **What comes out is video and pictures** (his): he takes shots and exports them as video, or as stills. **The worlds
+  stay live** (his), so that visitors can explore them later.
+- **The frame is a control: wide or vertical** (his), and the crew set it as he and Claude instruct. *Mine:* the size,
+  the frame rate and the length are controls too, and one shot can be exported in both frames.
+- **The goal is to make films; the first step is a library of assets** (his, 2026-10-09: "first I will build the
+  environments… I want to have a library of assets to be built first. We don't need camera motion and all of that",
+  F11). Sets, shots and the camera come after. Where the studio is hosted, its name and who may explore a world come
+  later (his, F7).
+- *Mine:* so **a world is one description, played two ways**: live in the browser, and rendered frame by frame to a
+  file. A video and a still are the same frames as the live world, never a second build of it (F5: every frame is a
+  function of time).
 
-## E2. The engine
+## F2. Brand.md does not bind it
 
-- *Mine:* **plain three.js on a canvas**, mounted as Home's viewer is (Home.md H2): no React renderer on top, the
-  canvas the one element that is not a component of the system. It belongs to the app.
-- **The frame is free** (his, Cinema.md F2): lights and shadows, fog, and effects over the picture (bloom, depth of
-  field, grain, the grade). *Mine:* the effects are passes after the render, each an entry of the Effects or Grades
-  library (E4).
-- **Every frame is a function of time** (Cinema.md F5). *Mine:* nothing in a shot reads the clock; the engine asks
-  "draw the shot at second *t*", and the same *t* is the same picture every time, however it is reached. Anything that
-  simulates, such as an agent's landing, is stepped from the start of its action at a fixed step, as the agent's motion
-  already is (Motion.md M17). *Mine:* a thing in a world that moves by itself (a cloud the wind carries) is moved to
-  the moment asked for, by the moment alone. That is what lets a shot be scrubbed, rendered at any frame, and exported frame by frame.
+- **Brand.md does not apply in the studio** (his): not its material (flat, no gradients, no glass, no glow), not its
+  restraint. A shot may use light, fog, bloom, depth of field and colour grading.
+- **It may inherit from the design system** (his): completely where that serves, as with the colours and the sizes, or
+  remade for the 3D world, as Orbit's agents are (F3).
+- **The freedom is the frame's** (his). The studio's own screen, meaning the controls round the picture, follows the
+  system: it is on the grid and built from `@no-origins/ui`, like the other studios.
 
-## E3. A shot is a description
+## F3. The cast
 
-*Mine:* a shot is data, typed in code (public) and written in the private folder (Cinema.md F8):
+- **Orbit's six are cast, recreated in 3D** (his). It is the largest piece of engineering here, and it is done anyway
+  (his). They are cast and never crew (his, F6).
+- **More cast are made, in the factory, from their roles** (his, F10): each an appearance with the same attributes a crew agent has (F6): a character, memory,
+  learnings, controls, feedback and artifacts. A new cast member is not one of Orbit's agents: Agents.md's six stay
+  six.
+- **An agent brings each cast member to life** (his): it acts with the cast member, playing it or helping it play,
+  taking direction and turning it into the cast member's states and actions.
+- **The Hiddenstack rig is not used** (his).
+- *Mine:* **Orbit's six bring their characters with them.** Each one's actor starts from its temperament and voice in
+  Agents.md A2, so Bali acts calm, patient and attentive and Kino eager, bold and happy.
+- *Mine:* **an agent in 3D is its published Orbit version** (Orbit.md C19, C22): shape, rotation, paint, material,
+  surface and face are read from the same `CharacterLook`, so a change in Orbit reaches the cast. The shapes are already
+  3D solids, rounded cores that a camera projects to a drawing (Orbit.md C12, `lib/agent-shape.ts`). In 3D the solid
+  is drawn itself instead of its projection.
+- *Mine:* **what carries over and what has to be decided again**:
 
-| Part | What it holds |
-|---|---|
-| **Frame** | Wide or vertical (his, Cinema.md F1), the size, the frame rate |
-| **World** | The environment and its props, each an entry with its controls set (Cinema.md F4) |
-| **Cast** | Who stands where: each cast member's place on the floor and which way it faces |
-| **Tracks** | One a department's kind of work (Cinema.md F6): camera, each light, each cast member, effects, grade, sound, music, titles. A track is a row of items |
-| **Item** | An entry or a preset (Cinema.md F5) on a track: when it starts, how long it lasts, its controls' values |
-
-- *Mine:* **a shot's length follows from its items**, as an action's does (Motion.md M24): nothing is placed after the
-  last one ends. A camera holds where its last move ended, and a light that nothing follows on its track stays lit to
-  the shot's end, however long the camera makes it (found by the first camera agent's test: the land went black).
-- *Mine:* **a shot has a draft and published versions**, as a character has (Motion.md M20): the crew work on the
-  draft; publishing makes a version that never changes; an export names the version it was made from.
-- *Mine:* **a scene is a list of shot versions with their cuts** (Cinema.md F5), and a film a list of scenes.
-
-## E4. How a library entry is built
-
-- **He describes it; Claude or Codex build it in code; the agents set its controls** (his, Cinema.md F4).
-- *Mine:* **an entry is a declaration and a builder.** The declaration is its name, its version and its controls, typed
-  as the system's properties are (Motion.md M20: number, angle, duration, colour, choice, switch). The builder turns its
-  values, and the moment, into what the engine draws. Each kind of library has its own builder's shape:
-
-  | Kind | The builder gives |
+  | Carries over | Decided again for 3D |
   |---|---|
-  | Environment, prop | Objects in the world, from the values |
-  | Camera move | Where the camera is, what it looks at and its lens, at each moment of the move |
-  | Light | Lights, their colour and strength at each moment |
-  | State, action | The cast member's pose and motion at each moment (Cinema.md F3) |
-  | Effect, grade | A pass over the picture, at each moment |
-  | Sound, music | When it plays, how loud, and from where in the world |
-  | Title | Text in the frame, at each moment |
+  | The shape and its soft edges (Orbit.md C12, C18) | Shade and Depth (Orbit.md C4, C14): real light falls on it now |
+  | The paint, the eyes' colour (Orbit.md C16, C20) | The face: drawn on a surface the camera goes round |
+  | The face's parts and their settings (Motion.md M20) | The surface's hand-drawn texture (Orbit.md C15) on a solid |
+  | Material, and how it scales the motion (Motion.md M17) | The nest: a set has a floor and no bowl |
+  | The actions' names and controls (Motion.md M24) | The tail: a spring chain in space |
+  | | Squash, stretch and wobble: the mesh deforms |
 
-- *Mine:* **an entry's version goes up when its code changes**, and a shot names the version of every entry it uses, so
-  an old shot still plays as it was made, and an old session can still be read (Cinema-Agents.md R6).
-- **An entry's name is his, and he renames it** (2026-10-09). *Mine:* its versions move to the new id together, the old
-  id kept in the entry's `formerly`, so a shot, a published version or an asset saved under the old name finds it;
-  nothing saved is rewritten.
+- *Mine:* **any cast member plays any action** (Motion.md M23). Bounce, Jump and Dive keep their names and controls;
+  their frames come from a 3D model of the same physics, since `sphere-motion` is a side view.
 
-## E5. What is public and what is private
+## F4. The libraries
 
-- **Everything of his is private** (his, Cinema.md F8): the ideas, the worlds, the shots, the agents.
-- **The library entries are private too** (his, 2026-10-09), since each one is built from his description: they are
-  code, but his ideas in code. They live in `apps/cinema/src/content/library/`, gitignored, and the app imports them through an
-  alias, as Home imports the house (`@house`, Home.md H4).
-- **His palette is private too** (Cinema.md F10): the colours he names (`PALETTE` in his folder; White first, his,
-  2026-10-09), which every colour control on the screen offers before the colours already in use; then his further
-  palettes (`PALETTES`), a row of swatches each, the vibrant ones first (his, 2026-10-09: "we need more vibrant color
-  palettes"). A colour stands in one row only; it is called by its value until he names it.
-- *Mine:* **until the app exists, the private folder is `.private/cinema/`**, gitignored already, and it moves into
-  `apps/cinema/src/content/` when the app is built.
-- *Mine:* **the stand-ins are public**: the placeholder figure, a plain camera move and a plain light that Claude
-  adds so a shot can be made before he has described his own (E8). They are tools, not his ideas, and he replaces them
-  as he describes his.
-- *Mine:* **what is public** is the engine, the types of a shot and of every kind of entry, the commands, the
-  renderer, the stand-ins, and a small made-up **sample** (one environment, one camera move, one light, a stand-in, one shot), which
-  is what CI and a fresh clone see, as Home's sample house is.
+- **Every entity has controls of its own** (his): an environment, a cast member, a piece of music, an effect, an agent.
+  The cast and the crew work by setting them (F6).
+- **He describes each environment in his own words** (his), every time he wants a new one or wants to extend one. His
+  description is the brief, as with Home's house (Home.md H2): it is built from his words, and he corrects it in words.
+  The same goes for every other library (his).
+- **Building an entry and using it are separate jobs** (his). This is Motion.md M20 as it stands: what an entry *can*
+  be is code, and what is *chosen* is data.
+  - **Building** an entry, meaning what it is and which controls it has, is code, written from his description by
+    Claude or Codex in this repository, as a new action is (Motion.md M24).
+  - **Using** an entry, meaning setting its controls, placing it and timing it, is data, kept as a draft and published
+    versions. That is the cast's and the crew's work (F6).
 
-## E6. The commands
+  The cast and the crew never write code. A control they need and do not have is a request to the builders, which he
+  approves.
+- **Where the music and the sounds come from is not settled** (his): generated, taken from free libraries, or files he
+  brings (his: "I'll try to get mp4"). *Mine:* each keeps where it came from and its licence, and a free one's
+  attribution goes with every export that uses it.
+- **A library is added when he names one** (his: "more if needed over time").
 
-**The agents work only through commands, and he and Claude use the same ones** (his, Cinema.md F6). *Mine:* a command
-line in the app, `pnpm --filter cinema cmd <command> …`, which every agent can run, and which the screen calls too:
-
-| Command | What it does | Department |
+| Library | What an entry is | |
 |---|---|---|
-| `new` | Starts a shot: its title and its frame | Direction |
-| `world` | Sets the shot's environment and its controls (`--keep` carries over what the new one takes) | Set |
-| `asset save`, `assets` | Saves the shot's world as an asset under his name; lists his assets (E9) | Set; anyone |
-| `cell` | Changes one cell of a grid: its asset, empty, back to the rules, or its copy's values (E9) | Set |
-| `place` | Puts a cast member on the ground, facing a way | Direction, cast |
-| `add` | Puts an entry or a preset on a track, at a time, with its values | The track's |
-| `set` | Changes an item's values | The track's |
-| `move`, `trim`, `remove` | Moves an item in time, changes its length, takes it off | The track's |
-| `frame` | Wide or vertical, the size, the frame rate | Direction, camera |
-| `shots`, `show`, `entries` | Read the shots, a shot as data, and the library with every entry's controls | Anyone |
-| `describe` | The world in words and numbers for an agent planning in it: its focus and size, the highest ground in each patch, the world's own notes (what stands where, how tall, the clouds and the wind), the shot's camera and lights | Anyone |
-| `agents`, `agent new · brief · say · close · feedback` | The agents (Cinema-Agents.md): the factory, the brief that opens a session and records his instruction, the agent's own lines, his feedback and verdicts | Him and Claude; `say` and `close` the agent's own |
-| `still` | Renders the shot at a moment | Anyone |
-| `sheet` | Renders a contact sheet: a still every so often across the shot | Anyone |
-| `clip` | Renders a stretch of the shot as a short video | Anyone |
-| `publish` | Makes the draft the shot's next version | Direction |
-| `export` | Renders a published version as a video or stills, in its frame | Direction |
+| **Cast** | A character's 3D look, with its attributes: an agent from Orbit, or a new cast member (F3) | his |
+| **States** | How a cast member holds itself and feels: pose, face, breath. Emotions are states (Agents.md, Open: moods) | his |
+| **Actions** | What a cast member does: Bounce, Jump, Dive and what he names next | his |
+| **Environments** | The set: ground, horizon, sky, forms, atmosphere | his |
+| **Effects** | What happens in or over the frame: particles, atmosphere, the lens and post | his |
+| **Camera** | Moves, angles and lenses | his |
+| **Lighting** | Lights and rigs of them, their colour and strength | his |
+| **Sound effects** | A sound and where it plays from | his |
+| **Music** | A track with its tempo and beats, so that cuts and actions can land on the beat | mine |
+| **Grades** | A scene's colour: its palette and the grade over it | mine |
+| **Props** | Objects in the set that are not cast | mine |
+| **Titles** | Text in the frame | mine |
 
-- *Mine:* **each command checks before it writes**: the values against their declaration, and the track against the
-  calling agent's department (Cinema-Agents.md R5). A refusal says why, and changes nothing.
-- *Mine:* **each command writes its own line** in the calling agent's session, and each render its artifact
-  (Cinema-Agents.md R6). An agent cannot skip the record.
-- *Mine:* **a command line, not a server, for now.** The agents are Claude Code agents, which run commands; the same
-  commands can be offered over MCP when the harness comes (Cinema.md F8).
+## F5. How they combine
 
-## E7. Rendering
+From the smallest to the largest:
 
-- *Mine:* **a still, a sheet and a clip are drawn by the same page**: a headless browser (Playwright's Chromium,
-  which the review loop already runs) opens the engine's page, `/render`, at a moment and takes the canvas, so what the
-  agent checks is exactly what he sees. That page is the frame at its exact size, so it is not on the grid: it is the
-  renderer's, and no one visits it.
-- *Mine:* **a video is its frames**: the engine draws each frame in turn at its exact moment, never in real time, so a
-  slow frame never drops; the frames go to ffmpeg (on his machine), which encodes the video. A clip for checking is
-  small and quick; an export is at its full size and takes as long as it takes.
-- *Mine:* **sound is mixed separately and joined**: the shot's sound and music items are mixed at their times into one
-  track, offline, and ffmpeg puts it under the picture. Live, the engine plays them through the browser.
-- **The frame is a control** (his, Cinema.md F1): wide or vertical, and one shot can be exported in both.
-- *Mine:* **renders land in the agent's artifacts** (Cinema-Agents.md R2) and exports in the film's folder, named by
-  the shot, its version and the frame.
+1. **An entry** is one thing from one library, with its controls set.
+2. **A preset** is his combination of entries across libraries, with their values (his: "permutations and
+   combinations among all the libraries"): a light rig, a camera angle, a grade and a sound, for example. A preset is
+   versioned like an entry.
+3. **A shot** is a set (an environment, the cast placed in it, the lighting) and a timeline: a track for each thing that
+   moves (the camera, each cast member's states and actions, the effects, the sound, the music), each a row of entries
+   and presets at their lengths. This is the sequencer Motion.md M24 leaves open, grown.
+4. **A scene** is shots in order, with their cuts.
 
-## E8. The first world
+Beside them:
 
-*Mine:* what the first build has to show, before anything else is built: **one shot, made the whole way through.**
+- **A workflow** is the steps an agent follows to direct a shot or a scene: what to take from which library or preset,
+  in what order, and what to check before going on (his). Agents follow one to repeat a shot, and write the next
+  version of one to improve it (his). A workflow is versioned like everything else, and publishing one is his.
+- *Mine:* **every frame is a function of time.** As with the agent's motion (Motion.md M17), any moment is the same
+  frame however it is reached. So a shot can be scrubbed, played live, exported as video or as a still at any frame
+  (F1), and an agent can look at any moment of what it made.
 
-1. The engine's page, the screen round it, and the commands.
-2. **His first environment, built from his description** (his, 2026-10-09). The description is his idea, so it is kept
-   in the private folder (E5) and not here.
-3. A camera move, a light and a stand-in where the cast will stand.
-4. The shot exported as a video and a still, wide and vertical.
+## F6. The crew
 
-It is done when an agent, given his words, makes that shot through the commands alone, and its session is recorded.
+- **The crew are agents** (his). Orbit's six are the cast and never the crew.
+- **A crew agent has** (his): a character, its memory, what it has learnt, its controls, the feedback it has been given
+  and the artifacts it has made. Its controls are its own (F4).
+- **A crew agent has a look, and is made in the factory from its department** (his, F10). *Mine:* its look shows on
+  the studio's screen, beside its sessions and in the day's review, and never in a shot.
+- **The crew work in departments** (his), with the agents of their own department and with other departments. **A
+  department has its own libraries and its own tracks** (his): art (the assets: environments, props, F11), cast (states, actions),
+  camera, light, sound (sound effects, music), effects, colour (grades), and direction, which puts the shot together. A
+  department writes only its own tracks, so two departments never write the same thing; inside one, its agents pass
+  work between them.
+- **One description, and one set of commands that change it** (his). A shot is a description, as Home's house is
+  (Home.md H2). It is changed only through typed commands: place a cast member, set a light, add a camera move, cue a
+  sound, render a still. The cast and the crew use them as tools, and so does Claude.
+- **An agent sees what it made by rendering it** (his): a still at a moment, a contact sheet of a shot, a clip. These
+  are its artifacts, and a workflow's checks look at them.
+- **Feedback becomes learning, and he can read it** (his). He gives feedback on an artifact. The agent keeps the
+  feedback, and writes down what it learnt from it in words he can read and correct. Its next version of the work
+  answers that feedback, as each version of a character or a motion answers his notes.
 
-## E9. Assets, and worlds built from them
+## F7. Where it lives
 
-- **An asset is a configuration he saves under a name of his own** (his, 2026-10-09: "I want to call this an asset…
-  save this configuration… when saving, I will save with the name I want to"). It is an entry, its version and its
-  values, kept in his private folder (E5). Saving under a name he has used makes the asset's next version.
-- *Mine:* **a draft uses an asset's newest version; publishing pins it** to the version in use, so a published shot
-  plays as it was made whatever he saves later (E3).
-- **A world can be a grid of assets** (his: "use this asset to build a grid of assets which will create a world"),
-  **filled by rules, then changed by hand** (his). *Mine:* such an environment declares its grid (its size, and which
-  asset its rules put in each cell), and its cells, "column,row" from 1, are part of the shot's world: a cell may hold
-  another asset, stay empty, or tune its own copy over the asset's values. The engine, the `cell` command and the
-  screen all read the grid from the declaration, so the rules are written once.
-- **A grid can have layers over its ground** (his, 2026-10-09: clouds as "a layer over the grid", and "we need
-  controls to define the movements of clouds"). *Mine:* each layer has rules of its own and takes assets of one kind
-  only; its cells are keyed "<layer>:column,row" and change by hand as the ground's do. What moves the layer (a wind)
-  is the grid's controls; what each thing does by itself (a cloud churning) is its asset's. *Mine:* a grid hands its
-  wind (velocity, turbulence, shear) to what it carries, so the wind can work inside a thing as well as move it; a
-  wind made of noise, not a fluid simulation, so every moment stays a function of the time alone (E2).
-- **An entry may be drawn by a shader of its own** (his pick, 2026-10-09: clouds as a real volume of gas, not balls).
-  *Mine:* it reads the scene's sun and sky as they are when it is drawn, and its picture goes through the same tone
-  mapping as the rest.
-- *Mine:* **the screen** offers a world that is one tile a "Save as asset" card, where he types the name, and an asset
-  control is a list of his assets by name, of the kind it takes. A grid's world has a map of its cells, seen from above,
-  a layer at a time: a cell picked shows
-  what stands there and takes another asset, empty, or back to the rules, and its copy's controls follow the map.
+*Mine:* `apps/cinema`, on `cinema.no-origins.com`, port 3009: the tenth app. It holds the engine where a world plays
+and is rendered, and his screen for watching it, one `Grid` with the picture in a box, like the other studios. The studio
+is his, behind the sign-in (`cinema.open`, Access.md); a live world (F1) is opened to visitors when he publishes it.
+**Later** (his): the host, the name, and who may explore a world. The goal now is films (F1).
+
+## F8. How he directs
+
+- **He is the director** (his). In any session he tells Claude an idea, a scene or a shot, and Claude makes the cast
+  and the crew it needs and instructs each of them to do its job (his).
+- *Mine:* **Claude stands between the director and the floor.** It breaks his idea into each department's work,
+  instructs each agent, has direction put the shot together, renders it, and brings him the artifacts. His notes go
+  back to the agent they are for, as feedback (F6).
+- *Mine:* **sessions forget; the agents do not.** Each agent's character, controls, memory, learnings, feedback and
+  artifacts are kept in files that the next session reads, so an agent made in one session is the same agent in the
+  next, and a shot he left can be picked up again.
+- *Mine:* **for now the agents are Claude Code agents**: Claude starts each one from its core and its recent sessions
+  (F9) and instructs it, it works through the commands of F6, and its session is recorded as it goes.
+- **A harness of its own comes later, if this works** (his): built for the Cinema Studio.
+- **How it works, step by step**, is **Cinema-Agents.md**: how an agent is made, kept, started, instructed, recorded
+  and reviewed.
+- **It is kept out of git, for now** (his): his ideas, the worlds, the shots, the libraries' data and every agent are in
+  a gitignored folder, as Home's house is (Home.md H4), since the repository is public. *Mine:* that folder is
+  `apps/cinema/src/content/`, also in `.vercelignore`. The code is public and written against its types.
+
+## F9. What an agent is made of, and how it grows
+
+**Every agent, cast or crew, keeps what it needs to learn and grow** (his): its profile and meta, its character, its
+controls, its memories, its learnings, the feedback it has been given, its artifacts and its history.
+
+**Its memory is in three tiers** (his, 2026-10-09):
+
+- **Core**: small and capped, loaded every time the agent starts: who it is, its character, its controls and the
+  learnings that matter most. It changes only at the day's review.
+- **Recent**: its latest sessions, loaded when it starts work.
+- **Archive**: everything older, searched only when a job needs it.
+
+| Part | What it is | Tier | Who changes it |
+|---|---|---|---|
+| **Profile and meta** | Its name, cast or crew, its department, when it was made, by whom, its version | Core | Claude, when it makes the agent |
+| **Character** | Its temperament and voice, in words | Core | He does |
+| **Controls** | Its own settings, typed (F4) | Core | He does, or Claude as he instructs |
+| **Learnings** | What it has learnt, as rules it follows | Core, those that matter most; the rest the archive | The day's review; he reads and corrects them |
+| **Memories** | What it knows: about him, the worlds and the shots it has worked on | Recent, then the archive | The agent, as it works |
+| **Sessions** | Its history: each piece of work, as below | Recent, then the archive | Recorded as it works; never edited |
+| **Feedback** | His notes, each on an artifact, kept in the session it belongs to | With its session | He does; never edited |
+| **Artifacts** | What it made: stills, contact sheets, clips | Kept apart, named by their sessions | The agent |
+
+**Every session is recorded** (his). A session is a piece of work the agent did, never its making: **the instructions
+it was given and the controls it set** (his). *Mine:* each record also holds who instructed it, the core it started
+from (by version), every command in order with its values, the artifacts it rendered, his feedback and his verdict on
+each artifact (kept, changed or dropped), and the version of each control's declaration, since a control can change in
+code (Motion.md M20). A record is appended to as the work goes and never edited.
+
+**The sessions are for training small models** (his): further on, they become the data to fine-tune small models, each
+specialised in the role it was trained on. *Mine:* that is why a record keeps the instruction and the controls that
+answered it side by side, which is a training example, and his verdict, which makes it a good one or a bad one. The
+sessions are kept whole and for good, in the private folder (F8).
+
+**The day's review** (his): at the end of each day, the day's sessions are reviewed and each agent's core is updated,
+so that it improves. *Mine:* Claude reads each agent's sessions and his feedback from the day, and proposes the changes
+to its core: a learning added, sharpened or dropped, each citing the sessions it came from. **The review saves them**
+(his), the core as its next version, and **he reads them whenever he can** (his). Then the day's sessions move along
+from recent towards the archive. *Mine:* a core is versioned, so a change he disagrees with is undone by going back to
+the core before it, as with any version (Motion.md M20).
+
+**An agent's performance is understood in several dimensions** (his). How big a core may grow is not fixed: it is one
+of the parameters by which an agent's performance is understood, so that agents can be improved in several dimensions
+(his). *Mine:* an agent's parameters (its core's cap, the model it thinks with, how hard it thinks) are among its
+controls (F4), and the day's review records how each agent did: how much of its work he kept, how many changes a shot
+took before he kept it, which of its learnings its sessions used, and how long and how much its work took. Changing a
+parameter is then a comparison of before and after. **The dimensions are defined over time, and the tracking is built
+as it goes** (his).
+
+## F10. The factory
+
+- **Characters are made in a factory** (his): a cast member from its role, a crew agent from its department.
+- *Mine:* **a role or a department is a template**: the look's starting parts (shape, paint, surface, face, the same
+  parts for cast and crew, so there is one way of making a character), a starting character in words, the controls and
+  libraries it works with, and an empty core. The factory makes an agent from a template, with everything F9 lists.
+- *Mine:* **Claude uses the factory whenever an idea needs someone who is not there yet** (F8), and he can ask for one
+  by its role or department.
+- *Mine:* **a template is versioned**, and an agent keeps the version it was made from, so the sessions of everyone made
+  from one template can later train that role's model together (F9).
+- **The palette grows with the scenes** (his): the colours a made character may wear are defined as the scenes that
+  need them are built, not in advance. Orbit.md C20 keeps its paints to Orbit's agents; the studio's palette is its
+  own.
+
+## F11. Assets first
+
+- **An asset is a thing a set is built from, made with its controls** (his, 2026-10-09): world-building elements such
+  as mountains, clouds, roads and houses, "any sort of assets that we need to create our set". **The art department
+  handles them** (his).
+- **He asks for an asset, then plays with it** (his): once it is built he looks at it in 3D, on its own, and tries its
+  controls; he asks for more controls, drops the ones not needed, or changes it. No camera, no shot.
+- **When he has decided on an asset, its schema is fixed** (his): the controls, or configurations, the art department
+  works with. Each version of an asset answers his notes, one at a time, as a character or a motion does.
+- **For a set, the art department's agents bring the assets it needs together and configure each for it** (his: "when
+  I describe a set, relevant or necessary assets can be brought together by the agents").
+- **The studio opens on a home page, its sections there; the first is Assets** (his, 2026-10-09). *Mine:* an asset
+  opens on its **bench**: the asset alone in the middle, looked round freely, its controls either side, what he sets
+  kept until he changes it. The shots' screen stays, off the home page until he names it a section.
+- **His first asset is Illusion Mountain** (his, 2026-10-09), made from the mountain he had tuned before.
 
 ## Open
 
-Nothing is open.
+1. **Where the music and the sounds come from** (F4).
+2. **The cast in 3D** (F3), the next document's to decide, version by version, as he looks at them: whether light
+   shades them smoothly or in flat steps as Orbit draws them, how the face stays on a body the camera can go round, how
+   they stand and land on a floor instead of in a nest, and how the tail moves in space.

@@ -29,9 +29,11 @@ const STEP = 0.12;
  *
  * **Free look**, the screen's alone: a drag turns round what the shot's camera is looking at, the wheel (or a pinch)
  * goes nearer or further, the arrow keys and + − do the same when the picture has focus, and Escape goes back. It
- * starts from wherever the shot's camera is, and `onFree` says it has; renders always use the shot's camera.
+ * starts from wherever the shot's camera is, and `onFree` says it has; renders always use the shot's camera. With
+ * `overview` (an asset's bench, which has no camera and frames nothing) it fills its box, starts from a view of the
+ * whole world, and Escape goes back there.
  */
-export function Picture({ shot, assets, aspect, length, playing, seek, free, onFree, onTime, onProblems }: {
+export function Picture({ shot, assets, aspect, length, playing, seek, free, onFree, onTime, onProblems, overview = false }: {
   shot: Shot;
   /** His saved assets, for a world built from them. */
   assets: AssetBook;
@@ -47,6 +49,8 @@ export function Picture({ shot, assets, aspect, length, playing, seek, free, onF
   /** Where it is, a few times a second while playing. */
   onTime: (t: number) => void;
   onProblems: (problems: string[]) => void;
+  /** Look at the whole world, not through the shot's camera. */
+  overview?: boolean;
 }) {
   const box = React.useRef<HTMLDivElement>(null);
   const canvas = React.useRef<HTMLCanvasElement>(null);
@@ -59,8 +63,8 @@ export function Picture({ shot, assets, aspect, length, playing, seek, free, onF
   }, [onTime, onProblems, onFree, length]);
 
   const paint = React.useCallback(() => {
-    engine?.draw(time.current, orbit.current ? poseOf(orbit.current) : undefined);
-  }, [engine]);
+    engine?.draw(time.current, orbit.current ? poseOf(orbit.current) : overview ? engine.overview() : undefined);
+  }, [engine, overview]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -80,15 +84,15 @@ export function Picture({ shot, assets, aspect, length, playing, seek, free, onF
   const fit = React.useCallback(() => {
     const host = box.current, target = canvas.current;
     if (!host || !target || !engine) return;
-    const ratio = aspect === "wide" ? 16 / 9 : 9 / 16;
     const { width: w, height: h } = host.getBoundingClientRect();
+    const ratio = overview ? Math.max(0.1, w / Math.max(1, h)) : aspect === "wide" ? 16 / 9 : 9 / 16;
     const width = Math.max(1, Math.floor(Math.min(w, h * ratio)));
     const height = Math.max(1, Math.floor(width / ratio));
     target.style.width = `${width}px`;
     target.style.height = `${height}px`;
     engine.size(width, height, Math.min(window.devicePixelRatio, 2));
     paint();
-  }, [aspect, engine, paint]);
+  }, [aspect, engine, paint, overview]);
 
   React.useEffect(() => {
     if (!engine) return;
@@ -141,13 +145,13 @@ export function Picture({ shot, assets, aspect, length, playing, seek, free, onF
   /** The free look, from where the shot's camera is now. */
   const look = React.useCallback(() => {
     if (orbit.current || !engine) return orbit.current;
-    const pose = engine.poseAt(time.current);
+    const pose = overview ? engine.overview() : engine.poseAt(time.current);
     const [dx, dy, dz] = [0, 1, 2].map((i) => pose.position[i]! - pose.target[i]!) as Vec3;
     const distance = Math.max(0.5, Math.hypot(dx, dy, dz));
     orbit.current = { target: pose.target, yaw: Math.atan2(dx, dz), pitch: Math.asin(dy / distance), distance, lens: pose.lens };
     latest.current.onFree(true);
     return orbit.current;
-  }, [engine]);
+  }, [engine, overview]);
   const turn = (yaw: number, pitch: number) => {
     const o = look();
     if (!o) return;
@@ -186,7 +190,7 @@ export function Picture({ shot, assets, aspect, length, playing, seek, free, onF
         ref={canvas}
         role="img"
         tabIndex={0}
-        aria-label={`${shot.title}, the shot. Drag, or the arrow keys, to look round; the wheel, or + and −, to go nearer.`}
+        aria-label={`${shot.title}${overview ? "" : ", the shot"}. Drag, or the arrow keys, to look round; the wheel, or + and −, to go nearer.`}
         className={free ? "cursor-grabbing touch-none outline-none focus-visible:ring-2 focus-visible:ring-ring" : "cursor-grab touch-none outline-none focus-visible:ring-2 focus-visible:ring-ring"}
         onPointerDown={(event) => {
           event.currentTarget.setPointerCapture(event.pointerId);

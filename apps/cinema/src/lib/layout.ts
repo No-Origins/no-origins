@@ -33,3 +33,31 @@ export function studioLayout(cols: number, rows: number): StudioLayout {
     bar: { col: 1, row: rows - barRows + 1, colSpan: cols, rowSpan: barRows },
   };
 }
+
+/**
+ * Where an asset's bench stands on the field (Cinema-Engine.md E1; the placing mine): the asset at the field's centre,
+ * as large as the field leaves it, its name under it; its controls in a column either side, at most six cells wide, a
+ * cell of air between each column and the picture. No bar: a bench has no time to play. On a field too narrow for
+ * columns either side, the picture on top and the controls in one column under it.
+ */
+export type BenchLayout = { picture: Rect; caption: Rect; left: Rect; right: Rect | null };
+
+export function benchLayout(cols: number, rows: number): BenchLayout {
+  if (cols >= 16) {
+    const side = cols >= 26 ? 6 : cols >= 22 ? 5 : 4;
+    const middle = { col: side + 2, colSpan: cols - 2 * (side + 1) };
+    return {
+      picture: { ...middle, row: 1, rowSpan: rows - 1 },
+      caption: { ...middle, row: rows, rowSpan: 1 },
+      left: { col: 1, row: 1, colSpan: side, rowSpan: rows },
+      right: { col: cols - side + 1, row: 1, colSpan: side, rowSpan: rows },
+    };
+  }
+  const pictureRows = Math.max(3, Math.round(rows * 0.4));
+  return {
+    picture: { col: 1, row: 1, colSpan: cols, rowSpan: pictureRows },
+    left: { col: 1, row: pictureRows + 1, colSpan: cols, rowSpan: Math.max(1, rows - pictureRows - 1) },
+    right: null,
+    caption: { col: 1, row: rows, colSpan: cols, rowSpan: 1 },
+  };
+}

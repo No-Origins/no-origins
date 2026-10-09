@@ -38,9 +38,14 @@ sun; tools, not his ideas), the commands, the renderer, the screen and the sampl
   Mac) and ffmpeg (E7).
 - `src/data/store.ts`: shots on disk (`shots/<id>/draft.json`, `versions/<n>.json`), renders, exports and the agents'
   session lines (Cinema-Agents.md R6).
-- `src/components/studio.tsx`: the screen, one `Grid` (E1): the picture at the centre, the jigs either side
-  (`jigs.tsx`, drawn from the entries' declarations), saved through `PATCH /shot/<id>`; `picture.tsx`: the shot in its
-  box, playing from its own clock, with free look; `render-target.tsx`: the canvas the renderer drives, at `/render`.
+- `src/app/page.tsx` + `src/components/home.tsx`: the home page (Cinema.md F11), its sections, Assets first (the
+  entries his folder lists in `ASSETS`). `src/app/asset/[id]` + `src/components/bench.tsx`: an asset's bench, the
+  asset alone, looked round freely, its controls either side, saved to `benches/<id>.json` (`engine/bench.ts`,
+  `/asset/<id>/bench`).
+- `src/components/studio.tsx`: the shots' screen at `/shots`, one `Grid` (E1): the picture at the centre, the jigs
+  either side (`jigs.tsx`, drawn from the entries' declarations), saved through `PATCH /shot/<id>`; `picture.tsx`: the
+  shot in its box, playing from its own clock, with free look; `render-target.tsx`: the canvas the renderer drives, at
+  `/render`.
 - `src/engine/edit.ts`: setting controls and a grid's cells, the changes the screen and the `set` and `cell` commands
   share. `src/engine/assets.ts`: his assets (E9): finding one by `id` or `id@n`, and pinning them when a shot is
   published. `src/components/world-jigs.tsx`: "Save as asset" and a grid's map of cells.

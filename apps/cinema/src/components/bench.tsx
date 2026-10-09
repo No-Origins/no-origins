@@ -1,0 +1,179 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { ENTRIES, PALETTE, PALETTES } from "@cinema/content";
+
+import { Button } from "@no-origins/ui/components/button";
+import { Grid, GridItem, useGridMetrics } from "@no-origins/ui/components/grid";
+import { ScrollArea } from "@no-origins/ui/components/scroll-area";
+import { Slot } from "@no-origins/ui/components/slot";
+import { Text } from "@no-origins/ui/components/text";
+
+import { EntryJigs, Jig } from "@/components/jigs";
+import { palettesOf } from "@/components/palettes";
+import { Picture } from "@/components/picture";
+import { benchShot } from "@/engine/bench";
+import { makeLibrary } from "@/engine/library";
+import type { AssetBook, Bench, Entry, Value, Values } from "@/engine/types";
+import { benchLayout } from "@/lib/layout";
+
+const library = makeLibrary(ENTRIES);
+/** A change is saved once the jigs have stood still this long, as the studio's are. */
+const SAVE_MS = 500;
+const STILL = { t: 0, n: 0 };
+const ignore = () => {};
+/** A bench's asset stands alone: it draws on none of his saved configurations. One object, so the picture keeps it. */
+const NONE: AssetBook = {};
+
+type Save = { state: "idle" | "saving" | "saved" | "refused"; note?: string };
+
+/**
+ * An asset's bench (Cinema.md F11, Cinema-Engine.md E1; his, 2026-10-09: "I should just be able to see the asset in
+ * the 3D space and look at it and play around with it"): the asset alone at the centre, looked round freely from a
+ * view of the whole of it, lit by the plain sun; its controls either side, a card a group, as the studio draws them.
+ * A change shows at once and is saved to the bench once the jigs stand still. No camera, no time, no shot.
+ */
+function Workbench({ initial }: { initial: Bench }) {
+  const metrics = useGridMetrics();
+  const [bench, setBench] = React.useState(initial);
+  const [free, setFree] = React.useState(false);
+  const [problems, setProblems] = React.useState<string[]>([]);
+  const [save, setSave] = React.useState<Save>({ state: "idle" });
+  const rev = React.useRef(initial.rev);
+  const pending = React.useRef<Values>({});
+  const timer = React.useRef<number | undefined>(undefined);
+  const busy = React.useRef(false);
+
+  const entry = library.find(bench.asset, bench.version);
+  const shot = React.useMemo(() => benchShot(bench, entry?.label ?? bench.asset), [bench, entry]);
+  const palettes = React.useMemo(() => palettesOf(library, shot.world ? [shot.world] : [], PALETTE, PALETTES), [shot]);
+
+  // One save at a time, in order; what changes while one is out goes in the next.
+  const flush = React.useCallback(async () => {
+    if (busy.current) return;
+    busy.current = true;
+    try {
+      while (Object.keys(pending.current).length) {
+        const values = pending.current;
+        pending.current = {};
+        setSave({ state: "saving" });
+        const response = await fetch(`/asset/${initial.asset}/bench`, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ rev: rev.current, values }),
+        });
+        const body = await response.json();
+        if (!response.ok) {
+          if (response.status === 409) {
+            rev.current = body.bench.rev;
+            pending.current = {};
+            setBench(body.bench);
+          }
+          setSave({ state: "refused", note: String(body.refused) });
+          return;
+        }
+        rev.current = body.rev;
+        setBench({ ...body, values: { ...body.values, ...pending.current } });
+        setSave({ state: "saved" });
+      }
+    } finally {
+      busy.current = false;
+    }
+  }, [initial.asset]);
+
+  const change = (control: string, value: Value) => {
+    setBench((now) => ({ ...now, values: { ...now.values, [control]: value } }));
+    pending.current = { ...pending.current, [control]: value };
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(flush, SAVE_MS);
+  };
+
+  if (!metrics || !entry) return null;
+  const layout = benchLayout(metrics.cols, metrics.rows);
+
+  // The groups shared out between the columns by how many controls each holds, the first half on the left.
+  const groups = [...new Set(entry.controls.map((control) => control.group ?? entry.label))];
+  const count = (group: string) => entry.controls.filter((control) => (control.group ?? entry.label) === group).length;
+  const left: string[] = [];
+  let held = 0;
+  for (const group of groups) {
+    if (layout.right && left.length && held >= entry.controls.length / 2) break;
+    left.push(group);
+    held += count(group);
+  }
+  const part = (names: readonly string[]) => ({ ...entry, controls: entry.controls.filter((control) => names.includes(control.group ?? entry.label)) }) as Entry;
+  const jigs = (names: readonly string[]) =>
+    names.length ? (
+      <EntryJigs entry={part(names)} values={bench.values} title={entry.label} bare palettes={palettes} assets={NONE} library={library} onChange={change} />
+    ) : null;
+
+  const card = (
+    <Jig title={entry.label} note={`Asset · version ${entry.version} · ${entry.controls.length} controls`}>
+      <Text role="caption" tone="muted" className="col-span-2">{entry.description}</Text>
+      <div className="col-span-2 flex flex-wrap gap-2">
+        <Button asChild variant="outline" size="sm">
+          <Link href="/">All assets</Link>
+        </Button>
+        <Button variant="outline" size="sm" disabled={!free} onClick={() => setFree(false)}>
+          Look from the start
+        </Button>
+      </div>
+    </Jig>
+  );
+  const column = (children: React.ReactNode, label: string) => (
+    <Slot fill="transparent" inset={0}>
+      <ScrollArea className="size-full" aria-label={label}>
+        <div className="flex flex-col gap-3">{children}</div>
+      </ScrollArea>
+    </Slot>
+  );
+  const right = groups.filter((group) => !left.includes(group));
+
+  return (
+    <>
+      <GridItem {...layout.picture} data-cinema-part="picture">
+        <Slot fill="background" inset={0}>
+          <Picture shot={shot} assets={NONE} aspect="wide" length={1} playing={false} seek={STILL} free={free} onFree={setFree} onTime={ignore} onProblems={setProblems} overview />
+        </Slot>
+      </GridItem>
+      <GridItem {...layout.left} data-cinema-part="controls">
+        {column(
+          layout.right ? jigs(left) : <>{card}{jigs(groups)}</>,
+          layout.right ? `${entry.label}'s controls` : `${entry.label}, and its controls`,
+        )}
+      </GridItem>
+      {layout.right && (
+        <GridItem {...layout.right} data-cinema-part="asset">
+          {column(<>{card}{jigs(right)}</>, `${entry.label}, and more of its controls`)}
+        </GridItem>
+      )}
+      <GridItem {...layout.caption} data-cinema-part="name">
+        <Slot fill="transparent" inset={0} alignX="center" alignY="center">
+          <div aria-live="polite" className="flex min-w-0 flex-col items-center">
+            <Text role="title" as="h2" align="center" className="truncate">{entry.label}</Text>
+            {problems.length ? (
+              <Text role="caption" align="center">{problems.join(" · ")}</Text>
+            ) : save.state === "refused" ? (
+              <Text role="caption" align="center">{save.note}</Text>
+            ) : save.state !== "idle" ? (
+              <Text role="caption" align="center">{save.state === "saving" ? "Saving…" : `Saved, revision ${bench.rev}`}</Text>
+            ) : (
+              <Text role="caption" align="center">Drag to look round; the wheel, or a pinch, to go nearer</Text>
+            )}
+          </div>
+        </Slot>
+      </GridItem>
+    </>
+  );
+}
+
+/** The studios' grid: the field drawn, the pointer a violet ring, no intro (Grid.md D49). */
+export function AssetBench({ initial, title }: { initial: Bench; title: string }) {
+  return (
+    <Grid overlay cursor>
+      <h1 className="sr-only">{`Cinema: ${title}`}</h1>
+      <Workbench initial={initial} />
+    </Grid>
+  );
+}

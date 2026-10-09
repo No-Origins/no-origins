@@ -7,3 +7,6 @@ export const ENTRIES: Entry[] = [plain];
 /** The sample names no colours of its own: its swatches are the ones its entries start from. */
 export const PALETTE: PaletteColour[] = [];
 export const PALETTES: Palette[] = [];
+
+/** The sample's Assets section (Cinema.md F11): its one made-up environment, so the home page and a bench have one. */
+export const ASSETS: string[] = ["plain"];

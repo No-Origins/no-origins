@@ -18,6 +18,8 @@ export type Engine = {
   draw: (t: number, pose?: CameraPose) => void;
   /** Where the shot's camera is at `t`. */
   poseAt: (t: number) => CameraPose;
+  /** A view of the whole world, a little above it and to one side, to look at it rather than shoot it (a bench). */
+  overview: () => CameraPose;
   /** The drawing's size in pixels, and how many device pixels to a pixel. */
   size: (width: number, height: number, pixelRatio?: number) => void;
   dispose: () => void;
@@ -41,6 +43,7 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
   let shot: Shot | null = null;
   let world = EMPTY_WORLD;
   let built: Built[] = [];
+  let worldObject: THREE.Object3D | undefined;
   /** Each light and when it is lit: from its start, until its end or, if nothing follows it on its track, for good. */
   let lights: { item: Item; object: THREE.Object3D; until: number }[] = [];
 
@@ -77,11 +80,12 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
     clear();
     const problems: string[] = [];
     world = EMPTY_WORLD;
+    worldObject = undefined;
     if (next.world) {
       const entry = entryFor(next.world, "environment", problems);
       if (entry) {
         const piece = entry.build(resolve(entry.controls, next.world.values), { library, assets, cells: next.world.cells ?? {} });
-        add(piece);
+        worldObject = add(piece);
         world = piece.world;
       }
     }
@@ -128,6 +132,24 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
     return { position: [world.focus[0], world.focus[1] + world.radius * 0.5, world.focus[2] + world.radius * 1.9], target: world.focus, lens: 35 };
   }
 
+  function overview(): CameraPose {
+    const box = worldObject ? new THREE.Box3().setFromObject(worldObject) : new THREE.Box3();
+    if (box.isEmpty()) box.setFromCenterAndSize(new THREE.Vector3(...world.focus), new THREE.Vector3(world.radius * 2, world.radius, world.radius * 2));
+    const centre = box.getCenter(new THREE.Vector3());
+    const reach = box.getSize(new THREE.Vector3()).length() / 2;
+    const lens = 35;
+    // Far enough that the whole of it fits the frame's narrower angle, from 35° round and 22° up.
+    const narrow = Math.min(radians(fieldOfView(lens, aspect)), 2 * Math.atan(Math.tan(radians(fieldOfView(lens, aspect)) / 2) * aspect));
+    // The box's round reach overstates a flat thing, so a little nearer than the sphere round it.
+    const distance = (reach / Math.sin(narrow / 2)) * 0.9;
+    const yaw = radians(35), pitch = radians(22);
+    return {
+      position: [centre.x + Math.sin(yaw) * Math.cos(pitch) * distance, centre.y + Math.sin(pitch) * distance, centre.z + Math.cos(yaw) * Math.cos(pitch) * distance],
+      target: [centre.x, centre.y, centre.z],
+      lens,
+    };
+  }
+
   function draw(t: number, override?: CameraPose) {
     if (!shot) return;
     for (const piece of built) piece.at?.(t);
@@ -146,6 +168,7 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
     load,
     draw,
     poseAt,
+    overview,
     size(width, height, pixelRatio = 1) {
       renderer.setPixelRatio(pixelRatio);
       renderer.setSize(width, height, false);

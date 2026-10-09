@@ -50,7 +50,7 @@ export const AUTH_ROUTES = ["/", "/sign-in", "/sign-up", "/forgot", "/account"];
  * a fresh clone) it shows the made-up sample shot. `/render` is the renderer's canvas, not a page, and is not swept.
  */
 export const CINEMA = "http://localhost:3009";
-export const CINEMA_ROUTES = ["/"];
+export const CINEMA_ROUTES = ["/", "/shots"];
 
 const APPS = [
   { name: "", base: "", routes: ROUTES },

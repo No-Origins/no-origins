@@ -1,13 +1,17 @@
-import { Studio } from "@/components/studio";
-import { listShots, readAssets, readDraft } from "@/data/store";
+import { ASSETS, ENTRIES } from "@cinema/content";
 
-// The shots are read from disk at each visit: the studio runs on his machine (Cinema-Engine.md E1), and they change as
-// the commands run.
-export const dynamic = "force-dynamic";
+import { Home } from "@/components/home";
+import { makeLibrary } from "@/engine/library";
 
-/** The studio's screen (E1): the shots there are, the first one open, and his saved assets. */
+/**
+ * The Cinema Studio's home (Cinema.md F11; his, 2026-10-09: "we shall create a homepage for Cinema Studio, and the
+ * first section will be assets"): its sections, Assets first, each asset a card that opens its bench.
+ */
 export default function Page() {
-  const shots = listShots();
-  const first = shots[0] ? (readDraft(shots[0].id) ?? null) : null;
-  return <Studio shots={shots.map(({ id, title, versions }) => ({ id, title, versions }))} initial={first} assets={readAssets()} />;
+  const library = makeLibrary(ENTRIES);
+  const assets = ASSETS.flatMap((id) => {
+    const entry = library.latest(id);
+    return entry ? [{ id: entry.id, label: entry.label, description: entry.description, version: entry.version, controls: entry.controls.length }] : [];
+  });
+  return <Home assets={assets} />;
 }
