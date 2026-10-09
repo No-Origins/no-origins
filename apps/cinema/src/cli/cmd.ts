@@ -1,7 +1,7 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { check, parse } from "../engine/controls.ts";
+import { check, parse, problem } from "../engine/controls.ts";
 import { setControls } from "../engine/edit.ts";
 import { makeLibrary, type Library } from "../engine/library.ts";
 import { frameTimes, itemsOf, newShot, nextId, shotLength } from "../engine/shot.ts";
@@ -133,6 +133,15 @@ function edited(shot: Shot, target: string, values: Values) {
     return refuse(error instanceof Error ? error.message : String(error));
   }
 }
+/** The values an entry's controls still take, from a use of another version of it. */
+function keepable(entry: Entry, values: Values): Values {
+  return Object.fromEntries(
+    Object.entries(values).filter(([id, value]) => {
+      const control = entry.controls.find((c) => c.id === id);
+      return control !== undefined && problem(control, value) === undefined;
+    }),
+  );
+}
 const entryOf = (use: Use) => library.find(use.entry, use.version) ?? refuse(`${use.entry}@${use.version} is not in the library`);
 const tag = (use: Use) => `${use.entry}@${use.version}`;
 
@@ -212,10 +221,14 @@ async function run(): Promise<string> {
       const entry = entryNamed(target);
       if (entry.kind !== "environment") refuse(`${entry.id} is a ${entry.kind}, not an environment`);
       const values = valuesFor(entry, pairs);
-      const same = shot.world?.entry === entry.id && shot.world.version === entry.version;
-      const world: Use = { entry: entry.id, version: entry.version, values: same ? { ...shot.world!.values, ...values } : values };
-      const saved = save({ ...shot, world }, { target: "world", entry: tag(world), values });
-      return `${shot.id}'s world is ${tag(world)}${Object.keys(values).length ? `, with ${Object.keys(values).join(", ")} set` : ""} · rev ${saved.rev}`;
+      // The same entry, at this version or another, keeps every value its controls still take (E4: a shot moved on to
+      // an entry's next version keeps what was tuned).
+      const previous = shot.world?.entry === entry.id ? shot.world : undefined;
+      const kept = previous ? keepable(entry, previous.values) : {};
+      const world: Use = { entry: entry.id, version: entry.version, values: { ...kept, ...values } };
+      const saved = save({ ...shot, world }, { target: "world", entry: tag(world), values, ...(previous && previous.version !== entry.version ? { from: tag(previous) } : {}) });
+      const moved = previous && previous.version !== entry.version ? `, moved on from ${tag(previous)} keeping ${Object.keys(kept).length} of its ${Object.keys(previous.values).length} values` : "";
+      return `${shot.id}'s world is ${tag(world)}${moved}${Object.keys(values).length ? `, with ${Object.keys(values).join(", ")} set` : ""} · rev ${saved.rev}`;
     }
 
     case "place": {
