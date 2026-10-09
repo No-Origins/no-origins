@@ -23,6 +23,8 @@ const library = makeLibrary(ENTRIES);
 /** A change is saved once the jigs have stood still this long, as the studio's are. */
 const SAVE_MS = 500;
 const STILL = { t: 0, n: 0 };
+/** How long an asset that moves by itself (a cloud) runs on its page before its time starts again. */
+const HOUR = 3600;
 const ignore = () => {};
 /** A bench's asset stands alone: it draws on none of his saved configurations. One object, so the picture keeps it. */
 const NONE: AssetBook = {};
@@ -150,7 +152,7 @@ function Workbench({ initial, configurations: saved }: { initial: Bench; configu
     <>
       <GridItem {...layout.picture} data-cinema-part="picture">
         <Slot fill="background" inset={0}>
-          <Picture shot={shot} assets={NONE} aspect="wide" length={1} playing={false} seek={STILL} free={free} onFree={setFree} onTime={ignore} onProblems={setProblems} overview />
+          <Picture shot={shot} assets={NONE} aspect="wide" length={HOUR} playing={false} seek={STILL} free={free} onFree={setFree} onTime={ignore} onProblems={setProblems} overview />
         </Slot>
       </GridItem>
       <GridItem {...layout.left} data-cinema-part="asset">

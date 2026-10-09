@@ -33,8 +33,8 @@ Current as of 2026-10-09.
 - **A home page, its first section Assets, and each asset on its page** (his, Cinema.md F11). *Mine:* `/` is the home:
   the studio's name, then each section, a heading row with its cards under it; an asset's card opens `/asset/<id>`,
   its page: the asset as the world at the field's centre, filling its box, looked round freely from a view that fits
-  the whole of it (no camera, no time), lit by the plain sun, on a floor that shows only its shadow (the page's, not
-  the asset's); the card that says which asset it is at the top left, a back arrow before its name (his, 2026-10-09),
+  the whole of it (no camera; time runs only for an asset that moves by itself, a cloud's gas), lit by the plain sun,
+  on a floor that shows only its shadow and hides nothing (the page's, not the asset's); the card that says which asset it is at the top left, a back arrow before its name (his, 2026-10-09),
   its controls under it and on the right, a card a group; a change saved once the jigs stand still to
   `benches/<id>.json` in his folder, from the revision the screen last saw (the code calls an asset's page its bench,
   from before he had an asset called Bench). The Assets section lists the entries his folder names (`ASSETS`), in his

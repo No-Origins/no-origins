@@ -256,8 +256,9 @@ as it goes** (his).
   **what it is for, so the agents know when to use it**, and kept to be used many ways: chosen by the art department
   for a set, and **loaded to start new configurations from**. *Mine:* the asset's page shows the configuration as code, to read
   and copy, beside the form that saves it and the list of those saved; the same name saves its next version.
-- **His assets so far** (his, 2026-10-09): **Illusion Mountain**, made from the mountain he had tuned before, and
-  **Bench**, a block with a glowing circle on its top where a cast member sits.
+- **His assets so far** (his, 2026-10-09): **Illusion Mountain**, made from the mountain he had tuned before;
+  **Bench**, a block with a glowing circle on its top where a cast member sits; and **Clouds**, made from the cloud of
+  gas he had designed before.
 
 ## Open
 

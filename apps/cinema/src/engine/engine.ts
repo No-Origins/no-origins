@@ -20,6 +20,8 @@ export type Engine = {
   poseAt: (t: number) => CameraPose;
   /** A view of the whole world, a little above it and to one side, to look at it rather than shoot it (a bench). */
   overview: () => CameraPose;
+  /** Whether anything built moves by itself (a cloud's gas), so a page that only looks at it still lets time run. */
+  moves: () => boolean;
   /** The drawing's size in pixels, and how many device pixels to a pixel. */
   size: (width: number, height: number, pixelRatio?: number) => void;
   dispose: () => void;
@@ -95,11 +97,14 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
     }
     if (options.floor) {
       const geometry = new THREE.PlaneGeometry(world.radius * 12, world.radius * 12);
-      const material = new THREE.ShadowMaterial({ opacity: 0.12 });
+      // It hides nothing: only the shadows on it are drawn, first, and nothing is kept from being drawn behind it (a
+      // cloud's gas hangs below the ground line).
+      const material = new THREE.ShadowMaterial({ opacity: 0.12, depthWrite: false });
       const floor = new THREE.Mesh(geometry, material);
       floor.rotation.x = -Math.PI / 2;
       floor.position.y = -0.01;
       floor.receiveShadow = true;
+      floor.renderOrder = -1;
       add({ object: floor, dispose: () => (geometry.dispose(), material.dispose()) });
     }
     scene.background = new THREE.Color(world.sky);
@@ -150,7 +155,8 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
     if (box.isEmpty()) box.setFromCenterAndSize(new THREE.Vector3(...world.focus), new THREE.Vector3(world.radius * 2, world.radius, world.radius * 2));
     const centre = box.getCenter(new THREE.Vector3());
     const lens = 35;
-    // From 35° round and 22° up, as near as lets every corner of the world's box stand inside the frame, with air.
+    // From 35° round and 22° up, as near as lets every corner of the world's box stand inside the frame, with air. The
+    // box is what each part says it is: a volume says its mass, not the room round it its gas swirls in.
     const yaw = radians(35), pitch = radians(22);
     const back = new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
     const right = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), back).normalize();
@@ -193,6 +199,7 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
     draw,
     poseAt,
     overview,
+    moves: () => built.some((piece) => piece.at !== undefined),
     size(width, height, pixelRatio = 1) {
       renderer.setPixelRatio(pixelRatio);
       renderer.setSize(width, height, false);

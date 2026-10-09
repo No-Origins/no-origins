@@ -99,7 +99,19 @@ export function Picture({ shot, assets, aspect, length, playing, seek, free, onF
     if (!engine) return;
     latest.current.onProblems(engine.load(shot, assets));
     fit();
-  }, [engine, shot, assets, fit]);
+    // On a page that only looks (`overview`), time still runs for a world that moves by itself, as a cloud's gas does.
+    if (!overview || !engine.moves()) return;
+    let frame = 0;
+    let last = performance.now();
+    const tick = (now: number) => {
+      time.current = (time.current + (now - last) / 1000) % latest.current.length;
+      last = now;
+      paint();
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [engine, shot, assets, fit, overview, paint]);
 
   React.useEffect(() => {
     const host = box.current;
