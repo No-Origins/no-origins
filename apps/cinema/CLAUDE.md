@@ -20,6 +20,9 @@ command line and the server read shots from the same folder (`src/data/store.ts`
 clone) both use the made-up **`src/sample/`**. The folder is in the tree that runs the app: moving the app to another
 checkout means moving the folder by hand, never through git.
 
+**His palette** is there too: `PALETTE` in `src/content/index.ts`, the colours he has named, offered first by every
+colour control on the screen. A colour joins it when he names one.
+
 **Public**: the engine, the types, the stand-ins (`src/engine/builtins`: a placeholder figure, two camera moves, a
 sun; tools, not his ideas), the commands, the renderer, the screen and the sample.
 

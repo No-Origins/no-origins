@@ -5,4 +5,5 @@
  */
 declare module "@cinema/content" {
   export const ENTRIES: import("@/engine/types").Entry[];
+  export const PALETTE: import("@/engine/types").PaletteColour[];
 }

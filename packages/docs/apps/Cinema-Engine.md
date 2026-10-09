@@ -83,6 +83,8 @@ Current as of 2026-10-09.
 - **The library entries are private too** (his, 2026-10-09), since each one is built from his description: they are
   code, but his ideas in code. They live in `apps/cinema/src/content/library/`, gitignored, and the app imports them through an
   alias, as Home imports the house (`@house`, Home.md H4).
+- **His palette is private too** (Cinema.md F10): the colours he names (`PALETTE` in his folder; White first, his,
+  2026-10-09), which every colour control on the screen offers before the colours already in use.
 - *Mine:* **until the app exists, the private folder is `.private/cinema/`**, gitignored already, and it moves into
   `apps/cinema/src/content/` when the app is built.
 - *Mine:* **the stand-ins are public**: the placeholder figure, a plain camera move and a plain light that Claude

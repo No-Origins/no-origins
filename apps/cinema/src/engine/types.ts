@@ -25,6 +25,9 @@ export type Control =
 export type Value = number | string | boolean;
 export type Values = Record<string, Value>;
 
+/** A colour of his palette (Cinema.md F10: it grows with the scenes): what it is, and what it is called. */
+export type PaletteColour = { value: string; label: string };
+
 /** The kinds of library this version builds (Cinema.md F4); effects, grades, sound, music, props and titles come later. */
 export type EntryKind = "environment" | "cast" | "camera" | "light";
 

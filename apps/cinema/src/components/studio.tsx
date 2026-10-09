@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Move3d, Pause, Play } from "lucide-react";
-import { ENTRIES } from "@cinema/content";
+import { ENTRIES, PALETTE } from "@cinema/content";
 
 import { Button } from "@no-origins/ui/components/button";
 import { Card } from "@no-origins/ui/components/card";
@@ -22,7 +22,7 @@ import { Picture } from "@/components/picture";
 import { setControls } from "@/engine/edit";
 import { makeLibrary, type Library } from "@/engine/library";
 import { shotLength } from "@/engine/shot";
-import type { Aspect, Shot, Use, Value, Values } from "@/engine/types";
+import type { Aspect, PaletteColour, Shot, Use, Value, Values } from "@/engine/types";
 import { studioLayout } from "@/lib/layout";
 
 const library = makeLibrary(ENTRIES);
@@ -37,11 +37,13 @@ const clock = (t: number) => `${Math.floor(t / 60)}:${(t % 60).toFixed(1).padSta
 const seconds = (t: number) => `${Number(t.toFixed(2))}s`;
 
 /**
- * The palette as it stands (Cinema.md F10: it grows with the scenes): every colour the library's entries start from,
- * named by what it colours, and every colour the shot already uses. A new colour is added by asking for it.
+ * The palette as it stands (Cinema.md F10: it grows with the scenes): the colours he has named first (`PALETTE`, in
+ * his private folder), then every colour the library's entries start from, named by what it colours, then every
+ * colour the shot already uses. A new colour is added by naming it.
  */
-function paletteOf(lib: Library, shot: Shot | null): ColourOption[] {
+function paletteOf(lib: Library, shot: Shot | null, his: readonly PaletteColour[]): ColourOption[] {
   const named = new Map<string, string>();
+  for (const colour of his) if (!named.has(colour.value.toLowerCase())) named.set(colour.value.toLowerCase(), colour.label);
   for (const entry of lib.entries)
     for (const control of entry.controls)
       if (control.kind === "colour" && !named.has(control.default.toLowerCase())) named.set(control.default.toLowerCase(), `${entry.label} ${control.label.toLowerCase()}`);
@@ -154,7 +156,7 @@ function Workspace({ shots, initial }: { shots: { id: string; title: string }[];
     setSave({ state: "idle" });
   };
 
-  const palette = React.useMemo(() => paletteOf(library, shot), [shot]);
+  const palette = React.useMemo(() => paletteOf(library, shot, PALETTE), [shot]);
   if (!metrics) return null;
   const layout = studioLayout(metrics.cols, metrics.rows);
   const length = shot ? shotLength(shot) : 0;
