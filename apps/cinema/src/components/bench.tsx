@@ -31,7 +31,9 @@ type Save = { state: "idle" | "saving" | "saved" | "refused"; note?: string };
 /**
  * An asset's bench (Cinema.md F11, Cinema-Engine.md E1; his, 2026-10-09: "I should just be able to see the asset in
  * the 3D space and look at it and play around with it"): the asset alone at the centre, looked round freely from a
- * view of the whole of it, lit by the plain sun; its controls either side, a card a group, as the studio draws them.
+ * view of the whole of it, lit by the plain sun; at the top left the card that says which asset it is (his, the same
+ * day: "that's where we usually put the cards that define the asset"), then its controls either side, a card a
+ * group, as the studio draws them.
  * A change shows at once and is saved to the bench once the jigs stand still. No camera, no time, no shot.
  */
 function Workbench({ initial }: { initial: Bench }) {
@@ -92,11 +94,13 @@ function Workbench({ initial }: { initial: Bench }) {
   if (!metrics || !entry) return null;
   const layout = benchLayout(metrics.cols, metrics.rows);
 
-  // The groups shared out between the columns by how many controls each holds, the first half on the left.
+  // The groups shared out between the columns by how many controls each holds, the first half on the left, under the
+  // asset's card.
   const groups = [...new Set(entry.controls.map((control) => control.group ?? entry.label))];
   const count = (group: string) => entry.controls.filter((control) => (control.group ?? entry.label) === group).length;
   const left: string[] = [];
-  let held = 0;
+  // The asset's card heads the left column, about as tall as three controls.
+  let held = 3;
   for (const group of groups) {
     if (layout.right && left.length && held >= entry.controls.length / 2) break;
     left.push(group);
@@ -137,15 +141,12 @@ function Workbench({ initial }: { initial: Bench }) {
           <Picture shot={shot} assets={NONE} aspect="wide" length={1} playing={false} seek={STILL} free={free} onFree={setFree} onTime={ignore} onProblems={setProblems} overview />
         </Slot>
       </GridItem>
-      <GridItem {...layout.left} data-cinema-part="controls">
-        {column(
-          layout.right ? jigs(left) : <>{card}{jigs(groups)}</>,
-          layout.right ? `${entry.label}'s controls` : `${entry.label}, and its controls`,
-        )}
+      <GridItem {...layout.left} data-cinema-part="asset">
+        {column(<>{card}{jigs(layout.right ? left : groups)}</>, `${entry.label}, and its controls`)}
       </GridItem>
       {layout.right && (
-        <GridItem {...layout.right} data-cinema-part="asset">
-          {column(<>{card}{jigs(right)}</>, `${entry.label}, and more of its controls`)}
+        <GridItem {...layout.right} data-cinema-part="controls">
+          {column(jigs(right), `More of ${entry.label}'s controls`)}
         </GridItem>
       )}
       <GridItem {...layout.caption} data-cinema-part="name">
