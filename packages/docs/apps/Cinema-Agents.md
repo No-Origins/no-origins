@@ -122,9 +122,9 @@ reads it whenever he can** (his, Cinema.md F9).
 ## R8. What has to exist first
 
 *Mine:* an agent can only do its job through the commands (Cinema.md F6), and the commands need a world to change and a
-stage to render it. So the order to build in:
+engine to render it (Cinema-Engine.md). So the order to build in:
 
-1. **The stage**: a world as a description, played live and rendered to a still or a clip at any moment (Cinema.md F1,
+1. **The engine**: a world as a description, played live and rendered to a still or a clip at any moment (Cinema.md F1,
    F5), and the commands that change it, each writing its line in the session.
 2. **The agents**: this document's folders, the factory, the brief, the record and the review.
 3. **A first world**: one environment he describes, a camera and a light, with plain stand-ins where the cast will

@@ -148,8 +148,8 @@ Beside them:
 
 ## F7. Where it lives
 
-*Mine:* `apps/cinema`, on `cinema.no-origins.com`, port 3009: the tenth app. It holds the stage where a world plays
-and is rendered, and his screen for watching it, one `Grid` with the stage in a box, like the other studios. The studio
+*Mine:* `apps/cinema`, on `cinema.no-origins.com`, port 3009: the tenth app. It holds the engine where a world plays
+and is rendered, and his screen for watching it, one `Grid` with the picture in a box, like the other studios. The studio
 is his, behind the sign-in (`cinema.open`, Access.md); a live world (F1) is opened to visitors when he publishes it.
 **Later** (his): the host, the name, and who may explore a world. The goal now is films (F1).
 
