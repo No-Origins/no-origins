@@ -12,7 +12,7 @@ export const ROUTES: string[] = ["/"];
 
 /** The showcase is a second app on its own port — its own project, its own domain. */
 export const DESIGN = "http://localhost:3001";
-export const DESIGN_ROUTES = ["/", "/atoms", "/molecules"];
+export const DESIGN_ROUTES = ["/", "/atoms", "/molecules", "/tokens/colour", "/components/button", "/foundations/cursor", "/tokens/spacing"];
 
 /** Engineering (Layer A), a third, on :3003. `/jido` is only a redirect to `/learn/jido`. */
 export const ENGINEERING = "http://localhost:3003";

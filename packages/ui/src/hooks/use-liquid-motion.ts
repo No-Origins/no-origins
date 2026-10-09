@@ -6,8 +6,10 @@ import { liquidFrame, liquidLevel, liquidStill, readLiquidMotion, type LiquidFra
 type LiquidMotionOptions = {
   /** The liquid's box. The motion is read off it (`readLiquidMotion`) when it starts and when `tuning` changes. */
   block: React.RefObject<HTMLElement | null>
-  /** The level it holds, 0 empty to 1 full. It arrives pouring from 0, and a new level pours from where it is. */
+  /** The level it holds, 0 empty to 1 full. It arrives pouring from `from`, and a new level pours from where it is. */
   level: number
+  /** Where it arrives from, 0 empty unless given: the scroll's liquid arrives from the level the cursor already held. */
+  from?: number
   /** Writes a frame onto the liquid. It runs every tick, so it touches the DOM and never React state. */
   paint: (frame: LiquidFrame, motion: LiquidMotion) => void
   /** Anything that changes when the tokens do (the studio's jig): a new value and the motion is read again. */
@@ -29,8 +31,8 @@ type Clock = { start: number; pourAt: number; pour: LiquidPour; level: number; m
  * `paint`; nothing renders per frame. Under reduced motion the liquid is painted once, still at its level, and again
  * at each new level.
  */
-export function useLiquidMotion({ block, level, paint, tuning, still = false, always = false }: LiquidMotionOptions) {
-  const clock = React.useRef<Clock>({ start: 0, pourAt: 0, pour: { from: 0, to: level, since: 0 }, level, motion: null })
+export function useLiquidMotion({ block, level, from = 0, paint, tuning, still = false, always = false }: LiquidMotionOptions) {
+  const clock = React.useRef<Clock>({ start: 0, pourAt: 0, pour: { from, to: level, since: 0 }, level, motion: null })
   const painter = React.useRef(paint)
   React.useLayoutEffect(() => {
     painter.current = paint

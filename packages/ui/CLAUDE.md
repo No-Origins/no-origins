@@ -5,7 +5,9 @@ and components. The repo-root `CLAUDE.md` holds the system-wide rules; this file
 
 Current as of 2026-10-08. Earlier versions and what they decided are in git history.
 
-**What every component wears.** Lime and violet accents (`--primary`, `--secondary`; `--muted` and `--accent` are lime
+**What every component wears.** Spacing by its job (Spacing.md): a box's padding is `p-inset` (a dense box's
+`p-inset-tight`), the space between its parts `gap-stack` or `gap-inline`, never a number off the base's nine steps, and
+never closer to a round corner than it allows. Lime and violet accents (`--primary`, `--secondary`; `--muted` and `--accent` are lime
 mixed over the page, never translucent). **One radius**, half the grid's cell (Grid.md D39): every box is `rounded-lg`,
 which the browser shrinks to a pill or a circle wherever a box is a cell or less across; lines (separators, table rows)
 stay straight. **Fields are outlined pills** (Input, Textarea, InputGroup, the Select triggers, the Combobox's chips,
@@ -30,7 +32,8 @@ src/components/*.tsx      74 components: 61 shadcn copies, edited on purpose (ru
                             (`cursor`, D34, its ring an image in globals.css); the painter fed (D38); the intro's props
                             (`intro`, `introAgents`, `introActions`, `introFocus`, `introFocusAt`, `introAct`,
                             `onIntroFocus`; D50), loading grid-intro.tsx only when there is an intro
-  grid-pages.tsx          `GridPages`: pages on the field and the turn (D27, D35, D37, D49; `TURN_MS`, `keyboard`)
+  grid-pages.tsx          `GridPages`: pages on the field and the turn (D27, D35, D37, D49; `TURN_MS`, `keyboard`),
+                          and the layout's fixtures, drawn on every page and never faded (D51)
   grid-pager.tsx          the bar on the bottom row, a slot of sub-slots (D27, D29): `defaultPagerBar`,
                             `numberedPagerBar` (D36, D46, D47)
   grid-intro.tsx          `GridIntro`: the intro played (D50, Motion.md M22), then the agents resting in their cells for
@@ -62,6 +65,8 @@ src/hooks/*.ts            use-mobile; use-reading-focus (`useReadingFocus`, Grid
                             use-farewell-motion (`useFarewellMotion`: Home's closing, the plan settling onto its cells,
                             then the hero and the links, on the `--motion-farewell-*` tokens)
 src/lib/utils.ts          `cn`, re-exported from the `cn` package
+src/lib/spacing.ts        spacing for script (Spacing.md): `SPACE_STEPS`, the base's nine steps; `SPACE_ROLES`, the
+                            jobs (`inset`, `stack`, `gutter` …); `space(role)` as CSS and `spaceOf(el, role)` in px
 src/lib/motion.ts         tokens for script (Motion.md M3): `motionMs`, `motionNumber`, `motionEase` read a `--motion-*`
                             token off an element when a motion starts; `easing`, `cubicBezier` turn CSS easing into a
                             function
@@ -82,6 +87,13 @@ src/lib/*-motion.ts       a motion's pure model: its tokens read off an element,
   grip-motion.ts          the grip (M16); spring.ts the springs it follows on (`springAt`, `springFollow`)
   step-motion.ts          the slider's marks, zones and tick (M21)
   liquid-motion.ts        liquid (M25): the waves, the bob and the pour
+  scroll-motion.ts        the scroll's liquid (M26, Grid.md D52): `SCROLL_START`, `readScrollMotion`,
+                            `scrollProgress`, and `scrollerAt`, the scrolling component under an event, which the grid
+                            leaves a wheel, a finger or a key to; `scrollCursorAt`, the ring holding a moment of
+                            flowing liquid as a cursor image; `scrollLevel`, the level for a share scrolled.
+                            `scroll-area.tsx` has no scrollbar: over it the ring holds liquid at the share scrolled,
+                            flowing (the cursor's own image redrawn every 50ms into `--scroll-cursor`); while a wheel
+                            turns, the ring and its `Liquid` drawn at the point, grown, the cursor hidden under them
   sphere-motion.ts        the agent's body (M17): a sphere head and a tail settling into its nest as into a bowl, a
                             jump, a landing, its eyes and face (`sphereFrame`, `sphereCourse`, `sphereBowl`)
   human-motion.ts         the human rig: joints and their limits (`HUMAN_JOINTS`), a walk and a run
@@ -143,7 +155,7 @@ components.json           what the CLI reads; aliases resolve to `@no-origins/ui
      dot, reading `move`'s tokens: a family that plays a part of another reads that family's tokens), `focus` (M13)
      and `mode` (M14), the studio's pages only, and `grip` with `--slider-height` (M16, every `Slider`).
    - **Read, not declared** (their `*_START` are the values): `--motion-move-enter-*` (M11), `--motion-step-*` (M21),
-     `--motion-liquid-*` (M25), `--motion-intro-*` (M22), `--motion-sphere-*` (M17).
+     `--motion-liquid-*` (M25), `--motion-scroll-*` (M26), `--motion-intro-*` (M22), `--motion-sphere-*` (M17).
    - **Declared for an app**: `farewell` (Home's closing) and `human` (the human rig, starting values).
 
 `pnpm --filter @no-origins/ui typecheck` checks the package on its own. Everything visual is reviewed through the

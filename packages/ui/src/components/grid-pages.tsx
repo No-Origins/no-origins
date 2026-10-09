@@ -6,6 +6,7 @@ import { isSlotItem, SlotContent } from "@no-origins/ui/components/slot"
 import { Grid, GridItem, type GridMetrics } from "@no-origins/ui/components/grid"
 import { GridPager } from "@no-origins/ui/components/grid-pager"
 import { resolvePages, type GridLayout, type GridLayoutItem } from "@no-origins/ui/lib/grid-layout"
+import { scrollerAt } from "@no-origins/ui/lib/scroll-motion"
 
 /**
  * A layout, one page at a time.
@@ -519,6 +520,8 @@ function createTurn(
   const onWheel = (event: React.WheelEvent) => {
     const { measured, gridH } = inputs.current
     if (!measured) return
+    // A wheel over a component that scrolls its own content is the component's (D52).
+    if (scrollerAt(event.target)) return
     const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? gridH : 1
     // Scrolling up is forward, to the next page (D27: "scrolling up means going to next page") — and "up" is the
     // HAND'S up, fingers moving up the trackpad, which the browser reports as a positive delta (the same as a wheel
@@ -545,7 +548,8 @@ function createTurn(
   }
 
   const onTouchStart = (event: React.TouchEvent) => {
-    touchY = event.touches[0]?.clientY ?? null
+    // A finger on a component that scrolls its own content is the component's (D52).
+    touchY = scrollerAt(event.target) ? null : (event.touches[0]?.clientY ?? null)
   }
   const onTouchMove = (event: React.TouchEvent) => {
     const y = event.touches[0]?.clientY
@@ -652,6 +656,8 @@ export type RenderGridItem = (item: GridLayoutItem) => React.ReactNode
 type GridPageSurfaceProps = {
   items: GridLayoutItem[]
   renderItem?: RenderGridItem
+  /** The layout's fixtures (D51): marked `data-fixed`, which globals.css leaves out of the turn's fade. */
+  fixed?: boolean
 }
 
 /**
@@ -662,11 +668,19 @@ type GridPageSurfaceProps = {
  * Memoised, and the turn is not a prop: the phase is an attribute on the tracks, which globals.css fades the page away
  * and in off, so a turn starting, washing or ending renders no card.
  */
-const GridPageSurface = React.memo(function GridPageSurface({ items, renderItem }: GridPageSurfaceProps) {
+const GridPageSurface = React.memo(function GridPageSurface({ items, renderItem, fixed }: GridPageSurfaceProps) {
   return (
     <>
       {items.map((item) => (
-        <GridItem key={item.id} col={item.col} row={item.row} colSpan={item.colSpan} rowSpan={item.rowSpan} className="relative touch-none select-none">
+        <GridItem
+          key={item.id}
+          col={item.col}
+          row={item.row}
+          colSpan={item.colSpan}
+          rowSpan={item.rowSpan}
+          data-fixed={fixed || undefined}
+          className="relative touch-none select-none"
+        >
           {renderItem ? renderItem(item) : isSlotItem(item) ? <SlotContent item={item} /> : null}
         </GridItem>
       ))}
@@ -749,6 +763,8 @@ function GridPages({
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
       const target = event.target as HTMLElement | null
       if (target && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))) return
+      // A component that scrolls its own content takes the keys while it has focus (D52).
+      if (scrollerAt(target)) return
       const dir = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 0
       if (!dir) return
       event.preventDefault()
@@ -772,6 +788,8 @@ function GridPages({
       style={TURN_STYLE}
       {...handlers}
     >
+      {/* The fixtures first, so they read before the page (a sidebar before its content, D51). */}
+      {layout.fixtures?.length ? <GridPageSurface items={layout.fixtures} renderItem={renderItem} fixed /> : null}
       <GridPageSurface items={items} renderItem={renderItem} />
       <GridPager
         page={Math.min(shown, count - 1)}

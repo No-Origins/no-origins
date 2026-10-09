@@ -13,7 +13,7 @@ it before editing the app (its `AGENTS.md` points there and carries the Next.js 
 | App | Folder | Host | Port | What it is |
 |---|---|---|---|---|
 | Portfolio | `apps/portfolio` | hiddenstack.no-origins.com (bhargav.no-origins.com redirects) | 3000 | His portfolio: one agent's section a page, turned by the agents (Portfolio.md P24) |
-| Showcase | `apps/design` | design.no-origins.com | 3001 | The design system's specimens, atoms and molecules |
+| Showcase | `apps/design` | design.no-origins.com | 3001 | The design system, Circles: a sidebar of ten groups, a page each with its purpose, and the specimens |
 | Admin | `apps/admin` | admin.no-origins.com | 3002 | People, Roles, Invitations, Audit and Settings (Access.md); `admin.open` and a second factor |
 | Engineering | `apps/engineering` | engineering.no-origins.com | 3003 | The engineering publish library: public explanations, no auth |
 | Motion studio | `apps/motion` | motion.no-origins.com | 3004 | Where the system's motion is designed (Motion.md); `motion.open` |
@@ -104,25 +104,30 @@ shadcn/ui, style `radix-sera`, base `radix`, base colour `neutral`, RTL on: 74 c
       pager bar), loading `load` (M10), hyper focus `focus` (M13) and focus mode `mode` (M14), those three on their
       studio pages only, and the grip `grip` (M16, every `Slider`). The agents' actions, Bounce, Jump and Dive (M24),
       are data: drafts and `major.minor` versions in the database.
-    - **On the bench, not decided:** enter · exit (M11), the slider's marks (M21), liquid (M25), the intro's tokens
+    - **On the bench, not decided:** enter · exit (M11), the slider's marks (M21), liquid (M25), the scroll's liquid
+      (M26, not on the bench), the intro's tokens
       (M22); their tokens are read with fallbacks, not in globals.css. Home's closing (`farewell`) and the human rig
       (`human`, starting values) have tokens there and no bench.
-11. **Text is a `Text`** (Type.md T1): eight roles (`hero`, `display`, `title`, `heading`, `label`, `body`, `caption`,
+11. **Spacing is two layers** (Spacing.md): a base of nine steps, `0 · 2 · 4 · 8 · 12 · 16 · 24 · 32 · 48px`, and no
+    others (SP2), and on it every space named by its job (SP3): `inset` (a box's padding), `inset-tight` (a dense
+    box's), `inset-pill` (a one-cell box's), `stack`, `stack-tight`, `inline`, `inline-tight`, `gutter`, as
+    `p-inset`, `gap-stack`. A box's padding clears its round corner (SP4); between boxes there is no margin (SP5).
+12. **Text is a `Text`** (Type.md T1): eight roles (`hero`, `display`, `title`, `heading`, `label`, `body`, `caption`,
     `mono`), a tone (`foreground`, `muted`, `faint`, `lime`), an alignment, `weight="heavy"`. Never `text-2xl`.
-12. **No gradients**: a surface is one flat colour, `color-mix`ed if it needs a hue. The one exception is the
+13. **No gradients**: a surface is one flat colour, `color-mix`ed if it needs a hue. The one exception is the
     portfolio's project-card image placeholders (lime to violet, with grain) until real images arrive. The agents take
     depth from grain, relief and stepped shade.
-13. **No glass**: no blur, frost, translucent surface, refraction, rim light or glow (none round the pointer). The
+14. **No glass**: no blur, frost, translucent surface, refraction, rim light or glow (none round the pointer). The
     exception is the motion studio's Hyper focus and Focus mode pages, hyper focus's blur and focus mode's 60% veil
     (Motion.md M13, M14); no page in any app blurs (Portfolio.md P21). Open: translucency (the overlays' `bg-black/20`).
-14. **No loader on any page** (Grid.md D49): a page is on the field once the grid has measured it; loading plays on the
+15. **No loader on any page** (Grid.md D49): a page is on the field once the grid has measured it; loading plays on the
     studio's Loading page only, until he names a loader. The grid's intro (D50) is the agents, not a loader.
-15. **Editing a shadcn component is a decision**: say why in a comment, since `shadcn add --overwrite` discards it.
+16. **Editing a shadcn component is a decision**: say why in a comment, since `shadcn add --overwrite` discards it.
 
 ## How he works
 
 - **Every route of every app is on the grid**: `GridPages` (or `Grid`), boxes in `Slot`s, overflow to the next page,
-  nothing scrolling, never a `max-w-* mx-auto` column. "Version 1" or "his to design" covers what sits on the grid,
+  no page scrolling (a component may scroll its own content: Grid.md D52), never a `max-w-* mx-auto` column. "Version 1" or "his to design" covers what sits on the grid,
   never whether; a page off the grid is to flag, not to copy. Check that `[data-slot="grid"]` is there and the page's
   scroll size is the viewport. Open: engineering and the sign-in screen (a card over a bare field), his to decide.
 - **Size boxes to their content.** Never stretch a component to its room: a card spans the rows its content needs, a
@@ -167,7 +172,10 @@ data**: items with a span per breakpoint and a render function, arranged on the 
   **`GRID_SPACING` is `0 · 4 · 8 · 12 · 16`**: the gap and a slot's `inset` (`SlotInset`) are steps of it.
 - **A box is a `Slot`** (Slots.md): one registry component (`Placed`) or sub-slots on its own cells, with `fill`
   (`transparent` · `background`, masking the lines · `muted` · `card`; D21), `inset`, `alignX`/`alignY`, no margin.
-  Every slot fills its span and **clips**: a cut-off component is in a slot that is too small. A Card in a slot gets
+  Every slot fills its span and **clips**: a cut-off component is in a slot that is too small. **A component may scroll
+  its own content** in a `ScrollArea` (D52): no scrollbar; over it the cursor's ring holds liquid at the share
+  scrolled, floating up as the pointer enters, growing while it scrolls and disappearing once the hand is still
+  (Motion.md M26); the grid leaves its wheel, finger and keys to it. A Card in a slot gets
   `transparent`, inset 0, stretch. Boxes are placed by coordinate, 1-based; **overflow goes to another page** (D5).
 - **The pager is a bar on the bottom row** (D27, D29): a fixture `GridPages` draws on every page, its cells
   reserved (`pagerCells`), one a layout (`layout.bar`), its cells sub-slots: four empty `card` cells, then the ↑ ↓

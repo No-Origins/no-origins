@@ -4,7 +4,7 @@ import { ThemeProvider } from "@no-origins/ui/components/theme-provider";
 import { TooltipProvider } from "@no-origins/ui/components/tooltip";
 import { Toaster } from "@no-origins/ui/components/sonner";
 import { cn } from "@no-origins/ui/lib/utils";
-import { ShowcaseNav } from "@/components/showcase-nav";
+import { SidebarStateProvider } from "@/components/sidebar";
 import "./globals.css";
 
 // Fonts stay the host's job: the app declares --font-sans / --font-heading / --font-mono, the package only reads them.
@@ -27,10 +27,9 @@ export const viewport: Viewport = {
 /**
  * design.no-origins.com — the showcase.
  *
- * Built on shadcn/ui (style `radix-sera`, base `radix`) and on the grid: nothing here scrolls, every page is a
- * `GridPages` under the one bar that names where you are, arranged the portfolio's way (Portfolio.md P2). Everything
- * it renders is imported from `@no-origins/ui/components/*` — the showcase owns no components of its own beyond this
- * shell.
+ * Built on shadcn/ui (style `radix-sera`, base `radix`) and on the grid: nothing here scrolls, and every page is a
+ * `GridPages` that is the viewport, arranged the portfolio's way (Portfolio.md P2). There is no chrome above it.
+ * Everything it renders is imported from `@no-origins/ui/components/*`.
  */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -42,9 +41,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full">
         <ThemeProvider>
           <TooltipProvider>
-            <ShowcaseNav />
-            {/* No container here: every page is a grid that fills the viewport under the nav. */}
-            <main>{children}</main>
+            {/* No container here: every page is a grid that fills the viewport. What the sidebar has open lives
+                here, so it stays open from page to page. */}
+            <SidebarStateProvider>
+              <main>{children}</main>
+            </SidebarStateProvider>
             <Toaster />
           </TooltipProvider>
         </ThemeProvider>

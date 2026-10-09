@@ -68,6 +68,12 @@ export type GridLayout = {
    * arrows under the reader's hand mid-turn. Absent for D27's bar — empty `card` cells, then the arrows.
    */
   bar?: GridLayout
+  /**
+   * Boxes the layout keeps on every page (Grid.md D51): drawn with whichever page is shown, on their own cells, and
+   * never faded by a turn, as the bar is not. They are placed on the field as given — the layout's author keeps every
+   * page off their cells — and drawn by the same `renderItem` as the pages' boxes.
+   */
+  fixtures?: GridLayoutItem[]
 }
 
 /** The fixed counts a layout saved before 2026-09-21 was authored on, so it still knows its field. */

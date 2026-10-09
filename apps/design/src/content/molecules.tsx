@@ -361,7 +361,7 @@ export const MOLECULES: PageContent = {
       },
       {
         id: "Alert",
-        span: CARD(4),
+        span: CARD(6),
         render: () => (
           <Specimen name="Alert" note="A standing message on the page, not a transient one.">
             <Alert className="max-w-lg">
@@ -1069,7 +1069,7 @@ export const MOLECULES: PageContent = {
         span: CARD(4),
         // Shorter when the packer has given it a row back to keep it on a page (Portfolio.md P5).
         render: (placed) => (
-          <Specimen name="ScrollArea" note="A styled scroller, so the bar matches the theme.">
+          <Specimen name="ScrollArea" note="A box that scrolls its own content, with no scrollbar: over it the cursor's ring holds liquid at how far it is scrolled.">
             <ScrollArea className={cn("w-72 border p-3", placed.rowSpan >= 4 ? "h-40" : "h-28")}>
               <div className="space-y-2">
                 {Array.from({ length: 16 }, (_, i) => (

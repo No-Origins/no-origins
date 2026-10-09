@@ -32,6 +32,7 @@ database (M24).
 | Grip (M16) | `--motion-grip-*` and `--slider-height` in globals.css | every `Slider` | his |
 | Steps (M21) | `--motion-step-*`, `--slider-mark-*`, not in globals.css (`STEP_START`) | a `Slider` with `marks`: the studio and the showcase | version 1 |
 | Liquid (M25) | `--motion-liquid-*`, not in globals.css (`LIQUID_START`) | `Liquid`: the status page, the showcase, the studio | version 1 |
+| The scroll's liquid (M26) | `--motion-scroll-*`, not in globals.css (`SCROLL_START`) | every `ScrollArea`: the cursor's liquid is how far it is scrolled, the ring growing while it scrolls | version 4 |
 | The agent's motion settings (M17, M23) | `SPHERE_START`; `--motion-sphere-*` on the studio's stage | every agent, under every action | his version 15 |
 | The agents' actions (M24) | the database: `studio_items` of kind `action` and their versions | the studio's Agents page; the portfolio's intro, from a copy | his, published |
 | The intro (M22) | `INTRO_START`; `--motion-intro-*`, not in globals.css | the portfolio | his 2s gather; the rest mine |
@@ -713,6 +714,45 @@ by version. The status page plays it in a cell beside every app (Status.md); the
 - **Flagged:** in a 60px cell an 8% wave is under 5px and may read as a shimmer; the back wave's tone reads differently
   in the two themes; many liquids bobbing together on the status page may read as the page breathing. **Open:** the
   colour is a prop, not a token; whether a liquid's colour is his to pick per use.
+
+
+**M26 — The scroll's liquid: the cursor shows how far a box is scrolled.** Version 4 (2026-10-09), designed version by
+version; not on the bench. His, in turn: "the scroll bar should show the percentage like fluid in our status page … as
+we scroll the fluid should fill up and the fluid should have motion, and then the fluid should disappear after a
+second"; "show some minimum level of fluid in the cursor that floats up when the cursor enters a scrollable area";
+"there is no motion to it … it feels like it is stuck"; and "the level of the fluid should always be tied to the amount
+of scroll in the section … it should disappear. And whenever there's movement of the cursor, the fill should be visible
+again"; and, so a scroll this new is noticed, "while scrolling, let's scale up the cursor and the fluid in it. And then
+once the scroll stops, we scale back. The motion, as usual, has to be fluid".
+
+- **What it is** (Grid.md D52): a component that scrolls its own content, in a `ScrollArea`, has no scrollbar; the
+  cursor's ring shows how far it is scrolled, filled with `Liquid` (M25) in a 20px glass inside its 24px ring.
+- **The level is always the scroll** (`scrollLevel`): Rest at the top, full at the end, in proportion between, so a box
+  that scrolls always shows some. A box whose content fits shows none.
+- **Entering**, the liquid floats up from empty to the level over **Rise** on **Rise ease**, flowing. **Moving** the
+  pointer keeps it shown, at the level. **Scrolling** fills or empties it with the scroll. Once the hand has been still
+  for **Hold** (no move, no scroll), it **disappears** over **Fade**; the pointer moving again shows it again, fading in
+  at the level. **Leaving**, the ring is hollow.
+- **The ring grows while it scrolls.** At the first scroll, the ring and its liquid grow to **Grow** times the cursor
+  over **Grow in**, on **Grow in ease** (a little past, then back); **Settle** after the last scroll they ease back to
+  the cursor's size over **Grow out** on **Grow out ease**, and the cursor takes the level on.
+- **Two drawings, one liquid.** While the pointer moves or rests, the liquid is part of the cursor's own image, so it
+  moves with the hand and never trails it (Grid.md D34): redrawn every 50ms (`SCROLL_CURSOR_FRAME_MS`, as often as a
+  browser redraws a changed cursor under a still mouse), each a moment of M25's flow, waves, back wave and bob
+  (`scrollCursorAt`, into `--scroll-cursor`). While a wheel turns, the hand is still, so the ring and its liquid are
+  drawn at the point at the screen's rate, where they can grow, following the level on a quick **Pour**, and the
+  cursor is hidden under them (`--scroll-cursor: none`); back at its size, or when the pointer moves, the drawing goes
+  and the cursor's image carries the level on.
+- **No ring cursor** (a finger, the keyboard, a grid without `cursor`): the scrolling liquid shows in a ring of its own,
+  at the pointer or the box's top end corner, and goes over Fade after Hold.
+- **The tokens**, `--motion-scroll-*`, none in globals.css (`SCROLL_START`, `lib/scroll-motion.ts`): **Rest** 0.2,
+  **Rise** 480ms, **Rise ease** the liquid's pour ease (expo out), **Hold** 1000ms, **Fade** 240ms, **Pour** 280ms (the
+  liquid's pour, quick so the level keeps up with the hand), **Wave** 0.14 (the liquid's wave, taller than its 8% so a
+  20px glass shows it), **Grow** 2, **Grow in** 320ms on `cubic-bezier(0.34, 1.56, 0.64, 1)`, **Grow out** 420ms on
+  `cubic-bezier(0.22, 1, 0.36, 1)`, **Settle** 180ms. The rest of the liquid's motion is M25's.
+- **Reduced motion:** no rise, no flow and no growing; a flat surface at the level, as M25 (`scrollCursorStill`).
+- **Open:** 20 frames a second is a cursor's ceiling, so the flow between scrolls is a little coarser than the scroll's;
+  the colour (lime, the liquid's, inside the violet ring); where it shows for a finger.
 
 ## 5. Open
 

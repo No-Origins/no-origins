@@ -4,10 +4,16 @@ import type { GridBreakpoint, Responsive } from "@no-origins/ui/components/grid"
 import type { GridLayoutItem, GridShape, SlotFill } from "@no-origins/ui/lib/grid-layout";
 
 /** The field a page is being arranged for: the live counts and the breakpoint that supplied the cell (Grid.md D12). */
-export type ShowcaseField = GridShape & { bp: GridBreakpoint };
+export type ShowcaseField = GridShape & { bp: GridBreakpoint; cell?: number };
 
 /** A size in cells, per breakpoint — the one design decision a specimen carries (Grid.md D18). */
 export type Span = { cols: number; rows: number };
+
+/**
+ * A span worked out from the band the page is actually given — its width in columns and the breakpoint whose sizes it
+ * reads — for a box of text whose rows follow how much of it a line holds.
+ */
+export type SpanFor = (band: number, bp: GridBreakpoint, cell?: number) => Span;
 
 /**
  * One thing on a showcase page: an id, its span per breakpoint, the box it sits in, and what it shows once placed.
@@ -16,10 +22,15 @@ export type Span = { cols: number; rows: number };
  */
 export type SpecimenItem = {
   id: string;
-  span: Responsive<Span>;
+  span: Responsive<Span> | SpanFor;
   /** The slot's fill (Slots.md S3), or `none` — the item IS the component, unwrapped (a Card is already a box). */
   variant?: SlotFill | "none";
   render: (placed: GridLayoutItem) => ReactNode;
+  /**
+   * Its rows are what its content needs: never given fewer to stay on a page, but moved whole to the next. For text and
+   * drawings, which cannot get denser; a specimen that can (Portfolio.md P5) leaves it off.
+   */
+  keep?: boolean;
 };
 
 /** A run of specimens that belong together. A section always starts a new page; a long one spills onto more. */

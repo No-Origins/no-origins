@@ -31,7 +31,7 @@ function PopoverContent({
         align={align}
         sideOffset={sideOffset}
         className={cn(
-          "z-50 flex w-72 origin-(--radix-popover-content-transform-origin) flex-col gap-4 rounded-lg bg-popover p-4 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden motion-surface data-[side=bottom]:slide-in-from-top-(length:--motion-surface-shift) data-[side=left]:slide-in-from-right-(length:--motion-surface-shift) data-[side=right]:slide-in-from-left-(length:--motion-surface-shift) data-[side=top]:slide-in-from-bottom-(length:--motion-surface-shift) data-open:animate-in data-open:fade-in-0 data-open:zoom-in-(--motion-surface-scale) data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-(--motion-surface-scale)",
+          "z-50 flex w-72 origin-(--radix-popover-content-transform-origin) flex-col gap-inset rounded-lg bg-popover p-inset text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden motion-surface data-[side=bottom]:slide-in-from-top-(length:--motion-surface-shift) data-[side=left]:slide-in-from-right-(length:--motion-surface-shift) data-[side=right]:slide-in-from-left-(length:--motion-surface-shift) data-[side=top]:slide-in-from-bottom-(length:--motion-surface-shift) data-open:animate-in data-open:fade-in-0 data-open:zoom-in-(--motion-surface-scale) data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-(--motion-surface-scale)",
           className
         )}
         {...props}

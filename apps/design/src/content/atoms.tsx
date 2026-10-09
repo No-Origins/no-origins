@@ -48,7 +48,7 @@ export const ATOMS: PageContent = {
       {
         id: "Button",
         // Six columns on lg (420px) wrap the variants and the sizes to two rows each: a row more there.
-        span: { ...half(4), lg: { cols: 6, rows: 5 } },
+        span: { ...half(6), lg: { cols: 6, rows: 6 } },
         render: () => (
           <Specimen name="Button" note="Six variants, four sizes, four icon sizes. `asChild` hands the styling to a link.">
             <div className="flex flex-wrap items-center gap-3">
@@ -343,8 +343,8 @@ export const ATOMS: PageContent = {
       },
       {
         id: "AspectRatio",
-        // The boxes are sized so the two stand side by side inside a half on lg (380 of the 396px inside the inset) and stack on a phone.
-        span: half(4),
+        // The boxes are sized so the two stand side by side inside a half on lg and stack on a phone.
+        span: half(5),
         render: () => (
           <Specimen name="AspectRatio" note="Holds a box's shape while what goes in it loads.">
             <div className="w-60">

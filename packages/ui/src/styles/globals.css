@@ -53,14 +53,15 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* The sidebar's colours are the system's (no greys of their own): hover and the current row are the muted tint. */
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--muted);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
   /* The first colours in a neutral system: his picks, 2026-09-24, for the portfolio's "HEY!" — lime the word, violet
      the "!" — given as sRGB 206 238 56 and 146 98 243 (these round-trip to exactly those). Named for what they are,
      not where they are used, so they can be used again. One value in both themes, so `.dark` does not repeat them. */
@@ -119,6 +120,36 @@
 /* A custom property's var() resolves where it is declared: the grid re-declares the radius so its own cell is read. */
 [data-slot="grid"] {
   --radius: calc(var(--grid-cell) / 2);
+}
+
+/* ── spacing (Spacing.md, 2026-10-09) ─────────────────────────────────────────────────────────────────────────
+   Two layers (SP1). The base is a few steps, and no others (SP2): 0 · 2 · 4 · 8 · 12 · 16 · 24 · 32 · 48px, which are
+   Tailwind's own steps 0 · 0.5 · 1 · 2 · 3 · 4 · 6 · 8 · 12. On it, every space is named by its job (SP3), and a
+   component asks for the job: `p-inset`, `gap-stack`, `p-inset-pill`. A box's padding never comes closer to its
+   corner than the corner allows (SP4): about 0.3 of the radius clears a round corner, so each inset is the larger of
+   its step and that. The insets read the radius, so, like it, they are declared again on every grid, which has a cell
+   of its own. Between boxes on the grid the space is the gutter; there is no margin (SP5). */
+:root,
+[data-slot="grid"] {
+  /* A box's padding: a card, a dialog, a slot with a surface. */
+  --space-inset: max(32px, calc(var(--radius) * 0.3));
+  /* A dense box's padding: a menu's panel, a popover of choices, a one-row record. */
+  --space-inset-tight: max(12px, calc(var(--radius) * 0.3));
+  /* A box one cell tall's padding, a pill, where the corner is half the box: the same on every side. */
+  --space-inset-pill: max(16px, calc(var(--radius) * 0.5));
+}
+
+:root {
+  /* Between things stacked in a box: a heading and its text, one paragraph and the next. */
+  --space-stack: 8px;
+  /* Between a label and what it names, a title and its note. */
+  --space-stack-tight: 4px;
+  /* Between things side by side in a row: controls, chips, a button and the next. */
+  --space-inline: 8px;
+  /* Between an icon and its word, inside one control. */
+  --space-inline-tight: 4px;
+  /* Between boxes on the grid, and the grid's own padding (Grid.md D13, D15). */
+  --space-gutter: 12px;
 }
 
 /* ── motion (Motion.md, 2026-09-27) ───────────────────────────────────────────────────────────────────────────
@@ -327,14 +358,15 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* The sidebar's colours are the system's (no greys of their own): hover and the current row are the muted tint. */
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--muted);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
 @theme inline {
@@ -366,6 +398,15 @@
   --color-lime: var(--lime);
   --color-lime-foreground: var(--lime-foreground);
   --color-violet: var(--violet);
+  /* Spacing by its job (Spacing.md SP3): `p-inset`, `gap-stack`, `p-inset-pill` … */
+  --spacing-inset: var(--space-inset);
+  --spacing-inset-tight: var(--space-inset-tight);
+  --spacing-inset-pill: var(--space-inset-pill);
+  --spacing-stack: var(--space-stack);
+  --spacing-stack-tight: var(--space-stack-tight);
+  --spacing-inline: var(--space-inline);
+  --spacing-inline-tight: var(--space-inline-tight);
+  --spacing-gutter: var(--space-gutter);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -433,16 +474,16 @@
   }
 }
 
-[data-slot="grid-tracks"][data-turn="wash"]>[data-slot="grid-item"]:not([data-pager]) {
+[data-slot="grid-tracks"][data-turn="wash"]>[data-slot="grid-item"]:not([data-pager]):not([data-fixed]) {
   animation: grid-turn-out var(--grid-turn-fade) cubic-bezier(0.32, 0, 0.67, 0) forwards;
 }
 
-[data-slot="grid-tracks"][data-turn="in"]>[data-slot="grid-item"]:not([data-pager]) {
+[data-slot="grid-tracks"][data-turn="in"]>[data-slot="grid-item"]:not([data-pager]):not([data-fixed]) {
   animation: grid-turn-in var(--grid-turn-fade) cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-slot="grid-tracks"][data-turn]>[data-slot="grid-item"]:not([data-pager]) {
+  [data-slot="grid-tracks"][data-turn]>[data-slot="grid-item"]:not([data-pager]):not([data-fixed]) {
     animation: none;
   }
 }
@@ -501,6 +542,14 @@
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%239262f3' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
   cursor: image-set(url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%239262f3' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 1x,
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%239262f3' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 2x) 12 12, auto;
+}
+
+/* Over a component that scrolls its own content (Grid.md D52, Motion.md M26): the ring holds a little liquid, the sign
+   that it scrolls. An image too, so it never trails the hand: `scroll-area.tsx` draws it into `--scroll-cursor` as the
+   liquid floats up, and marks the box `data-scroll-cursor` while it holds one. Pressed, the ring fills as everywhere. */
+[data-slot="grid"][data-cursor]:not(:active) [data-scroll-cursor],
+[data-slot="grid"][data-cursor]:not(:active) [data-scroll-cursor] * {
+  cursor: var(--scroll-cursor);
 }
 
 /* A slider's head held (slider.tsx, Motion.md M16): the pressed cursor stays the ring, and the head detaches into

@@ -39,15 +39,15 @@ gutter.
 | Token | Values | Default |
 |---|---|---|
 | `fill` | `transparent` · `background` · `muted` · `card` (Grid.md D21) | `transparent` |
-| `inset` | a step of the spacing scale, `0 · 4 · 8 · 12 · 16` (`SlotInset`, from `GRID_SPACING`) | `0`; `12` for `muted` and `card` |
+| `inset` | a step of the grid's scale, `0 · 4 · 8 · 12 · 16` (`SlotInset`, from `GRID_SPACING`), or a spacing job: `inset` · `inset-tight` · `inset-pill`, each the same on every side (Spacing.md SP3) | `0`; the `inset` job for `muted` and `card`, which clears the round corner (Spacing.md SP4) |
 | `alignX` | `start` · `center` · `end` · `stretch` | `stretch` |
 | `alignY` | `start` · `center` · `end` · `stretch` | `stretch` |
 
 Alignment is of the **component** within the slot: `stretch` makes it fill the slot; anything else lets it take its
 own size and places it. A slot holding sub-slots ignores alignment and inset: its children are placed by coordinate.
 
-Every slot fills its span and **clips**: nothing on the grid scrolls (Grid.md D3), so a component that is cut off is in
-a slot that is too small. A component that is already a box (a `Card`) goes in a `transparent` slot, inset 0, stretch,
+Every slot fills its span and **clips**: the grid never scrolls (Grid.md D3), so a component that is cut off is in a
+slot that is too small. A component may scroll its own content inside its slot, in a `ScrollArea` (Grid.md D52). A component that is already a box (a `Card`) goes in a `transparent` slot, inset 0, stretch,
 so the slot is invisible round it and the card's own border shows.
 
 The three surfaces — `background`, `muted`, `card` — are **round**: the system's one radius, half a cell (Grid.md

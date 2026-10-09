@@ -79,7 +79,7 @@ function MenubarContent({
         align={align}
         alignOffset={alignOffset}
         sideOffset={sideOffset}
-        className={cn("z-50 min-w-48 origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-lg bg-popover p-1.5 text-popover-foreground shadow-md ring-1 ring-foreground/10 motion-surface data-[side=bottom]:slide-in-from-top-(length:--motion-surface-shift) data-[side=left]:slide-in-from-right-(length:--motion-surface-shift) data-[side=right]:slide-in-from-left-(length:--motion-surface-shift) data-[side=top]:slide-in-from-bottom-(length:--motion-surface-shift) data-open:animate-in data-open:fade-in-0 data-open:zoom-in-(--motion-surface-scale)", className )}
+        className={cn("z-50 min-w-48 origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-lg bg-popover p-inset-tight text-popover-foreground shadow-md ring-1 ring-foreground/10 motion-surface data-[side=bottom]:slide-in-from-top-(length:--motion-surface-shift) data-[side=left]:slide-in-from-right-(length:--motion-surface-shift) data-[side=right]:slide-in-from-left-(length:--motion-surface-shift) data-[side=top]:slide-in-from-bottom-(length:--motion-surface-shift) data-open:animate-in data-open:fade-in-0 data-open:zoom-in-(--motion-surface-scale)", className )}
         {...props}
       />
     </MenubarPortal>
@@ -255,7 +255,7 @@ function MenubarSubContent({
   return (
     <MenubarPrimitive.SubContent
       data-slot="menubar-sub-content"
-      className={cn("z-50 min-w-32 origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-lg bg-popover p-1.5 text-popover-foreground shadow-md ring-1 ring-foreground/10 motion-surface data-[side=bottom]:slide-in-from-top-(length:--motion-surface-shift) data-[side=left]:slide-in-from-right-(length:--motion-surface-shift) data-[side=right]:slide-in-from-left-(length:--motion-surface-shift) data-[side=top]:slide-in-from-bottom-(length:--motion-surface-shift) data-open:animate-in data-open:fade-in-0 data-open:zoom-in-(--motion-surface-scale) data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-(--motion-surface-scale)", className )}
+      className={cn("z-50 min-w-32 origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-lg bg-popover p-inset-tight text-popover-foreground shadow-md ring-1 ring-foreground/10 motion-surface data-[side=bottom]:slide-in-from-top-(length:--motion-surface-shift) data-[side=left]:slide-in-from-right-(length:--motion-surface-shift) data-[side=right]:slide-in-from-left-(length:--motion-surface-shift) data-[side=top]:slide-in-from-bottom-(length:--motion-surface-shift) data-open:animate-in data-open:fade-in-0 data-open:zoom-in-(--motion-surface-scale) data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-(--motion-surface-scale)", className )}
       {...props}
     />
   )

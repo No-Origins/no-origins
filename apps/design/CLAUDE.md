@@ -11,8 +11,37 @@ pnpm --filter design dev                 # :3001
 
 ## The shape
 
-Three routes, each a `GridPages` of boxes under the nav, so no page scrolls: overflow goes to the next page, turned by
-the scroll, the pager's ↑ ↓ on the bottom row, a finger on a phone, or the keys ↑ ↓ ← → (Grid.md D27, D42).
+The overview, `/atoms`, `/molecules`, and a page for every entry of the sitemap at `/<group>/<page>` (about 140), each a
+`GridPages` of boxes that is the whole viewport, with the violet ring cursor (Grid.md D34): no page scrolls, and
+overflow goes to the next page, turned by the scroll, the pager's ↑ ↓ on the bottom row, a finger on a phone, or the
+keys ↑ ↓ ← → (Grid.md D27, D42). There is no nav bar and no chrome above the grid; `d` switches the theme.
+
+**The sitemap** (`src/content/sitemap.ts`) is the system's table of contents: ten groups (Overview, Brand, Tokens,
+Foundations, Components, Patterns, Templates, Accessibility, Content, Resources & Maintenance), each a list of pages,
+Components a list of categories of pages. Every page has a `purpose`, what it should cover, and may have `notes`; a
+group has a `brief`, what every page in it shows. Until a page's content is written, `app/[group]/[page]/page.tsx`
+shows it through `components/doc-page.tsx`: where it sits, its title, its purpose, its notes and its group's brief,
+each a card as tall as its text in whole cells (`components/doc-blocks.tsx`: `docTitle`, `docCard`, a span worked out
+from the band and the real cell it is given, `SpanFor`, and `keep`, so text moves whole to the next page rather than
+being squeezed). The routes are built ahead (`generateStaticParams`); any other address is a 404. To add or rename a
+page, change the sitemap. **A written page** is content beside `src/content/pages/index.ts`, registered there by its
+address (`WRITTEN`), and replaces the purpose. Written so far: **Foundations → Cursor** (`pages/cursor.tsx`: what the
+ring is, its six states drawn, a live list to scroll and a slider to hold, its rules, without a mouse, where it is on,
+using it, open questions, and the decisions behind it) and **Tokens → Spacing** (`pages/spacing.tsx`: the base's nine
+steps drawn to scale, the jobs drawn, the corner rule shown, the rules, using it; Spacing.md). Boxes here pad by job
+(Spacing.md): a card is a surface `Slot` with its default `inset`, the sidebar's name a pill (`inset-pill`), its list
+`inset-tight`.
+
+**The sidebar** (`src/components/sidebar.tsx`) is four columns on the left of every page: the system's name,
+**Circles**, in a bordered box on row 1, and under it the sitemap in one bordered box, built from the system's
+`SidebarMenu` rows (36px): the ten groups, each collapsing to its pages, Components' categories collapsing in turn,
+one group and one category open at a time. The current page's group and category open with it, and its row is the
+current one (the muted tint, `aria-current`). The box is as tall as its open rows in whole cells, as far as the field
+has room; beyond that the list **scrolls inside it** (Grid.md D52): no scrollbar, the cursor's ring fills with liquid
+to the share scrolled (Motion.md M26), and the current page is brought into view. On a field with room for it, a
+column of air and a six-column band (`SIDEBAR_MIN_COLS`, eleven, so twelve and up) it is the layout's **fixtures**
+(Grid.md D51): drawn on every page, never faded by a turn, and `arrange` keeps the pages right of it (`left`). On a
+narrower field (a phone, a portrait tablet) it is the first page instead.
 
 - `/` — what the system is and which layers exist: one section on a 12-column band — the intro, the two layer cards
   side by side (six columns each, one to a row on a phone), the notes.
@@ -32,8 +61,8 @@ each. To change a page, change its data.
   its items pack first-fit in reading order inside a **centred band of 4 · 6 · 8 · 12 · 16 columns** (a page may name a
   narrower one, `band`, when its items tile it — the overview's two cards divide 12); the pager's row is reserved; a
   page's block is **centred in the band and in the room** above the pager; an item taller than the room gives up at
-  most a quarter of its rows to stay on a page. There is no top row (`TOP_ROWS` is zero): the nav is this app's
-  chrome. The admin and the login carry copies of it; it is not a package export because the packer is an open
+  most a quarter of its rows to stay on a page. There is no top row (`TOP_ROWS` is zero). The admin and the login
+  carry copies of it; it is not a package export because the packer is an open
   question (Grid.md) the package must not decide — when it is decided, the copies become one.
 - **`SpecimenPages`** (`src/components/specimen.tsx`) runs `arrange` **on the field the page is actually on**,
   re-arranging whenever the grid reports another shape — never onto a reference field and then derived, which keeps
@@ -52,14 +81,14 @@ each. To change a page, change its data.
   design decision a specimen carries**: a specimen that is cut off has a span that is too small — grow it in its
   section, run the clip probe, look again.
 
-**The nav bar is exactly `3.5rem` tall, border included.** Every page sizes itself with `calc(100dvh - 3.5rem)`, so
-`h-14` sits on the `<header>` and not on the div inside it — with the border outside that height the page scrolled by
-one pixel. `<main>` sets no width or padding.
+**The grid is the viewport** (`h-dvh`, the grid's default): no page passes it a height, and `<main>` sets no width or
+padding.
 
 ## What is true here and easy to get wrong
 
 - **The app owns no components.** Everything it renders is imported from `@no-origins/ui/components/*`;
-  `specimen.tsx`, `showcase-nav.tsx` and `lib/arrange.ts` are the only things this app owns. If you find yourself
+  `specimen.tsx`, `sidebar.tsx`, `doc-page.tsx`, `doc-blocks.tsx` and `lib/arrange.ts` are the only things this app
+  owns. If you find yourself
   writing a component here, it belongs in the package.
 - **Every page is a client component**, the overview included: `GridPages` measures its box in the browser and a
   render function cannot cross the server boundary. Metadata lives in the layout.

@@ -89,7 +89,8 @@ export type GridPagerProps = {
 export function defaultPagerBar(width: number): GridLayout {
   const items: GridLayoutItem[] = []
   for (let col = 1; col <= width - 2; col++) {
-    items.push({ id: `pager-cell-${col}`, col, row: 1, colSpan: 1, rowSpan: 1, slot: { fill: "card" } })
+    // An empty cell: nothing to pad, so none (a surface slot's default inset is more than a cell can hold).
+    items.push({ id: `pager-cell-${col}`, col, row: 1, colSpan: 1, rowSpan: 1, slot: { fill: "card", inset: 0 } })
   }
   if (width >= 2) {
     items.push({

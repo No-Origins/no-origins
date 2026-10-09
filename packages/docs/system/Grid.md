@@ -22,6 +22,17 @@ everything, at every depth, snaps to the one grid (Slots.md S2).
 full width). Nothing holds a grid as a block in a page, so there is no `fill`. A className may give it another height
 when there is chrome above it, never a width.
 
+**D52 — A component may scroll its own content; the page never does, and the cursor shows how far.** The grid and
+the page stay still (D3, D5), but inside its box a component may scroll what it holds, in a `ScrollArea`, and only
+there. There is no scrollbar: the cursor tells (Motion.md M26). Over a box that scrolls, the cursor's ring (D34) holds
+`Liquid` (Motion.md M25) at the share scrolled, a little at the top and full at the end: it floats up as the pointer
+enters, follows the scroll, the ring growing while it scrolls, disappears once the hand is still, and shows again when
+the pointer moves; leaving, the ring is hollow. Where
+there is no ring cursor — a finger, the keyboard, a grid without `cursor` — the liquid shows in a ring of its own at the
+box's top end corner. A wheel, a finger or a key over a component that scrolls is the component's: the grid does not
+turn the page for it (`scrollerAt`, `lib/scroll-motion.ts`). Decided 2026-10-09; the showcase's sidebar is the first
+use.
+
 **D9 — Cells are square, always.** No stretch: there is no `fit` prop, no `GridFit` type and no toggle, and none is
 to come back. The side is the decided cell (D13); a cell is drawn as a circle inside its square (D40).
 
@@ -109,8 +120,9 @@ written in code, or arranged at runtime from spans. A tool for arranging by hand
 0 · 4 · 8 · 12 · 16
 ```
 
-`GRID_SPACING`, the grid's own and not a general spacing system. The gutter is one of these (D13), and so is a slot's
-inset (`SlotInset`, Slots.md S3), so the space between boxes and the space inside them are one family.
+`GRID_SPACING`, the grid's part of the system's base scale (Spacing.md SP2). The gutter is one of these (D13), and so
+is a slot's inset (`SlotInset`, Slots.md S3), so the space between boxes and the space inside them are one family.
+Every other space, and the jobs that name them, are Spacing.md's.
 
 - **4px steps**, the base of the Tailwind spacing the apps lay out with, so the grid and the utilities agree on a step.
 - **It stops at 16.** Past that the gutter out-measures a dense field's cell; a breakpoint that wants more air wants
@@ -232,11 +244,18 @@ takes those cells from the page.
 - **They belong in the bar only.** An ordinary box fades away with its page (D37, D49) and belongs to one page, so an
   arrow there would leave under the finger pressing it and be missing from the next page. A turner elsewhere would
   have to opt out of the fade and be drawn on every page, a second fixture.
-- **One bar per layout** (`layout.bar`), never a page's: the bar is the one thing on the field that does not turn, and
+- **One bar per layout** (`layout.bar`), never a page's: the bar does not turn (nor do the layout's fixtures, D51), and
   contents that changed between pages would move the arrows under the hand. With no `bar`, `GridPager` draws D27's
   (`defaultPagerBar`), built from the width so a wider bar adds empty cells and keeps the arrows at the end.
 - **A bar may leave the arrows out**, and nothing guards it: the wheel, a finger and the keys still turn the page, but
   a phone has nothing to press.
+
+**D51 — A layout may keep boxes on every page: its fixtures.** `layout.fixtures` is a list of layout items drawn with
+whichever page is shown, on their own cells, through the same `renderItem` as the pages' boxes. They are marked
+`data-fixed` and the turn never fades them, as it never fades the bar: a fixture stays under the hand while the page
+beside it turns. They are drawn before the page, so they read first. They are placed on the field as given; the
+layout's author keeps every page off their cells, and a layout arranged on the live field (the showcase's) recomputes
+both together. The first use is the showcase's sidebar (decided 2026-10-08).
 
 **D35 — A hand that goes on scrolling goes on turning.** Only a fling's decaying tail is ignored, never the hand. Each
 wheel event is read against the stream (`readWheel`, `grid-pages.tsx`): a tail is a run of five falls in the events'

@@ -7,8 +7,10 @@ import { paintLiquid, type LiquidFrame, type LiquidMotion } from "@no-origins/ui
 import { cn } from "@no-origins/ui/lib/utils"
 
 export type LiquidProps = Omit<React.ComponentProps<"div">, "children"> & {
-  /** How full, 0 to 1. It arrives pouring from empty, and a new level pours from where it is. */
+  /** How full, 0 to 1. It arrives pouring from `from` (empty unless given), and a new level pours from where it is. */
   level?: number
+  /** The level it arrives from, 0 to 1: empty unless given. */
+  from?: number
   /** The liquid's colour, as CSS. The primary, lime, unless given. */
   colour?: string
   /** What it says to a screen reader; "40% full" unless given. */
@@ -29,13 +31,13 @@ export type LiquidProps = Omit<React.ComponentProps<"div">, "children"> & {
  * translucent). It fills whatever box it is given, border and card behind it unless the class says otherwise; the
  * motion studio's Liquid page and the status page's cells are its uses.
  */
-export function Liquid({ level = 0.4, colour = "var(--primary)", label, still, always, tuning, className, style, ...props }: LiquidProps) {
+export function Liquid({ level = 0.4, from, colour = "var(--primary)", label, still, always, tuning, className, style, ...props }: LiquidProps) {
   const root = React.useRef<HTMLDivElement>(null)
   const paint = React.useCallback((frame: LiquidFrame, motion: LiquidMotion) => {
     if (root.current) paintLiquid(root.current, motion, frame)
   }, [])
   const held = Math.min(1, Math.max(0, level))
-  useLiquidMotion({ block: root, level: held, paint, still, always, tuning })
+  useLiquidMotion({ block: root, level: held, from: from === undefined ? 0 : Math.min(1, Math.max(0, from)), paint, still, always, tuning })
   return (
     <div
       ref={root}
