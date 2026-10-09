@@ -18,6 +18,7 @@ import { benchShot } from "@/engine/bench";
 import { makeLibrary } from "@/engine/library";
 import type { AssetBook, AssetVersion, Bench, Entry, Value, Values } from "@/engine/types";
 import { benchLayout } from "@/lib/layout";
+import type { Section } from "@/lib/sections";
 
 const library = makeLibrary(ENTRIES);
 /** A change is saved once the jigs have stood still this long, as the studio's are. */
@@ -42,7 +43,7 @@ type Save = { state: "idle" | "saving" | "saved" | "refused"; note?: string };
  * asset's card opens the configuration: the values as code, saved under his name with what it is for, and the ones he
  * saved before, loaded to start a new one from (`configuration.tsx`).
  */
-function Workbench({ initial, configurations: saved }: { initial: Bench; configurations: AssetVersion[] }) {
+function Workbench({ initial, section, configurations: saved }: { initial: Bench; section: Section; configurations: AssetVersion[] }) {
   const metrics = useGridMetrics();
   const [bench, setBench] = React.useState(initial);
   const [configurations, setConfigurations] = React.useState(saved);
@@ -67,7 +68,7 @@ function Workbench({ initial, configurations: saved }: { initial: Bench; configu
         const values = pending.current;
         pending.current = {};
         setSave({ state: "saving" });
-        const response = await fetch(`/asset/${initial.asset}/bench`, {
+        const response = await fetch(`${section.path}/${initial.asset}/bench`, {
           method: "PATCH",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ rev: rev.current, values }),
@@ -89,7 +90,7 @@ function Workbench({ initial, configurations: saved }: { initial: Bench; configu
     } finally {
       busy.current = false;
     }
-  }, [initial.asset]);
+  }, [initial.asset, section.path]);
 
   const change = (control: string, value: Value) => {
     setBench((now) => ({ ...now, values: { ...now.values, [control]: value } }));
@@ -108,18 +109,20 @@ function Workbench({ initial, configurations: saved }: { initial: Bench; configu
   if (!metrics || !entry) return null;
   const layout = benchLayout(metrics.cols, metrics.rows);
 
-  // The groups shared out between the columns by how many controls each holds, the first half on the left, under the
-  // asset's card.
+  // The groups shared out between the columns in their order, the first on the left under the asset's card, where the
+  // taller column is shortest. A card is about a row for its heading and one for each control, two for a colour's
+  // swatches; the asset's card about four.
   const groups = [...new Set(entry.controls.map((control) => control.group ?? entry.label))];
-  const count = (group: string) => entry.controls.filter((control) => (control.group ?? entry.label) === group).length;
-  const left: string[] = [];
-  // The asset's card heads the left column, about as tall as three controls.
-  let held = 3;
-  for (const group of groups) {
-    if (layout.right && left.length && held >= entry.controls.length / 2) break;
-    left.push(group);
-    held += count(group);
+  const tall = (group: string) =>
+    1 + entry.controls.filter((control) => (control.group ?? entry.label) === group).reduce((rows, control) => rows + (control.kind === "colour" ? 2 : 1), 0);
+  const heights = groups.map(tall);
+  const sum = (from: number, to: number) => heights.slice(from, to).reduce((a, b) => a + b, 0);
+  let split = groups.length;
+  if (layout.right) {
+    split = 1;
+    for (let k = 2; k <= groups.length; k++) if (Math.max(4 + sum(0, k), sum(k, groups.length)) < Math.max(4 + sum(0, split), sum(split, groups.length))) split = k;
   }
+  const left = groups.slice(0, split);
   const part = (names: readonly string[]) => ({ ...entry, controls: entry.controls.filter((control) => names.includes(control.group ?? entry.label)) }) as Entry;
   const jigs = (names: readonly string[]) =>
     names.length ? (
@@ -129,11 +132,12 @@ function Workbench({ initial, configurations: saved }: { initial: Bench; configu
   const card = (
     <Jig
       title={entry.label}
-      note={`Asset · version ${entry.version} · ${entry.controls.length} controls`}
+      note={`${section.one[0]!.toUpperCase()}${section.one.slice(1)} · version ${entry.version} · ${entry.controls.length} controls`}
       lead={
-        // His (2026-10-09): a back arrow before the asset's name, in place of an "All assets" button.
-        <Button asChild variant="outline" size="icon-sm" aria-label="Back to the assets">
-          <Link href="/">
+        // His (2026-10-09): a back arrow before the asset's name, in place of an "All assets" button. It goes home to
+        // the page of its own section.
+        <Button asChild variant="outline" size="icon-sm" aria-label={`Back to the ${section.label.toLowerCase()}`}>
+          <Link href={`/?section=${section.id}`}>
             <ArrowLeft />
           </Link>
         </Button>
@@ -141,7 +145,7 @@ function Workbench({ initial, configurations: saved }: { initial: Bench; configu
     >
       <Text role="caption" tone="muted" className="col-span-2">{entry.description}</Text>
       <div className="col-span-2 flex flex-wrap gap-2">
-        <Configuration asset={bench.asset} entry={entry} values={bench.values} configurations={configurations} onSaved={setConfigurations} onLoad={replace} />
+        <Configuration base={`${section.path}/${bench.asset}`} one={section.one} asset={bench.asset} entry={entry} values={bench.values} configurations={configurations} onSaved={setConfigurations} onLoad={replace} />
       </div>
     </Jig>
   );
@@ -184,11 +188,11 @@ function Workbench({ initial, configurations: saved }: { initial: Bench; configu
 }
 
 /** The studios' grid: the field drawn, the pointer a violet ring, no intro (Grid.md D49). */
-export function AssetBench({ initial, title, configurations }: { initial: Bench; title: string; configurations: AssetVersion[] }) {
+export function AssetBench({ initial, title, section, configurations }: { initial: Bench; title: string; section: Section; configurations: AssetVersion[] }) {
   return (
     <Grid overlay cursor>
       <h1 className="sr-only">{`Cinema: ${title}`}</h1>
-      <Workbench initial={initial} configurations={configurations} />
+      <Workbench initial={initial} section={section} configurations={configurations} />
     </Grid>
   );
 }

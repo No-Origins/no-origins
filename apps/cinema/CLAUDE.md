@@ -26,6 +26,8 @@ is his: never save one for him under a name he did not give, and a test saves it
 **His palette** is there too: `PALETTE` in `src/content/index.ts`, the colours he has named, offered first by every
 colour control on the screen. A colour joins it when he names one.
 
+**His effects** are there too: entries in `library/effects/`, built as environments are, listed in `EFFECTS`.
+
 **Public**: the engine, the types, the stand-ins (`src/engine/builtins`: a placeholder figure, two camera moves, a
 sun; tools, not his ideas), the commands, the renderer, the screen and the sample.
 
@@ -38,10 +40,12 @@ sun; tools, not his ideas), the commands, the renderer, the screen and the sampl
   Mac) and ffmpeg (E7).
 - `src/data/store.ts`: shots on disk (`shots/<id>/draft.json`, `versions/<n>.json`), renders, exports and the agents'
   session lines (Cinema-Agents.md R6).
-- `src/app/page.tsx` + `src/components/home.tsx`: the home page (Cinema.md F11), its sections, Assets first (the
-  entries his folder lists in `ASSETS`). `src/app/asset/[id]` + `src/components/bench.tsx`: an asset's page (its
-  "bench" in the code, from before his asset Bench), the asset alone, looked round freely, its controls either side,
-  saved to `benches/<id>.json` (`engine/bench.ts`, `/asset/<id>/bench`); `configuration.tsx`, its configurations.
+- `src/app/page.tsx` + `src/components/home.tsx`: the home page (Cinema.md F11), pages of the grid
+  (`homePages` in `lib/layout.ts`), its sections (`lib/sections.ts`): Assets (the entries his folder lists in `ASSETS`),
+  then Effects (`EFFECTS`). `src/app/asset/[id]` and `src/app/effect/[id]` (`components/entry-page.tsx`) +
+  `src/components/bench.tsx`: an entry's page (its "bench" in the code, from before his asset Bench), the entry alone,
+  looked round freely, its controls either side, saved to `benches/<id>.json` (`engine/bench.ts`,
+  `<path>/<id>/bench`; the effect's routes re-export the asset's); `configuration.tsx`, its configurations.
 - `src/components/studio.tsx`: the shots' screen at `/shots`, one `Grid` (E1): the picture at the centre, the jigs
   either side (`jigs.tsx`, drawn from the entries' declarations), saved through `PATCH /shot/<id>`; `picture.tsx`: the
   shot in its box, playing from its own clock, with free look; `render-target.tsx`: the canvas the renderer drives, at

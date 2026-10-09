@@ -30,15 +30,18 @@ Current as of 2026-10-09.
   change the `set` command makes (E6), from the revision the screen last saw: a command run meanwhile wins. Under the
   picture its name and a bar of play, the time to scrub, and **free look**: a drag turns round what the camera looks
   at, the wheel or a pinch goes nearer, and renders always use the shot's camera.
-- **A home page, its first section Assets, and each asset on its page** (his, Cinema.md F11). *Mine:* `/` is the home:
-  the studio's name, then each section, a heading row with its cards under it; an asset's card opens `/asset/<id>`,
+- **A home page, its first section Assets, and each asset on its page** (his, Cinema.md F11). *Mine:* `/` is the home,
+  pages of the grid: the studio's name, then each section (Assets, then Effects), a heading row with its cards under
+  it; what does not fit above the pager turns onto the next page, under its section's heading again, and `/?section=`
+  opens on the page a section starts on. An asset's card opens `/asset/<id>`, an effect's `/effect/<id>`, the same page,
   its page: the asset as the world at the field's centre, filling its box, looked round freely from a view that fits
   the whole of it (no camera; time runs only for an asset that moves by itself, a cloud's gas), lit by the plain sun,
-  on a floor that shows only its shadow and hides nothing (the page's, not the asset's); the card that says which asset it is at the top left, a back arrow before its name (his, 2026-10-09),
-  its controls under it and on the right, a card a group; a change saved once the jigs stand still to
+  on a floor that shows only its shadow and hides nothing (the page's, not the asset's); the card that says which asset it is at the top left, a back arrow before its name (his, 2026-10-09)
+  home to its section's page, its controls under it and on the right, a card a group, the groups split in their order
+  where the taller column is shortest; a change saved once the jigs stand still to
   `benches/<id>.json` in his folder, from the revision the screen last saw (the code calls an asset's page its bench,
-  from before he had an asset called Bench). The Assets section lists the entries his folder names (`ASSETS`), in his
-  order; a page moves on to its asset's newest version keeping every value its controls still take. The shots'
+  from before he had an asset called Bench). The Assets section lists the entries his folder names (`ASSETS`), the
+  Effects section those in `EFFECTS`, each in his order; a section with none is left out, but Assets. A page moves on to its asset's newest version keeping every value its controls still take. The shots'
   screen is `/shots`.
 
 ## E2. The engine
@@ -46,8 +49,9 @@ Current as of 2026-10-09.
 - *Mine:* **plain three.js on a canvas**, mounted as Home's viewer is (Home.md H2): no React renderer on top, the
   canvas the one element that is not a component of the system. It belongs to the app.
 - **The frame is free** (his, Cinema.md F2): lights and shadows, fog, and effects over the picture (bloom, depth of
-  field, grain, the grade). *Mine:* the effects are passes after the render, each an entry of the Effects or Grades
-  library (E4).
+  field, grain, the grade). *Mine:* an effect is either a thing in the world, drawn as the world is (rain, lightning:
+  Cinema.md F11's Effects section, built as an environment is until shots carry effects on their tracks), or a pass
+  after the render; each an entry of the Effects or Grades library (E4).
 - **Every frame is a function of time** (Cinema.md F5). *Mine:* nothing in a shot reads the clock; the engine asks
   "draw the shot at second *t*", and the same *t* is the same picture every time, however it is reached. Anything that
   simulates, such as an agent's landing, is stepped from the start of its action at a fixed step, as the agent's motion

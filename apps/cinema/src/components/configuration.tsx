@@ -34,7 +34,11 @@ import type { AssetVersion, Entry, Values } from "@/engine/types";
  * configurations he has saved of this asset, each with what it is for, any of them loaded onto the bench to start a new
  * one from.
  */
-export function Configuration({ asset, entry, values, configurations, onSaved, onLoad }: {
+export function Configuration({ base, one, asset, entry, values, configurations, onSaved, onLoad }: {
+  /** Where the entry's page is (`/asset/<id>`, `/effect/<id>`): its configurations are under it. */
+  base: string;
+  /** What the entry is, as its section calls one: "asset", "effect". */
+  one: string;
   asset: string;
   entry: Entry;
   /** The values on the bench now. */
@@ -52,12 +56,12 @@ export function Configuration({ asset, entry, values, configurations, onSaved, o
   const aboutId = React.useId();
 
   const all = resolve(entry.controls, values);
-  const code = JSON.stringify({ asset, version: entry.version, values: all }, null, 2);
+  const code = JSON.stringify({ [one]: asset, version: entry.version, values: all }, null, 2);
 
   const save = async () => {
     if (!name.trim() || saving) return;
     setSaving(true);
-    const response = await fetch(`/asset/${asset}/configurations`, {
+    const response = await fetch(`${base}/configurations`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ name: name.trim(), description, values: all }),
@@ -143,7 +147,7 @@ export function Configuration({ asset, entry, values, configurations, onSaved, o
                   </div>
                 ))
               ) : (
-                <Text role="caption">None of this asset yet.</Text>
+                <Text role="caption">{`None of this ${one} yet.`}</Text>
               )}
             </div>
           </div>

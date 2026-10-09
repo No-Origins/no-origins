@@ -61,3 +61,50 @@ export function benchLayout(cols: number, rows: number): BenchLayout {
     caption: { col: 1, row: rows, colSpan: cols, rowSpan: 1 },
   };
 }
+
+/**
+ * The home page's pages (Cinema.md F11; the placing mine): the studio's name on the first, then each section, a heading
+ * row with its cards under it, side by side and centred, a cell of air between rows and between sections, at most
+ * twenty cells across. What does not fit above the pager's row (Grid.md D27) goes on the next page (D5), under its
+ * section's heading again; a heading never ends a page without a row of its cards.
+ */
+export type HomeItem = Rect & { id: string };
+export const HOME_CARD = { cols: 6, rows: 3 };
+const HOME_WIDEST = 20;
+
+export function homePages(cols: number, rows: number, sections: readonly { id: string; cards: readonly string[] }[]): HomeItem[][] {
+  const width = Math.min(cols, HOME_WIDEST);
+  const start = Math.floor((cols - width) / 2) + 1;
+  const card = Math.min(width, HOME_CARD.cols);
+  const across = Math.max(1, Math.floor((width + 1) / (card + 1)));
+  const room = Math.max(1, rows - 1);
+  const pages: HomeItem[][] = [[{ id: "title", col: start, row: 1, colSpan: width, rowSpan: 2 }]];
+  let row = 4;
+  for (const section of sections) {
+    // Its cards a row at a time; a section with none has one row, to say so.
+    const lines = section.cards.length
+      ? Array.from({ length: Math.ceil(section.cards.length / across) }, (_, i) => section.cards.slice(i * across, (i + 1) * across))
+      : [[]];
+    let headed = false;
+    for (const line of lines) {
+      const tall = line.length ? HOME_CARD.rows : 1;
+      // A new page takes whatever comes, so a field too short for a card still shows it, cut off, and the pages end.
+      if (row + (headed ? 0 : 1) + tall - 1 > room && row > 2) {
+        pages.push([]);
+        row = 2;
+        headed = false;
+      }
+      const page = pages.at(-1)!;
+      if (!headed) {
+        page.push({ id: `heading:${section.id}:${pages.length}`, col: start, row, colSpan: width, rowSpan: 1 });
+        row += 1;
+        headed = true;
+      }
+      if (!line.length) page.push({ id: `empty:${section.id}`, col: start, row, colSpan: width, rowSpan: 1 });
+      const first = start + Math.floor((width - (line.length * card + (line.length - 1))) / 2);
+      line.forEach((id, i) => page.push({ id: `card:${section.id}:${id}`, col: first + i * (card + 1), row, colSpan: card, rowSpan: tall }));
+      row += tall + 1;
+    }
+  }
+  return pages;
+}

@@ -9,4 +9,6 @@ declare module "@cinema/content" {
   export const PALETTES: import("@/engine/types").Palette[];
   /** The Assets section (Cinema.md F11): the library entries that are his assets, in his order, by id. */
   export const ASSETS: string[];
+  /** The Effects section (Cinema.md F11): the library entries that are his effects, in his order, by id. */
+  export const EFFECTS: string[];
 }

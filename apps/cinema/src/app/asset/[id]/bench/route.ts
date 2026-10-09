@@ -1,16 +1,17 @@
-import { ASSETS, ENTRIES } from "@cinema/content";
+import { ENTRIES } from "@cinema/content";
 
 import { isId, readBench, saveBench } from "@/data/store";
 import { benchFor } from "@/engine/bench";
 import { check } from "@/engine/controls";
 import { makeLibrary } from "@/engine/library";
 import type { Values } from "@/engine/types";
+import { sectionOf } from "@/lib/sections";
 
 const library = makeLibrary(ENTRIES);
 
-/** The bench of an asset of the Assets section, as it is now (Cinema-Engine.md E1). */
+/** The bench of an entry of a home section (an asset, an effect), as it is now (Cinema-Engine.md E1). */
 function benchOf(id: string) {
-  return isId(id) && ASSETS.includes(id) ? benchFor(id, readBench(id), library) : undefined;
+  return isId(id) && sectionOf(id) ? benchFor(id, readBench(id), library) : undefined;
 }
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {

@@ -263,6 +263,13 @@ as it goes** (his).
 - **His assets so far** (his, 2026-10-09): **Illusion Mountain**, made from the mountain he had tuned before;
   **Bench**, a block with a glowing circle on its top where a cast member sits; and **Clouds**, made from the cloud of
   gas he had designed before.
+- **Effects are made the same way** (his, 2026-10-09: "Now, I need some effects like thunder and rain"): asked for,
+  played with on their own, versioned to his notes. *Mine:* the home's second section, **Effects**, the effects
+  department's (F4's Effects, F6), each effect on its page as an asset is. An effect takes the world's light, sky and
+  wind as an asset does (rain slants in a set's wind); a flash of lightning is the one light an effect carries, since
+  the flash is the effect. The sound of thunder is the sound department's: the studio plays no sound yet.
+- **His effects so far** (his, 2026-10-09): **Thunder**, lightning that strikes, flickers and lights what is round it;
+  and **Rain**, drops falling over an area and splashing where they land.
 
 ## Open
 

@@ -1,4 +1,4 @@
-import { ASSETS, ENTRIES } from "@cinema/content";
+import { ENTRIES } from "@cinema/content";
 
 import { isId, readAssets, saveAsset } from "@/data/store";
 import { assetId } from "@/engine/assets";
@@ -6,11 +6,12 @@ import { configurationsOf } from "@/engine/bench";
 import { check, resolve } from "@/engine/controls";
 import { makeLibrary } from "@/engine/library";
 import type { Values } from "@/engine/types";
+import { sectionOf } from "@/lib/sections";
 
 const library = makeLibrary(ENTRIES);
-const entryOf = (id: string) => (isId(id) && ASSETS.includes(id) ? library.latest(id) : undefined);
+const entryOf = (id: string) => (isId(id) && sectionOf(id) ? library.latest(id) : undefined);
 
-/** The configurations he has saved of this asset, the newest version of each. */
+/** The configurations he has saved of this asset (or effect), the newest version of each. */
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!entryOf(id)) return new Response("No such asset.", { status: 404 });

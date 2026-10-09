@@ -10,3 +10,6 @@ export const PALETTES: Palette[] = [];
 
 /** The sample's Assets section (Cinema.md F11): its one made-up environment, so the home page and a bench have one. */
 export const ASSETS: string[] = ["plain"];
+
+/** The sample has no effects: the home page leaves the section out. */
+export const EFFECTS: string[] = [];
