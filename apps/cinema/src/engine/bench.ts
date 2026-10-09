@@ -1,6 +1,6 @@
 import { problem } from "./controls.ts";
 import type { Library } from "./library.ts";
-import type { Bench, Entry, Shot, Values } from "./types.ts";
+import type { AssetBook, AssetVersion, Bench, Entry, Shot, Values } from "./types.ts";
 
 /**
  * An asset's bench (Cinema.md F11, Cinema-Engine.md E1): where he looks at one asset of the Assets section in 3D and
@@ -41,4 +41,15 @@ export function benchShot(bench: Bench, title: string): Shot {
     cast: [],
     tracks: [],
   };
+}
+
+/**
+ * The configurations he has saved of one asset (his word, 2026-10-09; the code's `AssetVersion`), the newest version of
+ * each, by name: what the bench lists to look at and load, and what the art department chooses from.
+ */
+export function configurationsOf(book: AssetBook, asset: string, library: Library): AssetVersion[] {
+  return Object.values(book)
+    .map((versions) => versions.at(-1)!)
+    .filter((saved) => library.idOf(saved.use.entry) === asset)
+    .sort((a, b) => a.name.localeCompare(b.name));
 }

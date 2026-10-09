@@ -118,12 +118,23 @@ export function readAssets(): AssetBook {
   return book;
 }
 
-/** Saves a configuration under his name for it: a new asset, or the next version of the one with that name. */
-export function saveAsset(name: string, use: Use): AssetVersion {
+/**
+ * Saves a configuration under his name for it, with what it is for: a new one, or the next version of the one with that
+ * name. (The code calls a saved configuration an asset, from before Cinema.md F11 made an asset the thing itself.)
+ */
+export function saveAsset(name: string, use: Use, description?: string): AssetVersion {
   const id = assetId(name);
-  if (!id || !isId(id)) throw new Error("An asset needs a name with a letter or a digit in it.");
+  if (!id || !isId(id)) throw new Error("A configuration needs a name with a letter or a digit in it.");
   const version = (readAssets()[id]?.at(-1)?.version ?? 0) + 1;
-  const asset: AssetVersion = { id, name: name.trim(), version, saved: new Date().toISOString(), use: { entry: use.entry, version: use.version, values: use.values } };
+  const about = description?.trim();
+  const asset: AssetVersion = {
+    id,
+    name: name.trim(),
+    version,
+    saved: new Date().toISOString(),
+    ...(about ? { description: about } : {}),
+    use: { entry: use.entry, version: use.version, values: use.values },
+  };
   writeJson(path.join(DATA, "assets", id, `${version}.json`), asset);
   return asset;
 }

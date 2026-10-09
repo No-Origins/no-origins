@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { ASSETS, ENTRIES } from "@cinema/content";
 
 import { AssetBench } from "@/components/bench";
-import { isId, readBench } from "@/data/store";
-import { benchFor } from "@/engine/bench";
+import { isId, readAssets, readBench } from "@/data/store";
+import { benchFor, configurationsOf } from "@/engine/bench";
 import { makeLibrary } from "@/engine/library";
 
 // The bench is read from disk at each visit: it changes as he plays with it.
@@ -23,5 +23,5 @@ export default async function Page({ params }: PageProps<"/asset/[id]">) {
   const { id } = await params;
   const bench = benchOf(id);
   if (!bench) notFound();
-  return <AssetBench initial={bench} title={library.latest(id)!.label} />;
+  return <AssetBench initial={bench} title={library.latest(id)!.label} configurations={configurationsOf(readAssets(), id, library)} />;
 }

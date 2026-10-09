@@ -252,6 +252,10 @@ as it goes** (his).
 - **The studio opens on a home page, its sections there; the first is Assets** (his, 2026-10-09). *Mine:* an asset
   opens on its **bench**: the asset alone in the middle, looked round freely, its controls either side, what he sets
   kept until he changes it. The shots' screen stays, off the home page until he names it a section.
+- **A configuration he likes he saves** (his, 2026-10-09): every value of the asset as he left it, under a name, with
+  **what it is for, so the agents know when to use it**, and kept to be used many ways: chosen by the art department
+  for a set, and **loaded to start new configurations from**. *Mine:* the bench shows the configuration as code, to read
+  and copy, beside the form that saves it and the list of those saved; the same name saves its next version.
 - **His first asset is Illusion Mountain** (his, 2026-10-09), made from the mountain he had tuned before.
 
 ## Open
@@ -260,5 +264,3 @@ as it goes** (his).
 2. **The cast in 3D** (F3), the next document's to decide, version by version, as he looks at them: whether light
    shades them smoothly or in flat steps as Orbit draws them, how the face stays on a body the camera can go round, how
    they stand and land on a floor instead of in a nest, and how the tail moves in space.
-3. **What his saved configurations are called** (F11). The code still calls a configuration he saved under a name
-   ("Suckers Mountain") an asset, from before F11; an asset is now the thing itself, and the word for those is his.

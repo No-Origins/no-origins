@@ -169,13 +169,17 @@ line in the app, `pnpm --filter cinema cmd <command> …`, which every agent can
 
 It is done when an agent, given his words, makes that shot through the commands alone, and its session is recorded.
 
-## E9. Assets, and worlds built from them
+## E9. Configurations, and worlds built from them
 
-- **An asset is a configuration he saves under a name of his own** (his, 2026-10-09: "I want to call this an asset…
-  save this configuration… when saving, I will save with the name I want to"). It is an entry, its version and its
-  values, kept in his private folder (E5). Saving under a name he has used makes the asset's next version.
-- *Mine:* **a draft uses an asset's newest version; publishing pins it** to the version in use, so a published shot
-  plays as it was made whatever he saves later (E3).
+- **A configuration is an asset's values he saves under a name of his own, with what it is for** (his, 2026-10-09:
+  "save this configuration… when saving, I will save with the name I want to"; then, with Cinema.md F11, "add
+  description to the saved configuration so that agents can understand when to use it"). It is an entry, its version
+  and its values, kept in his private folder (E5); saving under a name he has used makes its next version. *Mine:* the
+  code still calls a configuration an asset (`AssetVersion`, `assets/<id>/<n>.json`, the `asset` and `assets`
+  commands), from before F11 made an asset the thing itself; from a bench every value is saved, resolved, and a name
+  already given to a configuration of another asset is refused.
+- *Mine:* **a draft uses a configuration's newest version; publishing pins it** to the version in use, so a published
+  shot plays as it was made whatever he saves later (E3).
 - **A world can be a grid of assets** (his: "use this asset to build a grid of assets which will create a world"),
   **filled by rules, then changed by hand** (his). *Mine:* such an environment declares its grid (its size, and which
   asset its rules put in each cell), and its cells, "column,row" from 1, are part of the shot's world: a cell may hold
@@ -190,8 +194,9 @@ It is done when an agent, given his words, makes that shot through the commands 
 - **An entry may be drawn by a shader of its own** (his pick, 2026-10-09: clouds as a real volume of gas, not balls).
   *Mine:* it reads the scene's sun and sky as they are when it is drawn, and its picture goes through the same tone
   mapping as the rest.
-- *Mine:* **the screen** offers a world that is one tile a "Save as asset" card, where he types the name, and an asset
-  control is a list of his assets by name, of the kind it takes. A grid's world has a map of its cells, seen from above,
+- *Mine:* **the screen** offers a world that is one tile a "Save as configuration" card, where he types the name, and
+  an asset control is a list of his configurations by name, of the kind it takes. An asset's bench (E1) has the same
+  in its Configuration window, with the description and the code. A grid's world has a map of its cells, seen from above,
   a layer at a time: a cell picked shows
   what stands there and takes another asset, empty, or back to the rules, and its copy's controls follow the map.
 

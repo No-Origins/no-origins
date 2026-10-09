@@ -38,11 +38,13 @@ Reading
 
 Changing a shot (each needs its department when an agent runs it)
   new <shot> [--title t] [--aspect wide|vertical] [--size px] [--fps n]           direction
-  world <shot> <entry[@version]> [control=value …] [--keep]                       set
+  world <shot> <entry[@version]> [control=value …] [--keep]                       art
       (--keep carries over every value the new entry takes from the world before)
-  cell <shot> <[layer:]column,row> [--asset <id>|none|rules] [control=value …] [--clear]   set
+  cell <shot> <[layer:]column,row> [--asset <id>|none|rules] [control=value …] [--clear]   art
       (a layer's cell is named with its layer: clouds:2,3)
-  asset save "<name>" --from <shot>       saves the shot's world as an asset under his name   set
+  asset save "<name>" --from <shot> [--description "<when to use it>"]
+                                          saves the shot's world as a configuration under his name, with what it
+                                          is for (the code calls a configuration an asset, from before Cinema.md F11)   art
   place <shot> <entry[@version]> --at x,z [--facing deg] [--name n] [control=value …]   direction, cast
   add <shot> <entry[@version]> --start s --length s [control=value …]             the track's (camera, light)
   set <shot> <world|cast id|item id> [control=value …] [--at x,z] [--facing deg]  the thing's department
@@ -462,7 +464,9 @@ async function run(): Promise<string> {
       return ids.map((id) => {
         const versions = book[id]!;
         const newest = versions.at(-1)!;
-        return `  ${id}  "${newest.name}"  ${library.idOf(newest.use.entry)}@${newest.use.version}  versions ${versions.map((v) => v.version).join(", ")}  (newest saved ${newest.saved.slice(0, 16).replace("T", " ")})`;
+        const line = `  ${id}  "${newest.name}"  ${library.idOf(newest.use.entry)}@${newest.use.version}  versions ${versions.map((v) => v.version).join(", ")}  (newest saved ${newest.saved.slice(0, 16).replace("T", " ")})`;
+        // What it is for, in his words, so an agent knows when to use it.
+        return newest.description ? `${line}\n      ${newest.description}` : line;
       }).join("\n");
     }
 
@@ -474,8 +478,8 @@ async function run(): Promise<string> {
       const world = from.world ?? refuse(`${from.id} has no world to save`);
       const its = entryOf(world);
       if (its.kind === "environment" && its.grid) refuse(`${from.id}'s world is a grid of assets; an asset is one tile`);
-      const asset = saveAsset(name, world);
-      record({ type: "command", command: "asset save", shot: from.id, rev: from.rev, asset: `${asset.id}@${asset.version}`, name: asset.name });
+      const asset = saveAsset(name, world, flags.description);
+      record({ type: "command", command: "asset save", shot: from.id, rev: from.rev, asset: `${asset.id}@${asset.version}`, name: asset.name, ...(asset.description ? { description: asset.description } : {}) });
       return `saved "${asset.name}" as ${asset.id} version ${asset.version} (${tag(world)}, ${Object.keys(world.values).length} values)`;
     }
 

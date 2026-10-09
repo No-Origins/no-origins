@@ -112,7 +112,15 @@ export type Cell = { asset?: string; values?: Values };
  * An asset (his word, 2026-10-09): a configuration of an entry he saved under a name of his own, versioned. Saving
  * under a name he has used makes its next version; a draft uses the newest, a published shot the one it was made with.
  */
-export type AssetVersion = { id: string; name: string; version: number; saved: string; use: { entry: string; version: number; values: Values } };
+export type AssetVersion = {
+  id: string;
+  name: string;
+  version: number;
+  saved: string;
+  /** What it is for and when to use it, in his words, so an agent configuring a set knows (his, 2026-10-09). */
+  description?: string;
+  use: { entry: string; version: number; values: Values };
+};
 /**
  * An asset's bench (his, 2026-10-09: "I should just be able to see the asset in the 3D space, look at it and play
  * around with it"): the values he is trying it at, apart from any shot. `asset` is the library entry it holds (an

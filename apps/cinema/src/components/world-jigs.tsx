@@ -21,7 +21,10 @@ import type { AssetBook, AssetVersion, Cell, GridSpec } from "@/engine/types";
  * then use this asset to build a grid of assets", rules first, then cells by hand).
  */
 
-/** Saving the world as it is now as an asset, under the name he types: a new asset, or the next version of one. */
+/**
+ * Saving the world as it is now as a configuration (his word, 2026-10-09; the code's asset, from before Cinema.md F11),
+ * under the name he types: a new one, or the next version of one.
+ */
 export function SaveAsset({ assets, onSave }: { assets: AssetBook; onSave: (name: string) => Promise<string> }) {
   const [name, setName] = React.useState("");
   const [note, setNote] = React.useState("");
@@ -35,9 +38,9 @@ export function SaveAsset({ assets, onSave }: { assets: AssetBook; onSave: (name
   };
   const saved = Object.values(assets).map((versions) => versions.at(-1)!).sort((a, b) => a.name.localeCompare(b.name));
   return (
-    <Jig title="Save as asset" note="This configuration, under your name">
+    <Jig title="Save as configuration" note="The world as it is now, under your name">
       <div className="col-span-2 flex min-w-0 flex-col gap-2">
-        <Label htmlFor={id} className="sr-only">The asset&rsquo;s name</Label>
+        <Label htmlFor={id} className="sr-only">The configuration&rsquo;s name</Label>
         <div className="flex min-w-0 gap-2">
           <Input
             id={id}
@@ -53,7 +56,7 @@ export function SaveAsset({ assets, onSave }: { assets: AssetBook; onSave: (name
         {saved.length ? (
           <Text role="caption">Saved: {saved.map((a) => `${a.name} (v${a.version})`).join(" · ")}. The same name saves its next version.</Text>
         ) : (
-          <Text role="caption">No assets yet.</Text>
+          <Text role="caption">No configurations yet.</Text>
         )}
       </div>
     </Jig>

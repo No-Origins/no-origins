@@ -10,12 +10,13 @@ import { ScrollArea } from "@no-origins/ui/components/scroll-area";
 import { Slot } from "@no-origins/ui/components/slot";
 import { Text } from "@no-origins/ui/components/text";
 
+import { Configuration } from "@/components/configuration";
 import { EntryJigs, Jig } from "@/components/jigs";
 import { palettesOf } from "@/components/palettes";
 import { Picture } from "@/components/picture";
 import { benchShot } from "@/engine/bench";
 import { makeLibrary } from "@/engine/library";
-import type { AssetBook, Bench, Entry, Value, Values } from "@/engine/types";
+import type { AssetBook, AssetVersion, Bench, Entry, Value, Values } from "@/engine/types";
 import { benchLayout } from "@/lib/layout";
 
 const library = makeLibrary(ENTRIES);
@@ -34,11 +35,14 @@ type Save = { state: "idle" | "saving" | "saved" | "refused"; note?: string };
  * view of the whole of it, lit by the plain sun; at the top left the card that says which asset it is (his, the same
  * day: "that's where we usually put the cards that define the asset"), then its controls either side, a card a
  * group, as the studio draws them.
- * A change shows at once and is saved to the bench once the jigs stand still. No camera, no time, no shot.
+ * A change shows at once and is saved to the bench once the jigs stand still. No camera, no time, no shot. The
+ * asset's card opens the configuration: the values as code, saved under his name with what it is for, and the ones he
+ * saved before, loaded to start a new one from (`configuration.tsx`).
  */
-function Workbench({ initial }: { initial: Bench }) {
+function Workbench({ initial, configurations: saved }: { initial: Bench; configurations: AssetVersion[] }) {
   const metrics = useGridMetrics();
   const [bench, setBench] = React.useState(initial);
+  const [configurations, setConfigurations] = React.useState(saved);
   const [free, setFree] = React.useState(false);
   const [problems, setProblems] = React.useState<string[]>([]);
   const [save, setSave] = React.useState<Save>({ state: "idle" });
@@ -90,6 +94,13 @@ function Workbench({ initial }: { initial: Bench }) {
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(flush, SAVE_MS);
   };
+  /** A saved configuration loaded: every value of it on the bench, saved at once. */
+  const replace = (values: Values) => {
+    setBench((now) => ({ ...now, values }));
+    pending.current = { ...values };
+    window.clearTimeout(timer.current);
+    void flush();
+  };
 
   if (!metrics || !entry) return null;
   const layout = benchLayout(metrics.cols, metrics.rows);
@@ -122,6 +133,7 @@ function Workbench({ initial }: { initial: Bench }) {
         <Button variant="outline" size="sm" disabled={!free} onClick={() => setFree(false)}>
           Look from the start
         </Button>
+        <Configuration asset={bench.asset} entry={entry} values={bench.values} configurations={configurations} onSaved={setConfigurations} onLoad={replace} />
       </div>
     </Jig>
   );
@@ -170,11 +182,11 @@ function Workbench({ initial }: { initial: Bench }) {
 }
 
 /** The studios' grid: the field drawn, the pointer a violet ring, no intro (Grid.md D49). */
-export function AssetBench({ initial, title }: { initial: Bench; title: string }) {
+export function AssetBench({ initial, title, configurations }: { initial: Bench; title: string; configurations: AssetVersion[] }) {
   return (
     <Grid overlay cursor>
       <h1 className="sr-only">{`Cinema: ${title}`}</h1>
-      <Workbench initial={initial} />
+      <Workbench initial={initial} configurations={configurations} />
     </Grid>
   );
 }
