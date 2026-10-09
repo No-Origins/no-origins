@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "id": "sample",
+  "title": "Sample",
+  "rev": 1,
+  "frame": { "aspect": "wide", "size": 1080, "fps": 30 },
+  "world": { "entry": "plain", "version": 1, "values": {} },
+  "cast": [
+    { "id": "stand-in-1", "name": "Stand-in", "entry": "stand-in", "version": 1, "values": {}, "at": [0, 0], "facing": 20 }
+  ],
+  "tracks": [
+    {
+      "id": "camera",
+      "kind": "camera",
+      "items": [
+        { "id": "camera-1", "entry": "orbit", "version": 1, "start": 0, "length": 6, "values": { "distance": 7, "height": 2.5, "from": -40, "to": 40 } }
+      ]
+    },
+    {
+      "id": "light",
+      "kind": "light",
+      "items": [{ "id": "light-1", "entry": "sun", "version": 1, "start": 0, "length": 6, "values": {} }]
+    }
+  ]
+}

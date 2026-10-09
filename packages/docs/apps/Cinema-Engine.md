@@ -93,12 +93,14 @@ line in the app, `pnpm --filter cinema cmd <command> …`, which every agent can
 
 | Command | What it does | Department |
 |---|---|---|
-| `shot new` | Starts a shot: its frame and its world | Direction |
-| `place` | Puts a cast member on the floor, facing a way | Direction, cast |
+| `new` | Starts a shot: its title and its frame | Direction |
+| `world` | Sets the shot's environment and its controls | Set |
+| `place` | Puts a cast member on the ground, facing a way | Direction, cast |
 | `add` | Puts an entry or a preset on a track, at a time, with its values | The track's |
 | `set` | Changes an item's values | The track's |
 | `move`, `trim`, `remove` | Moves an item in time, changes its length, takes it off | The track's |
 | `frame` | Wide or vertical, the size, the frame rate | Direction, camera |
+| `shots`, `show`, `entries` | Read the shots, a shot as data, and the library with every entry's controls | Anyone |
 | `still` | Renders the shot at a moment | Anyone |
 | `sheet` | Renders a contact sheet: a still every so often across the shot | Anyone |
 | `clip` | Renders a stretch of the shot as a short video | Anyone |
@@ -114,9 +116,10 @@ line in the app, `pnpm --filter cinema cmd <command> …`, which every agent can
 
 ## E7. Rendering
 
-- *Mine:* **a still, a sheet and a clip are drawn by the same page**: a headless browser (Playwright's Chromium, which
-  the review loop already runs) opens the engine's page at a moment and takes the canvas, so what the agent checks is exactly
-  what he sees.
+- *Mine:* **a still, a sheet and a clip are drawn by the same page**: a headless browser (Playwright's Chromium,
+  which the review loop already runs) opens the engine's page, `/render`, at a moment and takes the canvas, so what the
+  agent checks is exactly what he sees. That page is the frame at its exact size, so it is not on the grid: it is the
+  renderer's, and no one visits it.
 - *Mine:* **a video is its frames**: the engine draws each frame in turn at its exact moment, never in real time, so a
   slow frame never drops; the frames go to ffmpeg (on his machine), which encodes the video. A clip for checking is
   small and quick; an export is at its full size and takes as long as it takes.

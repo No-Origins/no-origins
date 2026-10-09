@@ -28,3 +28,5 @@ dist
 # The house (Home.md H4): never in an upload, even a manual one from his machine.
 /apps/home/src/content/
 /apps/home/.publish/
+# The Cinema Studio's private folder (Cinema-Engine.md E5): his library, shots, agents, renders and exports.
+/apps/cinema/src/content/

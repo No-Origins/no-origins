@@ -1,9 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // Visual review loop for the workspace apps.
-// `pnpm review` boots EIGHT dev servers (or reuses ones already running) — the portfolio on :3000, the design
+// `pnpm review` boots NINE dev servers (or reuses ones already running) — the portfolio on :3000, the design
 // showcase on :3001, engineering on :3003, the motion studio on :3004, Orbit on :3005, Home on :3006, Status on
-// :3007 and the login on :3008 — sweeps
+// :3007, the login on :3008 and the Cinema Studio on :3009 — sweeps
 // every route in e2e/review.spec.ts on desktop + mobile viewports in both themes, and drops full-page screenshots into
 // e2e/screenshots/<project>/<route>.png. CI runs the same sweep (.github/workflows/ci.yml) and uploads the screenshots.
 //
@@ -45,7 +45,7 @@ export default defineConfig({
       use: { ...devices["Pixel 7"], colorScheme: "dark" },
     },
   ],
-  // Eight apps are booted (the admin is not: every route of it is behind auth and needs a running Supabase).
+  // Nine apps are booted (the admin is not: every route of it is behind auth and needs a running Supabase).
   webServer: [
     {
       command: "pnpm --filter portfolio dev",
@@ -92,6 +92,12 @@ export default defineConfig({
     {
       command: "pnpm --filter auth dev",
       url: "http://localhost:3008/sign-in",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      command: "pnpm --filter cinema dev",
+      url: "http://localhost:3009",
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
