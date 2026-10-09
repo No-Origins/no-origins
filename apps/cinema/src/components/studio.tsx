@@ -57,7 +57,7 @@ function paletteOf(lib: Library, shot: Shot | null, his: readonly PaletteColour[
   return [...named].map(([value, label]) => ({ value, label, colour: value }));
 }
 
-type Save = { state: "idle" | "saving" | "saved" | "refused"; note?: string };
+type Save = { state: "idle" | "saving" | "saved" | "refused" | "note"; note?: string };
 /** A change waiting to be saved: a target's values, or one cell of the world's grid. */
 type Change = { key: string; body: { target: string; values: Values } | { cell: CellChange & { key: string } } };
 
@@ -70,9 +70,13 @@ type Change = { key: string; body: { target: string; values: Values } | { cell: 
  * cell's asset at once, in order, from the revision the screen last saw: a command run meanwhile wins, and the screen
  * shows what it did. Built from the system (F2); the placing is mine.
  */
-function Workspace({ shots: initialShots, initial, assets: initialAssets }: { shots: { id: string; title: string }[]; initial: Shot | null; assets: AssetBook }) {
+type ShotSummary = { id: string; title: string; versions: number[] };
+
+function Workspace({ shots: initialShots, initial, assets: initialAssets }: { shots: ShotSummary[]; initial: Shot | null; assets: AssetBook }) {
   const metrics = useGridMetrics();
-  const [shots] = React.useState(initialShots);
+  const [shots, setShots] = React.useState(initialShots);
+  /** A published version being looked at (read-only), or null for the draft. */
+  const [viewing, setViewing] = React.useState<number | null>(null);
   const [shot, setShot] = React.useState(initial);
   const [assets, setAssets] = React.useState(initialAssets);
   const [aspect, setAspect] = React.useState<Aspect>(initial?.frame.aspect ?? "wide");
@@ -98,6 +102,7 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
 
   React.useEffect(() => {
     if (!id) return;
+    if (viewing !== null) return;
     const watch = setInterval(async () => {
       if (busy.current || queue.current.length) return;
       const response = await fetch(`/shot/${id}`, { cache: "no-store" }).catch(() => undefined);
@@ -106,7 +111,7 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
       if (next.id === id && next.rev !== rev.current) adopt(next);
     }, WATCH_MS);
     return () => clearInterval(watch);
-  }, [id, adopt]);
+  }, [id, adopt, viewing]);
 
   const flush = React.useCallback(async () => {
     if (!id || busy.current) return;
@@ -151,6 +156,7 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
   };
 
   const change = (target: string, control: string, value: Value) => {
+    if (viewing !== null) return;
     setShot((current) => {
       if (!current) return current;
       try {
@@ -163,6 +169,7 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
   };
 
   const changeCell = (key: string, cell: CellChange, wait: number) => {
+    if (viewing !== null) return;
     setShot((current) => {
       if (!current) return current;
       try {
@@ -193,11 +200,44 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
     setPlaying(false);
     setFree(false);
     setPicked(null);
+    setViewing(null);
     adopt(loaded);
     setAspect(loaded.frame.aspect);
     setTime(0);
     setSeek((s) => ({ t: 0, n: s.n + 1 }));
     setSave({ state: "idle" });
+  };
+
+  /** Looks at a published version (read-only), or back at the draft. */
+  const view = async (version: number | null) => {
+    if (!id) return;
+    clearTimeout(timer.current);
+    await flush();
+    const response = await fetch(version === null ? `/shot/${id}` : `/shot/${id}?version=${version}`, { cache: "no-store" });
+    if (!response.ok) return;
+    const loaded = (await response.json()) as Shot;
+    setPlaying(false);
+    setPicked(null);
+    setViewing(version);
+    if (version === null) adopt(loaded);
+    else setShot(loaded);
+    setSave({ state: "idle" });
+  };
+
+  /** Makes the draft, as it is now, the shot's next version. */
+  const publishDraft = async () => {
+    if (!id || viewing !== null) return;
+    clearTimeout(timer.current);
+    await flush();
+    const response = await fetch(`/shot/${id}/publish`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ rev: rev.current }) });
+    const body = await response.json();
+    if (response.ok) {
+      setShots((list) => list.map((s) => (s.id === id ? { ...s, versions: body.versions as number[] } : s)));
+      setSave({ state: "note", note: `Published as version ${body.version}. It never changes; the draft carries on.` });
+    } else {
+      if (response.status === 409) adopt(body.shot as Shot);
+      setSave({ state: "refused", note: String(body.refused) });
+    }
   };
 
   const palette = React.useMemo(() => paletteOf(library, shot, PALETTE), [shot]);
@@ -222,8 +262,8 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
   const pickedEntry = pickedAsset ? library.find(pickedAsset.use.entry, pickedAsset.use.version) : undefined;
   const worldJigs = world && worldEntry ? (
     <>
-      {!spec && <SaveAsset assets={assets} onSave={saveAsset} />}
-      <EntryJigs entry={worldEntry} values={world.values} title={worldEntry.label} note="The world" palette={palette} assets={assets} onChange={(c, v) => change("world", c, v)} />
+      {!spec && viewing === null && <SaveAsset assets={assets} onSave={saveAsset} />}
+      <EntryJigs entry={worldEntry} values={world.values} title={worldEntry.label} note={viewing === null ? "The world" : `The world, as published in version ${viewing}`} palette={palette} assets={assets} disabled={viewing !== null} onChange={(c, v) => change("world", c, v)} />
       {spec && (
         <CellsJig
           spec={spec}
@@ -233,6 +273,7 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
           onSelect={setPicked}
           onAsset={(key, asset) => changeCell(key, { asset }, 0)}
           onClear={(key) => changeCell(key, { clear: true }, 0)}
+          disabled={viewing !== null}
         />
       )}
       {spec && picked && pickedAsset && pickedEntry && (
@@ -243,6 +284,7 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
           note="This copy only"
           palette={palette}
           assets={assets}
+          disabled={viewing !== null}
           onChange={(c, v) => changeCell(picked, { values: { [c]: v } }, SAVE_MS)}
         />
       )}
@@ -263,6 +305,24 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
             </SelectContent>
           </Select>
         </Field>
+        <Field label="Version">
+          <Select value={viewing === null ? "draft" : String(viewing)} onValueChange={(next) => view(next === "draft" ? null : Number(next))}>
+            <SelectTrigger size="sm" aria-label="Version" className="w-full">
+              <SelectValue placeholder="Draft" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="draft">Draft (you tune this one)</SelectItem>
+              {[...(shots.find((s) => s.id === shot.id)?.versions ?? [])].reverse().map((v) => (
+                <SelectItem key={v} value={String(v)}>{`Version ${v}`}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+        <div className="col-span-2">
+          <Button variant="outline" size="sm" onClick={publishDraft} disabled={viewing !== null}>
+            Publish the draft
+          </Button>
+        </div>
         <Field label="See it">
           <ToggleGroup type="single" value={aspect} onValueChange={(next) => (next === "wide" || next === "vertical") && setAspect(next)} variant="outline" size="sm" aria-label="Frame">
             <ToggleGroupItem value="wide">Wide</ToggleGroupItem>
@@ -274,14 +334,14 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
         track.items.map((item) => {
           const entry = entryOf(item);
           return entry ? (
-            <EntryJigs key={item.id} entry={entry} values={item.values} title={`${track.kind === "camera" ? "Camera" : "Light"} · ${entry.label}`} note={`${item.id}, from ${seconds(item.start)} for ${seconds(item.length)}`} palette={palette} assets={assets} onChange={(c, v) => change(item.id, c, v)} />
+            <EntryJigs key={item.id} entry={entry} values={item.values} title={`${track.kind === "camera" ? "Camera" : "Light"} · ${entry.label}`} note={`${item.id}, from ${seconds(item.start)} for ${seconds(item.length)}`} palette={palette} assets={assets} disabled={viewing !== null} onChange={(c, v) => change(item.id, c, v)} />
           ) : null;
         }),
       )}
       {shot.cast.map((placement) => {
         const entry = entryOf(placement);
         return entry ? (
-          <EntryJigs key={placement.id} entry={entry} values={placement.values} title={`Cast · ${placement.name}`} note={`${placement.id}, at ${placement.at.join(", ")}`} palette={palette} assets={assets} onChange={(c, v) => change(placement.id, c, v)} />
+          <EntryJigs key={placement.id} entry={entry} values={placement.values} title={`Cast · ${placement.name}`} note={`${placement.id}, at ${placement.at.join(", ")}`} palette={palette} assets={assets} disabled={viewing !== null} onChange={(c, v) => change(placement.id, c, v)} />
         ) : null;
       })}
     </>
@@ -323,7 +383,7 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
             <Text role="title" as="h2" align="center" className="truncate">{shot?.title ?? "Cinema"}</Text>
             {problems.length > 0 ? (
               <Text role="caption" align="center">{problems.join(" · ")}</Text>
-            ) : save.state === "refused" ? (
+            ) : save.state === "refused" || save.state === "note" ? (
               <Text role="caption" align="center">{save.note}</Text>
             ) : save.state !== "idle" ? (
               <Text role="caption" align="center">{save.state === "saving" ? "Saving…" : `Saved to the draft, revision ${shot?.rev}`}</Text>
@@ -357,7 +417,7 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
 }
 
 /** The studios' grid: the field drawn, the pointer a violet ring, no intro (Grid.md D49). */
-export function Studio({ shots, initial, assets }: { shots: { id: string; title: string }[]; initial: Shot | null; assets: AssetBook }) {
+export function Studio({ shots, initial, assets }: { shots: ShotSummary[]; initial: Shot | null; assets: AssetBook }) {
   return (
     <Grid overlay cursor>
       <h1 className="sr-only">Cinema</h1>

@@ -65,7 +65,9 @@ export function SaveAsset({ assets, onSave }: { assets: AssetBook; onSave: (name
  * there: from the rules, empty, or any of his assets of the layer's kind; and gives it back to the rules. Its copy's own
  * values are the jigs that follow (the screen puts them under this card). A layer's cell is keyed "<layer>:column,row".
  */
-export function CellsJig({ spec, cells, assets, selected, onSelect, onAsset, onClear }: {
+export function CellsJig({ spec, cells, assets, selected, onSelect, onAsset, onClear, disabled }: {
+  /** Read-only, as a published version is: cells can be picked to see them, not changed. */
+  disabled?: boolean;
   spec: GridSpec;
   cells: Record<string, Cell>;
   assets: AssetBook;
@@ -135,11 +137,12 @@ export function CellsJig({ spec, cells, assets, selected, onSelect, onAsset, onC
               value={choice}
               assets={assets}
               accept={layer.accept}
+              disabled={disabled}
               extra={[["rules", "From the rules"], ["none", "Empty"]]}
               onChange={(next) => onAsset(selected, next === "rules" ? "rules" : next === "none" ? "" : next)}
             />
           </Field>
-          {cell ? (
+          {cell && !disabled ? (
             <div className="col-span-2">
               <Button variant="outline" size="sm" onClick={() => onClear(selected)}>Back to the rules</Button>
             </div>

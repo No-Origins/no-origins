@@ -64,7 +64,7 @@ function shown(control: ControlSpec, value: Value) {
 const NONE = "none";
 
 /** A list of his saved assets by name, the newest version of each; `none` for nothing. */
-export function AssetSelect({ id, label, value, assets, onChange, extra, accept }: {
+export function AssetSelect({ id, label, value, assets, onChange, extra, accept, disabled }: {
   id?: string;
   label: string;
   value: string;
@@ -74,10 +74,11 @@ export function AssetSelect({ id, label, value, assets, onChange, extra, accept 
   extra?: readonly (readonly [string, string])[];
   /** Which assets it offers: by default, all of them. */
   accept?: (asset: AssetVersion) => boolean;
+  disabled?: boolean;
 }) {
   const named = Object.values(assets).map((versions) => versions.at(-1)!).filter((a) => accept?.(a) ?? true).sort((a, b) => a.name.localeCompare(b.name));
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={value} onValueChange={onChange} disabled={disabled}>
       <SelectTrigger id={id} size="sm" aria-label={label} className="w-full">
         <SelectValue placeholder="No asset" />
       </SelectTrigger>
@@ -93,7 +94,7 @@ export function AssetSelect({ id, label, value, assets, onChange, extra, accept 
   );
 }
 
-function ControlRow({ control, value, palette, assets, onChange }: { control: ControlSpec; value: Value; palette: readonly ColourOption[]; assets: AssetBook; onChange: (value: Value) => void }) {
+function ControlRow({ control, value, palette, assets, disabled, onChange }: { control: ControlSpec; value: Value; palette: readonly ColourOption[]; assets: AssetBook; disabled?: boolean; onChange: (value: Value) => void }) {
   const id = React.useId();
   const wide = control.kind === "choice" || control.kind === "colour" || control.kind === "asset";
   let widget: React.ReactNode;
@@ -101,12 +102,12 @@ function ControlRow({ control, value, palette, assets, onChange }: { control: Co
     case "number":
     case "angle":
       widget = (
-        <Slider id={id} aria-label={control.label} min={control.min} max={control.max} step={control.step} value={[value as number]} onValueChange={([next]) => next !== undefined && onChange(next)} />
+        <Slider id={id} aria-label={control.label} min={control.min} max={control.max} step={control.step} value={[value as number]} onValueChange={([next]) => next !== undefined && onChange(next)} disabled={disabled} />
       );
       break;
     case "choice":
       widget = (
-        <ToggleGroup id={id} type="single" variant="outline" size="sm" aria-label={control.label} value={String(value)} onValueChange={(next) => next && onChange(next)} className="flex-wrap">
+        <ToggleGroup id={id} type="single" variant="outline" size="sm" aria-label={control.label} value={String(value)} onValueChange={(next) => next && onChange(next)} disabled={disabled} className="flex-wrap">
           {control.options.map((option) => (
             <ToggleGroupItem key={option} value={option}>{capital(option)}</ToggleGroupItem>
           ))}
@@ -114,7 +115,7 @@ function ControlRow({ control, value, palette, assets, onChange }: { control: Co
       );
       break;
     case "switch":
-      widget = <Switch id={id} aria-label={control.label} checked={value as boolean} onCheckedChange={onChange} />;
+      widget = <Switch id={id} aria-label={control.label} checked={value as boolean} onCheckedChange={onChange} disabled={disabled} />;
       break;
     case "asset":
       widget = (
@@ -124,13 +125,14 @@ function ControlRow({ control, value, palette, assets, onChange }: { control: Co
           value={String(value).split("@")[0] || NONE}
           assets={assets}
           accept={control.of ? (asset) => asset.use.entry === control.of : undefined}
+          disabled={disabled}
           onChange={(next) => onChange(next === NONE ? "" : next)}
         />
       );
       break;
     case "colour": {
       const options = palette.some((option) => option.value === value) ? palette : [...palette, { value: String(value), label: String(value), colour: String(value) }];
-      widget = <ColourPicker aria-label={control.label} options={options} value={String(value)} onValueChange={onChange} className="w-full" />;
+      widget = <ColourPicker aria-label={control.label} options={options} value={String(value)} onValueChange={onChange} disabled={disabled} className="w-full" />;
       break;
     }
   }
@@ -156,13 +158,15 @@ export function Field({ label, wide = true, children }: { label: string; wide?: 
 }
 
 /** An entry's controls as jigs, a card for each of its groups; `title` heads a card when the entry has no groups. */
-export function EntryJigs({ entry, values, title, note, palette, assets, onChange }: {
+export function EntryJigs({ entry, values, title, note, palette, assets, disabled, onChange }: {
   entry: Entry;
   values: Values;
   title: string;
   note?: string;
   palette: readonly ColourOption[];
   assets: AssetBook;
+  /** Read-only, as a published version is. */
+  disabled?: boolean;
   onChange: (control: string, value: Value) => void;
 }) {
   const resolved = resolve(entry.controls, values);
@@ -176,7 +180,7 @@ export function EntryJigs({ entry, values, title, note, palette, assets, onChang
       {[...groups].map(([group, controls], index) => (
         <Jig key={group} title={group === title ? title : `${title} · ${group}`} note={index === 0 ? note : undefined}>
           {controls.map((control) => (
-            <ControlRow key={control.id} control={control} value={resolved[control.id]!} palette={palette} assets={assets} onChange={(value) => onChange(control.id, value)} />
+            <ControlRow key={control.id} control={control} value={resolved[control.id]!} palette={palette} assets={assets} disabled={disabled} onChange={(value) => onChange(control.id, value)} />
           ))}
         </Jig>
       ))}

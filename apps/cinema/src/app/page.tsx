@@ -9,5 +9,5 @@ export const dynamic = "force-dynamic";
 export default function Page() {
   const shots = listShots();
   const first = shots[0] ? (readDraft(shots[0].id) ?? null) : null;
-  return <Studio shots={shots.map(({ id, title }) => ({ id, title }))} initial={first} assets={readAssets()} />;
+  return <Studio shots={shots.map(({ id, title, versions }) => ({ id, title, versions }))} initial={first} assets={readAssets()} />;
 }
