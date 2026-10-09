@@ -23,7 +23,10 @@ Current as of 2026-10-09.
   either side the jigs, every control of the world on the left and of the shot on the right (which shot, the frame to
   see it in, then its camera, lights and cast), drawn from the entries' declarations, so a control added in code is on
   the screen at once; a slider of twenty steps or fewer wears the system's marks, a dot over each step, across its card
-  (Motion.md M21; his, 2026-10-09). A change shows at once and is saved to the draft once the jigs stand still, through the same
+  (Motion.md M21; his, 2026-10-09). **Every card is whole rows of the field** (his, 2026-10-09: "the cards are not
+  following the background grid"): as many rows as its content reaches, the field's gap between cards, so its edges
+  stand on the field's lines; **folded, a card is one row**, its name and its arrow (his, the same day); a column with
+  more than it holds scrolls and comes to rest on a row. A change shows at once and is saved to the draft once the jigs stand still, through the same
   change the `set` command makes (E6), from the revision the screen last saw: a command run meanwhile wins. Under the
   picture its name and a bar of play, the time to scrub, and **free look**: a drag turns round what the camera looks
   at, the wheel or a pinch goes nearer, and renders always use the shot's camera.

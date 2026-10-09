@@ -7,12 +7,11 @@ import { ENTRIES, PALETTE, PALETTES } from "@cinema/content";
 
 import { Button } from "@no-origins/ui/components/button";
 import { Grid, GridItem, useGridMetrics } from "@no-origins/ui/components/grid";
-import { ScrollArea } from "@no-origins/ui/components/scroll-area";
 import { Slot } from "@no-origins/ui/components/slot";
 import { Text } from "@no-origins/ui/components/text";
 
 import { Configuration } from "@/components/configuration";
-import { EntryJigs, Jig } from "@/components/jigs";
+import { EntryJigs, Jig, JigColumn } from "@/components/jigs";
 import { palettesOf } from "@/components/palettes";
 import { Picture } from "@/components/picture";
 import { benchShot } from "@/engine/bench";
@@ -144,13 +143,7 @@ function Workbench({ initial, configurations: saved }: { initial: Bench; configu
       </div>
     </Jig>
   );
-  const column = (children: React.ReactNode, label: string) => (
-    <Slot fill="transparent" inset={0}>
-      <ScrollArea className="size-full" aria-label={label}>
-        <div className="flex flex-col gap-3">{children}</div>
-      </ScrollArea>
-    </Slot>
-  );
+  const column = (children: React.ReactNode, label: string) => <JigColumn label={label}>{children}</JigColumn>;
   const right = groups.filter((group) => !left.includes(group));
 
   return (

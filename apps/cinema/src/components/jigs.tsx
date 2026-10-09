@@ -7,9 +7,12 @@ import { Button } from "@no-origins/ui/components/button";
 import { Card, CardContent, CardHeader } from "@no-origins/ui/components/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@no-origins/ui/components/collapsible";
 import { ColourPicker, type ColourOption } from "@no-origins/ui/components/colour-picker";
+import { useGridMetrics } from "@no-origins/ui/components/grid";
 import { Label } from "@no-origins/ui/components/label";
+import { ScrollArea } from "@no-origins/ui/components/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@no-origins/ui/components/select";
 import { Slider } from "@no-origins/ui/components/slider";
+import { Slot } from "@no-origins/ui/components/slot";
 import { Switch } from "@no-origins/ui/components/switch";
 import { Text } from "@no-origins/ui/components/text";
 import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-group";
@@ -32,6 +35,87 @@ import type { AssetBook, AssetVersion, Control as ControlSpec, Entry, Value, Val
 /** A row of swatches a colour control offers: his named colours first, then each further palette under its name. */
 export type ColourRow = { label: string; options: readonly ColourOption[] };
 
+/**
+ * A box as tall as whole rows of the field (his, 2026-10-09: "the cards are not following the background grid"): the
+ * height its content needs, rounded up to the rows it reaches, so its edges stand on the field's lines (Grid.md D12).
+ * Measured from where its first part starts to where its last ends, so a box never grows by its own rounding, nor by
+ * where its parts sit in it (a folded card centres its name).
+ */
+function useRows<T extends HTMLElement>() {
+  const metrics = useGridMetrics();
+  const pitch = metrics ? metrics.cell + metrics.gap : 0;
+  const gap = metrics?.gap ?? 0;
+  const ref = React.useRef<T>(null);
+  const [height, setHeight] = React.useState<number>();
+  React.useLayoutEffect(() => {
+    const box = ref.current;
+    if (!box || !pitch) return;
+    const measure = () => {
+      const first = box.firstElementChild, last = box.lastElementChild;
+      if (!first || !last) return;
+      const style = getComputedStyle(box);
+      const edges = ["paddingTop", "paddingBottom", "borderTopWidth", "borderBottomWidth"] as const;
+      const natural = last.getBoundingClientRect().bottom - first.getBoundingClientRect().top + edges.reduce((sum, edge) => sum + parseFloat(style[edge]), 0);
+      const rows = Math.max(1, Math.ceil((natural + gap - 0.5) / pitch));
+      setHeight(rows * pitch - gap);
+    };
+    // Its parts change size as their content does, and come and go as it folds.
+    const sizes = new ResizeObserver(measure);
+    const watch = () => {
+      sizes.disconnect();
+      for (const part of box.children) sizes.observe(part);
+    };
+    watch();
+    measure();
+    const parts = new MutationObserver(() => {
+      watch();
+      measure();
+    });
+    parts.observe(box, { childList: true });
+    return () => {
+      sizes.disconnect();
+      parts.disconnect();
+    };
+  }, [pitch, gap]);
+  return [ref, height] as const;
+}
+
+/**
+ * A column of cards on the field: each card whole rows tall, the field's gap between them, so every edge is on one of
+ * its lines. A column with more than it can hold scrolls its own content (Grid.md D52) and comes to rest on a row,
+ * never between two.
+ */
+export function JigColumn({ label, children }: { label: string; children: React.ReactNode }) {
+  const metrics = useGridMetrics();
+  const pitch = metrics ? metrics.cell + metrics.gap : 0;
+  const content = React.useRef<HTMLDivElement>(null);
+  const [extent, setExtent] = React.useState(0);
+  React.useLayoutEffect(() => {
+    const box = content.current;
+    if (!box) return;
+    const measure = () => setExtent(box.scrollHeight);
+    const observer = new ResizeObserver(measure);
+    observer.observe(box);
+    measure();
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <Slot fill="transparent" inset={0}>
+      <ScrollArea className="size-full [&>[data-slot=scroll-area-viewport]]:snap-y [&>[data-slot=scroll-area-viewport]]:snap-mandatory" aria-label={label}>
+        <div ref={content} className="relative flex flex-col" style={{ gap: metrics?.gap }}>
+          {/* Where a scroll may come to rest: the top of every row. */}
+          {pitch
+            ? Array.from({ length: Math.ceil(extent / pitch) }, (_, row) => (
+                <span key={row} aria-hidden className="pointer-events-none absolute inset-x-0 h-px snap-start" style={{ top: row * pitch }} />
+              ))
+            : null}
+          {children}
+        </div>
+      </ScrollArea>
+    </Slot>
+  );
+}
+
 export function Jig({ title, note, lead, children }: {
   title: string;
   note?: string;
@@ -40,16 +124,25 @@ export function Jig({ title, note, lead, children }: {
   children: React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(true);
+  const [ref, height] = useRows<HTMLDivElement>();
   return (
     <Collapsible open={open} onOpenChange={setOpen} asChild>
-      <Card size="sm" data-cinema-jig={title} className="shrink-0 gap-3 shadow-none">
+      <Card
+        ref={ref}
+        size="sm"
+        data-cinema-jig={title}
+        data-folded={open ? undefined : ""}
+        // Folded, a card closes into one row (his, 2026-10-09): its name and its arrow, centred in it, the note gone.
+        className={cn("shrink-0 gap-3 shadow-none", !open && "justify-center")}
+        style={{ minHeight: height, ...(open ? {} : { paddingBlock: 0 }) }}
+      >
         <CardHeader className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
             {lead}
             {/* A card with a way back is the page's own: its name wraps rather than being cut short. */}
             <div className="flex min-w-0 flex-col gap-0.5">
               <Text role="label" as="h2" className={lead ? "break-words" : "truncate"}>{title}</Text>
-              {note ? <Text role="caption" className={lead ? "break-words" : "truncate"}>{note}</Text> : null}
+              {note && open ? <Text role="caption" className={lead ? "break-words" : "truncate"}>{note}</Text> : null}
             </div>
           </div>
           <CollapsibleTrigger asChild>

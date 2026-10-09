@@ -7,7 +7,6 @@ import { ENTRIES, PALETTE, PALETTES } from "@cinema/content";
 import { Button } from "@no-origins/ui/components/button";
 import { Card } from "@no-origins/ui/components/card";
 import { Grid, GridItem, GRID_SPACING, useGridMetrics } from "@no-origins/ui/components/grid";
-import { ScrollArea } from "@no-origins/ui/components/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@no-origins/ui/components/select";
 import { Slider } from "@no-origins/ui/components/slider";
 import { Slot } from "@no-origins/ui/components/slot";
@@ -16,7 +15,7 @@ import { Toggle } from "@no-origins/ui/components/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@no-origins/ui/components/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@no-origins/ui/components/tooltip";
 
-import { EntryJigs, Field, Jig } from "@/components/jigs";
+import { EntryJigs, Field, Jig, JigColumn } from "@/components/jigs";
 import { palettesOf } from "@/components/palettes";
 import { Picture } from "@/components/picture";
 import { CellsJig, layersOf, SaveAsset } from "@/components/world-jigs";
@@ -330,13 +329,7 @@ function Workspace({ shots: initialShots, initial, assets: initialAssets }: { sh
       })}
     </>
   ) : null;
-  const column = (children: React.ReactNode, label: string) => (
-    <Slot fill="transparent" inset={0}>
-      <ScrollArea className="size-full" aria-label={label}>
-        <div className="flex flex-col gap-3">{children}</div>
-      </ScrollArea>
-    </Slot>
-  );
+  const column = (children: React.ReactNode, label: string) => <JigColumn label={label}>{children}</JigColumn>;
 
   return (
     <>
