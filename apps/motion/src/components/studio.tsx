@@ -20,9 +20,9 @@ import { actionFamilyOf } from "@/content/agent-actions";
 import { studioLayout, type StudioBox } from "@/lib/layout";
 
 /**
- * M15: one measured field. Navigation replaces the family pager; nothing reserves the bottom row except transport. Since
- * 2026-10-01 (his) the stage is at the field's centre, the jigs in a column either side of it, six cells wide at the most,
- * and dragged between them, and the timeline ten cells at the most, under the stage.
+ * One measured field (Motion.md M15): a select picks the family; nothing reserves the bottom row except the transport.
+ * The stage is at the field's centre, the jigs in a column either side of it, six cells wide at the most, and dragged
+ * between them, and the timeline ten cells at the most, under the stage.
  */
 function Placed({ box, children, hidden = false, name }: { box: StudioBox; children: React.ReactNode; hidden?: boolean; name: string }) {
   return <GridItem {...box} data-studio-part={name} style={hidden ? { display: "none" } : undefined}>
@@ -170,9 +170,9 @@ function Workspace() {
   const layout = studioLayout(metrics.cols, metrics.rows, picksOf(family));
   const studio = useStudio();
   return <>
-    {/* The head's first row (his, 2026-09-29): the studio's name on a lime bar, and the family select a box of its own
-        at the bar's far end. The bar is a surface slot in the system's lime, `--primary`: Slot's four fills (Grid-v2.md
-        D21) have none of lime. The nav is `contents`, so both boxes stay on the grid. */}
+    {/* The head's first row: the studio's name on a lime bar, and the family select a box of its own at the bar's far
+        end. The bar is a surface slot in the system's lime, `--primary`: Slot's four fills (Grid.md D21) have none of
+        lime. The nav is `contents`, so both boxes stay on the grid. */}
     <nav aria-label="Motion studio" className="contents">
       <Placed box={layout.nav} name="navigation"><Slot fill="muted" inset={12} alignY="center" className="bg-primary text-primary-foreground">
         <div className="flex min-w-0 items-center justify-between gap-3 ps-2">

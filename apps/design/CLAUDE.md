@@ -2,97 +2,109 @@
 
 # apps/design — the showcase
 
-`design.no-origins.com`. It renders the design system and nothing else. The design system is `@no-origins/ui`
+`design.no-origins.com`, :3001. It renders the design system and nothing else. The design system is `@no-origins/ui`
 and every visual decision belongs there, not here.
 
 ```bash
-pnpm --filter design dev                 # :3001 (portfolio :3000, admin :3002)
+pnpm --filter design dev                 # :3001
 ```
 
 ## The shape
 
-Three routes, rebuilt 2026-09-16 when the design system was replaced with shadcn/ui, **put on the grid on
-2026-09-21** — his rule: "the grid is the viewport", so no page here scrolls — and **arranged the portfolio's way on
-2026-09-22** — his ask: "similar to how portfolio is designed, update the design app too." Every page is a `GridPages`
-of boxes; overflow goes to the next page, turned by the scroll, the pager's ↑ ↓ on the bottom row, or the keys ↑ ↓ ← → (D42; Grid.md
-D27 — a finger turns it on a phone). The fourth route, `/composer`, was removed on 2026-09-23 with the Compose button
-on every page (Grid-v2.md D30): his words, "remove the Composer feature completely and all the dead code".
+The overview, `/atoms`, `/molecules`, and a page for every entry of the sitemap at `/<group>/<page>` (about 140), each a
+`GridPages` of boxes that is the whole viewport, with the violet ring cursor (Grid.md D34): no page scrolls, and
+overflow goes to the next page, turned by the scroll, the pager's ↑ ↓ on the bottom row, a finger on a phone, or the
+keys ↑ ↓ ← → (Grid.md D27, D42). There is no nav bar and no chrome above the grid; `d` switches the theme.
 
-What "the portfolio's way" means here (Portfolio.md P2, P5, P7, P8, and `apps/portfolio/CLAUDE.md`):
+**The sitemap** (`src/content/sitemap.ts`) is the system's table of contents: ten groups (Overview, Brand, Tokens,
+Foundations, Components, Patterns, Templates, Accessibility, Content, Resources & Maintenance), each a list of pages,
+Components a list of categories of pages. Every page has a `purpose`, what it should cover, and may have `notes`; a
+group has a `brief`, what every page in it shows. Until a page's content is written, `app/[group]/[page]/page.tsx`
+shows it through `components/doc-page.tsx`: where it sits, its title, its purpose, its notes and its group's brief,
+each a card as tall as its text in whole cells (`components/doc-blocks.tsx`: `docTitle`, `docCard`, a span worked out
+from the band and the real cell it is given, `SpanFor`, and `keep`, so text moves whole to the next page rather than
+being squeezed). The routes are built ahead (`generateStaticParams`); any other address is a 404. To add or rename a
+page, change the sitemap. **A written page** is content beside `src/content/pages/index.ts`, registered there by its
+address (`WRITTEN`), and replaces the purpose. Written so far: **Foundations → Cursor** (`pages/cursor.tsx`: what the
+ring is, its six states drawn, a live list to scroll and a slider to hold, its rules, without a mouse, where it is on,
+using it, open questions, and the decisions behind it) and **Tokens → Spacing** (`pages/spacing.tsx`: the base's nine
+steps drawn to scale, the jobs drawn, the corner rule shown, the rules, using it; Spacing.md). Boxes here pad by job
+(Spacing.md): a card is a surface `Slot` with its default `inset`, the sidebar's name a pill (`inset-pill`), its list
+`inset-tight`.
 
-- **A page is sections, arranged on the field it is shown on.** `src/lib/arrange.ts` is the portfolio's `arrange`,
-  copied — every section starts a page and spills onto more; its items pack first-fit in reading order inside a
-  **centred band of 4 · 6 · 8 · 12 · 16 columns** (a page may name a narrower one, `band`, when its items tile it —
-  the overview's two cards divide 12); the pager's row is reserved; a page's block is **centred in the band and in
-  the room** above the pager; an item taller than the room gives up at most a quarter of its rows to stay on a page.
-  **One difference: no top row.** The portfolio reserves one on `lg`/`xl` because it has no chrome; the nav is this
-  app's chrome, so `TOP_ROWS` is zero everywhere. It is a copy and not a package export on purpose — the packer is
-  one of Grid-v2.md's open questions and the package must not decide it; when it is decided, both copies become one.
-- **Every specimen has a span per breakpoint** through three presets in `specimen.tsx`: `half(rows)` — two to a row
-  from `lg` up (564px on xl, 420 on lg), the whole band under it; `quarter(rows)` — four to a row on xl (276px), two
-  on lg and on a tablet; `band(rows, phoneRows)` — as wide as the band. Both widths divide the band, so rows tile. The
-  rows are the same at every breakpoint (a touch cell is a fifth taller), except that a tall `half` takes one more on
-  a phone. A specimen whose rows wrap on one breakpoint only spreads the preset and sets that breakpoint by hand
-  (`Button` and `Input` on `lg`).
-- **Each section has a one-row header** — `SectionHeader`, the portfolio's: number and name in small caps, the title
-  under them, stepping down a role on a phone.
-- **Text is a `Text`** (Type.md T1): the header, the specimen's name and note, the overview's copy. Nothing here
-  reaches for `text-2xl`.
-- **A specimen gets denser as its slot shrinks, and never clips** (P5): a render function receives its placed item,
-  so the `Card` specimen drops its body when the packer has given it a row back. `e2e/.mcp/showcase-clip.mjs`
-  (gitignored) turns every page at five sizes and prints every box whose content is cut off — a span is corrected
-  from that report, not from a guess. `Carousel` and `Pagination` always report; their own tracks are the overflow.
+**The sidebar** (`src/components/sidebar.tsx`) is four columns on the left of every page: the system's name,
+**Circles**, in a bordered box on row 1, and under it the sitemap in one bordered box, built from the system's
+`SidebarMenu` rows (36px): the ten groups, each collapsing to its pages, Components' categories collapsing in turn,
+one group and one category open at a time. The current page's group and category open with it, and its row is the
+current one (the muted tint, `aria-current`). The box is as tall as its open rows in whole cells, as far as the field
+has room; beyond that the list **scrolls inside it** (Grid.md D52): no scrollbar, the cursor's ring fills with liquid
+to the share scrolled (Motion.md M26), and the current page is brought into view. On a field with room for it, a
+column of air and a six-column band (`SIDEBAR_MIN_COLS`, eleven, so twelve and up) it is the layout's **fixtures**
+(Grid.md D51): drawn on every page, never faded by a turn, and `arrange` keeps the pages right of it (`left`). On a
+narrower field (a phone, a portrait tablet) it is the first page instead.
 
-- `/` — what the system is and which layers exist: one section on a 12-column band — the intro, the two layer
-  cards side by side (six columns each, one to a row on a phone), the notes.
+- `/` — what the system is and which layers exist: one section on a 12-column band — the intro, the two layer cards
+  side by side (six columns each, one to a row on a phone), the notes.
 - `/atoms` — the 18 indivisible components, one section, each in a **card** slot.
-- `/molecules` — the 45 that compose them, one section, **each on the molecule card** — his call, 2026-09-22, when
-  three widths read as scattered: "a Responsive card that takes full width in small screens and maybe around 8 cols
-  in large." `CARD(rows)` in `molecules.tsx` is one width — the band on a phone and a tablet, two to a row from `lg`
-  up, eight columns on `xl` — in a **card** slot like the atoms; only the rows differ, so the page is two columns of
-  cards. The five without a specimen are named in a footnote at the end.
+- `/molecules` — the 46 that compose them, one section: 41 **on the molecule card** — `CARD(rows)` in `molecules.tsx`,
+  one width (the band on a phone and a tablet, two to a row from `lg` up, eight columns on `xl`) in a **card** slot
+  like the atoms, only the rows differing, so the page is two columns of cards — and five without a specimen, named in
+  a footnote at the end.
 
 **A page is data in `src/content/`** — `overview.tsx`, `atoms.tsx`, `molecules.tsx`, each exporting a `PageContent`:
 a title, **sections** of `SpecimenItem`s (an id, a **span per breakpoint** in cells, a box variant or `none` for a
 component that is its own box, a render function that receives its placed item), the default variant and an optional
 narrower `band`. `src/content/index.ts` is the model (`findItem` walks the sections). The `page.tsx` files are one line
-each.
+each. To change a page, change its data.
 
-`SpecimenPages` (`src/components/specimen.tsx`) runs `arrange` **on the field the page is actually on**,
-re-arranging whenever the grid reports another shape. Not onto a reference field and then derived: a derived layout
-keeps each packed page as a hard break, and a screen one row shorter than the reference put every page's last row on
-a page of its own. **The span is the one design decision a specimen carries**, and changing a page means changing its
-data — there is no composer to arrange it in. A box clips what does not fit (the grid never scrolls, and neither does anything on it), so a specimen that
-is cut off is a specimen whose span is too small — grow it in its section, run the clip probe, look again. `<main>` in
-the layout sets no width or padding and every page takes the viewport under the nav. `specimen.tsx`,
-`showcase-nav.tsx` and `lib/arrange.ts` are the only things this app owns.
+- **`src/lib/arrange.ts` packs a page on the field it is shown on**: every section starts a page and spills onto more;
+  its items pack first-fit in reading order inside a **centred band of 4 · 6 · 8 · 12 · 16 columns** (a page may name a
+  narrower one, `band`, when its items tile it — the overview's two cards divide 12); the pager's row is reserved; a
+  page's block is **centred in the band and in the room** above the pager; an item taller than the room gives up at
+  most a quarter of its rows to stay on a page. There is no top row (`TOP_ROWS` is zero). The admin and the login
+  carry copies of it; it is not a package export because the packer is an open
+  question (Grid.md) the package must not decide — when it is decided, the copies become one.
+- **`SpecimenPages`** (`src/components/specimen.tsx`) runs `arrange` **on the field the page is actually on**,
+  re-arranging whenever the grid reports another shape — never onto a reference field and then derived, which keeps
+  each packed page as a hard break.
+- **Every specimen has a span per breakpoint** through three presets in `specimen.tsx`: `half(rows)` — two to a row
+  from `lg` up (564px on xl, 420 on lg), the whole band under it; `quarter(rows)` — four to a row on xl (276px), two on
+  lg and on a tablet; `band(rows, phoneRows)` — as wide as the band. Both widths divide the band, so rows tile. A phone
+  takes a third more rows (`onPhone`), since its cell gives way to six columns (Grid.md D33); a tall `half` one more
+  again. A specimen whose rows wrap on one breakpoint only spreads the preset and sets that breakpoint by hand
+  (`Button` and `Input` on `lg`).
+- **Each section has a one-row header** — `SectionHeader`: number and name in small caps, the title under them,
+  stepping down a role on a phone.
+- **Text is a `Text`** (Type.md T1): the header, the specimen's name and note, the overview's copy.
+- **A specimen gets denser as its slot shrinks, and never clips** (Portfolio.md P5): a render function receives its
+  placed item, so the `Card` specimen drops its body when the packer has given it a row back. **The span is the one
+  design decision a specimen carries**: a specimen that is cut off has a span that is too small — grow it in its
+  section, run the clip probe, look again.
 
-**The nav bar is exactly `3.5rem` tall, border included.** Every page sizes itself with `calc(100dvh - 3.5rem)`, so
-`h-14` sits on the `<header>` and not on the div inside it — with the border outside that height the page scrolled
-by one pixel.
+**The grid is the viewport** (`h-dvh`, the grid's default): no page passes it a height, and `<main>` sets no width or
+padding.
 
 ## What is true here and easy to get wrong
 
-- **The app owns no components.** Everything it renders is imported from `@no-origins/ui/components/*`. If you find
-  yourself writing a component here, it belongs in the package.
+- **The app owns no components.** Everything it renders is imported from `@no-origins/ui/components/*`;
+  `specimen.tsx`, `sidebar.tsx`, `doc-page.tsx`, `doc-blocks.tsx` and `lib/arrange.ts` are the only things this app
+  owns. If you find yourself
+  writing a component here, it belongs in the package.
 - **Every page is a client component**, the overview included: `GridPages` measures its box in the browser and a
   render function cannot cross the server boundary. Metadata lives in the layout.
-- **Later pages are not in the sweep.** `pnpm review` screenshots page 1 of each route.
-  `node e2e/.mcp/showcase-clip.mjs <outdir>` (gitignored) turns every page of the three reading routes at five sizes
-  — desktop, laptop, lg, tablet, phone — writes one PNG per page, prints the page count and the scroll size (which
-  must equal the viewport), and lists every box whose content is clipped. A turn takes about 0.35s. `e2e/.mcp/turn-review2.mjs <outdir>` drives
-  the turn — wheel up part way, let go, all the way, wheel down, the ↑ button — and prints each state, with each
-  box's X and Y scale (X must stay 1).
-- **Five components have no specimen yet** — `chart`, `combobox`, `message-scroller`, `questionnaire` and
-  `direction`. Each needs a host that gives it data or a route of its own. They are installed; they are listed at
-  the foot of `/molecules` so the omission stays visible.
-- **The old showcase is gone.** The token screens, the registry-driven `/components/[layer]` route and the `Tool`
-  shell went with the components they documented. The registry does not exist any more: there is no array to read a
-  component's name and description out of, so a specimen writes its own note.
-- **There is no database anywhere near this app** and there should not be.
+- **Five components have no specimen** — `chart`, `combobox`, `message-scroller`, `questionnaire` and `direction`.
+  Each needs a host that gives it data or a route of its own. They are installed and listed at the foot of
+  `/molecules`, so the omission stays visible. `python3 .claude/skills/add-component/scripts/counts.py` prints the
+  true counts.
+- **A specimen writes its own note.** There is no registry of components to read a name and description from.
+- **There is no database anywhere near this app**, and there should not be.
 
 ## Reviewing it
 
-`pnpm review` boots this app and sweeps its three routes on desktop and mobile in both themes — they are
-`DESIGN_ROUTES` in `e2e/review.spec.ts`; add new ones when you add pages. CI runs the same sweep on every PR. Then open the PNGs in
-`e2e/screenshots/<project>/` and look. Press `d` in the browser to switch theme by hand.
+`pnpm review` boots this app and sweeps its three routes (`DESIGN_ROUTES` in `e2e/review.spec.ts`) on desktop and
+mobile in both themes; CI runs the same sweep on every PR. Open the PNGs in `e2e/screenshots/<project>/design__*.png`
+and look. Press `d` in the browser to switch theme. **The sweep shoots page 1 of each route only**:
+`node e2e/.mcp/showcase-clip.mjs <outdir>` (gitignored) turns every page of the three routes at five sizes — desktop,
+laptop, lg, tablet, phone — writes one PNG per page, prints the page count and the scroll size (which must equal the
+viewport), and lists every box whose content is clipped. `Carousel` and `Pagination` always report: their own tracks
+are the overflow.

@@ -7,16 +7,13 @@ import {
 } from "./sphere-motion"
 
 /**
- * THE AGENT'S ACTIONS (Motion.md M24, his, 2026-10-01): the things an agent does, each by its name, in code. *"instead
- * of just trying to control every aspect uh, maybe we can have something like the actions that the agent does I mean
- * which will become part of the code … if I say something like uh, we need jump action or like bounce action um, maybe
- * you can just uh, give me controls for uh, how high it will bounce uh, how much time will it bounce uh, what should
- * happen once it bounces and lands."*
+ * THE AGENT'S ACTIONS (Motion.md M24): the things an agent does, each by its name, in code, each with the controls he
+ * tunes in the motion studio.
  *
  * - **An action is only what he names.** Each is declared here: its name, its controls in groups (typed properties,
  *   `./properties`, the motion studio's cards), and how it plays, worked out from them by the physics the agent already
- *   has (`./sphere-motion`). A new kind of move is a new action here, which he then tunes in the studio. Bounce was the
- *   first; Jump and Dive the next (his, the same evening).
+ *   has (`./sphere-motion`). A new kind of move is a new action here, which he then tunes in the studio. Bounce, Jump
+ *   and Dive are the three.
  * - **Its controls are its own.** They are the agent's motion settings (`set: "motion"` in `./agent-body` and
  *   `./agent-face`, so the one reader, `sphereMotionFrom`, reads them), with this action's labels and defaults; an
  *   action's values are kept apart from every other's. The character's look stands under them, and its Material still
@@ -149,14 +146,11 @@ function leapPlay(m: SphereMotion, g: SphereGeometry, trip: SphereTrip, rested: 
 }
 
 /**
- * A dive (his, 2026-10-01: *"diving is diving behind from behind the screen from one cell to another"*), version 2:
- * it crouches, springs up out of its nest (`spring`; 0, it slips straight in) and comes back down into it — into the
- * page's opening — and goes out of it behind the page **the way it is going** (his, the same evening:
- * *"instead of falling down It should exit in the direction that it's supposed to go"*), cut to the nest's circle, until
- * it is gone; it is behind the page for `under`, its nest going out and the next one lighting; and it glides into the
- * next nest behind the page the way it is going, on the line through its middle, and **carries on** in front of it
- * (his, the same note: *"it should just go and uh, follow inertia"*; version 1 sank and popped straight up whichever way):
- * coming up from under, it flies up out of the nest and falls back in; from the side, it arcs into the bowl and slides up
+ * A dive, diving behind the screen from one cell to another: it crouches, springs up out of its nest (`spring`; 0, it
+ * slips straight in) and comes back down into it — into the page's opening — and goes out of it behind the page **the
+ * way it is going**, cut to the nest's circle, until it is gone; it is behind the page for `under`, its nest going out
+ * and the next one lighting; and it glides into the next nest behind the page the way it is going, on the line through
+ * its middle, and **carries on** in front of it, following its inertia: coming up from under, it flies up out of the nest and falls back in; from the side, it arcs into the bowl and slides up
  * its far side and back; from above, it drops onto the floor (`sphereArrival`). It comes in as fast as falling `pop`
  * would make it. **One gravity** for all of it: slipping straight down out of its nest from rest takes `dive`, so the
  * spring, the going out and the coming in take as long as their distances make them.
@@ -269,13 +263,13 @@ const where = (columns: number): AgentActionGroup => ({
   ],
 })
 
-/** The tail's swing, at his version 15's. */
+/** The tail's swing, at his values (`SPHERE_START`). */
 const TAIL: AgentActionGroup = { id: "tail", label: "Tail", settings: [own("stiffness"), own("swing"), own("stretch")] }
 
 /**
  * **Bounce, version 1**: it crouches in its nest, leaps straight up, falls back into the same nest, bounces off its
  * floor — each bounce lower than the last — and settles. Landing off the bottom of its nest (`Land at`), it slides
- * round the bowl and comes back, as a jump's landing does. The first action (his example, 2026-10-01).
+ * round the bowl and comes back, as a jump's landing does.
  */
 const BOUNCE: AgentAction = {
   id: "bounce",
@@ -340,10 +334,9 @@ const BOUNCE: AgentAction = {
 }
 
 /**
- * **Jump, version 1** (his, 2026-10-01: *"jumping is jumping over the cells from one cell to another"*): the agent's
- * hop, nest to nest — a crouch, an arc over the cells under one gravity, a landing in the nest it reaches that bounces,
- * slides round the bowl and comes back, and the settle. Its defaults are his version 15's (`SPHERE_START`), the hop he
- * tuned on the Agent page, going three cells across.
+ * **Jump, version 1**: the agent's hop over the cells, nest to nest — a crouch, an arc over the cells under one
+ * gravity, a landing in the nest it reaches that bounces, slides round the bowl and comes back, and the settle. Its
+ * defaults are his (`SPHERE_START`), going three cells across.
  */
 const JUMP: AgentAction = {
   id: "jump",
@@ -368,8 +361,7 @@ const JUMP: AgentAction = {
 }
 
 /**
- * **Dive, version 2** (his, 2026-10-01: *"diving is diving behind from behind the screen from one cell to another"*):
- * into its nest, out of it behind the page the way it is going, and on into another, carried by its inertia
+ * **Dive, version 2**: into its nest, out of it behind the page the way it is going, and on into another, carried by its inertia
  * (`divePlay`).
  */
 const DIVE: AgentAction = {
@@ -403,7 +395,7 @@ const DIVE: AgentAction = {
       ],
     },
     {
-      // Version 2: coming in from the side, it slides up the bowl's far side and back, as a jump's landing does.
+      // Coming in from the side, it slides up the bowl's far side and back, as a jump's landing does.
       id: "after",
       label: "After landing",
       settings: [

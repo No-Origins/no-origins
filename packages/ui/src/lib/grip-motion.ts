@@ -12,8 +12,8 @@ import type { Spring, SpringState } from "./spring"
  * moving end stretches its round cap with its speed. Pure: `hooks/use-grip-motion.ts` plays it on the slider, and the
  * motion studio's timeline paints any moment of it from here.
  *
- * Its `--motion-grip-*` tokens are his since 2026-09-30 (globals.css, "A Today, tuned", his second tuning of his pick),
- * and with them the bar's height, `--slider-height`; every fallback here is the same.
+ * Its `--motion-grip-*` tokens are his (globals.css), and with them the bar's height, `--slider-height`; every
+ * fallback here is the same.
  */
 
 const CUBIC_OUT = "cubic-bezier(0.215, 0.61, 0.355, 1)"

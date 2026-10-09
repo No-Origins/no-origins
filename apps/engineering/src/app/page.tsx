@@ -20,12 +20,11 @@ export default function EngineeringIndexPage() {
     <Reading>
       <div className="space-y-10">
         <div>
-          <Badge variant="secondary">Layer A · public</Badge>
+          <Badge variant="secondary">Library</Badge>
           <h1 className="font-heading mt-4 text-4xl font-bold tracking-tight">Engineering</h1>
           <p className="text-muted-foreground mt-3 max-w-2xl">
-            Bhargav&apos;s engineering publish library — explanations and breakdowns on one public subdomain.
-            Layer A ships a static shell and the first piece. Layer B will move pieces into Supabase with MCP
-            publish (writers: Bhargav + bots only). No public write UI.
+            Bhargav&apos;s engineering library — explanations and breakdowns of the systems he builds with, one
+            piece at a time.
           </p>
         </div>
 
@@ -54,8 +53,7 @@ export default function EngineeringIndexPage() {
 
         <div className="text-muted-foreground space-y-2 border-t pt-8 text-sm">
           <p>
-            Compose only from <code className="font-mono text-xs">@no-origins/ui</code>. Press{" "}
-            <kbd className="font-mono text-xs">d</kbd> to switch theme.
+            Press <kbd className="font-mono text-xs">d</kbd> to switch theme.
           </p>
         </div>
       </div>

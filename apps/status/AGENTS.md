@@ -1,7 +1,7 @@
 # apps/status
 
-Status, where every app stands: read `CLAUDE.md` beside this file, then `packages/docs/apps/Status.md`. Next.js 16 on
-the App Router; the Next.js agent rules are appended below by `next dev`.
+Status, where every app stands: read `CLAUDE.md` beside this file for everything about this app. Next.js 16 on the
+App Router; the Next.js agent rules below are written by `next dev`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -18,11 +18,10 @@ export const STATUS_CELLS = 3;
 const over = (colour: string, lit: number) => (lit <= 0 ? "var(--border)" : lit >= 1 ? colour : `color-mix(in oklch, ${colour} ${lit * 100}%, var(--border))`);
 
 /**
- * The status pill (Portfolio.md P25, his, 2026-10-03: "Add a pill in the bottom right of the portfolio with a 'violet'
- * circle. When hovered on it, it should expand to 'Status page' with link icon that opens new tab"): a bordered circle
+ * The status pill (Portfolio.md P25): a bordered circle
  * one cell big in the field's bottom-right corner, a violet dot in it. The pointer on it, or the keys' focus, and it
  * grows LEFT to three cells — the dot staying in its cell, "Status page" and ↗ coming in beside it — by movement
- * (Motion.md M9, his decided motion for one-cell elements that grow to spell their name, the tech column's), played by
+ * (Motion.md M9, his decided motion for one-cell elements that grow to spell their name, the tech stack's), played by
  * `useCellMotion` and mirrored, since it grows from the right edge rather than the left; its border turns violet as it
  * grows. The whole pill is the link, to `status.no-origins.com` in a new tab, so a finger with no hover taps the circle
  * and goes. It stands in a `GridItem` three cells wide ending on the corner cell, a fixture the page's turn leaves

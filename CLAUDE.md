@@ -1,379 +1,229 @@
 # no-origins
 
-pnpm workspace. Apps live in `apps/*` — `portfolio` (hiddenstack.no-origins.com, :3000; bhargav.no-origins.com
-redirects to it), `design` (design.no-origins.com, the showcase, :3001), `admin` (admin.no-origins.com, the control
-surface, :3002), `engineering` (engineering.no-origins.com, the engineering publish library, :3003), `motion`
-(motion.no-origins.com, the motion studio, :3004, since 2026-09-27), `orbit` (orbit.no-origins.com, :3005, since
-2026-09-30: the agents' appearance, Orbit.md) and `home` (home.no-origins.com, :3006, since 2026-10-02: the model of
-the house he is building, Home.md — the app is in the repository and the house is not: it lives in
-`apps/home/src/content`, gitignored, and in a private Vercel Blob store the site reads behind the sign-in, H4), `status` (status.no-origins.com, :3007, since 2026-10-03: where every app
-stands, public, Status.md) and `auth` (auth.no-origins.com, :3008, since 2026-10-08: the login — signing in, making
-an account, the apps one may open and one's account, Admin.md §8.4 step 5, `apps/auth/CLAUDE.md`), all Next.js 16; the shared design
-system is `packages/ui` (`@no-origins/ui`, **2.0.0** since 2026-09-16), consumed from source. Each app has its own
-CLAUDE.md / AGENTS.md; read them before editing app code.
+The rules for working in this repository: what is here, the design system, how he works, the grid, and how it all
+builds and ships. Every agent session loads this file; `AGENTS.md` points Codex here.
 
-**Orbit is what the agents are called together** (his, 2026-10-01, Orbit.md C21): each agent has its own name — Bali,
-Kino, Zaza, Oru, Mira, Lola (Agents.md) — and Orbit is all of them, and the app where they are made. That app was the
-character studio, `apps/character` on `character.no-origins.com`, until the same day. A *character* is still one
-agent's look (the database's rows of kind `character`, `CharacterLook`).
+Current as of 2026-10-08. Earlier versions and what they decided are in git history.
 
-`packages/docs` (`@no-origins/docs`) is the knowledge base — every document that decides something, grouped into
-`brand/`, `system/`, `apps/` and `archive/`. It builds and exports nothing. `packages/docs/README.md` is the index
-and says which documents are live and which describe the deleted 1.0 system. Documents cite each other by bare
-filename (`Brand.md §1`, `Atomic.md D11`), never by path, and so do the ~50 source files that reference them —
-keep it that way.
+## What is here
 
-`services/agents` is the agents harness (Brand.md §1, §8): a Mix application on Jido, OTP app `:agents`,
-supervised as `Agents.Jido`. It is not a pnpm package. `pnpm-workspace.yaml` matches `apps/*`, `packages/*` and
-`supabase` only, and this directory has no `package.json`, so `pnpm build` does not compile it. Run it with
-`cd services/agents && mix test`. The Next apps do not import it. A screen for the harness, when one exists,
-is a block on the grid that talks to this runtime. Agent lifecycle stays on the BEAM. The swarm does not write
-`packages/ui`, the portfolio, or the publish bucket.
+A pnpm workspace (`apps/*`, `packages/*`, `supabase`) of nine Next.js 16 apps. Each app has its own `CLAUDE.md`: read
+it before editing the app (its `AGENTS.md` points there and carries the Next.js rules `next dev` writes).
 
-`supabase/` is the admin's database — schema, RLS, the allowlist gate and both buckets. `supabase/README.md` says how
-to run it and what has been verified. It is a workspace package, `@no-origins/supabase`, a `package.json` and nothing
-else, only so that a migration rebuilds no app on Vercel (Deploying, 2026-10-08). The portfolio and the showcase hold
-no database key for anything they render: **the page is static, a component may be live** (Admin.md §0.6, 2026-09-18).
-A page's structure is baked at Publish from the public `publish` bucket and served from the edge, never queried at
-visit; a component that needs live data declares it, fetches with the anon key through a per-table RLS policy, and has
-a fallback state. The showcase and engineering (Layer A) have no database anywhere near them, and that is deliberate.
+| App | Folder | Host | Port | What it is |
+|---|---|---|---|---|
+| Portfolio | `apps/portfolio` | hiddenstack.no-origins.com (bhargav.no-origins.com redirects) | 3000 | His portfolio: one agent's section a page, turned by the agents (Portfolio.md P24) |
+| Showcase | `apps/design` | design.no-origins.com | 3001 | The design system, Circles: a sidebar of ten groups, a page each with its purpose, and the specimens |
+| Admin | `apps/admin` | admin.no-origins.com | 3002 | People, Roles, Invitations, Audit and Settings (Access.md); `admin.open` and a second factor |
+| Engineering | `apps/engineering` | engineering.no-origins.com | 3003 | The engineering publish library: public explanations, no auth |
+| Motion studio | `apps/motion` | motion.no-origins.com | 3004 | Where the system's motion is designed (Motion.md); `motion.open` |
+| Orbit | `apps/orbit` | orbit.no-origins.com (character.no-origins.com 308s here) | 3005 | The agents' looks (Orbit.md); open to everyone, publishing the owner's (C24) |
+| Home | `apps/home` | home.no-origins.com | 3006 | A three.js model of the house he is building, and its tour (Home.md); `home.open` |
+| Status | `apps/status` | status.no-origins.com | 3007 | Where every app stands; public, no database (Status.md) |
+| Login | `apps/auth` | auth.no-origins.com | 3008 | Signing in, making an account, the apps one may open, one's account (Admin.md §8.4) |
 
-`packages/auth` (`@no-origins/auth`) is **the one sign-in**, and `apps/auth` its one door (step 5 of Access.md A11, being built:
-the app is in; the gates still send people to their own `/sign-in` until each points at it) (Admin.md §8.4, amended 2026-09-30, his: "the same auth
-because it should be same across no origins"): the Supabase clients, the gate (`authGate`, called from each app's
-`proxy.ts`), the callback, the sign-out, the login card and the sign-in screen, consumed from source. One session for
-every app — the cookie is written for `.no-origins.com` — one allowlist, and **roles and permissions being built**
-(**Access.md**, approved 2026-10-06: people and agents, permissions the code declares in
-`packages/auth/src/permissions.ts`, roles he makes in the admin; steps 1 to 4 of A11 are in: the tables and `noo_can()`, every
-database rule asking for a permission instead of a role, a token that carries the permissions, read by the gate
-(`authGate`'s `permission` — the admin `admin.open`, the motion studio `motion.open`, Home `home.open` — sends an account
-without it to a no-access card), and the admin's People, Roles, Invitations and Audit pages; `npx supabase test db` runs
-their tests). The hosted project takes a hook change as
-`db push` first, then `config push`. **The admin and the motion studio
-are behind it; Orbit is open to everyone and its publishing is the owner's** (Orbit.md C24, 2026-10-03, his: "users
-can experiment and play around"), the gate's `open` only refreshing the session there. Without its two keys the gate
-refuses in production; the motion studio alone opens on a development server that has none, and Orbit opens anywhere,
-so the review sweep and CI still see them.
+- **`packages/ui`** (`@no-origins/ui`, 2.0.0): the design system, consumed from source; its rules are in
+  `packages/ui/CLAUDE.md`. **`packages/auth`** (`@no-origins/auth`): the one sign-in, below.
+- **`packages/docs`** (`@no-origins/docs`): every document that decides something, in `brand/`, `system/` and `apps/`;
+  `README.md` is the index. It builds nothing. Documents and source comments cite a document by bare filename and ID
+  (`Grid.md D39`), never by path, and cite only IDs the document defines.
+- **`supabase/`** (`@no-origins/supabase`): the database (schema, RLS, the allowlist gate, both buckets, the access
+  tests; `supabase/README.md`), a workspace package with only a `package.json` so a change here rebuilds no app.
+- **`services/agents`**: the agents harness (Brand.md §1), a Mix application on Jido, OTP app `:agents`, supervised as
+  `Agents.Jido`, outside the pnpm workspace: `cd services/agents && mix test`. The Next apps do not import it; a screen
+  for it is a block on the grid that talks to this runtime. Agent lifecycle stays on the BEAM. The swarm does not
+  write `packages/ui`, the portfolio, or the publish bucket.
+
+**Orbit** is the six agents together (Bali, Kino, Zaza, Oru, Mira, Lola; Agents.md) and the app where they are made
+(Orbit.md C21). A *character* is one agent's look: `CharacterLook`, the database's rows of kind `character`. **Home's
+house is not in the repo** (Home.md H4): it lives in `apps/home/src/content` (gitignored) and the private Vercel Blob
+store `home-house`; `pnpm --filter home publish:house` fills the store, and running it is his call.
+
+**The page is static; a component may be live** (Admin.md §0.6). A page's structure is served from the edge, never
+queried at visit; the portfolio and the showcase hold no database key for anything they render. A component that needs
+live data declares it, fetches with the anon key through a per-table RLS policy, and has a fallback state. The showcase
+and engineering have no database anywhere near them, deliberately.
+
+**The sign-in.** `packages/auth` (Admin.md §8.4) holds the Supabase clients, the gate (`authGate`, from each app's
+`proxy.ts`), the callback, the sign-out, the login cards and the sign-in screen: one session for every app (the cookie
+is on `.no-origins.com`), one allowlist.
+
+- **Permissions are code; roles are his** (Access.md). A permission is declared in `packages/auth/src/permissions.ts`
+  with a migration calling `noo_permission_upsert` in the same change (the typecheck fails when they disagree). Every
+  database rule asks `noo_can()`; the token carries the permissions.
+- **The gate's `permission`** (`admin.open`, `motion.open`, `home.open`) sends an account without it to the no-access
+  card; `motion.open` alone tries every control and saves nothing. An `admin.*` permission counts only after a second
+  factor (Access.md A12). Orbit's gate is `open`: it refreshes the session, and RLS decides who may publish.
+- **Without its two keys the gate refuses in production.** On a development server with none, the motion studio, Home
+  and the login open (`openWithoutKeys`) and Orbit opens anywhere, so CI and a fresh clone see them.
+- **The login app is built and deployed; the gates do not use it yet**: each still sends people to its own `/sign-in`
+  until the next part of Access.md A11's step 5 points them at auth.no-origins.com.
+- `npx supabase test db` runs the access tests. On the hosted project a hook change is `db push`, then `config push`;
+  `[remotes.production]` in `config.toml` keeps a push to what was meant.
 
 ## The design system
 
-**Rebuilt on shadcn/ui, 2026-09-16.** Every component of the hand-written 1.0 system — the atoms, molecules,
-organisms, templates, the registry, the blob, the patterns, the CSS layers — was deleted. What replaced it:
+shadcn/ui, style `radix-sera`, base `radix`, base colour `neutral`, RTL on: 74 components in
+`packages/ui/src/components`, 61 from shadcn and 13 of the house's (`grid`, `grid-pages`, `grid-pager`, `grid-intro`,
+`slot`, `registry`, `text`, `portal`, `theme-provider`, `agent`, `colour-picker`, `liquid`, `hiddenstack-avatar`).
 
-- **shadcn/ui**, style `radix-sera`, base `radix`, base colour `neutral`, RTL on, and **one radius, half the grid's
-  cell** (`--radius`, `rounded-lg`; Grid.md D39 — it was `0` until 2026-09-26). 61 components in
-  `packages/ui/src/components/*.tsx`, plus `theme-provider.tsx`, the agent (`agent.tsx`, 2026-09-30, his approval,
-  drawn from `lib/sphere-motion`), the colour picker (`colour-picker.tsx`, 2026-10-01, his ask: *"color pickers
-  should always be like the paint"*) and the liquid (`liquid.tsx`, 2026-10-03, his ask: *"fill a cell beside in
-  progress with flowing liquid"*; Motion.md M25, its motion on the studio's bench), the three no registry has. **Every pick of a colour is a `ColourPicker`**:
-  swatches, one a colour, never a select of names or a row of worded toggles.
-- **The accents are lime and violet (2026-09-27, his, set in the portfolio's accent jig).** `--primary` is `--lime`
-  and `--secondary` is `--violet`, each with its own ink; the grey of hover and of being active (`--muted`) is lime at
-  14% mixed over the page, and a menu's highlighted item (`--accent`) lime at 4% over the popover — mixed, never
-  translucent. The rest of the palette is still shadcn's neutral. `text-primary` is lime text, about 1.3 : 1 on white,
-  so it is not for text on the light theme. The jig (`?jig` on the portfolio in development, `jig.tsx`) stays, to be
-  showcased in experiments; its "Neutral" puts shadcn's greys back. **The agent has paints of its own** beside them (2026-09-30,
-  Orbit.md C10): pink, red, orange, gold, green, teal and blue since 2026-10-01 (C20, his: peach, yellow and
-  grey out, "high contrast"), the `--agent-*` tokens with their inks, which nothing but the agent paints with — the
-  system's palette is still lime and violet, and widening it is his call. The new five are mid-tones that stand 3.3 : 1
-  from the page and the nest in both themes. A paint that went is read as its replacement (`RENAMED_PAINTS`).
-- **One stylesheet**, `packages/ui/src/styles/globals.css` — Tailwind, `tw-animate-css`, `shadcn/tailwind.css`, the
-  `:root` / `.dark` tokens and the `@theme inline` map. Every app imports exactly this and nothing else.
-- **`cn`** from the `cn` package, re-exported at `@no-origins/ui/lib/utils`.
-- **`gsap`** for motion, since 2026-09-21 — his ask. It animates what is **inside** a box (`Progress`'s `animate`
-  prop grows the fill; Portfolio.md P11) and plays the motion studio's loading; the grid's page turn keeps its own
-  per-frame writer for the pager's arrow (Grid.md D27). See `packages/ui/CLAUDE.md` rule 7.
-- **Motion is tokens (Motion.md, 2026-09-27).** Every number a component moves by is a `--motion-*` custom property
-  in globals.css, one family a group — surface, panel, state, disclose, grow — and components read them, CSS through
-  `motion-surface`/`motion-panel` and token-valued utilities, script through `@no-origins/ui/lib/motion`. The values
-  are the old defaults (shadcn's, Tailwind's, tw-animate's); none is his yet. Motion is designed in **the motion
-  studio**, `apps/motion`: a transparent stage at the centre of the grid, jigs as slots around it, and the CSS lines
-  to commit handed back (M7). **Its bench holds only what he names** (M9). **The agents' are actions** (M24, 2026-10-01, his): its Agents page picks one
-of those `@no-origins/ui/lib/agent-actions` declares, each with its own controls and as long as they make it, its draft
-and `major.minor` versions in the database (kind `action`); Bounce, Jump and Dive are the three, and the motions of rows went. The first is movement, how one-cell
-  elements move when one grows, whose model is `@no-origins/ui/lib/cell-motion`. **Movement is decided** (his
-  settings, 2026-09-27, the `--motion-move-*` tokens), the first motion in the system that is his, and **the
-  portfolio's tech column plays it** (a hovered or selected mark grows to spell its name), as does the numbered pager bar
-  (the page grows to spell its title, Grid.md D47), through `useCellMotion`
-  (`@no-origins/ui/hooks/use-cell-motion`), the same hook the studio's stage plays through. **Loading is decided too**
-  (his settings, the same night, the `--motion-load-*` tokens, `@no-origins/ui/lib/load-motion`): a square of dashed
-  lime rings on the centre, one a section, turning, each going to its section as movement's dot and opening. **No page
-  loads with it since 2026-09-30** (Grid.md D49, his: "remove all the current loaders … let the components load
-  quickly"): it plays on the studio's Loading page only. **Enter · exit** (M11, 2026-09-27), movement's first primitive (one
-  cell's element coming in and going out), is on the bench and not decided. **Hyper focus** (M13, 2026-09-28, named so 2026-09-29; `@no-origins/ui/lib/focus-motion`, `useFocusMotion`), a card in focus and the page
-  blurring round it, least at the card and rising in rings out from it, **is decided too** (his settings,
-  2026-09-28, the `--motion-focus-*` tokens) — and since his note the same night **a cloth, not a ripple**: drawn out
-  from under the card to every corner of its container, the card lifting over it, with focus mode (M14) beside it. **Both are off the portfolio since 2026-09-30**
-  (Portfolio.md P21, his: "We can have it the motion studio but I did not like it in the portfolio"): they play on the
-  studio's pages 5 and 6 only, and no page in any app blurs. **Both were picked again on
-  2026-09-29** (his settings, hyper focus "C Unroll, tuned" and focus mode "A As described, tuned"): focus mode is
-  decided too, its `--motion-mode-*` tokens in globals.css, and its cloth wears a 60% veil of the page's colour, his
-  exception to the no-glass rule (in the studio). Never write a literal
-  `duration-*` or `zoom-in-95` on a component again: name the token. The grid's own motion is not on the layer yet (Motion.md §5).
+1. **Build UI only from the design system.** Every visible element in every app is composed from `@no-origins/ui`:
+   never a hand-rolled control, a raw styled element standing in for one, or a component copied from elsewhere. When
+   one is missing, add it with the CLI (`cd packages/ui && npx shadcn@latest add <name>`; the `add-component` skill is
+   the procedure) or **stop and ask**: he asks for the exception, or you propose it and he approves it first. An app may
+   compose system components into an island; it may not invent primitives. Layout utilities are not components.
+2. **Import a component by its own path** (`@no-origins/ui/components/button`). There is no barrel, and should not be.
+3. **One stylesheet**, `packages/ui/src/styles/globals.css` (Tailwind, `tw-animate-css`, `shadcn/tailwind.css`, the
+   tokens, the `@theme inline` map); every app imports exactly this. `cn` is at `@no-origins/ui/lib/utils`.
+4. **Fonts are the host's**: each app declares `--font-sans`, `--font-heading`, `--font-mono`; the package reads them.
+5. **Theme** is `next-themes` on `.dark`. `d` toggles it, through the grid's sheet (Grid.md D28). Never call
+   `setTheme` for a toggle: call `useThemeToggle`.
+6. **The accents are lime and violet**: `--primary` is `--lime`, `--secondary` `--violet`, each with its ink; `--muted`
+   is lime at 14% mixed over the page, `--accent` lime at 4% over the popover: mixed, never translucent. The rest is
+   shadcn's neutral. Lime is about 1.3 : 1 on white, so `text-primary` is not text on the light theme; Type.md T4's
+   `lime` tone is the one exception (Open: its light-theme contrast). The portfolio's accent jig (`?jig`) stays.
+7. **The agent's paints are the agent's** (Orbit.md C20): lime, violet and `--agent-*` (pink, red, orange, gold, green,
+   teal, blue), each with its ink, at least 3.3 : 1 from the page and the nest in both themes. Nothing else paints with
+   them; widening the palette is his call. A retired paint's name reads as its replacement (`RENAMED_PAINTS`).
+8. **Every pick of a colour is a `ColourPicker`**: swatches, one a colour, the picked one pressed, each named in its
+   title. Never a select of colour names or a row of worded toggles.
+9. **One radius, half the cell** (Grid.md D39): `--radius` is half `--grid-cell` (which `Grid` writes; off the grid
+   globals.css reckons it from the viewport), and every box is `rounded-lg`, so a 1×1 is a circle and a box a cell tall
+   a pill. Never a second radius, never `rounded-none` on a box, except a fill meeting a divider inside a box (4px
+   there, the portfolio's work tabs) and a picture inset in a box (the box's radius less its inset, its project cards).
+   Lines stay straight, and a `transparent` slot is not rounded. **Fields are outlined pills** (Input, Textarea, the
+   Select triggers, InputGroup, Combobox, Command's search; InputOTP's slots circles), never sera's underline. **The
+   slider is a bar**, 8px (`--slider-height`), its head merged into the lime end; held, the head goes into the cursor's
+   ring, the bar parts 2px round it and the body follows on a spring (the grip, Motion.md M16).
+10. **Motion is tokens** (Motion.md M3, M4): every number a component moves by is a `--motion-*` token in globals.css,
+    in a family named for what it is for (`surface`, `panel`, `state`, `disclose`, `grow`: shadcn's and Tailwind's
+    defaults, none his yet), read by CSS (`motion-surface`, `motion-panel`, token-valued utilities) and by script
+    through `@no-origins/ui/lib/motion` as the motion starts. Never a literal `duration-*` or `zoom-in-95`. `gsap`
+    animates what is inside a box (`packages/ui/CLAUDE.md` rule 7). The studio's bench holds only what he names (M9).
+    - **Decided, his settings:** movement `move` (M9; `useCellMotion`: the portfolio's tech column, the numbered
+      pager bar), loading `load` (M10), hyper focus `focus` (M13) and focus mode `mode` (M14), those three on their
+      studio pages only, and the grip `grip` (M16, every `Slider`). The agents' actions, Bounce, Jump and Dive (M24),
+      are data: drafts and `major.minor` versions in the database.
+    - **On the bench, not decided:** enter · exit (M11), the slider's marks (M21), liquid (M25), the scroll's liquid
+      (M26, not on the bench), the intro's tokens
+      (M22); their tokens are read with fallbacks, not in globals.css. Home's closing (`farewell`) and the human rig
+      (`human`, starting values) have tokens there and no bench.
+11. **Spacing is two layers** (Spacing.md): a base of nine steps, `0 · 2 · 4 · 8 · 12 · 16 · 24 · 32 · 48px`, and no
+    others (SP2), and on it every space named by its job (SP3): `inset` (a box's padding), `inset-tight` (a dense
+    box's), `inset-pill` (a one-cell box's), `stack`, `stack-tight`, `inline`, `inline-tight`, `gutter`, as
+    `p-inset`, `gap-stack`. A box's padding clears its round corner (SP4); between boxes there is no margin (SP5).
+12. **Text is a `Text`** (Type.md T1): eight roles (`hero`, `display`, `title`, `heading`, `label`, `body`, `caption`,
+    `mono`), a tone (`foreground`, `muted`, `faint`, `lime`), an alignment, `weight="heavy"`. Never `text-2xl`.
+13. **No gradients**: a surface is one flat colour, `color-mix`ed if it needs a hue. The one exception is the
+    portfolio's project-card image placeholders (lime to violet, with grain) until real images arrive. The agents take
+    depth from grain, relief and stepped shade.
+14. **No glass**: no blur, frost, translucent surface, refraction, rim light or glow (none round the pointer). The
+    exception is the motion studio's Hyper focus and Focus mode pages, hyper focus's blur and focus mode's 60% veil
+    (Motion.md M13, M14); no page in any app blurs (Portfolio.md P21). Open: translucency (the overlays' `bg-black/20`).
+15. **No loader on any page** (Grid.md D49): a page is on the field once the grid has measured it; loading plays on the
+    studio's Loading page only, until he names a loader. The grid's intro (D50) is the agents, not a loader.
+16. **Editing a shadcn component is a decision**: say why in a comment, since `shadcn add --overwrite` discards it.
 
-Import a component by its own path — `@no-origins/ui/components/button` — never from a package root; there is no
-barrel and there should not be one. Add components with the CLI, from `packages/ui`, never by hand:
+## How he works
 
-```bash
-cd packages/ui && npx shadcn@latest add <name>
-```
+- **Every route of every app is on the grid**: `GridPages` (or `Grid`), boxes in `Slot`s, overflow to the next page,
+  no page scrolling (a component may scroll its own content: Grid.md D52), never a `max-w-* mx-auto` column. "Version 1" or "his to design" covers what sits on the grid,
+  never whether; a page off the grid is to flag, not to copy. Check that `[data-slot="grid"]` is there and the page's
+  scroll size is the viewport. Open: engineering and the sign-in screen (a card over a bare field), his to decide.
+- **Size boxes to their content.** Never stretch a component to its room: a card spans the rows its content needs, a
+  cell of air stands between neighbouring blocks, and a group is a heading row (the portfolio's section label: violet
+  icon and word, centred, no border) with its cards under it, side by side, never behind a selector. Overflow pages
+  (Grid.md D5); nothing is squeezed.
+- **Controls read as one system.** Label, control and value columns shared across every card of a group; one widget
+  per value type; one control height (36px, the system's small); a control's actions in its own menu, never buttons at
+  a line's end; things grouped by what they are. Probe each control's edges to check. Open: the components default to
+  40px; one height is his to decide.
+- **Toggles that write data are a draft, saved once**: changed rows marked, a count with Discard and Save, one
+  transaction (an RPC, as `noo_save_role`) so a refusal leaves everything as it was, and a warning before leaving
+  unsaved. Never a write per tick.
+- **A studio centres what is being designed** (Motion.md M15): the stage at the field's centre, jigs at most six cells
+  wide in columns either side, a timeline at most ten, centred under it; jigs drag by their grip and stay where he
+  leaves them (per page, in the browser); a column that overflows folds its cards to their headings.
+- **An agent always stands on a cell of the field** (nest, landing, dive), never between cells or on an invented one;
+  a centre between cells snaps to a real cell, and you say which.
+- **Draw what he names.** When its data is missing (a URL, the copy), draw it inert (no link, no tab stop, its name
+  kept) and say what it needs. Never invent the data.
+- **The field stays plain**: no art, scene or colour painted into the grid's cells.
+- **How he decides.** A design question gets five options at once, each testing a different mechanism, with its
+  reasoning and how it could fail; he picks by id, his notes outrank your recommendation, and the rule the pick implies
+  goes into its document. A character or a new motion family goes one version at a time instead ("Version N", no
+  presets): he tunes it, Copy sends his settings back, the next version answers his notes, and a pick's values become
+  the tokens in globals.css (Motion.md M7). Open: whether the families that already have five presets keep them.
 
-Fonts stay the host's job: each app declares `--font-sans`, `--font-heading` and `--font-mono`; the package only
-reads them. Theme is `next-themes` on the `.dark` class — `d` toggles it in the browser, through the grid's flip (D28) when a
-grid is on the page; never call `setTheme` for a toggle, call `useThemeToggle`.
+## The grid
 
-**Build UI only from the design system.** Every visible element in every app is composed from `@no-origins/ui`
-components — never a hand-rolled control, a raw styled element standing in for one, or a component copied in from
-another library or the web. If the design system lacks a component you need, do not improvise one: add it with the
-shadcn CLI (`cd packages/ui && npx shadcn@latest add <name>`) so it lands in the system, or **stop and ask first**
-— either Bhargav asks for the exception, or you propose one and he approves it before you write it. An app may
-still *compose* system components into an app-specific island (Admin.md §10: "an admin-only component is a fork of
-the design system wearing a different folder name"); what it may not do is invent primitives outside the system.
-Layout utilities (Tailwind flex/grid/spacing) are not components and are fine.
+`packages/ui`: `components/grid.tsx` (the field, the theme sheet, the cursor), `grid-pages.tsx` (pages, the turn),
+`grid-pager.tsx` (the bar), `grid-intro.tsx`, `slot.tsx`, `registry.tsx`, and `lib/grid-layout.ts` (the model, pure).
+**Grid.md** is the document: cite `Grid.md Dn`. The grid renders and nothing edits it (D30). **A page is content
+data**: items with a span per breakpoint and a render function, arranged on the field it is shown on (Portfolio.md P2).
 
-**The old design docs describe a system that no longer exists.** `packages/docs/system/` (Design-System.md,
-Atomic.md, Patterns.md) and `packages/docs/archive/Scene-Schema.md` were written for 1.0 and have not been
-rewritten. Do not follow them for component work — read them for the reasoning, not the API. Brand.md and
-Character.md are upstream of components and still stand.
+- **The cell is decided; the counts derive** (D12). `DEFAULT_GRID_CONFIG` holds `cell · gap` per breakpoint (D13,
+  D15): `base`/`sm`/`md` 72 · 12, `lg`/`xl` 60 · 12, and the bar's width, 6 cells (D29); change one only against
+  Grid.md §5's principles, recorded in D13 (D29 for the bar). A field is `floor((span − gap) / (cell + gap))` cells
+  each way, rounded down to even, never below two (D26), never fewer than six across: there the cell derives from the
+  width (D33). Nothing names cols or rows. **Cells are square** (D9) and **drawn as circles** (D40).
+- **The remainder is centred margin** (D14) and **the box's padding is the gutter** (D15); no `pad`. **The grid is its
+  box**, the viewport (`h-dvh`; a className may change the height, never the width); it never scrolls or overflows.
+  **`GRID_SPACING` is `0 · 4 · 8 · 12 · 16`**: the gap and a slot's `inset` (`SlotInset`) are steps of it.
+- **A box is a `Slot`** (Slots.md): one registry component (`Placed`) or sub-slots on its own cells, with `fill`
+  (`transparent` · `background`, masking the lines · `muted` · `card`; D21), `inset`, `alignX`/`alignY`, no margin.
+  Every slot fills its span and **clips**: a cut-off component is in a slot that is too small. **A component may scroll
+  its own content** in a `ScrollArea` (D52): no scrollbar; over it the cursor's ring holds liquid at the share
+  scrolled, floating up as the pointer enters, growing while it scrolls and disappearing once the hand is still
+  (Motion.md M26); the grid leaves its wheel, finger and keys to it. A Card in a slot gets
+  `transparent`, inset 0, stretch. Boxes are placed by coordinate, 1-based; **overflow goes to another page** (D5).
+- **The pager is a bar on the bottom row** (D27, D29): a fixture `GridPages` draws on every page, its cells
+  reserved (`pagerCells`), one a layout (`layout.bar`), its cells sub-slots: four empty `card` cells, then the ↑ ↓
+  pair, which takes the turn from context. `numberedPagerBar` numbers the pages (D36), the current one grown to two
+  cells with its number and `title`, the pages playing movement (D46, D47).
+- **The turn** (D27, D35, D37, D49): **scrolling up is forward** (a positive `deltaY`, never negated; ↑ is the next
+  page). The hand drives a progress only the arrow follows (a third of the field is a page); short of half way it
+  settles back. A committed turn fades the page away over `TURN_MS` (160ms), opacity only, and the next one in; no box
+  is squeezed, scaled or re-laid out. A hand that keeps scrolling keeps turning; only a fling's tail is ignored. The ↓
+  key turns forward and ↑ back (D42). The turn's custom properties are written on the bar, never the root.
+- **Reading focus** (D45): a page that opts in with `useReadingFocus` (the portfolio) moves focus in reading order with
+  Tab and the arrows, which then never turn it (`keyboard={false}`); `data-reading-after` stops read last.
+- **The theme falls as a sheet of paint** (D28): a plain sheet in the new theme, its edges a sharp moving wave, falls
+  over the outermost grid, the theme commits underneath, and it dissolves (`GridThemeFlip`, GSAP). No grid: instant.
+- **The field is painted** (D38): dashes, lit cell and the intro's ripples are canvases drawn by `lib/grid-field.ts`,
+  in a worker where possible; `gridFieldPainter` stays self-contained (the worker runs its source text).
+- **The pointer is a violet ring** (D34): `cursor` on `Grid`/`GridPages`, a 24px ring drawn from an image in
+  globals.css, filled while pressed; the cell under it lights its dashes violet, fading over 500ms; mouse and pen only,
+  sent to the painter, never React state.
+- **Nothing forces a breakpoint** (D11): `resolveField` takes a width and a height; to see a size, give the grid a box
+  of it. `GRID_REFERENCE_BOX` is the first frame's assumption; `metrics.bp` is the breakpoint that supplied the cell.
+- **Derivation is mobile-first** (D22): an unauthored breakpoint derives from the nearest narrower authored one, else
+  the nearest wider. A page that fits is kept, coordinates verbatim, and centred (D25); one that does not is packed in
+  reading order. Open: which field is authored on, and the packer; do not decide them in code.
+- **The intro is the agents** (D50, Motion.md M22; `intro`, `introAgents`, `introActions` on `Grid`, the
+  portfolio's). The six stand in a row while Bali, Kino and Mira bounce, each jumps or dives to the cell at the centre
+  of the boxes it opens (`data-intro-by`) with a small ripple, then dives home to a cell of its own (the last column;
+  the bottom row on a tall field) and rests there; each box fades in once its agent has gone. `introFocus` names the
+  agent whose section is the page, standing below it (or at `introFocusAt`); a new one turns the page by the agents
+  (`onIntroFocus`). `introAct` plays an action where an agent rests; `data-intro-fixed` marks a fixture no turn fades.
+  Once per load; under reduced motion the agents are drawn still.
 
-## The grid — the base layout
+## Building and deploying
 
-Built on `packages/ui/src/components/grid.tsx` (the field), `grid-pages.tsx` (pages, the turn, the pager),
-`grid-pager.tsx` (the bar) and `packages/ui/src/lib/grid-layout.ts` (the model, pure). **The grid renders; nothing
-edits it** (Grid-v2.md D30, 2026-09-23): the composer at `design.no-origins.com/composer`, the admin's compose
-dashboard, `GridEditor` and `GridFrame` were removed together — his words, "remove the Composer feature completely and
-all the dead code". A layout is written in code or arranged at runtime from spans. **Grid.md is the
-document** — a pointer, because the grid document is versioned: **Grid-v2.md is current** (2026-09-21) and Grid-v1.md
-is the record of the version before, with a table of what v2 did to each of its rules. Rule numbers run in one
-sequence across versions, so `Grid.md D7` is v1's D7 wherever it is written. The code is on v2 since 2026-09-21. The
-rules in short, each one his:
+`pnpm -r build` builds all nine apps with no environment (the admin's clients are made per request).
+`pnpm -r typecheck` and `pnpm -r lint` check the rest; `next build` does not lint in Next 16.
 
-- **The cell is decided; the counts derive (D12).** A breakpoint is **two numbers, `cell · gap`** (D13, D15), living
-  in `DEFAULT_GRID_CONFIG`. A field is as many whole cells as fit the box it is given, across and down,
-  `floor((span − gap) / (cell + gap))`, **rounded down to an even number, never below two (D26, 2026-09-21)** — the
-  field's centre is always a grid line, so a centred block is symmetric. **And never fewer than six across (D33,
-  2026-09-25):** where the decided cell gives fewer — every phone — the count is held at six and the cell derives from
-  the width (51px on a 390). Nobody decides cols or rows, and nothing in
-  the config or the props names them. **The grid never scrolls and never overflows its box.**
-- **The numbers in `DEFAULT_GRID_CONFIG` are decided (D13, 2026-09-21):** `base`/`sm`/`md` 72 · 12, `lg`/`xl`
-  60 · 12, and since D29 (2026-09-23) a third per breakpoint — the pager bar's width in cells, 6 everywhere.
-  Fingers get 72 because a 1×1 is the touch target; pointers get 60; the gutter is one number so the field has
-  one texture. Grid-v2.md §5 has the six principles they were checked against — change a number only against those,
-  and record it in D13 (or D29 for the bar).
-- **Cells are square, always** (D9, 2026-09-18: "only square. No stretch"). Trivially now: the side is the decided
-  number. There is no `fit` prop, no `GridFit` type and no toggle. Do not reintroduce one.
-- **Every corner is one cell's circle (D39, 2026-09-26, his: "hundred percent border radius I mean like circular
-  design").** `--radius` is half the cell — `Grid` writes its measured `--grid-cell` on its root; off the grid (a
-  portal, an app with no grid) globals.css reckons it from the viewport with D13's and D33's numbers — and every box
-  takes it as `rounded-lg`. The browser shrinks a corner to fit, so a 1×1 is a circle, a box a cell tall a pill, a
-  bigger one a cell's curve at each corner. One radius: never a second one, never `rounded-none` on a box (his two exceptions, D39: a fill inside a box meeting a divider takes 4px there — the portfolio's work tabs; and a picture inset in a box takes the box's radius less its inset — the portfolio's project cards, 2026-09-28). **Lines stay
-  straight** — separators, table rows, a turned-square arrow tip — and a `transparent` slot is not rounded (it has no
-  edge; it would only cut what it holds). **A field is a box, not a line (D39 amended, 2026-09-29, his: "even inputs
-  will have full rounded border")**: Input, Textarea, the Select triggers, InputGroup, Combobox, Command's search are
-  outlined pills and InputOTP's slots circles, where they were underlines. **The slider is a bar (D39 amended,
-  2026-09-30, his)**: 8px since his second tuning of the grip (16px at his pick, the cursor's ring, 24px, that morning), a pill with its head, a circle
-  the bar's height, merged into the lime end; held, the head detaches into the cursor, which stays a ring, and the bar
-  parts 2px round it (the grip, Motion.md M16). **The body is fluid** (his, the same night, after a segmented
-  version was tried and taken out, M18): it follows the head on a spring, its ends stretching as they move, and the
-  bar's height is a control (`--slider-height`). **The grip is decided** (his settings, the same night, "A As
-  described, tuned", then "A Today, tuned"): its `--motion-grip-*` tokens and `--slider-height: 8px` are in globals.css
-  — the head in the cursor at once, letting go over 240ms — and every `Slider` plays them. **A slider may have marks** (his, the same night, Motion.md M21): `marks`
-  puts a dot over each step above the bar; a held head snaps under a mark whose zone its cursor is in, and the snap is
-  a tick — the mark pops, the head kicks, a phone vibrates. On the studio's Steps page, version 1, not decided.
-  **A cell is a circle (D40)**: the painter draws each
-  cell's dashes as a ring and the pointer lights a cell only inside its circle. (The front cut a cell's disc first and
-  the rest of its tile `LACE_MS` later — the lace — in the intro and the wash, until D48 took both out.) D9's cell is
-  still a square box; the circle is drawn in it.
-- **The remainder is centred margin (D14).** What is left after the count is split equally on both sides by the
-  flex box; the gutter never widens to absorb it. **The box's padding is the gutter (D15)**: the field sits one gap
-  from every edge, so the screen edge is one more grid line. There is no `pad` — not in the config, not as a prop.
-- **The grid is always its box.** There is no `fill`: nothing holds a grid as a block in a page — "everything will
-  always be on the grid once we are out of the grid editor" — so the grid is the viewport (`h-dvh`). A className may
-  give it another height when there is chrome above; never a width.
-- **The spacing scale is `GRID_SPACING`, `0 · 4 · 8 · 12 · 16`**, the grid's and not a general spacing system. The
-  gap is a step of it and a slot's `inset` is typed from it (`SlotInset`); the cell is not on it.
-- **A box on the grid is a `Slot`** (`slot.tsx`, **Slots.md**). It holds one component from the **registry**
-  (`registry.tsx`, drawn by `Placed` — since the composer went it holds one entry, the pager's arrows) or sub-slots on
-  its own cells, and has tokens: `fill` in
-  four kinds (`transparent` · `background`, a mask over the grid lines · `muted` · `card`, Grid-v2.md D21), `inset`
-  from the spacing scale, `alignX`/`alignY`. **No margin** — the gutter is the margin. Every slot fills its span and
-  **clips**: nothing on the grid scrolls, so a component that is cut off is in a slot that is too small. A layout item
-  carries `slot`, `component` and `children` (a `GridLayout` on the slot's cells), and `SlotContent` renders any of
-  them with no custom `renderItem`. A Card in a slot gets `transparent`, inset 0, stretch, so its own border shows.
-- **Boxes are placed by coordinate**, 1-based like CSS grid lines.
-- **Overflow goes to another PAGE, never off the edge (D5).** A layout is pages. **The pager is a navbar on the bottom
-  row (D27, 2026-09-21)**: 1×1 cells at the bottom centre of every field, on every page — by default four empty
-  `card` slots then ↑ ↓ — a fixture drawn by `GridPages` (`grid-pager.tsx`), never a box on a page.
-  Its cells are reserved in the model (`pagerCells`): nothing packs there, and a kept page is centred in the
-  room above the row. **The bar is a slot and its cells are sub-slots (D29, 2026-09-23)**: its width is a number per
-  breakpoint in the config beside `cell · gap`, even and never below two, and the ↑ ↓ pair is one registry molecule
-  placed in the bar rather than hardwired to the last two cells — it takes the turn from context, not from props, and
-  belongs in the bar only, because an ordinary slot is faded away by the turn. **The bar is the layout's, one per layout** (`layout.bar`), never a page's — it is drawn on
-  every page, so contents that changed between pages would move the arrows under the hand. A bar may leave the arrows
-  out and nothing stops it; the default keeps them in the last two cells. **The scroll turns the page, and scrolling UP is forward — the hand's up: fingers moving up
-  the trackpad or the screen, a positive `deltaY`, never negated** (↑ is the next page, ↓ the one
-  before): a turn is a progress from 0 to 1 that the wheel or a finger drives (a third of the field is one page), and
-  **only the arrow follows the hand** — it fills by that share; let go short of half way and it settles back. **The
-  boxes do not shrink (D37, 2026-09-25, his: "let's not shrink the cards")**: when the turn commits, the page **fades
-  away** over `TURN_MS` (160ms), opacity only, and the next page is put on the field and **fades in** over the same
-  (D49, below). Every `GridPages` turns this way. Until D48 the ripple washed the page away, every box cut cell by cell
-  as its front crossed it (`washAway`, gone), and from D48 to D49 the loader brought a page with images in. Nothing in a box is ever squeezed, scaled or re-laid-out: D27's
-  clip-by-height went for the wash, and scaling (in Y, then uniformly) was sent back on 2026-09-21 — do not
-  reintroduce a transform or a shrink here. **A hand that goes on scrolling goes on turning (D35, 2026-09-25)**: only a fling's
-  decaying tail is ignored after a turn, never the hand (`readWheel`), a notch glides rather than jumps, and the turn
-  renders no card — the phase is `data-turn` on the tracks (`idle · drive · relax · wash · in`), the arrow's fill on
-  the bar. The arrows, ← → and ↑ ↓ play the same turn — the ↓ key forward and ↑ back, pressing the arrow that wears
-  that glyph (D42, 2026-09-26), a key a focused component took or a modified one left alone; the flip is gone.
-  **Where a page opts in with `useReadingFocus` (D45, 2026-09-27 — the portfolio), Tab and the arrows move focus in
-  reading order**, left to right and top to bottom as the boxes stand — **like a game controller's, the arrows never
-  turn that page** (a `GridPages` that opts in takes `keyboard={false}`; the portfolio's pages, one agent's section
-  each since Portfolio.md P24, turn by the scroll, a swipe and Page Down / Page Up, never by the arrows). The field
-  and the pager never move. What the bar's
-  empty cells hold is now a layout question, not an open one (D29). **A bar may number its pages (D36, 2026-09-25)**:
-  `numberedPagerBar` puts back (↑) on the first cell, forward (↓) on the last and a page number on every cell
-  between, from the registry's `pager-arrow` and `pager-page`. **Since D46 and D47 (2026-09-27, his) the page on the field
-  is grown to two cells showing its number and title** (a page's optional `title` on `GridPage`): on the bar's second
-  and third cells for the first page, the middle two for a page with pages on both sides, and the fourth and fifth for
-  the last. The pages between the arrows are one block (`pager-pages`) that **plays movement** as the page changes, and
-  a number turns straight to its page. The motion studio draws it. The portfolio's bar was this one
-  (Portfolio.md P14) until it became one page on a `Grid`, with no bar, on 2026-09-27 (P15); D27's is still the default.
-- **The theme falls over the field as a sheet of paint (D28, 2026-09-22).** Toggling light/dark — `d`, or the
-  showcase's button, both through `useThemeToggle` — is one beat on the outermost grid: one sheet in the NEW theme's
-  colours, plain — no cells drawn on it — with a sharp, moving wave of two to five uneven crests for its bottom and
-  top edge, falls
-  from above until the box is covered, the theme commits underneath, and the sheet dissolves. `GridThemeFlip` in `grid.tsx`, GSAP, one transform; the light tokens sit on `.light` as well as `:root` so
-  the sheet wears the theme before the page does. No grid on the page: the switch is instant.
-- **No page loads behind a loader (D49, 2026-09-30, his: "I want to remove all the current uh, loaders that we have. I
-  did not like it … just remove it and uh, let the components load quickly").** A page is on the field as soon as the
-  grid has measured it; a turn fades it away and the next one in, 160ms each. There is no intro: no `intro` prop on
-  `Grid` or `GridPages`, no `page` prop on `Grid`, no `data-loading` or `data-intro`, and nothing waits for page 1 before
-  a turn. D48's loader (2026-09-27) — dashed lime rings on the field's centre, one a box (`data-load-section`,
-  `data-load-box`), opening into the page after 2 s at the least — is gone from every page with `useGridLoad` and
-  `GridLoader`. Loading itself, his motion (Motion.md M10), stays whole in `lib/load-motion` and `useLoadMotion`, its
-  tokens in globals.css, and plays on the motion studio's Loading page only. Do not put a loader back on a page until
-  he names one. **He named one the same day: the intro is the agent (D50)**, and **since 2026-10-01 it is the six
-  playing his actions (version 3, Motion.md M22, his: "randomly some agents will dive and some agents will jump to
-  their positions")**, and **since version 4 the same day each lands on the centre of its sections and they come in
-  with its ripple** (his: "instead of uh, expanding these sections from top left they should render along with the uh,
-  ripple"), and **since version 5 they stand in a row and only some bounce** (his: "place them in uh, row in a line …
-  let's only make uh, Bali Kino and uh, Mira to bounce"), and **since version 6 every nest is a cell and the rest is
-  seen**, and **since version 7 the ripple is small again and the page comes after it** (his: "once the ripple ends we
-  can drop the agents and then render the components"), and **since version 8 they go home and stay** (his: "we'll
-  bring them to the right the last most column vertically centered"), and **since version 9 (2026-10-03) one agent is
-  in focus and the agents turn the page** (his: "each agent can pick a section. So we scroll from one agent to another
-  … when we scroll, they dive back into their place and the new agent dives in", then "the agent stays on the same
-  uh, page" and "right in the center bottom of the section"): `introFocus` names the agent whose section is the page's
-  boxes, and it stands where `introFocusAt` says (the portfolio: one cell on every page of a wide field, the third row
-  from the bottom at the centre, his) or else in the cell below the section, while the rest are at home; hovering
-  it opens its pill (name, chat, ↗ to Orbit, Portfolio.md P24) and a click bounces it (`introAct`, an action an agent
-  plays where it rests). A new `introFocus` turns the
-  page: the section fades away as its agent Dives home, `onIntroFocus` asks for the next section, and its agent Dives
-  in below it, ripples, and the section fades in (`data-intro-turn` while it does). Home is the bottom row on a field
-  taller than it is wide (Grid.md D50 version 9, Motion.md M22, Portfolio.md P24). What follows is version 8's
-  intro, which version 9 ends with one agent below page 1's section and the other five going straight home. `intro`, `introAgents` and `introActions` on `Grid` are the
-  portfolio's: its cast the six agents copied from their current versions (`apps/portfolio/src/content/agents.ts`),
-  each with whether it `bounces` (`content/intro.ts`), and its moves Bounce, Jump and Dive copied from theirs
-  (`content/actions.ts`). The six stand side by side in one row, a cell each, centred on the field's middle row (or the
-  nearest an agent does not land in), in a random order, and Bali, Kino and Mira Bounce, each at its own random times,
-  for 2s, the other three resting — breathing and blinking, each as if it had sat a while (version 6). Then each Jumps
-  or Dives, at random, to the centre of the boxes it opens, which every box names with `data-intro-by` — the cell at
-  the middle of the rectangle round them, always a cell of the field (version 6, his: "They should actually drop into
-  the cells on the grid"). As each lands, version 3's small ripple lights the two rings of cells round its nest in
-  violet: one pass of the field's painter an agent. Once it has spread, the agent Dives (his action) out of its nest
-  to a cell of its own in the field's last column, the six one above the other and centred down it, Bali at the top
-  (`introHome`, version 8); the boxes it opens fade in once it is gone, each by one Web Animations opacity fade (no
-  `clip-path`: version 4's cell-by-cell cut stuttered). The agents stay in those cells, breathing and blinking, after
-  the hand-over and on any field the grid is given later (`GridIntro` stays mounted, `settled`). `grid-intro.tsx`, which
-  the grid loads only then, draws it. The `--motion-intro-*` values are INTRO_START's in `lib/intro-motion`, not yet in
-  globals.css. Version 1 (one agent hopping in the avatar's ring, the whole field lit ring by ring), version 2 (the six
-  gathered in his loader's square, leaping all at once), version 3's top-left opening and its random spots in the
-  centre four by four are gone. Once per document load, never under reduced motion, where the agents are drawn in
-  their cells once, still. The ripple went before it (D48): the grid drawing itself in, the ripple between pages (D32), its wash
-  (D37) and the `ripple` prop. **The field is painted
-  (D38, 2026-09-25)**: the overlay's dashes and the pointer's cell are canvases drawn by one painter
-  (`lib/grid-field.ts`), in a worker where the browser can hand it a canvas, so the page's own loading on the main
-  thread cannot stall it. They were ~1,300 elements. `gridFieldPainter` must stay self-contained — the worker runs it
-  from its own source text. It lights the intro's ripples (passes, the youngest lighting showing where two cross) and
-  still carries the intro's reveal, which nothing sends any more.
-  **The turn's custom properties are written on the pager's bar, not the grid's root or tracks**: they inherit, and on
-  the root they restyled every element in the grid every frame of a turn; on the tracks, every box (until D37).
-- **The pointer is a violet ring, and the cell under it is lit (D34, 2026-09-25).** `cursor` on `Grid` or `GridPages`;
-  the portfolio has it. A 24px ring with a violet line, filled violet while pressed (**D43, 2026-09-26**, his: "change the
-  cursor color to violet"; it was lime), but a ring still while a slider's head is held, the head fitting into it
-  (2026-09-30, his, Motion.md M16) — **the system's cursor drawn from an image**
-  (globals.css), never a div moved on every pointer move: that cost a whole-page layerize a move and trailed the hand. The cell the pointer is on turns its **dashes** violet too (the default dashes, not a solid line — his, the same day; lime until D43)
-  — its ring's since D40 — and fades back over 500ms when left;
-  the gutter lights nothing, nor a square's corners outside its circle. Found from the field's numbers and sent to the field's painter (D38), never React state.
-  Mouse and pen only; a phone keeps its own. **No glow round the pointer**: D41 had the cells round a moving pointer
-  glow, and he withdrew it the same day (2026-09-26, "I did not like the glow effect") — do not bring it back. The
-  intro's lines were the one blur kept, until they went with the drawing (D48): the system keeps none.
-- **Nothing forces a breakpoint (D11).** `resolveField` takes a width and a height and nothing else; no grid
-  component takes a `breakpoint` prop. To see another size, give the grid a box of that size — a browser window, a
-  device in the review sweep. `GRID_REFERENCE_BOX` (`grid.tsx`) is each breakpoint's reference size, which a page
-  assumes for its first frame before the grid has measured. A phone on its side is just a wide short box with more
-  columns than rows; v1's transposition rule is gone.
-- **`metrics.bp` is the breakpoint that supplied the cell**, walking down the config, not the field: two boxes in
-  `lg` can have different fields. It keys the cell (D13) and, for now, the authored pages.
-- **Derivation is mobile-first (Grid-v2.md D22).** A breakpoint with no layout of its own derives from the nearest
-  authored breakpoint NARROWER than it, else the nearest wider — every other field packs each authored page in reading
-  order; an authored page break is a hard break; overflow adds pages. Inside a slot nothing is reserved for a pager.
-  **A page that FITS the target field is kept, coordinates verbatim, and centred (D25)**; only a page whose used block
-  does not fit is packed. Because counts follow the box, **authored pages carry the shape they were written on**
-  (`layout.shapes`, `LEGACY_SHAPES` for anything saved before v2) and are packed whenever the field's shape differs —
-  including the same breakpoint at another width. Which field is authored on, and the packer itself, are the open
-  questions; do not decide them in code. The one authored layout left is the admin home's, written in code.
+Nine Vercel projects in the `no-origins` team, one an app, Root Directory `apps/<app>`: `no-origins` (the portfolio),
+`design`, `admin`, `engineering`, `motion`, `character` (Orbit: root `apps/orbit`, orbit.no-origins.com;
+character.no-origins.com 308s from `apps/orbit/next.config.ts`), `home`, `status`, `auth`. Production is `main`. The
+admin, motion, Orbit, Home and the login carry the two `NEXT_PUBLIC_SUPABASE_*` variables (without them production
+answers 503); Home also the Blob store `home-house`. Open: Turnstile's site key joins the login's when he has made the
+site. The hosted Supabase lists every app's domain among its redirect URLs (`supabase/config.toml`). A new project:
+`vercel link` from the app's folder, `vercel project update --root-directory`, `vercel git connect`, `vercel domains
+add`, `vercel env add --type config` for the two variables, then skip-unaffected through the API
+(`vercel api -X PATCH /v9/projects/<name> --input -` with `enableAffectedProjectsDeployments`; the CLI has no flag).
 
-**Organisms and templates do not exist yet.** They get designed on top of this layer, not ported from 1.0. **The
-showcase itself is on the grid** since 2026-09-21 and **arranged the portfolio's way** since 2026-09-22
-(`apps/design/CLAUDE.md`, Portfolio.md P2, P7, P8): every reading page is a `GridPages` of sections whose specimens
-carry a span per breakpoint, packed into a centred band above the pager's row, the block centred in the room; no page
-in the workspace scrolls. **A page is content data**: sections of items, each with a span per breakpoint and a render
-function, arranged on the field it is shown on. To change a page, change its data. There is no design mode, no
-composer and nothing is edited in place.
-**Text is a `Text`** (`text.tsx`, Type.md): eight roles (`hero` over `display` since 2026-10-03, T5), tone, alignment — an app does not reach for `text-2xl`.
-
-## What builds
-
-**All nine apps build** — `pnpm -r build` is green, and CI's **Build** job builds all nine on every PR. The admin
-builds with no Supabase keys, since its clients are made per request; it stays out of the **review sweep** because
-every route is behind auth and needs a running Supabase, which `pnpm review` does not boot. The motion studio is
-behind the same sign-in since 2026-09-30 and stays in the sweep: its dev server opens when it has no keys (CI, a fresh
-clone). Orbit (2026-09-30) was behind it the same way until 2026-10-03, when it opened to everyone (Orbit.md C24), and
-is in the sweep too. **On his machine both have
-the local stack's keys** (their `.env.local`, his ask, 2026-09-30), so the motion studio asks for a sign-in as the admin does, Orbit shows a visitor the published agents, and
-`e2e/global-setup.ts` signs the test browser in first — by magic link through the local mail catcher, as the address in
-`.private/e2e-email` (gitignored) — leaving the session in `e2e/.auth/state.json` for every spec and the sweep. **Quests are gone**
-(Admin.md §0.7, 2026-09-23): the admin is sign-in, a home of three cards and `/settings`. **The portfolio was rebuilt on
-the grid on 2026-09-21** (Portfolio.md, `apps/portfolio/CLAUDE.md`): one route, the first screen — and since 2026-09-27
-one page, a `Grid` with no pager, the rest of the site in the room the first screen leaves (P15) — and since
-2026-10-03 **one agent's section a page**, six of them, turned by a scroll and played by the agents (P24). Its 1.0 pages, parked
-in `.legacy/`, were deleted on 2026-09-23 — git history keeps them.
-
-## Deploying
-
-Nine Vercel projects under the `no-origins` team, one per app, each with its **Root Directory** set to `apps/<app>`:
-`no-origins` → portfolio, `design`, `admin`, `engineering`, since 2026-10-03 `status` (status.no-origins.com, by the
-same recipe, with no environment variables: it has no database) and `home` (home.no-origins.com, the same recipe, the
-two `NEXT_PUBLIC_SUPABASE_*` variables as the studios', and the private Blob store `home-house` connected to it, which
-holds the house — Home.md H4; `pnpm --filter home publish:house` fills it), and since 2026-09-30 `motion` and `character` (Orbit's,
-named before it was; since 2026-10-01 its root directory is `apps/orbit` and its domain `orbit.no-origins.com`, with
-`character.no-origins.com` still attached and 308ing to it from `apps/orbit/next.config.ts`), and since 2026-10-08
-`auth` (auth.no-origins.com, the login, the same recipe and the same two variables; Turnstile's site key joins them when
-he has made the site; it has no deployment until the PR that brings `apps/auth` merges), made with
-the CLI the night PR #14 merged (`vercel link` from the app's folder creates the project; `vercel project update
---root-directory`, because link leaves it at `.`; `vercel git connect`; `vercel domains add`; `vercel env add
---type config` for the two `NEXT_PUBLIC_SUPABASE_*` variables, copied from the admin's — without them production
-answers 503). Production is `main`. The hosted Supabase carries every studio's domain and Home's among its redirect URLs, pushed from `config.toml`
-(supabase/README.md; `orbit.no-origins.com` and `home.no-origins.com` on 2026-10-03 — `config.toml` declares
-production's pooler and storage-analytics values under `[remotes.production]` so a push changes only what was meant).
-*Skip deployments for unaffected projects* is on for all nine; motion, character, status and home had it set on
-2026-10-03, and auth on 2026-10-08, through the project API (`vercel api -X PATCH /v9/projects/<name> --input -` with `enableAffectedProjectsDeployments`) — the CLI
-has no flag for it.
-
-**`apps/<app>/vercel.json` is the source of truth, not the dashboard.** A `vercel.json` in a project's root directory
-**overrides** the dashboard's fields, so the commands live in the repo, travel through review, and cannot quietly
-drift apart the way they did through 2026-09-22 (three projects, three different install commands). The dashboards
-carry the same commands since 2026-09-23; if they drift again, the file still wins. All nine files are byte-identical on purpose:
+**`apps/<app>/vercel.json` is the source of truth**: it overrides the dashboard. All nine are byte-identical:
 
 ```json
 {
@@ -390,96 +240,61 @@ carry the same commands since 2026-09-23; if they drift again, the file still wi
 }
 ```
 
-`pnpm run build` rather than `pnpm --filter <app> build` so no app name is embedded and renaming a package breaks
-nothing. `--frozen-lockfile` so a stale lockfile fails the build loudly instead of resolving something else — the
-failure that produced the engineering lockfile PRs. **`bom1` (Mumbai) since 2026-10-08, his**: the functions ran in
-`iad1` (Washington), the default, while the hosted Supabase is in `ap-south-1` (Mumbai) and he is in India, so every
-database call a page or an action waited on crossed the world twice — about 200 ms each, and the admin's pages and
-ticks took seconds. Keep the functions beside the database: if the database moves, `regions` moves with it. The one
-thing still in `iad1` is Home's Blob store, `home-house`, which Home reads once a visit; moving it means a new store
-in `bom1` and a `publish:house`, his call. **Only `main` deploys, since 2026-10-08, his**: no preview deployment of a
-pull request's branch — CI builds every app on every PR, and the previews were what used up the free plan's daily
-deployments ("Deployment rate limited — retry in 24 hours", which holds production deploys too). A branch that matches
-several patterns deploys if any is `true`; `**`, not `*`, because a branch name here has a `/` and `*` stops at one.
+`pnpm run build` embeds no app name; `--frozen-lockfile` fails a stale lockfile loudly. **`bom1`** puts the functions
+beside the hosted Supabase (`ap-south-1`): if the database moves, `regions` moves (Home's Blob store is still in `iad1`;
+moving it is a new store and a `publish:house`, his call). **Only `main` deploys**: no previews, which used up the free
+plan's daily deployments; `**`, not `*`, because branch names here have a `/`.
 
-**Which apps a push builds is Vercel's call, not a command's.** All nine projects have *Skip deployments for
-unaffected projects* on (`enableAffectedProjectsDeployments` in the project API): Vercel reads the pnpm workspace
-graph and compares against the last deployed commit. A project builds when its own folder changed, when a workspace
-package it depends on changed — `packages/ui` rebuilds all nine, `packages/auth` the admin, motion, Orbit, Home and the login,
-`packages/docs` none — or when a lockfile change moved its own dependencies. PR #5 and PR #7 deployed engineering and
-nothing else, #27 the admin and nothing else, #29 (documents only) nothing. A skipped project shows as *Canceled*,
-"the commit didn't affect this project", not as a missing deployment. **A change outside the workspace is global and
-rebuilds all nine** — Vercel's rule for anything `pnpm-workspace.yaml` does not match: the root's own files
-(`CLAUDE.md`, `AGENTS.md`, `playwright.config.ts`), `.github/`, `.changeset/`, `e2e/`, `services/`. Until 2026-10-08
-`supabase/` was one of them, so nearly every Access PR, because it carried a migration, rebuilt all eight apps
-whatever else it touched (#26, #30, #31), and the builds run one at a time: #31's admin waited in the queue while
-status, which #31 did not touch, built ahead of it. Since then `supabase/` is a workspace package no app depends on,
-and a change there rebuilds nothing. A new top-level folder that no app reads costs the same until it is one. **There
-is no `ignoreCommand`, and there should not be one.** One was written on 2026-09-23 (`git diff --quiet HEAD^ HEAD -- .
-../../packages/ui ../../pnpm-lock.yaml`) and taken out the same day: it compared only a push's last commit, so a push
-whose `packages/ui` commit was not the tip skipped every app it touched, and it rebuilt all four on any lockfile
-change where the graph rebuilds only the apps whose dependencies moved.
+**Which apps a push builds is Vercel's call.** Every project skips unaffected deployments, reading the pnpm graph
+against the last deployed commit: a project builds when its folder changed, a workspace package it depends on changed
+(`packages/ui`: all nine; `packages/auth`: the admin, motion, Orbit, Home, the login; `packages/docs` and `supabase/`:
+none) or the lockfile moved its dependencies; a skipped one shows *Canceled*. **A change outside the workspace rebuilds
+all nine**, one at a time: root files (`CLAUDE.md`, `AGENTS.md`, `playwright.config.ts`), `.github/`, `.changeset/`,
+`e2e/`, `services/`; a new top-level folder no app reads should be a workspace package, as `supabase/` is. **No
+`ignoreCommand`**: a command sees only a push's last commit, the graph the whole push. The skip covers Git deploys only
+(`vercel --prod` always builds), and connecting a project does not backfill.
 
-**Two things the skip does not cover.** It only applies to Git-triggered deploys — a manual `vercel --prod` always
-builds, whatever changed. And connecting a project does not backfill: the hooks fire on the next push, so a newly
-connected project stays on its last manual deployment until something lands on `main`.
-
-**CI is `.github/workflows/ci.yml`**, on every pull request and every push to `main`, and **branch protection on
-`main` requires all five of its checks**, admins included — nothing reaches production without them:
-
-| Job | What it runs |
-|---|---|
-| **Typecheck and lint** | frozen install, `pnpm -r typecheck` (`packages/ui` on its own too), `pnpm -r lint` — `next build` stopped linting in Next 16 |
-| **Build** | `pnpm -r build`, all nine apps, with no env — the one build check a merge can require |
-| **Visual review** | `pnpm review` (below); the screenshots and report are uploaded as the run's `review-screenshots` artifact |
-| **Agents tests** | `mix test` in `services/agents`, which no Vercel project builds — **only when `services/agents` changed** |
-| **Database tests** | `supabase start` (the database and auth only), an Owner made through the allowlist, `supabase test db` — the access rules (Access.md), **only when `supabase/` changed** |
-
-The last two run only when their folder (or the workflow) changed (his, 2026-10-08): a small `What changed` job diffs
-the change, and a job its `if` skips reports success, so the required check passes; when it cannot tell, or fails,
-both run. Warnings pass; errors fail. Vercel's own checks are not required, and since pull requests no longer deploy
-previews (above) they report only on `main`. **Node is 24
-everywhere**: `.nvmrc` for fnm and CI, `engines.node` (`24.x`) in the root and every app's `package.json` for Vercel,
-which reads it from the project's root directory and prefers it to the dashboard.
-
-A manual deploy, when one is wanted, runs from the repo root. The root `.vercel/project.json` is linked to
-`no-origins`; every other project is selected with env vars, and that file is never rewritten. **The IDs are not in
-the repo**, which is public: they are in `.private/vercel.env`, gitignored, with a README saying what else belongs
-there. A fresh clone has no `.private/` — copy it across.
+A manual deploy runs from the repo root. `.vercel/project.json` is linked to `no-origins` and never rewritten; other
+projects are picked by env var. The IDs are in `.private/vercel.env` (gitignored; the repo is public), which a fresh
+clone must be given.
 
 ```bash
 . .private/vercel.env                                           # the team ID and VERCEL_PROJECT_ID_<APP> for each
 vercel --prod                                                   # portfolio
-VERCEL_ORG_ID=$VERCEL_ORG_ID VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_DESIGN vercel --prod # design; _ADMIN, _ENGINEERING
+VERCEL_ORG_ID=$VERCEL_ORG_ID VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_DESIGN vercel --prod # design; _ADMIN, _MOTION …
 ```
 
-`.vercelignore` at the repo root keeps `e2e/`, `supabase/`, `services/`, `.claude/` and `.private/` out of the upload; its repo-root entries are
-anchored with a leading slash on purpose, because an unanchored `supabase` would also drop any app folder of that name
-(the admin's `src/lib/supabase/` was one until the sign-in moved into `packages/auth`, 2026-09-30).
+`.vercelignore` keeps `e2e/`, `supabase/`, `services/`, `.claude/`, `.private/`, the Playwright files and the house
+out of the upload; its repo-root entries are anchored with a leading slash, since a bare name matches at every depth.
 
-## Visual review loop (Playwright)
+**CI** (`.github/workflows/ci.yml`) runs on every pull request and push to `main`; branch protection requires all five
+checks, admins included. Warnings pass; errors fail. **Node is 24** everywhere (`.nvmrc`, `engines.node` `24.x`).
+
+| Job | What it runs |
+|---|---|
+| **Typecheck and lint** | frozen install, `pnpm -r typecheck` (the packages included), `pnpm -r lint` |
+| **Build** | `pnpm -r build`, all nine apps, no env |
+| **Visual review** | `pnpm review`; screenshots and report uploaded as `review-screenshots` |
+| **Agents tests** | `mix test` in `services/agents`, only when it changed |
+| **Database tests** | `supabase start` (database and auth), an Owner through the allowlist, `supabase test db`; only when `supabase/` changed |
+
+The last two are gated by a `What changed` job; a skipped job reports success, and when it cannot tell, both run.
+
+## The visual review loop
 
 After any UI change, look at the result before reporting done.
 
-1. `pnpm review` boots the portfolio on :3000, the showcase on :3001, engineering on :3003, the motion studio on
-   :3004, Orbit on :3005, Home on :3006, Status on :3007 and the login on :3008 (or reuses running ones), visits every
-   route in `ROUTES`, `DESIGN_ROUTES`, `ENGINEERING_ROUTES`, `MOTION_ROUTES`, `ORBIT_ROUTES`, `HOME_ROUTES`,
-   `STATUS_ROUTES` and `AUTH_ROUTES` in
-   `e2e/review.spec.ts` on desktop
-   (1440x900) and mobile (Pixel 7) in both themes, waits for a grid's intro (D50) to hand over, fails on a route that
-   answers 400+ or throws, echoes
-   `console.error` output, and writes full-page screenshots to `e2e/screenshots/<project>/<route>.png`. CI runs the
-   same sweep and uploads the screenshots.
-2. Open the relevant PNGs with the Read tool and inspect them. Narrow with `pnpm review --project=desktop` or
-   `pnpm review -g "/atoms"`.
-3. For interactive checks (hover, click, scroll, accessibility tree) use the `playwright` MCP server declared in
-   `.mcp.json`. It drives headless Chromium; start `pnpm --filter design dev` first and point it at
-   http://localhost:3001. Its screenshots land in `e2e/.mcp/`.
+1. **`pnpm review review.spec.ts`** boots every app but the admin on its port (or reuses running servers), visits each
+   route in `e2e/review.spec.ts`'s lists on desktop (1440×900) and mobile (Pixel 7) in both themes, waits for a grid's
+   intro to hand over, fails on a 400+ or a throw, echoes `console.error`, and writes full-page screenshots to
+   `e2e/screenshots/<project>/<app>__<route>.png`. Name the spec: a plain `pnpm review` (what CI runs) also runs
+   `e2e/agents.spec.ts`, `e2e/motion-studio.spec.ts` and any gitignored stray spec under `e2e/.mcp/`.
+2. Open the PNGs with Read. Narrow with `--project=desktop` or `-g "design /molecules"`.
+3. For hover, click, scroll or the accessibility tree, use the `playwright` MCP server (`.mcp.json`, headless
+   Chromium) against the app's dev server (`pnpm --filter design dev`, :3001). Its screenshots land in `e2e/.mcp/`.
+4. `e2e/global-setup.ts` signs the browser in once (magic link, local mail catcher) as `E2E_EMAIL` or
+   `.private/e2e-email`, into `e2e/.auth/state.json`, so the studios' local keys do not stop the sweep.
 
-`probe12` and `growForTool` went with the `Bento` and the `Tool` they policed.
-
-Add new routes to the app's list in `e2e/review.spec.ts` when you add pages. Screenshots, traces, and reports are
-gitignored.
-
-**The admin is not in the sweep.** Every one of its routes is behind auth and needs a running Supabase, which
-`pnpm review` does not boot. Review it by signing in and looking — see `apps/admin/CLAUDE.md`.
+Add a page's route to its app's list in `e2e/review.spec.ts`. Screenshots, traces and reports are gitignored. **The
+admin is not in the sweep** (every route is behind auth and needs a running Supabase): sign in and look
+(`apps/admin/CLAUDE.md`).

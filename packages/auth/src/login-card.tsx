@@ -26,7 +26,7 @@ import { SecondFactorCard } from "./second-factor";
  *   returns the same "invalid login credentials" for a wrong password and an unknown address, so it is not an
  *   oracle either.
  * - **Passkey** is the fastest and safest door: a WebAuthn assertion signs you straight in, no email round-trip
- *   and nothing phishable. You register the passkey while signed in (the landing screen); this button uses it.
+ *   and nothing phishable. You register the passkey while signed in (your account settings); this button uses it.
  *   It only appears when the browser has an authenticator, and it needs passkeys enabled on the server (§8.4).
  */
 function LoginCardInner({ app }: { app: string }) {
@@ -145,7 +145,7 @@ function MagicLinkForm({ next }: { next: string }) {
         <Alert>
           <AlertTitle>Check your inbox</AlertTitle>
           <AlertDescription>
-            If <strong>{email}</strong> is on the list, a link is on its way. It expires in fifteen minutes.
+            If <strong>{email}</strong> is on the list, a link is on its way. It lasts an hour.
           </AlertDescription>
         </Alert>
         <Button variant="ghost" onClick={() => setState("idle")}>

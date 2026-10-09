@@ -12,22 +12,15 @@ import { FactCard } from "@/components/profile-card";
 import { ROLES } from "@/content/resume";
 
 /**
- * The work column (Portfolio.md P4, amended 2026-09-27, his: "Work is too much information … instead of horizontal
- * placing of logos and changing them like tabs, I want to remove all the dense information in the cards and put the
- * logos vertically under the work icon cell, and each company cell (similar to education) can have up to maximum of
- * two rows height and minimum amount of information required in it"). The section's label (`lead`), the briefcase and
- * the word centred on the first row (his, the same day: "the labels should justify center in their own section"), and
+ * The work (Portfolio.md P4). The section's label (`lead`), the briefcase and the word centred on the first row, and
  * under it a row for each company, newest first as the résumé lists them: its mark on a cell of its own, bordered and
- * filled as the tabs' cells were, which the one radius makes a circle (Grid.md D39), so the marks stand in a column
- * under the briefcase; and beside it, on the column's other cells, a pill with the role and, under it in `caption`,
- * the company and the years, left-aligned since 2026-09-28 (his: "make the company names also left aligned"; they were
- * centred as the degree's pill is). The company is its short name (TTT) where the full one does not fit beside the
- * years.
+ * filled, which the one radius makes a circle (Grid.md D39), so the marks stand in a column under the briefcase; and
+ * beside it, on the column's other cells, a pill with the role and, under it in `caption`, the company and the years,
+ * left-aligned. The company is its short name (TTT) where the full one does not fit beside the years.
  *
- * **One row each**: the two lines fit a row at every width the column takes, five cells and up, so no company takes
- * the second row he allowed. The tabs, the active company's growth and its card — what I did there and the stack —
- * went; the lines are still in `resume.ts` (P6). Nothing here is pressed, so nothing is a Tab stop. Where the rows are
- * fewer than the label and the companies, the label goes first, then the oldest companies (P5).
+ * **One row each**: the two lines fit a row at every width the column takes, five cells and up. Nothing here is
+ * pressed, so nothing is a Tab stop. Where the rows are fewer than the label and the companies, the label goes first,
+ * then the oldest companies (P5).
  */
 export function ProfileWork({ cols, rows, lead }: { cols: number; rows: number; lead?: SectionLabel }) {
   const m = useGridMetrics();
@@ -54,7 +47,7 @@ export function ProfileWork({ cols, rows, lead }: { cols: number; rows: number; 
             <FactCard className="flex-none" style={{ width: cell }}>
               <CompanyLogo company={role.company} style={{ height: mark, width: "auto", maxWidth: mark * 1.5 }} />
             </FactCard>
-            {/* Left-aligned (his, 2026-09-28: "make the company names also left aligned"), as the projects' cards are. */}
+            {/* Left-aligned, as the projects' cards are. */}
             <Card size="sm" className="min-h-0 min-w-0 flex-1 justify-center gap-0 py-0" style={{ paddingInline: PAD }}>
               <Text as="span" className="truncate">
                 {role.title}
@@ -70,10 +63,7 @@ export function ProfileWork({ cols, rows, lead }: { cols: number; rows: number; 
   );
 }
 
-/**
- * The tech column's grown mark's fill: lime at 12%, mixed into the card so it is opaque (his, 2026-09-27, from the
- * accent jig, for the work's active tab, which went the same day).
- */
+/** The tech stack's grown mark's fill: lime at 12%, mixed into the card so it is opaque. */
 export const ACTIVE_FILL = "color-mix(in oklch, var(--lime) 12%, var(--card))";
 
 /** The air inside a pill's round ends, a step of the spacing scale: the words start after the curve. */

@@ -23,8 +23,7 @@ const FIRST_FIELD: PortfolioField = {
 };
 
 /**
- * One scroll is one turn (P24, his: "it has to be a trigger like once I scroll it should directly…"): a wheel turns the
- * page on its first event, and nothing more of that gesture turns it — a trackpad's fling goes on sending events for a
+ * One scroll is one turn (P24): a wheel turns the page on its first event, and nothing more of that gesture turns it — a trackpad's fling goes on sending events for a
  * second or more. A new gesture is a wheel event after this long with none.
  */
 const WHEEL_GAP_MS = 200;
@@ -34,33 +33,27 @@ const WHEEL_MIN_PX = 4;
 const SWIPE_MIN_PX = 40;
 
 /**
- * The portfolio on the grid, ONE AGENT'S SECTION A PAGE (Portfolio.md P24, his, 2026-10-03, after a recruiter friend
- * found the one page too much at once: "having pages is a good idea … I think it's very interesting if each agent can
- * pick a section. So we scroll from one agent to another. So whoever agent is in focus should dive in to show their
- * section. And when we scroll, they dive back into their place and the new agent dives in"). It was one page from
- * 2026-09-27 (P15).
+ * The portfolio on the grid, ONE AGENT'S SECTION A PAGE (Portfolio.md P24): whichever agent is in focus dives in to
+ * show its section, and on a turn it dives back home and the next agent dives in.
  *
- * A `Grid`, not a `GridPages` — there is no bar, and the turn is the agents' (Grid.md D50, version 9). The page on the
+ * A `Grid`, not a `GridPages` — there is no bar, and the turn is the agents' (Grid.md D50). The page on the
  * field is `PAGES[shown]`, arranged alone (`arrangeAgent`); the page asked for is `PAGES[want]`, the grid's `introFocus`.
  * They differ while the page turns: the section on the field fades away as its agent dives home, the grid asks for the
- * next one (`onIntroFocus`) and its agent dives in. The intro opens on Bali's (version 9): the six stand in their row,
+ * next one (`onIntroFocus`) and its agent dives in. The intro opens on Bali's: the six stand in their row,
  * Bali, Kino and Mira bounce, then Bali goes into the centre of the profile and the rest go home to the field's last
  * column — its bottom row on a phone.
  *
  * **What turns it**: the wheel or a trackpad, either way, one gesture one turn — a positive delta is forward, never
  * negated (Grid.md D27): fingers moving up or left on a trackpad, a wheel turned toward you; a swipe, a finger moving
- * left or up; Page Down and Page Up; **and a click on an agent at home**, which turns straight to its page (his, the
- * same evening: "I should be able to travel to pages by clicking on the agent on the right column" — `AgentHome` on
- * every home cell but the empty one of the agent on the field, `homes` from `arrangeAgent`). Nothing turns
+ * left or up; Page Down and Page Up; **and a click on an agent at home**, which turns straight to its page
+ * (`AgentHome` on every home cell but the empty one of the agent on the field, `homes` from `arrangeAgent`). Nothing turns
  * it while it is turning or while the intro plays, and the first and last pages go no further. The arrows still move
  * focus in reading order (Grid.md D45), and a swipe across the projects' carousel turns the carousel.
  *
  * **The agent of the page** stands in one cell on every page of a wide field — the third row from the bottom, at its
- * centre — and below its section on a phone (`stand`, his, 2026-10-03: "put the agent in the bottom third row in the
- * large screen"), where the grid draws it (`introFocusAt`). Hovering it opens its pill beside it (`AgentSpot`,
- * `AgentPill`, `useAgentPill`; his, the same day: "let's show it with hover"): its name, a chat button and ↗ to Orbit.
- * A click on it — a tap, Enter — plays his Bounce where it stands (`introAct`; his: "When we click on the agent, add
- * bounce"), as the intro plays it, never while it is in the air or the page is turning.
+ * centre — and below its section on a phone (`stand`), where the grid draws it (`introFocusAt`). Hovering it opens its
+ * pill beside it (`AgentSpot`, `AgentPill`, `useAgentPill`): its name, a chat button and ↗ to Orbit. A click on it — a
+ * tap, Enter — plays his Bounce where it stands (`introAct`), as the intro plays it, never while it is in the air or the page is turning.
  * Leaving the agent and the pill, Escape, a press anywhere else or a turn closes it; a tap or the keys open it where
  * there is no hover.
  */
@@ -69,7 +62,7 @@ export function PortfolioPages({ page }: { page: PortfolioPage }) {
   // The page asked for and the page on the field (P24).
   const [want, setWant] = React.useState(0);
   const [shown, setShown] = React.useState(0);
-  // The agent's pill, opened by hover, and its bounce, each press of it (P24, his: "When we click on the agent, add bounce").
+  // The agent's pill, opened by hover, and its bounce, each press of it (P24).
   const [bounces, setBounces] = React.useState(0);
   const pill = useAgentPill(React.useCallback(() => setBounces((n) => n + 1), []));
   const { open, close, dismiss } = pill;
@@ -195,7 +188,7 @@ export function PortfolioPages({ page }: { page: PortfolioPage }) {
         onMetrics={onMetrics}
       >
         {/* Only once the grid has measured: the first field is a guess, and a box placed on it would flash in the wrong
-            cells for a frame (GridPages waited the same way). */}
+            cells for a frame. */}
         {field
           ? arranged.items.map((placed) => (
               <GridItem
@@ -218,8 +211,7 @@ export function PortfolioPages({ page }: { page: PortfolioPage }) {
             <AgentSpot id={PAGES[shown]!} open={open} controls={pillId} />
           </GridItem>
         ) : null}
-        {/* The agents at home, each a way to its page (his: "travel to pages by clicking on the agent on the right column"):
-            a spot on every home cell but the empty one of the agent on the field. The keys read the column after the
+        {/* The agents at home, each a way to its page: a spot on every home cell but the empty one of the agent on the field. The keys read the column after the
             section (`data-reading-after`, Grid.md D45), not a cell at a time between its lines. */}
         {field && arranged.homes
           ? PAGES.map((id, i) => {
@@ -231,8 +223,7 @@ export function PortfolioPages({ page }: { page: PortfolioPage }) {
               ) : null;
             })
           : null}
-        {/* The status pill (P25, his: "a pill in the bottom right … with a violet circle"), a fixture: on the corner cell, with
-            the two it grows into to its left. */}
+        {/* The status pill (P25), a fixture: on the corner cell, with the two it grows into to its left. */}
         {field && arranged.status ? (
           <GridItem
             col={Math.max(1, arranged.status.col - STATUS_CELLS + 1)}

@@ -1,21 +1,17 @@
 import type { Family, Values } from "./families";
 
 /**
- * Hyper focus (Motion.md M13, his, 2026-09-28; named so on 2026-09-29, when the portfolio took it as one of its two
- * modes, focus mode, page 6, the other): a card in focus, and everything else blurring round it — "start from the card
- * with less intensity and then increase the intensity in a circular fashion from the card … how do I define the
- * intensity at each point". Since the same night **the blur is a cloth, not a ripple** (his: "I want to consider that
- * as a cloth, a blurring cloth, not as a ripple … the cloth should reach every corner of the viewport" — the container it is in, he said after — "So I need
- * controls about the lift, about the intensity, about the cloth"). For the portfolio's cards (Portfolio.md P18), which
- * play it through the package's `useFocusMotion` while hyper focus is on (P20). Its tokens keep the `focus` name.
+ * Hyper focus (Motion.md M13): a card in focus, and everything else blurring round it, least at the card and more the
+ * further from it. **The blur is a cloth, not a ripple**: drawn out from under the card to every corner of the
+ * container it is in, the card lifting over it. The package plays it through `useFocusMotion`; it plays on the studio
+ * only (Portfolio.md P21). Its tokens keep the `focus` name.
  *
  * Its tokens are in four groups, one on the jig at a time: **Cloth** (how it is drawn out from under the card to every
  * corner, and its hem), **Intensity** (how blurred each point is, by its distance from the card), **Lift** (the card
  * coming up over the cloth, its shadow on it) and **Release** (how it goes, and moves on to the next card). Every token
- * is his second pick (2026-09-29, round 2's C Unroll, tuned; round 1's C Tide, tuned, before it) and in globals.css, so
- * preset A is "Today", read off the page, and the package's `readFocusMotion` falls back to the same (`FOCUS_START`).
- * B–E are round 2, the cloth, as they were: Sheet, Unroll, Drape and Swell. Round 1's four, and the Today it replaced,
- * are in Motion.md.
+ * is his pick (round 2's C Unroll, tuned) and in globals.css, so preset A is "Today", read off the page, and the
+ * package's `readFocusMotion` falls back to the same (`FOCUS_START`). B–E are round 2, the cloth, as they were: Sheet,
+ * Unroll, Drape and Swell.
  */
 
 const CUBIC_OUT = "cubic-bezier(0.215, 0.61, 0.355, 1)";

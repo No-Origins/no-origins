@@ -19,7 +19,7 @@ const HEAD_COLS = "@min-[600px]:grid-cols-[minmax(0,1fr)_auto]";
 
 /**
  * The second factor's heading on Settings (Access.md A12): what it is, whether this session has given a code, and
- * adding an authenticator. Step 1 of A12's order: nothing asks for the code yet.
+ * adding an authenticator. The admin asks for a code once a sign-in (A12).
  */
 export function AuthenticatorsHead({ secondFactor }: { secondFactor: SecondFactor }) {
   const [adding, setAdding] = React.useState(false);
@@ -33,7 +33,7 @@ export function AuthenticatorsHead({ secondFactor }: { secondFactor: SecondFacto
           ) : null}
         </div>
         <Text role="caption" as="span" className="line-clamp-2">
-          The second factor: soon the admin asks for a six-digit code once a sign-in. Add two — your phone and a password
+          The second factor: the admin asks for a six-digit code once a sign-in. Add two — your phone and a password
           manager — so losing one is not losing the admin.
         </Text>
       </div>
@@ -75,7 +75,7 @@ export function AuthenticatorRecord({ authenticator, secondFactor }: { authentic
             <AlertDialogTitle>Remove {authenticator.name}?</AlertDialogTitle>
             <AlertDialogDescription>
               {last
-                ? "It is your only authenticator: once the admin asks for a code, you would add a new one at your next sign-in."
+                ? "It is your only authenticator: the admin asks for a code, so you would add a new one at your next sign-in."
                 : "Its codes stop working at once. Your other authenticator still opens the admin."}
             </AlertDialogDescription>
           </AlertDialogHeader>

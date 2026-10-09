@@ -15,8 +15,8 @@ cd packages/ui && npx shadcn@latest add popover --diff
 ## 1. Radius — `[radius]` (Grid.md D39)
 
 **One radius, half the grid's cell**: `--radius`, written as `rounded-lg`. The browser shrinks a corner to fit, so a
-box a cell tall or less becomes a pill and a 1×1 a circle, and a bigger box gets a cell's curve at each corner. It
-was `0` until 2026-09-26, and radix-sera still ships `rounded-none`.
+box a cell tall or less becomes a pill and a 1×1 a circle, and a bigger box gets a cell's curve at each corner.
+radix-sera ships `rounded-none`.
 
 | sera | here |
 |---|---|
@@ -39,10 +39,9 @@ Stays as it is:
 
 The radius edit is in nearly every file and **needs no comment** (packages/ui rule 6).
 
-## 2. Fields are outlined pills — `[field]` (Grid.md D39, amended 2026-09-29)
+## 2. Fields are outlined pills — `[field]` (Grid.md D39)
 
-His words: *"even inputs will have full rounded border"*. Every field is a box rounded to a pill with a 1px border;
-sera's underline field is gone. Input, Textarea, InputGroup, the Select triggers, NativeSelect, the Combobox's chips,
+Every field is a box rounded to a pill with a 1px border, never sera's underline. Input, Textarea, InputGroup, the Select triggers, NativeSelect, the Combobox's chips,
 Command's search and the Questionnaire's answer are all pills, and InputOTP's slots are circles.
 
 Upstream `input.tsx` (the underline):
@@ -94,8 +93,8 @@ The swap, from upstream `popover.tsx`:
   that runs continuously (a spinner, a caret blink) — that is not a family's motion.
 - A motion that fits **no** family is a design decision, not a token you invent. Leave shadcn's value with a
   `// TODO(Motion.md M4): no family yet — <what it is>` comment and name it in the report as open.
-- The families' **values** are nobody's pick yet except where Motion.md says so (`move`, `load`, `focus`, `mode` are
-  Bhargav's). Never edit a token's value in `globals.css` as part of adding a component.
+- The families' **values** are nobody's pick yet except where Motion.md says so (`move`, `load`, `focus`, `mode` and
+  `grip` are Bhargav's). Never edit a token's value in `globals.css` as part of adding a component.
 - If the component moves, add it to its family's row in Motion.md M4's table.
 - GSAP in a component (packages/ui rule 7): pin `x: 0` when tweening `xPercent` over an inline transform, drop any CSS
   `transition` on a property GSAP writes, check reduced motion in the component and `gsap.set` to the end state.
@@ -124,14 +123,12 @@ hover-card, menubar, popover, select, sheet, tooltip. A `createPortal(` in a com
 
 ## 5. No glass, no gradients — `[glass]`, `[gradient]`
 
-Every glass effect and every gradient was removed on 2026-09-16, on purpose: no `backdrop-blur-*`, no frosted or
-translucent surface, no refraction or rim light; no `bg-gradient-*`, `bg-linear-*`, no `from-* via-* to-*`, no
-sweep, streak or film. Flat washes only.
+The system has no glass and no gradients: no `backdrop-blur-*`, no frosted or translucent surface, no refraction or
+rim light; no `bg-gradient-*`, `bg-linear-*`, no `from-* via-* to-*`, no sweep, streak or film. Flat washes only.
 
-- `supports-backdrop-filter:backdrop-blur-sm` on a new overlay → remove it. The four overlays that still carry it
-  (dialog, alert-dialog, drawer, sheet) are debt, not precedent.
-- Bhargav's exceptions live in the portfolio's two modes (the focus cloth's blur, focus mode's 60% veil), not in
-  components. Do not add a blur to a component because those exist.
+- `supports-backdrop-filter:backdrop-blur-sm` on an overlay → remove it; no installed overlay keeps one.
+- Bhargav's exceptions are the motion studio's Hyper focus and Focus mode pages (the cloth's blur, focus mode's 60%
+  veil; Motion.md M13, M14), not components. Do not add a blur to a component because those exist.
 
 ## 6. Colour — `[colour]`
 
@@ -143,7 +140,7 @@ sweep, streak or film. Flat washes only.
   see-through (the long comment in `button.tsx`).
 - A colour the component needs goes in `globals.css` (packages/ui rule 2), never in the component or an app.
 
-## 7. Blending — `[blend]` (the Avatar, 2026-09-29)
+## 7. Blending — `[blend]` (`avatar.tsx`)
 
 A `mix-blend-*` inside a component makes Chrome isolate the nearest stacking context to blend it. Where that box also
 holds a cloth of `backdrop-filter` layers (focus, focus mode, Motion.md M13, M14), it becomes their backdrop root and
@@ -151,13 +148,13 @@ the grid under the cloth stays sharp. Put `isolate` on the component's root, and
 
 ## 8. Comment every divergence — `[comment]` (packages/ui rule 6)
 
-A shadcn file here is a copy, and `shadcn add --overwrite` throws away every edit in it. So each edit says why, at
-the top of the file or above the part it changed, in the house voice — the date, whose words, what and why:
+A shadcn file here is a copy, and `shadcn add --overwrite` throws away every edit in it. So each edit says what
+diverged and why, citing the rule it follows, at the top of the file or above the part it changed:
 
 ```tsx
-// Diverged from sera (2026-09-29, his: "even inputs will have full rounded border", after the dropdowns): the same
-// outlined pill as `SelectTrigger` — a box rounded to a pill (Grid.md D39), the text inside its ends — not sera's
-// underline field. Focus and invalid ring it as the trigger does; a field is typed into, not pressed, so no hover tint.
+// Diverged from sera: the same outlined pill as `SelectTrigger` — a box rounded to a pill (Grid.md D39), the text
+// inside its ends — not sera's underline field. Focus and invalid ring it as the trigger does; a field is typed into,
+// not pressed, so no hover tint.
 ```
 
 The radius needs no comment (it is in nearly every file). The portal gets its one-line `// Motion.md M8:` comment. The

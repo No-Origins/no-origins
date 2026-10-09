@@ -2,12 +2,11 @@
 
 # apps/home — Home
 
-`home.no-origins.com`. **The model of the house he is building** (Home.md, `packages/docs/apps/`; read it before changing
-anything here) — and, later, the realistic pictures image models make from it (H5). His name for it, 2026-10-02:
-*"name that as home"*.
+`home.no-origins.com`, :3006. **The model of the house he is building** — and, later, the realistic pictures image
+models make from it (H5). **Home.md** is its document; read it before changing anything here.
 
 ```bash
-pnpm --filter home dev              # :3006 (portfolio :3000, design :3001, admin :3002, engineering :3003, motion :3004, orbit :3005)
+pnpm --filter home dev              # :3006
 pnpm --filter home publish:house    # put the house on the site (H4); --dry checks without uploading
 ```
 
@@ -15,7 +14,7 @@ pnpm --filter home publish:house    # put the house on the site (H4); --dry chec
 
 **The house lives in `src/content/`, which is gitignored**, on his machine: the description (`home.ts` and its parts),
 the tour (`tour.ts`), the tour's pictures (`pictures/*.webp`) and **`Home-plan.md`, the house's own record** — the plan
-read off his wireframes (H7), every version since (H8), the tour's stops and versions (H9). **Read `Home-plan.md` before
+read off his wireframes and its versions (H7), the tour's stops and versions (H9). **Read `Home-plan.md` before
 changing the house.** Nothing in that folder is ever committed, pasted into a document in `packages/docs`, or written
 into a file outside it; a commit that would carry it is wrong, whatever else it does.
 
@@ -35,10 +34,19 @@ their openings, slabs by outline, blocks, stairs and the named views (H5). Feet,
 down), levels above the model's ground. `src/lib/build.ts` turns it into three.js — a box or an extrusion per element,
 one flat colour each, edges drawn — and `src/lib/viewer.ts` mounts that on a canvas the way `packages/ui`'s avatar
 viewer is mounted: plain three.js, rendering on demand, one sun and the sky, no React renderer.
-`src/components/model-view.tsx` is the canvas in React; `src/components/home.tsx` the page, given the house and the tour
-by `src/app/page.tsx`: one `Grid` with the overlay and the cursor, the stage on it, the view's name right over the
-player as one `hero` (Type.md T5) and the player on the last row, a pill as wide as its controls, placed by
-`src/lib/layout.ts`. The screen is his to design (H3).
+
+**The page** (`src/components/home.tsx`, given the house and the tour by `src/app/page.tsx`) is one `Grid` with the
+overlay and the cursor, its boxes placed by `src/lib/layout.ts`. The screen is his to design (H3).
+
+- **The tour** (`homeLayout`): the stage (`src/components/model-view.tsx`, the canvas in React) takes the field; the
+  view's name stands right over the player as one `hero` (Type.md T5) — "The house" on the long shot, the stop's name
+  at a stop, "Plan" on the plan; the player is a pill as wide as its controls on the last row or rows: back, play or
+  pause, forward; the stops, one numbered circle each; the speed, 1× or 2×; and Plan.
+- **The farewell** (`farewellLayout`, `useFarewellMotion` from `@no-origins/ui/hooks/use-farewell-motion`): at the
+  tour's end, unless the plan is pressed, the stage settles into a five-column Plan, "Thanks for visiting, have a good
+  day" arrives under it as a heavy `hero`, and four outlined buttons follow — Design, Portfolio, Motion and Orbit,
+  each a link to its app. The player stays only where the field has room for it under them. The motion's numbers are
+  the `--motion-farewell-*` tokens in globals.css.
 
 **The tour is a description too** (H9): typed by `src/lib/tour.ts` — an opening (the long shot, and the `approach`
 leg Play glides in by), the stops (each a fixed camera with the guide's line and, where one was made, the picture from
@@ -65,8 +73,8 @@ type what it cannot yet say (and to `src/sample` if the sample should show it).
   the walk (`e2e/.mcp/home-tour.mjs`, below).
 - **Behind the sign-in, twice** (H4): the gate in `src/proxy.ts`, which asks for `home.open` (Access.md A6) and whose
   matcher exempts no image so the pictures are gated, and `signedIn()` in `src/lib/store.ts`, which asks the database
-  for `home.open` again where the house is read. Only the Owner holds it until he gives it in a role. **Open without a login only on a
-  development server with no Supabase keys**, so `pnpm review` and CI see the sample.
+  for `home.open` again where the house is read. The Owner holds it; anyone else only through a role he gives. **Open
+  without a login only on a development server with no Supabase keys**, so `pnpm review` and CI see the sample.
 - **Only `@no-origins/ui` stands on the page.** The canvas is the one element that is not a component of the system,
   as the avatar's is; every control is.
 
@@ -78,4 +86,4 @@ e2e/review.spec.ts -g "home /"` runs only this app's route. **To see the tour**,
 `node e2e/.mcp/home-tour.mjs e2e/.mcp/home-tour 1440x900 light stops` walks every stop and screenshots each with its
 picture in; `… walk` takes frames mid-walk; `… play` presses Play and watches it advance; `… approach` frames the glide
 in from the long shot; `pixel dark one` is a phone. The canvas carries `data-stop`, `data-phase` (`at` · `walk`) and
-`data-picture` (the picture's fade, 0–100) for scripts to wait on.
+`data-picture` (the picture's fade, 0–100) for scripts to wait on; the farewell carries `data-home-farewell`.

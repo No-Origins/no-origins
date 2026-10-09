@@ -1,17 +1,14 @@
 /**
- * THE AGENT'S SHAPES (Orbit.md C10, C12, C18), pure: what the head is drawn as when it is not the sphere.
- * **Rounded solids in 3D** (version 3, 2026-09-30), turned by his rotation, resting in the cell as in a tunnel, **with
- * smooth edges** (version 5, 2026-10-01).
+ * THE AGENT'S SHAPES (Orbit.md C10, C12, C18), pure: what the head is drawn as when it is not the sphere. **Rounded
+ * solids in 3D**, turned by his rotation, resting in the cell as in a tunnel, **with smooth edges**.
  *
- * **Each shape is a solid with soft edges** (his: *"let's not have sharp edges for the characters"*): a core — the
+ * **Each shape is a solid with soft edges**, never sharp: a core — the
  * cube, the hexagonal prism and the pyramid as faces, the cylinder, the cone and the hemisphere as circles and a dome —
  * grown by a ball `RHO` wide, so every edge is a quarter-round and every corner a piece of a sphere (the Minkowski
  * sum). A round one keeps the sphere's two tones — its dark side, then its lit side moved toward the light — and flat
  * colour for its ends.
  *
- * **Its edges are smooth** (versions 4 and 5, 2026-10-01, his: *"the edges of all shapes … are not smooth I can see the
- * lines and … weird edges and … corners. We want these shapes to be smooth"*, then, of version 4's one band an edge:
- * *"the edges are just a few subdivisions it's not even smooth"*). **Its outline is the hull of its round parts,
+ * **Its edges are smooth**, with no line, facet or star showing at an edge or a corner. **Its outline is the hull of its round parts,
  * finely** — the horizon of each of its corners' balls and of its dome, as the camera sees it, and its rims'
  * quarter-rounds, a few degrees apart — so it is a curve wherever the solid is round and straight where it is flat, and
  * it moves smoothly as it turns: it is the solid's, not a rounding on the page. It is found as the solid stands and
@@ -21,8 +18,7 @@
  * (`TONE_STEPS`) — so an edge rounds from one face's tone to the next in steps too fine to see, and a corner with them.
  * An edge is cut into runs of one step along its round (`runsOf`); a corner's ball into regions between the circles
  * where its tone crosses a step, every boundary an arc on the ball (`cornerOf`). Flat colour still: each step is one
- * flat path, and what is one step is one path, so nothing shows between them. Version 3 was five facets an edge with a
- * fan at each corner — the lines and the corners' stars he saw — and version 4 one band an edge.
+ * flat path, and what is one step is one path, so nothing shows between them.
  *
  * **Turned, then seen.** Rotate Y about its upright, on the spot, then X toward you or away, then Z about the way you
  * look; then a camera in front of it and above, in perspective, looking straight ahead (`VIEWS`, each shape's natural

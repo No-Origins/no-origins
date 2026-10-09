@@ -1,8 +1,7 @@
 /**
  * Every app of No Origins, in the order the repo-root CLAUDE.md names them, and where each stands (Status.md S2).
- * **Every one is in progress** (his, 2026-10-03: "that should show all our apps and each one of it is still in
- * progress"), and the liquid beside each is 40% full (his: "Fill only 40% of the liquid"). The page is this data: to
- * change what it says of an app, change it here.
+ * **Every one is in progress**, and the liquid beside each is 40% full. The page is this data: to change what it says
+ * of an app, change it here.
  */
 export type AppStatus = {
   id: string;
@@ -26,4 +25,5 @@ export const APPS: readonly AppStatus[] = [
   { id: "orbit", name: "Orbit", host: "orbit.no-origins.com", ...IN_PROGRESS },
   { id: "home", name: "Home", host: "home.no-origins.com", ...IN_PROGRESS },
   { id: "status", name: "Status", host: "status.no-origins.com", ...IN_PROGRESS },
+  { id: "auth", name: "Account", host: "auth.no-origins.com", ...IN_PROGRESS },
 ];

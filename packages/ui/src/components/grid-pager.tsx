@@ -13,11 +13,11 @@ import { flowSpots, stateOf, type CellFlow, type CellFrame, type CellState } fro
 import { pagerCells, type GridLayout, type GridLayoutItem } from "@no-origins/ui/lib/grid-layout"
 
 /**
- * The pager — the navbar (Grid.md D27, 2026-09-21; D29, 2026-09-23). A row of 1×1 cells at the bottom centre of every
+ * The pager — the navbar (Grid.md D27, D29). A row of 1×1 cells at the bottom centre of every
  * field, on every page. It is a FIXTURE, not a placeable component: `pagerCells` reserves its cells in the model so
  * nothing is ever packed there, and `GridPages` draws it itself.
  *
- * Since D29 the bar is a SLOT and its cells are SUB-SLOTS (Slots.md S2, S5): one item spanning the bar's cells whose
+ * The bar is a SLOT and its cells are SUB-SLOTS (D29; Slots.md S2, S5): one item spanning the bar's cells whose
  * `children` are a layout on them, so a cell can hold anything a slot holds instead of being permanently empty. Its
  * width is the field's `pager` — a number per breakpoint in the config, even and never below two — and the ↑ ↓ pair
  * is one registry molecule (`pager-arrows`) placed in it rather than hardwired to the last two cells. `bar` overrides
@@ -28,15 +28,14 @@ import { pagerCells, type GridLayout, type GridLayoutItem } from "@no-origins/ui
  * it by hand, a click on an arrow plays it. Whichever way, the arrow being turned towards FILLS in proportion — the
  * ↑ from its bottom up, the ↓ from its top down — reading the fill's two edges off the bar, where the turn writes them,
  * so the fill follows the scroll without a render; it is the one thing on the field that does, since the boxes stay
- * whole until the turn commits and the page fades away (Grid.md D37, D48) — and once the page has turned, the fill
+ * whole until the turn commits and the page fades away (Grid.md D37, D49) — and once the page has turned, the fill
  * LEAVES the way it came as the new page arrives, its trailing edge crossing the arrow, rather than filling again or
- * pulling back (2026-09-22). At the last page ↑ is disabled, at the first ↓ is. It filled in the colour of the ripple
- * the turn played, lime or violet (D32), until the loader replaced the ripple (D48).
+ * pulling back. At the last page ↑ is disabled, at the first ↓ is.
  *
- * Since D36 (2026-09-25) a bar may number its pages instead: `numberedPagerBar` puts one arrow on each end cell and the
- * pages between, the arrows split into one registry entry a cell (`pager-arrow`). Since D46 (2026-09-27) the page the
- * field is on grows to two cells to show its number and title, beside the pages before and after it, and since D47 (the
- * same day) the pages are one block (`pager-pages`) that plays movement (Motion.md M9) as the page changes.
+ * A bar may number its pages instead (D36): `numberedPagerBar` puts one arrow on each end cell and the pages between,
+ * the arrows split into one registry entry a cell (`pager-arrow`). The page the field is on grows to two cells to show
+ * its number and title, beside the pages before and after it (D46), and the pages are one block (`pager-pages`) that
+ * plays movement (Motion.md M9) as the page changes (D47).
  */
 
 /** The turn, published to the bar's contents (D29). The arrows and the page numbers take it from here, not from props. */
@@ -44,7 +43,7 @@ export type GridTurnState = {
   page: number
   /**
    * The page the field is turning to: `page` at rest, and the next page from the moment the turn commits — through the
-   * hold while the last page fades away, where a hand still scrolling moves it on a page a step (D35, D48).
+   * hold while the last page fades away, where a hand still scrolling moves it on a page a step (D35, D49).
    */
   coming: number
   count: number
@@ -59,8 +58,8 @@ const GridTurnContext = React.createContext<GridTurnState | null>(null)
 
 /**
  * The turn of the pager the caller sits in. Null outside a bar — which is why the arrows molecule is offered in the
- * bar only (D29): elsewhere on the field there is a turn to drive, but an ordinary slot is washed away as the page
- * turns (D37) and leaves with it, so the control would cut itself away under the finger pressing it.
+ * bar only (D29): elsewhere on the field there is a turn to drive, but an ordinary slot fades away as the page turns
+ * (D37) and leaves with it, so the control would vanish under the finger pressing it.
  */
 export function useGridTurn() {
   return React.useContext(GridTurnContext)
@@ -90,7 +89,8 @@ export type GridPagerProps = {
 export function defaultPagerBar(width: number): GridLayout {
   const items: GridLayoutItem[] = []
   for (let col = 1; col <= width - 2; col++) {
-    items.push({ id: `pager-cell-${col}`, col, row: 1, colSpan: 1, rowSpan: 1, slot: { fill: "card" } })
+    // An empty cell: nothing to pad, so none (a surface slot's default inset is more than a cell can hold).
+    items.push({ id: `pager-cell-${col}`, col, row: 1, colSpan: 1, rowSpan: 1, slot: { fill: "card", inset: 0 } })
   }
   if (width >= 2) {
     items.push({
@@ -175,7 +175,7 @@ const GridPager = React.memo(function GridPager({ page, coming = page, count, ti
 /**
  * The ↑ ↓ pair — one molecule on two cells (D29), registered so it is placed in the bar rather than drawn by it. It
  * draws the two buttons on its own two cells with the field's gutter between them, so they sit on the grid exactly as
- * two 1×1 boxes did. It takes the turn from context: a component in a slot is handed props by the inspector, and the
+ * two 1×1 boxes did. It takes the turn from context: a component in a slot is handed props by its layout, and the
  * turn is not a prop anyone should type.
  */
 function GridPagerArrows() {
@@ -417,8 +417,7 @@ function PagerArrow({ dir, disabled, onClick }: { dir: "up" | "down"; disabled: 
       className={cn("bg-card relative size-full overflow-hidden [&_svg]:size-5")}
     >
       <Icon />
-      {/* The fill: the same arrow clipped to the turned share, in reverse colours. Where the grid rippled between pages
-          it took the ripple's colour, lime or violet (Grid.md D32), until the loader replaced the ripple (D48). */}
+      {/* The fill: the same arrow clipped to the turned share, in reverse colours. */}
       <span
         aria-hidden
         className="absolute inset-0 grid place-items-center"

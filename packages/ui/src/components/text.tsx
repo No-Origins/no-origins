@@ -2,9 +2,8 @@ import * as React from "react"
 import { cn } from "cn"
 
 /**
- * Text (Type.md). Seven roles, read off the showcase as it stood on 2026-09-21, and an eighth over them since
- * 2026-10-03 (`hero`, T5: the name a screen is called by); two knobs besides the role, tone (four since 2026-09-25)
- * and alignment. Every piece of text in an app is one of these — a page does not reach for `text-2xl` on its own (T1).
+ * Text (Type.md). Eight roles, `hero` over the rest (T5: the name a screen is called by); two knobs besides the role,
+ * tone (four) and alignment. Every piece of text in an app is one of these — a page does not reach for `text-2xl` on its own (T1).
  */
 
 export const TEXT_ROLES = ["hero", "display", "title", "heading", "label", "body", "caption", "mono"] as const

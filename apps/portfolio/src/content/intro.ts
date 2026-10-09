@@ -10,8 +10,8 @@ const order = (id: string) => {
 };
 
 /**
- * Who bounces while the six stand in their row (Grid.md D50, Motion.md M22, version 5, Portfolio.md P23; his,
- * 2026-10-01: "not all the agents will bounce um, let's only make uh, Bali Kino and uh, Mira to bounce"). Zaza, Oru and
+ * Who bounces while the six stand in their row (Grid.md D50, Motion.md M22, Portfolio.md P23): Bali, Kino and Mira.
+ * Zaza, Oru and
  * Lola sit in their nests, breathing, until they leave. Kept apart from `agents.ts`, which the snapshot rewrites.
  */
 const BOUNCERS = new Set(["bali", "kino", "mira"]);

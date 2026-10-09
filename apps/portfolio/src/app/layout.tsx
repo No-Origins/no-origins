@@ -10,9 +10,8 @@ import "./globals.css";
 const fontSans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const fontHeading = Montserrat({ subsets: ["latin"], variable: "--font-heading" });
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
-// --font-display is the app's own: an ultra-bold condensed grotesque (Anton) for the avatar's "HEY!" island and, since
-// 2026-09-25, the tagline over the profile card. The design system reads sans/heading/mono; this one is the host's,
-// used nowhere the package can see.
+// --font-display is the app's own: an ultra-bold condensed grotesque (Anton) for the avatar's "HEY!" island and his
+// statements. The design system reads sans/heading/mono; this one is the host's, used nowhere the package can see.
 const fontDisplay = Anton({ subsets: ["latin"], weight: "400", variable: "--font-display" });
 
 export const metadata: Metadata = {
@@ -29,8 +28,8 @@ export const viewport: Viewport = {
 };
 
 /**
- * hiddenstack.no-origins.com — the portfolio, on the grid (Portfolio.md). The shell is the theme and the fonts;
- * every page is a GridPages that takes the whole viewport, so there is no nav, footer or container here.
+ * hiddenstack.no-origins.com — the portfolio, on the grid (Portfolio.md). The shell is the theme and the fonts; the
+ * page is a `Grid` that takes the whole viewport, so there is no nav, footer or container here.
  */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -42,7 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full">
         <ThemeProvider>
           {children}
-          {/* The accent jig, dev only and only on ?jig (2026-09-27): kept, to be showcased later in experiments. */}
+          {/* The accent jig, dev only and only on ?jig: kept, to be showcased later in experiments. */}
           {process.env.NODE_ENV === "development" ? <Jig /> : null}
         </ThemeProvider>
       </body>

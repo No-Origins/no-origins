@@ -4,27 +4,20 @@ import { focusRings, type FocusBox } from "@no-origins/ui/lib/focus-motion"
 import { easing, motionMs, motionNumber } from "@no-origins/ui/lib/motion"
 
 /**
- * Focus mode (Motion.md M14, his, 2026-09-28), pure: one vertical of the page read at a time. "An overlay on top of the
- * first section … a little above the section, like it's coming out of the screen in 3D … the rest should feel like a
- * cloth overlay … start blurring out from the edges of the focus component … like we are looking through a panel that
- * gives us more focus on that vertical." A **panel** comes out of the page over the vertical, and a **cloth** of blur
- * rolls out from the panel's edges over everything else, least at the panel and rising outward. **Moving to another
- * vertical, the one left unfocuses while the next focuses, both from the same moment** (his, 2026-09-29: "Instead of
- * sliding the focus container, we should just unfocus while refocusing on the next one"): each vertical has a panel
- * and a cloth of its own, the one left plays the way out (`modeOffAt`) and the next the way in (`modeOnAt`), and the
- * two cloths, one over the other, compound where both are out (`modeSwitchMs`). The panel slid there until then.
+ * Focus mode (Motion.md M14), pure: one vertical of the page read at a time. A **panel** comes out of the page over the
+ * vertical, and a **cloth** of blur rolls out from the panel's edges over everything else, least at the panel and
+ * rising outward. **Moving to another vertical, the one left unfocuses while the next focuses, both from the same
+ * moment**: each vertical has a panel and a cloth of its own, the one left plays the way out (`modeOffAt`) and the next
+ * the way in (`modeOnAt`), and the two cloths, one over the other, compound where both are out (`modeSwitchMs`).
  *
  * The panel is a see-through frame with a shadow, lifted in 3D: perspective, a push towards the eye and a swing on the
- * way. What is under it stays sharp, because the cloth has a hole where the panel stands. **Only the panel lifts** (his,
- * 2026-09-28: "the components that are in the focus mode should not scale. They have to remain at the level that they
- * are at"): the vertical it holds is never moved, scaled or swung, and keeps its place on the page.
+ * way. What is under it stays sharp, because the cloth has a hole where the panel stands. **Only the panel lifts**: the
+ * vertical it holds is never moved, scaled or swung, and keeps its place on the page.
  *
- * **It rises straight out of the page, its whole line there from the start** (his, 2026-09-29: "Instead of border
- * start from top and all, let's just have the option to border to rise from the viewport directly without that border
- * animation"). Its way in is two steps, the panel rising (`p`) and the cloth coming the stagger after it (`c`); its
- * way out is the same steps backward, the cloth going and the panel dropping back into the page the stagger after,
- * each by its own time and curve (`lift`, `drop`; `modeOnAt`, `modeOffAt`). Until then its line was drawn first, from the middle of its top down both sides to the
- * middle of its bottom, and then it lifted. The panel is an outline (`modeShape`): each point of its rounded rectangle
+ * **It rises straight out of the page, its whole line there from the start.** Its way in is two steps, the panel
+ * rising (`p`) and the cloth coming the stagger after it (`c`); its way out is the same steps backward, the cloth going
+ * and the panel dropping back into the page the stagger after, each by its own time and curve (`lift`, `drop`;
+ * `modeOnAt`, `modeOffAt`). The panel is an outline (`modeShape`): each point of its rounded rectangle
  * is swung, lifted and seen through the perspective, and drawn as SVG.
  *
  * The cloth is drawn as focus's is (focus-motion.ts): layers over the surface, each a `backdrop-filter` blur, one a
@@ -37,8 +30,7 @@ import { easing, motionMs, motionNumber } from "@no-origins/ui/lib/motion"
  * the stagger after the panel starts to lift. Rolling out, the cloth's edge is a clip, a rounded rectangle growing from
  * the panel to the far corner of the surface. What moves is a few custom properties on the surface (`paintMode`).
  *
- * The numbers are his since 2026-09-29 (globals.css, `--motion-mode-*`, "A As described, tuned"); every fallback here is
- * the same value.
+ * The numbers are his (globals.css, `--motion-mode-*`); every fallback here is the same value.
  */
 
 export type ModeWay = "unfurl" | "swell" | "fade"
@@ -92,9 +84,7 @@ export type ModeMotion = {
  * The values globals.css has, what every token falls back to where it is unset. His pick (2026-09-29, "A As described,
  * tuned"): a quick 90ms rise on ease-out, and a drop the same until he tunes it, 80px out through 800px, a -3° swing, a 40px
  * shadow, a 16px margin; a cloth from 2px at the panel rising on expo out to 7px over at most 16 cells in seven rings,
- * under a 60% veil, swelling in over 250ms and thinning out over 1000ms. (A 500ms slide that stayed out, cubic in-out,
- * and a line drawn round the panel in 700ms, cubic in-out, before it lifted, were his too, until he took both out the
- * same day.)
+ * under a 60% veil, swelling in over 250ms and thinning out over 1000ms.
  */
 export const MODE_START = {
   lift: 90,
@@ -327,8 +317,7 @@ export type ModePanelParts = {
  * Draws a moment of the panel: its line, and its shadow — shown only outside the panel (`cut` is the panel in the
  * shadow's mask), so what is under the panel is never darkened, as a box-shadow never paints inside its box. The shadow
  * is the line's own colour (his, 2026-09-28: "the shadow should be derived from the border"): the panel's
- * `currentColor`, so whatever colours the line colours it too, in either theme. It was the page's foreground, which
- * is white on the dark theme.
+ * `currentColor`, so whatever colours the line colours it too, in either theme.
  */
 export function paintModePanel(parts: ModePanelParts, shape: ModeShape, opacity: number) {
   parts.panel?.setAttribute("opacity", clamp01(opacity).toFixed(3))
@@ -435,8 +424,7 @@ const EDGE =
  * The layers that draw the cloth, as styles for elements that each cover the surface: one a ring, the first everywhere
  * outside the hole, and the veil last where it has one. Never put an opacity, a filter, a mask or paint containment on
  * anything round them, nor an unisolated blend beside them (focus-motion.ts): it becomes their backdrop root, and they
- * blur nothing past it (the Avatar's blended ring, until it was `isolate`, kept the field sharp once the panel had
- * slid off the profile). Nor a clip but a rounded rectangle on them: under a `path()` or a `polygon()`, Chromium drops
+ * blur nothing past it (an unisolated blended ring keeps the field sharp behind it). Nor a clip but a rounded rectangle on them: under a `path()` or a `polygon()`, Chromium drops
  * their masks and blurs everything.
  */
 export function modeLayerStyles(m: ModeMotion, pitch: number): CSSProperties[] {

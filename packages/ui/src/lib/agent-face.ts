@@ -9,29 +9,28 @@ import {
 } from "./properties"
 
 /**
- * THE AGENT'S FACE, declared (Motion.md M20, "The face, version 1", agreed 2026-09-30, his: *"yes for both"*): the
- * parts it can wear, their styles, and each part's settings as typed properties (`./properties`). Orbit
+ * THE AGENT'S FACE, declared (Motion.md M20): the parts it can wear, their styles, and each part's settings as typed properties (`./properties`). Orbit
  * builds its library from this and the motion studio its controls; the drawing (`sphere-motion`, `components/agent`)
  * reads the values a look and a motion give.
  *
  * - **A slot is a place on the face** — eyes, pupils, upper lids, lower lids, brows, and the symbols a mood pops up
- *   (his, asked: "a slot of their own"). Mustache, hair and marks come later (M20).
+ *   in a slot of their own. Mustache, hair and marks come later (M20).
  * - **A slot wears one style, or none.** Its style is a choice property whose first option is the default, so an
- *   untouched look is version 12's face: solid eyes, plain upper lids, nothing else. A style of `none` shows no
+ *   untouched look is the agent's own face: solid eyes, plain upper lids, nothing else. A style of `none` shows no
  *   settings. A style can also be an uploaded drawing, `upload:` and its version's id (M20's "An uploaded style"),
  *   whose settings are `uploadSettings`, the same for every drawing.
  * - **A pair is mirrored until a look sets its right side apart** (`FaceWear.right`), which is what gives one raised
  *   brow. A mirrored value reads the same on both sides: a slant or an angle is measured from the inner end, so 0.8 is
  *   both inner ends down.
- * - **`set` says where a setting's rest is designed**: `look`, in Orbit, as part of the character; or
- *   `motion`, only by a motion's rows, its rest the default here, every agent's alike (Motion.md M23). A look marked
- *   `pose` — how open the lids are, the brows' angle — is one a motion's row may move for a while, which is how a mood
- *   is made; no motion touches the rest of the look, and a row never puts a part on.
- * - **`worn` or `played`**: a look picks a worn slot's style; a played slot (the symbols) shows only while a motion's row
- *   sets its style.
+ * - **`set` says where a setting's rest is designed**: `look`, in Orbit, as part of the character; or `motion`, by an
+ *   action's controls (Motion.md M24), its rest the default here, every agent's alike. A look marked `pose` — how open
+ *   the lids are, the brows' angle — is one a motion may move for a while, which is how a mood is made; no motion
+ *   touches the rest of the look, and a motion never puts a part on.
+ * - **`worn` or `played`**: a look picks a worn slot's style; a played slot (the symbols) shows only while a motion sets
+ *   its style.
  *
  * Ids are unique across the face, so a motion's row keys a value by its id alone, and a right side apart by
- * `sideKey(id, "right")`. The defaults are version 12's (his settings) where version 12 has the setting.
+ * `sideKey(id, "right")`. The defaults are his settings (`SPHERE_START`) where those have the setting.
  */
 
 export type FaceSlotId = "eyes" | "pupils" | "upper-lids" | "lower-lids" | "brows" | "symbols"

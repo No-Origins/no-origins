@@ -32,16 +32,15 @@ const DESTINATIONS = [
 /**
  * The page (Home.md H3, H9): the model on a stage that takes the field, and on the last rows, its name over the
  * player. The name is one `hero` (Type.md T5) — "The house" on the long shot, the stop's name at a stop, "Plan" on the
- * plan; nothing else, his (version 3: the guide's card with its line and the tour's progress went) — right over the
+ * plan; nothing else, his — right over the
  * player, and a new name arrives as a surface does, fading in and rising by the surface's shift (Motion.md M4; the
  * enter · exit of M11 is not decided, so this is the system's placeholder). The player is a pill as wide as its
  * controls, not its row (his: "remove the extra padding"): back, play or pause, forward; the stops, one numbered
- * circle each, the one the camera is at pressed; the speed, 1× or 2× (version 7; the guide's voice went); and the
- * plan.
+ * circle each, the one the camera is at pressed; the speed, 1× or 2×; and the plan.
  * The page opens on the tour's long shot, the whole house, no stop pressed; Play glides in to the first stop, then
  * walks the stops in order and waits at each; a drag on the model pauses it; a stop pressed walks there if it is next
  * door and cuts there if not. The plan pressed shows the plan and no stop is pressed until one is picked again.
- * Version 3's placing; the screen is his to design.
+ * The screen is his to design.
  */
 function Workspace({ house, tour: homeTour }: { house: House; tour: Tour }) {
   const metrics = useGridMetrics();

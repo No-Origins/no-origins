@@ -1,7 +1,6 @@
 /**
- * THE AGENT'S TEXTURES (Orbit.md C15; version 5), pure: what its surface is drawn with, **drawn on the
- * surface** (his, 2026-09-30, of version 4: *"the texture is being applied as a plain flat image and it doesn't adapt to
- * the face of the shape … Bali is a sphere and the lines are straight instead of bending based on the surface"*).
+ * THE AGENT'S TEXTURES (Orbit.md C15), pure: what its surface is drawn with, **drawn on the surface**, bending with
+ * it, never laid on as a flat image.
  *
  * A texture is **marks on a patch of surface**: each solid says what patches it has (a face of the cube, the side of
  * the cylinder as one sheet, the sphere as one sheet of longitude and latitude), each a rectangle `w × h` in the
@@ -11,10 +10,10 @@
  * body is. So a cube's grid runs along its edges and breaks at them, as paint on a box does; the sphere's stripes are
  * its meridians and its contours its latitudes, bending toward the rim; a cylinder's stripes follow its side round.
  *
- * **His family** (his: *"I loved stripes and contours. I want to see more variations like that"*): line textures that
+ * **His family**: line textures that
  * read as the form — stripes, zebra, meridians, latitudes, contours, spiral, strata, waves, chevron, hatch, grid — and
  * with them what surfaces are made of: bricks, weave, scales, honeycomb, crackle, woodgrain, marble, dots, splatter,
- * smears (textiles, stone, glaze, coats, print). Rays, scribble, dashes and pebbles went (his). Two tones, flat, no
+ * smears (textiles, stone, glaze, coats, print). Two tones, flat, no
  * gradient (2026-09-16): lines stroked with round ends, shapes filled, each in the tone of the surface it is on.
  */
 

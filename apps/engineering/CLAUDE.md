@@ -1,43 +1,38 @@
 @AGENTS.md
 
-# apps/engineering — the engineering publish library
+# apps/engineering — the engineering library
 
-`engineering.no-origins.com`. Public explanations and breakdowns on one subdomain. Layer A is a
-static/seeded shell on `@no-origins/ui`; Layer B (later) moves pieces into Supabase + MCP publish.
-No auth, no public write UI, no canvas/tldraw in A.
+`engineering.no-origins.com`, :3003. Public explanations and breakdowns on one subdomain: static pieces written in the
+repo on `@no-origins/ui`. No auth, no database, no public write UI.
 
 ```bash
-pnpm --filter engineering dev                 # :3003 (portfolio :3000, design :3001, admin :3002)
+pnpm --filter engineering dev                 # :3003
 ```
 
-## Routes (Layer A)
+## Routes
 
-- `/` — what Engineering is + index of pieces (starts with Jido).
-- `/learn/jido` — client interactive layered Jido tour (ported from the CoS HTML deck into React).
-- `/jido` — redirect → `/learn/jido`.
+- `/` — what Engineering is, and the index of pieces (one so far, the Jido tour).
+- `/learn/jido` — the interactive layered tour of Jido (`components/jido-tour.tsx`, its layers in
+  `components/jido-layers*.tsx`, their names in `lib/jido-meta.ts`), driven by its buttons and by ← → / Page Up · Page
+  Down / Home.
+- `/jido` — a redirect to `/learn/jido` (`next.config.ts`).
 
-Later (B): `/learn/[slug]` driven from Supabase published pieces.
+## The shape
 
-## Shape
+**It is not on the grid.** `/` is a centred column that scrolls (`Reading`, `components/reading.tsx`, `max-w-5xl`), and
+the tour is a full-height column — its head, a stage that scrolls (`overflow-y-auto`) and a footer of controls. Open:
+engineering on the grid, or an exemption — his decision.
 
-- Compose only from `@no-origins/ui/components/*`. Layout helpers (`Reading`) may live here; do not invent
-  design-system primitives — add via shadcn CLI in `packages/ui` or ask first.
-- Fonts: `--font-sans` / `--font-heading` / `--font-mono` (Inter / Montserrat / Geist_Mono) like sibling apps.
-- Jido tour uses a fuller-height shell (sticky meta + scrollable stage + footer nav) but still system
-  Button / Card / Badge / Progress / Table.
-
-## Layer A vs B
-
-- **A (this PR):** static seed. First piece is the Jido tour in-repo. No Supabase, no MCP.
-- **B (next):** pieces table; MCP `list` / `create` / `update` / `publish`; writers = Bhargav + bots only.
+- Compose only from `@no-origins/ui/components/*` (today `Button`, `Card`, `Badge`, `Progress`, `Table`, `Tooltip`
+  and the `Toaster`). A layout helper (`Reading`) may live here; a design-system primitive may not — add it with the
+  shadcn CLI in `packages/ui`, or ask first.
+- Fonts: `--font-sans` / `--font-heading` / `--font-mono` (Inter / Montserrat / Geist Mono), as the sibling apps.
+- Open: whether the pieces move into Supabase with an MCP publish (`list` / `create` / `update` / `publish`, writers
+  him and his bots) — not built, and his to decide.
 
 ## Reviewing it
 
-In the sweep since 2026-09-23: `pnpm review` boots this app on :3003 with the portfolio and the showcase and visits
-`ENGINEERING_ROUTES` (`/`, `/learn/jido`) in `e2e/review.spec.ts` on desktop and mobile in both themes; CI runs the
-same sweep on every PR. Screenshots land as `e2e/screenshots/<project>/engineering__<route>.png`. `/jido` is only a
-redirect and is not swept. Add a route to the list when you add one.
-
-## Non-goals (A)
-
-Auth, CMS UI, search, full MDX pipeline, Supabase, MCP publish, tldraw/canvas, new UI primitives.
+`pnpm review` boots this app on :3003 and visits `ENGINEERING_ROUTES` (`/`, `/learn/jido`) in `e2e/review.spec.ts` on
+desktop and mobile in both themes; CI runs the same sweep on every PR. Screenshots land as
+`e2e/screenshots/<project>/engineering__<route>.png`. `/jido` is only a redirect and is not swept. Add a route to the
+list when you add one.

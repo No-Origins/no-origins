@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Inter, Montserrat } from "next/font/google";
 import { ThemeProvider } from "@no-origins/ui/components/theme-provider";
-import { TooltipProvider } from "@no-origins/ui/components/tooltip";
-import { Toaster } from "@no-origins/ui/components/sonner";
 import { cn } from "@no-origins/ui/lib/utils";
 import "./globals.css";
 
@@ -12,7 +10,7 @@ const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   title: { default: "No Origins — Engineering", template: "%s — No Origins Engineering" },
-  description: "Public engineering publish library — explanations and breakdowns from No Origins.",
+  description: "The engineering library — explanations and breakdowns from No Origins.",
 };
 
 export const viewport: Viewport = {
@@ -23,8 +21,8 @@ export const viewport: Viewport = {
 };
 
 /**
- * engineering.no-origins.com — Layer A library shell.
- * Everything visible is composed from `@no-origins/ui/components/*`.
+ * engineering.no-origins.com — the engineering library's shell: the theme and the fonts. Everything visible is composed
+ * from `@no-origins/ui/components/*`.
  */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -35,10 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full">
         <ThemeProvider>
-          <TooltipProvider>
-            <main>{children}</main>
-            <Toaster />
-          </TooltipProvider>
+          <main>{children}</main>
         </ThemeProvider>
       </body>
     </html>

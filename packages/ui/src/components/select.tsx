@@ -19,7 +19,7 @@ function SelectGroup({
   return (
     <SelectPrimitive.Group
       data-slot="select-group"
-      className={cn("scroll-my-1.5 p-1.5", className)}
+      className={cn("scroll-my-inset-tight p-inset-tight", className)}
       {...props}
     />
   )

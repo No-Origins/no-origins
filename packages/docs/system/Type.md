@@ -1,79 +1,71 @@
 # No Origins — Type
 
-*The typography roles of the 2.0 system. Opened 2026-09-21, when a `Text` slot was needed and there was nothing for
-it to wear: the 1.0 type scale went with 1.0, and 2.0 had three font slots and whatever Tailwind size a page happened
-to use. Bhargav: "there is no way I can add text and apply our typography tokens to it." Decided on the
-recommendation, the same day.*
+The typography of the design system: the roles every piece of text wears, and the few knobs beside them.
 
-Companion documents: **Brand.md** (voice), **Slots.md** (a `Text` is a component in a slot), **Grid-v2.md** (the
-cell sizes these are read against).
+Current as of 2026-10-08. Earlier versions and what they decided are in git history.
+
+Companion documents: **Brand.md** (voice), **Slots.md** (a `Text` is a component in a slot), **Grid.md** (the cell
+sizes these are read against).
 
 ---
 
 ## 1. The roles
 
-Every piece of text in an app is one of eight roles (seven until T5). The roles were **read off the showcase's pages** as they stood on
-2026-09-21 — the sizes and weights already in use — rather than derived from a ratio, so adopting them changed nothing
-that was on screen. Fonts are the three slots the host declares (`--font-heading`, `--font-sans`, `--font-mono`); the
-package only reads them.
+Every piece of text in an app is one of eight roles. Fonts are the three slots the host declares (`--font-heading`,
+`--font-sans`, `--font-mono`); the package only reads them.
 
-| Role | Font | Size · weight · tracking | For |
-|---|---|---|---|
-| `hero` | heading | 5xl · bold · tight | the one name a screen is called by, over its title (T5, 2026-10-03) |
-| `display` | heading | 4xl · bold · tight | a page's one big title |
-| `title` | heading | 3xl · bold · tight | a section title |
-| `heading` | heading | xl · semibold | a card or group title |
-| `label` | heading | xs · bold · uppercase, widest | the small caps that name a thing |
-| `body` | sans | sm · normal | paragraphs |
-| `caption` | sans | xs · normal · muted by default | notes, secondary lines |
-| `mono` | mono | xs | counts, ids, code |
+| Role | Font | Size · weight · tracking | Element | For |
+|---|---|---|---|---|
+| `hero` | heading | 5xl · bold · tight | `h1` | the one name a screen is called by, over its title (T5) |
+| `display` | heading | 4xl · bold · tight | `h1` | a page's one big title |
+| `title` | heading | 3xl · bold · tight | `h2` | a section title |
+| `heading` | heading | xl · semibold | `h3` | a card or group title |
+| `label` | heading | xs · bold · uppercase, widest | `p` | the small caps that name a thing |
+| `body` | sans | sm · normal | `p` | paragraphs |
+| `caption` | sans | xs · normal · muted by default | `p` | notes, secondary lines |
+| `mono` | mono | xs | `p` | counts, ids, code |
 
-Two more knobs, and only two: **tone** — `foreground`, `muted`, `faint` (T3) or `lime` (T4) — and **align** — start,
-center, end. Anything else a
-piece of text wants (a colour, a size between two roles, italics) is not a token; it is a new role, decided here, or
-it is not done.
+Beside the role, `Text` takes:
 
-## 2. The rule
+- **`tone`** — `foreground`, `muted`, `faint` (T3) or `lime` (T4). Each role has its default (`muted` for `caption`,
+  `foreground` for the rest).
+- **`align`** — `start`, `center`, `end`.
+- **`weight`** — `default`, or `heavy` (`font-black`, 900) for a screen's closing or opening `hero`: Home's thank-you
+  at its end is the one use. A role's own weight is otherwise its weight.
+- **`as`** — the element, where the role's default is the wrong one (a `span` in a line, a `button`). It changes the
+  tag, not the look.
+
+Anything else a piece of text wants — a colour, a size between two roles, italics — is not a token: it is a new role
+or tone, decided here, or it is not done.
+
+## 2. The rules
 
 **T1 — Text is a `Text`.** `packages/ui/src/components/text.tsx`: `<Text role="body" tone="muted" align="center">`.
-The seven roles are the whole scale; a page does not reach for `text-2xl` on its own. The showcase's pages are the
-one exception for now — they were written before this and are documentation, not an app — and get moved over as they
-are recomposed in the composer. *The composer went 2026-09-23 (Grid.md D30); they move over when their content files
-are next rewritten.*
+The eight roles are the whole scale; an app does not reach for `text-2xl` on its own. The showcase's specimens are the
+one exception for now: they move over as their content files are rewritten.
 
-**T2 — In the composer, text is a slot holding `Text`** (Slots.md S1). The registry entry carries the text, the role,
-the tone and the alignment as its props; where the text sits in its slot is the slot's `alignX`/`alignY`.
-**Withdrawn in part 2026-09-23 (Slots.md S7).** The composer and the registry's `Text` entry are gone; text in a slot
-is a `Text` written in code, and where it sits is still the slot's `alignX`/`alignY`.
+**T2 — In a slot, text is a `Text` written in code.** Where it sits in its slot is the slot's `alignX`/`alignY`
+(Slots.md S3).
 
-**T3 — A third tone, `faint`, for text meant to be found rather than read.** *2026-09-25, for a quote on the
-portfolio's first screen: "in a very subtle way … we can use some tokens that reduce the opacity or something like
-that … with our bold text, the title font."* The token is `--faint-foreground` (`text-faint-foreground`): a step past
-`muted` in each theme — `oklch(0.8 0 0)` on light, `0.42` on dark, where muted is `0.556` and `0.708`. **It is a flat
-grey, not the foreground at an alpha**: nothing translucent goes over the grid (glass went on 2026-09-16), and a glyph
-at an alpha lets the grid's lines show through it. It is a tone, so it goes with any role; the first use was `title`,
-bold words in a quiet colour, which is what makes it subtle rather than small — moved the same day to `display` in
-the portfolio's own display face (Portfolio.md P4), still faint.
+**T3 — A third tone, `faint`, for text meant to be found rather than read.** `--faint-foreground`
+(`text-faint-foreground`): a step past `muted` in each theme — `oklch(0.8 0 0)` on light and `0.42` on dark, where the
+muted foreground is `0.556` and `0.708`. **It is a flat grey, not the foreground at an alpha**: nothing translucent goes
+over the grid, and a glyph at an alpha lets the grid's lines show through it. It is a tone, so it goes with any role;
+bold words in a quiet colour are what make it subtle rather than small.
 
-**T4 — A fourth tone, `lime`, the system's first colour on text.** *2026-09-25: "@hiddenstack in lime colour with a
-small text font."* It is `text-lime`, the `--lime` token his HEY! introduced, one value in both themes — so it is
-**1.3 : 1 on the light background** and 15 : 1 on the dark. The first use is a `caption` that is also a thing to press
-(Portfolio.md P4), which is the only use it should have until the light-theme contrast is decided.
-*Since 2026-09-26 it is also, from his mock, the portfolio's role line (a `label`, not pressed) and its *Résumé* link (a
-`body`), Portfolio.md P4, so the light-theme contrast is now three pieces of text.*
+**T4 — A fourth tone, `lime`, the system's colour on text.** `text-lime`, the `--lime` token, one value in both themes:
+15 : 1 on the dark background and **1.3 : 1 on the light**. It is for a word that is also a thing to press, and for the
+places he has put it: the portfolio's "— @hiddenstack" (a `caption` that is a button) and its role line (a `label`,
+Portfolio.md P4), and the motion studio's ring numbers on its focus and mode stages (a `mono`). Open: the light-theme
+contrast, his to decide.
 
-**T5 — An eighth role, `hero`, for the name a screen is called by.** *2026-10-03, for Home's name under the model
-(Home.md H9): "instead of putting the house in the card, make it a heading font that we have with a large size", then
-"increase the text size".* `display` was the top of the scale, 4xl; `hero` is 5xl, bold, tight, in the heading font —
-the one piece of text on a screen that stands over its title, and it is a role rather than a size on the page because
-T1 leaves the page no size to reach for. The first use is Home's name under the model — "The house", a stop's name,
-"Plan" — a row tall on a wide field, two on a phone, keyed so a new name arrives as a surface does (Motion.md M4). The
-step above display is mine; whether it is the right one, and the name, are his.
+**T5 — An eighth role, `hero`, for the name a screen is called by.** 5xl, bold, tight, in the heading font: the one
+piece of text on a screen that stands over its title, a role rather than a size on the page because T1 leaves the page
+no size to reach for. Home's name under the model (Home.md H9) and the status page's name are its uses. The step above
+`display`, and the name, are his to change.
 
 ## 3. Open
 
 - **Line length.** A `body` in a wide slot runs the whole width; whether `Text` caps its measure (at ~65ch) or leaves
   that to the slot's span is undecided. It leaves it to the span for now — the cell is the unit.
-- **A second body size.** `body` is `sm`; if a reading page ever wants `base`, that is an eighth role, here.
-
-**Heavy emphasis, 2026-10-03:** Home’s closing thank-you uses the largest role, `hero`, with `weight="heavy"` (900); added to `Text` so the app does not invent a typography style. The host heading font remains Montserrat. Default role weights remain as before.
+- **A second body size.** `body` is `sm`; if a reading page ever wants `base`, that is a ninth role, here.

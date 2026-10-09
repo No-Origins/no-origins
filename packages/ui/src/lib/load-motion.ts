@@ -1,48 +1,25 @@
 /**
- * How a page loads (Motion.md M10, 2026-09-27, his: "ripple is not the loading state that I want … when it first loads,
- * we will have X number of line dashed bordered cells at the center which will be rotating the x is defined by the
- * number of cards or sections in the page so they will rotate uh, and then once everything is ready to render they will
- * expand to the component that they are supposed to be"). "Line" is lime, as it was for the pointer (Grid.md D34).
+ * How a page loads (Motion.md M10): a lime dashed ring a section, turning on the centre, each going to its section as
+ * movement's dot and opening into it. Decided: his numbers are the `--motion-load-*` tokens in globals.css, and for the
+ * travel it reads movement's. No page loads with it (Grid.md D49): it plays on the motion studio's Loading page.
  *
  * Pure, but for reading the tokens (`readLoadMotion`): a frame is a function of the motion's numbers, the block, where
  * each section lands, when the page was ready and the time since loading began. `useLoadMotion`
- * (`hooks/use-load-motion.ts`) plays it: the motion studio with the numbers on a jig, and a page, when one adopts it,
- * with the tokens it reads off itself. Positions are px from the top-left of the block's first cell. **Its numbers are
- * his** (2026-09-27, the `--motion-load-*` tokens in globals.css, from the studio's preset A tuned), and for the travel
- * it reads movement's.
+ * (`hooks/use-load-motion.ts`) plays it: the motion studio with the numbers on a jig, and a page, were one to adopt it,
+ * with the tokens it reads off itself. Positions are px from the top-left of the block's first cell.
  *
- * **The loader is a square** (his, the same night: "I want them to be distributed between same number of columns and
- * rows"; the page folded, a row of cells for each of its rows, before). One cell a section, a lime ring in dashes, in a
- * block at the block's centre as near square as it can be, a row taller rather than wider (ten stand as 3, 3, 3, 1), in
- * the page's reading order. **While the page loads** it turns, by the motion's `turn`, and the turn is on the rings, never the page: every
- * ring's dashes go round (spin), neighbours turn opposite ways, meshed like gears (gears), a closed ring goes round the
- * page, handing over like a marquee (chase), or one ring at a time turns once round and hands on to the next (relay).
- * **The turn does not stop for the move** (his, the same night: "the turn should continue while expanding too"): it goes
- * on through the press, while the dashes close, and on under the closed ring as it travels, until each ring is released
- * into a plain border ("without the dashed borders"), and the lap is only how fast it goes ("lab speed is basically how
- * fast the cell is evolving"), never how long the page takes.
+ * **The loader is a square**: one cell a section, a lime ring in dashes, in a block at the block's centre as near
+ * square as it can be, a row taller rather than wider (ten stand as 3, 3, 3, 1), in the page's reading order. **While
+ * the page loads** it turns, by the motion's `turn`, and the turn is on the rings, never the page: every ring's dashes
+ * go round (spin), neighbours turn opposite ways, meshed like gears (gears), a closed ring goes round the page, handing
+ * over like a marquee (chase), or one ring at a time turns once round and hands on to the next (relay). **The turn
+ * does not stop for the move**: it goes on through the press, while the dashes close, and on under the closed ring as
+ * it travels, until each ring is released into a plain border; the lap is only how fast it goes, never how long the
+ * page takes.
  *
- * **When it is ready, each ring moves to its section as movement's dot does** (Motion.md M9; his, the same night: "the
- * beauty in the movement motion that we designed is that there is a filled circle in the center … when it moves, it
- * shrinks so that it appears as it is drowning into the cell and then floating back in another cell … once the
- * handover starts, the line dashed border treating it like a different component on the cell should scale down its
- * size by 0.8 as if it's a tactical feedback and then perform the movement and then once it reaches its destination
- * cell it should tactically scale up to fill the cell and then open up"). Then, the same night: "the press should
- * happen to all the loading circles at once. And then they have to travel to their cell we can account for the distance
- * so every cell can reach its destination cell based on the distance and then once they reach the press goes back to
- * one and open … without the dashed borders just have the border". And then: "the expectation was to do the movement
- * directly from the cell it is in to its destination cell the values that we kept default in the movement motion
- * should be the same … once it shrinks to 0.8 that means it is basically in the state of how we setup movement". Then:
- * "change the press to 0.5 instead of 0.8 … once the cell is moving from one cell to another, once it shrinks down and
- * exits its first cell, it should not be visible anywhere else again except where it reached its destination cell" —
- * which movement's dot now does too (`travelScale`). And last: "let all the loading cells reach their destination cell
- * at once … every thing reaching at its own pace it feels a little off". And the next day, 2026-09-28: "just before the
- * transition from one cell to another, the circle shrinks. So, while shrinking it should not be bordered circle. The
- * dashes should slowly as they shrink should become full circle".
- *
- * So every ring is pressed at once, to his 0.5 (`LOAD_PRESS`), its dashes growing into their gaps as it shrinks until
- * it is a full circle — pressed, it is movement's dot at rest — and then goes
- * straight to the cell of its section nearest it, in ONE move of movement's dot: its curve, its duration
+ * **When it is ready, each ring moves to its section as movement's dot does** (Motion.md M9). Every ring is pressed
+ * at once, to his 0.5 (`LOAD_PRESS`), its dashes growing into their gaps as it shrinks until it is a full circle —
+ * pressed, it is movement's dot at rest — and then goes straight to the cell of its section nearest it, in ONE move of movement's dot: its curve, its duration
  * (`--motion-move-duration`), however far it goes, so every ring lands at once, and its size, set by where it is
  * (`travelScale`) — it drowns leaving its cell, is not seen over any cell between, and floats up in the cell it
  * reaches. A ring with nowhere to go stays pressed until the rest land. All are released together, back to the cell's
@@ -341,7 +318,6 @@ function stepped(v: number): number {
 
 /**
  * A section opening from its anchor's cell `a` to its box `to`, `q` of the way: each edge outward, never past its own.
- * The intro's boxes opened by it too, until its version 4 (`lib/intro-motion`, Motion.md M22).
  */
 export function openBox(m: LoadMotion, a: LoadBox, to: LoadBox, q: number, pitch: number): LoadBox {
   if (m.open !== "cells") return lerpBox(a, to, q)
@@ -398,7 +374,7 @@ export function loadFrame(plan: LoadPlan, t: number): LoadFrame[] {
     const opens = at + (plan.opens[j] ?? 0)
     if (t >= opens) {
       // The plain border, opening; the section comes in over the end of it, and the border goes as it comes — handing
-      // over to the section's own, or to none where the section wears none (a page's borderless column, Grid.md D48).
+      // over to the section's own, or to none where the section wears none.
       const q = within(t, opens, opens + m.duration)
       const content = m.reveal > 0 ? within(q, 1 - m.reveal, 1) : q >= 1 ? 1 : 0
       return { ...openBox(m, a, target, m.move.ring(q), pitch), scale: 1, opacity: 1 - content, lime: 0, dash: 0, solid: 1, content }

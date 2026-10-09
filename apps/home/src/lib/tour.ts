@@ -68,7 +68,7 @@ export const TOUR_MOTION = {
   lookLag: 0.3,
   /** A leg shorter than this is a turn in place: the look swings from the stop it leaves to the one it reaches. */
   turnOnly: 6,
-  /** How long the walk waits at a stop before moving on, seconds (version 7, his: "at max three seconds"; 6 while the voice spoke). */
+  /** How long the walk waits at a stop before moving on, seconds (his: at most three). */
   dwell: 3,
   /** How soon the walk moves on after Play at a stop, seconds. */
   resume: 0.5,

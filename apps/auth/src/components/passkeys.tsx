@@ -30,7 +30,7 @@ export type Passkeys = {
 
 /**
  * Passkey enrollment (Admin.md §8.4 — the third door), as state the account page lays out on the field: a record for
- * each passkey (account.tsx). The admin's Settings had it until the account moved here (step 5).
+ * each passkey (account.tsx). The admin's Settings has its own copy.
  *
  * You register a passkey *here*, while signed in — the session is the proof it belongs to you, so there is no
  * address to type and no oracle to leak. Once one exists, the login card's "Sign in with a passkey" button uses

@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-// engineering.no-origins.com — public engineering publish library (Layer A).
+// engineering.no-origins.com — the public engineering library. `/jido` is the Jido guide's short address.
 const nextConfig: NextConfig = {
   transpilePackages: ["@no-origins/ui"],
   async redirects() {

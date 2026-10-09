@@ -107,8 +107,8 @@ function NewRole() {
 // ── /roles/<id> ───────────────────────────────────────────────────────────────────────────────────────────────
 
 /**
- * What the role's page holds until Save (Access.md A7, his, 2026-10-07: "select and then click on save so that we can
- * push all the changes together"): the name, the sentence and the ticks. Its boxes are placed on the field one by one,
+ * What the role's page holds until Save (Access.md A7, his, 2026-10-07: every change is pushed together): the name, the
+ * sentence and the ticks. Its boxes are placed on the field one by one,
  * so they read it from here rather than through props — a tick redraws the boxes that show it, never the layout.
  */
 type Draft = {

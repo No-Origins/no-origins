@@ -39,7 +39,7 @@ type LoadMotionOptions = {
    * else holds the cells still while it loads and puts the sections in at once when it is ready (Motion.md §5).
    */
   always?: boolean
-  /** Called once the last section is in, after `ready` — the grid's load ended there, until the grid stopped loading (Grid.md D49). */
+  /** Called once the last section is in, after `ready`. */
   onIn?: () => void
 }
 
@@ -47,7 +47,7 @@ type Shape = Pick<LoadMotionOptions, "cols" | "rows" | "targets" | "cell" | "gap
 type Clock = { start: number; ready: number | null; motion: LoadMotion | null; loading: boolean }
 
 /**
- * Loading (Motion.md M10, his, 2026-09-27) on a block: while `ready` is false the loader's cells turn at its centre,
+ * Loading (Motion.md M10) on a block: while `ready` is false the loader's cells turn at its centre,
  * one a section; when it goes true each expands into its section. One GSAP ticker while anything moves, each tick
  * handing `loadFrame`'s frame to `paint`; nothing renders per frame, and once the last section is in the ticker stops.
  * `ready` going false again starts loading over.
@@ -174,10 +174,10 @@ const lineColour = (lime: number) =>
   lime >= 1 ? "var(--lime)" : lime <= 0 ? "var(--border)" : `color-mix(in oklch, var(--lime) ${lime * 100}%, var(--border))`
 
 /**
- * The painter for a ring drawn as an SVG holding one `rect` (the motion studio's stage; the grid's loader until D49), px from the
- * block's first cell: its box, its corner (a cell's circle), its dashes — how far round and how closed — how lit, its
- * line's colour, and how big it is drawn in its box, about the box's centre, so its dashes keep their count while it is
- * pressed or drowns. `shown` 0 hides it whatever the frame says — the grid's rings come up as the drawing reaches them.
+ * The painter for a ring drawn as an SVG holding one `rect` (the motion studio's stage), px from the block's first
+ * cell: its box, its corner (a cell's circle), its dashes — how far round and how closed — how lit, its line's colour,
+ * and how big it is drawn in its box, about the box's centre, so its dashes keep their count while it is pressed or
+ * drowns. `shown` 0 hides it whatever the frame says.
  */
 export function paintLoadRing(svg: SVGSVGElement | null, f: LoadFrame, cell: number, shown = 1) {
   const rect = svg?.firstElementChild as SVGRectElement | null | undefined

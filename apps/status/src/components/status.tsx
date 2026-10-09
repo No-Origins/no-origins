@@ -32,8 +32,7 @@ export function arrangeStatus({ cols, rows }: Field) {
 }
 
 /**
- * The status page (Status.md, his, 2026-10-03: "that should show all our apps and each one of it is still in progress
- * and to represent that as an icon, let's fill a cell beside in progress with flowing liquid"): one `Grid` with the
+ * The status page (Status.md): one `Grid` with the
  * overlay and the cursor, nothing else on the page. Each app is a row of three boxes on the field's cells — a card
  * with its name and its host, which is a link to it; a pill saying where it stands; and a cell of liquid (the
  * design system's `Liquid`, Motion.md M25) as full as the app is far along, 40% today, every one.

@@ -3,10 +3,10 @@
 import * as React from "react"
 
 /**
- * The registry (Slots.md §3): the components a layout item can name by `kind` — `component: { kind }` — and a slot
- * draws with `Placed`. It filled the composer's palette until the composer was removed (2026-09-23); what is left is
- * what a layout still places: the pager's parts, in the bar — the arrows as a pair (Grid.md D29), one arrow a cell
- * (D36), and the pages between them as one block (D46, D47). Each entry loads its module on first render.
+ * The registry (Slots.md S6): the components a layout item can name by `kind` — `component: { kind }` — and a slot
+ * draws with `Placed`. It holds what a layout places: the pager's parts, in the bar — the arrows as a pair (Grid.md
+ * D29), one arrow a cell (D36), and the pages between them as one block (D46, D47). Each entry loads its module on
+ * first render.
  */
 
 type Props = Record<string, unknown>

@@ -45,42 +45,27 @@ function brand(hex: string) {
 const PAD = GRID_SPACING[3];
 
 /**
- * The tech column, left of the first screen's centre (Portfolio.md P4, amended 2026-09-26, his: "there will be left
- * side section where each cell will be filled with logos of the tools, languages, any tech that I use or used"). One
- * mark on each cell of the column, straight on the field, no tile — the way the company marks stood on the Work screen
- * — in reading order, at the company marks' size (half the cell less a step of the spacing scale), all the text's
- * colour, so the column reads quiet beside the profile. Cells past the last mark are the field's own. Beside the centre
- * it is five cells wide, as the work is, and as tall as the centre; on a narrower field it goes under the centre and
- * the work, as wide as the centre.
+ * The tech stack (Portfolio.md P4). One mark on each cell, straight on the field, no tile, in reading order, at the
+ * company marks' size (half the cell less a step of the spacing scale), all the text's colour. Cells past the last mark
+ * are the field's own.
  *
- * **Hovered or selected, a mark grows to spell out its name, and the marks after it move on** (his, 2026-09-27: "use
- * this motion in the technical stack vertical. Whenever I hover/select a logo, it should expand to name the library or
- * tool"). That motion is movement (Motion.md M9), his pick in the motion studio, played by the package's
- * `useCellMotion` on the tokens in globals.css: the marks flow along the rows, the active one takes as many whole cells
- * as its mark and name need, and one pushed past a row's end goes out of it and comes in at the start of the next.
- * Only the marks travel. The active mark's pill is ringed in lime over the work's lime wash (`ACTIVE_FILL`), its name
- * lime on dark and the ink on light, its mark in its brand's colour (his pick, when it was a hover); the rest have no
- * ring, as before. Hover is read from the cell under the pointer, never the mark, which moves (the studio's rule); it
- * lets go when the pointer leaves the column. A click or a tap selects a mark — it stays grown with the pointer gone —
- * and pressing it again lets it go. Every mark is a stop, in reading order (Grid.md D45), and Space or Enter selects
- * it as a click does; focus alone does not grow it, since the marks it pushed on would move under the keys — the one
- * pushed to the next row came back to a row Tab had passed, and was skipped.
+ * **Hovered or selected, a mark grows to spell out its name, and the marks after it move on.** That motion is movement
+ * (Motion.md M9), his pick in the motion studio, played by the package's `useCellMotion` on the tokens in globals.css:
+ * the marks flow along the rows, the active one takes as many whole cells as its mark and name need, and one pushed past
+ * a row's end goes out of it and comes in at the start of the next. Only the marks travel. The active mark's pill is
+ * ringed in lime over a lime wash (`ACTIVE_FILL`), its name lime on dark and the ink on light, its mark in its brand's
+ * colour; the rest have no ring. Hover is read from the cell under the pointer, never the mark, which moves (the
+ * studio's rule); it lets go when the pointer leaves the marks. A click or a tap selects a mark — it stays grown with the
+ * pointer gone — and pressing it again lets it go. Every mark is a stop, in reading order (Grid.md D45), and Space or
+ * Enter selects it as a click does; focus alone does not grow it, since the marks it pushed on would move under the
+ * keys.
  *
- * The column keeps a spare row under its marks for what a grown one pushes over (`TECH` in site.tsx); where it has
- * none, it shows only as many marks as fit with any one grown, rather than cut one off (P5).
+ * It keeps a spare row under its marks for what a grown one pushes over (`TECH` in site.tsx); where it has none, it
+ * shows only as many marks as fit with any one grown, rather than cut one off (P5).
  *
  * A `lead` takes the first row, centred on it, and the marks flow on from the row under it — the section's label, its
- * icon and its word (his, 2026-09-27: "make them part of the top first cell within their section", then "expand them
- * to also show the label of the section name", then "move all the cards or boxes that are in the row of the label …
- * to the next row"). Nothing flows into its row. With one row, the label goes and the marks keep it (P5).
+ * icon and its word. Nothing flows into its row. With one row, the label goes and the marks keep it (P5).
  */
-/**
- * The most rows the column uses beside the block, `cols` wide: its label's, its marks' at rest, and one for what a
- * grown mark pushes over, which is the air under it (his, 2026-09-28: "there are three rows empty between technical
- * skills and art skills. Reduce it to one"; `growMost`).
- */
-export const techRowsMost = (cols: number) => 1 + Math.ceil(TECH.length / Math.max(1, cols)) + 1;
-
 export function ProfileTech({ cols, rows, lead }: { cols: number; rows: number; lead?: SectionLabel }) {
   const m = useGridMetrics();
   const cell = m?.cell ?? 60;

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowLeftIcon } from "lucide-react";
 
 import { cn } from "@no-origins/ui/lib/utils";
-import { Alert, AlertDescription, AlertTitle } from "@no-origins/ui/components/alert";
 import { Button } from "@no-origins/ui/components/button";
 import { countFor, DEFAULT_GRID_CONFIG, GRID_REFERENCE_BOX, specFor, type Responsive } from "@no-origins/ui/components/grid";
 import { GridPages } from "@no-origins/ui/components/grid-pages";
@@ -38,27 +37,17 @@ export const band = (rows: number, narrow = rows, phone = narrow): Responsive<Sp
   md: { cols: BAND, rows },
 });
 
-// ── a change's refusal ────────────────────────────────────────────────────────────────────────────────────────
-
-const RefusalContext = React.createContext<(message: string | null) => void>(() => {});
-
-/** Show a refusal under the page's name, or clear it with `null`. */
-export function useRefuse() {
-  return React.useContext(RefusalContext);
-}
-
 // ── the page ──────────────────────────────────────────────────────────────────────────────────────────────────
 
 export function AuthPages({ title, line, back, items }: { title: string; line: string; back?: Back; items: readonly AuthItem[] }) {
   const [field, setField] = React.useState<AuthField | null>(null);
-  const [refusal, setRefusal] = React.useState<string | null>(null);
 
   const all = React.useMemo<AuthItem[]>(() => [
     ...(back ? [{ id: "back", repeat: true, span: { base: { cols: 1, rows: 1 } }, render: () => <BackCell back={back} /> }] : []),
-    // The name takes the rest of the band beside the way back, or all of it; a refusal grows it a row.
-    { id: "title", repeat: true, span: { base: { cols: back ? -1 : BAND, rows: refusal ? 3 : 2 } }, render: () => <PageTitle title={title} line={line} refusal={refusal} /> },
+    // The name takes the rest of the band beside the way back, or all of it.
+    { id: "title", repeat: true, span: { base: { cols: back ? -1 : BAND, rows: 2 } }, render: () => <PageTitle title={title} line={line} /> },
     ...items,
-  ], [back, title, line, refusal, items]);
+  ], [back, title, line, items]);
 
   const layout = React.useMemo<GridLayout>(() => {
     const on = field ?? FIRST_FIELD;
@@ -69,15 +58,13 @@ export function AuthPages({ title, line, back, items }: { title: string; line: s
   const renderItem = React.useCallback((placed: GridLayoutItem) => byId.get(placed.id)?.render(placed) ?? null, [byId]);
 
   return (
-    <RefusalContext.Provider value={setRefusal}>
-      <GridPages
-        layout={layout}
-        overlay
-        className="h-dvh"
-        onMetrics={(m) => setField((prev) => (prev && prev.cols === m.cols && prev.rows === m.rows && prev.bp === m.bp ? prev : { bp: m.bp, cols: m.cols, rows: m.rows }))}
-        renderItem={renderItem}
-      />
-    </RefusalContext.Provider>
+    <GridPages
+      layout={layout}
+      overlay
+      className="h-dvh"
+      onMetrics={(m) => setField((prev) => (prev && prev.cols === m.cols && prev.rows === m.rows && prev.bp === m.bp ? prev : { bp: m.bp, cols: m.cols, rows: m.rows }))}
+      renderItem={renderItem}
+    />
   );
 }
 
@@ -92,21 +79,14 @@ function BackCell({ back }: { back: Back }) {
   );
 }
 
-/** The page's name, its first line centred on a cell's middle, and the line of what the page is — or a refusal. */
-function PageTitle({ title, line, refusal }: { title: string; line: string; refusal: string | null }) {
+/** The page's name, its first line centred on a cell's middle, and the line of what the page is. */
+function PageTitle({ title, line }: { title: string; line: string }) {
   return (
     <Slot fill="background" alignY="start">
       {/* text-3xl's line is 2.25rem: half the rest of the cell above it puts the name on the cell's middle. */}
       <div className="flex min-w-0 flex-col gap-1" style={{ paddingTop: "calc((var(--grid-cell, 60px) - 2.25rem) / 2)" }}>
         <Text role="title" as="h1" className="truncate">{title}</Text>
-        {refusal ? (
-          <Alert variant="destructive" className="mt-1">
-            <AlertTitle>Not done</AlertTitle>
-            <AlertDescription className="line-clamp-2">{refusal}</AlertDescription>
-          </Alert>
-        ) : (
-          <Text role="body" tone="muted" className="line-clamp-3">{line}</Text>
-        )}
+        <Text role="body" tone="muted" className="line-clamp-3">{line}</Text>
       </div>
     </Slot>
   );

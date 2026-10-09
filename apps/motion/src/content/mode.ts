@@ -1,30 +1,18 @@
 import type { Family, Values } from "./families";
 
 /**
- * Focus mode (Motion.md M14, his, 2026-09-28): the portfolio shows a lot at once, meant for a seven-second glance, and
- * focus mode lets a reader take one vertical at a time. "An option called focus mode … in the bottom right … once we
- * turn it on there should be an overlay on top of the first section … a little above the section, like it's coming
- * out of the screen in 3D … the rest should feel like a cloth overlay … start blurring out from the edges of the focus
- * component … increasing the same blur default that we have right now … like we are looking through a panel … three
- * verticals … the user can click between the verticals … bottom center … should be the cells … the focus component
- * should slide from one vertical to another." The motion is the package's `useModeMotion`. **The slide went the next
- * day** (his, 2026-09-29: "Instead of sliding the focus container, we should just unfocus while refocusing on the next
- * one … both 1 unfocusing and 2 focusing should start at a time"): every vertical has a panel and a cloth of its own,
- * and another vertical is the one left playing the way out and the next the way in, from the same moment. **Its line
- * is not drawn any more** (his, the same day: "Instead of border start from top and all, let's just have the option to
- * border to rise from the viewport directly without that border animation"): the panel rises out of the page with its
- * whole line there, and going is the same steps backward (his: "the vertical in focus will repeat the steps
- * backward").
+ * Focus mode (Motion.md M14): one vertical at a time. The vertical in focus rises out of the page on a panel, its whole
+ * line there, like it is coming out of the screen, and the rest of the page is under a cloth, blurring more from the
+ * panel's edges out; another vertical is picked from the cells at the bottom centre, and the one left plays the way
+ * out while the next plays the way in, from the same moment. Going is the same steps backward. The motion is the
+ * package's `useModeMotion`; it plays on the studio only (Portfolio.md P21).
  *
  * Its tokens are in five groups, one on the jig at a time: **Lift** (the panel rising out of the page and dropping back,
- * each its time and curve: his ask, 2026-09-29, "controls to control the lift and drop timings"), **Panel** (the frame
- * coming out of the page: how far, how seen, its swing, shadow and margin), **Line** (its
- * width, on the page and once up; its Draw and Draw ease went with the draw), **Cloth** (the blur round it, how much at
- * each point) and **Roll** (how the cloth comes and goes). A fifth, **Slide** (the panel's slide, its curve and its
- * dip), went with the slide. Every
- * token is his pick (2026-09-29, A As described, tuned) and in globals.css, so preset A is "Today", read off the page,
- * and the package's `readModeMotion` falls back to the same (`MODE_START`). B–E are round 1's other four, as they were;
- * A As described, the brief's values it was tuned from, is in Motion.md.
+ * each its time and curve), **Panel** (the frame coming out of the page: how far, how seen, its swing, shadow and
+ * margin), **Line** (its width, on the page and once up), **Cloth** (the blur round it, how much at each point) and
+ * **Roll** (how the cloth comes and goes). Every token is his pick (A As described, tuned) and in globals.css, so preset
+ * A is "Today", read off the page, and the package's `readModeMotion` falls back to the same (`MODE_START`). B–E are
+ * round 1's other four, as they were.
  */
 
 const IN_OUT = "cubic-bezier(0.65, 0, 0.35, 1)";

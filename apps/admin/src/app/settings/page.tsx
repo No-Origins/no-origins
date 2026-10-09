@@ -5,8 +5,8 @@ import { SettingsView } from "@/components/settings";
 export const metadata = { title: "Settings" };
 
 /**
- * Settings (Admin.md §0.5) — the account controls that used to be the whole signed-in landing: who you are, your
- * passkeys, your password, and the way out. The home is the grid of feature cards; this is the Settings card.
+ * Settings (Admin.md §0.5) — the account controls: who you are, your password, your passkeys, your authenticator apps
+ * and the way out. The home is the grid of feature cards; this is the Settings card.
  */
 export default async function SettingsPage() {
   const profile = await currentProfile();

@@ -6,126 +6,51 @@ import { sphereBeats, type SphereGeometry, type SphereMotion } from "@no-origins
 
 /**
  * The intro (Grid.md D50, Motion.md M22), pure: who stands where, what each does and when, which cells its ripple lights,
- * and when each box comes in.
- *
- * **Version 9, one agent's section at a time** (his, 2026-10-03, after a recruiter friend found the page too much at
- * once: *"I think it's very interesting if each agent can pick a section. So we scroll from one agent to another. So
- * whoever agent is in focus should dive in to show their section. And when we scroll, they dive back into their place
- * and the new agent dives in."*). Where the page names one agent as in focus (`focus`), the boxes on the field are its
- * section alone, and:
- *
- * - **The one in focus stays on its page, below its section** (his, the same day, before he had seen it: *"it will be
- *   great if the agent stays on the same page until we change the section"*, then: *"place it right in the center bottom
- *   of the section"*): in the cell under the section's last row, at its centre, never on it (`introBeside`), resting
- *   there, breathing and blinking, its nest lit under it, until the page turns. Where the field has no free cell round
- *   the section, it dives into the section's centre and is **held** there, gone behind the page (`hold`), as first
- *   built.
- * - **The intro ends with that one below its section and the rest at home** (`introPlan` with `focus`): they stand in
- *   their row and bounce as in version 8; then the one in focus jumps or dives to its cell below its section, its
- *   ripple spreads, and once it has the section fades in. The others jump or dive straight to their cells at home, with
- *   no ripple: they open nothing.
- * - **The page turns by the agents** (`introGoIn`, `introGoHome`): the one in focus dives out of its cell below its
- *   section, under the page and up into its cell at home, while its section fades away (`out`); the next one dives out
- *   of its cell at home and comes up below its own section, its ripple spreads, and the section fades in. An empty cell
- *   at home is the page being shown.
- * - **Home is the bottom row on a field taller than it is wide** (`introHome`): a phone's six columns are the six cells,
- *   where version 8's last column stood over the page's own boxes.
- *
- * **Version 8, home** (his, 2026-10-01: "after the intro scene, once the agents jump into their sections and dive, they
- * all should uh, come and settle in the last row middle six columns cells", and before it was built: "instead of uh,
- * bringing them to the bottom, we'll bring them to the right the last most column vertically centered"). Version 7 as
- * it is until the ripple has spread, but where each goes then:
- *
- * - **Each has a cell of its own in the last column** (`introHome`): the cast one above the other in the field's
- *   right-most column, centred down it, in the cast's order — on the portfolio Bali, Kino, Zaza, Oru, Mira and Lola
- *   from the top.
- * - **Its dive into its nest is his Dive to that cell** (`open`): his action as he published it, out of its nest
- *   behind the page the way it is going and up into its cell, carrying on into its bowl. Version 7's own sink, straight
- *   down through the nest over `dive`, went with the token. It dives once its ripple has spread and its landing has come
- *   to rest, whichever is later: the Dive sets off from the agent sitting in its nest.
- * - **Its nest goes as it dives into it** (`introNestLeft`), version 7's rule, over the Dive's going out of it; the
- *   cell it comes up in lights while it is under, as the Dive lights it, and stays lit.
- * - **Its boxes fade in once it is gone** (`gone`), as in version 7.
- * - **It stays**: in its cell, breathing and blinking, once the intro is over, and on any field the grid is given after
- *   it, or where it never played (`introResting`).
- *
- * **Version 7, the small ripple and then the page** (his, 2026-10-01: "the ripple is now more stuttering it's not smooth
- * and then also it stops at the borders of the section and which is weird so i don't think we need such big uh,
- * ripples i think we can just have small ripples and uh, once the ripple ends we can drop the agents and then render
- * the components"). Version 6 as it is, but how each lands and how its boxes come in:
- *
- * - **Its ripple is small again** (`introRipple`): version 3's, `ripple` rings out from its nest's edge, whatever the
- *   boxes round it; it no longer crosses them or stops at their edges.
- * - **Once it has spread, the agent drops** (`settle`): `settle` after its last ring lights, it dives into its nest.
- * - **Its nest goes as it dives** (`introNestLeft`): the lime ring and its tint fade back to the field's own cell over
- *   the dive (his, the same evening), so the cell is plain by the time it is gone.
- * - **Then its components render** (`reveal`): once it is gone, every box it opens fades in over `reveal`. Opacity only, which the compositor plays: version 4's cell-by-cell clip, re-cut on the main thread
- *   a ring at a time, is what stuttered, and it went with `behind` and `lace`.
- *
- * **Version 6, cells and rest** (his, 2026-10-01: "those who are not bouncing should uh, be in the rest motion. And I
- * also saw that uh, after bouncing, they just randomly appear over uh, some cell which is not part of the grid … They
- * should actually drop into the cells on the grid"). Version 5 as it is, but:
- *
- * - **Every nest is a cell of the field** (`introCast`): where the boxes' middle falls between cells, the cell next to
- *   it that is in one of the boxes, the first in reading order. Version 4's half-way nests are gone.
- * - **Each is seen resting** (`since`): its rest — Breath and blinks, the agent's own (`SPHERE_START`) — plays as if it
- *   had sat one to two Blink every already, at random, so each breathes at its own phase and blinks at its own moment
- *   while they stand. From a start of nothing, all six were half a breath in when they left, and none had blinked.
- *
- * **Version 5, the row** (his, 2026-10-01: "instead of placing this agent's uh, randomly let's place them in uh, row in
- * a line uh, without any gaps in between them uh, their order will be random and also not all the agents will bounce
- * um, let's only make uh, Bali Kino and uh, Mira to bounce"). Version 4 as it is, but how they stand and who bounces:
+ * and when each box comes in. It plays his three actions (`lib/agent-actions`, M24) as he published them, each agent as
+ * its look makes it; nothing of the move is the intro's.
  *
  * - **They stand in a row** (`introSpots`): a cell each, side by side with no cell between, centred on the field's
  *   middle row — the upper of its two middle rows, since a field's rows are even (D26) — or the nearest row to it that
  *   no agent lands in. Who stands in which cell is random, a different order every load.
- * - **Only some bounce** (`IntroAgent.bounces`, the page's to say): on the portfolio Bali, Kino and Mira. The rest sit
- *   in their nests, breathing and blinking, until they leave.
- *
- * **Version 4, the centre and the ripple** (his, the same day: "the agent should jump to the center of the sections that
- * it is rendering. And uh, instead of uh, expanding these sections from top left they should render along with the uh,
- * ripple"). Version 3 as it was, but where each lands and how its boxes come in:
- *
- * - **It lands on the centre of the boxes it opens** (`introCast`): the middle of the rectangle round them all — a cell
- *   where it is an odd number of cells across, and until version 6 half way between two where it is even. An agent
- *   that opens none sits where version 3 sat it, on the box that names it, a tab on a phone.
- * - **Its ripple crossed them**, until version 7: over every cell of the boxes it opens and a ring past their edges,
- *   each cell of a box coming in a ring's time behind it, its disc and then its tile (D40's lace), the box clipped to
- *   them. It stuttered and stopped at the boxes' edges (his).
- *
- * Version 3 (the same day, his: "Since we have now defined the motions for uh, dive, jump and bounce, in
- * intro, intro will be a three second sequence where all the six agents are randomly placed within the center four by
- * four cells and then they will randomly keep bouncing not together random agents will bounce at random times with
- * random frequency for uh, two seconds and then randomly some agents will dive and some agents will jump to their
- * positions and um, once they reach their destination cell we should have the ripple the first type of ripple that we
- * had … but that should happen for all the agents with small radius"). It plays his three actions
- * (`lib/agent-actions`, M24) as he published them, each agent as its look makes it; nothing of the move is the intro's.
- *
- * - **They stood at random**, until version 5: six cells picked at random from the field's centre four by four — a
- *   different six every load — never a cell an agent lands on; each agent in the one of them that, all told, left the
- *   cast least to travel, so they fanned out.
- * - **They bounce, not together** (`gather`, `first`, `rest`; all of them until version 5, those that `bounces` since):
- *   each its first Bounce at a random moment in the first
- *   `first`, and again at its own pace — a wait it picks up to `rest`, each wait varying round it — so some bounce
- *   often and some seldom. A bounce may start once the last has come to rest; its settle, a jiggle his Bounce does not
- *   squash, is cut by the next. Nothing bounces that would not be at rest when it leaves.
+ * - **Some bounce, not together** (`gather`, `first`, `rest`; `IntroAgent.bounces`, the page's to say — on the
+ *   portfolio Bali, Kino and Mira): each its first Bounce at a random moment in the first `first`, and again at its own
+ *   pace — a wait it picks up to `rest`, each wait varying round it — so some bounce often and some seldom. A bounce may
+ *   start once the last has come to rest; its settle, a jiggle his Bounce does not squash, is cut by the next. Nothing
+ *   bounces that would not be at rest when it leaves. The rest sit in their nests until they leave.
+ * - **Each is seen resting** (`since`): its rest — Breath and blinks, the agent's own (`SPHERE_START`) — plays as if it
+ *   had sat one to two Blink every already, at random, so each breathes at its own phase and blinks at its own moment.
  * - **They leave, some diving and some jumping** (`leave`): each at a random moment in the `leave` after `gather`, by a
- *   Jump or a Dive picked at random — at least one of each — to the nest it lands in (`introCast`): the TOP-LEFT cell of
- *   the box it opened first until version 4.
- * - **Each lands and its ripple spreads** (`ripple`, `ring`): version 1's ripple (2026-09-30) — as it first touches down
- *   in its nest, the cells round it light ring by ring out from the nest's edge, `ring` apart, in violet, each fading as
- *   the pointer's cell does; two rings out, as again since version 7 (versions 4 to 6 crossed its boxes). One pass of
- *   the field's painter an agent (`introRipple`), so two that cross each light their cells.
- * - **It dives into its nest**: in version 3 `settle` after landing, through the page's opening, over `dive`, and the
- *   nest opened into the box by his loader's opening (M10), the other boxes following `cascade` a pitch.
+ *   Jump or a Dive picked at random — at least one of each — to the nest it lands in.
+ * - **It lands on the centre of the boxes it opens** (`introCast`): the cell at the middle of the rectangle round them,
+ *   always a cell of the field.
+ * - **Its ripple spreads** (`ripple`, `ring`; `introRipple`): as it first touches down, the cells round its nest light
+ *   ring by ring out from the nest's edge, `ring` apart, in violet, each fading as the pointer's cell does. One pass of
+ *   the field's painter an agent, so two that cross each light their cells.
+ * - **Then it dives home** (`settle`): once its ripple has spread and its landing has come to rest, his Dive out of its
+ *   nest, behind the page, and up into its cell at home. Its nest fades back to the field's own cell as it goes
+ *   (`introNestLeft`); the cell it comes up in lights while it is under, and stays lit.
+ * - **Its boxes fade in once it is gone** (`reveal`): opacity only, which the compositor plays.
+ * - **Home** (`introHome`): a cell each in the field's last column, the cast one above the other and centred down it,
+ *   in the cast's order — on the portfolio Bali, Kino, Zaza, Oru, Mira and Lola from the top; on a field taller than it
+ *   is wide, the bottom row. They stay there, breathing and blinking, once the intro is over, and on any field the grid
+ *   is given after it, or where it never played (`introResting`).
+ *
+ * **One agent in focus** (`focus`): where the page names one, the boxes on the field are its section alone, and:
+ *
+ * - **The intro ends with that one below its section and the rest at home** (`introPlan` with `focus`): the one in
+ *   focus jumps or dives to its cell below its section, its ripple spreads, and once it has, the section fades in. The
+ *   others jump or dive straight to their cells at home, with no ripple: they open nothing.
+ * - **It stays below its section** (`introBeside`): in the cell under the section's last row, at its centre, never on
+ *   it, resting there, its nest lit under it, until the page turns. Where the field has no free cell round the section,
+ *   it dives into the section's centre and is **held** there, gone behind the page (`hold`).
+ * - **The page turns by the agents** (`introGoIn`, `introGoHome`): the one in focus dives out of its cell below its
+ *   section, under the page and up into its cell at home, while its section fades away (`out`); the next one dives out
+ *   of its cell at home and comes up below its own section, its ripple spreads, and the section fades in. An empty cell
+ *   at home is the page being shown.
  *
  * Every box is someone's: one that names no agent of the cast is opened by the nearest. An agent no box is opened by
- * lands on the box that names it (its first), or else on the biggest, beside the one that opens it, along its top row —
- * on a phone, four of them on the tabs bar, one a tab.
- *
- * Version 2 (2026-10-01, the six): they gathered in his loader's square on the centre, breathing, and leapt all at once
- * on an arc of the intro's own, every one in the air the same time. Version 1 (2026-09-30): one agent in the avatar's
- * ring, a hop in place, the field lit ring by ring from it out to its far corner.
+ * lands on the box that names it (its first), or else on the biggest, seated along its top row beside the one that
+ * opens it.
  *
  * The numbers are mine but the two seconds, his to tune. None of the `--motion-intro-*` tokens is in globals.css yet:
  * `readIntroMotion` falls back to INTRO_START.
@@ -147,16 +72,14 @@ export type IntroMotion = {
   settle: number
   /** How long the boxes it opens take to fade in, once it is gone behind the page, ms. */
   reveal: number
-  /** How long a section takes to fade away as the page turns (version 9), ms: its agent is already on its way home. */
+  /** How long a section takes to fade away as the page turns, ms: its agent is already on its way home. */
   out: number
 }
 
 /**
- * Version 8 (2026-10-01, mine but `gather`): version 3's bouncing, leaving and ripple — two rings, 80ms apart; the dive
- * home 250ms after the ripple's last ring, so the ripple is seen spread before the agent goes; and the boxes fading in
- * over version 1's 500ms, his first "the card should render smoothly". Version 7's `dive`, its own sink's 320ms, is his
- * Dive's since version 8. Version 9's `out`, a section fading away as the page turns, is the grid's own turn's 160ms
- * (`TURN_MS`, D37, D49).
+ * The intro's numbers, mine but `gather`: two rings of ripple, 80ms apart; the dive home 250ms after the ripple's last
+ * ring, so the ripple is seen spread before the agent goes; the boxes fading in over 500ms; and `out`, a section fading
+ * away as the page turns, the grid's own turn's 160ms (`TURN_MS`, D49).
  */
 export const INTRO_START: IntroMotion = { gather: 2000, first: 500, rest: 700, leave: 300, ripple: 2, ring: 80, settle: 250, reveal: 500, out: 160 }
 
@@ -177,7 +100,7 @@ export function readIntroMotion(el: Element): IntroMotion {
 
 /**
  * An agent of the cast: its name, which the page's boxes name it by (`data-intro-by`), its look, and whether it bounces
- * while the cast stands in its row (version 5; it does unless the page says not).
+ * while the cast stands in its row (it does unless the page says not).
  */
 export type IntroAgent = { id: string; look: CharacterLook; bounces?: boolean }
 
@@ -224,8 +147,7 @@ function reach(b: IntroBox, c: IntroCell) {
 /**
  * The cell at the middle of the rectangle round `list`: the middle itself where the rectangle is an odd number of cells
  * across and down; where it is even, of the two (or four) cells round the middle, the first in reading order that is in
- * one of the boxes, else the first — always a cell of the field (his, 2026-10-01: "They should actually drop into the
- * cells on the grid"; version 4 stood a nest half way between two).
+ * one of the boxes, else the first — always a cell of the field, never a point between cells.
  */
 function middle(list: readonly IntroBox[]): IntroCell {
   const l = Math.min(...list.map((b) => b.col))
@@ -238,8 +160,8 @@ function middle(list: readonly IntroBox[]): IntroCell {
 }
 
 /**
- * The nest an agent opens `boxes` from: the cell at the centre of them all (version 6's rule, `middle`) — a section's,
- * as the page turns to it (version 9). None, with no boxes.
+ * The nest an agent opens `boxes` from: the cell at the centre of them all (`middle`) — a section's, as the page turns
+ * to it. None, with no boxes.
  */
 export function introNest(boxes: readonly IntroBox[]): IntroCell | null {
   return boxes.length ? middle(boxes) : null
@@ -268,7 +190,7 @@ function shuffled<T>(list: readonly T[], random: () => number): T[] {
 
 /**
  * The cast's parts on the page, `ids` in the cast's order. Each box is opened by the first of the agents it names that is
- * in the cast, and an agent that opens any lands on the centre of them (version 4). One left with none lands on the
+ * in the cast, and an agent that opens any lands on the centre of them. One left with none lands on the
  * first box that names it, or else the biggest — opening that box, on its centre, if no one else does, and otherwise
  * seated along its top row after the one that opens it. A box that names none of them goes to the agent whose nest is
  * nearest.
@@ -291,7 +213,7 @@ export function introCast(ids: readonly string[], boxes: readonly IntroBox[]): I
     else guests[at]!.push(a)
   }
   // Each that opens boxes on their centre; each guest in its seat, after the seat the one that opens the box would
-  // have had — on a phone's tabs bar, each over its own tab.
+  // have had.
   const nests = ids.map((_, a) => {
     const own = boxes.filter((_, i) => owner[i] === a)
     return own.length ? middle(own) : null
@@ -315,7 +237,7 @@ export function introCast(ids: readonly string[], boxes: readonly IntroBox[]): I
 }
 
 /**
- * Where each agent stands as the intro starts, a field `cols` × `rows` (version 5, his): side by side in one row, a cell
+ * Where each agent stands as the intro starts, a field `cols` × `rows`: side by side in one row, a cell
  * each with no cell between, centred across the field, in a random order (`random`). The row is the field's middle —
  * the upper of its two middle rows — or the nearest to it where no agent lands (`nests`, in the cast's order); a cast
  * wider than the field goes on in the rows under it.
@@ -335,11 +257,9 @@ export function introSpots(nests: readonly (IntroCell | null)[], cols: number, r
 }
 
 /**
- * Where the agent in focus stands on its page (version 9, his: "it will be great if the agent stays on the same page
- * until we change the section", and then: "instead of placing them on the left of the section, uh, place it right in
- * the center bottom of the section"): the cell under the section `boxes` make, at its centre — where the section is an
- * even number of cells across, the left of its two middle cells, then the right, since an agent stands on a cell (his,
- * 2026-10-01). Where that row is not free, the same cells over the section, then the cell left of its first row and the
+ * Where the agent in focus stands on its page: the cell under the section `boxes` make, at its centre — where the
+ * section is an even number of cells across, the left of its two middle cells, then the right, since an agent stands
+ * on a cell. Where that row is not free, the same cells over the section, then the cell left of its first row and the
  * one right of it. Never in a box nor in any cell of `taken` (the agents' cells at home). None, with no boxes or no
  * such cell.
  */
@@ -357,16 +277,16 @@ export function introBeside(boxes: readonly IntroBox[], cols: number, rows: numb
 }
 
 /**
- * Where home is on a field `cols` × `rows`: its last column (version 8), or its bottom row where it is taller than it is
- * wide (version 9) — a phone's, whose six columns are the six cells, where the last column stood over its boxes.
+ * Where home is on a field `cols` × `rows`: its last column, or its bottom row where it is taller than it is wide — a
+ * phone's, whose six columns are the six cells, where a last column would stand over its boxes.
  */
 export const introHomeSide = (cols: number, rows: number): "column" | "row" => (rows > cols ? "row" : "column")
 
 /**
- * Where each of `n` agents settles once the intro is over, a field `cols` × `rows` (version 8, his): one above the other
+ * Where each of `n` agents settles once the intro is over, a field `cols` × `rows`: one above the other
  * in its last column, a cell each, centred down it, in the cast's order from the top — the fourth row to the ninth of a
  * field twelve deep, since a field's rows are even (D26). A cast taller than the field goes on in the column left of it.
- * **On a field taller than it is wide, side by side along its bottom row** (version 9, `introHomeSide`), centred across
+ * **On a field taller than it is wide, side by side along its bottom row** (`introHomeSide`), centred across
  * it, in the cast's order from the left; a cast wider than the field goes on in the row over it.
  */
 export function introHome(n: number, cols: number, rows: number): IntroCell[] {
@@ -390,7 +310,7 @@ export type IntroStep = { at: number; play: AgentActionPlay; m: SphereMotion }
 export type IntroPart = {
   spot: IntroCell
   nest: IntroCell
-  /** Its cell in the last column, where it settles (version 8). */
+  /** Its cell at home, where it settles (`introHome`). */
   home: IntroCell
   /** The boxes it opens, as its role has them. */
   boxes: IntroRole["boxes"]
@@ -413,11 +333,11 @@ export type IntroPart = {
   gone: number
   settled: number
   /**
-   * Held, from this moment on, gone behind the page (version 9): the agent in focus, dived into its section's nest and
+   * Held, from this moment on, gone behind the page: the agent in focus, dived into its section's nest and
    * staying under it while its section is shown, until the page turns (`introComeHome`). None, never held.
    */
   hold?: number
-  /** Whether its landing in its nest lights a ripple; it does unless it says not (version 9: one going home opens nothing). */
+  /** Whether its landing in its nest lights a ripple; it does unless it says not (one going home opens nothing). */
   ripple?: boolean
 }
 
@@ -425,7 +345,7 @@ export type IntroPart = {
 export type IntroPlan = { parts: IntroPart[]; boxes: number[]; end: number }
 
 /**
- * Which ring of a ripple from `nest` the cell `c` is in (version 1's count): the whole pitches its centre is out from the
+ * Which ring of a ripple from `nest` the cell `c` is in: the whole pitches its centre is out from the
  * nest's edge, the cells round the nest the first, 0.
  */
 function ringOf({ cell, gap }: SphereGeometry, nest: IntroCell, c: IntroCell) {
@@ -450,8 +370,8 @@ export function introPlan(input: {
   /** Whether each agent bounces while they stand (`IntroAgent.bounces`); every one where none is given. */
   bounces?: readonly boolean[]
   /**
-   * The agent in focus, by its index (version 9): it alone goes to its nest — below its section — and opens every box,
-   * staying there; the rest go straight home. None, version 8: each opens its own and every one goes home.
+   * The agent in focus, by its index: it alone goes to its nest — below its section — and opens every box, staying
+   * there; the rest go straight home. None: each opens its own and every one goes home.
    */
   focus?: number
   /** Its nest is its section's centre, with no cell below it: once its ripple has spread it dives in and is held. */
@@ -491,7 +411,7 @@ export function introPlan(input: {
       t += resting + pace * (0.65 + 0.7 * random())
     }
     const travel = divers.has(a) ? "dive" : "jump"
-    // Version 9: one not in focus goes straight home, and that is all it does.
+    // One not in focus goes straight home, and that is all it does.
     if (focus !== undefined && a !== focus) {
       const home = homes?.[a] ?? spot
       const go = agentAction(travel)!.play(ms[travel], g, { from: spot, to: home }, restedAt(leave))
@@ -516,7 +436,7 @@ export function introPlan(input: {
     const go = agentAction(travel)!.play(ms[travel], g, { from: spot, to: nest }, restedAt(leave))
     steps.push({ at: leave, play: go, m: ms[travel] })
     const lands = leave + go.lands
-    // Version 9: the one in focus stays below its section, which fades in once its ripple has spread.
+    // The one in focus stays below its section, which fades in once its ripple has spread.
     if (focus === a && !under) {
       return {
         spot,
@@ -534,13 +454,13 @@ export function introPlan(input: {
         settled: leave + go.total,
       }
     }
-    // Home, by his Dive (version 8): once its ripple has spread — its last ring lit, and `settle` more — and its landing
+    // Home, by his Dive: once its ripple has spread — its last ring lit, and `settle` more — and its landing
     // has come to rest, since a Dive sets off from the agent sitting in its nest.
     const open = Math.max(lands + rippleSpan(m) + m.settle, leave + go.total)
     const home = homes?.[a] ?? nest
     const back = dive.play(ms.dive, g, { from: nest, to: home }, restedAt(open))
     steps.push({ at: open, play: back, m: ms.dive })
-    // Version 9: the one in focus stays under its section once it has dived in.
+    // The one in focus stays under its section once it has dived in.
     const held = focus === a ? open + (back.gone ?? back.lands) : undefined
     return {
       spot,
@@ -571,7 +491,7 @@ export function introPlan(input: {
 }
 
 /**
- * The cast at rest in its cells (`homes`) with no intro to play (version 8): once it is over and the grid is given another
+ * The cast at rest in its cells (`homes`) with no intro to play: once it is over and the grid is given another
  * field, or where it never played — under reduced motion, a grid mounted after it. Each breathes and blinks as if it
  * had sat there a while (`random`), by its Dive's values, as it rests once it has dived home. `still`, to be drawn once
  * and never again: each half way between two blinks, so none is drawn with its eyes shut.
@@ -581,7 +501,7 @@ export function introResting(input: {
   homes: readonly IntroCell[]
   motions: readonly IntroMotions[]
   still?: boolean
-  /** The agent in focus, by its index (version 9): below its section, its cell at home empty. */
+  /** The agent in focus, by its index: below its section, its cell at home empty. */
   out?: number
   /** Where the one in focus stands, below its section (`introBeside`); none, under it (`hold`). */
   outAt?: IntroCell | null
@@ -614,7 +534,7 @@ export function introResting(input: {
 }
 
 /**
- * An agent under the page with no section to have dived into (version 9): the page in focus on a field the intro did not
+ * An agent under the page with no section to have dived into: the page in focus on a field the intro did not
  * play on. Held, from its start, at the moment its Dive home from its own cell is gone; `introComeHome` brings it up.
  */
 function introUnder(g: SphereGeometry, home: IntroCell, m: SphereMotion, since: number): IntroPart {
@@ -640,7 +560,7 @@ function introUnder(g: SphereGeometry, home: IntroCell, m: SphereMotion, since: 
 }
 
 /**
- * The agent in focus diving in as the page turns to its section (version 9): out of its cell at `home` by his Dive and up
+ * The agent in focus diving in as the page turns to its section: out of its cell at `home` by his Dive and up
  * in `nest`, below its section, its ripple spreading as it lands; the section fades in from `gone`, once the ripple has
  * spread, and it stays there, resting. `under`, with no cell below it: `nest` is the section's centre, and it dives
  * into it once the ripple has spread and it is at rest — the intro's own timing (`settle`) — and is held there, gone
@@ -696,8 +616,7 @@ export function introGoIn(input: { m: IntroMotion; g: SphereGeometry; home: Intr
 export const introRestsAt = (part: IntroPart): IntroCell => part.steps[part.steps.length - 1]?.play.to ?? part.spot
 
 /**
- * The agent in focus going home as the page turns away from its section (version 9, his: "when we scroll, they dive back
- * into their place"): from the cell below the section where it rests, `t` ms into its part, by his Dive, out of that
+ * The agent in focus going home as the page turns away from its section: from the cell below the section where it rests, `t` ms into its part, by his Dive, out of that
  * nest — which goes as it does (`introNestLeft`) — under the page and up into its cell at `home`. A part on a clock of its
  * own, from 0.
  */
@@ -728,8 +647,7 @@ export function introGoHome(input: { g: SphereGeometry; part: IntroPart; t: numb
 }
 
 /**
- * An action played where the agent rests, `t` ms into its part (version 9, his, 2026-10-03: "When we click on the
- * agent, add bounce"): his Bounce, or any action, from its cell back into it, as it moves in that action; then resting
+ * An action played where the agent rests, `t` ms into its part — a click on it, say: his Bounce, or any action, from its cell back into it, as it moves in that action; then resting
  * there. A part on a clock of its own, from 0.
  */
 export function introActHere(input: { g: SphereGeometry; part: IntroPart; t: number; action: IntroActionId; motions: IntroMotions }): IntroPart {
@@ -766,7 +684,7 @@ export const introAway = (part: IntroPart, t: number) => {
 }
 
 /**
- * A held agent let go of (version 9): it carries on the Dive it was held in, under the page and up into its cell at
+ * A held agent let go of: it carries on the Dive it was held in, under the page and up into its cell at
  * home, from where it was held — so the clock it is drawn on runs from `hold` ms before the page turned. Done once it has
  * come to rest there (`settled`).
  */
@@ -777,7 +695,7 @@ export function introComeHome(part: IntroPart): IntroPart {
 
 /**
  * An agent at `t` ms into the intro: its moment of the step it is in, or past, and how it moves in it, its blinks on its
- * own clock. Held (version 9), it stays at `hold`, gone behind the page.
+ * own clock. Held, it stays at `hold`, gone behind the page.
  */
 export function introAt(part: IntroPart, t: number): { frame: AgentActionFrame; m: SphereMotion } {
   const at = part.hold === undefined ? t : Math.min(t, part.hold)
@@ -789,13 +707,12 @@ export function introAt(part: IntroPart, t: number): { frame: AgentActionFrame; 
   return { frame: step.play.at(at - step.at, part.since + t), m: step.m }
 }
 
-/** Whether an agent is held under the page at `t` (version 9): nothing of it is drawn. */
+/** Whether an agent is held under the page at `t`: nothing of it is drawn. */
 export const introHeld = (part: IntroPart, t: number) => part.hold !== undefined && t >= part.hold
 
 /**
  * How much of the nest it landed in is left at `t`: all of it until it dives home, then going back to the field's own
- * cell as it goes out of it, none once it is gone (his, 2026-10-01: "the cell border should also turn to its default
- * state while the agent is diving").
+ * cell as it goes out of it, none once it is gone.
  */
 export function introNestLeft(part: IntroPart, t: number): number {
   return t < part.open ? 1 : 1 - clamp01((t - part.open) / Math.max(1, part.gone - part.open))
@@ -808,8 +725,8 @@ const rippleSpan = (m: IntroMotion) => Math.max(0, m.ripple - 1) * m.ring
 export type IntroField = { cols: number; rows: number; cell: number; gap: number }
 
 /**
- * An agent's ripple, landing in `nest` (version 3's, small): when each cell of the field lights, ms after it touches
- * down, reading order — one pass of the field's painter — and the last's. As version 1 counted its rings: a cell is in
+ * An agent's ripple, landing in `nest`, small: when each cell of the field lights, ms after it touches down, reading
+ * order — one pass of the field's painter — and the last's. A cell is in
  * the ring of the whole pitches its centre is out from the nest's edge, the cells round the nest the first; those
  * `ripple` rings out and more never light (Infinity), nor the nest's own cell, under it.
  */

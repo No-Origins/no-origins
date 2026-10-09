@@ -3,11 +3,10 @@ import type { CSSProperties } from "react"
 import { easing, motionMs, motionNumber } from "@no-origins/ui/lib/motion"
 
 /**
- * Focus (Motion.md M13, his, 2026-09-28), pure: a card in focus, and the page blurring round it — "the blurring to
- * start from the card with less intensity and then increase the intensity in a circular fashion from the card".
+ * Hyper focus (Motion.md M13), pure: a card in focus, and the page blurring round it, least at the card and rising
+ * outward from it. It plays on the motion studio's pages only; no page in any app blurs.
  *
- * **The blur is a cloth, not a ripple** (his, the same night: "I want to consider that as a cloth, a blurring cloth,
- * not as a ripple … the cloth should reach every corner of the viewport"). It is attached to the card, least blurred
+ * **The blur is a cloth, not a ripple**, reaching every corner of the surface. It is attached to the card, least blurred
  * next to it and thicker out from it (the field, `focusRings`), and it is drawn out from under the card: each of its
  * four edges goes out to the surface's, so its corners run straight to the surface's corners and all four arrive
  * together (`pull` 1), or its edges go at one speed and the nearest lands first (`pull` 0). The card is lifted over
@@ -19,8 +18,7 @@ import { easing, motionMs, motionNumber } from "@no-origins/ui/lib/motion"
  * cloth's edges, the blur's strength and opacity, and the lift. The card in focus stands over the layers; that is the
  * caller's.
  *
- * The numbers are his since 2026-09-28, and his second pick since 2026-09-29 (globals.css, `--motion-focus-*`); every
- * fallback here is the same value.
+ * The numbers are his (globals.css, `--motion-focus-*`); every fallback here is the same value.
  */
 
 export type FocusWay = "spread" | "swell" | "fade"

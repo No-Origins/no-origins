@@ -8,7 +8,7 @@ import { Placed } from "@no-origins/ui/components/registry"
 import { resolveSubSlots, type GridLayoutItem, type SlotAlign, type SlotFill, type SlotInset } from "@no-origins/ui/lib/grid-layout"
 
 /**
- * A SLOT (Slots.md) — the box on the grid that holds a component or sub-slots. It was `GridBox` for an afternoon.
+ * A SLOT (Slots.md) — the box on the grid that holds a component or sub-slots.
  *
  * Tokens (S3): `fill` — nothing, the page background (a mask over the grid lines), the muted surface, or the card
  * surface with a hairline (Grid.md D21); `inset` — a step of the spacing scale, none for `transparent`/`background`
@@ -32,14 +32,22 @@ const SURFACE: Record<SlotFill, string> = {
   card: "rounded-lg bg-card border-border border",
 }
 
-/** A fill's inset when none is set. */
-function defaultInset(fill: SlotFill): SlotInset {
-  return fill === "muted" || fill === "card" ? 12 : 0
+/** An inset by its job (Spacing.md SP3): a box's, a dense box's, or a pill's, each the same on every side. */
+export type SlotInsetJob = "inset" | "inset-tight" | "inset-pill"
+
+/**
+ * The slot's padding: a step of the grid's scale as written, a job as its token, or, with none set, a surface's
+ * box padding (the `inset` job, which clears the round corner, SP4) and nothing for no surface.
+ */
+function paddingOf(fill: SlotFill, inset: SlotInset | SlotInsetJob | undefined): number | string {
+  if (typeof inset === "string") return `var(--space-${inset})`
+  if (inset !== undefined) return inset
+  return fill === "muted" || fill === "card" ? "var(--space-inset)" : 0
 }
 
 export type SlotProps = React.ComponentProps<"div"> & {
   fill?: SlotFill
-  inset?: SlotInset
+  inset?: SlotInset | SlotInsetJob
   alignX?: SlotAlign
   alignY?: SlotAlign
 }
@@ -51,7 +59,7 @@ function Slot({ fill = "transparent", inset, alignX = "stretch", alignY = "stret
       data-fill={fill}
       // One cell of CSS grid: `justify-items`/`align-items` place the single child, and `stretch` fills the slot.
       className={cn("grid h-full w-full min-h-0 min-w-0 grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)] overflow-hidden", SURFACE[fill], className)}
-      style={{ padding: inset ?? defaultInset(fill), justifyItems: alignX, alignItems: alignY, ...style }}
+      style={{ padding: paddingOf(fill, inset), justifyItems: alignX, alignItems: alignY, ...style }}
       {...props}
     />
   )

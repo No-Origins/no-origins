@@ -1,6 +1,6 @@
 ---
 name: add-component
-description: Add, re-pull or propose a component for the no-origins design system (`@no-origins/ui`, shadcn radix-sera) and bring it to the house rules — one radius, fields as pills, motion by token, the portal container — then give it a showcase specimen, fix the component counts, write the changeset and look at it. Use this whenever someone wants a new UI primitive in packages/ui, is about to run `shadcn add` for anything, wants to update, re-sync or overwrite an installed shadcn component from upstream, asks for a component from another registry (magicui, originui, a URL, a GitHub source), or asks for a UI element in any app (portfolio, showcase, admin, engineering, motion) that the design system does not have yet — even when they only say "I need a rating widget on the portfolio" or "can we get a date range picker".
+description: Add, re-pull or propose a component for the no-origins design system (`@no-origins/ui`, shadcn radix-sera) and bring it to the house rules — one radius, fields as pills, motion by token, the portal container — then give it a showcase specimen, fix the component counts, write the changeset and look at it. Use this whenever someone wants a new UI primitive in packages/ui, is about to run `shadcn add` for anything, wants to update, re-sync or overwrite an installed shadcn component from upstream, asks for a component from another registry (magicui, originui, a URL, a GitHub source), or asks for a UI element in any app that the design system does not have yet — even when they only say "I need a rating widget on the portfolio" or "can we get a date range picker".
 ---
 
 # Add a component to `@no-origins/ui`
@@ -36,9 +36,9 @@ npx shadcn@latest add <name> --view           # the files themselves ("No files"
 |---|---|
 | **A.** In `@shadcn`, not installed | Add it — §2, then §3 onwards |
 | **B.** Installed; upstream has changes they want | Re-pull — §2b, then §3 onwards |
-| **C.** In another registry (`@magicui`, `@originui`, a URL, a GitHub source) | Stop and propose — §1a. Only `@shadcn` goes straight in (decided 2026-09-30) |
+| **C.** In another registry (`@magicui`, `@originui`, a URL, a GitHub source) | Stop and propose — §1a. Only `@shadcn` goes straight in |
 | **D.** In no registry, or `--view` says "No files" for radix-sera | Stop and propose — §1a. Never write one by hand |
-| **E.** A block (`login-01`, `dashboard-01`, `sidebar-07`, …) | A block is a composition, not a component, and does not go in `packages/ui`. Say so, and propose composing it in the app from system components — an app island (Admin.md §10) |
+| **E.** A block (`login-01`, `dashboard-01`, `sidebar-07`, …) | A block is a composition, not a component, and does not go in `packages/ui`. Say so, and propose composing it in the app from system components, as an island of that app |
 
 Almost every `@shadcn` ui item is installed already, so A is rare and B, C and D are the usual cases. Before
 proposing anything new, ask whether the thing can be **composed** from what exists — a stat tile is a `Card` and two
@@ -47,9 +47,9 @@ can, that is usually the better answer; offer it first.
 
 ### 1a. Stop and propose
 
-CLAUDE.md: *"If the design system lacks a component you need, do not improvise one … stop and ask first — either
-Bhargav asks for the exception, or you propose one and he approves it before you write it."* A proposal is one short
-message, and it ends your turn:
+The repo-root `CLAUDE.md`'s first design-system rule: when the system lacks a component, add it with the CLI or stop
+and ask — he asks for the exception, or you propose it and he approves it before it is written. A proposal is one
+short message, and it ends your turn:
 
 - what was asked for, and where it would be used
 - where it could come from: the registry item, with what `--view` shows it would install (npm dependencies, files,
@@ -125,7 +125,7 @@ read **`references/house-edits.md`** for each rule's before → after, its excep
 repo. In short:
 
 1. **Radius** — every box `rounded-lg`, one radius only; lines stay straight (Grid.md D39).
-2. **Fields are outlined pills**, never sera's underline (D39 amended, 2026-09-29).
+2. **Fields are outlined pills**, never sera's underline (Grid.md D39).
 3. **Motion by token**, in its family — never `duration-*`, `zoom-in-95`, `slide-in-from-*-2` (Motion.md M3, M4).
 4. **Portals** go through `usePortalContainer()` (Motion.md M8).
 5. **No glass, no gradients** — no blur, frost or translucent surface, no sweep.
@@ -134,13 +134,12 @@ repo. In short:
 8. **Every divergence gets a comment** saying why (rule 6) — except the radius, which is in nearly every file.
 
 Do not treat installed components as proof that something is allowed. A few still carry leftovers the checker flags
-— literal durations in `navigation-menu`, `sidebar`, `item`, `message-scroller` and `input-otp`, sera's
-`backdrop-blur-sm` on the overlays of `dialog`, `alert-dialog`, `drawer` and `sheet`, the underline on
+— literal durations in `navigation-menu`, `sidebar`, `item`, `message-scroller` and `input-otp`, and the underline on
 `ButtonGroupText`. They are debt, not precedent: mention them if you meet them, do not fix them unasked.
 
-A motion that fits none of the five families (surface, panel, state, disclose, grow) is a design decision, not a
-token you invent. Leave shadcn's value in place with a `// TODO(Motion.md M4): no family yet` comment, and name it in
-the report as open. Motion.md M4: *"a new component joins a family rather than getting its own numbers."*
+A motion that fits none of the families in Motion.md M4 is a design decision, not a token you invent. Leave shadcn's
+value in place with a `// TODO(Motion.md M4): no family yet` comment, and name it in the report as open. A new
+component joins a family rather than getting numbers of its own (M4).
 
 ## 4. The showcase
 
@@ -160,22 +159,23 @@ Every component gets a specimen at design.no-origins.com, or is named in the foo
 
 ## 5. The counts
 
-How many components there are is written in several places, and they have drifted. Run:
+How many components there are is written in several places. Run:
 
 ```bash
 python3 .claude/skills/add-component/scripts/counts.py
 ```
 
 It prints the real numbers (components in the package, specimens on each page, names in the footnote) and every line
-in the docs and the showcase that states one, digits or words. Make each one true. If the component moves, add it to
-its family's row in Motion.md M4's table, which is the one place that says what each family moves.
+in the docs and the showcase that states one, digits or words. Make each one true. A new house component — one not
+from the CLI — goes in the script's `OURS` set, or it is counted as a shadcn component. If the component moves, add
+it to its family's row in Motion.md M4's table, which is the one place that says what each family moves.
 
 ## 6. Check it
 
 ```bash
 pnpm --filter @no-origins/ui typecheck
 pnpm --filter design typecheck && pnpm --filter design lint
-pnpm review -g "/molecules"          # or "/atoms" — boots the showcase on :3001 if it is not running
+pnpm review review.spec.ts -g "design /molecules"   # or "design /atoms" — boots the showcase on :3001 if it is not running
 ```
 
 Then open the specimen's screenshots with Read — `e2e/screenshots/{desktop,desktop-dark,mobile,mobile-dark}/design__molecules.png`

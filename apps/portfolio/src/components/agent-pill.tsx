@@ -23,12 +23,10 @@ const HOVER_CLOSE_MS = 200;
 const inPill = (el: EventTarget | null) => el instanceof Element && !!el.closest("[data-agent-pill], [data-agent-spot]");
 
 /**
- * The pill opens by HOVER (his, 2026-10-03: "instead of clicking the agent to open up its information I think uh, let's
- * show it with hover"; it opened by a click until then): a mouse or a pen on the agent opens it, and it stays while the
+ * The pill opens by HOVER: a mouse or a pen on the agent opens it, and it stays while the
  * pointer is on the agent or the pill, going HOVER_CLOSE_MS after it has left both. What has no hover keeps a way in: a
  * tap opens and closes it, and the keys' focus on the agent opens it, Enter toggling it. `spot` goes on the agent's
- * cell, `pill` on the pill's. `onPress`, each press of the agent however it comes — the bounce (his, 2026-10-03: "When
- * we click on the agent, add bounce").
+ * cell, `pill` on the pill's. `onPress`, each press of the agent however it comes — the bounce.
  */
 export function useAgentPill(onPress?: () => void) {
   const [open, setOpen] = React.useState(false);
@@ -106,8 +104,7 @@ export function AgentSpot({ id, open, controls }: { id: string; open: boolean; c
 }
 
 /**
- * An agent at home, to click (his, 2026-10-03: "I should be able to travel to pages by clicking on the agent on the
- * right column"): the way to its page. As the spot, a circle the cell's size under the grid's drawing with nothing of
+ * An agent at home, to click: the way to its page. As the spot, a circle the cell's size under the grid's drawing with nothing of
  * its own to see, lit as a ghost button is under the pointer; its page and its name for a screen reader.
  */
 export function AgentHome({ id, title, onClick }: { id: string; title: string; onClick: () => void }) {
@@ -115,9 +112,7 @@ export function AgentHome({ id, title, onClick }: { id: string; title: string; o
 }
 
 /**
- * What the agent opens (his, 2026-10-03: "a pill of three cells which has name of the agent a chat icon
- * button to chat with it and uh, 45 degree arrow that link icon in the icon button to open up a new page in a new tab
- * it should open orbit application"): one pill, a cell each — its name, a chat button and ↗ to Orbit in a new tab.
+ * What the agent opens: one pill, a cell each — its name, a chat button and ↗ to Orbit in a new tab.
  * Each sits on its own cell of the field, so the three line up with the cells around them. **The chat is drawn and
  * does nothing yet**: there is no chat to open (his to build).
  */
@@ -136,7 +131,7 @@ export function AgentPill({ id, domId }: { id: string; domId: string }) {
         className="absolute -inset-px grid items-center justify-items-center"
         style={{ gridTemplateColumns: m ? `repeat(3, ${m.cell}px)` : "repeat(3, 1fr)", columnGap: m?.gap ?? 0 }}
       >
-        {/* A little bold (his, 2026-10-03: "Make the name of the agent a little bold"): semibold, a step over medium. */}
+        {/* A little bold: semibold, a step over medium. */}
         <Text as="span" className="font-semibold">
           {name}
         </Text>

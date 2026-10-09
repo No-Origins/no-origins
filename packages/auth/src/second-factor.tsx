@@ -19,9 +19,9 @@ import { supabaseEnv } from "./env";
 /**
  * The second factor (Access.md A12): an authenticator app's six-digit code, which takes a session from `aal1` to
  * `aal2`. The account's side of it — adding an authenticator, giving a code, removing one — as a hook, two forms and
- * the frames they are shown in: two dialogs for the admin's Settings and a card for the sign-in page's code step, which
- * the gate sends a one-factor session to when it holds an `admin.*` permission. All of it built from the design system,
- * so the auth app (`auth.no-origins.com`, Admin.md §8.4) takes it unchanged.
+ * the frames they are shown in: two dialogs for the account's settings (the admin's Settings page and the login's
+ * account page, `auth.no-origins.com`) and a card for the sign-in page's code step, which the gate sends a one-factor
+ * session to when it holds an `admin.*` permission. All of it built from the design system.
  *
  * Supabase's own rules, proven on the local stack on 2026-10-08: once an authenticator is verified, adding another or
  * removing one needs `aal2`, so a session that has not given a code is asked for one first (`locked`). A passkey
@@ -99,7 +99,7 @@ async function prove(code: string): Promise<string | null> {
   const mfa = supabaseBrowser().auth.mfa;
   const factors = await mfa.listFactors();
   if (factors.error) return factors.error.message;
-  if (!factors.data.totp.length) return "This account has no authenticator app yet: add one in Settings, then use its code.";
+  if (!factors.data.totp.length) return "This account has no authenticator app yet: add one in your account settings, then use its code.";
   // Any verified authenticator's code will do; Supabase checks it against the one named, so try each.
   for (const factor of factors.data.totp) {
     const { error } = await mfa.challengeAndVerify({ factorId: factor.id, code });
@@ -216,7 +216,7 @@ export function AuthenticatorFlow({ secondFactor, onDone }: { secondFactor: Seco
           <Field>
             <FieldLabel htmlFor="second-factor-name">Name it</FieldLabel>
             <Input id="second-factor-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Phone" disabled={pending} />
-            <FieldDescription>So you can tell your authenticators apart in Settings.</FieldDescription>
+            <FieldDescription>So you can tell your authenticators apart in your account settings.</FieldDescription>
           </Field>
           <Button disabled={pending || !name.trim() || taken} onClick={begin}>
             {taken ? "That name is taken" : pending ? "Making the code…" : "Show the QR code"}
@@ -243,7 +243,7 @@ export function AuthenticatorFlow({ secondFactor, onDone }: { secondFactor: Seco
   );
 }
 
-/** Add an authenticator, in a dialog (the admin's Settings). Each opening starts afresh: its body mounts with it. */
+/** Add an authenticator, in a dialog (the account's settings). Each opening starts afresh: its body mounts with it. */
 export function AddAuthenticatorDialog({ open, onOpenChange, secondFactor, onAdded }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -255,7 +255,7 @@ export function AddAuthenticatorDialog({ open, onOpenChange, secondFactor, onAdd
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add an authenticator</DialogTitle>
-          <DialogDescription className="sr-only">An app that shows a six-digit code, for the admin's second factor.</DialogDescription>
+          <DialogDescription className="sr-only">An app that shows a six-digit code, for your account's second factor.</DialogDescription>
         </DialogHeader>
         <AuthenticatorFlow
           secondFactor={secondFactor}
@@ -331,7 +331,7 @@ export function SecondFactorCard({ app, next }: { app: string; next: string }) {
             </Alert>
           ) : none ? (
             <>
-              <Text role="body">{app} asks for a code from an authenticator app once a sign-in. Add one now; add a second later in Settings, so losing one is not losing {app}.</Text>
+              <Text role="body">{app} asks for a code from an authenticator app once a sign-in. Add one now; add a second later in your account settings, so losing one is not losing {app}.</Text>
               <AuthenticatorFlow secondFactor={secondFactor} onDone={go} />
             </>
           ) : (

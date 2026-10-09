@@ -4,11 +4,11 @@ import * as React from "react"
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 
 /**
- * Switching the theme is a FLIP of the field when a grid is on the page (Grid-v2.md D28, 2026-09-21): the cells close
- * over the page in the new theme's colours, row by row from the top, the theme changes underneath, and they open
- * again. The grid does the flipping; this provider only knows that something may want to. A grid registers a flipper
- * here, and every toggle — the `d` key, the showcase's button — goes through `useThemeToggle`, which hands the switch
- * to the flipper when there is one and switches at once when there is not.
+ * Switching the theme is one beat on the field when a grid is on the page (Grid.md D28): a sheet of paint in the new
+ * theme's colours falls over the box, the theme changes underneath, and the sheet dissolves. The grid does the
+ * flipping; this provider only knows that something may want to. A grid registers a flipper here, and every toggle —
+ * the `d` key, the showcase's button — goes through `useThemeToggle`, which hands the switch to the flipper when there
+ * is one and switches at once when there is not.
  */
 export type ThemeFlipper = (next: "light" | "dark", commit: () => void) => void
 

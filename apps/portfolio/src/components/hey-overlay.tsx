@@ -12,9 +12,8 @@ export type HeyOrigin = { x: number; y: number; size: number };
 
 type HeyAvatar = { src: string; alt: string; initials: string };
 
-// The word's size, which the face is measured in (em). His, 2026-09-24, against the first cut: the word 30% bigger
-// (38vw → 49.4vw, cap 42rem → 54.6rem) and the face 30% smaller (30vw → 21vw, so 0.425 of the word). 100dvh only keeps
-// the caps (0.89em) on a very wide, short box.
+// The word's size, which the face is measured in (em); the face is 0.425 of the word. 100dvh only keeps the caps
+// (0.89em) on a very wide, short box.
 const HEY_SIZE = "clamp(7.8rem, min(49.4vw, 100dvh), 54.6rem)";
 const FACE = 0.425;
 // Points on the level, full-size word, in em from its centre — Anton at this leading and tracking, the same at every
@@ -23,20 +22,16 @@ const H_E_SEAM = { x: -0.294, y: 0 };
 const H_TOP = { x: -0.5435, y: -0.445 };
 // The hair between a perched face and the letter under it, in em — the gap the stacked pass had.
 const PERCH_GAP = 0.03;
-// How long it holds once it has landed, in seconds, before it goes by itself (his, 2026-09-24: "close the overlay
-// automatically after 1 second" — after a pass with no timer at all, and a first cut of 1.5 — then half a second less,
-// taken here once the fall itself had no half second left to give).
+// How long it holds once it has landed, in seconds, before it goes by itself.
 const HOLD = 0.5;
-// The tilts, in degrees (negative is counter-clockwise), his, 2026-09-24: the word's and the face's. All lean the same
-// way. In the snap they are the wind-up and both come level on the slap; in the slap they are kept, and the word's is
-// shallower there (his, the same day: "change the angle of text also to minus 15").
+// The tilts, in degrees (negative is counter-clockwise): the word's and the face's. All lean the same way. In the snap
+// they are the wind-up and both come level on the slap; in the slap they are kept, and the word's is shallower there.
 const HEY_TILT = -30;
 const SLAP_TILT = -15;
 const FACE_TILT = -10;
 
 /**
- * Two motions on trial (his, 2026-09-24: "this is not replacing the existing animation … once we see this in action we
- * can take further decision"). The card plays them turn about; `REST` is where each leaves the word and the face.
+ * Two motions on trial, his to pick between. The card plays them turn about; `REST` is where each leaves the word and the face.
  * - `snap` — the word pops up behind the face at −30° while the face leaps and tilts; both come level on the slap.
  * - `slap` — nothing turns: the word, 30% smaller, slaps onto the screen from behind it at −15°, then the face at −10°.
  */
@@ -51,14 +46,14 @@ type Rest = {
 };
 const REST: Record<HeyMotion, Rest> = {
   snap: { word: { scale: 1, rotation: 0, x: 0 }, face: { rotation: 0, seat: H_E_SEAM, perch: false } },
-  // 70% — his, 2026-09-24: at full size a tilted word runs off the top and bottom of the screen. They sat too much on
-  // each other: the word went 10% right, and the face — after a pass 30% up and left, "too far" — sits "just above H".
+  // 70%: at full size a tilted word runs off the top and bottom of the screen. The word sits 10% right, and the face
+  // just above the H.
   slap: { word: { scale: 0.7, rotation: SLAP_TILT, x: 0.1 }, face: { rotation: FACE_TILT, seat: H_TOP, perch: true } },
 };
 
 /**
- * The avatar's "HEY!" — the portfolio's one bit of mischief (his ask, 2026-09-24: the avatar "pops out and slaps on
- * the screen", then the word fills it). An app-specific island: the flung face is the design system's `Avatar` in one
+ * The avatar's "HEY!" — the portfolio's one bit of mischief: the avatar pops out and slaps on the screen, then the word
+ * fills it. An app-specific island: the flung face is the design system's `Avatar` in one
  * of the HEY faces the card picks at random (`profile.heyFaces`), the word is a `Text` wearing the app's own display
  * font (`--font-display`, Anton); nothing here is hand-rolled but the motion, which is GSAP — the same choice the grid
  * made for what lives inside a box (packages/ui rule 7).
@@ -70,8 +65,9 @@ const REST: Record<HeyMotion, Rest> = {
  *
  * It holds for `HOLD` once it has landed, then goes by itself; a click anywhere takes it down sooner, or Escape, the
  * keyboard's way out, since the overlay itself takes no focus. It goes by falling off, like a sticker coming off the
- * glass — nothing fades. While it is up the page behind does not turn: the portal still bubbles React's
- * wheel and touch events to `GridPages`, and a turn would unmount the card and this with it.
+ * glass — nothing fades. While it is up the page behind does not turn: it is outside the grid, which turns only for a
+ * wheel or a swipe on it, and it keeps its own wheel and touch events and the keys — a turn would unmount the card and
+ * this with it.
  */
 export function HeyOverlay({
   origin,
@@ -110,13 +106,13 @@ export function HeyOverlay({
     if (!backdrop || !text || !clone) return done();
     arrivalRef.current?.kill();
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return done();
-    // It falls off like a sticker coming off (his, 2026-09-24: "it should not fade"). The veil goes at once, so the two
+    // It falls off like a sticker coming off, never fading. The veil goes at once, so the two
     // come off over the page itself; each tips at an edge as it peels, then drops off the bottom under gravity, swinging
     // as it goes — the face first, being on top, the word a beat behind it.
     gsap.set(backdrop, { autoAlpha: 0 });
     const drop = `+=${window.innerHeight * 1.3}`;
     const fall = gsap.timeline({ onComplete: done });
-    // 0.23s in all — his, the same day: the first cut's 0.73s less half a second, every beat scaled alike.
+    // 0.23s in all.
     fall.to(clone, { rotation: "-=6", y: "-=10", duration: 0.03, ease: "power1.out" }, 0);
     fall.to(clone, { rotation: "+=40", x: "+=40", y: drop, duration: 0.17, ease: "power2.in" }, 0.03);
     fall.to(text, { rotation: "-=4", y: "-=10", duration: 0.03, ease: "power1.out" }, 0.025);
@@ -149,7 +145,7 @@ export function HeyOverlay({
     const faceX = cx + ox * Math.cos(turn) - oy * Math.sin(turn);
     const faceY = cy + ox * Math.sin(turn) + oy * Math.cos(turn);
     // Then the pair — the turned word's box and the face — is centred down the frame as one, so a face perched on a
-    // high letter does not leave the top of the screen (the H at −15° put it there, 2026-09-24). A face inside the
+    // high letter (the H at −15°) does not leave the top of the screen. A face inside the
     // word's box, as in the snap, moves nothing. The word's box is its layout box, which no transform touches.
     const halfW = (text.offsetWidth * word.scale) / 2;
     const halfH = (text.offsetHeight * word.scale) / 2;
@@ -176,7 +172,7 @@ export function HeyOverlay({
 
     gsap.set(backdrop, { autoAlpha: 0 });
 
-    // Snappier since his third pass (2026-09-24): every beat about 30% shorter than the first cut.
+    // The screen-shake, a beat at each hit.
     const shakeTl = gsap
       .timeline({ paused: true })
       .to(shake, { x: -14, y: 8, duration: 0.035 })
@@ -206,9 +202,8 @@ export function HeyOverlay({
       tl.add(() => shakeTl.restart(), "slap+=0.1");
     } else {
       // Nothing turns: each is at its angle from the first frame to the last. And each slaps onto the screen from behind
-      // it — his, 2026-09-24: "instead of scaling down, it should scale up", after a pass where they fell onto it from
-      // above: it grows toward the glass, faster and faster, and sticks there at its size — no overshoot, no spring
-      // back ("it should just stick to the screen … no bounce or anything"). Each hit shakes the screen.
+      // it: it grows toward the glass, faster and faster, and sticks there at its size — no overshoot, no spring back.
+      // Each hit shakes the screen.
       gsap.set(clone, { rotation: rest.face.rotation });
       gsap.set(text, { autoAlpha: 0, x: word.x, y: word.y, scale: word.scale * 0.35, rotation: word.rotation, transformOrigin: "50% 50%" });
       // The word first.
@@ -232,7 +227,8 @@ export function HeyOverlay({
     };
   }, [origin, motion, dismiss]);
 
-  // Keys stop here while it is up — caught on the way down, before the grid's ← → on `window` can turn the page.
+  // Keys stop here while it is up — caught on the way down, before Page Down or Page Up can turn the page or the
+  // arrows move focus.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       e.stopPropagation();
@@ -271,7 +267,7 @@ export function HeyOverlay({
               className="text-[1em] leading-[0.89] tracking-normal uppercase whitespace-nowrap"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              {/* His colours, 2026-09-24 — tokens in the package's globals.css (packages/ui rule 2). */}
+              {/* His colours — tokens in the package's globals.css (packages/ui rule 2). */}
               <span className="text-lime">Hey</span>
               <span className="text-violet">!</span>
             </Text>

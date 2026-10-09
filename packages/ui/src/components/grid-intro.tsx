@@ -40,10 +40,10 @@ import {
 import { readSphereMotion, sphereBowl } from "@no-origins/ui/lib/sphere-motion"
 
 /**
- * The intro, played (Grid.md D50, Motion.md M22, version 8): the page's agents standing in a row on the field's middle,
- * in a random order, those that bounce each at its own random times, then jumping or diving to the centre of the boxes
- * they open, a small ripple spreading round each as it lands, then diving home to their cells in the field's last column,
- * and the boxes each opens fading in once it is gone. `lib/intro-motion` is who goes where, by which action, and when;
+ * The intro, played (Grid.md D50, Motion.md M22): the page's agents standing in a row on the field's middle, in a
+ * random order, those that bounce each at its own random times, then jumping or diving to the centre of the boxes they
+ * open, a small ripple spreading round each as it lands, then diving home to their cells (`introHome`), and the boxes
+ * each opens fading in once it is gone. `lib/intro-motion` is who goes where, by which action, and when;
  * this draws them, hands the ripples to the field's painter and shows the boxes. **Then they stay**: it goes on drawing
  * them, resting in their cells, once the intro is over (`settled`).
  *
@@ -55,7 +55,7 @@ import { readSphereMotion, sphereBowl } from "@no-origins/ui/lib/sphere-motion"
  * for them, BOXES_WAIT_MS at most, and plays on an empty field where there are none. While the intro runs globals.css
  * holds every box back; one coming in is shown here, its opacity set to 1 once and faded up from 0 by one animation the
  * compositor plays (`REVEAL_EASE`, over `reveal`), so a busy main thread cannot make it stutter, until the grid lets
- * go of them all at the end. Version 4's clip, re-cut a ring at a time, stuttered (his, 2026-10-01).
+ * go of them all at the end. Opacity only: a clip re-cut on the main thread stutters.
  *
  * **The agents** are the design system's `Agent`, each as its look makes it under each action's values
  * (`sphereMotionOf`, the actions `introActionValues` gives); with no cast, one, as the tokens on the grid make it
@@ -70,22 +70,23 @@ import { readSphereMotion, sphereBowl } from "@no-origins/ui/lib/sphere-motion"
  * drawn once, still.
  *
  * **The ripples** are the field's painter's (D38), one pass an agent, all sent as the intro starts, each timed from its
- * landing on the painter's own clock, so a busy main thread cannot hold them back (version 1's rule).
+ * landing on the painter's own clock, so a busy main thread cannot hold them back.
  *
- * **One agent in focus** (version 9, `focus`): the page shows that agent's section alone, and the agent stays below it,
- * centred (`introBeside`; under it, held behind the page, where no cell round it is free). The intro ends with it there and the rest at home; a
- * new `focus` turns the page — the section on the field fades away over `out` while its agent dives home, the page is
- * told it may put the next section on the field (`onFocus`), and the next agent dives from home to the cell below
- * those boxes, its ripple spreading, and they fade in. While a page turns the grid carries `data-intro-turn`, and
- * globals.css holds back any box it has not shown. Each agent is drawn on a clock of its own (`Live`), so one can turn
- * while the rest go on resting. Resting, it finds the boxes too, to stand the one in focus below them.
+ * **One agent in focus** (`focus`): the page shows that agent's section alone, and the agent stays below it, centred
+ * (`introBeside`; under it, held behind the page, where no cell round it is free). The intro ends with it there and the
+ * rest at home; a new `focus` turns the page — the section on the field fades away over `out` while its agent dives
+ * home, the page is told it may put the next section on the field (`onFocus`), and the next agent dives from home to
+ * the cell below those boxes, its ripple spreading, and they fade in. While a page turns the grid carries
+ * `data-intro-turn`, and globals.css holds back any box it has not shown. Each agent is drawn on a clock of its own
+ * (`Live`), so one can turn while the rest go on resting. Resting, it finds the boxes too, to stand the one in focus
+ * below them.
  */
 
 /** How long it waits for the page's boxes before it plays without them. */
 const BOXES_WAIT_MS = 600
 /** A box fading in: the curve globals.css brings the page in by (`grid-intro-in`). */
 const REVEAL_EASE = "cubic-bezier(0.33, 1, 0.68, 1)"
-/** The painter's colour the ripples light in: violet, the pointer's lit cell's (D43) and version 1's rings'. */
+/** The painter's colour the ripples light in: violet, the pointer's lit cell's (D43). */
 const RIPPLE_LAYER = 1
 /** Far enough out to cut nothing. */
 const FAR = 1e5
@@ -115,22 +116,20 @@ export type GridIntroProps = {
   /** It is over: every box is in and every agent at rest in its cell. It goes on drawing them. */
   onDone: () => void
   /**
-   * The agent in focus, by its id (version 9): its section is the page's boxes, and it is under it. A new one turns the
-   * page. None, version 8: every agent opens its own boxes and they all go home.
+   * The agent in focus, by its id: its section is the page's boxes, and it is under it. A new one turns the page. None:
+   * every agent opens its own boxes and they all go home.
    */
   focus?: string
-  /** The field is clear for `focus`'s section (version 9): the page puts its boxes on the field now. */
+  /** The field is clear for `focus`'s section: the page puts its boxes on the field now. */
   onFocus?: (agent: string) => void
   /**
-   * Where the agent in focus stands, a cell of the field, 0-based (version 9, his, 2026-10-03: "put the agent in the
-   * bottom third row"): the page's to say, read as the intro plans and as each page comes in. None, below its section
-   * (`introBeside`).
+   * Where the agent in focus stands, a cell of the field, 0-based: the page's to say, read as the intro plans and as
+   * each page comes in. None, below its section (`introBeside`).
    */
   focusAt?: IntroCell
   /**
-   * An action for an agent to play where it rests (version 9, his, 2026-10-03: "When we click on the agent, add
-   * bounce"): played each time `key` changes, once the intro is over, when no page is turning and the agent is not in
-   * the air or under the page.
+   * An action for an agent to play where it rests — a click on it, say: played each time `key` changes, once the intro
+   * is over, when no page is turning and the agent is not in the air or under the page.
    */
   act?: { agent: string; action: IntroActionId; key: number }
 }
@@ -138,7 +137,7 @@ export type GridIntroProps = {
 /** A box of the page: its element, and where it is in cells. */
 type Found = { el: HTMLElement; cells: IntroBox }
 
-/** Each agent's part and the moment its clock started (`performance.now()`): what is drawn (version 9). */
+/** Each agent's part and the moment its clock started (`performance.now()`): what is drawn. */
 type Live = { parts: IntroPart[]; zeros: number[] }
 
 /** The page's boxes on the tracks, in cells from the field's first. */
@@ -165,13 +164,13 @@ type Play = {
   found: Found[]
   plan: IntroPlan
   ids: string[]
-  /** The intro's numbers, each agent's motions and its cell at home: what a turn is planned from (version 9). */
+  /** The intro's numbers, each agent's motions and its cell at home: what a turn is planned from. */
   intro: IntroMotion
   motions: IntroMotions[]
   homes: IntroCell[]
-  /** The agent in focus as it was planned: under its section, its boxes the page's (version 9). */
+  /** The agent in focus as it was planned: under its section, its boxes the page's. */
   focus?: string
-  /** Each agent's ripple, none for one that opens nothing (version 9). */
+  /** Each agent's ripple, none for one that opens nothing. */
   ripples: ({ delays: Float64Array; span: number } | null)[]
   /** How long the boxes take to fade in. */
   reveal: number
@@ -191,7 +190,7 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, foc
   // Read as it plans, never planned on: the grid letting go of the page as the intro ends must not start them over.
   const resting = React.useRef(settled)
   resting.current = settled
-  // The focus as it is now, read as it plans (version 9).
+  // The focus as it is now, read as it plans.
   const focusNow = React.useRef(focus)
   focusNow.current = focus
   const focusAtNow = React.useRef(focusAt)
@@ -202,7 +201,7 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, foc
   React.useLayoutEffect(() => {
     const tracks = root.querySelector<HTMLElement>('[data-slot="grid-tracks"]')
     if (resting.current) {
-      // Resting, the boxes matter only to stand the one in focus below them (version 9): measured now, and again as the
+      // Resting, the boxes matter only to stand the one in focus below them: measured now, and again as the
       // page arranges itself on the new field, unless a page is turning.
       if (focusNow.current === undefined || !tracks) {
         setFound({ metrics, boxes: [] })
@@ -268,12 +267,12 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, foc
     const g = { cell, gap }
     const homes = introHome(ids.length, cols, rows)
     const intro = readIntroMotion(root)
-    // The agent in focus (version 9), if the page names one the cast has.
+    // The agent in focus, if the page names one the cast has.
     const focus = focusNow.current !== undefined && ids.includes(focusNow.current) ? focusNow.current : undefined
     const f = focus === undefined ? undefined : ids.indexOf(focus)
     const base = { metrics, ids, intro, motions, homes, focus }
     const boxes = found.boxes.map((b) => b.cells)
-    // In focus, it stands where the page says, else below its section (version 9).
+    // In focus, it stands where the page says, else below its section.
     const beside = f === undefined ? null : (focusAtNow.current ?? introBeside(boxes, cols, rows, homes))
     if (resting.current) {
       // Under reduced motion they are drawn once, still: their eyes open.
@@ -300,7 +299,7 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, foc
   const behind = React.useRef<(SVGGElement | null)[]>([])
   const done = React.useRef({ onReveal, onDone, pass, onFocus })
   done.current = { onReveal, onDone, pass, onFocus }
-  // The agent whose section is on the field (version 9), and how the play turns the page to another: set by the play
+  // The agent whose section is on the field, and how the play turns the page to another: set by the play
   // while it can turn — once the intro is over and no page is turning (`idle`).
   const shown = React.useRef<string | undefined>(undefined)
   const turnTo = React.useRef<((agent: string) => void) | null>(null)
@@ -318,10 +317,10 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, foc
       const r = ripples[a]
       if (r) done.current.pass(r.delays, r.span, performance.timeOrigin + start + p.lands, RIPPLE_LAYER)
     })
-    // Each agent on its own clock, every one from the start (version 9: a turn restarts two of them).
+    // Each agent on its own clock, every one from the start (a turn restarts two of them).
     const live: Live = { parts: [...plan.parts], zeros: plan.parts.map(() => start) }
     shown.current = play.focus
-    // The page is told whose section the play takes as on the field (version 9). Where the play begins with a focus
+    // The page is told whose section the play takes as on the field. Where the play begins with a focus
     // the page asked for before it could turn — the intro skipped, under reduced motion or on a second mount, and a
     // turn asked before this chunk had loaded — the page would otherwise wait for a hand-over that never comes, and no
     // turn after it would go. Told the agent it already shows, the page changes nothing.
@@ -333,7 +332,7 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, foc
     const tracks = root.querySelector<HTMLElement>('[data-slot="grid-tracks"]')
     const g = { cell: play.metrics.cell, gap: play.metrics.gap }
 
-    // A page turning (version 9): its section fading away, then the next one's boxes, each fading in from `at`.
+    // A page turning: its section fading away, then the next one's boxes, each fading in from `at`.
     type Turn = {
       to: string
       phase: "out" | "in"
@@ -465,7 +464,7 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, foc
         const ta = now - live.zeros[a]!
         const { frame: af, m } = introAt(part, ta)
         const [from, to] = af.frame.nests
-        // Held under its section (version 9): nothing of it, nor of its nests.
+        // Held under its section: nothing of it, nor of its nests.
         const held = introHeld(part, ta)
         // The nest it leaves: its spot's as it goes to its box, and its box's as it dives home, going as it dives into it.
         place(nestFrom.current[a], from.x, from.y, held ? 0 : from.lit * introNestLeft(part, ta))
@@ -484,7 +483,7 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, foc
         }
         if (!hidden) painters.current[a]?.paint(af.frame, m)
       })
-      // A page turning (version 9): the next section's boxes, each fading in from its moment, and the end.
+      // A page turning: the next section's boxes, each fading in from its moment, and the end.
       if (turn) {
         for (const box of turn.boxes) {
           const since = now - box.at
@@ -527,7 +526,7 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, foc
     }
   }, [play, root])
 
-  // An action where it rests, each time the page asks again (version 9).
+  // An action where it rests, each time the page asks again.
   const actNow = React.useRef(act)
   actNow.current = act
   const actKey = act?.key
@@ -536,7 +535,7 @@ export function GridIntro({ metrics, root, agents, actions, settled = false, foc
     if (actKey !== undefined && ask) actHere.current?.(ask.agent, ask.action)
   }, [actKey])
 
-  // The page turns (version 9): once the play can, whenever the focus is not the agent whose section is on the field.
+  // The page turns: once the play can, whenever the focus is not the agent whose section is on the field.
   React.useLayoutEffect(() => {
     if (!idle || focus === undefined || focus === shown.current || !turnTo.current) return
     setIdle(false)

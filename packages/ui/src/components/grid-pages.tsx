@@ -6,20 +6,18 @@ import { isSlotItem, SlotContent } from "@no-origins/ui/components/slot"
 import { Grid, GridItem, type GridMetrics } from "@no-origins/ui/components/grid"
 import { GridPager } from "@no-origins/ui/components/grid-pager"
 import { resolvePages, type GridLayout, type GridLayoutItem } from "@no-origins/ui/lib/grid-layout"
+import { scrollerAt } from "@no-origins/ui/lib/scroll-motion"
 
 /**
  * A layout, one page at a time.
  *
- * Turning the page is a PROGRESS from 0 to 1 (Grid.md D27, 2026-09-21) that the wheel or a finger drives by hand —
- * scrolling UP is forward, to the next page, and "up" is the hand's: fingers moving up the trackpad or the screen, a
- * wheel rolled towards you. As it moves the ↑ fills from its bottom up; scrolling down, the ↓ from its top down. The
- * boxes do not follow the hand (D37, 2026-09-25, his: "let's not shrink the cards"): until the turn commits they stay
- * whole. Let go short of half way and the fill settles back; past it, or a whole page of travel, and the turn commits:
- * the page fades away over TURN_MS, and the next page is put on the field and fades in over the same (Grid.md D49,
- * 2026-09-30, his: "remove all the current loaders … let the components load quickly"). From D48 the grid's loader
- * brought a page with images still to come in out of its rings, and until D48 a ripple ran through the field and washed
- * the page away, box by box, cell by cell (D32, D37). A hand that goes on scrolling goes
- * on turning (D35): through the emptied field it turns on, a page a step, and the page it stops on is put on the field
+ * Turning the page is a PROGRESS from 0 to 1 (Grid.md D27) that the wheel or a finger drives by hand — scrolling UP is
+ * forward, to the next page, and "up" is the hand's: fingers moving up the trackpad or the screen, a wheel rolled
+ * towards you. As it moves the ↑ fills from its bottom up; scrolling down, the ↓ from its top down. The boxes do not
+ * follow the hand and never shrink (D37): until the turn commits they stay whole. Let go short of half way and the
+ * fill settles back; past it, or a whole page of travel, and the turn commits: the page fades away over TURN_MS, and
+ * the next page is put on the field and fades in over the same (D49). A hand that goes on scrolling goes on turning
+ * (D35): through the emptied field it turns on, a page a step, and the page it stops on is put on the field
  * when it stops; only the decaying tail of a trackpad's fling is ignored. A click on the pager's arrow, ← →, or a host's
  * toolbar play the same turn. The field and the pager never move.
  *
@@ -38,8 +36,7 @@ const RELAX_MS = 120
 const SETTLE_MS = 100
 /**
  * …and a notched wheel's, which sends one event a notch: a steady roll is a notch every 100–250ms, so with the
- * trackpad's 100ms the turn let go between two notches and the boxes fell back — a slow roll turned no page at all
- * (measured 2026-09-25, a Windows mouse: 22 notches, seven pages of travel, nothing).
+ * trackpad's 100ms the turn would let go between two notches and settle back, and a slow roll would turn no page.
  */
 const NOTCH_SETTLE_MS = 260
 /** One wheel event this big, in px, is a notch rather than a trackpad's frame. */
@@ -49,15 +46,14 @@ const COMMIT_AT = 0.5
 /** The share of the field's height one page of scroll travel is. */
 const RANGE_OF_FIELD = 1 / 3
 /**
- * How closely the boxes follow the wheel, in ms: the time constant of an exponential follow — 63% of the way in this
- * long, 95% in three times it. A notch is a third of a page in one event, and it was drawn in one frame, a jump; now it
- * glides, and a trackpad's uneven events are evened out. A finger is not smoothed: it is on the glass.
+ * How closely the turn's progress — the arrow's fill — follows the wheel, in ms: the time constant of an exponential
+ * follow, 63% of the way in this long, 95% in three times it. A notch is a third of a page in one event, so it glides
+ * rather than jumps, and a trackpad's uneven events are evened out. A finger is not smoothed: it is on the glass.
  */
 const FOLLOW_MS = 40
 /**
- * While the page fades away, the hand's travel turns the next page too (2026-09-25, his: "if I'm continuously slow
- * scrolling, we can just continue the ripple without rendering the cards" — the ripple went with D48, the turning on
- * stayed). Steps follow each other no closer than this share of the hold, however fast the wheel spins.
+ * While the page fades away, the hand's travel turns the next page too (D35). Steps follow each other no closer than
+ * this share of the hold, however fast the wheel spins.
  */
 const STEP_MIN_SHARE = 0.5
 /**
@@ -72,10 +68,8 @@ const FOLLOW_THROUGH = 0.5
 
 /**
  * A trackpad goes on sending wheel events after the fingers lift — the fling's momentum, decaying frame by frame — and
- * after a turn that tail is not the hand: it started a second turn that relaxed back, a wobble after every turn
- * (2026-09-22). Until 2026-09-25 the whole wheel was muted until it had been quiet for 160ms, which muted the hand too:
- * a mouse rolled steadily, or fingers still moving, never turned a second page. Now each event is read. A TAIL is a run
- * of falls in the size of the events — a fling's momentum only ever shrinks — and only the tail is dropped. The hand is
+ * after a turn that tail is not the hand: read as the hand, it starts a second turn that relaxes back, a wobble after
+ * every turn. The whole wheel is not muted, which would mute the hand too: each event is read. A TAIL is a run of falls in the size of the events — a fling's momentum only ever shrinks — and only the tail is dropped. The hand is
  * anything else: a new push after a pause or the other way, an event that rises, and a steady roll of equal notches.
  * The first few events of a fall are MAYBE: kept aside, counted once the hand is seen to go on, dropped if the fall
  * turns out to be a tail. Tuned on randomised hands, flings, notches and 120Hz streams with coalesced frames
@@ -134,7 +128,7 @@ function readWheel(t: WheelTrace, now: number, px: number): WheelKind {
 
 /**
  * `wash` is the turn from the moment it commits until the next page is put on the field: the last page fades away
- * (globals.css, off `data-turn="wash"`; the ripple washed it away until D48, and the name stayed). The hand may go on
+ * (globals.css, off `data-turn="wash"`). The hand may go on
  * turning pages through it, and the page is put on the field only when the hold is over and the hand has stopped. `in`
  * is that page arriving: it fades in (D49), as the page the hand brought the turn back to fades back in.
  */
@@ -233,10 +227,8 @@ function createTurn(
 
   // The phase goes on the grid's TRACKS — globals.css fades the page away off it — and the hand's progress on the
   // pager's BAR, the one thing that reads it. Custom properties inherit, so a value written every frame restyles
-  // everything under the element it is written on: on the grid's root it restyled every element in the grid, the
-  // overlay's cells and the ripple's line layers (three times the style work, and dropped frames, measured
-  // 2026-09-25); on the tracks, every box on the page, which read it for their clip until D37. The root keeps the
-  // defaults (globals.css).
+  // everything under the element it is written on: on the grid's root or its tracks it would restyle every element or
+  // every box in the grid, each frame. The root keeps the defaults (globals.css).
   let tracks: HTMLElement | null = null
   let bar: HTMLElement | null = null
   const tracksEl = () => {
@@ -262,9 +254,6 @@ function createTurn(
     el.style.setProperty("--grid-turn-fill-front", String(inward ? dir : p))
     el.style.setProperty("--grid-turn-fill-back", String(inward ? p : 0))
   }
-
-  // The arrow filled in the colour of the ripple the turn would play (D32) until D48 took the ripple out: it keeps its
-  // own fill.
 
   const setPhase = (next: TurnPhase, d: 1 | -1) => {
     const from = phase
@@ -531,11 +520,13 @@ function createTurn(
   const onWheel = (event: React.WheelEvent) => {
     const { measured, gridH } = inputs.current
     if (!measured) return
+    // A wheel over a component that scrolls its own content is the component's (D52).
+    if (scrollerAt(event.target)) return
     const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? gridH : 1
     // Scrolling up is forward, to the next page (D27: "scrolling up means going to next page") — and "up" is the
     // HAND'S up, fingers moving up the trackpad, which the browser reports as a positive delta (the same as a wheel
-    // rolled towards you). Not negated since 2026-09-21: negating it made a trackpad and a finger on the screen
-    // disagree, because the finger handler below already reads the hand's direction.
+    // rolled towards you). Never negated: negating it makes a trackpad and a finger on the screen disagree, because
+    // the finger handler below already reads the hand's direction.
     const px = event.deltaY * unit
     if (px === 0) return
     const now = performance.now()
@@ -557,7 +548,8 @@ function createTurn(
   }
 
   const onTouchStart = (event: React.TouchEvent) => {
-    touchY = event.touches[0]?.clientY ?? null
+    // A finger on a component that scrolls its own content is the component's (D52).
+    touchY = scrollerAt(event.target) ? null : (event.touches[0]?.clientY ?? null)
   }
   const onTouchMove = (event: React.TouchEvent) => {
     const y = event.touches[0]?.clientY
@@ -664,6 +656,8 @@ export type RenderGridItem = (item: GridLayoutItem) => React.ReactNode
 type GridPageSurfaceProps = {
   items: GridLayoutItem[]
   renderItem?: RenderGridItem
+  /** The layout's fixtures (D51): marked `data-fixed`, which globals.css leaves out of the turn's fade. */
+  fixed?: boolean
 }
 
 /**
@@ -672,14 +666,21 @@ type GridPageSurfaceProps = {
  * its own content (Slots.md); anything else draws nothing.
  *
  * Memoised, and the turn is not a prop: the phase is an attribute on the tracks, which globals.css fades the page away
- * and in off, so a turn starting, washing or ending renders no card. It rendered
- * every card on the page at each phase — the first wheel event of every turn among them.
+ * and in off, so a turn starting, washing or ending renders no card.
  */
-const GridPageSurface = React.memo(function GridPageSurface({ items, renderItem }: GridPageSurfaceProps) {
+const GridPageSurface = React.memo(function GridPageSurface({ items, renderItem, fixed }: GridPageSurfaceProps) {
   return (
     <>
       {items.map((item) => (
-        <GridItem key={item.id} col={item.col} row={item.row} colSpan={item.colSpan} rowSpan={item.rowSpan} className="relative touch-none select-none">
+        <GridItem
+          key={item.id}
+          col={item.col}
+          row={item.row}
+          colSpan={item.colSpan}
+          rowSpan={item.rowSpan}
+          data-fixed={fixed || undefined}
+          className="relative touch-none select-none"
+        >
           {renderItem ? renderItem(item) : isSlotItem(item) ? <SlotContent item={item} /> : null}
         </GridItem>
       ))}
@@ -745,8 +746,7 @@ function GridPages({
     [count, onPageChange],
   )
 
-  // A turn holds the next page back while the last one fades away; then it fades in (D49). It held it while a ripple
-  // crossed the field and washed the page away until D48 (D32, D37).
+  // A turn holds the next page back while the last one fades away; then it fades in (D49).
   const hold = metrics ? TURN_MS : 0
   const { shown, coming, rootRef, handlers } = usePageTurn(page, metrics ? count : 1, metrics, setPage, hold)
   const onTurn = React.useCallback((dir: 1 | -1) => setPage(page + dir), [setPage, page])
@@ -763,6 +763,8 @@ function GridPages({
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
       const target = event.target as HTMLElement | null
       if (target && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))) return
+      // A component that scrolls its own content takes the keys while it has focus (D52).
+      if (scrollerAt(target)) return
       const dir = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 0
       if (!dir) return
       event.preventDefault()
@@ -786,6 +788,8 @@ function GridPages({
       style={TURN_STYLE}
       {...handlers}
     >
+      {/* The fixtures first, so they read before the page (a sidebar before its content, D51). */}
+      {layout.fixtures?.length ? <GridPageSurface items={layout.fixtures} renderItem={renderItem} fixed /> : null}
       <GridPageSurface items={items} renderItem={renderItem} />
       <GridPager
         page={Math.min(shown, count - 1)}

@@ -45,7 +45,7 @@ function DropdownMenuContent({
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         align={align}
-        className={cn("z-50 max-h-(--radix-dropdown-menu-content-available-height) w-(--radix-dropdown-menu-trigger-width) min-w-48 origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1.5 text-popover-foreground shadow-md ring-1 ring-foreground/10 motion-surface data-[side=bottom]:slide-in-from-top-(length:--motion-surface-shift) data-[side=left]:slide-in-from-right-(length:--motion-surface-shift) data-[side=right]:slide-in-from-left-(length:--motion-surface-shift) data-[side=top]:slide-in-from-bottom-(length:--motion-surface-shift) data-[state=closed]:overflow-hidden data-open:animate-in data-open:fade-in-0 data-open:zoom-in-(--motion-surface-scale) data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-(--motion-surface-scale)", className )}
+        className={cn("z-50 max-h-(--radix-dropdown-menu-content-available-height) w-(--radix-dropdown-menu-trigger-width) min-w-48 origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-inset-tight text-popover-foreground shadow-md ring-1 ring-foreground/10 motion-surface data-[side=bottom]:slide-in-from-top-(length:--motion-surface-shift) data-[side=left]:slide-in-from-right-(length:--motion-surface-shift) data-[side=right]:slide-in-from-left-(length:--motion-surface-shift) data-[side=top]:slide-in-from-bottom-(length:--motion-surface-shift) data-[state=closed]:overflow-hidden data-open:animate-in data-open:fade-in-0 data-open:zoom-in-(--motion-surface-scale) data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-(--motion-surface-scale)", className )}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
@@ -246,7 +246,7 @@ function DropdownMenuSubContent({
   return (
     <DropdownMenuPrimitive.SubContent
       data-slot="dropdown-menu-sub-content"
-      className={cn("z-50 min-w-36 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-lg bg-popover p-1.5 text-popover-foreground shadow-md ring-1 ring-foreground/10 motion-surface data-[side=bottom]:slide-in-from-top-(length:--motion-surface-shift) data-[side=left]:slide-in-from-right-(length:--motion-surface-shift) data-[side=right]:slide-in-from-left-(length:--motion-surface-shift) data-[side=top]:slide-in-from-bottom-(length:--motion-surface-shift) data-open:animate-in data-open:fade-in-0 data-open:zoom-in-(--motion-surface-scale) data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-(--motion-surface-scale)", className )}
+      className={cn("z-50 min-w-36 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-lg bg-popover p-inset-tight text-popover-foreground shadow-md ring-1 ring-foreground/10 motion-surface data-[side=bottom]:slide-in-from-top-(length:--motion-surface-shift) data-[side=left]:slide-in-from-right-(length:--motion-surface-shift) data-[side=right]:slide-in-from-left-(length:--motion-surface-shift) data-[side=top]:slide-in-from-bottom-(length:--motion-surface-shift) data-open:animate-in data-open:fade-in-0 data-open:zoom-in-(--motion-surface-scale) data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-(--motion-surface-scale)", className )}
       {...props}
     />
   )
