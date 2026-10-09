@@ -4,7 +4,7 @@ import { resolve } from "./controls.ts";
 import type { Library } from "./library.ts";
 import { fieldOfView, radians } from "./math.ts";
 import { holding } from "./shot.ts";
-import type { Built, CameraEntry, Entry, EntryKind, Item, Shot, Use, World } from "./types.ts";
+import type { Built, CameraEntry, CameraPose, Entry, EntryKind, Item, Shot, Use, World } from "./types.ts";
 
 /**
  * The engine (Cinema-Engine.md E2): plain three.js on a canvas, mounted as Home's viewer is. It is asked one thing,
@@ -14,7 +14,10 @@ import type { Built, CameraEntry, Entry, EntryKind, Item, Shot, Use, World } fro
 export type Engine = {
   /** Builds a shot's world, cast and lights. Says what it could not build; the rest is drawn. */
   load: (shot: Shot) => string[];
-  draw: (t: number) => void;
+  /** Draws the moment `t`, through the shot's camera, or through `pose` when one is given (the screen's free look). */
+  draw: (t: number, pose?: CameraPose) => void;
+  /** Where the shot's camera is at `t`. */
+  poseAt: (t: number) => CameraPose;
   /** The drawing's size in pixels, and how many device pixels to a pixel. */
   size: (width: number, height: number, pixelRatio?: number) => void;
   dispose: () => void;
@@ -112,16 +115,19 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
     return problems;
   }
 
-  function draw(t: number) {
+  function poseAt(t: number): CameraPose {
+    const track = shot?.tracks.find((candidate) => candidate.kind === "camera");
+    const held = track ? holding(track, t) : undefined;
+    const entry = held ? library.find(held.item.entry, held.item.version) : undefined;
+    if (held && entry?.kind === "camera") return (entry as CameraEntry).pose(resolve(entry.controls, held.item.values), held.u, world);
+    return { position: [world.focus[0], world.focus[1] + world.radius * 0.5, world.focus[2] + world.radius * 1.9], target: world.focus, lens: 35 };
+  }
+
+  function draw(t: number, override?: CameraPose) {
     if (!shot) return;
     for (const light of lights) light.object.visible = light.item.start <= t && t <= light.item.start + light.item.length;
 
-    const track = shot.tracks.find((candidate) => candidate.kind === "camera");
-    const held = track ? holding(track, t) : undefined;
-    const entry = held ? library.find(held.item.entry, held.item.version) : undefined;
-    const pose = held && entry?.kind === "camera"
-      ? (entry as CameraEntry).pose(resolve(entry.controls, held.item.values), held.u, world)
-      : { position: [world.focus[0], world.focus[1] + world.radius * 0.5, world.focus[2] + world.radius * 1.9] as const, target: world.focus, lens: 35 };
+    const pose = override ?? poseAt(t);
     camera.position.set(...pose.position);
     camera.lookAt(...pose.target);
     camera.aspect = aspect;
@@ -133,6 +139,7 @@ export function createEngine(canvas: HTMLCanvasElement, library: Library, option
   return {
     load,
     draw,
+    poseAt,
     size(width, height, pixelRatio = 1) {
       renderer.setPixelRatio(pixelRatio);
       renderer.setSize(width, height, false);

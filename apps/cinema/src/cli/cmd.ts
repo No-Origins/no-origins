@@ -2,6 +2,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { check, parse } from "../engine/controls.ts";
+import { setControls } from "../engine/edit.ts";
 import { makeLibrary, type Library } from "../engine/library.ts";
 import { frameTimes, itemsOf, newShot, nextId, shotLength } from "../engine/shot.ts";
 import { DEPARTMENTS, TRACK_DEPARTMENT } from "../engine/types.ts";
@@ -123,6 +124,14 @@ function valuesFor(entry: Entry, raw: Record<string, string>): Values {
   }
   const problems = check(entry.controls, values);
   return problems.length ? refuse(problems.join("; ")) : values;
+}
+/** The screen's change and the command's are one (`engine/edit.ts`); its reasons become a refusal. */
+function edited(shot: Shot, target: string, values: Values) {
+  try {
+    return setControls(shot, target, values, library);
+  } catch (error) {
+    return refuse(error instanceof Error ? error.message : String(error));
+  }
 }
 const entryOf = (use: Use) => library.find(use.entry, use.version) ?? refuse(`${use.entry}@${use.version} is not in the library`);
 const tag = (use: Use) => `${use.entry}@${use.version}`;
@@ -246,22 +255,22 @@ async function run(): Promise<string> {
         allow("set");
         const use = shot.world ?? refuse(`${shot.id} has no world yet (use \`world\`)`);
         const values = valuesFor(entryOf(use), pairs);
-        const saved = save({ ...shot, world: { ...use, values: { ...use.values, ...values } } }, { target, entry: tag(use), values });
+        const saved = save(edited(shot, target, values), { target, entry: tag(use), values });
         return `set the world's ${Object.keys(values).join(", ") || "nothing"} · rev ${saved.rev}`;
       }
       const placement = placeOf(shot, target!);
       if (placement) {
         allow("direction", "cast");
         const values = valuesFor(entryOf(placement), pairs);
-        const next = { ...placement, values: { ...placement.values, ...values }, ...("at" in flags ? { at: at() } : {}), ...("facing" in flags ? { facing: number("facing") } : {}) };
-        const saved = save({ ...shot, cast: shot.cast.map((p) => (p.id === target ? next : p)) }, { target, entry: tag(next), values, at: next.at, facing: next.facing });
+        const withValues = edited(shot, target!, values);
+        const next = { ...placeOf(withValues, target!)!, ...("at" in flags ? { at: at() } : {}), ...("facing" in flags ? { facing: number("facing") } : {}) };
+        const saved = save({ ...withValues, cast: withValues.cast.map((p) => (p.id === target ? next : p)) }, { target, entry: tag(next), values, at: next.at, facing: next.facing });
         return `set ${target}: ${[...Object.keys(values), ...("at" in flags ? ["at"] : []), ...("facing" in flags ? ["facing"] : [])].join(", ") || "nothing"} · rev ${saved.rev}`;
       }
       const found = itemsOf(shot).get(target!) ?? refuse(`${shot.id} has no ${target}`);
       allow(TRACK_DEPARTMENT[found.track.kind]);
       const values = valuesFor(entryOf(found.item), pairs);
-      const tracks = shot.tracks.map((track) => ({ ...track, items: track.items.map((item) => (item.id === target ? { ...item, values: { ...item.values, ...values } } : item)) }));
-      const saved = save({ ...shot, tracks }, { target, entry: tag(found.item), values });
+      const saved = save(edited(shot, target!, values), { target, entry: tag(found.item), values });
       return `set ${target}'s ${Object.keys(values).join(", ") || "nothing"} · rev ${saved.rev}`;
     }
 

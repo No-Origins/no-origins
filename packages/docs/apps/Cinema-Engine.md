@@ -17,9 +17,15 @@ Current as of 2026-10-09.
   others, on port 3009, started with `pnpm --filter cinema dev`. It has no Vercel project and is deployed nowhere until
   he says. CI builds it like every app, against the sample (E5).
 - **Its screen follows the system** (his, Cinema.md F2): one `Grid`, the picture in a box, and round it the controls
-  built from `@no-origins/ui`: play and pause, a timeline he can scrub, the shot's tracks, the frame (wide or
-  vertical), and export. *Mine:* version 1 is only that, since he directs through Claude (Cinema.md F8); the screen is
-  for watching and checking.
+  built from `@no-origins/ui`.
+- **He plays with the controls himself, and moves round the world** (his, 2026-10-09: "I don't see any controls for me
+  to play around"). *Mine:* the picture at the field's centre, as every studio has it (Motion.md M15); in a column
+  either side the jigs, every control of the world on the left and of the shot on the right (which shot, the frame to
+  see it in, then its camera, lights and cast), drawn from the entries' declarations, so a control added in code is on
+  the screen at once. A change shows at once and is saved to the draft once the jigs stand still, through the same
+  change the `set` command makes (E6), from the revision the screen last saw: a command run meanwhile wins. Under the
+  picture its name and a bar of play, the time to scrub, and **free look**: a drag turns round what the camera looks
+  at, the wheel or a pinch goes nearer, and renders always use the shot's camera.
 
 ## E2. The engine
 

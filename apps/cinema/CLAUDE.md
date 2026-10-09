@@ -32,8 +32,10 @@ sun; tools, not his ideas), the commands, the renderer, the screen and the sampl
   Mac) and ffmpeg (E7).
 - `src/data/store.ts`: shots on disk (`shots/<id>/draft.json`, `versions/<n>.json`), renders, exports and the agents'
   session lines (Cinema-Agents.md R6).
-- `src/components/studio.tsx`: the screen, one `Grid` (E1); `picture.tsx`: the shot in its box, playing from its own
-  clock; `render-target.tsx`: the canvas the renderer drives, at `/render`.
+- `src/components/studio.tsx`: the screen, one `Grid` (E1): the picture at the centre, the jigs either side
+  (`jigs.tsx`, drawn from the entries' declarations), saved through `PATCH /shot/<id>`; `picture.tsx`: the shot in its
+  box, playing from its own clock, with free look; `render-target.tsx`: the canvas the renderer drives, at `/render`.
+- `src/engine/edit.ts`: setting controls, the one change the screen and the `set` command share.
 
 ## What is true here and easy to get wrong
 
@@ -44,7 +46,8 @@ sun; tools, not his ideas), the commands, the renderer, the screen and the sampl
 - **An entry's version goes up when its code changes after a shot has used it** (E4): keep the old version beside the
   new one and list both in the library, so the old shot still plays as it was made. Until he has seen a version, it is
   still being made and keeps its number.
-- **The commands are the only way a shot changes** (E6), for him, Claude and the agents alike. Each checks its values
+- **The commands are the only way a shot changes** (E6), for him, Claude and the agents alike; the screen's jigs save
+  through the same change (`engine/edit.ts`), refused when the shot moved on since the screen read it. Each checks its values
   and the agent's department before writing; a refusal changes nothing and records nothing. With `--agent` and
   `--session` each writes its own line in that session; never write a session by hand.
 - **`/render` is not a page.** It is the renderer's canvas at the frame's exact size, so it is off the grid on purpose

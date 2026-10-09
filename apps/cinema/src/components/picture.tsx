@@ -3,7 +3,22 @@
 import * as React from "react";
 
 import type { Engine } from "@/engine/engine";
-import type { Aspect, Shot } from "@/engine/types";
+import type { Aspect, CameraPose, Shot, Vec3 } from "@/engine/types";
+
+/** A free look: round a point, by a bearing and a pitch, from a distance, through a lens. */
+type Orbit = { target: Vec3; yaw: number; pitch: number; distance: number; lens: number };
+
+const poseOf = (o: Orbit): CameraPose => ({
+  position: [
+    o.target[0] + Math.sin(o.yaw) * Math.cos(o.pitch) * o.distance,
+    o.target[1] + Math.sin(o.pitch) * o.distance,
+    o.target[2] + Math.cos(o.yaw) * Math.cos(o.pitch) * o.distance,
+  ],
+  target: o.target,
+  lens: o.lens,
+});
+const TURN = 0.006;
+const STEP = 0.12;
 
 /**
  * The shot in its box (Cinema-Engine.md E1, E2): a canvas the engine draws on, fitted to the frame's shape (wide or
@@ -11,8 +26,12 @@ import type { Aspect, Shot } from "@/engine/types";
  *
  * The engine never reads the clock; this does, to play. Playing, it moves `t` on by the time that passed and loops at
  * the shot's end; paused, it draws only when told where to be (`seek`) or when the shot changes.
+ *
+ * **Free look**, the screen's alone: a drag turns round what the shot's camera is looking at, the wheel (or a pinch)
+ * goes nearer or further, the arrow keys and + − do the same when the picture has focus, and Escape goes back. It
+ * starts from wherever the shot's camera is, and `onFree` says it has; renders always use the shot's camera.
  */
-export function Picture({ shot, aspect, length, playing, seek, onTime, onProblems }: {
+export function Picture({ shot, aspect, length, playing, seek, free, onFree, onTime, onProblems }: {
   shot: Shot;
   aspect: Aspect;
   /** The shot's length in seconds. */
@@ -20,6 +39,9 @@ export function Picture({ shot, aspect, length, playing, seek, onTime, onProblem
   playing: boolean;
   /** Where to be: a new `n` moves there. */
   seek: { t: number; n: number };
+  /** Looking freely rather than through the shot's camera. */
+  free: boolean;
+  onFree: (free: boolean) => void;
   /** Where it is, a few times a second while playing. */
   onTime: (t: number) => void;
   onProblems: (problems: string[]) => void;
@@ -28,10 +50,15 @@ export function Picture({ shot, aspect, length, playing, seek, onTime, onProblem
   const canvas = React.useRef<HTMLCanvasElement>(null);
   const [engine, setEngine] = React.useState<Engine | null>(null);
   const time = React.useRef(seek.t);
-  const latest = React.useRef({ onTime, onProblems, length });
+  const orbit = React.useRef<Orbit | null>(null);
+  const latest = React.useRef({ onTime, onProblems, onFree, length });
   React.useEffect(() => {
-    latest.current = { onTime, onProblems, length };
-  }, [onTime, onProblems, length]);
+    latest.current = { onTime, onProblems, onFree, length };
+  }, [onTime, onProblems, onFree, length]);
+
+  const paint = React.useCallback(() => {
+    engine?.draw(time.current, orbit.current ? poseOf(orbit.current) : undefined);
+  }, [engine]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -58,8 +85,8 @@ export function Picture({ shot, aspect, length, playing, seek, onTime, onProblem
     target.style.width = `${width}px`;
     target.style.height = `${height}px`;
     engine.size(width, height, Math.min(window.devicePixelRatio, 2));
-    engine.draw(time.current);
-  }, [aspect, engine]);
+    paint();
+  }, [aspect, engine, paint]);
 
   React.useEffect(() => {
     if (!engine) return;
@@ -77,8 +104,15 @@ export function Picture({ shot, aspect, length, playing, seek, onTime, onProblem
 
   React.useEffect(() => {
     time.current = seek.t;
-    engine?.draw(seek.t);
-  }, [engine, seek]);
+    paint();
+  }, [seek, paint]);
+
+  // Back to the shot's camera when free look is let go.
+  React.useEffect(() => {
+    if (free) return;
+    orbit.current = null;
+    paint();
+  }, [free, paint]);
 
   React.useEffect(() => {
     if (!engine || !playing) return;
@@ -86,10 +120,9 @@ export function Picture({ shot, aspect, length, playing, seek, onTime, onProblem
     let last = performance.now();
     let told = 0;
     const tick = (now: number) => {
-      const end = latest.current.length;
-      time.current = (time.current + (now - last) / 1000) % end;
+      time.current = (time.current + (now - last) / 1000) % latest.current.length;
       last = now;
-      engine.draw(time.current);
+      paint();
       if (now - told > 100) {
         told = now;
         latest.current.onTime(time.current);
@@ -101,11 +134,98 @@ export function Picture({ shot, aspect, length, playing, seek, onTime, onProblem
       cancelAnimationFrame(frame);
       latest.current.onTime(time.current);
     };
-  }, [engine, playing]);
+  }, [engine, playing, paint]);
+
+  /** The free look, from where the shot's camera is now. */
+  const look = React.useCallback(() => {
+    if (orbit.current || !engine) return orbit.current;
+    const pose = engine.poseAt(time.current);
+    const [dx, dy, dz] = [0, 1, 2].map((i) => pose.position[i]! - pose.target[i]!) as Vec3;
+    const distance = Math.max(0.5, Math.hypot(dx, dy, dz));
+    orbit.current = { target: pose.target, yaw: Math.atan2(dx, dz), pitch: Math.asin(dy / distance), distance, lens: pose.lens };
+    latest.current.onFree(true);
+    return orbit.current;
+  }, [engine]);
+  const turn = (yaw: number, pitch: number) => {
+    const o = look();
+    if (!o) return;
+    o.yaw += yaw;
+    o.pitch = Math.max(-1.45, Math.min(1.45, o.pitch + pitch));
+    paint();
+  };
+  const zoom = (by: number) => {
+    const o = look();
+    if (!o) return;
+    o.distance = Math.max(0.5, Math.min(5000, o.distance * Math.exp(by)));
+    paint();
+  };
+
+  // The wheel is listened to directly, so it can be kept from the page.
+  React.useEffect(() => {
+    const target = canvas.current;
+    if (!target) return;
+    const wheel = (event: WheelEvent) => {
+      event.preventDefault();
+      zoom(event.deltaY * 0.0015);
+    };
+    target.addEventListener("wheel", wheel, { passive: false });
+    return () => target.removeEventListener("wheel", wheel);
+  });
+
+  const drag = React.useRef<{ x: number; y: number; pointers: Map<number, { x: number; y: number }> }>({ x: 0, y: 0, pointers: new Map() });
+  const spread = () => {
+    const [a, b] = [...drag.current.pointers.values()];
+    return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0;
+  };
 
   return (
-    <div ref={box} data-slot="picture" data-status={engine ? "ready" : "loading"} className="flex size-full items-center justify-center">
-      <canvas ref={canvas} role="img" aria-label={`${shot.title}, the shot`} />
+    <div ref={box} data-slot="picture" data-status={engine ? "ready" : "loading"} data-free={free} className="flex size-full items-center justify-center">
+      <canvas
+        ref={canvas}
+        role="img"
+        tabIndex={0}
+        aria-label={`${shot.title}, the shot. Drag, or the arrow keys, to look round; the wheel, or + and −, to go nearer.`}
+        className={free ? "cursor-grabbing touch-none outline-none focus-visible:ring-2 focus-visible:ring-ring" : "cursor-grab touch-none outline-none focus-visible:ring-2 focus-visible:ring-ring"}
+        onPointerDown={(event) => {
+          event.currentTarget.setPointerCapture(event.pointerId);
+          drag.current.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+          drag.current.x = event.clientX;
+          drag.current.y = event.clientY;
+        }}
+        onPointerMove={(event) => {
+          const pointers = drag.current.pointers;
+          if (!pointers.has(event.pointerId)) return;
+          if (pointers.size === 2) {
+            const before = spread();
+            pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            const after = spread();
+            if (before && after) zoom(Math.log(before / after));
+            return;
+          }
+          pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+          turn(-(event.clientX - drag.current.x) * TURN, (event.clientY - drag.current.y) * TURN);
+          drag.current.x = event.clientX;
+          drag.current.y = event.clientY;
+        }}
+        onPointerUp={(event) => drag.current.pointers.delete(event.pointerId)}
+        onPointerCancel={(event) => drag.current.pointers.delete(event.pointerId)}
+        onKeyDown={(event) => {
+          const keys: Record<string, () => void> = {
+            ArrowLeft: () => turn(STEP, 0),
+            ArrowRight: () => turn(-STEP, 0),
+            ArrowUp: () => turn(0, STEP / 2),
+            ArrowDown: () => turn(0, -STEP / 2),
+            "+": () => zoom(-STEP),
+            "=": () => zoom(-STEP),
+            "-": () => zoom(STEP),
+            Escape: () => latest.current.onFree(false),
+          };
+          const act = keys[event.key];
+          if (!act) return;
+          event.preventDefault();
+          act();
+        }}
+      />
     </div>
   );
 }
