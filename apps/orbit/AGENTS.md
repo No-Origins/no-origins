@@ -1,6 +1,6 @@
 # apps/orbit
 
-Orbit, the agents' looks: read `CLAUDE.md` beside this file for everything about this app. Next.js 16 on the
+Orbit, the world: read `CLAUDE.md` beside this file for everything about this app. Next.js 16 on the
 App Router; the Next.js agent rules below are written by `next dev`.
 
 <!-- BEGIN:nextjs-agent-rules -->

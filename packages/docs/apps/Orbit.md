@@ -6,6 +6,11 @@ moves — how its controls stand and read, how a look is saved and published, an
 **Motion.md**, the studio of how the agents move, and to **Brand.md** §1 and §8 and **Agents.md**, which say what the
 agents are.
 
+**The app this document describes was deleted on 2026-10-12** (his): `apps/orbit` is now the world (World.md). What
+stands here is what an agent looks like, which `packages/ui` draws and the motion studio reads, and the looks already
+published, still in the database. The rules about the app itself (its stage, sections and controls) no longer describe
+anything; where the looks are made next is open (World.md, Open), and this document is rewritten once he decides.
+
 Current as of 2026-10-08. Earlier versions and what they decided are in git history.
 
 ## C1. What it is for

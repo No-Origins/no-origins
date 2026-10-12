@@ -202,6 +202,7 @@ export function cursorPage(entry: DocEntry): PageContent {
     ]),
     docCard("using", "Using it", undefined, [
       "Turn it on for a field with cursor on Grid or GridPages. Every element on that field wears the ring.",
+      "Off the grid, a surface turns it on with data-cursor on its own element, only where the device hovers with a fine pointer (Orbit's world). Every element inside it wears the ring.",
       "For a box whose content can outgrow it, use ScrollArea: it scrolls inside its box, and the cursor shows how far.",
       "A page can keep the lit cell off while it shows something over the field, with data-cursor-still on the grid (the motion studio's focus pages).",
       "The scroll's liquid moves by the --motion-scroll-* tokens (Tokens → Motion); the lit cell fades over 500ms.",

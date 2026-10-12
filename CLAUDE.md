@@ -17,7 +17,7 @@ it before editing the app (its `AGENTS.md` points there and carries the Next.js 
 | Admin | `apps/admin` | admin.no-origins.com | 3002 | People, Roles, Invitations, Audit and Settings (Access.md); `admin.open` and a second factor |
 | Engineering | `apps/engineering` | engineering.no-origins.com | 3003 | The engineering publish library: public explanations, no auth |
 | Motion studio | `apps/motion` | motion.no-origins.com | 3004 | Where the system's motion is designed (Motion.md); `motion.open` |
-| Orbit | `apps/orbit` | orbit.no-origins.com (character.no-origins.com 308s here) | 3005 | The agents' looks (Orbit.md); open to everyone, publishing the owner's (C24) |
+| Orbit | `apps/orbit` | orbit.no-origins.com (character.no-origins.com 308s here) | 3005 | The world: the 3D world that becomes the base UI, every app a place in it (World.md, a draft); public, no database |
 | Home | `apps/home` | home.no-origins.com | 3006 | A three.js model of the house he is building, and its tour (Home.md); `home.open` |
 | Status | `apps/status` | status.no-origins.com | 3007 | Where every app stands; public, no database (Status.md) |
 | Login | `apps/auth` | auth.no-origins.com | 3008 | Signing in, making an account, the apps one may open, one's account (Admin.md §8.4) |
@@ -34,8 +34,10 @@ it before editing the app (its `AGENTS.md` points there and carries the Next.js 
   for it is a block on the grid that talks to this runtime. Agent lifecycle stays on the BEAM. The swarm does not
   write `packages/ui`, the portfolio, or the publish bucket.
 
-**Orbit** is the six agents together (Bali, Kino, Zaza, Oru, Mira, Lola; Agents.md) and the app where they are made
-(Orbit.md C21). A *character* is one agent's look: `CharacterLook`, the database's rows of kind `character`. **Home's
+**Orbit is the world** (World.md): the 3D world that becomes No Origins' base UI in place of the grid, one app at a
+time, each a place he describes and Claude builds. The agents are six (Bali, Kino, Zaza, Oru, Mira, Lola; Agents.md).
+A *character* is one agent's look: `CharacterLook`, the database's rows of kind `character`, still read by the motion
+studio; the editor that made them went with the old Orbit (World.md, Open: where the agents' looks are made). **Home's
 house is not in the repo** (Home.md H4): it lives in `apps/home/src/content` (gitignored) and the private Vercel Blob
 store `home-house`; `pnpm --filter home publish:house` fills the store, and running it is his call.
 
@@ -53,9 +55,9 @@ is on `.no-origins.com`), one allowlist.
   database rule asks `noo_can()`; the token carries the permissions.
 - **The gate's `permission`** (`admin.open`, `motion.open`, `home.open`) sends an account without it to the no-access
   card; `motion.open` alone tries every control and saves nothing. An `admin.*` permission counts only after a second
-  factor (Access.md A12). Orbit's gate is `open`: it refreshes the session, and RLS decides who may publish.
+  factor (Access.md A12).
 - **Without its two keys the gate refuses in production.** On a development server with none, the motion studio, Home
-  and the login open (`openWithoutKeys`) and Orbit opens anywhere, so CI and a fresh clone see them.
+  and the login open (`openWithoutKeys`), so CI and a fresh clone see them.
 - **The login app is built and deployed; the gates do not use it yet**: each still sends people to its own `/sign-in`
   until the next part of Access.md A11's step 5 points them at auth.no-origins.com.
 - `npx supabase test db` runs the access tests. On the hosted project a hook change is `db push`, then `config push`;
@@ -130,6 +132,8 @@ shadcn/ui, style `radix-sera`, base `radix`, base colour `neutral`, RTL on: 74 c
   no page scrolling (a component may scroll its own content: Grid.md D52), never a `max-w-* mx-auto` column. "Version 1" or "his to design" covers what sits on the grid,
   never whether; a page off the grid is to flag, not to copy. Check that `[data-slot="grid"]` is there and the page's
   scroll size is the viewport. Open: engineering and the sign-in screen (a card over a bare field), his to decide.
+  **Orbit is the exception, and the direction**: it is the world, not the grid (World.md), and the base UI moves
+  there one app at a time. Until an app moves, its routes stay on the grid.
 - **Size boxes to their content.** Never stretch a component to its room: a card spans the rows its content needs, a
   cell of air stands between neighbouring blocks, and a group is a heading row (the portfolio's section label: violet
   icon and word, centred, no border) with its cards under it, side by side, never behind a selector. Overflow pages
@@ -194,7 +198,8 @@ data**: items with a span per breakpoint and a render function, arranged on the 
   in a worker where possible; `gridFieldPainter` stays self-contained (the worker runs its source text).
 - **The pointer is a violet ring** (D34): `cursor` on `Grid`/`GridPages`, a 24px ring drawn from an image in
   globals.css, filled while pressed; the cell under it lights its dashes violet, fading over 500ms; mouse and pen only,
-  sent to the painter, never React state.
+  sent to the painter, never React state. Off the grid, a surface wears it with `data-cursor` (Orbit's world) and sets
+  no cursor of its own.
 - **Nothing forces a breakpoint** (D11): `resolveField` takes a width and a height; to see a size, give the grid a box
   of it. `GRID_REFERENCE_BOX` is the first frame's assumption; `metrics.bp` is the breakpoint that supplied the cell.
 - **Derivation is mobile-first** (D22): an unauthored breakpoint derives from the nearest narrower authored one, else
@@ -216,8 +221,8 @@ data**: items with a span per breakpoint and a render function, arranged on the 
 Nine Vercel projects in the `no-origins` team, one an app, Root Directory `apps/<app>`: `no-origins` (the portfolio),
 `design`, `admin`, `engineering`, `motion`, `character` (Orbit: root `apps/orbit`, orbit.no-origins.com;
 character.no-origins.com 308s from `apps/orbit/next.config.ts`), `home`, `status`, `auth`. Production is `main`. The
-admin, motion, Orbit, Home and the login carry the two `NEXT_PUBLIC_SUPABASE_*` variables (without them production
-answers 503); Home also the Blob store `home-house`. Open: Turnstile's site key joins the login's when he has made the
+admin, motion, Home and the login carry the two `NEXT_PUBLIC_SUPABASE_*` variables (without them production answers
+503; Orbit's project still has them, unread since the world has no sign-in); Home also the Blob store `home-house`. Open: Turnstile's site key joins the login's when he has made the
 site. The hosted Supabase lists every app's domain among its redirect URLs (`supabase/config.toml`). A new project:
 `vercel link` from the app's folder, `vercel project update --root-directory`, `vercel git connect`, `vercel domains
 add`, `vercel env add --type config` for the two variables, then skip-unaffected through the API
@@ -247,7 +252,7 @@ plan's daily deployments; `**`, not `*`, because branch names here have a `/`.
 
 **Which apps a push builds is Vercel's call.** Every project skips unaffected deployments, reading the pnpm graph
 against the last deployed commit: a project builds when its folder changed, a workspace package it depends on changed
-(`packages/ui`: all nine; `packages/auth`: the admin, motion, Orbit, Home, the login; `packages/docs` and `supabase/`:
+(`packages/ui`: all nine; `packages/auth`: the admin, motion, Home, the login; `packages/docs` and `supabase/`:
 none) or the lockfile moved its dependencies; a skipped one shows *Canceled*. **A change outside the workspace rebuilds
 all nine**, one at a time: root files (`CLAUDE.md`, `AGENTS.md`, `playwright.config.ts`), `.github/`, `.changeset/`,
 `e2e/`, `services/`; a new top-level folder no app reads should be a workspace package, as `supabase/` is. **No

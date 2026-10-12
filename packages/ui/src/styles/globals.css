@@ -529,16 +529,18 @@
    moved on every pointer move would cost a whole-page layerize a move and lag. The colour is `--violet` as sRGB
    (146 98 243, D43), because an image cannot read a custom property; the 2x image is the
    same drawing at twice the pixels, and a browser without `image-set` for cursors takes the first line. The hotspot is
-   the centre. The grid only sets `data-cursor` where the device hovers with a fine pointer, so a phone keeps its own. */
-[data-slot="grid"][data-cursor],
-[data-slot="grid"][data-cursor] * {
+   the centre. It is worn wherever an element carries `data-cursor`, not on the grid alone: the grid sets it on its
+   field, and a surface off the grid on its own (Orbit's world, World.md W10). Either sets it only where the device
+   hovers with a fine pointer, so a phone keeps its own. */
+[data-cursor],
+[data-cursor] * {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
   cursor: image-set(url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 1x,
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 2x) 12 12, auto;
 }
 
-[data-slot="grid"][data-cursor]:active,
-[data-slot="grid"][data-cursor]:active * {
+[data-cursor]:active,
+[data-cursor]:active * {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%239262f3' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
   cursor: image-set(url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%239262f3' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 1x,
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%239262f3' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 2x) 12 12, auto;
@@ -547,16 +549,16 @@
 /* Over a component that scrolls its own content (Grid.md D52, Motion.md M26): the ring holds a little liquid, the sign
    that it scrolls. An image too, so it never trails the hand: `scroll-area.tsx` draws it into `--scroll-cursor` as the
    liquid floats up, and marks the box `data-scroll-cursor` while it holds one. Pressed, the ring fills as everywhere. */
-[data-slot="grid"][data-cursor]:not(:active) [data-scroll-cursor],
-[data-slot="grid"][data-cursor]:not(:active) [data-scroll-cursor] * {
+[data-cursor]:not(:active) [data-scroll-cursor],
+[data-cursor]:not(:active) [data-scroll-cursor] * {
   cursor: var(--scroll-cursor);
 }
 
 /* A slider's head held (slider.tsx, Motion.md M16): the pressed cursor stays the ring, and the head detaches into
    it. From the
    press to the release, wherever the pointer is, so a drag off the bar keeps it. */
-[data-slot="grid"][data-cursor]:has([data-slot="slider-thumb"][data-held]),
-[data-slot="grid"][data-cursor]:has([data-slot="slider-thumb"][data-held]) * {
+[data-cursor]:has([data-slot="slider-thumb"][data-held]),
+[data-cursor]:has([data-slot="slider-thumb"][data-held]) * {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
   cursor: image-set(url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 1x,
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 2x) 12 12, auto;

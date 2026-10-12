@@ -1,10 +1,10 @@
 @AGENTS.md
 
-# apps/orbit — Orbit
+# apps/orbit — Orbit, the world
 
-`orbit.no-origins.com`, :3005. **Orbit is the agents, together** — each has its own name — **and this app, where they
-are made** (Orbit.md C21). Here each agent's character is designed: what it looks like, not how it moves. **Orbit.md**
-is its document; read it before changing anything here.
+`orbit.no-origins.com`, :3005. **Orbit is the world**: the 3D world that is No Origins' base UI, where every app
+becomes a place (World.md W1). **World.md** is its document; read it before changing anything here. It is a draft
+until he signs it off.
 
 ```bash
 pnpm --filter orbit dev              # :3005
@@ -12,135 +12,120 @@ pnpm --filter orbit dev              # :3005
 
 ## The shape
 
-`/` is one `Grid` with the overlay and the cursor, the motion studio's shell, inside `CharacterProvider`
-(`components/character-context.tsx`: the look, and its draft and versions). Its boxes are placed by `studioLayout`
-(`src/lib/stage.ts`) from the measured field.
+- **The world is drawn in the root layout** (`src/app/layout.tsx`, World.md W2) by `World`
+  (`src/components/world.tsx`): one canvas, mounted once, so it outlives every navigation. Each route is a place or a
+  builder's page, and its page is the interface over the world (W10). The route picks the view (`viewOf`).
+- **The engine is `src/world/`** (W12), loaded after the page, never on the server:
+  - `engine.ts`: the WebGPU renderer (WebGL 2 behind it, W9), the scene, the camera and the drag round what a builder's
+    view looks at; it **draws on demand** (W8): a resize, a setting, a view, a drag. On a builder's page it centres what
+    it looks at in the room the card leaves (`data-world-aside`).
+  - `start.ts`: the cells (2 m, `CELL`), the cell two ahead (`AHEAD`: where the visitor's camera
+    starts looking, and where the portal stands on its page), which portals a view shows (`portalsOn`: the portal's
+    page one, every other view none; his: "Portals are not space units"), and the views (`viewFor`).
+  - `orbit.ts` (no three.js): the world's size (`WorldSize`, World.md W29): width (x) and breadth (z) centred at x/z
+    0, height up from y 0; it starts 1000 × 1000 × 1000 m (`WORLD_SIZE_START`), within `WORLD_SIZE_RANGE`. The default block
+    is 1 × 1 × 0.25 m (`BASE_BLOCK`, W4); `SECTOR_BLOCK` (0.3 m) and `BLOCK` (10 × 10 × 1 m), with the
+    `[column, row, level]` lattice helpers, are kept only for frozen versions. Camera X/Z limits are independent of
+    height: `onPlane`, `overGroundPlane` and `lookingOverPlane` hold every camera above ground and half a metre inside
+    the world's sides and top (`edgesOf`), from the world's size in the settings. North is −Z, East +X, South +Z, West −X. The sphere is historical (W16).
+  - `hierarchy.ts` (no three.js; World.md W4, W25): **what is built**, flat data: units (ecosystem › habitat › sector
+    › zone), each naming its parent, its place relative to it (his: "Let's go relative") and its entry, a pointer to
+    one of its own; and each zone's assets, blocks with a size (1–10 × the default each way) and a colour. Places
+    are lattice steps `[x m, z m, level]`, a block's its north-west bottom corner. `worldOf` mends what was kept;
+    `make` (never empty, placed east), `remove` (not an entry), `makeEntry`, `moveTo`, `rename`, `withBlockAt`,
+    `withoutAsset`; `boxesOf`/`originsOf` place it in the world; `inside` holds a box within the boundaries;
+    `placeUnder`/`boxUnder` aim; `occupancyOf`/`overlapsOf` are one block a step.
+  - `build-orbit.ts`: the open painted sky background (`build-fluid-sky.ts`), and no ground plane (World.md W24: the
+    land is what is built). There is no dome or continuous water; ponds will be added later.
+    `build-clouds.ts` ray-marches a continuous sky layer with integrated pigment and scattered light (W31);
+    `clouds.ts` and `cloud-job.ts` prepare density and sun/sky depth through `cloud-worker.ts`. `cloud-pass.ts`
+    caps cloud pixels, adapts quality and caches frames while keeping the world resolution. Coverage replaces Count.
+    V15's image layers and v14's ribbon-like volumes are frozen; current clouds download no artwork. Billow scale is metres and Above is clearance from ground, independent of the plane size.
+    Sky and clouds have independent clocks and uniform controls; pause/zero speed/reduced motion rests them (W8).
+    `build-blocks.ts` draws a zone's blocks as one solid, each its own size and colour, a face the zone covers whole
+    skipped (a top cut round a portal), and the ghost at the next block's size. Fog is
+    `scene.fog`.
+  - **A builder is two files**: what it is, its controls and its motion, with no three.js, so a page reads it without
+    loading the world (`portal.ts`), and what makes it (`build-portal.ts`). A version he has seen is frozen beside the
+    next (`portal-v1.ts` to `portal-v5.ts` and their builders; 1 to 4 the hole's), and nothing draws them.
+  - `store.ts`: a store a jig, and `worldStore` (what is built, parsed by `worldOf`) and `buildStore` (the builder's
+    state: zone picked, tool, level, the next block's size and colour), kept apart from the sector's tuning (W25);
+    the portal's settings while he tunes, kept in the browser (`no-origins:orbit:portal`; the hole's key
+    is read once and let go), and `portalOpening`, Play on the card heard by the world.
+- **The builder** (World.md W14), `src/app/build/`: its layout holds the sidebar (`src/components/build-sidebar.tsx`,
+  the design system's `Sidebar`, floating, folding to icons, a sheet on a phone) with World (the boundaries), Environment, Camera, Map, and
+  Elements › Portal and Sector, and each item is a jig's page. `/build` opens on Environment.
+- **A jig is data** (`src/world/jig.ts`): its name, version, his settings (`start`) and its groups of controls (a
+  number, a range of two heads, a colour, a choice; a long range marks every `marks` of its units; each named with its
+  group, so View's Height and Focus's are told apart). **The slider is the design system's, untouched**: never override
+  its marks' snapping (`--motion-step-zone`) here. A single number's value is typed beside its label (`TypedValue`, the
+  motion studio's `ParameterControl` way): any value on its step, set by Enter or blur, Escape to let it go. A jig may say what moves a value in the world (`movedBy`, read
+  against its `inputs`), and the card then locks what nothing on is moving (`lockOf`); the camera no longer does. Every jig's card is the one `JigCard` (`src/components/jig-card.tsx`; bound
+  to its store in `jigs.tsx`): `inset` padding, right of the sidebar and centred down the page, along the bottom of a
+  phone; Play where the jig has a motion, Reset, Copy. Every control is the system's (a stepped, marked `Slider`, the
+  `ColourPicker`). A group may carry a `note` (a caption under its name: what was built, how), and a jig's `copy` adds
+  lines to Copy (the blocks). The jigs (World.md W15): **World v1** (`bounds.ts`, World.md W29: the boundaries, Width,
+  Breadth, Height, on `/build/world`, first in the sidebar, the visitor's camera; `boundsStore`, `sizeOf`; the engine's
+  `bounds` setting), **Environment v17** (`environment.ts`: the open square, Sky, Clouds,
+  Cloud texture/colour, Light and texture (Grain size is the clouds'), Fog; it builds nothing (his: "remove it" the
+  blocks); v1–v16 frozen, v17 with continuous coverage, worker preparation and bounded rendering cost (W31); v16 with sculpted gas (W30); v15 with painted billows and veils (W28); v14 with local gas banks (W27); v11 with `build-blocks-v11.ts`;
+  Motion Flowing/Paused and Copy's Settings JSON, with version-specific storage), **Camera v8** (`camera.ts`: Height, Angle and Turn his, `eyeOf` over where it is on the ground, `at`, not a value,
+  starting where it sees the cell two ahead, `startAt`; its zoom narrowing the field of view, `fovOf`; the wheel zooms on its
+  page; it moves by `movement.ts` and flies by `focus.ts`; versions 1 to 7 frozen, with 5 to 7's drags and flights).ts`), **Portal v6, his settings**
+  (`portal.ts`; `/build/hole` redirects to its page), **Sector v4** (`sector.ts`, World.md W4, W24, W25; v1 the plane to v3 frozen,
+  with `sector-zones-v3.tsx` and `build-blocks-sector-v3.ts`; `/build/plane` redirects to its page): the jig's own
+  settings are the Grain alone; its Ecosystem, Habitat, Sector and Zone groups and Build are drawn by
+  `sector-world.tsx` from `worldStore` and `buildStore` (`JigCard`'s `sections` and `notes`; the Build group through
+  the shared `JigControls`), and its Copy (`copy`) adds `worldLines`. Picking a unit picks its entry zone and the view
+  travels there; a click on its page builds into the picked zone (`building()` in the engine, `withBlockAt`/
+  `withoutAsset`, `onWorld` to `worldStore`); the engine makes a part a zone (`zone <id>`), so a click remakes one.
+  The portal's page stands the portal on its own 2 × 2 m block (`PORTAL_STAND`, `PORTAL_TOP` in `start.ts`). A jig control may be `text` (a name, `TypedText`).
+- **The hand moves every view.** A jig's page that is looked round (Environment, Portal, Sector) is OrbitControls',
+  held above the ground on every change (`holdLook`). **On the Sector page a click builds** (a press under 5 px and 500
+  ms) into the zone picked: the ghost shows where (`aim`), and the engine tells the world to `onWorld`, which
+  `world.tsx` writes to `worldStore`; on Environment and Sector a right-drag pans, the wheel dollies, and it stays above
+  ground. The
+  visitor's camera (`/` and the Camera page) moves over the ground (`movement.ts`): a drag slides it, carrying on over
+  the Glide or springing back (After a drag), and the arrows and W A S D carry it while held, at the Keys' speed. Its
+  Height, Angle and Turn never move with it. The keys are the world's unless a control on the card or the sidebar has
+  focus (`busy` in the engine); a press on the world focuses the canvas and gives them back. The engine's one frame loop
+  runs while a portal opens, a drag carries on, a key is held or easing, the camera flies, or the sky/clouds flow.
+- **The map** (`minimap.tsx`, `map.ts`, Map v3; v1/v2 frozen) covers the world's floor, width by breadth, with N/E/S/W labels,
+  blocks and the camera wedge. It appears on Environment as well as visitor views; a click travels there. Its jig is
+  Size, Shows (The plane/Around the camera), Reach (10–1000 m), Turns. `world-compass.tsx` composes a Card and Text
+  over every view for cardinal directions, heading and X/Z metres. Both receive the actual camera pose (`onWhere`).
+- **Environment keys** also travel across the plane: WASD/arrows translate the orbit target and camera together.
+  Right-drag pans along the ground. A world press takes focus back; focused controls keep their own keys.
+- **The camera's keys are caught first** (`keydown` on capture): on the visitor's camera and Environment, D walks, so the design
+  system's `d` (the theme) never sees it; elsewhere `d` still flips the theme.
+- **A click on a portal flies the camera to it** (`focus.ts`): a press that moves under 5 px and lifts within 500 ms is
+  a click; the ray meets the ground and `portalUnder` names the portal. `focusOn` is where it ends (Focus's Height,
+  Angle and Zoom, standing where it sees the portal at the middle, `overlooking`), `flightAt` the flight on Flight's
+  spring with its Arc; the flight tells its values (`onEye`) and the Camera page writes them to its store, so the card
+  moves with it. The engine keeps where the camera was (`focused.before`); a click on the ground or Escape flies back.
+  `data-focus` names the portal. The engine's one frame loop
+  runs while a portal opens or a drag carries on.
+- **The pointer is the design system's ring** (Grid.md D34, World.md W10): `world.tsx` puts `data-cursor` on the body
+  where the device hovers with a fine pointer, so the canvas, the card, the sidebar, the map and anything portalled
+  wear it, filled while pressed. Never set a cursor here (no `grab`, `pointer`, `crosshair`); the engine clears the
+  `cursor: auto` OrbitControls leaves on the canvas when it lets go of it.
+- **The interface's layer lets the pointer through** (`pointer-events-none` in the root layout): a drag and the wheel
+  reach the world, and only the sidebar and the card take it back (`pointer-events-auto`). Anything new drawn over the
+  world takes it back the same way, or it cannot be clicked.
+- **Every jig's page is a playground for everyone** (his): `store.ts` keeps a store a jig, in the browser
+  (`no-origins:orbit:<jig>`), shown only on that jig's page (`settingsFor` in `world.tsx`); the world everywhere else is
+  his settings, and Reset goes back to them. The engine draws from all three (`WorldSettings`) and makes anew only what
+  changed.
+- **The portal opens** as its page comes into view and on Play (`openingAt`, `edgeAt` in `portal.ts`): it grows from a point on
+  the design system's spring (`@no-origins/ui/lib/spring`, Response and Bounce), its edge rippling, the ripple dying as
+  the spring rests; its three waves are drawn at random from the Waves range each time it opens (`drawWaves`; the
+  engine keeps each portal's draw for the opening). `buildPortal` makes each surface once and `pose(t)` moves its points round the edge; the engine
+  draws every frame only while it opens, then stops (W8). Under reduced motion it arrives open. Between the rim and the
+  ground's cut lies a collar of the ground's colour, so the moving edge never meets the ground.
+- **Nothing is lit**: every surface is a flat colour, except the portal's wall, painted a colour a row as it falls into
+  the dark, the blocks and clouds, clouds integrate cream/blush pigment and sage recesses through their gas, with cached sun/sky depth and bounded flow; block faces take adjustable sunlight and lavender shade with anchored mineral grain, the painted sky with its low sun and the powdery ground.
+- **No sign-in, no database.** The world is public and static (Admin.md §0.6).
+- `character.no-origins.com` still 308s here (`next.config.ts`).
 
-- **The agent's cell** (C2) is a cell of the field grown to a radius of three cells, six across, centred across the
-  field **at the top, one row above it**; a field too narrow or too short gives it fewer cells, kept even. Inside it the
-  agent sits (C3), drawn by `AgentCell` (`components/agent-cell.tsx`). **The cell is part of the grid**: every cell of
-  the field its circle overlaps is painted out under it (`coveredCells`), and the four in the corners of its square,
-  which it misses, stay. Its slot is `transparent`, because the `background` fill would take those corners too.
-- **Everything round the circle is a section** (C7): its heading on a row of its own — the portfolio's section label,
-  composed the same way (`SectionLabel`, `components/section.tsx`) — and its cards under it, each as many rows as it
-  has lines, never stretched to its room.
-  - **The body** (`components/appearance-card.tsx`, C4): Size, then Shade, one a row, in a card four across and two
-    down, centred under the circle, its heading on the row between them — or first in the right room where it and the
-    bar do not both fit there.
-  - **The face** (`components/face-panel.tsx`, C5, C7): a section a worn slot, flowing down the room to the circle's
-    left.
-  - **The body's own sections** (`components/body-sections.tsx`, C10, C12, C22) flow down the room to its right:
-    **Shape** (with its Material), **Rotation**, **Colour**, **Surface** (its texture and depth), **Tail** (its first
-    line the switch; off, the section is that line alone, C23) and **Rest**.
-  - **The draft's bar** (`components/versions-panel.tsx`, C6, C11) is on the field's last row under the circle, between
-    the rooms' pagers: a circle that opens the versions in a dialog (the next major over them, to publish), and a pill
-    of the agent's select, the draft's state and Publish, which makes the next minor version at a press (C19: a version
-    is `major.minor` and has no name; `lib/versions.ts` spells them) — or, for a visitor, "Yours to play with" and
-    Sign in (C24).
-- **Rooms flow and page.** A column of air stands between the circle and each room. `flow` (`lib/stage.ts`) places a
-  room's sections column by column, a section whole unless it is taller than a column, and what the room cannot hold
-  is its next page, turned by its pager on the field's last row (`Flow`); a style picked that moves its section to
-  another page turns to it. **A section folds to its heading** (C9): the heading row is its toggle, a folded section
-  flows as one row, and the page follows a section that moves. The folds are held above the rooms (`FoldProvider`,
-  `useFold`) and not saved. A field with no room beside the circle has one room under it, where the body and its
-  sections, then the face, flow, the bar on the row above its pager.
-- **Every control is `PropertyControl`** (`components/property-control.tsx`), a line of its card (`Line`, three columns
-  — label, control, value — that **every card in a room shares**, `LINE_LABEL` and `LINE_VALUE` in
-  `components/section.tsx`; the body's card placed on its own fits its label column), made from a setting's type in the
-  package's declaration (`@no-origins/ui/lib/properties`, `agent-face`, `agent-body`), never a list of its own. **One
-  grammar for every line** (C11): a number is a slider and its typed value; a choice a select across the control's and
-  the value's columns, what it offers that is not a value (a face slot's uploads, template and upload) at the end of its
-  list; a paint, and a colour by name, the design system's `ColourPicker` (C17); a switch at the control's start. The
-  value's column holds a number or nothing, and every box is 36px (Open: 36 or 40 — his decision). No button at a
-  line's end.
-- **Only what he names stands round the circle**, one piece at a time, as the motion studio's bench holds only what he
-  names (Motion.md M9): the body and its sections, the face, and the draft and its versions. Its name, its meta and its
-  personality are what he has named as coming.
-- **`/hiddenstack`** (`components/hiddenstack-studio.tsx`) is Hiddenstack's figure, the design system's
-  `HiddenstackAvatar` on the same shell. Open: `/hiddenstack`, in the code but not decided.
-
-## Who may do what (C24)
-
-**Orbit is everyone's to play with; saving is for whoever holds its permissions.** `src/proxy.ts` runs the shared gate
-with `open`: nobody is sent to the sign-in, and `/sign-in` is there for whoever saves. `src/app/actions.ts` is server
-functions for whoever asks (`@no-origins/auth/server`), the database deciding: every load says whether the page is
-`editable` — the signed-in account holds `orbit.draft.save` (asked of the database, `noo_can`) — and each write asks
-its own permission in `writer()`: `orbit.draft.save`, `orbit.version.publish`, `orbit.agent.create`,
-`orbit.style.upload`. The Owner holds them all and may give them in a role (Access.md A3).
-
-- **A visitor** loads each agent as **the version pages show, never the draft**, moves every control on the page, opens
-  the six and reads the versions, and nothing is saved: the context schedules no save, and the server refuses before
-  RLS would. The anon key's policies (`…_studio_public_read.sql`) read the agents and their versions and nothing else.
-  Do not read the draft for a visitor, and do not offer them Publish, Go back, a new agent or an upload.
-- **There are six characters** (C13, Agents.md): Bali, Kino, Zaza, Oru, Mira and Lola. The draft bar's select opens
-  one, and makes a new one by its name at the end of its list (`createCharacter`, C19) (`open` in the context settles
-  what is pending first); every action takes the open one's `itemId`, and uploads are the open character's own.
-- **Saving** (C6): the draft loads when the studio opens, saves `SAVE_AFTER` ms after the last change, whole
-  (`resolveCharacter`), on the `rev` it was loaded at; a save another device made first is refused, and the draft's bar
-  offers to load it. Publishing saves what is pending first, then makes the latest version's next minor
-  (`publish("minor")`) or, from the versions, its next major (`publish("major")`), counted from the latest and never
-  from the one pages show.
-- **Locally**: with no keys the page is `offline`, and it is all there is. With the local stack's two keys in
-  `.env.local` (`.env.example`) the studio shows the published agents and the bar offers the sign-in; a session made on
-  any app on localhost is this one too, since a localhost cookie is every port's.
-
-## What is true here and easy to get wrong
-
-- **Orbit holds the look, never the motion** (C22, Motion.md M23): what the agent is, and how it rests — the
-  declaration's `set: "look"`, a look a motion may move marked `pose`. How it moves (Breath, Squeeze, a jump's
-  settings) is every agent's and the motion studio's, and a character saves none of it (`resolveCharacter`). Do not put
-  a motion setting on a card here; the agent still plays its rest, by the shared values.
-- **The agent is the design system's `Agent`** (`@no-origins/ui/components/agent`), drawing one frame of the package's
-  sphere (`@no-origins/ui/lib/sphere-motion`, Motion.md M17), from the look through `sphereMotionOf(look)`
-  (`@no-origins/ui/lib/agent-body`). Never a copy of its model or its painting here: the motion studio's stage draws the
-  same component. A look with nothing set is the package's defaults, so a default changed there shows here. No tokens
-  are written here.
-- **It plays its rest, and nothing else** (C3): a still course (`sphereStill`), one frame of it
-  (`sphereFrame(course, t, t)`) painted through the `Agent`'s ref on every animation frame — breathing and blinking on
-  one clock from when the cell mounts, carried on when the look changes. It never jumps. Under reduced motion it paints
-  its first frame and stops. Never pass the `Agent` a still `frame` here as well: it repaints that on every change of
-  the look, and the breath would flick to its start while a slider is dragged.
-- **A look is held whole.** Save through `resolveCharacter`, never a partial look: a version is frozen, and one that
-  said "the default" would change the day a default did.
-- **An upload is cleaned in the page and checked again on the server** (C8): `lib/clean-svg.ts` lines it up by its
-  template's Guides (the cross to the anchor, the head to a radius of 100), flattens every shape through its
-  transforms (`svgpath`), resolves its colours and refuses what the system never draws; `lib/drawing.ts` has the
-  template (`templateSvg`, `templatePartOf`) and `strictDrawing`, the server's refusal of anything half-right. The
-  shape is the package's `DrawingData` (`@no-origins/ui/lib/agent-face`); the agent draws a look's `upload:<id>` from
-  the `drawings` it is handed (every drawing version's shapes, loaded with the draft). The file goes to the private
-  `assets` bucket before its version is written, so a frozen version never names a file that is not there.
-- **The slider's body springs after a jump**: a typed value moves the head at once and the lime body follows. That is
-  the system's slider, not lag here.
-- **The cell is its nest.** The sphere's size is a share of its nest, and the nest here is the whole cell, so its
-  geometry is `{ cell: diameter, gap: 0 }`. The cell is drawn as the motion studio draws a nest: the muted tint in a
-  lime hairline.
-- **The cells it covers are painted out in SVG, not masked by the slot.** The `background` fill's corners are a cell's
-  curve, which runs along the corner cells' rings; the outer edge of their dashes showed through it, and it hid the
-  corner cells he wants kept.
-- **The cell is abstract geometry, by his spec**, drawn in SVG round the `Agent` like the motion studio's nests. That
-  is the one element here that is not `@no-origins/ui`. Every control is.
-
-## Reviewing it
-
-`pnpm review` boots this app on :3005 and screenshots `/` and `/hiddenstack` (`ORBIT_ROUTES` in `e2e/review.spec.ts`)
-on desktop and mobile in both themes — the signed-in page on his machine, where the sweep's browser is signed in first
-(`e2e/global-setup.ts`), the offline page in CI. `pnpm review e2e/review.spec.ts -g orbit` runs only this app's
-routes. Gitignored helpers in `e2e/.mcp/`, each with :3005 running (and the local stack where it signs in):
-
-- **They read only:** `orbit-public.mjs <out>` (C24's probe: a visitor reads the bar, lists the agents, types a Size
-  and counts the server actions it sends — none — then, signed in as the owner, checks Publish, *New agent…* and the
-  versions' actions); `orbit-look.mjs <out> [light|dark] [WxH …]` (every box with its cells, anything drawn outside its
-  box); `orbit-pages.mjs <out> [WxH] [scheme] [styled]` (every page of every room, anything clipped);
-  `orbit-flow.mjs`, `orbit-fold.mjs`, `orbit-controls.mjs`, `orbit-chooser.mjs`, `orbit-signed.mjs`. A control is
-  named by its section ("Body size value", "Brows style"), and the probes turn to a section's page first
-  (`toSection`).
-- **They write his local database**, so clean up after them — versions are frozen, so a test one goes with the
-  trigger disabled for it alone, locally only: `orbit-versions.mjs <out> [name]` (makes an agent and publishes it),
-  `orbit-upload.mjs <out>` (uploads a drawing and its files), `orbit-rotate.mjs` (autosaves into the draft: snapshot
-  and restore it around the run).
-
-## Deploying
-
-The Vercel project is named `character`, its root directory `apps/orbit` and its domain `orbit.no-origins.com`;
-`character.no-origins.com` is still attached and 308s to it from `next.config.ts`, path and query intact. The hosted
-Supabase lists both among its redirect URLs (`supabase/config.toml`). `vercel.json` is the same file as every app's.
+The canvas carries `data-ready="true"` once its first frame is drawn, `data-backend` (`webgpu` or `webgl`), and
+`data-opening` while a portal opens, for the visual review, which visits `/` and each jig's page once they rest.

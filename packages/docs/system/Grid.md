@@ -329,7 +329,9 @@ across, a 2px line on nothing, filled while a button is held (`:active`), its ce
 system's cursor, drawn from an image** (globals.css, a 2x through `image-set`), over the whole field, a link's hand and
 a button's included. The system draws it where the hand is; it is never a div moved on every pointer move, which costs
 a whole-page layerize a move and trails the hand. While a slider's head is held (`data-held`) the pressed cursor stays
-the ring, and the head goes into it (Motion.md M16).
+the ring, and the head goes into it (Motion.md M16). **The ring is the system's, not the grid's alone**: any element
+that carries `data-cursor` wears it over everything inside it; the grid sets it on its field, and a surface off the grid
+on its own (Orbit's world, World.md W10), each only where the device hovers with a fine pointer.
 
 The cell the pointer is on draws its own dashes — its ring (D40) — lit at once, and a cell it leaves fades back over
 500ms (`LIT_FADE_MS`). The cell is found from the field's numbers, never by hit-testing and never through React state:
