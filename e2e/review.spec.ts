@@ -22,9 +22,9 @@ export const ENGINEERING_ROUTES = ["/", "/learn/jido"];
 export const MOTION = "http://localhost:3004";
 export const MOTION_ROUTES = ["/", "/concepts/split", "/concepts/dock", "/concepts/inspector"];
 
-/** Orbit (Orbit.md), the agents' app, a fifth, on :3005 — the agent's cell on the grid, and Hiddenstack's figure. */
+/** Orbit (World.md), the world, a fifth, on :3005 — the start location, and the builder's pages (W14). */
 export const ORBIT = "http://localhost:3005";
-export const ORBIT_ROUTES = ["/", "/hiddenstack"];
+export const ORBIT_ROUTES = ["/", "/build/world", "/build/environment", "/build/camera", "/build/map", "/build/portal", "/build/sector"];
 
 /** Home (Home.md), the model of the house, a sixth, on :3006 — one route, the model and its tour. */
 export const HOME = "http://localhost:3006";
@@ -79,6 +79,12 @@ for (const app of APPS) {
       await page.waitForFunction(() => {
         const canvas = document.querySelector<HTMLElement>('[data-slot="model-view"] canvas');
         return !canvas || (canvas.dataset.ready === "true" && (!canvas.dataset.picture || canvas.dataset.picture === "100"));
+      }, null, { timeout: 5_000 }).catch(() => undefined);
+      // The world (World.md) says when its first frame is drawn and its portals have opened, or that the device can
+      // draw no 3D.
+      await page.waitForFunction(() => {
+        const canvas = document.querySelector<HTMLElement>('[data-slot="world"] canvas');
+        return !canvas || (canvas.dataset.ready === "true" && !canvas.dataset.opening) || canvas.dataset.unavailable === "true";
       }, null, { timeout: 5_000 }).catch(() => undefined);
       await page.waitForTimeout(400);
 

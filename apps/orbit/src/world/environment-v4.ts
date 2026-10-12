@@ -1,0 +1,181 @@
+import { COLOURS } from "./colours";
+import type { Jig } from "./jig";
+import { BLOCK, type Block } from "./orbit";
+
+/** Environment v4: peach sunlight, lavender shade and mineral grain from his landscape reference.
+ * Versions 2 and 3 and their builders are frozen alongside this version; these starting values are his to tune.
+ */
+export type EnvironmentConfig = {
+  /** The sphere's radius, in metres. */
+  radius: number;
+  /** Atmosphere: warm horizon, sunlight's direction and tint, cool shadows, and surface grain in world metres. */
+  horizon: string;
+  sunlight: string;
+  shadow: string;
+  warmth: number;
+  sunHeight: number;
+  sunTurn: number;
+  shade: number;
+  grain: number;
+  grainSize: number;
+  /** The dome: its colour, how much of it shows over what is behind it (0 to 1), how bright its shine (0 to 1). */
+  dome: string;
+  tint: number;
+  gloss: number;
+  /** The sky's colour, flat; the clouds': their colour, how many, and how far above the dome's top, in metres. */
+  sky: string;
+  clouds: string;
+  cloudCount: number;
+  cloudHeight: number;
+  /**
+   * The water: its colour; its level, in metres over the sphere's bottom (below it where negative); how big its waves
+   * are (0, still colour, to 1); and how fast they move (0, still).
+   */
+  water: string;
+  waterLevel: number;
+  waves: number;
+  waveSpeed: number;
+  /** Higher viscosity broadens and slows the pastel water's ripples; reach bounds its disc outside the dome. */
+  viscosity: number;
+  waterReach: number;
+  boundary: number;
+  /** The fog: its colour, and where it starts and where it is whole, in metres from the camera. */
+  fog: string;
+  fogFrom: number;
+  fogTo: number;
+  /** The blocks' colour, every block standing (`orbit.ts`), and how they are built: the tool, and the level placed on. */
+  ground: string;
+  blocks: Block[];
+  tool: string;
+  level: number;
+};
+
+/**
+ * The start location as blocks (mine): three by three under the visitor, on level −1, so the visitor stands on their
+ * tops, the floor of level 0, where the ground was.
+ */
+const START_BLOCKS: Block[] = [-1, 0, 1].flatMap((row) => [-1, 0, 1].map((column) => [column, row, -1] as const));
+
+/** Starting atmosphere from his reference: blue-lavender overhead, apricot horizon, rose water,
+ * pale sand, a low peach sun, cool shadows and fine grain. These are a first pass for him to tune.
+ */
+export const ENVIRONMENT_START: EnvironmentConfig = {
+  radius: 60,
+  horizon: "#ffdfbd",
+  sunlight: "#f2bfa6",
+  shadow: "#8b82b3",
+  warmth: 0.55,
+  sunHeight: 12,
+  sunTurn: 135,
+  shade: 0.45,
+  grain: 0.18,
+  grainSize: 0.06,
+  dome: "#f7f1f2",
+  tint: 0.28,
+  gloss: 0.12,
+  sky: "#9caee5",
+  clouds: "#f7f1f2",
+  cloudCount: 28,
+  cloudHeight: 10,
+  water: "#e6a3ad",
+  waterLevel: 0,
+  waves: 0.25,
+  waveSpeed: 0.5,
+  viscosity: 0.7,
+  waterReach: 2.5,
+  boundary: 0.25,
+  fog: "#ffdfbd",
+  fogFrom: 80,
+  fogTo: 1500,
+  ground: "#efe5e8",
+  blocks: START_BLOCKS,
+  tool: "place",
+  level: 0,
+};
+
+export const ENVIRONMENT_JIG: Jig<EnvironmentConfig> = {
+  name: "Environment",
+  version: 4,
+  start: ENVIRONMENT_START,
+  groups: [
+    {
+      title: "The Orbit",
+      controls: [{ kind: "number", key: "radius", label: "Radius", min: 40, max: 200, step: 5, marks: 20, unit: "m" }],
+    },
+    {
+      title: "Light and texture",
+      note: () => "Peach light, lavender shade and fine mineral grain. Grain stays on the surface as you move.",
+      controls: [
+        { kind: "colour", key: "horizon", label: "Horizon", options: COLOURS },
+        { kind: "colour", key: "sunlight", label: "Sunlight", options: COLOURS },
+        { kind: "colour", key: "shadow", label: "Shadow", options: COLOURS },
+        { kind: "number", key: "warmth", label: "Warmth", min: 0, max: 1, step: 0.05, marks: 0.25 },
+        { kind: "number", key: "sunHeight", label: "Sun height", min: 0, max: 90, step: 1, marks: 15, unit: "°" },
+        { kind: "number", key: "sunTurn", label: "Sun turn", min: -180, max: 180, step: 1, marks: 45, unit: "°" },
+        { kind: "number", key: "shade", label: "Shade", min: 0, max: 1, step: 0.05, marks: 0.25 },
+        { kind: "number", key: "grain", label: "Grain", min: 0, max: 0.5, step: 0.01, marks: 0.1 },
+        { kind: "number", key: "grainSize", label: "Grain size", min: 0.02, max: 0.3, step: 0.01, marks: 0.07, unit: "m" },
+      ],
+    },
+    {
+      title: "Dome",
+      controls: [
+        { kind: "colour", key: "dome", label: "Colour", options: COLOURS },
+        { kind: "number", key: "tint", label: "Tint", min: 0, max: 0.6, step: 0.02, marks: 0.1 },
+        { kind: "number", key: "gloss", label: "Gloss", min: 0, max: 1, step: 0.05, marks: 0.25 },
+        { kind: "number", key: "boundary", label: "Contours", min: 0, max: 1, step: 0.05, marks: 0.25 },
+      ],
+    },
+    {
+      title: "Sky and clouds",
+      controls: [
+        { kind: "colour", key: "sky", label: "Sky", options: COLOURS },
+        { kind: "colour", key: "clouds", label: "Clouds", options: COLOURS },
+        { kind: "number", key: "cloudCount", label: "Count", min: 0, max: 60, step: 1, marks: 10 },
+        { kind: "number", key: "cloudHeight", label: "Above", min: 0, max: 100, step: 1, marks: 10, unit: "m" },
+      ],
+    },
+    {
+      title: "Water",
+      note: () => "A soft pastel layer below the dome. Viscosity slows and broadens the ripples; Reach gives it a finite edge.",
+      controls: [
+        { kind: "colour", key: "water", label: "Colour", options: COLOURS },
+        { kind: "number", key: "waterLevel", label: "Level", min: -50, max: 400, step: 1, marks: 50, unit: "m" },
+        { kind: "number", key: "waves", label: "Waves", min: 0, max: 1, step: 0.05, marks: 0.25 },
+        { kind: "number", key: "waveSpeed", label: "Speed", min: 0, max: 3, step: 0.1, marks: 0.5, unit: "×" },
+        { kind: "number", key: "viscosity", label: "Viscosity", min: 0, max: 1, step: 0.05, marks: 0.25 },
+        { kind: "number", key: "waterReach", label: "Reach", min: 1.25, max: 5, step: 0.25, marks: 0.75, unit: "×" },
+      ],
+    },
+    {
+      title: "Fog",
+      controls: [
+        { kind: "colour", key: "fog", label: "Colour", options: COLOURS },
+        { kind: "number", key: "fogFrom", to: "fogTo", label: "Distance", min: 0, max: 3000, step: 10, marks: 500, unit: "m" },
+      ],
+    },
+    {
+      title: "Blocks",
+      note: (config) =>
+        `${config.blocks.length} ${config.blocks.length === 1 ? "block" : "blocks"}, each ${BLOCK.width} × ${BLOCK.length} × ${BLOCK.height} m. Click the world to ${
+          config.tool === "remove" ? "take away the block under the pointer" : "place a block on the level or against a block"
+        }; drag to look round, right-drag to move, the wheel to come nearer.`,
+      controls: [
+        { kind: "colour", key: "ground", label: "Colour", options: COLOURS },
+        {
+          kind: "choice",
+          key: "tool",
+          label: "Tool",
+          options: [
+            { value: "place", label: "Place" },
+            { value: "remove", label: "Remove" },
+          ],
+        },
+        // A level is a block's height (1 m): as many as the largest sphere holds, below the start's floor and above it.
+        { kind: "number", key: "level", label: "Level", min: -200, max: 199, step: 1, marks: 50 },
+      ],
+    },
+  ],
+  // What has been built is sent back with the settings: every block, as [column, row, level].
+  copy: (config) => [`Blocks (${config.blocks.length}): ${JSON.stringify(config.blocks)}`],
+};

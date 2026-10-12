@@ -235,8 +235,9 @@ function ScrollArea({
     fadeAt: 0,
   })
 
-  // A ring cursor to hold it: the grid's (Grid.md D34). Elsewhere the cursor's image is left alone.
-  const ringCursor = () => !!viewport.current?.closest('[data-slot="grid"][data-cursor]')
+  // A ring cursor to hold it: the system's, wherever an element carries it, the grid's or a surface's off the grid
+  // (Grid.md D34). Elsewhere the cursor's image is left alone.
+  const ringCursor = () => !!viewport.current?.closest("[data-cursor]")
 
   const levelNow = (c: CursorLiquid, now: number) => {
     if (!c.motion) return c.to
