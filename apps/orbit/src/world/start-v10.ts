@@ -1,4 +1,4 @@
-import { eyeOf, fovOf, startAt, type CameraConfig } from "./camera";
+import { eyeOf, fovOf, startAt, type CameraConfig } from "./camera-v8";
 import type { EnvironmentConfig } from "./environment-v10";
 
 /**

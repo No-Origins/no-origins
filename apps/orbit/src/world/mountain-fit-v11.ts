@@ -1,0 +1,20 @@
+import { mountainExtent } from "./mountain-profile-v11";
+import { WORLD_SIZE } from "./orbit";
+import type { MountainConfig } from "./mountain-jig-v11";
+import type { Mountain } from "./mountains";
+
+/** W56: shared bounds for rendering/framing, including the curved body and separate head. */
+export function mountainFits(layout: Mountain[], configs: MountainConfig[], spacing: number) {
+  const footprints = configs.map((c) => mountainExtent(c).radius);
+  return layout.map((mountain, index) => {
+    const foot = footprints[index];
+    const room = WORLD_SIZE.diameter / 2 - Math.hypot(mountain.x, mountain.z) - 20;
+    let scale = Math.min(1, room / foot);
+    layout.forEach((other, i) => {
+      if (i === index) return;
+      const roomBetween = Math.hypot(mountain.x - other.x, mountain.z - other.z) - spacing;
+      scale = Math.min(scale, roomBetween / (foot + footprints[i]));
+    });
+    return { scale, radius: foot * scale };
+  });
+}

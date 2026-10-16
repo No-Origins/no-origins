@@ -1,13 +1,13 @@
 import * as THREE from "three/webgpu";
-import { cameraPosition, float, mix, mx_noise_float, mx_noise_vec3, positionWorld, smoothstep, uniform, vec3 } from "three/tsl";
+import { cameraPosition, float, hash, mix, mx_noise_float, mx_noise_vec3, positionWorld, screenCoordinate, smoothstep, uniform, vec3 } from "three/tsl";
 import { sunOf } from "./atmosphere";
-import type { EnvironmentConfig } from "./environment";
+import type { AtmosphereSettings } from "./environment";
 
 /** Pastel gases on one sky shell. A direction-space field has no UV seam or pole singularity.
  * Two noise scales and one domain warp suggest thick rolling gases without volume marching or texture assets.
  * Time comes from the sky's own speed clock; all artistic controls are uniforms.
  */
-export function buildFluidSky(environment: EnvironmentConfig) {
+export function buildFluidSky(environment: AtmosphereSettings) {
   const clock = uniform(0);
   const paint = uniform(new THREE.Color(environment.sky));
   const pigment = uniform(new THREE.Color(environment.skyPigment));
@@ -36,11 +36,13 @@ export function buildFluidSky(environment: EnvironmentConfig) {
   const facing = direction.dot(sun);
   const sunset = facing.max(0).pow(8).mul(warmth.mul(0.35));
   const material = new THREE.MeshBasicNodeMaterial({ side: THREE.BackSide, depthWrite: false, fog: false });
-  material.colorNode = mix(gases, light, sunset); // W28: diffuse light, no hard sun disc in the powder target.
+  // W33: a pixel's worth of dither keeps the blue-to-peach gradient from banding.
+  const dither = hash(screenCoordinate.x.add(screenCoordinate.y.mul(4096))).sub(0.5).mul(1.5 / 255);
+  material.colorNode = mix(gases, light, sunset).add(dither); // W28: diffuse light, no hard sun disc in the powder target.
   const mesh = new THREE.Mesh(new THREE.SphereGeometry(10000, 48, 32), material);
   mesh.name = "open-sky-background";
   mesh.renderOrder = -3;
-  const set = (next: EnvironmentConfig) => {
+  const set = (next: AtmosphereSettings) => {
     paint.value.set(next.sky); pigment.value.set(next.skyPigment); horizon.value.set(next.horizon);
     light.value.set(next.sunlight); sun.value.copy(sunOf(next)); warmth.value = next.warmth;
     amount.value = next.skyFlow; scale.value = next.skyScale; viscosity.value = next.skyViscosity;

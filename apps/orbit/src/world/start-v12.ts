@@ -1,4 +1,4 @@
-import { eyeOf, fovOf, startAt, type CameraConfig } from "./camera";
+import { eyeOf, fovOf, startAt, type CameraConfig } from "./camera-v8";
 import { BLOCK_COLOUR, metresOf, type Box } from "./hierarchy";
 
 /**
@@ -33,7 +33,7 @@ export const portalsOn = (view: ViewName): Cell[] => (view === "portal" ? [AHEAD
  */
 export const PORTAL_STAND: Box = (() => {
   const { x, z } = centreOf(AHEAD);
-  return { id: "portal-stand", zone: "portal-stand", colour: BLOCK_COLOUR, from: [x - 1, z - 1, 0], to: [x + 1, z + 1, 1] };
+  return { id: "portal-stand", sector: "portal-stand", colour: BLOCK_COLOUR, from: [x - 1, z - 1, 0], to: [x + 1, z + 1, 1] };
 })();
 
 /** The top of the portal's block, in metres: where the portal is cut. */

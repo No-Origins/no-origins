@@ -299,18 +299,22 @@ function StillAgent({ size }: { size: number }) {
   );
 }
 
-/** The colour picker, live (Orbit.md C17): the agent's paints, one picked, its name under them. */
+/**
+ * The colour picker, live (Orbit.md C17): the agent's paints, one picked, its name under them; then the same paints
+ * with several picked (`multiple`, World.md W91: a grove's colours), their names under them.
+ */
+// The paints in the rows the system names them in (the root CLAUDE.md, rule 7): the accents, then the agents' seven.
 function PickedColour() {
   const [paint, setPaint] = React.useState("violet");
+  const [paints, setPaints] = React.useState<string[]>(["violet", "teal"]);
+  const options = AGENT_PAINTS.map((p) => ({ value: p.value, label: p.label, colour: p.fill, group: p.value === "lime" || p.value === "violet" ? "Accents" : "Agents" }));
+  const names = (values: readonly string[]) => values.map((value) => AGENT_PAINTS.find((p) => p.value === value)?.label).join(", ");
   return (
-    <div className="flex w-72 flex-col gap-2">
-      <ColourPicker
-        aria-label="Paint"
-        value={paint}
-        onValueChange={setPaint}
-        options={AGENT_PAINTS.map((p) => ({ value: p.value, label: p.label, colour: p.fill }))}
-      />
-      <Text role="caption">{AGENT_PAINTS.find((p) => p.value === paint)?.label}</Text>
+    <div className="flex w-full flex-col gap-2">
+      <ColourPicker aria-label="Paint" value={paint} onValueChange={setPaint} options={options} />
+      <Text role="caption">{names([paint])}</Text>
+      <ColourPicker multiple aria-label="Paints" value={paints} onValueChange={setPaints} options={options} />
+      <Text role="caption">{names(paints)}</Text>
     </div>
   );
 }
@@ -571,9 +575,9 @@ export const MOLECULES: PageContent = {
       },
       {
         id: "ColourPicker",
-        span: CARD(3),
+        span: CARD(5),
         render: () => (
-          <Specimen name="ColourPicker" note="Every pick of a colour: swatches, one a colour, each named in its title.">
+          <Specimen name="ColourPicker" note="Every pick of a colour: small swatches, each named in a tooltip, a family a row; one picked, or several (multiple).">
             <PickedColour />
           </Specimen>
         ),

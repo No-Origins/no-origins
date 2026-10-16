@@ -3,7 +3,7 @@
 How much room goes between things and inside them: one base scale, and on it every space named by its job. The tokens
 are in `packages/ui/src/styles/globals.css`; the design site's Tokens → Spacing shows them.
 
-Current as of 2026-10-09. Earlier versions and what they decided are in git history.
+Current as of 2026-10-15. Earlier versions and what they decided are in git history.
 
 **SP1 — Spacing is two layers: a base scale, and jobs on it.** Decided 2026-10-09 (his pick, E of five: a stepped
 scale alone, spacing following the cell, spacing by job alone, everything a fraction of the cell, and the two layers).
@@ -28,7 +28,7 @@ grid uses. A space off these steps (shadcn's 6, 10, 14, 20px) is to move onto th
 |---|---|---|
 | `inset` | 32px, or more (SP4) | A box's padding: a card, a dialog, a slot with a surface (its default), an alert. 32px since his "I don't feel the padding is enough … go to next two tokens up" (2026-10-09), from 16 |
 | `inset-tight` | 12px, or more (SP4) | A dense box's padding: a menu's panel, a list of choices, the showcase's sidebar list |
-| `inset-pill` | 16px, or more (SP4) | A box one cell tall, a pill, where the corner is half the box; the same on every side |
+| `inset-pill` | 16px, or more (SP4) | A box one cell tall, a pill, where the corner is half the box; the same on every side. A jig's cards (SP6) |
 | `stack` | 8px | Between things stacked in a box: a heading and its text, one paragraph and the next |
 | `stack-tight` | 4px | Between a label and what it names, a title and its note |
 | `inline` | 8px | Between things side by side in a row: controls, chips |
@@ -52,7 +52,18 @@ field is the gutter (Grid.md D15); a box has no margin, and a cell of air betwee
 the grid. Inside a box the space between things is a gap on their container (`gap-stack`, `gap-inline`), not a margin
 on one of them.
 
+**SP6 — A jig's cards pad at `inset-pill`.** Decided 2026-10-15 (his pick, A of five: `inset-pill` throughout, the
+padding following the fold, a folded group exactly one cell tall, folded groups as pill rows with only the open ones
+cards, and a 24px job for jigs). A jig is a column of cards of controls, each group a card that folds to its name.
+Folded, the card is a box under a cell tall, so it is a pill (Grid.md D39); at `inset` it stood about 82px, past the
+cell, and its sides went straight (his: "the cards when collapsed are not taking rounded sides"). Open, it keeps the
+same inset, so its name and its controls stand on one edge, and the card's own gap (`--card-spacing`) parts the name
+from the controls. `inset-tight` was too close (his: "very minimum padding … no space to breathe"). The jig sets the
+card's `--card-spacing` to the job.
+
 ## Open
 
 - The components and apps still use spaces off the base (SP2); they move onto it, and a lint keeps them there.
 - Whether `stack` and `inline` stay the same size.
+- The jigs off SP6: the motion studio's pad a plain 16px, which its column's arithmetic counts (a folded card's
+  height, the insets, a token card's chrome), and the portfolio's accent jig pads at `inset-tight`. Both move onto it.

@@ -17,7 +17,7 @@ it before editing the app (its `AGENTS.md` points there and carries the Next.js 
 | Admin | `apps/admin` | admin.no-origins.com | 3002 | People, Roles, Invitations, Audit and Settings (Access.md); `admin.open` and a second factor |
 | Engineering | `apps/engineering` | engineering.no-origins.com | 3003 | The engineering publish library: public explanations, no auth |
 | Motion studio | `apps/motion` | motion.no-origins.com | 3004 | Where the system's motion is designed (Motion.md); `motion.open` |
-| Orbit | `apps/orbit` | orbit.no-origins.com (character.no-origins.com 308s here) | 3005 | The world: the 3D world that becomes the base UI, every app a place in it (World.md, a draft); public, no database |
+| Orbit | `apps/orbit` | orbit.no-origins.com (character.no-origins.com 308s here) | 3005 | The world: the 3D world that becomes the base UI, every app a place in it (World.md, a draft); public, its elements' variants, its world and its environment read live from the database, his to save (World.md W73, W75) |
 | Home | `apps/home` | home.no-origins.com | 3006 | A three.js model of the house he is building, and its tour (Home.md); `home.open` |
 | Status | `apps/status` | status.no-origins.com | 3007 | Where every app stands; public, no database (Status.md) |
 | Login | `apps/auth` | auth.no-origins.com | 3008 | Signing in, making an account, the apps one may open, one's account (Admin.md §8.4) |
@@ -87,8 +87,9 @@ shadcn/ui, style `radix-sera`, base `radix`, base colour `neutral`, RTL on: 74 c
 7. **The agent's paints are the agent's** (Orbit.md C20): lime, violet and `--agent-*` (pink, red, orange, gold, green,
    teal, blue), each with its ink, at least 3.3 : 1 from the page and the nest in both themes. Nothing else paints with
    them; widening the palette is his call. A retired paint's name reads as its replacement (`RENAMED_PAINTS`).
-8. **Every pick of a colour is a `ColourPicker`**: swatches, one a colour, the picked one pressed, each named in its
-   title. Never a select of colour names or a row of worded toggles.
+8. **Every pick of a colour is a `ColourPicker`**: swatches at the small size, one a colour, the picked one pressed,
+   each named in a tooltip, in rows, a palette's family a row (Orbit.md C17). Never a select of colour names or a row
+   of worded toggles.
 9. **One radius, half the cell** (Grid.md D39): `--radius` is half `--grid-cell` (which `Grid` writes; off the grid
    globals.css reckons it from the viewport), and every box is `rounded-lg`, so a 1×1 is a circle and a box a cell tall
    a pill. Never a second radius, never `rounded-none` on a box, except a fill meeting a divider inside a box (4px
@@ -140,7 +141,8 @@ shadcn/ui, style `radix-sera`, base `radix`, base colour `neutral`, RTL on: 74 c
   (Grid.md D5); nothing is squeezed.
 - **Controls read as one system.** Label, control and value columns shared across every card of a group; one widget
   per value type; one control height (36px, the system's small); a control's actions in its own menu, never buttons at
-  a line's end; things grouped by what they are. Probe each control's edges to check. Open: the components default to
+  a line's end, except Orbit's jig cards, whose actions are icon buttons, a click each, named in a tooltip (his,
+  World.md W76); things grouped by what they are. Probe each control's edges to check. Open: the components default to
   40px; one height is his to decide.
 - **Toggles that write data are a draft, saved once**: changed rows marked, a count with Discard and Save, one
   transaction (an RPC, as `noo_save_role`) so a refusal leaves everything as it was, and a warning before leaving
@@ -222,7 +224,7 @@ Nine Vercel projects in the `no-origins` team, one an app, Root Directory `apps/
 `design`, `admin`, `engineering`, `motion`, `character` (Orbit: root `apps/orbit`, orbit.no-origins.com;
 character.no-origins.com 308s from `apps/orbit/next.config.ts`), `home`, `status`, `auth`. Production is `main`. The
 admin, motion, Home and the login carry the two `NEXT_PUBLIC_SUPABASE_*` variables (without them production answers
-503; Orbit's project still has them, unread since the world has no sign-in); Home also the Blob store `home-house`. Open: Turnstile's site key joins the login's when he has made the
+503; Orbit's too, read in the browser for the published elements and the world, World.md W73: without them it draws its published copy in code); Home also the Blob store `home-house`. Open: Turnstile's site key joins the login's when he has made the
 site. The hosted Supabase lists every app's domain among its redirect URLs (`supabase/config.toml`). A new project:
 `vercel link` from the app's folder, `vercel project update --root-directory`, `vercel git connect`, `vercel domains
 add`, `vercel env add --type config` for the two variables, then skip-unaffected through the API
@@ -252,7 +254,7 @@ plan's daily deployments; `**`, not `*`, because branch names here have a `/`.
 
 **Which apps a push builds is Vercel's call.** Every project skips unaffected deployments, reading the pnpm graph
 against the last deployed commit: a project builds when its folder changed, a workspace package it depends on changed
-(`packages/ui`: all nine; `packages/auth`: the admin, motion, Home, the login; `packages/docs` and `supabase/`:
+(`packages/ui`: all nine; `packages/auth`: the admin, motion, Orbit, Home, the login; `packages/docs` and `supabase/`:
 none) or the lockfile moved its dependencies; a skipped one shows *Canceled*. **A change outside the workspace rebuilds
 all nine**, one at a time: root files (`CLAUDE.md`, `AGENTS.md`, `playwright.config.ts`), `.github/`, `.changeset/`,
 `e2e/`, `services/`; a new top-level folder no app reads should be a workspace package, as `supabase/` is. **No

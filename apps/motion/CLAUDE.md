@@ -67,7 +67,8 @@ specimen's jig (Scene); the motion is the tokens. A new family gets the timeline
 - `src/components/studio-jigs.tsx` — the token jigs: `jigSections` groups a family's tokens, `TokenJig` is a group's
   card, paged by `linePages` with each control's real height, and **`ParameterControl` is every token's control**: its
   label and its value typed beside it, the slider (or a select, for an ease or a choice; the `ColourPicker` for a
-  choice of colours) under them, and what it moves in a line. Also the head's `PresetSelect`, `PresetJig` (a narrow
+  choice of colours, on a line of its own, its swatches in rows the pitch counts) under them, and what it moves in a
+  line. Also the head's `PresetSelect`, `PresetJig` (a narrow
   field's Presets), `ResetMotion` and `CopySettings`.
 - `src/components/jigs.tsx` — the `Timeline` and the `Specimen` (Scene: Columns and Rows, then the family's own options,
   `SPECIMEN`), built from `Jig`, `Control` and `Controls`, which carry the jigs' rhythm: 12px down, 24px across, a

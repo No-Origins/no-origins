@@ -1,5 +1,6 @@
 /**
- * The Orbit: an open box of his size (World.md W29), centred at x/z 0 and standing on y 0, and the blocks' sizes. The
+ * The Orbit: an open cylinder a kilometre across and a kilometre high (World.md W29, W33, W42), centred at x/z 0 and
+ * standing on y 0, its ceiling the clouds, and the blocks' sizes. The
  * lattice version 4 of the sector builds on, a block's own size and colour in a zone of the hierarchy, is
  * `hierarchy.ts`; the lattice below, a block of one size at `[column, row, level]` round the start, is the frozen
  * versions'.
@@ -8,23 +9,29 @@
 export const PLANE_SIZE = 1000;
 
 /**
- * The world's size, in metres (his, W29: "Can we set the world width, breadth and height?"): its width west to east (x),
- * its breadth north to south (z), each centred on the middle, and its height up from its floor, y 0. Every camera and
- * everything built stays inside it; the sky and the clouds are beyond it.
+ * The world's size, in metres (W42): a cylinder (his: "Instead of cuboid shaped world, lets make it cylindrical"), its
+ * diameter across the floor, centred on the middle, and its height up from its floor, y 0. Every camera and everything
+ * built stays inside it; its top is the clouds' underside (W33), and cloud walls conceal everything beyond its round side (W43).
  */
-export type WorldSize = { readonly width: number; readonly breadth: number; readonly height: number };
+export type WorldSize = { readonly diameter: number; readonly height: number };
 
-/** The world as it starts (mine, his to tune): W23's kilometre square, a kilometre high, so nothing it held moves. */
-export const WORLD_SIZE_START: WorldSize = { width: PLANE_SIZE, breadth: PLANE_SIZE, height: 1000 };
+/** The world's size, fixed (his, W33: "It should be 1000m length, width and height"): a kilometre across and high. */
+export const WORLD_SIZE: WorldSize = { diameter: 1000, height: 1000 };
+
+/** The box the frozen World versions 1 to 3 were: its width west to east (x), its breadth north to south (z), its height. */
+export type BoxSize = { readonly width: number; readonly breadth: number; readonly height: number };
+
+/** Where the frozen World versions 1 and 2 started, and version 3's fixed size: the kilometre cube. */
+export const WORLD_SIZE_START: BoxSize = { width: 1000, breadth: 1000, height: 1000 };
 
 /**
- * What each of the world's sizes may be (mine): across and along on a step of 2 m, so the middle stays on a whole metre
- * and the edges on the lattice (W4); up, a metre at a time, from 10 m, room for a camera over a block.
+ * What World version 2, frozen, let each size be: 500 m at a time each way (his: "The steps should increase with 500m
+ * only"), from 500 m; across and along to 4000 m, up to 2000 m (mine).
  */
-export const WORLD_SIZE_RANGE: Record<keyof WorldSize, { min: number; max: number; step: number }> = {
-  width: { min: 20, max: 4000, step: 2 },
-  breadth: { min: 20, max: 4000, step: 2 },
-  height: { min: 10, max: 2000, step: 1 },
+export const WORLD_SIZE_RANGE: Record<keyof BoxSize, { min: number; max: number; step: number }> = {
+  width: { min: 500, max: 4000, step: 500 },
+  breadth: { min: 500, max: 4000, step: 500 },
+  height: { min: 500, max: 2000, step: 500 },
 };
 
 /** A box's size on a lattice, in metres: across (x), along (z) and up (y). */
@@ -175,43 +182,83 @@ export function slotUnder(origin: Vec, direction: Vec, blocks: readonly Block[],
 /** The lowest a camera stands, in metres over the world's floor (W23). */
 const LOWEST = 0.2;
 
-/** How far from the middle a camera may be, across (x) and along (z), and how high: half a metre inside each side. */
-export function edgesOf(size: WorldSize): { x: number; z: number; top: number } {
-  return {
-    x: Math.max(0, size.width / 2 - INSIDE),
-    z: Math.max(0, size.breadth / 2 - INSIDE),
-    top: Math.max(LOWEST, size.height - INSIDE),
-  };
+/** How far from the middle a camera may be over the floor, and how high: half a metre inside the round side and the top. */
+export function edgesOf(size: WorldSize): { radius: number; top: number } {
+  return { radius: Math.max(0, size.diameter / 2 - INSIDE), top: Math.max(LOWEST, size.height - INSIDE) };
 }
 
-const within = (v: number, edge: number) => Math.max(-edge, Math.min(edge, v));
+type Ground = readonly [x: number, z: number];
 
-/** A camera held inside the world: over its floor, under its top, and inside each side, each on its own. */
+/** A point over the floor held within `radius` of the middle: one beyond it is brought in along the way to the middle. */
+function withinRound([x, z]: Ground, radius: number): Ground {
+  const far = Math.hypot(x, z);
+  return far <= radius ? [x, z] : [(x * radius) / far, (z * radius) / far];
+}
+
+/** A camera held inside the world: over its floor, under its top, and inside its round side. */
 export function onPlane(point: Vec, size: WorldSize): Vec {
   const edge = edgesOf(size);
-  return [within(point[0], edge.x), Math.max(LOWEST, Math.min(edge.top, point[1])), within(point[2], edge.z)];
+  const [x, z] = withinRound([point[0], point[2]], edge.radius);
+  return [x, Math.max(LOWEST, Math.min(edge.top, point[1])), z];
 }
 
 /**
- * Clip an orbiting camera along its line of sight at the world's sides, floor and top; targets may sit below the floor
- * for the portal inspection, never over the top.
+ * Clip an orbiting camera along its line of sight at the world's round side, floor and top; targets may sit below the
+ * floor for the portal inspection, never over the top.
  */
 export function lookingOverPlane(position: Vec, target: Vec, size: WorldSize): { position: Vec; target: Vec } {
   const edge = edgesOf(size);
-  const held: Vec = [within(target[0], edge.x), Math.min(edge.top, target[1]), within(target[2], edge.z)];
+  const [hx, hz] = withinRound([target[0], target[2]], edge.radius);
+  const held: Vec = [hx, Math.min(edge.top, target[1]), hz];
   const delta: Vec = [position[0] - held[0], position[1] - held[1], position[2] - held[2]];
   let t = 1;
-  for (const [axis, side] of [[0, edge.x], [2, edge.z]] as const) {
-    if (delta[axis] > 0) t = Math.min(t, (side - held[axis]) / delta[axis]);
-    if (delta[axis] < 0) t = Math.min(t, (-side - held[axis]) / delta[axis]);
+  // Where the line from the target meets the round side: the larger root of |held + t·delta| = radius over the floor.
+  const a = delta[0] ** 2 + delta[2] ** 2;
+  if (a > 1e-12) {
+    const b = 2 * (hx * delta[0] + hz * delta[2]);
+    const c = hx ** 2 + hz ** 2 - edge.radius ** 2;
+    t = Math.min(t, Math.max(0, (-b + Math.sqrt(Math.max(0, b * b - 4 * a * c))) / (2 * a)));
   }
   if (delta[1] < 0 && held[1] >= LOWEST) t = Math.min(t, (LOWEST - held[1]) / delta[1]);
   if (delta[1] > 0) t = Math.min(t, (edge.top - held[1]) / delta[1]);
   return { position: onPlane([held[0] + delta[0] * t, held[1] + delta[1] * t, held[2] + delta[2] * t], size), target: held };
 }
 
-/** Where over the floor a camera may be: inside the world's width and breadth, each on its own, whatever its height. */
-export function overGroundPlane(at: readonly [number, number], size: WorldSize): readonly [number, number] {
-  const edge = edgesOf(size);
-  return [within(at[0], edge.x), within(at[1], edge.z)];
+/**
+ * How far a looked-round camera and what it looks at may rise together, `by` metres asked (down when negative): as far
+ * as it takes them, short of the camera passing the world's floor or either passing its top. What it looks at may sink
+ * below the floor, as `lookingOverPlane` lets it.
+ */
+export function riseInside(position: Vec, target: Vec, by: number, size: WorldSize): number {
+  const { top } = edgesOf(size);
+  if (by > 0) return Math.max(0, Math.min(by, top - position[1], top - target[1]));
+  return Math.min(0, Math.max(by, LOWEST - position[1]));
+}
+
+/** Where over the floor a camera may be: inside the world's round side, whatever its height. */
+export function overGroundPlane(at: Ground, size: WorldSize): Ground {
+  return withinRound(at, edgesOf(size).radius);
+}
+
+/**
+ * How far points over the floor may move together (a looked-round camera and what it looks at), `shift` asked: as far
+ * as it takes them, and where one would leave the round side, slid along it instead, so a hand or a key held against
+ * the side carries on round it and never stops dead.
+ */
+export function slideInside(points: readonly Ground[], shift: Ground, size: WorldSize): Ground {
+  const { radius } = edgesOf(size);
+  let [sx, sz] = shift;
+  for (let i = 0; i < 4; i++) {
+    let worst: { over: number; at: Ground } | null = null;
+    for (const [x, z] of points) {
+      const at: Ground = [x + sx, z + sz];
+      const over = Math.hypot(at[0], at[1]) - radius;
+      if (over > 1e-9 && (!worst || over > worst.over)) worst = { over, at };
+    }
+    if (!worst) break;
+    const [ix, iz] = withinRound(worst.at, radius);
+    sx += ix - worst.at[0];
+    sz += iz - worst.at[1];
+  }
+  return [sx, sz];
 }

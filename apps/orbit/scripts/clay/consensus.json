@@ -1,0 +1,7053 @@
+{
+ "method": "Consensus of three measurers (gradient, segmentation, visual; segmentation shifted -0.5 px to pixel-centre coordinates): per row and field the median of the available values (mean of two), a value only where at least two report one; then every view overlaid at 3x-12x (contrast-stretched where the lit floor meets the legs) and the rows that looked off or disagreed by >4 px settled by re-measuring half-way crossings in luminance or warmth (R-B); landmarks are medians, head polygons are vertex-matched medians, per-corner radii from a ray fit of the rounded outline. Pixel centres at integers.",
+ "views": {
+  "front": {
+   "centreX": 181.2,
+   "crownY": 221.36,
+   "groundY": 782.29,
+   "rows": [
+    {
+     "y": 220,
+     "left": null,
+     "right": null,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 224,
+     "left": 173.3,
+     "right": 201.2,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 228,
+     "left": 161.28,
+     "right": 212.66,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 232,
+     "left": 150.45,
+     "right": 222.74,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 236,
+     "left": 141,
+     "right": 231.68,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 240,
+     "left": 133.1,
+     "right": 239.7,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 244,
+     "left": 125.66,
+     "right": 246.6,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 248,
+     "left": 119.2,
+     "right": 252.4,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 252,
+     "left": 114.9,
+     "right": 256.1,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 256,
+     "left": 112.52,
+     "right": 258.3,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 260,
+     "left": 110.82,
+     "right": 259.79,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 264,
+     "left": 109.35,
+     "right": 261.16,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 268,
+     "left": 107.89,
+     "right": 262.43,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 272,
+     "left": 106.4,
+     "right": 263.68,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 276,
+     "left": 104.94,
+     "right": 264.86,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 280,
+     "left": 103.59,
+     "right": 265.96,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 284,
+     "left": 102.24,
+     "right": 267.1,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 288,
+     "left": 101.03,
+     "right": 268.13,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 292,
+     "left": 99.91,
+     "right": 269.03,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 296,
+     "left": 98.9,
+     "right": 269.72,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 300,
+     "left": 98.2,
+     "right": 270.11,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 304,
+     "left": 98.23,
+     "right": 269.58,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 308,
+     "left": 99.14,
+     "right": 268.34,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 312,
+     "left": 100.54,
+     "right": 266.57,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 316,
+     "left": 102.35,
+     "right": 264.69,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 320,
+     "left": 104.38,
+     "right": 262.62,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 324,
+     "left": 106.45,
+     "right": 260.48,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 328,
+     "left": 108.66,
+     "right": 258.24,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 332,
+     "left": 111.02,
+     "right": 255.74,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 336,
+     "left": 113.59,
+     "right": 253.18,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 340,
+     "left": 116.28,
+     "right": 250.54,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 344,
+     "left": 119.06,
+     "right": 247.7,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 348,
+     "left": 121.97,
+     "right": 244.79,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 352,
+     "left": 125.08,
+     "right": 241.72,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 356,
+     "left": 128.61,
+     "right": 238.34,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 360,
+     "left": 132.97,
+     "right": 233.8,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 364,
+     "left": 135.9,
+     "right": 231.38,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 368,
+     "left": 134.18,
+     "right": 233.39,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 372,
+     "left": 124.5,
+     "right": 242.27,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 376,
+     "left": 105.2,
+     "right": 258.75,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 380,
+     "left": 89.6,
+     "right": 272.4,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 384,
+     "left": 79.93,
+     "right": 281.8,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 388,
+     "left": 73.1,
+     "right": 288.6,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 392,
+     "left": 68.2,
+     "right": 293.6,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 396,
+     "left": 64.4,
+     "right": 297.25,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 400,
+     "left": 61.52,
+     "right": 300.22,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 404,
+     "left": 59.13,
+     "right": 302.59,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 408,
+     "left": 57.1,
+     "right": 304.54,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 412,
+     "left": 55.44,
+     "right": 306.28,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 416,
+     "left": 54.1,
+     "right": 307.56,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 420,
+     "left": 52.81,
+     "right": 308.73,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 424,
+     "left": 51.75,
+     "right": 309.66,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 428,
+     "left": 50.8,
+     "right": 310.61,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 432,
+     "left": 49.84,
+     "right": 311.48,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 436,
+     "left": 48.99,
+     "right": 312.32,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 440,
+     "left": 48.22,
+     "right": 313.06,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 444,
+     "left": 47.5,
+     "right": 313.59,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 448,
+     "left": 46.76,
+     "right": 314.27,
+     "armInnerLeft": 99.87,
+     "torsoLeft": 102.01,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 452,
+     "left": 45.7,
+     "right": 315.1,
+     "armInnerLeft": 100.3,
+     "torsoLeft": 102.47,
+     "torsoRight": 259.07,
+     "armInnerRight": 261.32,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 456,
+     "left": 44.26,
+     "right": 316.41,
+     "armInnerLeft": 101.02,
+     "torsoLeft": 102.94,
+     "torsoRight": 258.22,
+     "armInnerRight": 259.79,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 460,
+     "left": 42.42,
+     "right": 317.96,
+     "armInnerLeft": 100.87,
+     "torsoLeft": 104.38,
+     "torsoRight": 257.43,
+     "armInnerRight": 258.9,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 464,
+     "left": 40.41,
+     "right": 319.53,
+     "armInnerLeft": 102.24,
+     "torsoLeft": 105,
+     "torsoRight": 256.19,
+     "armInnerRight": 258.62,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 468,
+     "left": 38.54,
+     "right": 321.15,
+     "armInnerLeft": 103.38,
+     "torsoLeft": 105.57,
+     "torsoRight": 255.52,
+     "armInnerRight": 257.8,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 472,
+     "left": 36.67,
+     "right": 322.56,
+     "armInnerLeft": 104.08,
+     "torsoLeft": 106.12,
+     "torsoRight": 255.28,
+     "armInnerRight": 257.12,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 476,
+     "left": 34.95,
+     "right": 323.96,
+     "armInnerLeft": 104.13,
+     "torsoLeft": 106.48,
+     "torsoRight": 254.83,
+     "armInnerRight": 256.76,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 480,
+     "left": 33.22,
+     "right": 325.36,
+     "armInnerLeft": 104.42,
+     "torsoLeft": 106.56,
+     "torsoRight": 254.64,
+     "armInnerRight": 256.68,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 484,
+     "left": 31.55,
+     "right": 326.72,
+     "armInnerLeft": 104.38,
+     "torsoLeft": 106.55,
+     "torsoRight": 254.55,
+     "armInnerRight": 256.65,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 488,
+     "left": 30.24,
+     "right": 328.07,
+     "armInnerLeft": 104.11,
+     "torsoLeft": 106.56,
+     "torsoRight": 254.55,
+     "armInnerRight": 256.57,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 492,
+     "left": 28.73,
+     "right": 329.33,
+     "armInnerLeft": 104.08,
+     "torsoLeft": 106.4,
+     "torsoRight": 254.59,
+     "armInnerRight": 256.68,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 496,
+     "left": 27.5,
+     "right": 330.45,
+     "armInnerLeft": 103.86,
+     "torsoLeft": 106.21,
+     "torsoRight": 254.75,
+     "armInnerRight": 256.73,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 500,
+     "left": 26.28,
+     "right": 331.55,
+     "armInnerLeft": 103.53,
+     "torsoLeft": 105.76,
+     "torsoRight": 255,
+     "armInnerRight": 256.87,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 504,
+     "left": 25,
+     "right": 332.49,
+     "armInnerLeft": 103.12,
+     "torsoLeft": 105.6,
+     "torsoRight": 255.31,
+     "armInnerRight": 257.21,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 508,
+     "left": 23.9,
+     "right": 333.39,
+     "armInnerLeft": 102.95,
+     "torsoLeft": 105.19,
+     "torsoRight": 255.48,
+     "armInnerRight": 257.54,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 512,
+     "left": 22.95,
+     "right": 334.32,
+     "armInnerLeft": 102.5,
+     "torsoLeft": 104.72,
+     "torsoRight": 255.7,
+     "armInnerRight": 257.79,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 516,
+     "left": 22.23,
+     "right": 335.13,
+     "armInnerLeft": 102.08,
+     "torsoLeft": 104.44,
+     "torsoRight": 256.17,
+     "armInnerRight": 258.07,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 520,
+     "left": 21.45,
+     "right": 335.74,
+     "armInnerLeft": 101.61,
+     "torsoLeft": 103.86,
+     "torsoRight": 256.43,
+     "armInnerRight": 258.45,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 524,
+     "left": 20.65,
+     "right": 336.5,
+     "armInnerLeft": 101.06,
+     "torsoLeft": 103.49,
+     "torsoRight": 256.63,
+     "armInnerRight": 258.77,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 528,
+     "left": 20.08,
+     "right": 337.08,
+     "armInnerLeft": 100.59,
+     "torsoLeft": 102.9,
+     "torsoRight": 257.1,
+     "armInnerRight": 259.1,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 532,
+     "left": 19.43,
+     "right": 337.57,
+     "armInnerLeft": 100.11,
+     "torsoLeft": 102.52,
+     "torsoRight": 257.38,
+     "armInnerRight": 259.54,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 536,
+     "left": 18.88,
+     "right": 338.11,
+     "armInnerLeft": 99.7,
+     "torsoLeft": 101.9,
+     "torsoRight": 257.7,
+     "armInnerRight": 259.84,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 540,
+     "left": 18.46,
+     "right": 338.5,
+     "armInnerLeft": 99.25,
+     "torsoLeft": 101.57,
+     "torsoRight": 258.23,
+     "armInnerRight": 260.29,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 544,
+     "left": 18.09,
+     "right": 338.84,
+     "armInnerLeft": 98.69,
+     "torsoLeft": 100.92,
+     "torsoRight": 258.36,
+     "armInnerRight": 260.73,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 548,
+     "left": 17.62,
+     "right": 339.26,
+     "armInnerLeft": 98.18,
+     "torsoLeft": 100.47,
+     "torsoRight": 258.74,
+     "armInnerRight": 261.01,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 552,
+     "left": 17.42,
+     "right": 339.48,
+     "armInnerLeft": 97.54,
+     "torsoLeft": 99.76,
+     "torsoRight": 259.29,
+     "armInnerRight": 261.51,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 556,
+     "left": 17.29,
+     "right": 339.59,
+     "armInnerLeft": 97.13,
+     "torsoLeft": 99.3,
+     "torsoRight": 259.65,
+     "armInnerRight": 261.89,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 560,
+     "left": 17.16,
+     "right": 339.66,
+     "armInnerLeft": 96.37,
+     "torsoLeft": 98.7,
+     "torsoRight": 260.18,
+     "armInnerRight": 262.37,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 564,
+     "left": 17.11,
+     "right": 339.65,
+     "armInnerLeft": 95.83,
+     "torsoLeft": 98.07,
+     "torsoRight": 260.46,
+     "armInnerRight": 262.79,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 568,
+     "left": 17.17,
+     "right": 339.61,
+     "armInnerLeft": 95.23,
+     "torsoLeft": 97.53,
+     "torsoRight": 261.11,
+     "armInnerRight": 263.29,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 572,
+     "left": 17.34,
+     "right": 339.5,
+     "armInnerLeft": 94.54,
+     "torsoLeft": 96.8,
+     "torsoRight": 261.36,
+     "armInnerRight": 263.8,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 576,
+     "left": 17.56,
+     "right": 339.2,
+     "armInnerLeft": 93.93,
+     "torsoLeft": 96.24,
+     "torsoRight": 262.05,
+     "armInnerRight": 264.38,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 580,
+     "left": 18.05,
+     "right": 338.63,
+     "armInnerLeft": 93.24,
+     "torsoLeft": 95.53,
+     "torsoRight": 262.57,
+     "armInnerRight": 265,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 584,
+     "left": 18.69,
+     "right": 337.9,
+     "armInnerLeft": 92.33,
+     "torsoLeft": 94.75,
+     "torsoRight": 263.24,
+     "armInnerRight": 265.76,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 588,
+     "left": 19.64,
+     "right": 336.92,
+     "armInnerLeft": 91.45,
+     "torsoLeft": 93.8,
+     "torsoRight": 264.14,
+     "armInnerRight": 266.62,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 592,
+     "left": 21.01,
+     "right": 335.62,
+     "armInnerLeft": 90.4,
+     "torsoLeft": 92.75,
+     "torsoRight": 265.17,
+     "armInnerRight": 267.61,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 596,
+     "left": 22.76,
+     "right": 333.92,
+     "armInnerLeft": 89.13,
+     "torsoLeft": 91.44,
+     "torsoRight": 266.48,
+     "armInnerRight": 268.91,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 600,
+     "left": 25.31,
+     "right": 331.7,
+     "armInnerLeft": 86.65,
+     "torsoLeft": 90.44,
+     "torsoRight": 268.04,
+     "armInnerRight": 270.66,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 604,
+     "left": 28.69,
+     "right": 328.7,
+     "armInnerLeft": 86.16,
+     "torsoLeft": 88,
+     "torsoRight": 270.1,
+     "armInnerRight": 272.69,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 608,
+     "left": 33.75,
+     "right": 324.5,
+     "armInnerLeft": 81.8,
+     "torsoLeft": 87.12,
+     "torsoRight": 273.5,
+     "armInnerRight": 275.53,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 612,
+     "left": 42.98,
+     "right": 317.48,
+     "armInnerLeft": 74.66,
+     "torsoLeft": 86.5,
+     "torsoRight": 274.43,
+     "armInnerRight": 281.15,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 616,
+     "left": 85.71,
+     "right": 275.3,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 620,
+     "left": 85.29,
+     "right": 276,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 182.5,
+     "slitRight": 183.5
+    },
+    {
+     "y": 624,
+     "left": 84.66,
+     "right": 276.69,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 182.45,
+     "slitRight": 183.61
+    },
+    {
+     "y": 628,
+     "left": 83.73,
+     "right": 277,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 182.29,
+     "slitRight": 183.64
+    },
+    {
+     "y": 632,
+     "left": 83.06,
+     "right": 277.5,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 181.89,
+     "slitRight": 183.77
+    },
+    {
+     "y": 636,
+     "left": 82.46,
+     "right": 278.19,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 181.58,
+     "slitRight": 184.15
+    },
+    {
+     "y": 640,
+     "left": 81.8,
+     "right": 278.79,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 181.38,
+     "slitRight": 184.32
+    },
+    {
+     "y": 644,
+     "left": 81.28,
+     "right": 279.44,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 180.93,
+     "slitRight": 184.4
+    },
+    {
+     "y": 648,
+     "left": 80.74,
+     "right": 280.2,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 180.61,
+     "slitRight": 184.49
+    },
+    {
+     "y": 652,
+     "left": 80.16,
+     "right": 280.74,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 180.5,
+     "slitRight": 184.58
+    },
+    {
+     "y": 656,
+     "left": 79.63,
+     "right": 281.39,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 180.11,
+     "slitRight": 184.73
+    },
+    {
+     "y": 660,
+     "left": 79.07,
+     "right": 281.96,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 179.63,
+     "slitRight": 185.02
+    },
+    {
+     "y": 664,
+     "left": 78.59,
+     "right": 282.42,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 179.5,
+     "slitRight": 185.28
+    },
+    {
+     "y": 668,
+     "left": 77.99,
+     "right": 282.91,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 179.22,
+     "slitRight": 185.4
+    },
+    {
+     "y": 672,
+     "left": 77.57,
+     "right": 283.45,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 178.74,
+     "slitRight": 185.5
+    },
+    {
+     "y": 676,
+     "left": 77.08,
+     "right": 283.88,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 178.53,
+     "slitRight": 185.6
+    },
+    {
+     "y": 680,
+     "left": 76.67,
+     "right": 284.4,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 178.31,
+     "slitRight": 185.79
+    },
+    {
+     "y": 684,
+     "left": 76.27,
+     "right": 284.87,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 177.84,
+     "slitRight": 186.1
+    },
+    {
+     "y": 688,
+     "left": 75.83,
+     "right": 285.31,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 177.56,
+     "slitRight": 186.32
+    },
+    {
+     "y": 692,
+     "left": 75.47,
+     "right": 285.69,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 177.45,
+     "slitRight": 186.44
+    },
+    {
+     "y": 696,
+     "left": 75.13,
+     "right": 286.1,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 177.14,
+     "slitRight": 186.5
+    },
+    {
+     "y": 700,
+     "left": 74.8,
+     "right": 286.39,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 176.73,
+     "slitRight": 186.6
+    },
+    {
+     "y": 704,
+     "left": 74.48,
+     "right": 286.7,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 176.54,
+     "slitRight": 186.74
+    },
+    {
+     "y": 708,
+     "left": 74.18,
+     "right": 286.86,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 176.4,
+     "slitRight": 186.93
+    },
+    {
+     "y": 712,
+     "left": 73.96,
+     "right": 287.14,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 175.96,
+     "slitRight": 187.24
+    },
+    {
+     "y": 716,
+     "left": 73.79,
+     "right": 287.4,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 175.6,
+     "slitRight": 187.38
+    },
+    {
+     "y": 720,
+     "left": 73.59,
+     "right": 287.55,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 175.47,
+     "slitRight": 187.46
+    },
+    {
+     "y": 724,
+     "left": 73.53,
+     "right": 287.71,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 175.26,
+     "slitRight": 187.5
+    },
+    {
+     "y": 728,
+     "left": 73.46,
+     "right": 287.79,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 174.74,
+     "slitRight": 187.71
+    },
+    {
+     "y": 732,
+     "left": 73.42,
+     "right": 287.87,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 174.52,
+     "slitRight": 188.1
+    },
+    {
+     "y": 736,
+     "left": 73.5,
+     "right": 287.58,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 174.29,
+     "slitRight": 188.35
+    },
+    {
+     "y": 740,
+     "left": 73.77,
+     "right": 287.41,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 173.77,
+     "slitRight": 188.47
+    },
+    {
+     "y": 744,
+     "left": 74.2,
+     "right": 287.2,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 173.5,
+     "slitRight": 188.64
+    },
+    {
+     "y": 748,
+     "left": 74.3,
+     "right": 286.72,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 173.2,
+     "slitRight": 189.08
+    },
+    {
+     "y": 752,
+     "left": 74.9,
+     "right": 286.5,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 172.6,
+     "slitRight": 189.45
+    },
+    {
+     "y": 756,
+     "left": 75.77,
+     "right": 285.94,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 172.22,
+     "slitRight": 189.73
+    },
+    {
+     "y": 760,
+     "left": 76.82,
+     "right": 285.04,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 171.44,
+     "slitRight": 190.49
+    },
+    {
+     "y": 764,
+     "left": 78.03,
+     "right": 284.05,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 170.4,
+     "slitRight": 191.4
+    },
+    {
+     "y": 768,
+     "left": 79.49,
+     "right": 282.62,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 168.63,
+     "slitRight": 192.55
+    },
+    {
+     "y": 772,
+     "left": 81.5,
+     "right": 280.35,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 166.43,
+     "slitRight": 194.5
+    },
+    {
+     "y": 776,
+     "left": 83.94,
+     "right": 277.12,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 163.84,
+     "slitRight": 196.59
+    },
+    {
+     "y": 780,
+     "left": 91.18,
+     "right": 272.34,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 151.33,
+     "slitRight": 203.97
+    }
+   ]
+  },
+  "back": {
+   "centreX": 975.75,
+   "crownY": 221.6,
+   "groundY": 782.88,
+   "rows": [
+    {
+     "y": 220,
+     "left": null,
+     "right": null,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 224,
+     "left": 966.88,
+     "right": 993.42,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 228,
+     "left": 954.6,
+     "right": 1004.8,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 232,
+     "left": 943.8,
+     "right": 1014.7,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 236,
+     "left": 934.67,
+     "right": 1023.4,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 240,
+     "left": 926.83,
+     "right": 1031.07,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 244,
+     "left": 919.54,
+     "right": 1038.1,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 248,
+     "left": 913.12,
+     "right": 1043.8,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 252,
+     "left": 909.2,
+     "right": 1047.5,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 256,
+     "left": 906.87,
+     "right": 1049.69,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 260,
+     "left": 905.29,
+     "right": 1051.33,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 264,
+     "left": 903.71,
+     "right": 1052.58,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 268,
+     "left": 902.38,
+     "right": 1053.82,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 272,
+     "left": 900.9,
+     "right": 1055.09,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 276,
+     "left": 899.53,
+     "right": 1056.33,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 280,
+     "left": 898.33,
+     "right": 1057.45,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 284,
+     "left": 897.08,
+     "right": 1058.59,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 288,
+     "left": 895.78,
+     "right": 1059.73,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 292,
+     "left": 894.58,
+     "right": 1060.78,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 296,
+     "left": 893.62,
+     "right": 1061.68,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 300,
+     "left": 893.04,
+     "right": 1062.25,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 304,
+     "left": 893.17,
+     "right": 1061.73,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 308,
+     "left": 893.87,
+     "right": 1060.66,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 312,
+     "left": 895.43,
+     "right": 1059.05,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 316,
+     "left": 897.33,
+     "right": 1057.2,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 320,
+     "left": 899.36,
+     "right": 1055.21,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 324,
+     "left": 901.39,
+     "right": 1053.05,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 328,
+     "left": 903.6,
+     "right": 1050.76,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 332,
+     "left": 906.05,
+     "right": 1048.45,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 336,
+     "left": 908.59,
+     "right": 1045.93,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 340,
+     "left": 911.25,
+     "right": 1043.25,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 344,
+     "left": 913.94,
+     "right": 1040.49,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 348,
+     "left": 916.79,
+     "right": 1037.6,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 352,
+     "left": 920.13,
+     "right": 1034.55,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 356,
+     "left": 923.43,
+     "right": 1031.03,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 360,
+     "left": 928.4,
+     "right": 1026.43,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 364,
+     "left": 930.37,
+     "right": 1022.73,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 368,
+     "left": 928.42,
+     "right": 1024.52,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 372,
+     "left": 917.05,
+     "right": 1034.29,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 376,
+     "left": 896,
+     "right": 1054.72,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 380,
+     "left": 881.1,
+     "right": 1069.5,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 384,
+     "left": 872.1,
+     "right": 1078.5,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 388,
+     "left": 865.82,
+     "right": 1084.63,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 392,
+     "left": 861.4,
+     "right": 1089.06,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 396,
+     "left": 858,
+     "right": 1092.5,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 400,
+     "left": 855.36,
+     "right": 1095.28,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 404,
+     "left": 853.15,
+     "right": 1097.54,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 408,
+     "left": 851.3,
+     "right": 1099.54,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 412,
+     "left": 849.84,
+     "right": 1101.07,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 416,
+     "left": 848.53,
+     "right": 1102.37,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 420,
+     "left": 847.34,
+     "right": 1103.51,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 424,
+     "left": 846.27,
+     "right": 1104.5,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 428,
+     "left": 845.29,
+     "right": 1105.38,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 432,
+     "left": 844.4,
+     "right": 1106.2,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 436,
+     "left": 843.6,
+     "right": 1106.91,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 440,
+     "left": 842.86,
+     "right": 1107.69,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 444,
+     "left": 842.14,
+     "right": 1108.49,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 448,
+     "left": 841.3,
+     "right": 1109.2,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 452,
+     "left": 840.3,
+     "right": 1110.22,
+     "armInnerLeft": 898.19,
+     "torsoLeft": 900.35,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 456,
+     "left": 838.83,
+     "right": 1111.45,
+     "armInnerLeft": 898.62,
+     "torsoLeft": 900.72,
+     "torsoRight": 1055.92,
+     "armInnerRight": 1058.58,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 460,
+     "left": 836.93,
+     "right": 1113.17,
+     "armInnerLeft": 898.2,
+     "torsoLeft": 901.89,
+     "torsoRight": 1054.88,
+     "armInnerRight": 1056.53,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 464,
+     "left": 835.13,
+     "right": 1114.85,
+     "armInnerLeft": 899.1,
+     "torsoLeft": 901.76,
+     "torsoRight": 1053.61,
+     "armInnerRight": 1055.7,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 468,
+     "left": 833.26,
+     "right": 1116.69,
+     "armInnerLeft": 900.03,
+     "torsoLeft": 902.4,
+     "torsoRight": 1052.61,
+     "armInnerRight": 1054.75,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 472,
+     "left": 831.53,
+     "right": 1118.41,
+     "armInnerLeft": 900.67,
+     "torsoLeft": 902.62,
+     "torsoRight": 1052.43,
+     "armInnerRight": 1053.76,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 476,
+     "left": 829.79,
+     "right": 1119.84,
+     "armInnerLeft": 901.08,
+     "torsoLeft": 903.07,
+     "torsoRight": 1051.77,
+     "armInnerRight": 1053.68,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 480,
+     "left": 828.07,
+     "right": 1121.43,
+     "armInnerLeft": 901.15,
+     "torsoLeft": 903.36,
+     "torsoRight": 1051.59,
+     "armInnerRight": 1053.39,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 484,
+     "left": 826.49,
+     "right": 1122.81,
+     "armInnerLeft": 901.11,
+     "torsoLeft": 903.34,
+     "torsoRight": 1051.51,
+     "armInnerRight": 1052.99,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 488,
+     "left": 825,
+     "right": 1124.14,
+     "armInnerLeft": 901.14,
+     "torsoLeft": 903.15,
+     "torsoRight": 1051.48,
+     "armInnerRight": 1052.95,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 492,
+     "left": 823.61,
+     "right": 1125.45,
+     "armInnerLeft": 901.13,
+     "torsoLeft": 902.89,
+     "torsoRight": 1051.51,
+     "armInnerRight": 1053.22,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 496,
+     "left": 822.25,
+     "right": 1126.55,
+     "armInnerLeft": 900.79,
+     "torsoLeft": 902.7,
+     "torsoRight": 1051.57,
+     "armInnerRight": 1053.47,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 500,
+     "left": 820.95,
+     "right": 1127.65,
+     "armInnerLeft": 900.24,
+     "torsoLeft": 902.62,
+     "torsoRight": 1051.64,
+     "armInnerRight": 1053.69,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 504,
+     "left": 819.91,
+     "right": 1128.54,
+     "armInnerLeft": 900.21,
+     "torsoLeft": 902.19,
+     "torsoRight": 1052.23,
+     "armInnerRight": 1053.74,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 508,
+     "left": 819.1,
+     "right": 1129.42,
+     "armInnerLeft": 899.76,
+     "torsoLeft": 901.7,
+     "torsoRight": 1052.47,
+     "armInnerRight": 1054.23,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 512,
+     "left": 818.27,
+     "right": 1130.22,
+     "armInnerLeft": 899.29,
+     "torsoLeft": 901.52,
+     "torsoRight": 1052.73,
+     "armInnerRight": 1054.64,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 516,
+     "left": 817.56,
+     "right": 1130.81,
+     "armInnerLeft": 899.11,
+     "torsoLeft": 900.83,
+     "torsoRight": 1053.3,
+     "armInnerRight": 1054.77,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 520,
+     "left": 816.86,
+     "right": 1131.5,
+     "armInnerLeft": 898.32,
+     "torsoLeft": 900.69,
+     "torsoRight": 1053.49,
+     "armInnerRight": 1055.52,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 524,
+     "left": 816.26,
+     "right": 1132.01,
+     "armInnerLeft": 898.09,
+     "torsoLeft": 899.81,
+     "torsoRight": 1054.11,
+     "armInnerRight": 1055.71,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 528,
+     "left": 815.64,
+     "right": 1132.63,
+     "armInnerLeft": 897.4,
+     "torsoLeft": 899.66,
+     "torsoRight": 1054.39,
+     "armInnerRight": 1056.36,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 532,
+     "left": 815.12,
+     "right": 1133.04,
+     "armInnerLeft": 897.28,
+     "torsoLeft": 898.93,
+     "torsoRight": 1054.82,
+     "armInnerRight": 1056.71,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 536,
+     "left": 814.67,
+     "right": 1133.46,
+     "armInnerLeft": 896.55,
+     "torsoLeft": 898.7,
+     "torsoRight": 1055.3,
+     "armInnerRight": 1057.27,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 540,
+     "left": 814.25,
+     "right": 1133.74,
+     "armInnerLeft": 896.31,
+     "torsoLeft": 898.05,
+     "torsoRight": 1055.66,
+     "armInnerRight": 1057.7,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 544,
+     "left": 813.84,
+     "right": 1134.08,
+     "armInnerLeft": 895.62,
+     "torsoLeft": 897.69,
+     "torsoRight": 1056.27,
+     "armInnerRight": 1058.2,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 548,
+     "left": 813.59,
+     "right": 1134.32,
+     "armInnerLeft": 895.32,
+     "torsoLeft": 896.95,
+     "torsoRight": 1056.62,
+     "armInnerRight": 1058.69,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 552,
+     "left": 813.33,
+     "right": 1134.51,
+     "armInnerLeft": 894.55,
+     "torsoLeft": 896.7,
+     "torsoRight": 1057.24,
+     "armInnerRight": 1059.13,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 556,
+     "left": 813.16,
+     "right": 1134.62,
+     "armInnerLeft": 894.28,
+     "torsoLeft": 895.89,
+     "torsoRight": 1057.71,
+     "armInnerRight": 1059.69,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 560,
+     "left": 813.07,
+     "right": 1134.67,
+     "armInnerLeft": 893.45,
+     "torsoLeft": 895.69,
+     "torsoRight": 1058.26,
+     "armInnerRight": 1060.24,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 564,
+     "left": 813.02,
+     "right": 1134.68,
+     "armInnerLeft": 893.16,
+     "torsoLeft": 894.77,
+     "torsoRight": 1058.66,
+     "armInnerRight": 1060.69,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 568,
+     "left": 813.09,
+     "right": 1134.65,
+     "armInnerLeft": 892.48,
+     "torsoLeft": 894.45,
+     "torsoRight": 1059.26,
+     "armInnerRight": 1061.28,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 572,
+     "left": 813.19,
+     "right": 1134.54,
+     "armInnerLeft": 891.92,
+     "torsoLeft": 893.72,
+     "torsoRight": 1059.75,
+     "armInnerRight": 1061.71,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 576,
+     "left": 813.43,
+     "right": 1134.32,
+     "armInnerLeft": 891.37,
+     "torsoLeft": 893.04,
+     "torsoRight": 1060.27,
+     "armInnerRight": 1062.48,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 580,
+     "left": 813.86,
+     "right": 1133.82,
+     "armInnerLeft": 890.5,
+     "torsoLeft": 892.63,
+     "torsoRight": 1061,
+     "armInnerRight": 1062.84,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 584,
+     "left": 814.49,
+     "right": 1133.42,
+     "armInnerLeft": 889.84,
+     "torsoLeft": 891.75,
+     "torsoRight": 1061.43,
+     "armInnerRight": 1063.69,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 588,
+     "left": 815.42,
+     "right": 1132.66,
+     "armInnerLeft": 888.97,
+     "torsoLeft": 890.76,
+     "torsoRight": 1062.24,
+     "armInnerRight": 1064.38,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 592,
+     "left": 816.62,
+     "right": 1131.67,
+     "armInnerLeft": 887.76,
+     "torsoLeft": 889.78,
+     "torsoRight": 1063.18,
+     "armInnerRight": 1065.18,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 596,
+     "left": 818.43,
+     "right": 1130.35,
+     "armInnerLeft": 886.39,
+     "torsoLeft": 888.51,
+     "torsoRight": 1064.19,
+     "armInnerRight": 1066.11,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 600,
+     "left": 820.3,
+     "right": 1128.34,
+     "armInnerLeft": 884.46,
+     "torsoLeft": 886.96,
+     "torsoRight": 1065.21,
+     "armInnerRight": 1067.56,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 604,
+     "left": 823.11,
+     "right": 1125.45,
+     "armInnerLeft": 883.4,
+     "torsoLeft": 884.5,
+     "torsoRight": 1067.6,
+     "armInnerRight": 1068.5,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 608,
+     "left": 827.3,
+     "right": 1121.59,
+     "armInnerLeft": 879.6,
+     "torsoLeft": 883.4,
+     "torsoRight": 1068.2,
+     "armInnerRight": 1071.4,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 612,
+     "left": 833.98,
+     "right": 1115.86,
+     "armInnerLeft": 874.01,
+     "torsoLeft": 882.67,
+     "torsoRight": 1068.6,
+     "armInnerRight": 1076.18,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 616,
+     "left": 850.97,
+     "right": 1102.6,
+     "armInnerLeft": 860.12,
+     "torsoLeft": 881.8,
+     "torsoRight": 1069.45,
+     "armInnerRight": 1088.07,
+     "slitLeft": null,
+     "slitRight": null
+    },
+    {
+     "y": 620,
+     "left": 881.26,
+     "right": 1070.41,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 975.5,
+     "slitRight": 977.46
+    },
+    {
+     "y": 624,
+     "left": 880.61,
+     "right": 1071.21,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 975.55,
+     "slitRight": 977.57
+    },
+    {
+     "y": 628,
+     "left": 879.96,
+     "right": 1070.7,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 975.47,
+     "slitRight": 977.67
+    },
+    {
+     "y": 632,
+     "left": 879.41,
+     "right": 1071.6,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 975.33,
+     "slitRight": 977.77
+    },
+    {
+     "y": 636,
+     "left": 878.77,
+     "right": 1072.11,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 974.96,
+     "slitRight": 977.97
+    },
+    {
+     "y": 640,
+     "left": 878.17,
+     "right": 1072.63,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 974.78,
+     "slitRight": 978.18
+    },
+    {
+     "y": 644,
+     "left": 877.6,
+     "right": 1073.32,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 974.66,
+     "slitRight": 978.32
+    },
+    {
+     "y": 648,
+     "left": 876.88,
+     "right": 1073.83,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 974.31,
+     "slitRight": 978.53
+    },
+    {
+     "y": 652,
+     "left": 876.34,
+     "right": 1074.49,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 973.99,
+     "slitRight": 978.67
+    },
+    {
+     "y": 656,
+     "left": 875.64,
+     "right": 1075.11,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 973.71,
+     "slitRight": 978.84
+    },
+    {
+     "y": 660,
+     "left": 875.27,
+     "right": 1075.56,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 973.54,
+     "slitRight": 979.07
+    },
+    {
+     "y": 664,
+     "left": 874.67,
+     "right": 1076.2,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 973.2,
+     "slitRight": 979.24
+    },
+    {
+     "y": 668,
+     "left": 874.28,
+     "right": 1076.62,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 972.91,
+     "slitRight": 979.44
+    },
+    {
+     "y": 672,
+     "left": 873.68,
+     "right": 1077.21,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 972.71,
+     "slitRight": 979.64
+    },
+    {
+     "y": 676,
+     "left": 873.33,
+     "right": 1077.59,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 972.62,
+     "slitRight": 979.76
+    },
+    {
+     "y": 680,
+     "left": 872.96,
+     "right": 1078.15,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 972.3,
+     "slitRight": 979.89
+    },
+    {
+     "y": 684,
+     "left": 872.4,
+     "right": 1078.56,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 971.9,
+     "slitRight": 980.09
+    },
+    {
+     "y": 688,
+     "left": 872.18,
+     "right": 1079.05,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 971.72,
+     "slitRight": 980.26
+    },
+    {
+     "y": 692,
+     "left": 871.61,
+     "right": 1079.44,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 971.6,
+     "slitRight": 980.49
+    },
+    {
+     "y": 696,
+     "left": 871.32,
+     "right": 1079.72,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 971.3,
+     "slitRight": 980.67
+    },
+    {
+     "y": 700,
+     "left": 870.93,
+     "right": 1080.24,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 970.87,
+     "slitRight": 980.8
+    },
+    {
+     "y": 704,
+     "left": 870.52,
+     "right": 1080.54,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 970.68,
+     "slitRight": 980.96
+    },
+    {
+     "y": 708,
+     "left": 870.33,
+     "right": 1080.7,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 970.52,
+     "slitRight": 981.16
+    },
+    {
+     "y": 712,
+     "left": 870.19,
+     "right": 1081.08,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 970.2,
+     "slitRight": 981.3
+    },
+    {
+     "y": 716,
+     "left": 869.97,
+     "right": 1081.29,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 969.82,
+     "slitRight": 981.52
+    },
+    {
+     "y": 720,
+     "left": 869.77,
+     "right": 1081.4,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 969.7,
+     "slitRight": 981.7
+    },
+    {
+     "y": 724,
+     "left": 869.92,
+     "right": 1081.5,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 969.54,
+     "slitRight": 981.83
+    },
+    {
+     "y": 728,
+     "left": 869.69,
+     "right": 1081.51,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 969.16,
+     "slitRight": 982.02
+    },
+    {
+     "y": 732,
+     "left": 869.81,
+     "right": 1081.47,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 968.79,
+     "slitRight": 982.22
+    },
+    {
+     "y": 736,
+     "left": 869.89,
+     "right": 1081.34,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 968.63,
+     "slitRight": 982.48
+    },
+    {
+     "y": 740,
+     "left": 869.92,
+     "right": 1081.4,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 968.21,
+     "slitRight": 982.72
+    },
+    {
+     "y": 744,
+     "left": 870.36,
+     "right": 1081.02,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 967.79,
+     "slitRight": 982.93
+    },
+    {
+     "y": 748,
+     "left": 870.46,
+     "right": 1080.64,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 967.62,
+     "slitRight": 983.16
+    },
+    {
+     "y": 752,
+     "left": 871.04,
+     "right": 1080.29,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 967.13,
+     "slitRight": 983.47
+    },
+    {
+     "y": 756,
+     "left": 871.5,
+     "right": 1079.59,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 966.65,
+     "slitRight": 983.88
+    },
+    {
+     "y": 760,
+     "left": 872.55,
+     "right": 1078.77,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 965.9,
+     "slitRight": 984.44
+    },
+    {
+     "y": 764,
+     "left": 873.45,
+     "right": 1077.73,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 964.94,
+     "slitRight": 985.17
+    },
+    {
+     "y": 768,
+     "left": 874.97,
+     "right": 1076.78,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 963.8,
+     "slitRight": 986.44
+    },
+    {
+     "y": 772,
+     "left": 876.42,
+     "right": 1074.42,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 961.57,
+     "slitRight": 988.6
+    },
+    {
+     "y": 776,
+     "left": 878.77,
+     "right": 1071.2,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 957.82,
+     "slitRight": 991.07
+    },
+    {
+     "y": 780,
+     "left": 883.81,
+     "right": 1067.45,
+     "armInnerLeft": null,
+     "torsoLeft": null,
+     "torsoRight": null,
+     "armInnerRight": null,
+     "slitLeft": 953.38,
+     "slitRight": 997.18
+    }
+   ]
+  },
+  "side": {
+   "centreX": 718.4,
+   "crownY": 221.85,
+   "groundY": 784.9,
+   "facing": "left",
+   "rows": [
+    {
+     "y": 220,
+     "front": null,
+     "back": null,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 224,
+     "front": 693.5,
+     "back": 718.19,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 228,
+     "front": 687.43,
+     "back": 733.41,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 232,
+     "front": 683.1,
+     "back": 746.4,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 236,
+     "front": 679.3,
+     "back": 756.47,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 240,
+     "front": 675.6,
+     "back": 764.3,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 244,
+     "front": 672.3,
+     "back": 770.16,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 248,
+     "front": 668.9,
+     "back": 774.18,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 252,
+     "front": 665.78,
+     "back": 776.51,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 256,
+     "front": 662.83,
+     "back": 778.24,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 260,
+     "front": 660.1,
+     "back": 779.72,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 264,
+     "front": 657.89,
+     "back": 781.21,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 268,
+     "front": 656.15,
+     "back": 782.56,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 272,
+     "front": 654.5,
+     "back": 783.79,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 276,
+     "front": 653.02,
+     "back": 784.99,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 280,
+     "front": 651.65,
+     "back": 786.12,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 284,
+     "front": 650.5,
+     "back": 787.18,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 288,
+     "front": 649.4,
+     "back": 788.13,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 292,
+     "front": 648.4,
+     "back": 788.9,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 296,
+     "front": 647.46,
+     "back": 789.58,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 300,
+     "front": 646.75,
+     "back": 790.12,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 304,
+     "front": 646.23,
+     "back": 790.29,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 308,
+     "front": 646.53,
+     "back": 789.68,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 312,
+     "front": 647.3,
+     "back": 788.8,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 316,
+     "front": 648.28,
+     "back": 787.78,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 320,
+     "front": 649.26,
+     "back": 786.58,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 324,
+     "front": 650.3,
+     "back": 785.22,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 328,
+     "front": 651.49,
+     "back": 783.75,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 332,
+     "front": 652.74,
+     "back": 782.37,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 336,
+     "front": 654.2,
+     "back": 780.69,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 340,
+     "front": 655.71,
+     "back": 778.89,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 344,
+     "front": 657.45,
+     "back": 777.12,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 348,
+     "front": 659.24,
+     "back": 775.09,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 352,
+     "front": 661.21,
+     "back": 772.68,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 356,
+     "front": 663.55,
+     "back": 769.95,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 360,
+     "front": 666.18,
+     "back": 766.93,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 364,
+     "front": 669.45,
+     "back": 763.18,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 368,
+     "front": 673.9,
+     "back": 757.84,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 372,
+     "front": 684.3,
+     "back": 759.36,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 376,
+     "front": 683.08,
+     "back": 761.64,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 380,
+     "front": 680.58,
+     "back": 763.98,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 384,
+     "front": 677.38,
+     "back": 766.29,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 388,
+     "front": 673.86,
+     "back": 768.31,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 392,
+     "front": 670.72,
+     "back": 770.01,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 396,
+     "front": 667.64,
+     "back": 771.68,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 400,
+     "front": 665.15,
+     "back": 773.15,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 404,
+     "front": 662.83,
+     "back": 774.55,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 408,
+     "front": 660.94,
+     "back": 775.67,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 412,
+     "front": 659.15,
+     "back": 776.57,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 416,
+     "front": 657.55,
+     "back": 777.35,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 420,
+     "front": 656.25,
+     "back": 778.07,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 424,
+     "front": 655.16,
+     "back": 778.72,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 428,
+     "front": 654.11,
+     "back": 779.26,
+     "armFront": null,
+     "armBack": 770.22
+    },
+    {
+     "y": 432,
+     "front": 653.17,
+     "back": 779.72,
+     "armFront": null,
+     "armBack": 770.42
+    },
+    {
+     "y": 436,
+     "front": 652.46,
+     "back": 780.17,
+     "armFront": 686.44,
+     "armBack": 770.44
+    },
+    {
+     "y": 440,
+     "front": 651.89,
+     "back": 780.58,
+     "armFront": 688.1,
+     "armBack": 770.43
+    },
+    {
+     "y": 444,
+     "front": 651.47,
+     "back": 780.8,
+     "armFront": 689.03,
+     "armBack": 770.5
+    },
+    {
+     "y": 448,
+     "front": 651.2,
+     "back": 781.26,
+     "armFront": 689.96,
+     "armBack": 770.88
+    },
+    {
+     "y": 452,
+     "front": 650.96,
+     "back": 781.55,
+     "armFront": 690.35,
+     "armBack": 771.23
+    },
+    {
+     "y": 456,
+     "front": 650.69,
+     "back": 781.8,
+     "armFront": 690.43,
+     "armBack": 771.82
+    },
+    {
+     "y": 460,
+     "front": 650.52,
+     "back": 782.05,
+     "armFront": 690.29,
+     "armBack": 772.53
+    },
+    {
+     "y": 464,
+     "front": 650.45,
+     "back": 782.36,
+     "armFront": 689.73,
+     "armBack": 773.49
+    },
+    {
+     "y": 468,
+     "front": 650.39,
+     "back": 782.62,
+     "armFront": 689.19,
+     "armBack": 774.44
+    },
+    {
+     "y": 472,
+     "front": 650.34,
+     "back": 782.85,
+     "armFront": 688.52,
+     "armBack": 775.23
+    },
+    {
+     "y": 476,
+     "front": 650.3,
+     "back": 783.17,
+     "armFront": 687.99,
+     "armBack": 776.3
+    },
+    {
+     "y": 480,
+     "front": 650.27,
+     "back": 783.45,
+     "armFront": 687.42,
+     "armBack": 776.86
+    },
+    {
+     "y": 484,
+     "front": 650.25,
+     "back": 783.72,
+     "armFront": 687.14,
+     "armBack": 777.29
+    },
+    {
+     "y": 488,
+     "front": 650.22,
+     "back": 784.06,
+     "armFront": 686.62,
+     "armBack": 777.97
+    },
+    {
+     "y": 492,
+     "front": 650.23,
+     "back": 784.41,
+     "armFront": 686.29,
+     "armBack": 778.49
+    },
+    {
+     "y": 496,
+     "front": 650.23,
+     "back": 784.61,
+     "armFront": 685.84,
+     "armBack": 778.93
+    },
+    {
+     "y": 500,
+     "front": 650.28,
+     "back": 784.8,
+     "armFront": 685.42,
+     "armBack": 779.27
+    },
+    {
+     "y": 504,
+     "front": 650.28,
+     "back": 785.05,
+     "armFront": 685.16,
+     "armBack": 780.34
+    },
+    {
+     "y": 508,
+     "front": 650.31,
+     "back": 785.32,
+     "armFront": 684.72,
+     "armBack": 780.32
+    },
+    {
+     "y": 512,
+     "front": 650.44,
+     "back": 785.47,
+     "armFront": 684.38,
+     "armBack": 780.54
+    },
+    {
+     "y": 516,
+     "front": 650.65,
+     "back": 785.58,
+     "armFront": 683.97,
+     "armBack": 780.37
+    },
+    {
+     "y": 520,
+     "front": 650.83,
+     "back": 785.63,
+     "armFront": 683.6,
+     "armBack": 780.41
+    },
+    {
+     "y": 524,
+     "front": 651.1,
+     "back": 785.66,
+     "armFront": 683.35,
+     "armBack": 780.4
+    },
+    {
+     "y": 528,
+     "front": 651.35,
+     "back": 785.66,
+     "armFront": 683.01,
+     "armBack": 780.48
+    },
+    {
+     "y": 532,
+     "front": 651.65,
+     "back": 785.6,
+     "armFront": 682.65,
+     "armBack": 780.15
+    },
+    {
+     "y": 536,
+     "front": 651.99,
+     "back": 785.5,
+     "armFront": 682.38,
+     "armBack": 779.38
+    },
+    {
+     "y": 540,
+     "front": 652.36,
+     "back": 785.32,
+     "armFront": 682.32,
+     "armBack": 779.18
+    },
+    {
+     "y": 544,
+     "front": 652.73,
+     "back": 785.1,
+     "armFront": 682.15,
+     "armBack": 779.01
+    },
+    {
+     "y": 548,
+     "front": 653.23,
+     "back": 784.77,
+     "armFront": 681.94,
+     "armBack": 778.68
+    },
+    {
+     "y": 552,
+     "front": 653.68,
+     "back": 784.44,
+     "armFront": 681.73,
+     "armBack": 778.33
+    },
+    {
+     "y": 556,
+     "front": 654.23,
+     "back": 783.96,
+     "armFront": 681.63,
+     "armBack": 777.87
+    },
+    {
+     "y": 560,
+     "front": 654.69,
+     "back": 783.53,
+     "armFront": 681.63,
+     "armBack": 777.24
+    },
+    {
+     "y": 564,
+     "front": 655.38,
+     "back": 782.82,
+     "armFront": 681.66,
+     "armBack": 776.8
+    },
+    {
+     "y": 568,
+     "front": 656.16,
+     "back": 782.11,
+     "armFront": 681.75,
+     "armBack": 776.59
+    },
+    {
+     "y": 572,
+     "front": 656.98,
+     "back": 781.29,
+     "armFront": 681.92,
+     "armBack": 776.53
+    },
+    {
+     "y": 576,
+     "front": 657.81,
+     "back": 780.32,
+     "armFront": 682.27,
+     "armBack": 775.42
+    },
+    {
+     "y": 580,
+     "front": 658.71,
+     "back": 779.11,
+     "armFront": 682.68,
+     "armBack": 774.58
+    },
+    {
+     "y": 584,
+     "front": 660.11,
+     "back": 777.61,
+     "armFront": 683.41,
+     "armBack": 773.72
+    },
+    {
+     "y": 588,
+     "front": 661.23,
+     "back": 775.71,
+     "armFront": 684.58,
+     "armBack": 772.69
+    },
+    {
+     "y": 592,
+     "front": 663.39,
+     "back": 773.6,
+     "armFront": 686.29,
+     "armBack": 771.82
+    },
+    {
+     "y": 596,
+     "front": 664.3,
+     "back": 771,
+     "armFront": 688.5,
+     "armBack": 769.91
+    },
+    {
+     "y": 600,
+     "front": 664.95,
+     "back": 768.71,
+     "armFront": 691.59,
+     "armBack": 764.31
+    },
+    {
+     "y": 604,
+     "front": 665.3,
+     "back": 767.57,
+     "armFront": 696.04,
+     "armBack": 759.68
+    },
+    {
+     "y": 608,
+     "front": 665.42,
+     "back": 767.16,
+     "armFront": 703.45,
+     "armBack": 753.83
+    },
+    {
+     "y": 612,
+     "front": 665.57,
+     "back": 767.44,
+     "armFront": 717.63,
+     "armBack": 739.84
+    },
+    {
+     "y": 616,
+     "front": 665.74,
+     "back": 767.7,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 620,
+     "front": 665.96,
+     "back": 768.29,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 624,
+     "front": 666.23,
+     "back": 768.72,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 628,
+     "front": 666.37,
+     "back": 769.27,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 632,
+     "front": 666.5,
+     "back": 769.64,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 636,
+     "front": 666.59,
+     "back": 769.94,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 640,
+     "front": 666.63,
+     "back": 770.49,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 644,
+     "front": 666.7,
+     "back": 770.77,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 648,
+     "front": 666.69,
+     "back": 771.38,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 652,
+     "front": 666.64,
+     "back": 771.79,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 656,
+     "front": 666.61,
+     "back": 772.31,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 660,
+     "front": 666.57,
+     "back": 772.65,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 664,
+     "front": 666.46,
+     "back": 772.9,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 668,
+     "front": 666.4,
+     "back": 773.36,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 672,
+     "front": 666.29,
+     "back": 773.6,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 676,
+     "front": 666.2,
+     "back": 773.81,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 680,
+     "front": 666.07,
+     "back": 774.17,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 684,
+     "front": 666.02,
+     "back": 774.49,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 688,
+     "front": 665.84,
+     "back": 774.67,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 692,
+     "front": 665.79,
+     "back": 774.89,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 696,
+     "front": 665.59,
+     "back": 775.23,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 700,
+     "front": 665.43,
+     "back": 775.44,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 704,
+     "front": 665.16,
+     "back": 775.64,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 708,
+     "front": 664.9,
+     "back": 775.78,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 712,
+     "front": 664.7,
+     "back": 775.88,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 716,
+     "front": 664.49,
+     "back": 776.02,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 720,
+     "front": 664.01,
+     "back": 776.12,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 724,
+     "front": 663.38,
+     "back": 776.21,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 728,
+     "front": 663.52,
+     "back": 776.12,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 732,
+     "front": 663.17,
+     "back": 776.08,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 736,
+     "front": 662.29,
+     "back": 775.9,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 740,
+     "front": 662.35,
+     "back": 775.82,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 744,
+     "front": 662.16,
+     "back": 775.65,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 748,
+     "front": 662.2,
+     "back": 775.3,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 752,
+     "front": 662.67,
+     "back": 774.66,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 756,
+     "front": 663.31,
+     "back": 774.16,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 760,
+     "front": 664.27,
+     "back": 773.35,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 764,
+     "front": 666.15,
+     "back": 772.27,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 768,
+     "front": 669.75,
+     "back": 771.41,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 772,
+     "front": 673.5,
+     "back": 769.12,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 776,
+     "front": 676.5,
+     "back": 766.45,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 780,
+     "front": 678.5,
+     "back": 762.92,
+     "armFront": null,
+     "armBack": null
+    },
+    {
+     "y": 784,
+     "front": 689.3,
+     "back": 751.74,
+     "armFront": null,
+     "armBack": null
+    }
+   ]
+  },
+  "threeQuarterLeft": {
+   "centreX": 477.72,
+   "crownY": 221.45,
+   "groundY": 784.6,
+   "rows": [
+    {
+     "y": 220,
+     "left": null,
+     "right": null
+    },
+    {
+     "y": 224,
+     "left": 453.2,
+     "right": 480.4
+    },
+    {
+     "y": 228,
+     "left": 444.6,
+     "right": 494
+    },
+    {
+     "y": 232,
+     "left": 436.85,
+     "right": 506.2
+    },
+    {
+     "y": 236,
+     "left": 430.1,
+     "right": 516.4
+    },
+    {
+     "y": 240,
+     "left": 423.67,
+     "right": 525.2
+    },
+    {
+     "y": 244,
+     "left": 417.72,
+     "right": 532.06
+    },
+    {
+     "y": 248,
+     "left": 412.1,
+     "right": 536.06
+    },
+    {
+     "y": 252,
+     "left": 406.97,
+     "right": 538.15
+    },
+    {
+     "y": 256,
+     "left": 402.91,
+     "right": 539.6
+    },
+    {
+     "y": 260,
+     "left": 400.59,
+     "right": 541.14
+    },
+    {
+     "y": 264,
+     "left": 398.9,
+     "right": 542.48
+    },
+    {
+     "y": 268,
+     "left": 397.6,
+     "right": 543.79
+    },
+    {
+     "y": 272,
+     "left": 396.4,
+     "right": 545.21
+    },
+    {
+     "y": 276,
+     "left": 395.2,
+     "right": 546.33
+    },
+    {
+     "y": 280,
+     "left": 393.97,
+     "right": 547.5
+    },
+    {
+     "y": 284,
+     "left": 392.79,
+     "right": 548.55
+    },
+    {
+     "y": 288,
+     "left": 391.72,
+     "right": 549.55
+    },
+    {
+     "y": 292,
+     "left": 390.76,
+     "right": 550.42
+    },
+    {
+     "y": 296,
+     "left": 389.82,
+     "right": 550.82
+    },
+    {
+     "y": 300,
+     "left": 389.02,
+     "right": 550.63
+    },
+    {
+     "y": 304,
+     "left": 388.33,
+     "right": 549.61
+    },
+    {
+     "y": 308,
+     "left": 388.01,
+     "right": 548.21
+    },
+    {
+     "y": 312,
+     "left": 388.52,
+     "right": 546.52
+    },
+    {
+     "y": 316,
+     "left": 389.82,
+     "right": 544.59
+    },
+    {
+     "y": 320,
+     "left": 391.63,
+     "right": 542.67
+    },
+    {
+     "y": 324,
+     "left": 393.54,
+     "right": 540.67
+    },
+    {
+     "y": 328,
+     "left": 395.57,
+     "right": 538.63
+    },
+    {
+     "y": 332,
+     "left": 397.8,
+     "right": 536.44
+    },
+    {
+     "y": 336,
+     "left": 400.17,
+     "right": 533.99
+    },
+    {
+     "y": 340,
+     "left": 402.56,
+     "right": 531.53
+    },
+    {
+     "y": 344,
+     "left": 404.98,
+     "right": 528.74
+    },
+    {
+     "y": 348,
+     "left": 407.48,
+     "right": 525.76
+    },
+    {
+     "y": 352,
+     "left": 410.18,
+     "right": 522.35
+    },
+    {
+     "y": 356,
+     "left": 412.96,
+     "right": 518.46
+    },
+    {
+     "y": 360,
+     "left": 416.18,
+     "right": 519.53
+    },
+    {
+     "y": 364,
+     "left": 419.9,
+     "right": 521.91
+    },
+    {
+     "y": 368,
+     "left": 426.57,
+     "right": 528.2
+    },
+    {
+     "y": 372,
+     "left": 430.5,
+     "right": 543.45
+    },
+    {
+     "y": 376,
+     "left": 425.7,
+     "right": 554.06
+    },
+    {
+     "y": 380,
+     "left": 415.5,
+     "right": 562.2
+    },
+    {
+     "y": 384,
+     "left": 407.01,
+     "right": 568.71
+    },
+    {
+     "y": 388,
+     "left": 400.1,
+     "right": 574.07
+    },
+    {
+     "y": 392,
+     "left": 394.73,
+     "right": 578.19
+    },
+    {
+     "y": 396,
+     "left": 390.2,
+     "right": 581.3
+    },
+    {
+     "y": 400,
+     "left": 386.6,
+     "right": 583.7
+    },
+    {
+     "y": 404,
+     "left": 383.51,
+     "right": 585.73
+    },
+    {
+     "y": 408,
+     "left": 381.42,
+     "right": 587.37
+    },
+    {
+     "y": 412,
+     "left": 379.4,
+     "right": 588.58
+    },
+    {
+     "y": 416,
+     "left": 377.87,
+     "right": 589.6
+    },
+    {
+     "y": 420,
+     "left": 376.83,
+     "right": 590.55
+    },
+    {
+     "y": 424,
+     "left": 375.92,
+     "right": 591.32
+    },
+    {
+     "y": 428,
+     "left": 375.28,
+     "right": 591.97
+    },
+    {
+     "y": 432,
+     "left": 374.7,
+     "right": 592.69
+    },
+    {
+     "y": 436,
+     "left": 374.33,
+     "right": 593.31
+    },
+    {
+     "y": 440,
+     "left": 373.97,
+     "right": 593.97
+    },
+    {
+     "y": 444,
+     "left": 373.69,
+     "right": 594.71
+    },
+    {
+     "y": 448,
+     "left": 373.54,
+     "right": 595.53
+    },
+    {
+     "y": 452,
+     "left": 373.4,
+     "right": 596.7
+    },
+    {
+     "y": 456,
+     "left": 373.11,
+     "right": 598.11
+    },
+    {
+     "y": 460,
+     "left": 372.5,
+     "right": 599.62
+    },
+    {
+     "y": 464,
+     "left": 371.44,
+     "right": 601.1
+    },
+    {
+     "y": 468,
+     "left": 370.26,
+     "right": 602.39
+    },
+    {
+     "y": 472,
+     "left": 369.03,
+     "right": 603.53
+    },
+    {
+     "y": 476,
+     "left": 367.64,
+     "right": 604.52
+    },
+    {
+     "y": 480,
+     "left": 366.44,
+     "right": 605.42
+    },
+    {
+     "y": 484,
+     "left": 365.32,
+     "right": 606.33
+    },
+    {
+     "y": 488,
+     "left": 364.13,
+     "right": 606.96
+    },
+    {
+     "y": 492,
+     "left": 362.81,
+     "right": 607.7
+    },
+    {
+     "y": 496,
+     "left": 361.63,
+     "right": 608.33
+    },
+    {
+     "y": 500,
+     "left": 360.5,
+     "right": 608.82
+    },
+    {
+     "y": 504,
+     "left": 359.45,
+     "right": 609.33
+    },
+    {
+     "y": 508,
+     "left": 358.47,
+     "right": 609.76
+    },
+    {
+     "y": 512,
+     "left": 357.5,
+     "right": 610.22
+    },
+    {
+     "y": 516,
+     "left": 356.53,
+     "right": 610.67
+    },
+    {
+     "y": 520,
+     "left": 355.73,
+     "right": 610.99
+    },
+    {
+     "y": 524,
+     "left": 354.95,
+     "right": 611.41
+    },
+    {
+     "y": 528,
+     "left": 354.25,
+     "right": 611.7
+    },
+    {
+     "y": 532,
+     "left": 353.44,
+     "right": 611.91
+    },
+    {
+     "y": 536,
+     "left": 352.7,
+     "right": 612.16
+    },
+    {
+     "y": 540,
+     "left": 352.15,
+     "right": 612.47
+    },
+    {
+     "y": 544,
+     "left": 351.41,
+     "right": 612.63
+    },
+    {
+     "y": 548,
+     "left": 350.78,
+     "right": 612.78
+    },
+    {
+     "y": 552,
+     "left": 350.27,
+     "right": 612.89
+    },
+    {
+     "y": 556,
+     "left": 349.61,
+     "right": 612.96
+    },
+    {
+     "y": 560,
+     "left": 349.33,
+     "right": 612.94
+    },
+    {
+     "y": 564,
+     "left": 348.87,
+     "right": 612.89
+    },
+    {
+     "y": 568,
+     "left": 348.47,
+     "right": 612.84
+    },
+    {
+     "y": 572,
+     "left": 348.39,
+     "right": 612.68
+    },
+    {
+     "y": 576,
+     "left": 348.42,
+     "right": 612.36
+    },
+    {
+     "y": 580,
+     "left": 348.72,
+     "right": 611.73
+    },
+    {
+     "y": 584,
+     "left": 349.45,
+     "right": 610.88
+    },
+    {
+     "y": 588,
+     "left": 350.92,
+     "right": 609.78
+    },
+    {
+     "y": 592,
+     "left": 352.62,
+     "right": 608.2
+    },
+    {
+     "y": 596,
+     "left": 354.42,
+     "right": 606.13
+    },
+    {
+     "y": 600,
+     "left": 357.5,
+     "right": 603.09
+    },
+    {
+     "y": 604,
+     "left": 362.23,
+     "right": 598.7
+    },
+    {
+     "y": 608,
+     "left": 371.76,
+     "right": 592.81
+    },
+    {
+     "y": 612,
+     "left": 386.78,
+     "right": 576.97
+    },
+    {
+     "y": 616,
+     "left": 386.42,
+     "right": 556.91
+    },
+    {
+     "y": 620,
+     "left": 385.81,
+     "right": 557.63
+    },
+    {
+     "y": 624,
+     "left": 385.38,
+     "right": 558.38
+    },
+    {
+     "y": 628,
+     "left": 384.85,
+     "right": 558.85
+    },
+    {
+     "y": 632,
+     "left": 384.46,
+     "right": 559.56
+    },
+    {
+     "y": 636,
+     "left": 384.09,
+     "right": 560.23
+    },
+    {
+     "y": 640,
+     "left": 383.58,
+     "right": 560.79
+    },
+    {
+     "y": 644,
+     "left": 383.26,
+     "right": 561.57
+    },
+    {
+     "y": 648,
+     "left": 382.76,
+     "right": 562.16
+    },
+    {
+     "y": 652,
+     "left": 382.44,
+     "right": 562.7
+    },
+    {
+     "y": 656,
+     "left": 382.17,
+     "right": 563.47
+    },
+    {
+     "y": 660,
+     "left": 381.75,
+     "right": 563.83
+    },
+    {
+     "y": 664,
+     "left": 381.48,
+     "right": 564.51
+    },
+    {
+     "y": 668,
+     "left": 381.2,
+     "right": 565.09
+    },
+    {
+     "y": 672,
+     "left": 380.76,
+     "right": 565.57
+    },
+    {
+     "y": 676,
+     "left": 380.51,
+     "right": 566.13
+    },
+    {
+     "y": 680,
+     "left": 380.28,
+     "right": 566.6
+    },
+    {
+     "y": 684,
+     "left": 380.1,
+     "right": 567.1
+    },
+    {
+     "y": 688,
+     "left": 379.73,
+     "right": 567.57
+    },
+    {
+     "y": 692,
+     "left": 379.54,
+     "right": 567.86
+    },
+    {
+     "y": 696,
+     "left": 379.42,
+     "right": 568.44
+    },
+    {
+     "y": 700,
+     "left": 379.27,
+     "right": 568.69
+    },
+    {
+     "y": 704,
+     "left": 379.14,
+     "right": 569.14
+    },
+    {
+     "y": 708,
+     "left": 379.08,
+     "right": 569.45
+    },
+    {
+     "y": 712,
+     "left": 379.05,
+     "right": 569.61
+    },
+    {
+     "y": 716,
+     "left": 379.03,
+     "right": 569.71
+    },
+    {
+     "y": 720,
+     "left": 379.1,
+     "right": 569.84
+    },
+    {
+     "y": 724,
+     "left": 379.24,
+     "right": 569.98
+    },
+    {
+     "y": 728,
+     "left": 379.38,
+     "right": 570.03
+    },
+    {
+     "y": 732,
+     "left": 379.63,
+     "right": 570.05
+    },
+    {
+     "y": 736,
+     "left": 379.89,
+     "right": 569.88
+    },
+    {
+     "y": 740,
+     "left": 380.25,
+     "right": 569.78
+    },
+    {
+     "y": 744,
+     "left": 380.87,
+     "right": 569.59
+    },
+    {
+     "y": 748,
+     "left": 381.55,
+     "right": 569.35
+    },
+    {
+     "y": 752,
+     "left": 382.36,
+     "right": 568.94
+    },
+    {
+     "y": 756,
+     "left": 383.44,
+     "right": 568.34
+    },
+    {
+     "y": 760,
+     "left": 384.33,
+     "right": 567.51
+    },
+    {
+     "y": 764,
+     "left": 386.29,
+     "right": 566.53
+    },
+    {
+     "y": 768,
+     "left": 389.36,
+     "right": 565.1
+    },
+    {
+     "y": 772,
+     "left": 392.2,
+     "right": 562.93
+    },
+    {
+     "y": 776,
+     "left": 402.45,
+     "right": 562.39
+    },
+    {
+     "y": 780,
+     "left": 481.6,
+     "right": 557.29
+    },
+    {
+     "y": 784,
+     "left": 490.35,
+     "right": 542.42
+    }
+   ]
+  },
+  "threeQuarterRight": {
+   "centreX": 1277.2,
+   "crownY": 221.53,
+   "groundY": 782.89,
+   "rows": [
+    {
+     "y": 220,
+     "left": null,
+     "right": null
+    },
+    {
+     "y": 224,
+     "left": 1261.27,
+     "right": 1287.64
+    },
+    {
+     "y": 228,
+     "left": 1249.75,
+     "right": 1298.8
+    },
+    {
+     "y": 232,
+     "left": 1240.3,
+     "right": 1308.6
+    },
+    {
+     "y": 236,
+     "left": 1232.3,
+     "right": 1317.25
+    },
+    {
+     "y": 240,
+     "left": 1225.26,
+     "right": 1324.6
+    },
+    {
+     "y": 244,
+     "left": 1218.62,
+     "right": 1331.59
+    },
+    {
+     "y": 248,
+     "left": 1212.5,
+     "right": 1337.6
+    },
+    {
+     "y": 252,
+     "left": 1207.2,
+     "right": 1341.41
+    },
+    {
+     "y": 256,
+     "left": 1203.5,
+     "right": 1343.6
+    },
+    {
+     "y": 260,
+     "left": 1201.41,
+     "right": 1345.14
+    },
+    {
+     "y": 264,
+     "left": 1199.74,
+     "right": 1346.58
+    },
+    {
+     "y": 268,
+     "left": 1198.33,
+     "right": 1347.87
+    },
+    {
+     "y": 272,
+     "left": 1197.12,
+     "right": 1349.27
+    },
+    {
+     "y": 276,
+     "left": 1195.97,
+     "right": 1350.53
+    },
+    {
+     "y": 280,
+     "left": 1194.81,
+     "right": 1351.75
+    },
+    {
+     "y": 284,
+     "left": 1193.78,
+     "right": 1352.91
+    },
+    {
+     "y": 288,
+     "left": 1192.82,
+     "right": 1354.04
+    },
+    {
+     "y": 292,
+     "left": 1191.92,
+     "right": 1355.1
+    },
+    {
+     "y": 296,
+     "left": 1191.22,
+     "right": 1356.01
+    },
+    {
+     "y": 300,
+     "left": 1190.69,
+     "right": 1356.53
+    },
+    {
+     "y": 304,
+     "left": 1190.76,
+     "right": 1356.41
+    },
+    {
+     "y": 308,
+     "left": 1191.52,
+     "right": 1355.47
+    },
+    {
+     "y": 312,
+     "left": 1193.07,
+     "right": 1354.11
+    },
+    {
+     "y": 316,
+     "left": 1195.11,
+     "right": 1352.5
+    },
+    {
+     "y": 320,
+     "left": 1197.29,
+     "right": 1350.68
+    },
+    {
+     "y": 324,
+     "left": 1199.57,
+     "right": 1348.82
+    },
+    {
+     "y": 328,
+     "left": 1202,
+     "right": 1347.17
+    },
+    {
+     "y": 332,
+     "left": 1204.4,
+     "right": 1345.33
+    },
+    {
+     "y": 336,
+     "left": 1207.1,
+     "right": 1343.36
+    },
+    {
+     "y": 340,
+     "left": 1209.76,
+     "right": 1341.26
+    },
+    {
+     "y": 344,
+     "left": 1212.66,
+     "right": 1339.16
+    },
+    {
+     "y": 348,
+     "left": 1215.76,
+     "right": 1336.91
+    },
+    {
+     "y": 352,
+     "left": 1219.32,
+     "right": 1334.61
+    },
+    {
+     "y": 356,
+     "left": 1223.26,
+     "right": 1331.88
+    },
+    {
+     "y": 360,
+     "left": 1227.11,
+     "right": 1328.58
+    },
+    {
+     "y": 364,
+     "left": 1226.23,
+     "right": 1323.42
+    },
+    {
+     "y": 368,
+     "left": 1224.55,
+     "right": 1317.5
+    },
+    {
+     "y": 372,
+     "left": 1217.29,
+     "right": 1322.4
+    },
+    {
+     "y": 376,
+     "left": 1203.8,
+     "right": 1336.32
+    },
+    {
+     "y": 380,
+     "left": 1193.2,
+     "right": 1347.65
+    },
+    {
+     "y": 384,
+     "left": 1185.5,
+     "right": 1355.61
+    },
+    {
+     "y": 388,
+     "left": 1179.85,
+     "right": 1361.51
+    },
+    {
+     "y": 392,
+     "left": 1175.56,
+     "right": 1366.03
+    },
+    {
+     "y": 396,
+     "left": 1172.2,
+     "right": 1369.4
+    },
+    {
+     "y": 400,
+     "left": 1169.7,
+     "right": 1372
+    },
+    {
+     "y": 404,
+     "left": 1167.54,
+     "right": 1373.79
+    },
+    {
+     "y": 408,
+     "left": 1165.75,
+     "right": 1375.19
+    },
+    {
+     "y": 412,
+     "left": 1164.41,
+     "right": 1376.23
+    },
+    {
+     "y": 416,
+     "left": 1163.33,
+     "right": 1377.04
+    },
+    {
+     "y": 420,
+     "left": 1162.52,
+     "right": 1377.65
+    },
+    {
+     "y": 424,
+     "left": 1161.81,
+     "right": 1378.31
+    },
+    {
+     "y": 428,
+     "left": 1161.24,
+     "right": 1378.91
+    },
+    {
+     "y": 432,
+     "left": 1160.61,
+     "right": 1379.45
+    },
+    {
+     "y": 436,
+     "left": 1160.12,
+     "right": 1380.08
+    },
+    {
+     "y": 440,
+     "left": 1159.72,
+     "right": 1380.49
+    },
+    {
+     "y": 444,
+     "left": 1159.42,
+     "right": 1381.12
+    },
+    {
+     "y": 448,
+     "left": 1159,
+     "right": 1381.7
+    },
+    {
+     "y": 452,
+     "left": 1158.46,
+     "right": 1382.49
+    },
+    {
+     "y": 456,
+     "left": 1157.59,
+     "right": 1383.53
+    },
+    {
+     "y": 460,
+     "left": 1156.43,
+     "right": 1384.95
+    },
+    {
+     "y": 464,
+     "left": 1155.04,
+     "right": 1386.56
+    },
+    {
+     "y": 468,
+     "left": 1153.76,
+     "right": 1388.38
+    },
+    {
+     "y": 472,
+     "left": 1152.56,
+     "right": 1390.25
+    },
+    {
+     "y": 476,
+     "left": 1151.44,
+     "right": 1392.11
+    },
+    {
+     "y": 480,
+     "left": 1150.4,
+     "right": 1394.07
+    },
+    {
+     "y": 484,
+     "left": 1149.5,
+     "right": 1395.76
+    },
+    {
+     "y": 488,
+     "left": 1148.63,
+     "right": 1397.59
+    },
+    {
+     "y": 492,
+     "left": 1147.85,
+     "right": 1399.43
+    },
+    {
+     "y": 496,
+     "left": 1147.22,
+     "right": 1401.12
+    },
+    {
+     "y": 500,
+     "left": 1146.59,
+     "right": 1402.65
+    },
+    {
+     "y": 504,
+     "left": 1146.04,
+     "right": 1404.31
+    },
+    {
+     "y": 508,
+     "left": 1145.61,
+     "right": 1405.78
+    },
+    {
+     "y": 512,
+     "left": 1145.19,
+     "right": 1407.3
+    },
+    {
+     "y": 516,
+     "left": 1144.77,
+     "right": 1408.47
+    },
+    {
+     "y": 520,
+     "left": 1144.56,
+     "right": 1409.53
+    },
+    {
+     "y": 524,
+     "left": 1144.31,
+     "right": 1410.59
+    },
+    {
+     "y": 528,
+     "left": 1144.18,
+     "right": 1411.59
+    },
+    {
+     "y": 532,
+     "left": 1144.07,
+     "right": 1412.62
+    },
+    {
+     "y": 536,
+     "left": 1144.01,
+     "right": 1413.53
+    },
+    {
+     "y": 540,
+     "left": 1144.02,
+     "right": 1414.45
+    },
+    {
+     "y": 544,
+     "left": 1144.08,
+     "right": 1415.23
+    },
+    {
+     "y": 548,
+     "left": 1144.23,
+     "right": 1415.9
+    },
+    {
+     "y": 552,
+     "left": 1144.38,
+     "right": 1416.54
+    },
+    {
+     "y": 556,
+     "left": 1144.51,
+     "right": 1417.27
+    },
+    {
+     "y": 560,
+     "left": 1144.73,
+     "right": 1417.73
+    },
+    {
+     "y": 564,
+     "left": 1145.06,
+     "right": 1418.3
+    },
+    {
+     "y": 568,
+     "left": 1145.42,
+     "right": 1418.66
+    },
+    {
+     "y": 572,
+     "left": 1145.81,
+     "right": 1418.9
+    },
+    {
+     "y": 576,
+     "left": 1146.43,
+     "right": 1418.99
+    },
+    {
+     "y": 580,
+     "left": 1146.95,
+     "right": 1418.78
+    },
+    {
+     "y": 584,
+     "left": 1147.65,
+     "right": 1418.4
+    },
+    {
+     "y": 588,
+     "left": 1148.52,
+     "right": 1417.43
+    },
+    {
+     "y": 592,
+     "left": 1149.8,
+     "right": 1416.05
+    },
+    {
+     "y": 596,
+     "left": 1151.4,
+     "right": 1413.72
+    },
+    {
+     "y": 600,
+     "left": 1153.39,
+     "right": 1410.7
+    },
+    {
+     "y": 604,
+     "left": 1156,
+     "right": 1406.18
+    },
+    {
+     "y": 608,
+     "left": 1159.87,
+     "right": 1399
+    },
+    {
+     "y": 612,
+     "left": 1165.57,
+     "right": 1368.74
+    },
+    {
+     "y": 616,
+     "left": 1179,
+     "right": 1369.21
+    },
+    {
+     "y": 620,
+     "left": 1200.48,
+     "right": 1369.76
+    },
+    {
+     "y": 624,
+     "left": 1199.68,
+     "right": 1370.26
+    },
+    {
+     "y": 628,
+     "left": 1198.99,
+     "right": 1370.75
+    },
+    {
+     "y": 632,
+     "left": 1198.28,
+     "right": 1371.23
+    },
+    {
+     "y": 636,
+     "left": 1197.56,
+     "right": 1371.76
+    },
+    {
+     "y": 640,
+     "left": 1196.9,
+     "right": 1372.27
+    },
+    {
+     "y": 644,
+     "left": 1196.25,
+     "right": 1372.74
+    },
+    {
+     "y": 648,
+     "left": 1195.59,
+     "right": 1373.26
+    },
+    {
+     "y": 652,
+     "left": 1194.9,
+     "right": 1373.61
+    },
+    {
+     "y": 656,
+     "left": 1194.3,
+     "right": 1374.18
+    },
+    {
+     "y": 660,
+     "left": 1193.6,
+     "right": 1374.58
+    },
+    {
+     "y": 664,
+     "left": 1193.09,
+     "right": 1375.08
+    },
+    {
+     "y": 668,
+     "left": 1192.51,
+     "right": 1375.43
+    },
+    {
+     "y": 672,
+     "left": 1191.89,
+     "right": 1375.91
+    },
+    {
+     "y": 676,
+     "left": 1191.38,
+     "right": 1376.27
+    },
+    {
+     "y": 680,
+     "left": 1190.94,
+     "right": 1376.59
+    },
+    {
+     "y": 684,
+     "left": 1190.53,
+     "right": 1376.97
+    },
+    {
+     "y": 688,
+     "left": 1190.15,
+     "right": 1377.25
+    },
+    {
+     "y": 692,
+     "left": 1189.64,
+     "right": 1377.47
+    },
+    {
+     "y": 696,
+     "left": 1189.25,
+     "right": 1377.7
+    },
+    {
+     "y": 700,
+     "left": 1188.84,
+     "right": 1378.06
+    },
+    {
+     "y": 704,
+     "left": 1188.51,
+     "right": 1378.31
+    },
+    {
+     "y": 708,
+     "left": 1188.19,
+     "right": 1378.36
+    },
+    {
+     "y": 712,
+     "left": 1187.93,
+     "right": 1378.45
+    },
+    {
+     "y": 716,
+     "left": 1187.54,
+     "right": 1378.58
+    },
+    {
+     "y": 720,
+     "left": 1187.53,
+     "right": 1378.66
+    },
+    {
+     "y": 724,
+     "left": 1187.34,
+     "right": 1378.68
+    },
+    {
+     "y": 728,
+     "left": 1187.19,
+     "right": 1378.64
+    },
+    {
+     "y": 732,
+     "left": 1187.15,
+     "right": 1378.66
+    },
+    {
+     "y": 736,
+     "left": 1187.22,
+     "right": 1378.45
+    },
+    {
+     "y": 740,
+     "left": 1187.18,
+     "right": 1378.21
+    },
+    {
+     "y": 744,
+     "left": 1187.37,
+     "right": 1377.8
+    },
+    {
+     "y": 748,
+     "left": 1187.59,
+     "right": 1377.37
+    },
+    {
+     "y": 752,
+     "left": 1188,
+     "right": 1376.66
+    },
+    {
+     "y": 756,
+     "left": 1188.62,
+     "right": 1375.83
+    },
+    {
+     "y": 760,
+     "left": 1189.36,
+     "right": 1374.71
+    },
+    {
+     "y": 764,
+     "left": 1190.69,
+     "right": 1373.75
+    },
+    {
+     "y": 768,
+     "left": 1191.83,
+     "right": 1370
+    },
+    {
+     "y": 772,
+     "left": 1193.66,
+     "right": 1367.12
+    },
+    {
+     "y": 776,
+     "left": 1196.5,
+     "right": 1363
+    },
+    {
+     "y": 780,
+     "left": 1202.06,
+     "right": 1272.5
+    }
+   ]
+  }
+ },
+ "head": {
+  "front": [
+   [
+    187.53,
+    217.52
+   ],
+   [
+    256.1,
+    246.44
+   ],
+   [
+    272.97,
+    304.15
+   ],
+   [
+    231.46,
+    369.6
+   ],
+   [
+    135.8,
+    369.6
+   ],
+   [
+    94.87,
+    305.76
+   ],
+   [
+    115.22,
+    246.69
+   ]
+  ],
+  "side": [
+   [
+    696.4,
+    217.15
+   ],
+   [
+    773.96,
+    240.55
+   ],
+   [
+    793.52,
+    305.19
+   ],
+   [
+    766.33,
+    368.66
+   ],
+   [
+    668.97,
+    372.63
+   ],
+   [
+    643.79,
+    306.46
+   ],
+   [
+    658.17,
+    259.83
+   ]
+  ],
+  "threeQuarterLeft": [
+   [
+    461.93,
+    217.45
+   ],
+   [
+    535.62,
+    242.15
+   ],
+   [
+    553.77,
+    300.36
+   ],
+   [
+    521.01,
+    359.1
+   ],
+   [
+    424.2,
+    374.54
+   ],
+   [
+    385.5,
+    311.44
+   ],
+   [
+    401.38,
+    253.37
+   ]
+  ],
+  "cornerRadius": {
+   "front": 33.21,
+   "side": 37
+  },
+  "cornerRadii": {
+   "order": "same order as the vertices; ray-fit of the rounded outline to edge points (rms 0.2-0.4 px); null = corner hidden by the neck/shoulders",
+   "front": [
+    50.5,
+    36.5,
+    36,
+    null,
+    null,
+    32,
+    37
+   ],
+   "side": [
+    31,
+    39.5,
+    56.5,
+    null,
+    null,
+    46,
+    74.5
+   ],
+   "threeQuarterLeft": [
+    43.5,
+    32.5,
+    37.5,
+    null,
+    null,
+    32.5,
+    38.5
+   ]
+  }
+ },
+ "landmarks": {
+  "headBottomY": 369.56,
+  "headWidestY": 300.5,
+  "neckWidthFront": 94.78,
+  "neckDepthSide": 74.59,
+  "neckBottomY": 369,
+  "armpitY": 460.5,
+  "armEndY": 615.04,
+  "armWidestY": 539.5,
+  "crotchY": 619.43,
+  "legWidthTop": 95.43,
+  "legWidthBottom": 99.2,
+  "legDepthSide": 108.97,
+  "footCornerRadius": 28.63,
+  "armDepthSide": 97.66,
+  "armWidthFrontWidest": 79.56,
+  "torsoDepthSideMax": 135.03
+ },
+ "symmetric": {
+  "front": {
+   "note": "Half-widths from centreX, the mean of the left and right sides of the front and back views together, i.e. (right-left)/2 averaged over both views, so they do not depend on centreX. armInner/torso are the crease's two edges, slit the half-gap between the legs. The symmetric arm ends at armEndY (mean of the four arm ends, 615.6): at y 616 the back view's arm sliver is replaced by its hip edges.",
+   "armEndY": 615.63,
+   "rows": [
+    {
+     "y": 220,
+     "outer": null,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 224,
+     "outer": 13.61,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 228,
+     "outer": 25.39,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 232,
+     "outer": 35.8,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 236,
+     "outer": 44.85,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 240,
+     "outer": 52.71,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 244,
+     "outer": 59.87,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 248,
+     "outer": 65.97,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 252,
+     "outer": 69.88,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 256,
+     "outer": 72.15,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 260,
+     "outer": 73.75,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 264,
+     "outer": 75.17,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 268,
+     "outer": 76.49,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 272,
+     "outer": 77.87,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 276,
+     "outer": 79.18,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 280,
+     "outer": 80.37,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 284,
+     "outer": 81.59,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 288,
+     "outer": 82.76,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 292,
+     "outer": 83.83,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 296,
+     "outer": 84.72,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 300,
+     "outer": 85.28,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 304,
+     "outer": 84.98,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 308,
+     "outer": 84,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 312,
+     "outer": 82.41,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 316,
+     "outer": 80.55,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 320,
+     "outer": 78.52,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 324,
+     "outer": 76.42,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 328,
+     "outer": 74.19,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 332,
+     "outer": 71.78,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 336,
+     "outer": 69.23,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 340,
+     "outer": 66.57,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 344,
+     "outer": 63.8,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 348,
+     "outer": 60.91,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 352,
+     "outer": 57.76,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 356,
+     "outer": 54.33,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 360,
+     "outer": 49.72,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 364,
+     "outer": 46.96,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 368,
+     "outer": 48.83,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 372,
+     "outer": 58.75,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 376,
+     "outer": 78.07,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 380,
+     "outer": 92.8,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 384,
+     "outer": 102.07,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 388,
+     "outer": 108.58,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 392,
+     "outer": 113.27,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 396,
+     "outer": 116.84,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 400,
+     "outer": 119.66,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 404,
+     "outer": 121.96,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 408,
+     "outer": 123.92,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 412,
+     "outer": 125.52,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 416,
+     "outer": 126.82,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 420,
+     "outer": 128.02,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 424,
+     "outer": 129.04,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 428,
+     "outer": 129.98,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 432,
+     "outer": 130.86,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 436,
+     "outer": 131.66,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 440,
+     "outer": 132.42,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 444,
+     "outer": 133.11,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 448,
+     "outer": 133.85,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 452,
+     "outer": 134.83,
+     "armInner": 80.51,
+     "torso": 78.3,
+     "slit": null
+    },
+    {
+     "y": 456,
+     "outer": 136.19,
+     "armInner": 79.68,
+     "torso": 77.62,
+     "slit": null
+    },
+    {
+     "y": 460,
+     "outer": 137.95,
+     "armInner": 79.09,
+     "torso": 76.51,
+     "slit": null
+    },
+    {
+     "y": 464,
+     "outer": 139.71,
+     "armInner": 78.25,
+     "torso": 75.76,
+     "slit": null
+    },
+    {
+     "y": 468,
+     "outer": 141.51,
+     "armInner": 77.29,
+     "torso": 75.04,
+     "slit": null
+    },
+    {
+     "y": 472,
+     "outer": 143.19,
+     "armInner": 76.53,
+     "torso": 74.74,
+     "slit": null
+    },
+    {
+     "y": 476,
+     "outer": 144.76,
+     "armInner": 76.31,
+     "torso": 74.26,
+     "slit": null
+    },
+    {
+     "y": 480,
+     "outer": 146.38,
+     "armInner": 76.13,
+     "torso": 74.08,
+     "slit": null
+    },
+    {
+     "y": 484,
+     "outer": 147.87,
+     "armInner": 76.04,
+     "torso": 74.04,
+     "slit": null
+    },
+    {
+     "y": 488,
+     "outer": 149.24,
+     "armInner": 76.07,
+     "torso": 74.08,
+     "slit": null
+    },
+    {
+     "y": 492,
+     "outer": 150.61,
+     "armInner": 76.17,
+     "torso": 74.2,
+     "slit": null
+    },
+    {
+     "y": 496,
+     "outer": 151.81,
+     "armInner": 76.39,
+     "torso": 74.35,
+     "slit": null
+    },
+    {
+     "y": 500,
+     "outer": 152.99,
+     "armInner": 76.7,
+     "torso": 74.57,
+     "slit": null
+    },
+    {
+     "y": 504,
+     "outer": 154.03,
+     "armInner": 76.9,
+     "torso": 74.94,
+     "slit": null
+    },
+    {
+     "y": 508,
+     "outer": 154.95,
+     "armInner": 77.27,
+     "torso": 75.26,
+     "slit": null
+    },
+    {
+     "y": 512,
+     "outer": 155.83,
+     "armInner": 77.66,
+     "torso": 75.55,
+     "slit": null
+    },
+    {
+     "y": 516,
+     "outer": 156.54,
+     "armInner": 77.91,
+     "torso": 76.05,
+     "slit": null
+    },
+    {
+     "y": 520,
+     "outer": 157.23,
+     "armInner": 78.51,
+     "torso": 76.34,
+     "slit": null
+    },
+    {
+     "y": 524,
+     "outer": 157.9,
+     "armInner": 78.83,
+     "torso": 76.86,
+     "slit": null
+    },
+    {
+     "y": 528,
+     "outer": 158.5,
+     "armInner": 79.37,
+     "torso": 77.23,
+     "slit": null
+    },
+    {
+     "y": 532,
+     "outer": 159.01,
+     "armInner": 79.72,
+     "torso": 77.69,
+     "slit": null
+    },
+    {
+     "y": 536,
+     "outer": 159.51,
+     "armInner": 80.22,
+     "torso": 78.1,
+     "slit": null
+    },
+    {
+     "y": 540,
+     "outer": 159.88,
+     "armInner": 80.61,
+     "torso": 78.57,
+     "slit": null
+    },
+    {
+     "y": 544,
+     "outer": 160.25,
+     "armInner": 81.16,
+     "torso": 79,
+     "slit": null
+    },
+    {
+     "y": 548,
+     "outer": 160.59,
+     "armInner": 81.55,
+     "torso": 79.48,
+     "slit": null
+    },
+    {
+     "y": 552,
+     "outer": 160.81,
+     "armInner": 82.14,
+     "torso": 80.02,
+     "slit": null
+    },
+    {
+     "y": 556,
+     "outer": 160.94,
+     "armInner": 82.54,
+     "torso": 80.54,
+     "slit": null
+    },
+    {
+     "y": 560,
+     "outer": 161.03,
+     "armInner": 83.2,
+     "torso": 81.01,
+     "slit": null
+    },
+    {
+     "y": 564,
+     "outer": 161.05,
+     "armInner": 83.62,
+     "torso": 81.57,
+     "slit": null
+    },
+    {
+     "y": 568,
+     "outer": 161,
+     "armInner": 84.21,
+     "torso": 82.1,
+     "slit": null
+    },
+    {
+     "y": 572,
+     "outer": 160.88,
+     "armInner": 84.76,
+     "torso": 82.65,
+     "slit": null
+    },
+    {
+     "y": 576,
+     "outer": 160.63,
+     "armInner": 85.39,
+     "torso": 83.26,
+     "slit": null
+    },
+    {
+     "y": 580,
+     "outer": 160.14,
+     "armInner": 86.02,
+     "torso": 83.85,
+     "slit": null
+    },
+    {
+     "y": 584,
+     "outer": 159.54,
+     "armInner": 86.82,
+     "torso": 84.54,
+     "slit": null
+    },
+    {
+     "y": 588,
+     "outer": 158.63,
+     "armInner": 87.65,
+     "torso": 85.46,
+     "slit": null
+    },
+    {
+     "y": 592,
+     "outer": 157.42,
+     "armInner": 88.66,
+     "torso": 86.46,
+     "slit": null
+    },
+    {
+     "y": 596,
+     "outer": 155.77,
+     "armInner": 89.87,
+     "torso": 87.68,
+     "slit": null
+    },
+    {
+     "y": 600,
+     "outer": 153.61,
+     "armInner": 91.78,
+     "torso": 88.96,
+     "slit": null
+    },
+    {
+     "y": 604,
+     "outer": 150.59,
+     "armInner": 92.91,
+     "torso": 91.3,
+     "slit": null
+    },
+    {
+     "y": 608,
+     "outer": 146.26,
+     "armInner": 96.38,
+     "torso": 92.8,
+     "slit": null
+    },
+    {
+     "y": 612,
+     "outer": 139.09,
+     "armInner": 102.17,
+     "torso": 93.46,
+     "slit": null
+    },
+    {
+     "y": 616,
+     "outer": 94.31,
+     "armInner": null,
+     "torso": null,
+     "slit": null
+    },
+    {
+     "y": 620,
+     "outer": 94.97,
+     "armInner": null,
+     "torso": null,
+     "slit": 0.74
+    },
+    {
+     "y": 624,
+     "outer": 95.66,
+     "armInner": null,
+     "torso": null,
+     "slit": 0.8
+    },
+    {
+     "y": 628,
+     "outer": 96,
+     "armInner": null,
+     "torso": null,
+     "slit": 0.89
+    },
+    {
+     "y": 632,
+     "outer": 96.66,
+     "armInner": null,
+     "torso": null,
+     "slit": 1.08
+    },
+    {
+     "y": 636,
+     "outer": 97.27,
+     "armInner": null,
+     "torso": null,
+     "slit": 1.39
+    },
+    {
+     "y": 640,
+     "outer": 97.86,
+     "armInner": null,
+     "torso": null,
+     "slit": 1.58
+    },
+    {
+     "y": 644,
+     "outer": 98.47,
+     "armInner": null,
+     "torso": null,
+     "slit": 1.78
+    },
+    {
+     "y": 648,
+     "outer": 99.1,
+     "armInner": null,
+     "torso": null,
+     "slit": 2.03
+    },
+    {
+     "y": 652,
+     "outer": 99.68,
+     "armInner": null,
+     "torso": null,
+     "slit": 2.19
+    },
+    {
+     "y": 656,
+     "outer": 100.31,
+     "armInner": null,
+     "torso": null,
+     "slit": 2.44
+    },
+    {
+     "y": 660,
+     "outer": 100.79,
+     "armInner": null,
+     "torso": null,
+     "slit": 2.73
+    },
+    {
+     "y": 664,
+     "outer": 101.34,
+     "armInner": null,
+     "torso": null,
+     "slit": 2.95
+    },
+    {
+     "y": 668,
+     "outer": 101.81,
+     "armInner": null,
+     "torso": null,
+     "slit": 3.18
+    },
+    {
+     "y": 672,
+     "outer": 102.35,
+     "armInner": null,
+     "torso": null,
+     "slit": 3.42
+    },
+    {
+     "y": 676,
+     "outer": 102.76,
+     "armInner": null,
+     "torso": null,
+     "slit": 3.55
+    },
+    {
+     "y": 680,
+     "outer": 103.23,
+     "armInner": null,
+     "torso": null,
+     "slit": 3.77
+    },
+    {
+     "y": 684,
+     "outer": 103.69,
+     "armInner": null,
+     "torso": null,
+     "slit": 4.11
+    },
+    {
+     "y": 688,
+     "outer": 104.09,
+     "armInner": null,
+     "torso": null,
+     "slit": 4.32
+    },
+    {
+     "y": 692,
+     "outer": 104.51,
+     "armInner": null,
+     "torso": null,
+     "slit": 4.47
+    },
+    {
+     "y": 696,
+     "outer": 104.84,
+     "armInner": null,
+     "torso": null,
+     "slit": 4.68
+    },
+    {
+     "y": 700,
+     "outer": 105.23,
+     "armInner": null,
+     "torso": null,
+     "slit": 4.95
+    },
+    {
+     "y": 704,
+     "outer": 105.56,
+     "armInner": null,
+     "torso": null,
+     "slit": 5.12
+    },
+    {
+     "y": 708,
+     "outer": 105.76,
+     "armInner": null,
+     "torso": null,
+     "slit": 5.29
+    },
+    {
+     "y": 712,
+     "outer": 106.02,
+     "armInner": null,
+     "torso": null,
+     "slit": 5.59
+    },
+    {
+     "y": 716,
+     "outer": 106.23,
+     "armInner": null,
+     "torso": null,
+     "slit": 5.87
+    },
+    {
+     "y": 720,
+     "outer": 106.4,
+     "armInner": null,
+     "torso": null,
+     "slit": 6
+    },
+    {
+     "y": 724,
+     "outer": 106.44,
+     "armInner": null,
+     "torso": null,
+     "slit": 6.13
+    },
+    {
+     "y": 728,
+     "outer": 106.54,
+     "armInner": null,
+     "torso": null,
+     "slit": 6.46
+    },
+    {
+     "y": 732,
+     "outer": 106.53,
+     "armInner": null,
+     "torso": null,
+     "slit": 6.75
+    },
+    {
+     "y": 736,
+     "outer": 106.38,
+     "armInner": null,
+     "torso": null,
+     "slit": 6.98
+    },
+    {
+     "y": 740,
+     "outer": 106.28,
+     "armInner": null,
+     "torso": null,
+     "slit": 7.3
+    },
+    {
+     "y": 744,
+     "outer": 105.92,
+     "armInner": null,
+     "torso": null,
+     "slit": 7.57
+    },
+    {
+     "y": 748,
+     "outer": 105.65,
+     "armInner": null,
+     "torso": null,
+     "slit": 7.85
+    },
+    {
+     "y": 752,
+     "outer": 105.21,
+     "armInner": null,
+     "torso": null,
+     "slit": 8.3
+    },
+    {
+     "y": 756,
+     "outer": 104.56,
+     "armInner": null,
+     "torso": null,
+     "slit": 8.69
+    },
+    {
+     "y": 760,
+     "outer": 103.61,
+     "armInner": null,
+     "torso": null,
+     "slit": 9.4
+    },
+    {
+     "y": 764,
+     "outer": 102.57,
+     "armInner": null,
+     "torso": null,
+     "slit": 10.31
+    },
+    {
+     "y": 768,
+     "outer": 101.23,
+     "armInner": null,
+     "torso": null,
+     "slit": 11.64
+    },
+    {
+     "y": 772,
+     "outer": 99.21,
+     "armInner": null,
+     "torso": null,
+     "slit": 13.77
+    },
+    {
+     "y": 776,
+     "outer": 96.4,
+     "armInner": null,
+     "torso": null,
+     "slit": 16.5
+    },
+    {
+     "y": 780,
+     "outer": 91.2,
+     "armInner": null,
+     "torso": null,
+     "slit": 24.11
+    }
+   ]
+  },
+  "asymmetry": {
+   "front": {
+    "centreX": 181.2,
+    "head": {
+     "rows": 36,
+     "meanLeftMinusRight": -6.77,
+     "maxAbs": 12.1,
+     "shapeSpread": 2.35,
+     "midpoint": 184.58
+    },
+    "shoulders": {
+     "rows": 18,
+     "meanLeftMinusRight": 0.03,
+     "maxAbs": 5.17,
+     "shapeSpread": 1.79,
+     "midpoint": 181.18
+    },
+    "arms": {
+     "rows": 44,
+     "meanLeftMinusRight": 4.41,
+     "maxAbs": 5.84,
+     "shapeSpread": 1.47,
+     "midpoint": 179
+    },
+    "legs": {
+     "rows": 40,
+     "meanLeftMinusRight": 1.23,
+     "maxAbs": 1.84,
+     "shapeSpread": 0.35,
+     "midpoint": 180.58
+    },
+    "crease": {
+     "meanLeftMinusRight": 2.63,
+     "midpoint": 179.89
+    },
+    "slit": {
+     "midpointTop": 183,
+     "midpointMean": 181.7
+    }
+   },
+   "back": {
+    "centreX": 975.75,
+    "head": {
+     "rows": 36,
+     "meanLeftMinusRight": -4.25,
+     "maxAbs": 8.8,
+     "shapeSpread": 1.58,
+     "midpoint": 977.88
+    },
+    "shoulders": {
+     "rows": 18,
+     "meanLeftMinusRight": 0.67,
+     "maxAbs": 1.44,
+     "shapeSpread": 0.55,
+     "midpoint": 975.42
+    },
+    "arms": {
+     "rows": 44,
+     "meanLeftMinusRight": 2.72,
+     "maxAbs": 3.82,
+     "shapeSpread": 0.93,
+     "midpoint": 974.39
+    },
+    "legs": {
+     "rows": 40,
+     "meanLeftMinusRight": 0.42,
+     "maxAbs": 1.53,
+     "shapeSpread": 0.32,
+     "midpoint": 975.54
+    },
+    "crease": {
+     "meanLeftMinusRight": -2.54,
+     "midpoint": 977.02
+    },
+    "slit": {
+     "midpointTop": 976.48,
+     "midpointMean": 975.85
+    }
+   }
+  }
+ },
+ "disagreements": {
+  "front": [
+   {
+    "y": 612,
+    "field": "left",
+    "values": {
+     "gradient": 42.98,
+     "segmentation": 42.07,
+     "visual": 48
+    },
+    "consensus": 42.98,
+    "settled": "median 43.0 kept: on the stretched crop the dot sits on the left arm's rounded bottom-left outline; visual's 48.0 is ~5 px inside it"
+   },
+   {
+    "y": 616,
+    "field": "right",
+    "values": {
+     "gradient": 275.25,
+     "segmentation": 306.35,
+     "visual": 275.3
+    },
+    "consensus": 275.3,
+    "settled": "median 275.3 (hip): the right arm ends at 615.5, so row 616 no longer meets it; segmentation counted the arm's last 0.1 px"
+   },
+   {
+    "y": 780,
+    "field": "left",
+    "values": {
+     "gradient": 95.62,
+     "segmentation": 91.18,
+     "visual": 90.8
+    },
+    "consensus": 91.18,
+    "settled": "median 91.2: the last row cuts the contact line at the left foot's rounded corner (+-2 px)"
+   },
+   {
+    "y": 780,
+    "field": "slitLeft",
+    "values": {
+     "gradient": 148.66,
+     "segmentation": null,
+     "visual": 154
+    },
+    "consensus": 151.33,
+    "settled": "mean of the two (151.33): the feet's inner corners meet the contact line here; segmentation gives no slit below 772 (+-3 px)"
+   }
+  ],
+  "back": [
+   {
+    "y": 376,
+    "field": "left",
+    "values": {
+     "gradient": 896,
+     "segmentation": 888.5,
+     "visual": 896.1
+    },
+    "consensus": 896,
+    "settled": "median 896.0: the shoulder line is nearly horizontal next to the neck notch, so a 1 px difference in y moves x ~8 px; segmentation's 888.5 is the outlier"
+   },
+   {
+    "y": 608,
+    "field": "armInnerLeft",
+    "values": {
+     "gradient": 877.5,
+     "segmentation": 883.47,
+     "visual": 879.6
+    },
+    "consensus": 879.6,
+    "settled": "median 879.6: the arm's inner-bottom curve leaving the hip (checked on a stretched crop); segmentation's 883.5 is the crease/hip side"
+   },
+   {
+    "y": 608,
+    "field": "armInnerRight",
+    "values": {
+     "gradient": 1073.5,
+     "segmentation": 1068.31,
+     "visual": 1071.4
+    },
+    "consensus": 1071.4,
+    "settled": "median 1071.4, as at the left: segmentation's 1068.3 follows the hip"
+   },
+   {
+    "y": 612,
+    "field": "armInnerRight",
+    "values": {
+     "gradient": 1076.18,
+     "segmentation": 1068.63,
+     "visual": 1076.2
+    },
+    "consensus": 1076.18,
+    "settled": "median 1076.2 (gradient and visual agree): the arm's inner-bottom curve; segmentation's 1068.6 is the hip"
+   },
+   {
+    "y": 616,
+    "field": "left",
+    "values": {
+     "gradient": 850.97,
+     "segmentation": 846.05,
+     "visual": 883.5
+    },
+    "consensus": 850.97,
+    "settled": "median 851.0 kept: re-measured, the left arm's flat bottom (616.1-616.2) crosses row 616 between x 851.0 and 859.3; visual skipped the row (its >=0.25 px rule) and gave the hip; torsoLeft set to the re-measured hip edge 881.8"
+   }
+  ],
+  "side": [
+   {
+    "y": 228,
+    "field": "back",
+    "values": {
+     "gradient": 733.41,
+     "segmentation": 739.58,
+     "visual": 733.4
+    },
+    "consensus": 733.41,
+    "settled": "median 733.4 (gradient and visual agree): the crown's near-horizontal back slope; segmentation's crossing lands 6 px further back"
+   },
+   {
+    "y": 436,
+    "yTo": 584,
+    "field": "armBack",
+    "values": "gradient ~770-781, segmentation ~770-781, visual ~780-786 (= its back silhouette)",
+    "consensus": "mean of gradient and segmentation",
+    "settled": "visual gave the back silhouette as the arm's back on 436-596; the faint valley 5-11 px inside it (gradient, segmentation) is the arm's back edge and the strip behind it is the torso's back (no such valley at the head's or legs' back edges, so it is not rim light; the strip shows on a contrast-stretched crop). Visual's values were excluded and the mean of gradient and segmentation used"
+   },
+   {
+    "y": 768,
+    "field": "front",
+    "values": {
+     "gradient": 671.95,
+     "segmentation": 669.75,
+     "visual": 667
+    },
+    "consensus": 669.75,
+    "settled": "median 669.8: the row where the far foot's front strip ends (gradient 672.0 = near leg, visual 667.0 = strip); +-2.5 px"
+   },
+   {
+    "y": 784,
+    "field": "front",
+    "values": {
+     "gradient": 696.59,
+     "segmentation": 688.49,
+     "visual": 689.3
+    },
+    "consensus": 689.3,
+    "settled": "median 689.3 (segmentation and visual agree): the last row cuts the near foot's curved contact line"
+   },
+   {
+    "y": 784,
+    "field": "back",
+    "values": {
+     "gradient": 743.37,
+     "segmentation": 751.74,
+     "visual": 751.8
+    },
+    "consensus": 751.74,
+    "settled": "median 751.7 (segmentation and visual agree): as for front"
+   }
+  ],
+  "threeQuarterLeft": [
+   {
+    "y": 612,
+    "field": "right",
+    "values": {
+     "gradient": 576.97,
+     "segmentation": 581.51,
+     "visual": 576.7
+    },
+    "consensus": 576.97,
+    "settled": "median 577.0: the near arm's near-horizontal bottom; segmentation's crossing is ~1 px higher on it (581.5)"
+   },
+   {
+    "y": 776,
+    "field": "left",
+    "values": {
+     "gradient": 476.5,
+     "segmentation": 404.12,
+     "visual": 400.8
+    },
+    "consensus": 402.45,
+    "settled": "set to 402.45 (mean of segmentation and visual, re-measured crossing 401.5-402.2): the far foot's bottom (776.0-776.1) still crosses row 776; gradient's 476.5 is the near foot"
+   },
+   {
+    "y": 780,
+    "field": "left",
+    "values": {
+     "gradient": 482.43,
+     "segmentation": 475.33,
+     "visual": 481.6
+    },
+    "consensus": 481.6,
+    "settled": "median 481.6: the near foot's left corner on the contact line"
+   },
+   {
+    "y": 784,
+    "field": "left",
+    "values": {
+     "gradient": 500.88,
+     "segmentation": 490.35,
+     "visual": 490.3
+    },
+    "consensus": 490.35,
+    "settled": "median 490.4 (segmentation and visual agree): the last row cuts the near foot's curved contact line"
+   },
+   {
+    "y": 784,
+    "field": "right",
+    "values": {
+     "gradient": 532.59,
+     "segmentation": 542.42,
+     "visual": 548.5
+    },
+    "consensus": 542.42,
+    "settled": "median 542.4: as for left (+-3 px)"
+   }
+  ],
+  "threeQuarterRight": [
+   {
+    "y": 372,
+    "field": "right",
+    "values": {
+     "gradient": 1321.24,
+     "segmentation": 1328.46,
+     "visual": 1322.4
+    },
+    "consensus": 1322.4,
+    "settled": "median 1322.4: the shoulder line beside the neck notch is nearly horizontal; segmentation's 1328.5 is the outlier"
+   },
+   {
+    "y": 612,
+    "field": "right",
+    "values": {
+     "gradient": 1368.74,
+     "segmentation": 1384.23,
+     "visual": 1368.7
+    },
+    "consensus": 1368.74,
+    "settled": "median 1368.7 (hip): the far arm ends at ~611, so row 612 no longer meets it; segmentation counted the arm"
+   }
+  ]
+ },
+ "decisions": [
+  "front y440 armInnerLeft: only gradient reports 99.5; dropped (2-of-3 rule)",
+  "front y440 torsoLeft: only gradient reports 99.5; dropped (2-of-3 rule)",
+  "front y440 torsoRight: only gradient reports 262.43; dropped (2-of-3 rule)",
+  "front y440 armInnerRight: only gradient reports 262.43; dropped (2-of-3 rule)",
+  "front y444 armInnerLeft: only gradient reports 101; dropped (2-of-3 rule)",
+  "front y444 torsoLeft: only gradient reports 101; dropped (2-of-3 rule)",
+  "front y444 torsoRight: only gradient reports 261.72; dropped (2-of-3 rule)",
+  "front y444 armInnerRight: only gradient reports 261.72; dropped (2-of-3 rule)",
+  "front y448 torsoRight: only gradient reports 260.5; dropped (2-of-3 rule)",
+  "front y448 armInnerRight: only gradient reports 260.5; dropped (2-of-3 rule)",
+  "front y612 torsoLeft: only visual reports 86.5; dropped (2-of-3 rule)",
+  "back y440 armInnerLeft: only gradient reports 898.15; dropped (2-of-3 rule)",
+  "back y440 torsoLeft: only gradient reports 898.15; dropped (2-of-3 rule)",
+  "back y440 torsoRight: only gradient reports 1060.18; dropped (2-of-3 rule)",
+  "back y440 armInnerRight: only gradient reports 1060.18; dropped (2-of-3 rule)",
+  "back y444 armInnerLeft: only gradient reports 898.5; dropped (2-of-3 rule)",
+  "back y444 torsoLeft: only gradient reports 898.5; dropped (2-of-3 rule)",
+  "back y444 torsoRight: only gradient reports 1059.23; dropped (2-of-3 rule)",
+  "back y444 armInnerRight: only gradient reports 1059.23; dropped (2-of-3 rule)",
+  "back y448 armInnerLeft: only gradient reports 898.5; dropped (2-of-3 rule)",
+  "back y448 torsoLeft: only gradient reports 898.5; dropped (2-of-3 rule)",
+  "back y448 torsoRight: only gradient reports 1058.75; dropped (2-of-3 rule)",
+  "back y448 armInnerRight: only gradient reports 1058.75; dropped (2-of-3 rule)",
+  "back y452 torsoRight: only gradient reports 1058.5; dropped (2-of-3 rule)",
+  "back y452 armInnerRight: only gradient reports 1058.5; dropped (2-of-3 rule)",
+  "back y616 armInnerLeft: only gradient reports 860.12; dropped (2-of-3 rule)",
+  "side y416 armBack: only segmentation reports 768.74; dropped (2-of-3 rule)",
+  "side y424 armFront: only gradient reports 685.29; dropped (2-of-3 rule)",
+  "side y424 armBack: only segmentation reports 770.01; dropped (2-of-3 rule)",
+  "side y432 armFront: only gradient reports 685.24; dropped (2-of-3 rule)",
+  "side y592 armBack: only gradient reports 771.82; dropped (2-of-3 rule)",
+  "side y596 armBack: only gradient reports 769.91; dropped (2-of-3 rule)",
+  "front y612 torsoLeft: null -> 86.5 (kept visual's hip edge: the left arm still reaches row 612, so the hip edge is separate from the arm's inner edge)",
+  "back y616 armInnerLeft: null -> 860.12 (kept gradient's: the left arm's flat bottom (616.1-616.2) crosses row 616 between x 851 and 859.3 (warmth half-way, re-measured))",
+  "back y616 torsoLeft: null -> 881.8 (re-measured hip edge (warmth half-way between 24 at x881 and 73 at x883); visual's 883.5 was 1.7 px in)",
+  "side y592 armBack: null -> 771.82 (gradient's arm-back line kept: segmentation stops at 588 and visual's value is the silhouette; a faint dip at x 771-773 is still visible on this row)",
+  "side y596 armBack: null -> 769.91 (gradient's, as at 592: the arm's back-bottom corner lies inside the torso's back outline)",
+  "threeQuarterLeft y776 left: 404.12 -> 402.45 (mean of segmentation 404.1 and visual 400.8: the far foot's flat bottom (776.0-776.1) still crosses row 776, re-measured crossing 401.5-402.2; gradient's 476.5 is the near foot)",
+  "landmarks.armDepthSide: median 97.99 -> 97.66 (mean of gradient 97.33 and segmentation 97.99; visual's 103.2 used the back silhouette, which is the torso, as the arm's back)"
+ ],
+ "notes": "INPUTS: all three result files read and well formed. Conventions differ: gradient and visual put pixel centres at integers; segmentation uses continuous coordinates (pixel i spans [i,i+1)), so 0.5 was subtracted from every segmentation position (rows, centreX, crown/ground, head vertices, y landmarks; not widths or radii). After that the three agree to ~0.1-0.5 px on most rows. All numbers here are pixel-centre coordinates. | RULE: median of available values (mean of two). A row value is given only where at least two measurers give one; this drops single-measurer rows (the crease's soft top at 440-448 from gradient alone; side armFront 424/432; side armBack 416/424). Exceptions, each re-checked on the image: front 612 torsoLeft 86.5 (visual's hip edge, needed because the left arm still reaches row 612), back 616 armInnerLeft 860.12 (gradient's) and torsoLeft 881.8 (re-measured), side armBack 592/596 (gradient's), 3/4L 776 left 402.45. Full list in 'decisions'. | CHECKED BY OVERLAY: outer edges, creases, slit and head polygons sit on the true edges in all five views at 3x and in 5x-12x crops of the head, neck, arm ends, crotch, feet and side arm. Upper-body outer edges were also re-scanned automatically: every one is within 1.2 px of a local half-way crossing; only foot rows (>=736 on the front left leg, >=764 elsewhere) and the arm ends' tangent rows have too little contrast for that test, and those were checked by eye. | SIDE VIEW: faces image-left (front = belly = left edge), confirmed by all three. The arm's back edge is the faint line 5-11 px inside the back outline; the back outline from the shoulder down to y~596 is the TORSO's back, not the arm (visual read it as the arm). So armDepthSide 97.66 (mean of gradient 97.33 and segmentation 97.99) and torsoDepthSideMax 135.03 at y 512 is the torso's own depth (belly to upper back). armFront starts at 436, armBack at 428; above that the arm merges into the shoulder. Below y~690 the far leg peeks 3-7 px ahead of the near leg down to ~768, and side 'front' follows it there; legDepthSide 108.97 is the near leg. Side neck: 74.6 deep at y~371 (rows: 75.1 at 372). | HEAD: front 171.9 wide at y 300 (x 98.2-270.1), crown 221.36 to underside 369.56 = 148.2 tall; side 144.1 deep at y 304 (x 646.2-790.3); 3/4L about 163 wide. Polygons are 7-gons ordered clockwise on screen from the crown. Side polygon: its front and upper-front vertices come from segmentation and visual only; gradient fitted a different 7-gon (one bowed upper-front side, plus an underside vertex at (713.9, 358.3) that is the near shoulder's outline, not the head). The two bottom vertices of each polygon are hidden where the head meets the neck/shoulders (side: the bottom is the line through the neck notches). cornerRadius is the measurers' median (front 33.21, side 37.0); per-corner ray fits (head.cornerRadii) give front crown 50.5, upper corners 36.5/37, sides 32/36; side crown 31, upper-back 39.5, back 56.5, front 46, upper-front 74.5 (155 deg, barely a corner); 3/4L crown 43.5, others 32.5-38.5. With one radius of 33.2 the rounded front crown sits ~1.1 px above the measured crown; the crown wants ~50. A joint single-radius fit gives front 37, side 35.5, 3/4L 36.5, but the outline moves only 0.05 px rms between 33 and 37 (obtuse 125-140 deg corners), so the radius is weakly fixed by the image. | NECK: only a ~6 px waist where the head's lower corners meet the shoulder line: front 94.78 wide at the notches (y 363; x 136.3-231.5), back 92.1, side 74.6; neckBottomY 369.0, headBottomY 369.56 (front underside; segmentation's 370.7 is the centre of the dark underside crease). | CREASES: soft shading from ~440 (depth ~10 levels), >=20 levels by ~448, half its full depth at 460-462 (armpitY 460.5, the median; segmentation's 449 used a 15-level threshold), full depth ~470. Gradient reports the crease centre for both armInner and torso, segmentation and visual its two half-depth crossings (core 2.4-3 px), so the consensus crease is ~1-1.5 px narrower than the two-crossing readings. Below ~600 the arm's rounded inner-bottom corner lifts off the hip and the two values become the arm's and the hip's own outlines. | ARM ENDS (lowest point of each arm's rounded end, medians): front left 614.4, front right 615.5, back left 616.1, back right 616.5, side 612.75, 3/4L far 609.6 / near 612.7, 3/4R near 616.5 / far ~611; armEndY 615.04 is the front mean, 615.6 with the back. Contrast there is only 3-15 levels: +-1 px in y, +-3 px in x along the flat bottom. Arm width (outer edge to crease, front) peaks on a plateau y 528-548: left 80.8, right 78.3 (back 82.1/76.3); armWidthFrontWidest 79.56 at armWidestY 539.5 (visual's 563 was where the whole silhouette is widest, a different quantity). Widest silhouette: front 322.5 at y 560-564 (x 17.1-339.7), back 321.7 at 564. | LEGS AND FEET: slit opens at 619.4-619.9 (crotchY 619.43; gradient's 618.4 is the top of the dark shading above it), 1-1.5 px wide at 620-640, ~10 px at 700, ~28 px at 772. Leg width (one leg, outer edge to slit edge) mean of the four legs front+back: 94.9 at y 624, 100.5 at 704-712 (max), 99.0 at 740, 96.9 at 752, then the foot corners; front only 95.4, 101.1, 99.5. legWidthTop 95.43 (front, y 624), legWidthBottom 99.2 (y ~740, above the corner rounding). footCornerRadius 28.63; a re-fit of the four outer foot corners from the consensus rows gives 27.5-29.3 (mean 28.3). | GROUND: groundY is the lowest point of the dark contact line under each view's lowest foot. Per foot: front left 781.25, right 782.28; back 782.85/782.88; side near foot 784.9 (far foot hidden, ends ~767-777); 3/4L far 776.1, near 784.6; 3/4R near 782.9, far 778.3. The camera looks slightly down: nearer feet sit lower and contact lines curve, so the last row of each view cuts the contact line and is not a leg width. | SYMMETRY (left minus right of the outer edges about centreX, px; image left/right): front head -6.77 (max 12.1), shoulders 0.03 (max 5.17), arms 4.41 (max 5.84), legs 1.23 (max 1.84); back head -4.25, shoulders 0.67, arms 2.72, legs 0.42. These are mostly offsets, not shape: region midpoints front head 184.58, shoulders 181.18, arms 179, legs 180.58 vs centreX 181.2; back 977.88/975.42/974.39/975.54 vs 975.75. Both views shift the head to image-right and the arms to image-left, and the image-left arm is wider in both (front 80.8/78.3, back 82.1/76.3); a real 3D asymmetry would flip sides between front and back, so this is a skew of the render, and symmetric.front holds the averaged half-widths. The crown vertex (187.5) is 3 px right of the head's own centre (184.5): the head polygon's top is skewed too; mirror it about x 184.5 for a symmetric head. | 3/4 VIEWS: centreX is the silhouette midpoint (median of the three), not the turning axis; the head midpoints are 469.5 (3/4L) and 1274.4 (3/4R). | LEAST CERTAIN: foot rows >=772 and the foot corners (+-2 px); slit at 776-780 (+-3 px); arm-end bottoms (+-1 px y, +-3 px x); side far-leg front at 744-768 (+-2.5 px); side armBack (a 3-8 level line, +-1 px); the head's hidden bottom vertices and all head corner radii; armpitY (440-462 depending on the depth threshold). | HINTS THAT WERE WRONG: crown is 221.4-221.9 (row 220 is empty in every view); ground is 781-785, not 780; the back view spans 813.0-1134.7, not 808-1138; the arms end at 614-616.5, not 600-612; the front head is 171.9 wide, not 173; the crease shows faintly from ~440 and is sharp only from ~458, not 445. Confirmed: column ranges of the other views, the slit start (619.4-619.9), the side view facing left."
+}

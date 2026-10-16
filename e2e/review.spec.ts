@@ -24,7 +24,7 @@ export const MOTION_ROUTES = ["/", "/concepts/split", "/concepts/dock", "/concep
 
 /** Orbit (World.md), the world, a fifth, on :3005 — the start location, and the builder's pages (W14). */
 export const ORBIT = "http://localhost:3005";
-export const ORBIT_ROUTES = ["/", "/build/world", "/build/environment", "/build/camera", "/build/map", "/build/portal", "/build/sector"];
+export const ORBIT_ROUTES = ["/", "/build/world", "/build/sectors", "/build/sky", "/build/clouds", "/build/camera", "/build/map", "/build/base-clouds", "/build/light", "/build/fog", "/build/mountains", "/build/human"];
 
 /** Home (Home.md), the model of the house, a sixth, on :3006 — one route, the model and its tour. */
 export const HOME = "http://localhost:3006";

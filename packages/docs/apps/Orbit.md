@@ -302,13 +302,21 @@ sheet of hand-made swatches:
 
 - **The colour picker is the design system's** (`@no-origins/ui/components/colour-picker`, `ColourPicker`): swatches
   composed from `ToggleGroup`, one a colour, the one picked pressed with the foreground's edge, each a circle with a dot
-  of its colour, standing together from its start at the small size and sharing out a column too narrow for them rather
-  than wrapping. One is always picked. On the showcase's molecules page.
+  of its colour, every one the small size, standing in rows from the start: as many to a row as the column holds, the
+  rest on the next. They never grow smaller to share a column (they did, until his note below: twenty-two in a card
+  were specks). One is always picked. On the showcase's molecules page.
+- **A palette's families are its rows** (his, 2026-10-14: "I'm unable to recognise colors from color palettes. Organize
+  them and break them into rows"): an option names its family (`group`), a family's swatches share a row in the order
+  given, and the caller organises the palette — the world's twenty-two in five, Neutrals, Warm, Blues, Violets and
+  Greens, each light to dark (World.md W14); the paints as the system names them, the accents then the agents' seven.
+  Where a card names a control's value, a colour's picked name stands after its label, as a number's does.
 - **Every pick of a colour is one**, in every app — never a select of names or a row of worded toggles. Here: the
   paint, and every colour by name — the eyes' (C16), the brows', the texture's — whose swatches are what each name is on
   the agent now (the eyes' through `eyeColours`).
-- **Each swatch is named in its title** and as its accessible name: two can look alike — on a violet body Paint and
-  Violet are one colour — and the name tells them apart.
+- **Each swatch is named in a tooltip** (his, 2026-10-15: "add tooltips to these colors because I'm unable to see
+  which color it is"), the system's `Tooltip` on hover and on focus, and as its accessible name; it was a `title` until
+  then. Two can look alike — on a violet body Paint and Violet are one colour — and the name tells them apart. Its dot
+  is 20px in the 36px circle, 16 until the same day.
 
 ## C18. The shapes' edges are smooth
 
@@ -371,7 +379,9 @@ violet: widening it is his call.
   through a choice's `renamed` in the declaration (`lib/properties.ts`) and the tokens' reader, so a look saved in one
   keeps its place on the wheel. Drafts take the new name at their next save; versions are frozen with the old one and
   drawn in the new colour.
-- **The swatches share the Paint line's two columns**, 18 px each at 1440 × 900.
+- **The swatches shared the Paint line's two columns**, 18 px each at 1440 × 900, in the editor that went with the old
+  Orbit; a picker of the nine paints now stands at the small size in rows (C17, 2026-10-14), as the showcase's
+  specimen shows them: the accents, then the seven.
 
 ## C21. Orbit: the app, and the agents together
 

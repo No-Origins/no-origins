@@ -18,7 +18,7 @@ export function WorldCompass({ where, size }: { where: Where; size: WorldSize })
       </div>
       <Text role="caption" align="center">{facing} · {Math.round(turn) % 360}°</Text>
       <Text role="caption" tone="muted" align="center">X {Math.round(where.at[0])} · Z {Math.round(where.at[1])} m</Text>
-      <Text role="caption" tone="muted" align="center">{size.width} × {size.breadth} × {size.height} m</Text>
+      <Text role="caption" tone="muted" align="center">⌀ {size.diameter} m · {size.height} m high</Text>
     </Card>
   );
 }

@@ -3,15 +3,19 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 
-import { CAMERA_START, MOVED_KEYS, zoomBy } from "@/world/camera";
-import { ENVIRONMENT_START } from "@/world/environment";
-import { MAP_START, type Where } from "@/world/map";
-import { PORTAL_START } from "@/world/portal";
-import { BUILD_START, SECTOR_START } from "@/world/sector";
-import { boxesOf, metresOf, originsOf, pickedZone, WORLD_START, type WorldData } from "@/world/hierarchy";
-import { WORLD_SIZE_START } from "@/world/orbit";
-import { boundsStore, buildStore, cameraStore, environmentStore, mapStore, portalOpening, portalStore, sectorStore, worldStore } from "@/world/store";
-import { centreOf, portalsOn, viewOf, type ViewName } from "@/world/start";
+import { MOVED_KEYS, zoomBy } from "@/world/camera";
+import { HUMAN_START, HUMAN_VERSION } from "@/world/human";
+import type { Library } from "@/world/library";
+import type { Where } from "@/world/map";
+import { MOUNTAIN_START, MOUNTAIN_VERSION } from "@/world/mountain-jig";
+import { nextSeed, PLACE_START } from "@/world/place";
+import { BUILD_START, SPACES_START } from "@/world/spaces";
+import { byId } from "@/world/variants";
+import { roomOf, sectorOf } from "@/world/hierarchy";
+import { WORLD_SIZE } from "@/world/orbit";
+import { fullView } from "@/world/full-view";
+import { buildStore, cameraStore, cloudsStore, environmentStore, humanLibrary, humanStore, mapStore, mountainLibrary, mountainStore, placeStore, publishedEnvironment, publishedWorld, sectorFraming, spacesStore, worldLibrary, worldStore } from "@/world/store";
+import { viewOf, type ViewName } from "@/world/start";
 import type { WorldEngine, WorldSettings } from "@/world/engine";
 import { WorldCompass } from "@/components/world-compass";
 import { Minimap } from "@/components/minimap";
@@ -21,29 +25,33 @@ import { Minimap } from "@/components/minimap";
  * engine (`src/world/engine.ts`) and three.js are loaded after the page, so the page never waits for them (W7). The
  * route picks the view.
  *
- * The world is his settings, except on a jig's page (`/build/…`, W14), where anyone may play with that jig: there that
- * one is the store's, the card's settings, and the rest stay his. On the portal's page, Play plays its opening again; on
- * the camera's, the wheel zooms its lens, a step of the Zoom control a notch, away from you in, towards you out, and a
- * drag's or a click's values are written to its store as they move, so its card shows them moving. At `/` they stay
- * the world's own.
+ * The world is his, as published (W73: the elements' variants and the world from the database, W75: the environment
+ * too, his published copy in code until they are read), except on a jig's page (`/build/…`, W14), where anyone may play with that jig: there that
+ * one is the store's, the card's settings, and the rest stay his. An element's page shows that element alone (W72).
+ * On the camera's page, the wheel zooms its lens, a step of the Zoom
+ * control a notch, away from you in, towards you out, and a drag's or a click's values are written to its store as
+ * they move, so its card shows them moving. At `/` they stay the world's own.
  *
- * On the sector's page a click on the world builds into the zone picked: the engine says what the world is now, and it
- * is written to its store, so the card counts the blocks and Copy sends them back. A zone newly picked there, or made,
- * is travelled to, so what is built into is in view.
+ * On the Sectors page a click on the world builds a block or places an element into the sector picked, or with Select
+ * picks blocks or an element for the card's Picked group, and a drag moves an element (W24, W73, W82): the engine says
+ * what the world is now, and it is written to its store, so the card counts what stands and Copy sends it back; Save
+ * and Publish keep it. The World page places nothing (W82): it shows the world as the sectors build it, every sector
+ * drawn by its edges. On the Sectors page the camera goes to the sector picked (W81): as the page comes into view, and
+ * whenever a sector is picked, made, moved or sized, or Go to it is pressed, so the sector is whole in view.
  *
- * Over the visitor's camera (`/`, the world's page, the camera's and the map's) stands the map (`minimap.tsx`), told where the camera
- * is each time it moves, with the Orbit's round and its blocks (and a portal, were one in its view, which flies the camera
- * to it); a click elsewhere on it takes the camera there.
+ * Over the visitor's camera (`/`, the camera's page and the map's) stands the map (`minimap.tsx`), told where the
+ * camera is each time it moves, with the Orbit's round; a click on it takes the camera there.
  */
 export function World() {
+  const rendererVersion = `${MOUNTAIN_VERSION}:${HUMAN_VERSION}`;
   const ref = useRef<HTMLCanvasElement>(null);
   const engine = useRef<WorldEngine | null>(null);
   const view = viewOf(usePathname());
   const viewNow = useRef(view);
   const [where, setWhere] = useState<Where | null>(null);
-  const map = useSyncExternalStore(mapStore.subscribe, () => (view === "map" ? mapStore.get() : MAP_START), () => MAP_START);
-  // The world's boundaries (W29): someone's on the World page, where they are set; his everywhere else.
-  const size = useSyncExternalStore(boundsStore.subscribe, () => (view === "world" ? boundsStore.get() : WORLD_SIZE_START), () => WORLD_SIZE_START);
+  const map = useSyncExternalStore(mapStore.subscribe, () => (view === "map" ? mapStore.get() : publishedEnvironment().map), mapStore.start);
+  // The World page's full view (W105) puts the compass and the map away with the rest of the interface.
+  const full = useSyncExternalStore(fullView.subscribe, fullView.get, fullView.start);
 
   // The pointer is the design system's ring (Grid.md D34; his: "Looks like Cursor is not used from design system. We
   // should"), over the whole page, the world and the interface over it, and whatever portals to the body: the page
@@ -63,6 +71,8 @@ export function World() {
     viewNow.current = view;
     engine.current?.set(settingsFor(view));
     engine.current?.setView(view);
+    // The Sectors page arrives at the sector picked, there at once (W81).
+    if (engine.current) frameSector(engine.current, view, true);
   }, [view]);
 
   useEffect(() => {
@@ -84,6 +94,8 @@ export function World() {
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
+    delete canvas.dataset.ready;
+    delete canvas.dataset.unavailable;
     let disposed = false;
     let unsubscribe = () => {};
 
@@ -96,7 +108,20 @@ export function World() {
                 },
                 onWhere: setWhere,
                 onWorld: (world) => {
-                  if (viewNow.current === "sector") worldStore.set(world);
+                  if (viewNow.current === "spaces") worldStore.set(world);
+                },
+                onPick: (picked, joint) => {
+                  if (viewNow.current === "spaces") placeStore.set({ picked, joint: joint ?? null });
+                },
+                onPickBlocks: (picked) => {
+                  if (viewNow.current === "spaces") buildStore.set({ picked });
+                },
+                onTool: (tool) => {
+                  if (viewNow.current === "spaces") buildStore.set({ tool });
+                },
+                onPlaced: (kind) => {
+                  // The next grove is scattered by another seed, so two groves never stand alike (W89).
+                  if (kind === "tree") placeStore.set({ seed: nextSeed(placeStore.get().seed) });
                 },
               })))
       .then((world) => {
@@ -104,25 +129,26 @@ export function World() {
         if (disposed) return world.dispose();
         engine.current = world;
         const played = () => world.set(settingsFor(viewNow.current));
-        let picked = buildStore.get().zone;
+        // A sector picked, made, moved or sized takes the camera to it on the Sectors page (W81); a block built does not.
         const builds = () => {
           played();
-          const { zone } = buildStore.get();
-          if (zone === picked) return;
-          picked = zone;
-          if (viewNow.current !== "sector") return;
-          const [x, z] = middleOf(worldStore.get(), zone);
-          world.travelTo(x, z);
+          frameSector(world, viewNow.current);
         };
+        frameSector(world, viewNow.current, true);
         const stops = [
-          boundsStore.subscribe(played),
-          portalStore.subscribe(played),
           environmentStore.subscribe(played),
+          mountainStore.subscribe(played),
+          cloudsStore.subscribe(played),
           cameraStore.subscribe(played),
-          sectorStore.subscribe(played),
-          worldStore.subscribe(played),
+          humanStore.subscribe(played),
+          spacesStore.subscribe(played),
+          worldStore.subscribe(builds),
+          placeStore.subscribe(played),
+          mountainLibrary.subscribe(played),
+          humanLibrary.subscribe(played),
+          worldLibrary.subscribe(played),
           buildStore.subscribe(builds),
-          portalOpening.subscribe(() => world.open()),
+          sectorFraming.subscribe(() => frameSector(world, viewNow.current, false, true)),
         ];
         unsubscribe = () => stops.forEach((stop) => stop());
       })
@@ -137,25 +163,23 @@ export function World() {
       engine.current?.dispose();
       engine.current = null;
     };
-  }, []);
+  // W64, W66: a new mountain or human renderer version replaces a running engine during development refresh.
+  // Ordinary settings still retune the existing engine through its subscriptions.
+  }, [rendererVersion]);
 
-  // The map, over the visitor's camera: the Orbit, its blocks and the portals this view shows (none: the portal stands
-  // only on its own page).
-  const shown = settingsFor(view);
-  const portals = portalsOn(view).map((cell) => ({ ...centreOf(cell), radius: shown.portal.radius + shown.portal.rimWidth }));
-  const visitor = view !== "portal";
+  // The map, over the visitor's camera: the Orbit; its Shown switch (W76) takes it away.
 
   return (
     <div data-slot="world" className="fixed inset-0">
       <canvas ref={ref} tabIndex={0} aria-label="Orbit world. Use WASD or arrow keys to travel." className="block size-full touch-none outline-none" />
-      {where ? <WorldCompass where={where} size={size} /> : null}
-      {visitor && where ? (
+      {where && !full ? <WorldCompass where={where} size={WORLD_SIZE} /> : null}
+      {where && map.shown && !full ? (
         <Minimap
+          // On a phone's Sectors page the item card stands where the map would (W89, mine).
+          className={view === "spaces" ? "max-md:hidden" : undefined}
           map={map}
           where={where}
-          size={size}
-          portals={portals}
-          onPortal={(index) => engine.current?.focusPortal(index)}
+          size={WORLD_SIZE}
           onTravel={(x, z) => engine.current?.travelTo(x, z)}
         />
       ) : null}
@@ -166,29 +190,59 @@ export function World() {
 /** How far the wheel turns for one step of zoom, in its pixels: a notch of a mouse's wheel. */
 const WHEEL_STEP = 100;
 
-/** The settings a view shows: on a jig's page, that jig's as played there; everything else, his. */
+/** The variants of a library by id, the same object while the library has not changed, so the engine remakes nothing for nothing. */
+const variantsById = new WeakMap<Library<object>, Record<string, object>>();
+function variantsOf<C extends object>(library: Library<C>): Record<string, C> {
+  let held = variantsById.get(library as Library<object>);
+  if (!held) {
+    held = byId(library.variants);
+    variantsById.set(library as Library<object>, held);
+  }
+  return held as Record<string, C>;
+}
+
+/**
+ * The settings a view shows: on a jig's page, that jig's as played there; everything else, his. The world is the one
+ * being built or placed on the Sector and World pages, where this browser holds one, else the world as published
+ * (W73); a mountain's and a human's variants are the libraries' everywhere, so what is published, or what he last
+ * saved, is what the placed ones are drawn from (a pipe, a road and a grove carry their own look, W93); and the
+ * environment, the atmosphere, the clouds and the camera, is as published (W75) but on the page tuning it.
+ */
 function settingsFor(view: ViewName): WorldSettings {
-  const building = view === "sector";
+  const building = view === "spaces" || view === "world";
+  const environment = publishedEnvironment();
   return {
-    bounds: view === "world" ? boundsStore.get() : WORLD_SIZE_START,
-    portal: view === "portal" ? portalStore.get() : PORTAL_START,
-    environment: view === "environment" ? environmentStore.get() : ENVIRONMENT_START,
-    camera: view === "camera" ? cameraStore.get() : CAMERA_START,
-    sector: building ? sectorStore.get() : SECTOR_START,
-    world: building ? worldStore.get() : WORLD_START,
-    build: building ? buildStore.get() : BUILD_START,
+    bounds: WORLD_SIZE,
+    environment: view === "environment" ? environmentStore.get() : environment.atmosphere,
+    mountains: variantsOf(mountainLibrary.get()),
+    mountain: view === "mountain" ? mountainStore.get() : MOUNTAIN_START,
+    humanVariants: variantsOf(humanLibrary.get()),
+    clouds: view === "clouds" ? cloudsStore.get() : environment.clouds,
+    camera: view === "camera" ? cameraStore.get() : environment.camera,
+    human: view === "human" ? humanStore.get() : HUMAN_START,
+    spaces: building ? spacesStore.get() : SPACES_START,
+    world: building && worldStore.kept() ? worldStore.get() : publishedWorld(),
+    build: view === "spaces" ? buildStore.get() : BUILD_START,
+    place: view === "spaces" ? placeStore.get() : PLACE_START,
   };
 }
 
-/** Where a zone is, over the ground, in metres: the middle of its blocks, or its origin while it has none. */
-function middleOf(world: WorldData, zone: string): [number, number] {
-  const id = pickedZone(world, zone).id;
-  const boxes = boxesOf(world).filter((box) => box.zone === id);
-  if (!boxes.length) {
-    const [x, , z] = metresOf(originsOf(world).get(id) ?? [0, 0, 0]);
-    return [x, z];
+/** The sector room last framed: the camera goes again only when the room picked moves, grows or is another (W81). */
+let framed = "";
+
+/**
+ * Takes the camera to the sector picked on the Sectors page (W81): the room of the sector picked, in the world
+ * the page builds on; `instant` as the page arrives, `again` for Go to it, which goes even to the room last framed.
+ */
+function frameSector(engine: WorldEngine, view: ViewName, instant = false, again = false) {
+  if (view !== "spaces") {
+    framed = "";
+    return;
   }
-  const [x0, , z0] = metresOf([Math.min(...boxes.map((box) => box.from[0])), Math.min(...boxes.map((box) => box.from[1])), 0]);
-  const [x1, , z1] = metresOf([Math.max(...boxes.map((box) => box.to[0])), Math.max(...boxes.map((box) => box.to[1])), 0]);
-  return [(x0 + x1) / 2, (z0 + z1) / 2];
+  const world = settingsFor("spaces").world;
+  const room = roomOf(sectorOf(world, buildStore.get().sector));
+  const key = JSON.stringify(room);
+  if (key === framed && !again && !instant) return;
+  framed = key;
+  engine.frame(room, instant);
 }

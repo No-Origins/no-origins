@@ -1,106 +1,112 @@
-export const CLOUD_SCALE = 120;
-export type CloudField = { data: Uint8Array; resolution: readonly [number, number, number] };
-const smooth = (lo: number, hi: number, v: number) => {
-  const t = Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
-  return t * t * (3 - 2 * t);
+import { COLOURS } from "./colours";
+import type { Jig } from "./jig";
+
+/**
+ * The clouds' jig, version 5 (World.md W38; his: "Give me jig controls for the clouds above"): the ceiling clouds (W33),
+ * tuned on a page of their own, `/build/clouds`, seen as the Environment's page sees them. What was W36's art, fixed,
+ * is now his to tune; these starts are W36's values. Version 4 lets Drift reach 150 m/s and Roll 5× (his, W74: "make
+ * it up to 150 meters per second. And maybe give roll also up to 5x"); version 5 shows or hides the ceiling by a switch
+ * (W76); versions 1 to 4 are frozen beside it. Nothing here is three.js; `build-clouds.ts` draws from it.
+ */
+export const CLOUDS_VERSION = 5;
+
+export type CloudsConfig = {
+  /** Whether the ceiling is drawn (W76): off, the sky shows overhead; the walls stay. */
+  shown: boolean;
+  /** The layer: how high the masses rise over the ceiling, how much of the sky they fill, and the sizes of their forms. */
+  thickness: number;
+  coverage: number;
+  masses: number;
+  billows: number;
+  stretch: number;
+  /** The edge: how far a mass's edge feathers, and how much of the thin wisps show along the wind. */
+  feather: number;
+  wisps: number;
+  /** The paint: lit, middle and shaded colours; the sky washed over every cloud; the haze; the sun's glow at the margins; the grain. */
+  cream: string;
+  rose: string;
+  sage: string;
+  wash: number;
+  haze: number;
+  glow: number;
+  grain: number;
+  /** W46: how much ceiling pigment reaches the otherwise neutral cloud walls. */
+  wallTint: number;
+  /** The motion: metres drifted along the Sky's Wind for each second of the clouds' clock, and how fast the billows roll. */
+  drift: number;
+  roll: number;
 };
 
-/** Sculpted gas, not a colour image. R density, G broad pigment, B medium pigment, A tooth.
- * Connected unequal lobes, 3D displacement and four erosion scales avoid the v14 ribbon cross-section.
- * All six borders are empty. */
-export function cloudBankVolume(seed: number, phase: number, wisps: number, resolution: readonly [number, number, number] = [160, 96, 96]): CloudField {
-  const [width, height, depth] = resolution;
-  const data = new Uint8Array(width * height * depth * 4);
-  const hash = (x: number, y: number, z: number) => {
-    let n = Math.imul(x, 73856093) ^ Math.imul(y, 19349663) ^ Math.imul(z, 83492791) ^ seed;
-    n = Math.imul(n ^ (n >>> 16), 2246822507);
-    return ((n ^ (n >>> 13)) >>> 0) / 4294967295;
-  };
-  const noise = (x: number, y: number, z: number) => {
-    const ix = Math.floor(x), iy = Math.floor(y), iz = Math.floor(z);
-    const sx = smooth(0, 1, x - ix), sy = smooth(0, 1, y - iy), sz = smooth(0, 1, z - iz);
-    let v = 0;
-    for (let dz = 0; dz < 2; dz++) for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) {
-      v += hash(ix + dx, iy + dy, iz + dz) * (dx ? sx : 1 - sx) * (dy ? sy : 1 - sy) * (dz ? sz : 1 - sz);
-    }
-    return v;
-  };
-  const join = (a: number, b: number, radius: number) => {
-    const h = Math.max(0, radius - Math.abs(a - b)) / radius;
-    return Math.min(a, b) - h * h * radius * 0.25;
-  };
-  const lobes = Array.from({ length: 7 }, (_, i) => ({
-    x: (i - 3) * 0.22, y: Math.sin(i * 1.35 + phase) * 0.15 + 0.07,
-    z: Math.sin(i * 1.7 + phase) * 0.18,
-    rx: 0.23 + hash(i, 1, 0) * 0.05, ry: 0.25 + hash(i, 2, 0) * 0.17, rz: 0.32 + hash(i, 3, 0) * 0.13,
-  }));
-  for (let z = 1; z < depth - 1; z++) for (let y = 1; y < height - 1; y++) for (let x = 1; x < width - 1; x++) {
-    const u = (x + 0.5) / width * 2 - 1, v = (y + 0.5) / height * 2 - 1, w = (z + 0.5) / depth * 2 - 1;
-    if (Math.abs(u) > 0.96 || Math.abs(v) > 0.85 || Math.abs(w) > 0.8) continue;
-    const broad = noise(u * 4 + 17, v * 2 + 11, w * 2 + 23);
-    const warpY = noise(u * 6 + 7, v * 3 + 2, w * 3 + 6) - 0.5;
-    const warpZ = noise(u * 6 + 31, v * 3 + 9, w * 3 + 16) - 0.5;
-    const py = v + warpY * 0.22, pz = w + warpZ * 0.22;
-    let distance = 2;
-    for (const lobe of lobes) {
-      const r = Math.sqrt(((u - lobe.x) / lobe.rx) ** 2 + ((py - lobe.y) / lobe.ry) ** 2 + ((pz - lobe.z) / lobe.rz) ** 2);
-      distance = join(distance, (r - 1) * Math.min(lobe.rx, lobe.ry, lobe.rz), 0.09);
-    }
-    if (distance > 0.2 && (v > -0.05 || v < -0.6)) continue;
-    const medium = noise(u * 15 + 5, py * 7 + 3, pz * 7 + 7);
-    const fine = noise(u * 33 + 23, py * 16 + 12, pz * 16 + 9);
-    const tooth = noise(u * 67 + 2, py * 32 + 1, pz * 32 + 19);
-    const eroded = distance + (0.5 - broad) * 0.16 + (0.5 - medium) * 0.26 + (0.5 - fine) * 0.115 + (0.5 - tooth) * 0.045;
-    const body = (1 - smooth(-0.012, 0.027, eroded)) * smooth(0.22, 0.68, medium * 0.7 + fine * 0.3);
-    const shell = (1 - smooth(0.04, 0.12, eroded)) * wisps * 0.025;
-    const wakeY = -0.3 + Math.sin(u * 7 + phase) * 0.1 + warpY * 0.2;
-    const wake = Math.sqrt((u / 0.92) ** 4 + ((v - wakeY) / 0.12) ** 2 + ((w - Math.sin(u * 4 + phase) * 0.2) / 0.43) ** 2);
-    const trail = (1 - smooth(0.55, 1.05, wake + (0.5 - medium) * 1.5 + (0.5 - fine) * 0.65)) * wisps * 0.09;
-    const border = smooth(0.97, 0.88, Math.abs(u)) * smooth(0.9, 0.78, Math.abs(v)) * smooth(0.84, 0.73, Math.abs(w));
-    const i = ((z * height + y) * width + x) * 4;
-    data[i] = Math.round(Math.min(1, body + shell + trail) * border * 255);
-    data[i + 1] = Math.round(noise(u * 4 + 43, py * 2.5 + 7, pz * 0.45 + 5) * 255); data[i + 2] = Math.round(medium * 255); data[i + 3] = Math.round(tooth * 255);
-  }
-  return { data, resolution };
-}
+/** His settings: W36's, softer and pastel, as he saw them in Environment version 22. */
+export const CLOUDS_START: CloudsConfig = {
+  shown: true,
+  thickness: 240,
+  coverage: 0.5,
+  masses: 8000,
+  billows: 2600,
+  stretch: 1.6,
+  feather: 0.08,
+  wisps: 0.45,
+  cream: "#fff6e8",
+  rose: "#f7cdd8",
+  sage: "#cdd4c3",
+  wash: 0.1,
+  haze: 9000,
+  glow: 0.3,
+  grain: 0.035,
+  wallTint: 0.04,
+  drift: 10,
+  roll: 0.6,
+};
 
-/** Trilinear density; outside is empty rather than clamped to an edge. */
-export function densityAt(field: CloudField, x: number, y: number, z: number): number {
-  if (x <= 0 || x >= 1 || y <= 0 || y >= 1 || z <= 0 || z >= 1) return 0;
-  const [w, h, d] = field.resolution;
-  const px = x * w - 0.5, py = y * h - 0.5, pz = z * d - 0.5;
-  const ix = Math.max(0, Math.floor(px)), iy = Math.max(0, Math.floor(py)), iz = Math.max(0, Math.floor(pz));
-  const sx = Math.max(0, px - ix), sy = Math.max(0, py - iy), sz = Math.max(0, pz - iz);
-  let value = 0;
-  for (let dz = 0; dz < 2; dz++) for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) {
-    const i = ((Math.min(d - 1, iz + dz) * h + Math.min(h - 1, iy + dy)) * w + Math.min(w - 1, ix + dx)) * 4;
-    value += field.data[i] / 255 * (dx ? sx : 1 - sx) * (dy ? sy : 1 - sy) * (dz ? sz : 1 - sz);
-  }
-  return value;
-}
-
-/** W31: cache integrated optical depth toward the sun and open sky when light changes.
- * R/G: metres of density / 128. B: local occupancy for diagnostics. The shader integrates scattered colour
- * at every view sample; this numeric cache is not a painted cloud asset. */
-export function cloudLighting(field: CloudField, scale: readonly number[], localSun: readonly number[], resolution: readonly [number, number, number] = [112, 64, 64]): CloudField {
-  const [w, h, d] = resolution, data = new Uint8Array(w * h * d * 4);
-  const ray = (x: number, y: number, z: number, direction: readonly number[]) => {
-    let tau = 0, previous = 0;
-    for (const distance of [2, 5, 9, 15, 23, 34, 49, 70, 100, 140, 195, 270]) {
-      const mid = (previous + distance) / 2;
-      tau += densityAt(field, x + direction[0] * mid / scale[0], y + direction[1] * mid / scale[1], z + direction[2] * mid / scale[2]) * (distance - previous);
-      previous = distance;
-    }
-    return tau;
-  };
-  for (let z = 0; z < d; z++) for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const u = (x + 0.5) / w, v = (y + 0.5) / h, s = (z + 0.5) / d;
-    const density = densityAt(field, u, v, s);
-    if (density < 0.002) continue;
-    const i = ((z * h + y) * w + x) * 4;
-    data[i] = Math.round(Math.min(1, ray(u, v, s, localSun) / 128) * 255);
-    data[i + 1] = Math.round(Math.min(1, ray(u, v, s, [0, 1, 0]) / 128) * 255);
-    data[i + 2] = Math.round(density * 255); data[i + 3] = 255;
-  }
-  return { data, resolution };
-}
+export const CLOUDS_JIG: Jig<CloudsConfig> = {
+  name: "Clouds",
+  version: CLOUDS_VERSION,
+  start: CLOUDS_START,
+  groups: [
+    {
+      title: "Layer",
+      note: ({ thickness }) =>
+        `The world's ceiling, 1000 m up, enclosed by neutral cloud walls; off, the sky shows overhead. The masses rise up to ${thickness} m from it, tallest at their cores; Coverage fills the sky or opens it; Masses and Billows are the sizes of the big forms and the puffs on them; Stretch draws them out along the Sky's Wind.`,
+      controls: [
+        { kind: "switch", key: "shown", label: "Ceiling shown", heads: true },
+        { kind: "number", key: "thickness", label: "Thickness", min: 0, max: 600, step: 10, marks: 100, unit: "m" },
+        { kind: "number", key: "coverage", label: "Coverage", min: 0, max: 1, step: 0.05, marks: 0.25 },
+        { kind: "number", key: "masses", label: "Masses", min: 3000, max: 12000, step: 500, marks: 3000, unit: "m" },
+        { kind: "number", key: "billows", label: "Billows", min: 1000, max: 5000, step: 100, marks: 1000, unit: "m" },
+        { kind: "number", key: "stretch", label: "Stretch", min: 1, max: 4, step: 0.1, marks: 1, unit: "×" },
+      ],
+    },
+    {
+      title: "Edge",
+      note: () => "Feather is how far an edge fades, like a dry brush; Wisps are the thin streaks along the wind outside a mass.",
+      controls: [
+        { kind: "number", key: "feather", label: "Feather", min: 0, max: 0.2, step: 0.01, marks: 0.05 },
+        { kind: "number", key: "wisps", label: "Wisps", min: 0, max: 1, step: 0.05, marks: 0.25 },
+      ],
+    },
+    {
+      title: "Paint",
+      note: () => "Cream where lit, rose in the middle tones, sage in shade. Wash is the sky's colour over every cloud; Haze is how far off they dissolve into it; Glow is the sun through the thin margins. Wall tint controls colour on the boundary; zero keeps it neutral.",
+      controls: [
+        { kind: "colour", key: "cream", label: "Cream", options: COLOURS },
+        { kind: "colour", key: "rose", label: "Rose", options: COLOURS },
+        { kind: "colour", key: "sage", label: "Sage", options: COLOURS },
+        { kind: "number", key: "wash", label: "Wash", min: 0, max: 0.5, step: 0.05 },
+        { kind: "number", key: "haze", label: "Haze", min: 2000, max: 20000, step: 500, marks: 6000, unit: "m" },
+        { kind: "number", key: "glow", label: "Glow", min: 0, max: 1, step: 0.05, marks: 0.25 },
+        { kind: "number", key: "grain", label: "Grain", min: 0, max: 0.1, step: 0.005, marks: 0.025 },
+        { kind: "number", key: "wallTint", label: "Wall tint", min: 0, max: 1, step: 0.01, marks: 0.25 },
+      ],
+    },
+    {
+      title: "Motion",
+      note: () => "Drift follows the Sky's Wind on the clouds' clock, which the Environment's Motion pauses; Roll is how fast the puffs turn over.",
+      controls: [
+        { kind: "number", key: "drift", label: "Drift", min: 0, max: 150, step: 1, marks: 25, unit: "m/s" },
+        { kind: "number", key: "roll", label: "Roll", min: 0, max: 5, step: 0.1, marks: 1, unit: "×" },
+      ],
+    },
+  ],
+  copy: (config) => [`Settings JSON: ${JSON.stringify(config)}`],
+};

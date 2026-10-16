@@ -45,44 +45,72 @@ export function JigCard({ title, action, children }: { title: React.ReactNode; a
 
 /**
  * How tall a token's control stands in a jig, with the gap under it, px: its label, its control and its caption — a
- * select's or a picker's 36, a slider's 16. The card round them takes `TOKEN_CARD_CHROME`: its insets, its head and the
- * gap under the head, less the last control's gap.
+ * select's or a picker's 36, a slider's 16. A picker's swatches stand at the small size in rows (Orbit.md C17), so one
+ * with more than its line holds across (`room`, px) is a row taller for each row they wrap into. The card round them
+ * takes `TOKEN_CARD_CHROME`: its insets, its head and the gap under the head, less the last control's gap.
  */
-const tokenPitch = (token: Token) => (token.kind === "ease" || token.choices ? 96 : 76);
+const SWATCH = 36;
+const SWATCH_GAP = 4;
+const swatchRows = (token: Token, room: number) =>
+  token.choices && token.swatches ? Math.ceil(token.choices.length / Math.max(1, Math.floor((room + SWATCH_GAP) / (SWATCH + SWATCH_GAP)))) : 1;
+const tokenPitch = (token: Token, room: number) =>
+  (token.kind === "ease" || token.choices ? 96 : 76) + (swatchRows(token, room) - 1) * (SWATCH + SWATCH_GAP);
 const TOKEN_CARD_CHROME = 80;
+/** The card's inset either side (`--card-spacing`, 16) and the gap between two controls on a line (`gap-x-6`). */
+const CARD_INSETS = 32;
+const LINE_GAP = 24;
+/** The width of a six-cell card at the narrower cell, what a card is before it is measured. */
+const SIX_CELLS = 420;
 
-/** A section's tokens in lines of `perLine`, each line as tall as its tallest. */
-const linesOf = (tokens: readonly Token[], perLine: number) =>
-  Array.from({ length: Math.ceil(tokens.length / perLine) }, (_, i) => tokens.slice(i * perLine, (i + 1) * perLine));
-const pitchOf = (line: readonly Token[]) => Math.max(...line.map(tokenPitch));
+/**
+ * A section's tokens in lines of `perLine`, each line as tall as its tallest. A choice of colours takes a line of its
+ * own (as Orbit's cards give it), so its swatches have the card's width and the agent's nine paints stand in one row.
+ */
+const linesOf = (tokens: readonly Token[], perLine: number) => {
+  const lines: Token[][] = [];
+  for (const token of tokens) {
+    const last = lines[lines.length - 1];
+    if (!last || token.swatches || last[0]?.swatches || last.length >= perLine) lines.push([token]);
+    else last.push(token);
+  }
+  return lines;
+};
+/** The room a line's control has across, px: the card's content, shared by two with the gap between. */
+const roomOf = (line: readonly Token[], perLine: number, width: number) => {
+  const content = (width || SIX_CELLS) - CARD_INSETS;
+  return perLine === 2 && line.length > 1 ? (content - LINE_GAP) / 2 : content;
+};
+const pitchOf = (line: readonly Token[], perLine: number, width: number) =>
+  Math.max(...line.map((token) => tokenPitch(token, roomOf(line, perLine, width))));
 
 /** A token jig's height with every control on it, px — or with its first `lines` of them, the least it reads in. */
-export const tokenNatural = (tokens: readonly Token[], perLine: number, lines = Infinity) =>
-  TOKEN_CARD_CHROME + linesOf(tokens, perLine).slice(0, lines).reduce((sum, line) => sum + pitchOf(line), 0);
+export const tokenNatural = (tokens: readonly Token[], perLine: number, lines = Infinity, width = 0) =>
+  TOKEN_CARD_CHROME + linesOf(tokens, perLine).slice(0, lines).reduce((sum, line) => sum + pitchOf(line, perLine, width), 0);
 
 /** Tokens in pages of lines of `perLine`, each page's lines standing in `room` px — a line at the least a page. */
-function linePages(tokens: readonly Token[], perLine: number, room: number): Token[][] {
+function linePages(tokens: readonly Token[], perLine: number, width: number, room: number): Token[][] {
   const pages: Token[][] = [];
   let page: Token[] = [];
   let used = 0;
   for (const line of linesOf(tokens, perLine)) {
-    if (page.length && used + pitchOf(line) > room) {
+    const pitch = pitchOf(line, perLine, width);
+    if (page.length && used + pitch > room) {
       pages.push(page);
       page = [];
       used = 0;
     }
     page.push(...line);
-    used += pitchOf(line);
+    used += pitch;
   }
   if (page.length) pages.push(page);
   return pages;
 }
 
-function Parameter({ token, family }: { token: Token; family: Family }) {
+function Parameter({ token, family, className }: { token: Token; family: Family; className?: string }) {
   const studio = useStudio();
   const value = studio.values(family)[token.name];
   if (value === undefined) return null;
-  return <ParameterControl token={token} value={value} swatches={token.swatches?.(studio.values(family))} onChange={(next) => studio.setValue(family, token.name, next)} />;
+  return <ParameterControl token={token} value={value} swatches={token.swatches?.(studio.values(family))} onChange={(next) => studio.setValue(family, token.name, next)} className={className} />;
 }
 
 /**
@@ -90,11 +118,12 @@ function Parameter({ token, family }: { token: Token; family: Family }) {
  * an ease or a choice) under them, and what it moves in a line. A choice of colours (`swatches`, what each looks like
  * now) is the design system's colour picker, as every pick of a colour is (Orbit.md C17).
  */
-function ParameterControl({ token, value, onChange, swatches }: {
+function ParameterControl({ token, value, onChange, swatches, className }: {
   token: Token;
   value: Value;
   onChange: (value: Value) => void;
   swatches?: Record<string, string>;
+  className?: string;
 }) {
   const id = React.useId();
   const [draft, setDraft] = React.useState<string | null>(null);
@@ -109,7 +138,7 @@ function ParameterControl({ token, value, onChange, swatches }: {
     setDraft(null);
   };
   const unit = token.kind === "ms" ? "ms" : token.unit ?? "ratio";
-  return <div className="flex min-w-0 flex-col gap-1">
+  return <div className={cn("flex min-w-0 flex-col gap-1", className)}>
     <div className="flex min-h-6 items-center justify-between gap-2">
       <Label htmlFor={id} className="min-w-0">{token.label}</Label>
       {!choices ? <div className="flex shrink-0 items-center gap-1">
@@ -144,7 +173,7 @@ export function TokenJig({ family, section: index, height }: { family: Family; s
   const [page, setPage] = React.useState(0);
   if (!section) return <PresetJig family={family} />;
   const perLine = perLineOf(width);
-  const pages = linePages(section.tokens, perLine, height - TOKEN_CARD_CHROME);
+  const pages = linePages(section.tokens, perLine, width, height - TOKEN_CARD_CHROME);
   const current = Math.min(page, pages.length - 1);
   return <JigCard title={section.title} action={pages.length > 1 ? <div className="flex shrink-0 items-center gap-1">
     <Button size="icon-xs" variant="ghost" aria-label={`Previous ${section.title} controls`} disabled={current === 0} onClick={() => setPage(current - 1)}><ArrowLeft /></Button>
@@ -152,7 +181,7 @@ export function TokenJig({ family, section: index, height }: { family: Family; s
     <Button size="icon-xs" variant="ghost" aria-label={`Next ${section.title} controls`} disabled={current + 1 === pages.length} onClick={() => setPage(current + 1)}><ArrowRight /></Button>
   </div> : null}>
     <div className={cn("grid gap-x-6 gap-y-3", perLine === 2 && "grid-cols-2")}>
-      {(pages[current] ?? []).map((token) => <Parameter key={token.name} token={token} family={family} />)}
+      {(pages[current] ?? []).map((token) => <Parameter key={token.name} token={token} family={family} className={cn(perLine === 2 && token.swatches && "col-span-2")} />)}
     </div>
   </JigCard>;
 }

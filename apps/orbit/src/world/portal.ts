@@ -1,7 +1,9 @@
 import { springAt } from "@no-origins/ui/lib/spring";
 
 import { COLOURS } from "./colours";
-import type { Jig } from "./jig";
+import { configOf, type Jig, type JigGroup } from "./jig";
+import { PUBLISHED_PORTALS } from "./published";
+import type { Variant } from "./variants";
 
 /**
  * The portal, version 6 (World.md W3: what a thing can be is code). Called the hole until version 4 (his: "Let's call
@@ -16,14 +18,17 @@ import type { Jig } from "./jig";
  * version 3 (`portal-v3.ts`), "I think we should have rim. I'm thinking minimal line rim at the edge?"; on version 4
  * (`portal-v4.ts`), "We need black in the color palette", then the opening; on version 5 (`portal-v5.ts`), "Increase the
  * range for reach till 2.0" and "I need waves to be range I can set and the waves should be random values between the
- * range".
+ * range". Version 7 (W89; his: "For portal, color swatch, width of the rim, radius, and depth should be configured at
+ * the time of placement, and also wall color, darkness, and reach"; of what its variant keeps, P1): a variant is how it
+ * opens alone; its look, its size, rim and wall, is each placed portal's own (`PortalLook`), set on the Sectors page
+ * as it is placed, and the portal's page shows it in the look last set there. Version 6 is frozen (`portal-v6.ts`).
  *
  * This file is what the portal is, its jig and how it opens, and nothing of three.js, so the page's controls can
  * read it without loading the world. `build-portal.ts` makes it.
  *
- * A version he has seen is frozen: a change to what it can be is version 7, beside this one.
+ * A version he has seen is frozen: a change to what it can be is version 8, beside this one.
  */
-export const PORTAL_VERSION = 6;
+export const PORTAL_VERSION = 7;
 
 export type PortalConfig = {
   /** The opening's radius, in metres. */
@@ -58,7 +63,9 @@ export type PortalConfig = {
  * The portal as he set it (his, 2026-10-12: "Here are the settings I want for Portals"): what every portal in the world
  * is, and what the portal's page starts from and Reset goes back to.
  */
-export const PORTAL_START: PortalConfig = {
+export const PORTAL_START: PortalConfig = PUBLISHED_PORTALS[0].settings;
+/** His settings as he sent them (2026-10-12), the first published copy; kept to read, not read by anything. */
+export const PORTAL_SENT: PortalConfig = {
   radius: 0.5,
   depth: 2,
   rimWidth: 0.01,
@@ -73,36 +80,67 @@ export const PORTAL_START: PortalConfig = {
   wavesTo: 8,
 };
 
-/** The portal's card (World.md W14): its controls, grouped as the card shows them. */
+/**
+ * A placed portal's look (W89; his): its size, its rim and its wall, the seven version 6's page tuned. Picked as it is
+ * placed and kept with it (`PlacedAsset`'s `look`); a portal placed before W89 has none, and is drawn in its variant's.
+ */
+export type PortalLook = Pick<PortalConfig, "radius" | "depth" | "rimWidth" | "rim" | "wall" | "darkness" | "reach">;
+export const LOOK_KEYS = ["radius", "depth", "rimWidth", "rim", "wall", "darkness", "reach"] as const satisfies readonly (keyof PortalLook)[];
+
+/** A portal's look of a config: its seven, and nothing of how it opens. */
+export const lookOf = (config: PortalLook): PortalLook => Object.fromEntries(LOOK_KEYS.map((key) => [key, config[key]])) as PortalLook;
+
+/** The next portal's look until one is set (mine): his portal's, as he sent it. */
+export const LOOK_START: PortalLook = lookOf(PORTAL_START);
+
+/**
+ * A portal's look as the Sectors page sets it (W89), in the groups and ranges version 6's page had: Size (Radius,
+ * Depth), Rim (Width, Colour) and Wall (Colour, Darkness, Reach).
+ */
+export const LOOK_GROUPS: readonly JigGroup<PortalLook>[] = [
+  {
+    title: "Size",
+    controls: [
+      { kind: "number", key: "radius", label: "Radius", min: 0.2, max: 1.2, step: 0.1, unit: "m" },
+      { kind: "number", key: "depth", label: "Depth", min: 0.2, max: 2, step: 0.2, unit: "m" },
+    ],
+  },
+  {
+    title: "Rim",
+    controls: [
+      { kind: "number", key: "rimWidth", label: "Width", min: 0.01, max: 0.1, step: 0.01, unit: "m" },
+      { kind: "colour", key: "rim", label: "Colour", options: COLOURS },
+    ],
+  },
+  {
+    title: "Wall",
+    controls: [
+      { kind: "colour", key: "wall", label: "Colour", options: COLOURS },
+      { kind: "number", key: "darkness", label: "Darkness", min: 0, max: 1, step: 0.1 },
+      { kind: "number", key: "reach", label: "Reach", min: 0, max: 2, step: 0.1 },
+    ],
+  },
+];
+
+/** A look as kept (a placed portal's, the placing's), read against its controls, or none where it is not one. */
+export function lookFrom(value: unknown): PortalLook | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const kept = configOf({ name: "Portal look", version: PORTAL_VERSION, start: LOOK_START, groups: LOOK_GROUPS }, value);
+  return kept ? lookOf(kept) : undefined;
+}
+
+/**
+ * The portal's card (World.md W14, W89): how it opens, its variant's alone; its look is set as it is placed (P1), and
+ * the page shows it in the look last set there.
+ */
 export const PORTAL_JIG: Jig<PortalConfig> = {
   name: "Portal",
   version: PORTAL_VERSION,
   start: PORTAL_START,
   groups: [
     {
-      title: "Size",
-      controls: [
-        { kind: "number", key: "radius", label: "Radius", min: 0.2, max: 1.2, step: 0.1, unit: "m" },
-        { kind: "number", key: "depth", label: "Depth", min: 0.2, max: 2, step: 0.2, unit: "m" },
-      ],
-    },
-    {
-      title: "Rim",
-      controls: [
-        { kind: "number", key: "rimWidth", label: "Width", min: 0.01, max: 0.1, step: 0.01, unit: "m" },
-        { kind: "colour", key: "rim", label: "Colour", options: COLOURS },
-      ],
-    },
-    {
-      title: "Wall",
-      controls: [
-        { kind: "colour", key: "wall", label: "Colour", options: COLOURS },
-        { kind: "number", key: "darkness", label: "Darkness", min: 0, max: 1, step: 0.1 },
-        { kind: "number", key: "reach", label: "Reach", min: 0, max: 2, step: 0.1 },
-      ],
-    },
-    {
       title: "Opening",
+      note: () => "How it opens. Its size, rim and wall are each portal's, set as it is placed on the Sectors page; it is shown here in the look last set there.",
       controls: [
         { kind: "number", key: "response", label: "Response", min: 200, max: 1600, step: 100, unit: "ms" },
         { kind: "number", key: "bounce", label: "Bounce", min: 0, max: 0.9, step: 0.1 },
@@ -111,6 +149,8 @@ export const PORTAL_JIG: Jig<PortalConfig> = {
       ],
     },
   ],
+  // W71: Copy ends with the settings exactly, so what he sends back is what the world starts from.
+  copy: (config) => [`Settings JSON: ${JSON.stringify(config)}`],
 };
 
 // ── how it opens ─────────────────────────────────────────────────────────────────────────────────────────────
@@ -188,3 +228,13 @@ export function cutOf(config: PortalConfig): number {
   }
   return far * 1.01 + 0.002;
 }
+
+/** His variants (World.md W72): the one portal he has tuned (W14, his settings); what stands on its page. */
+/** His variants of the portal (W72, W73): the published copy (`published.ts`); the first, his settings of 2026-10-12, is what the page starts from. */
+export const PORTAL_VARIANTS: readonly Variant<PortalConfig>[] = PUBLISHED_PORTALS;
+
+/**
+ * A portal's settings as something kept them, read against the jig (a variant, W72), and its look too (W89): a variant
+ * kept before version 7 keeps the look it had, which a portal placed before W89, with no look of its own, is drawn in.
+ */
+export const portalConfigOf = (saved: unknown) => configOf({ ...PORTAL_JIG, groups: [...(LOOK_GROUPS as unknown as Jig<PortalConfig>["groups"]), ...PORTAL_JIG.groups] }, saved);

@@ -12,6 +12,8 @@ import { facing, reachOf, type CameraConfig, type Ground } from "./camera";
  *   camera's spring, from the hand's speed (Response, Bounce; `@no-origins/ui/lib/spring`).
  * - **The arrows and W A S D** carry it the way it faces (↑ W), back (↓ S), left (← A) and right (→ D), at the Keys'
  *   metres a second, picking up and losing speed over the Glide.
+ * - **E and Q** raise and lower a looked-round camera and what it looks at (his: "there is no way currently for me to
+ *   move vertically"), at the same speed and over the same Glide; the visitor walks on the ground, so never theirs.
  *
  * However it moves, it stays over the Orbit's plane (`overGroundPlane` in `orbit.ts`, held by the engine).
  *
@@ -66,13 +68,16 @@ const KEYS: Record<string, Ground> = {
 /** Whether a key moves the camera (by its `code`, so W A S D are where they are on any keyboard). */
 export const movesCamera = (code: string) => code in KEYS;
 
-/** The speed the held keys ask for, in metres a ms over the ground: the Keys' speed the way they point. */
-export function keysWant(camera: CameraConfig, held: ReadonlySet<string>): Ground {
+/**
+ * The speed the held keys ask for, in metres a ms over the ground: the Keys' speed the way they point. Without
+ * `sideways` the keys across (A, D, ← →) carry nothing: they turn instead (`keysTurn`, World.md W78).
+ */
+export function keysWant(camera: CameraConfig, held: ReadonlySet<string>, sideways = true): Ground {
   let across = 0;
   let ahead = 0;
   for (const code of held) {
     const way = KEYS[code];
-    if (!way) continue;
+    if (!way || (!sideways && way[0])) continue;
     across += way[0];
     ahead += way[1];
   }
@@ -82,6 +87,26 @@ export function keysWant(camera: CameraConfig, held: ReadonlySet<string>): Groun
   const right: Ground = [-way[2], way[0]];
   const metres = camera.keys / 1000 / size;
   return [(right[0] * across + way[0] * ahead) * metres, (right[1] * across + way[2] * ahead) * metres];
+}
+
+/** The keys that raise (E) and lower (Q) a looked-round camera, beside W A S D. */
+const RISE: Record<string, number> = { KeyE: 1, KeyQ: -1 };
+
+/** Whether a key raises or lowers a looked-round camera (by its `code`, as W A S D are). */
+export const risesCamera = (code: string) => code in RISE;
+
+/** The speed the held E and Q ask for, in metres a ms: up or down at the Keys' speed, none while both or neither are held. */
+export function keysRise(camera: CameraConfig, held: ReadonlySet<string>): number {
+  let rise = 0;
+  for (const code of held) rise += RISE[code] ?? 0;
+  return (Math.sign(rise) * camera.keys) / 1000;
+}
+
+/** Which way the held keys across turn the look (World.md W78, A and D: Turn): −1 to the left, 1 to the right, 0 neither. */
+export function keysTurn(held: ReadonlySet<string>): number {
+  let turn = 0;
+  for (const code of held) turn += KEYS[code]?.[0] ?? 0;
+  return Math.sign(turn);
 }
 
 /** The keys' speed `dt` ms on: closing on what they want over the Glide, at once under reduced motion or none. */

@@ -1,16 +1,26 @@
+import { CAMERA_JIG, CAMERA_START, type CameraConfig } from "./camera";
+import { CLOUDS_JIG, CLOUDS_START, type CloudsConfig } from "./clouds";
 import { COLOURS } from "./colours";
-import type { Jig } from "./jig";
-import { PLANE_SIZE } from "./orbit";
+import { configOf, type Jig } from "./jig";
+import { MAP_JIG, MAP_START, type MapConfig } from "./map";
+import { WORLD_SIZE } from "./orbit";
 
-/** Environment v17: the open square's atmosphere and cardinal directions (World.md W23), and nothing built: its blocks
- * are gone (his, asked whether the environment's 10 m blocks stay: "remove it"); what is built is the sector's
- * (`sector.ts`, W24). Versions 1–16 and their builders are frozen alongside this version; these starting values are
- * his to tune.
+/**
+ * Environment v36: the open square's atmosphere and cardinal directions (World.md W23), a page a group under the
+ * sidebar's Environment (W73; his: "under environment, we should have clouds, camera, map, and base clouds, light and
+ * texture, fog, individually to configure", and a Sky page of their own): Sky (with the Motion that pauses every clock),
+ * Base clouds, Light and texture and Fog, each page a slice of this one jig and its one store (`environmentPage`),
+ * so the pages tune one atmosphere. What stands in the world, and where, is the World page's now (W73): version 34's
+ * placement, the ring's places and the grove, is frozen beside this (`environment-v34.ts`). The clouds are the
+ * world's ceiling (W33), tuned on their own page (W38). Version 36 turns things on and off by a switch (W76; his: "give
+ * me option to enable or disable something just by using toggle"): Motion, and each part, the sky's colour flow, the
+ * base clouds and the fog, which drawn off are as if their amount were nothing (`drawnOf`). Versions 1 to 35 and their
+ * builders are frozen alongside this version; these starting values are his to tune.
  */
 export type EnvironmentConfig = {
-  /** All atmosphere clocks pause together, retaining their current moment. */
-  motion: string;
-  /** Atmosphere: warm horizon, sunlight's direction and tint, cool shadows, and surface grain in world metres. */
+  /** All atmosphere clocks run while on; off, they pause together, retaining their current moment. */
+  motion: boolean;
+  /** Atmosphere: warm horizon, sunlight's direction and tint, and cool shadows. */
   horizon: string;
   sunlight: string;
   shadow: string;
@@ -18,11 +28,10 @@ export type EnvironmentConfig = {
   sunHeight: number;
   sunTurn: number;
   shade: number;
-  /** How fine the clouds' grain is, in metres (`cloudGrain` is how much). */
-  grainSize: number;
-  /** The open sky colour. Clouds stand above the plane. */
+  /** The open sky colour, overhead; the clouds are under it, at the world's ceiling. */
   sky: string;
-  /** Pastel gas: second pigment, amount, billow scale, wind-driven speed/direction, viscosity and turbulence. */
+  /** Pastel gas: shown or not, second pigment, amount, billow scale, wind-driven speed/direction, viscosity and turbulence. */
+  skyFlowShown: boolean;
   skyPigment: string;
   skyFlow: number;
   skyScale: number;
@@ -31,49 +40,36 @@ export type EnvironmentConfig = {
   skyViscosity: number;
   skyTurbulence: number;
   skySoftness: number;
-  clouds: string;
-  /** Coverage of the continuous sky layer; no placed cloud count. */
-  cloudCoverage: number;
-  cloudHeight: number;
-  /** Cloud shape: billow scale in metres, layer thickness, wind stretch and fixed seed. */
-  cloudSize: number;
-  cloudTallness: number;
-  cloudStretch: number;
+  /** The clouds' clock, internal art with no controls (W32): it runs while Flow is above 0, at Speed times real time. */
   cloudFlow: number;
   cloudSpeed: number;
-  cloudViscosity: number;
-  cloudSeed: number;
-  /** Independent pastel shading and fine surface grain; Softness rounds the light-to-shadow transition. */
-  cloudLight: string;
-  cloudShadow: string;
-  cloudWarmth: number;
-  cloudShade: number;
-  cloudSoftness: number;
-  cloudGrain: number;
-  /** Volumetric extinction, broken margins, scattered fill and the second pastel pigment. */
-  cloudDensity: number;
-  cloudErosion: number;
-  cloudPowder: number;
-  cloudPigment: string;
-  cloudBlend: number;
-  /** W31: feathered gas margins, tapered trails, broad pigment and distance contrast. */
-  cloudEdgeWidth: number;
-  cloudWisps: number;
-  cloudPigmentScale: number;
-  cloudDistanceSoftness: number;
-  /** Samples through the continuous gas layer; no cloud images are used. */
-  cloudDetail: number;
-  /** The fog: its colour, and where it starts and where it is whole, in metres from the camera. */
+  /** Lower cloud gas, independent of the ceiling: W38. Height is the mean bank centre, in world metres. */
+  baseCloudsShown: boolean;
+  baseCloudDensity: number;
+  baseCloudCoverage: number;
+  baseCloudHeight: number;
+  baseCloudVariation: number;
+  baseCloudThickness: number;
+  baseCloudScale: number;
+  baseCloudSpeed: number;
+  baseCloudWind: number;
+  /** The fog: shown or not, its colour, and where it starts and where it is whole, in metres from the camera. */
+  fogShown: boolean;
   fog: string;
   fogFrom: number;
   fogTo: number;
 };
 
-/** W31: a continuous, bounded-cost cloud layer with scattered light and flowing erosion.
- * The colours, layering and motion are his to tune and send back through Copy.
+/**
+ * The atmosphere's settings: what the sky, the base gas and the cloud light are built from, this version's as drawn
+ * (`drawnOf`, the switches already in its numbers), or a frozen version's that carried placement too, or Motion as a
+ * word; so neither Motion nor a switch is read here.
  */
+export type AtmosphereSettings = Omit<EnvironmentConfig, "motion" | "skyFlowShown" | "baseCloudsShown" | "fogShown">;
+
+/** The sky, light and fog as they start; his to tune and send back through Copy. */
 export const ENVIRONMENT_START: EnvironmentConfig = {
-  motion: "flowing",
+  motion: true,
   horizon: "#ffdfbd",
   sunlight: "#ffdfbd",
   shadow: "#8b82b3",
@@ -81,8 +77,8 @@ export const ENVIRONMENT_START: EnvironmentConfig = {
   sunHeight: 35,
   sunTurn: -90,
   shade: 0.45,
-  grainSize: 0.06,
   sky: "#bbcedc",
+  skyFlowShown: true,
   skyPigment: "#e6a3ad",
   skyFlow: 0,
   skyScale: 3,
@@ -91,32 +87,18 @@ export const ENVIRONMENT_START: EnvironmentConfig = {
   skyViscosity: 0.8,
   skyTurbulence: 0.55,
   skySoftness: 0.75,
-  clouds: "#fff0d5",
-  cloudCoverage: 0.65,
-  cloudHeight: 25,
-  cloudSize: 120,
-  cloudTallness: 0.7,
-  cloudStretch: 2.4,
   cloudFlow: 0.65,
   cloudSpeed: 0.45,
-  cloudViscosity: 0.65,
-  cloudSeed: 7,
-  cloudLight: "#fff0d5",
-  cloudShadow: "#90a590",
-  cloudWarmth: 0.5,
-  cloudShade: 0.95,
-  cloudSoftness: 0.55,
-  cloudGrain: 0.03,
-  cloudDensity: 1.2,
-  cloudErosion: 0.5,
-  cloudPowder: 0.65,
-  cloudPigment: "#f6b9c9",
-  cloudBlend: 1,
-  cloudEdgeWidth: 0.6,
-  cloudWisps: 0.7,
-  cloudPigmentScale: 120,
-  cloudDistanceSoftness: 0.25,
-  cloudDetail: 48,
+  baseCloudsShown: true,
+  baseCloudDensity: 0.65,
+  baseCloudCoverage: 0.65,
+  baseCloudHeight: 0,
+  baseCloudVariation: 50,
+  baseCloudThickness: 85,
+  baseCloudScale: 130,
+  baseCloudSpeed: 0.6,
+  baseCloudWind: 45,
+  fogShown: true,
   fog: "#ffdfbd",
   fogFrom: 180,
   fogTo: 1500,
@@ -124,19 +106,34 @@ export const ENVIRONMENT_START: EnvironmentConfig = {
 
 export const ENVIRONMENT_JIG: Jig<EnvironmentConfig> = {
   name: "Environment",
-  version: 17,
+  version: 36,
   start: ENVIRONMENT_START,
   groups: [
     {
-      title: "The Orbit",
-      note: () => `A ${PLANE_SIZE} × ${PLANE_SIZE} m square, open: no ground plane; what stands in it is the sector's, under Elements › Sector. WASD or arrows to travel; drag to look around, right-drag to pan. Click the map for longer journeys.`,
+      title: "Motion",
+      note: () => `A round ${WORLD_SIZE.diameter} m across, open, its ceiling the clouds' underside ${WORLD_SIZE.height} m up. Every clock of the atmosphere, the sky's, the ceiling's and the base clouds', runs while Motion is on and pauses together when it is off. WASD or arrows to travel; drag to look around, right-drag to pan. Click the map for longer journeys.`,
       controls: [
-        { kind: "choice", key: "motion", label: "Motion", options: [{ value: "flowing", label: "Flowing" }, { value: "paused", label: "Paused" }] },
+        { kind: "switch", key: "motion", label: "Motion", heads: true },
+      ],
+    },
+    {
+      title: "Base clouds",
+      note: () => "White gas around the mountains; off, none is drawn. Density sets how opaque it is; Coverage opens gaps. Height is the bank centre relative to the world floor; Height variation spreads banks above and below it. Speed and Wind move these clouds independently of the ceiling.",
+      controls: [
+        { kind: "switch", key: "baseCloudsShown", label: "Base clouds shown", heads: true },
+        { kind: "number", key: "baseCloudDensity", label: "Density", min: 0, max: 2, step: 0.05, marks: 0.5 },
+        { kind: "number", key: "baseCloudCoverage", label: "Coverage", min: 0, max: 1, step: 0.05, marks: 0.25 },
+        { kind: "number", key: "baseCloudHeight", label: "Height", min: 0, max: 180, step: 1, marks: 30, unit: "m" },
+        { kind: "number", key: "baseCloudVariation", label: "Height variation", min: 0, max: 100, step: 1, marks: 25, unit: "m" },
+        { kind: "number", key: "baseCloudThickness", label: "Thickness", min: 20, max: 160, step: 1, marks: 20, unit: "m" },
+        { kind: "number", key: "baseCloudScale", label: "Scale", min: 40, max: 300, step: 1, marks: 50, unit: "m" },
+        { kind: "number", key: "baseCloudSpeed", label: "Speed", min: 0, max: 3, step: 0.1, marks: 0.5, unit: "×" },
+        { kind: "number", key: "baseCloudWind", label: "Wind", min: -180, max: 180, step: 1, marks: 45, unit: "°" },
       ],
     },
     {
       title: "Light and texture",
-      note: () => "Peach light and lavender shade on everything built. Grain size is how fine the clouds' grain is; the sector's blocks have their own (Elements › Sector).",
+      note: () => "Sun height and turn light the mountains and cloud walls. Shade softens the sky fill; Warmth colours the sunlight. Tune ground texture under Elements › Sector.",
       controls: [
         { kind: "colour", key: "horizon", label: "Horizon", options: COLOURS },
         { kind: "colour", key: "sunlight", label: "Sunlight", options: COLOURS },
@@ -145,14 +142,21 @@ export const ENVIRONMENT_JIG: Jig<EnvironmentConfig> = {
         { kind: "number", key: "sunHeight", label: "Sun height", min: 0, max: 90, step: 1, marks: 15, unit: "°" },
         { kind: "number", key: "sunTurn", label: "Sun turn", min: -180, max: 180, step: 1, marks: 45, unit: "°" },
         { kind: "number", key: "shade", label: "Shade", min: 0, max: 1, step: 0.05, marks: 0.25 },
-        { kind: "number", key: "grainSize", label: "Grain size", min: 0.02, max: 0.3, step: 0.01, marks: 0.07, unit: "m" },
       ],
     },
     {
       title: "Sky",
-      note: () => "An open pastel sky behind the clouds. Flow adds a subtle colour wash; Wind also directs the cloud layer.",
+      note: () => "An open pastel sky behind the clouds.",
       controls: [
         { kind: "colour", key: "sky", label: "Colour", options: COLOURS },
+      ],
+    },
+    {
+      // W76: the sky's own switch is its colour flow's, so the flow is a group of its own with the switch on its header.
+      title: "Colour flow",
+      note: () => "A pastel wash flowing over the sky; off, the sky is its colour alone. Pigment is the wash's colour and Flow how much of it; Wind directs the flow.",
+      controls: [
+        { kind: "switch", key: "skyFlowShown", label: "Colour flow shown", heads: true },
         { kind: "colour", key: "skyPigment", label: "Pigment", options: COLOURS },
         { kind: "number", key: "skyFlow", label: "Flow", min: 0, max: 1, step: 0.05, marks: 0.25 },
         { kind: "number", key: "skyScale", label: "Billows", min: 1, max: 8, step: 0.25, marks: 1 },
@@ -164,55 +168,78 @@ export const ENVIRONMENT_JIG: Jig<EnvironmentConfig> = {
       ],
     },
     {
-      title: "Clouds",
-      note: () => "Flowing cream billows with blush pigment, sage recesses and dissolving gas edges, following Integrated powder. Clouds form one continuous sky layer; Coverage opens or fills the sky. Viscosity slows the flow; Speed 0 holds the clouds still.",
-      controls: [
-        { kind: "number", key: "cloudCoverage", label: "Coverage", min: 0, max: 1, step: 0.05, marks: 0.25 },
-        { kind: "number", key: "cloudHeight", label: "Above", min: 10, max: 300, step: 5, marks: 50, unit: "m" },
-        { kind: "number", key: "cloudSize", label: "Billow scale", min: 20, max: 120, step: 5, marks: 20, unit: "m" },
-        { kind: "number", key: "cloudTallness", label: "Height", min: 0.15, max: 1.5, step: 0.05, marks: 0.25, unit: "×" },
-        { kind: "number", key: "cloudStretch", label: "Stretch", min: 1, max: 6, step: 0.1, marks: 1, unit: "×" },
-        { kind: "number", key: "cloudWisps", label: "Wisps", min: 0, max: 1, step: 0.05, marks: 0.25 },
-        { kind: "number", key: "cloudFlow", label: "Flow", min: 0, max: 1, step: 0.05, marks: 0.25 },
-        { kind: "number", key: "cloudSpeed", label: "Speed", min: 0, max: 3, step: 0.1, marks: 0.5, unit: "×" },
-        { kind: "number", key: "cloudViscosity", label: "Viscosity", min: 0, max: 1, step: 0.05, marks: 0.25 },
-        { kind: "number", key: "cloudSeed", label: "Seed", min: 0, max: 999, step: 1, marks: 100 },
-      ],
-    },
-    {
-      title: "Cloud texture",
-      note: () => "Density holds the core; Edge width feathers its margins. Erosion acts mainly at the edge. Softness spreads the light; fine Grain stays quiet. Colour and light travel through the volume.",
-      controls: [
-        { kind: "number", key: "cloudDensity", label: "Density", min: 0.2, max: 3, step: 0.1, marks: 0.5 },
-        { kind: "number", key: "cloudEdgeWidth", label: "Edge width", min: 0, max: 1, step: 0.05, marks: 0.25 },
-        { kind: "number", key: "cloudErosion", label: "Erosion", min: 0, max: 1, step: 0.05, marks: 0.25 },
-        { kind: "number", key: "cloudPowder", label: "Powder", min: 0, max: 1, step: 0.05, marks: 0.25 },
-        { kind: "number", key: "cloudSoftness", label: "Softness", min: 0.05, max: 1, step: 0.05, marks: 0.25 },
-        { kind: "number", key: "cloudGrain", label: "Grain", min: 0, max: 0.5, step: 0.01, marks: 0.1 },
-        { kind: "number", key: "cloudDetail", label: "Detail", min: 16, max: 48, step: 8, marks: 16 },
-      ],
-    },
-    {
-      title: "Cloud colour",
-      controls: [
-        { kind: "colour", key: "clouds", label: "Colour", options: COLOURS },
-        { kind: "colour", key: "cloudPigment", label: "Pigment", options: COLOURS },
-        { kind: "number", key: "cloudPigmentScale", label: "Pigment scale", min: 40, max: 300, step: 10, marks: 50, unit: "m" },
-        { kind: "number", key: "cloudDistanceSoftness", label: "Distance softness", min: 0, max: 1, step: 0.05, marks: 0.25 },
-        { kind: "number", key: "cloudBlend", label: "Blend", min: 0, max: 1, step: 0.05, marks: 0.25 },
-        { kind: "colour", key: "cloudLight", label: "Light", options: COLOURS },
-        { kind: "colour", key: "cloudShadow", label: "Shadow", options: COLOURS },
-        { kind: "number", key: "cloudWarmth", label: "Warmth", min: 0, max: 1, step: 0.05, marks: 0.25 },
-        { kind: "number", key: "cloudShade", label: "Shade", min: 0, max: 1, step: 0.05, marks: 0.25 },
-      ],
-    },
-    {
       title: "Fog",
+      note: () => "The fog paints the blocks and the portals, never a mountain; off, nothing is fogged.",
       controls: [
+        { kind: "switch", key: "fogShown", label: "Fog shown", heads: true },
         { kind: "colour", key: "fog", label: "Colour", options: COLOURS },
         { kind: "number", key: "fogFrom", to: "fogTo", label: "Distance", min: 0, max: 3000, step: 10, marks: 500, unit: "m" },
       ],
     },
   ],
-  copy: (config) => [`Square: ${PLANE_SIZE} × ${PLANE_SIZE} m, no ground plane; North −Z, East +X, South +Z, West −X`, `Settings JSON: ${JSON.stringify(config)}`],
+  copy: (config) => [`World: a cylinder ${WORLD_SIZE.diameter} m across, ${WORLD_SIZE.height} m high, the clouds its ceiling, no ground plane; North −Z, East +X, South +Z, West −X`, `Settings JSON: ${JSON.stringify(config)}`],
 };
+
+/** The Environment's pages (W73), each the groups of the one jig it shows, by its route. */
+export const ENVIRONMENT_PAGES = {
+  sky: { name: "Sky", groups: ["Motion", "Sky", "Colour flow"] },
+  "base-clouds": { name: "Base clouds", groups: ["Base clouds"] },
+  light: { name: "Light and texture", groups: ["Light and texture"] },
+  fog: { name: "Fog", groups: ["Fog"] },
+} as const;
+
+/** One page's jig: the environment's, named for the page, with that page's groups alone; Copy sends those groups. */
+export function environmentPage(page: keyof typeof ENVIRONMENT_PAGES): Jig<EnvironmentConfig> {
+  const { name, groups } = ENVIRONMENT_PAGES[page];
+  return { ...ENVIRONMENT_JIG, name, groups: ENVIRONMENT_JIG.groups.filter((group) => (groups as readonly string[]).includes(group.title)), copy: (config) => [`Settings JSON: ${JSON.stringify(Object.fromEntries(ENVIRONMENT_JIG.groups.filter((group) => (groups as readonly string[]).includes(group.title)).flatMap((group) => group.controls.flatMap((c) => (c.kind === "number" && c.to ? [c.key, c.to] : [c.key]))).map((key) => [key, config[key as keyof EnvironmentConfig]])))}`] };
+}
+
+/** The keys a page's groups tune: what its Reset puts back. */
+export function environmentKeys(page: keyof typeof ENVIRONMENT_PAGES): (keyof EnvironmentConfig)[] {
+  const { groups } = ENVIRONMENT_PAGES[page];
+  return ENVIRONMENT_JIG.groups.filter((group) => (groups as readonly string[]).includes(group.title)).flatMap((group) => group.controls.flatMap((c) => (c.kind === "number" && c.to ? [c.key, c.to] : [c.key]))) as (keyof EnvironmentConfig)[];
+}
+
+/** Where fog that is off starts: beyond anything the camera sees (its far plane is 20 km). */
+const NO_FOG = 1_000_000;
+const drawn = new WeakMap<EnvironmentConfig, EnvironmentConfig>();
+
+/**
+ * The atmosphere as the world draws it (W76): a part switched off is drawn as if its amount were nothing, the sky's
+ * colour flow and the base clouds' density nothing, the fog starting beyond the far plane, so every builder reads one
+ * set of numbers and nothing is remade for a switch. The same settings give the same object.
+ */
+export function drawnOf(config: EnvironmentConfig): EnvironmentConfig {
+  let held = drawn.get(config);
+  if (!held) {
+    held = {
+      ...config,
+      skyFlow: config.skyFlowShown ? config.skyFlow : 0,
+      baseCloudDensity: config.baseCloudsShown ? config.baseCloudDensity : 0,
+      fogFrom: config.fogShown ? config.fogFrom : NO_FOG,
+      fogTo: config.fogShown ? config.fogTo : NO_FOG,
+    };
+    drawn.set(config, held);
+  }
+  return held;
+}
+
+/**
+ * The Environment as one item in the database (World.md W75; his: "we don't need names in environment. We need versions
+ * to keep publishing"): what every page under the sidebar's Environment tunes, kept together, unnamed and without
+ * variants, its draft saved and its versions published as the world's are: this jig's atmosphere, the ceiling clouds
+ * (`clouds.ts`), the visitor's camera (`camera.ts`) and the map (`map.ts`).
+ */
+export type EnvironmentData = { atmosphere: EnvironmentConfig; clouds: CloudsConfig; camera: CameraConfig; map: MapConfig };
+
+/** The environment as kept, each part read against its jig (`configOf`); a part missing is its jig's start, and a value not an object null. */
+export function environmentOf(saved: unknown): EnvironmentData | null {
+  if (!saved || typeof saved !== "object" || Array.isArray(saved)) return null;
+  const { atmosphere, clouds, camera, map } = saved as Record<string, unknown>;
+  return {
+    atmosphere: configOf(ENVIRONMENT_JIG, atmosphere) ?? ENVIRONMENT_START,
+    clouds: configOf(CLOUDS_JIG, clouds) ?? CLOUDS_START,
+    camera: configOf(CAMERA_JIG, camera) ?? CAMERA_START,
+    map: configOf(MAP_JIG, map) ?? MAP_START,
+  };
+}
