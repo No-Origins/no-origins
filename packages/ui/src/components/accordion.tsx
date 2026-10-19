@@ -65,9 +65,14 @@ function AccordionContent({
       className="overflow-hidden text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
       {...props}
     >
+      {/*
+        Sera pins this box to `h-(--radix-accordion-content-height)`, the height Radix measured as the item opened, which
+        clips anything that grows while it is open: a jig's group gaining controls as a block is picked (Orbit's Sector
+        card). The keyframes animate the outer element's height, so the pin does nothing for the motion; dropped.
+      */}
       <div
         className={cn(
-          "h-(--radix-accordion-content-height) pt-0 pb-4 [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground [&_p:not(:last-child)]:mb-4",
+          "pt-0 pb-4 [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground [&_p:not(:last-child)]:mb-4",
           className
         )}
       >

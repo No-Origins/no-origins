@@ -1,146 +1,133 @@
 @AGENTS.md
 
-# apps/orbit — Orbit
+# apps/orbit — Orbit, the clearing
 
-`orbit.no-origins.com`, :3005. **Orbit is the agents, together** — each has its own name — **and this app, where they
-are made** (Orbit.md C21). Here each agent's character is designed: what it looks like, not how it moves. **Orbit.md**
-is its document; read it before changing anything here.
+Read World.md W108 first, and W111 for every loading change. On 2026-10-18 he asked to remove the previous Orbit and rebuild from his sandy clearing reference. W1–W107 document history; their editor, environment and navigation no longer apply.
 
-```bash
-pnpm --filter orbit dev              # :3005
-```
+- One public route, `/`, one persistent canvas in the root layout, no editor, library, database reads or saved world. The original Clay, sky and clouds are retained.
+- `src/components/world.tsx` loads `src/world/clearing.ts` after mount. Three.js WebGPU with WebGL fallback; on-demand rendering, capped pixel ratio, deterministic scatter, disposal on unmount.
+- The reference is the direction: warm sand, soft shadows, three adjoining flat blank black screens, a featureless clay human, six colored geometric companions on fine ground rings, one empty central ring, peripheral rocks and grass.
+- `clearing-agents.ts` builds the six clay companions: softened silhouettes, subtle hand-shaped asymmetry and matte grain, individual eyes/mouths and resting tilts. Keep their surface patterns as soft clay relief: green scallops, orange honeycomb and pink wavy ridges. Facial marks react to pointer hover/tap and Clay’s proximity: gaze, blink, lifting paired brows and smiling mouths. Violet has two brows. All six bodies turn toward Clay within 8 m of the gathering’s centre (9 m exit margin) and return to their resting headings outside it. Nearby Clay takes gaze priority over the pointer. Reduced motion holds expressions without blinking. Pink retains the small round shades, long bridge and no temples. Their six ring positions and collision positions stay shared.
+- His latest top-view sketch sets the screens: a straight 5.4 m centre panel with two 4.5 m flat wings swept forward about 33°, meeting exactly at the centre panel’s ends. All are 6.5 m high, blank black and bezel-free; the centre stays 11.4 m behind the world origin. Rendering and collisions share these placements.
+- The screen carries what he supplies: the NO ORIGINS title, then the grid and its three button cells (World.md W112). No invented app links or assignments for the companions.
+- Drag or touch to look round; wheel or pinch to zoom; WASD/arrows move Clay, Shift runs, Space jumps, double Space toggles flight; Space rises and Shift descends in flight. Home or Escape restores the initial camera view. The camera stays above ground.
+- The canvas uses the system cursor and has an accessible description; the server page contains the scene description using Text. `ClayControls` composes the system Popover, Text and Buttons for touch/keyboard movement, flight and reset.
+- Sky and clouds reuse `build-fluid-sky.ts`, `build-clouds.ts`, `cloud-noise.ts` and their supporting settings. `published-environment.json` retains their existing copy; the ceiling shader gains an open-sky option without the former cylinder rim.
+- The human reuses the existing `build-human.ts`, `human.ts`, `clay-turnaround.ts` and `clay-skin.ts`: the measured Clay silhouette, connected skin and rig. Its clearing finish is warm ivory (`#e1d2c5`) with shared head/body pigment variation, anchored grain and restrained warm sheen. Retain its flight modules and measurement scripts; do not replace it with primitive shapes. `published-humans.json` retains the existing character settings without loading the removed world.
+- `clearing-scenery.ts` builds irregular mineral-grained stones, merged curved grass blades, and a small inset teal pond beside the clearing. Its matching ground opening, sloping bank, water and shoreline planting share one outline; water is opaque with still fine ripple normals.
+- Scene dimensions and material values are in `clearing.ts`. The existing sky and cloud clocks run when their saved settings enable motion; reduced motion and a hidden tab pause them.
+- `data-ready` announces the first rendered frame; `data-backend` says webgpu or webgl. Former `/build/*` bookmarks redirect to `/`.
+- `pnpm --filter orbit dev` runs on :3005. Check typecheck, lint, build and visually review desktop and portrait before reporting done.
+- The shared stylesheet stays the only stylesheet. `character.no-origins.com` continues redirecting to Orbit.
 
-## The shape
+- `clay-travel.ts` restores the existing Clay gait/flight samplers with movement relative to the camera, normalized diagonal input, camera follow and boundaries around the screens, agents, pond and every stone. Stone footprints come from the rendered vertices, expanded by Clay’s 45 cm clearance. All blockers have finite heights: Clay can fly above agents, screens and rocks, land on their tops and fall when walking off. Blur/hidden-tab clears held inputs; reduced motion suppresses jumping and holds airborne motion. `clay-input.ts` shares commands with touch controls. Reset returns the character to its starting position. The Follow cursor Switch (on by default) controls head tracking and survives Reset for the visit. Clay’s head follows the cursor using the existing rig gaze limits while standing, walking and flying; pointer leave restores the gait/flight head pose, with token-based easing and instant reduced-motion updates. Flight has momentum and secondary motion (World.md W108, his flight request): a launch with stretch, a spring-held height, coasting into the glide, turning on a spring with a bank, and a flared landing with squash; `human-flight.ts` holds the body's springs (`stepFlightBody`).
 
-`/` is one `Grid` with the overlay and the cursor, the motion studio's shell, inside `CharacterProvider`
-(`components/character-context.tsx`: the look, and its draft and versions). Its boxes are placed by `studioLayout`
-(`src/lib/stage.ts`) from the measured field.
+- **His approved hillock concept:** three low grassy mounds shelter the perimeter, with meadow patches, tiny wildflowers and scattered stones, retaining the open sandy gathering. Deterministic radial geometry blends into sand; grass and stones follow the same smooth terrain height that supports Clay on slopes.
 
-- **The agent's cell** (C2) is a cell of the field grown to a radius of three cells, six across, centred across the
-  field **at the top, one row above it**; a field too narrow or too short gives it fewer cells, kept even. Inside it the
-  agent sits (C3), drawn by `AgentCell` (`components/agent-cell.tsx`). **The cell is part of the grid**: every cell of
-  the field its circle overlaps is painted out under it (`coveredCells`), and the four in the corners of its square,
-  which it misses, stay. Its slot is `transparent`, because the `background` fill would take those corners too.
-- **Everything round the circle is a section** (C7): its heading on a row of its own — the portfolio's section label,
-  composed the same way (`SectionLabel`, `components/section.tsx`) — and its cards under it, each as many rows as it
-  has lines, never stretched to its room.
-  - **The body** (`components/appearance-card.tsx`, C4): Size, then Shade, one a row, in a card four across and two
-    down, centred under the circle, its heading on the row between them — or first in the right room where it and the
-    bar do not both fit there.
-  - **The face** (`components/face-panel.tsx`, C5, C7): a section a worn slot, flowing down the room to the circle's
-    left.
-  - **The body's own sections** (`components/body-sections.tsx`, C10, C12, C22) flow down the room to its right:
-    **Shape** (with its Material), **Rotation**, **Colour**, **Surface** (its texture and depth), **Tail** (its first
-    line the switch; off, the section is that line alone, C23) and **Rest**.
-  - **The draft's bar** (`components/versions-panel.tsx`, C6, C11) is on the field's last row under the circle, between
-    the rooms' pagers: a circle that opens the versions in a dialog (the next major over them, to publish), and a pill
-    of the agent's select, the draft's state and Publish, which makes the next minor version at a press (C19: a version
-    is `major.minor` and has no name; `lib/versions.ts` spells them) — or, for a visitor, "Yours to play with" and
-    Sign in (C24).
-- **Rooms flow and page.** A column of air stands between the circle and each room. `flow` (`lib/stage.ts`) places a
-  room's sections column by column, a section whole unless it is taller than a column, and what the room cannot hold
-  is its next page, turned by its pager on the field's last row (`Flow`); a style picked that moves its section to
-  another page turns to it. **A section folds to its heading** (C9): the heading row is its toggle, a folded section
-  flows as one row, and the page follows a section that moves. The folds are held above the rooms (`FoldProvider`,
-  `useFold`) and not saved. A field with no room beside the circle has one room under it, where the body and its
-  sections, then the face, flow, the bar on the row above its pager.
-- **Every control is `PropertyControl`** (`components/property-control.tsx`), a line of its card (`Line`, three columns
-  — label, control, value — that **every card in a room shares**, `LINE_LABEL` and `LINE_VALUE` in
-  `components/section.tsx`; the body's card placed on its own fits its label column), made from a setting's type in the
-  package's declaration (`@no-origins/ui/lib/properties`, `agent-face`, `agent-body`), never a list of its own. **One
-  grammar for every line** (C11): a number is a slider and its typed value; a choice a select across the control's and
-  the value's columns, what it offers that is not a value (a face slot's uploads, template and upload) at the end of its
-  list; a paint, and a colour by name, the design system's `ColourPicker` (C17); a switch at the control's start. The
-  value's column holds a number or nothing, and every box is 36px (Open: 36 or 40 — his decision). No button at a
-  line's end.
-- **Only what he names stands round the circle**, one piece at a time, as the motion studio's bench holds only what he
-  names (Motion.md M9): the body and its sections, the face, and the draft and its versions. Its name, its meta and its
-  personality are what he has named as coming.
-- **`/hiddenstack`** (`components/hiddenstack-studio.tsx`) is Hiddenstack's figure, the design system's
-  `HiddenstackAvatar` on the same shell. Open: `/hiddenstack`, in the code but not decided.
+- **His hillock refinement:** move the right-hand mound into the marked front-left foreground. Replace the pale oval borders and patchy surface with irregular low slopes sharing the floor’s sand material, grain and world UVs; meadow coverage thins into sand over a broad fringe. Denser fresh green, shorter curved blades follow his grassy hill reference, with small flowers and stones retained.
 
-## Who may do what (C24)
+- **His painted-meadow correction:** replace the dense hillock blade geometry with a generated hand-painted albedo texture (`painted-meadow-v1.png`): sage/olive leaf dabs, short grass strokes, sandy gaps and tiny flower flecks. A per-vertex coverage mask mixes the meadow with the floor’s sand texture over the irregular fringe; the sparse original planting beside stones and pond remains. Terrain, hill positions and Clay support stay shared.
 
-**Orbit is everyone's to play with; saving is for whoever holds its permissions.** `src/proxy.ts` runs the shared gate
-with `open`: nobody is sent to the sign-in, and `/sign-in` is there for whoever saves. `src/app/actions.ts` is server
-functions for whoever asks (`@no-origins/auth/server`), the database deciding: every load says whether the page is
-`editable` — the signed-in account holds `orbit.draft.save` (asked of the database, `noo_can`) — and each write asks
-its own permission in `writer()`: `orbit.draft.save`, `orbit.version.publish`, `orbit.agent.create`,
-`orbit.style.upload`. The Owner holds them all and may give them in a role (Access.md A3).
+- **His seating sketch:** three companions each side of Clay’s centre circle in a broad shallow arc facing the three screens. A silver pedestal podium sits ahead of Clay’s circle; it is always raised and ready. The circle keeps its resting finish; the podium has matching physical support and collision.
 
-- **A visitor** loads each agent as **the version pages show, never the draft**, moves every control on the page, opens
-  the six and reads the versions, and nothing is saved: the context schedules no save, and the server refuses before
-  RLS would. The anon key's policies (`…_studio_public_read.sql`) read the agents and their versions and nothing else.
-  Do not read the draft for a visitor, and do not offer them Publish, Go back, a new agent or an upload.
-- **There are six characters** (C13, Agents.md): Bali, Kino, Zaza, Oru, Mira and Lola. The draft bar's select opens
-  one, and makes a new one by its name at the end of its list (`createCharacter`, C19) (`open` in the context settles
-  what is pending first); every action takes the open one's `itemId`, and uploads are the open character's own.
-- **Saving** (C6): the draft loads when the studio opens, saves `SAVE_AFTER` ms after the last change, whole
-  (`resolveCharacter`), on the `rev` it was loaded at; a save another device made first is refused, and the draft's bar
-  offers to load it. Publishing saves what is pending first, then makes the latest version's next minor
-  (`publish("minor")`) or, from the versions, its next major (`publish("major")`), counted from the latest and never
-  from the one pages show.
-- **Locally**: with no keys the page is `offline`, and it is all there is. With the local stack's two keys in
-  `.env.local` (`.env.example`) the studio shows the published agents and the bar offers the sign-in; a session made on
-  any app on localhost is this one too, since a localhost cookie is every port's.
+- **His podium reference and docking:** a thin silver tabletop, broad pedestal and stepped foot, always at full height. Standing in Clay’s circle smoothly centres Clay, turns toward the screens and places both paddle-arm ends on the tabletop over `--motion-human-podium-settle` (850 ms fallback); reduced motion applies the finished stance immediately. The camera follows the same interpolated displacement. A fresh movement command releases the pose, and docking re-arms after leaving the circle. Flight/reset release it too. His latest correction removes the screens’ bezels and spectral finish, moves the backdrop farther back, and uses his subsequent straight-centre/angled-wing plan; rendering and collisions share those placements.
 
-## What is true here and easy to get wrong
+- **His spacing and screen finish correction:** move the whole screen assembly and its rear meadow hill five metres farther back (centre screen z = −11.4 m, hill z = −18 m). Screens are solid black slabs, 18 cm thick, retaining the joined-wing plan. Collision clearance includes slab thickness, and the rear walking boundary extends to z = −15 m so the added open sand remains accessible.
 
-- **Orbit holds the look, never the motion** (C22, Motion.md M23): what the agent is, and how it rests — the
-  declaration's `set: "look"`, a look a motion may move marked `pose`. How it moves (Breath, Squeeze, a jump's
-  settings) is every agent's and the motion studio's, and a character saves none of it (`resolveCharacter`). Do not put
-  a motion setting on a card here; the agent still plays its rest, by the shared values.
-- **The agent is the design system's `Agent`** (`@no-origins/ui/components/agent`), drawing one frame of the package's
-  sphere (`@no-origins/ui/lib/sphere-motion`, Motion.md M17), from the look through `sphereMotionOf(look)`
-  (`@no-origins/ui/lib/agent-body`). Never a copy of its model or its painting here: the motion studio's stage draws the
-  same component. A look with nothing set is the package's defaults, so a default changed there shows here. No tokens
-  are written here.
-- **It plays its rest, and nothing else** (C3): a still course (`sphereStill`), one frame of it
-  (`sphereFrame(course, t, t)`) painted through the `Agent`'s ref on every animation frame — breathing and blinking on
-  one clock from when the cell mounts, carried on when the look changes. It never jumps. Under reduced motion it paints
-  its first frame and stops. Never pass the `Agent` a still `frame` here as well: it repaints that on every change of
-  the look, and the breath would flick to its start while a slider is dragged.
-- **A look is held whole.** Save through `resolveCharacter`, never a partial look: a version is frozen, and one that
-  said "the default" would change the day a default did.
-- **An upload is cleaned in the page and checked again on the server** (C8): `lib/clean-svg.ts` lines it up by its
-  template's Guides (the cross to the anchor, the head to a radius of 100), flattens every shape through its
-  transforms (`svgpath`), resolves its colours and refuses what the system never draws; `lib/drawing.ts` has the
-  template (`templateSvg`, `templatePartOf`) and `strictDrawing`, the server's refusal of anything half-right. The
-  shape is the package's `DrawingData` (`@no-origins/ui/lib/agent-face`); the agent draws a look's `upload:<id>` from
-  the `drawings` it is handed (every drawing version's shapes, loaded with the draft). The file goes to the private
-  `assets` bucket before its version is written, so a frozen version never names a file that is not there.
-- **The slider's body springs after a jump**: a typed value moves the head at once and the lime body follows. That is
-  the system's slider, not lag here.
-- **The cell is its nest.** The sphere's size is a share of its nest, and the nest here is the whole cell, so its
-  geometry is `{ cell: diameter, gap: 0 }`. The cell is drawn as the motion studio draws a nest: the muted tint in a
-  lime hairline.
-- **The cells it covers are painted out in SVG, not masked by the slot.** The `background` fill's corners are a cell's
-  curve, which runs along the corner cells' rings; the outer edge of their dashes showed through it, and it hid the
-  corner cells he wants kept.
-- **The cell is abstract geometry, by his spec**, drawn in SVG round the `Agent` like the motion studio's nests. That
-  is the one element here that is not `@no-origins/ui`. Every control is.
+- **His first-load placement:** Clay begins at the centre circle facing the screens, with the existing smooth podium stance settling the hands onto the tabletop. Reset restores this same position and heading.
 
-## Reviewing it
+- **His hip and knee correction:** Clay retains its measured silhouette but has hip sockets inside the pelvis above the crotch and separate thigh/shin skin influences. The knee bones now visibly bend the lower legs; compact weight transitions and local knee fairing keep the clay surface continuous (World.md W108).
 
-`pnpm review` boots this app on :3005 and screenshots `/` and `/hiddenstack` (`ORBIT_ROUTES` in `e2e/review.spec.ts`)
-on desktop and mobile in both themes — the signed-in page on his machine, where the sweep's browser is signed in first
-(`e2e/global-setup.ts`), the offline page in CI. `pnpm review e2e/review.spec.ts -g orbit` runs only this app's
-routes. Gitignored helpers in `e2e/.mcp/`, each with :3005 running (and the local stack where it signs in):
+- **His shared screen attention:** while Clay is docked at the podium (including its settling motion), all six agents smoothly turn their bodies and gaze toward the centre screen. This takes priority over Clay/pointer tracking; releasing the podium stance restores normal attention. The existing agent turn/gaze timing and reduced-motion behavior apply.
 
-- **They read only:** `orbit-public.mjs <out>` (C24's probe: a visitor reads the bar, lists the agents, types a Size
-  and counts the server actions it sends — none — then, signed in as the owner, checks Publish, *New agent…* and the
-  versions' actions); `orbit-look.mjs <out> [light|dark] [WxH …]` (every box with its cells, anything drawn outside its
-  box); `orbit-pages.mjs <out> [WxH] [scheme] [styled]` (every page of every room, anything clipped);
-  `orbit-flow.mjs`, `orbit-fold.mjs`, `orbit-controls.mjs`, `orbit-chooser.mjs`, `orbit-signed.mjs`. A control is
-  named by its section ("Body size value", "Brows style"), and the probes turn to a section's page first
-  (`toSection`).
-- **They write his local database**, so clean up after them — versions are frozen, so a test one goes with the
-  trigger disabled for it alone, locally only: `orbit-versions.mjs <out> [name]` (makes an agent and publishes it),
-  `orbit-upload.mjs <out>` (uploads a drawing and its files), `orbit-rotate.mjs` (autosaves into the draft: snapshot
-  and restore it around the run).
+- **His bag:** Clay carries a red faceted backpack inspired by his folded-panel reference: pale seams, small silver rivets, red shoulder straps and a carry loop. `clay-bag.ts` attaches it to the chest bone through walking, podium poses and flight. Click the bag without dragging or use the accessible Bag button to open the shared-system dialog. The bag starts empty; no collectibles have been specified. `clay-inventory.ts` stores versioned browser-local items (identity, name, description, source zone and quantity), shared across future zones, with `collectClayItem` for actual collection interactions. Opening the dialog clears held movement and blocks travel commands until closed; Escape and focus restoration use the system dialog.
 
-## Deploying
+- **His approved backpack concept and fidelity correction:** `public/references/clay-backpack-v1.png` is the accepted generated rear/front concept. Match its broad compact shell, genuinely pitched horizontal face panels and triangular side folds, restrained coated red grain, exposed pale panel edges, silver inset rivets, substantial woven carry loop and open dark strap adjusters. Shoulder ribbons sample the retained trunk’s surface during construction to wrap its real shoulder contours; do not substitute upright strap tabs or a thin flat polygon pouch. The pack remains chest-carried through Clay’s existing poses.
 
-The Vercel project is named `character`, its root directory `apps/orbit` and its domain `orbit.no-origins.com`;
-`character.no-origins.com` is still attached and 308s to it from `next.config.ts`, path and query intact. The hosted
-Supabase lists both among its redirect URLs (`supabase/config.toml`). `vercel.json` is the same file as every app's.
+- **His marked bag correction:** remove the carry loop entirely. The blue-circled shoulder clipping is fixed by binding the shoulder strap’s full-width vertices to barycentric coordinates on the actual trunk triangles with a small surface clearance. `bag.update()` follows the CPU-deformed Clay skin after travel poses, updates normals and bounds, and skips unchanged skin versions. A smooth transition preserves the fixed front/lower strap sections and the shoulder’s rest offset. The shell remains chest-carried; shoulder edges must remain outside the skin during podium, gait and flight poses.
+
+- **His walking strap spike:** shoulder rays must reject hits more than 6.5 cm from a strap vertex or below the shoulder band. A ray that misses the shoulder can hit a thigh or foot; carrying its long rest offset rotates the strap into a spike as the leg swings. Nearby upper-skin attachments alone deform the shoulder section. Check mid-stride poses across opposing arm/hip swings, not only the docked stance.
+
+- **His VR v1 and updated body:** `public/references/clay-vr-v1.png` is the accepted visor/body concept; he requested its front/profile/back/three-quarter sheet first, kept as `clay-vr-turnaround-v1.png`, then implementation. `clay-vr.ts` holds the proportions measured against the retained 8 ft height: a wider round head, broader torso and thicker paddle arms/column legs, with a very short visible neck. The clearing overlays these dimensions on the existing Clay configuration, retaining connected skin, hip/knee rig, gait, flight, podium and gaze. Its shallow smoked-black opaque visor is warped to the real head loft with a thin graphite rim, attached to the head bone; no temples, headband, earpieces or cables. The red backpack remains, without a carry loop, using the nearby-shoulder attachment guard.
+
+- **His review of VR Clay against the image:** proportions alone kept too much of the old angular silhouette. The clearing now selects `clayProfile: "vr-v1"`: a full-cheeked rounded head loft with a soft crown, a fuller rounder torso, generous elliptical paddle ends, and a 14° outward arm rest added to the existing rig poses. Warmer ivory and broader pressed-clay marks replace the uniformly fine grain for this profile; those marks stay anchored on the CPU-deformed skin too. The original measured turnaround remains intact for the historical profile. Visor curvature reads the new actual head loft.
+
+- **His height correction:** after the fuller body/bag read too wide, increase the clearing's Clay stature from 243.84 cm to 295 cm while preserving its head size and all widths/depths. `clayHeight` is an optional independent measure; normalized loft dimensions compensate for stature so no lateral size grows. Legs are 88 cm and arms 72 cm, and the torso takes the remaining rise. Hip/spine/chest rest positions, visor height and shoulder sampling follow the new stature. The bag grows vertically with it. Reset preserves the rig’s measured hip rest height, and the podium derives its tabletop from the taller character's actual arm reach.
+
+- **His bag width adjustment:** reduce the shell width by exactly 10%, with its height/depth and Clay's dimensions unchanged. Shoulder strap fitting keeps the body's previous shoulder span; only the bag attachment points follow the narrower shell.
+
+- **His compact backpack refinement (2026-10-19):** match the bag in `clay-backpack-v2.png`, the user-selected world concept, without changing Clay or the surrounding world. The actual shell is a compact octagonal volume with one broad central face, large pitched corner/perimeter facets, softly chamfered edges, quiet coated-red grain and one restrained dark-red closure near the back. This supersedes the earlier horizontal panel grid, pale piping and silver rivets. The existing 10% narrower shell bounds, fitted woven shoulder straps, nearby-upper-skin barycentric attachment guards, chest carrying, carry-loop removal and click-to-open inventory behavior remain.
+
+- **His shoulder-strap smoothing (2026-10-19):** round the pointed bends on both shoulders where the strap's skin-bound and fixed sections meet. The upper ribbons now fair those transitions while preserving their full width and thickness; contact-plane constraints retain the existing shoulder clearance instead of smoothing into Clay. Nearby-upper-skin attachment guards, fixed bag mounts, shell and inventory remain. Review both sides in podium, opposing gait and flight poses.
+
+- **His visor Gateway (World.md W109):** Control T or the Visor button opens a first-person zone chooser. Six equal sharp circular concept previews and solid pill labels form a widely spaced horizontal strip, centred on entry, with pointer/A/D turning and touch swiping on narrow screens. The camera shares the strip’s yaw; hover grows a preview slightly without resizing its hit area. A thin curved visor silhouette and peripheral shading replace the hard border. Entry/exit, camera, turning and hover use visor motion tokens and respect reduced motion. His explicitly requested exception permits background blur and a peripheral vignette here. Travel is blocked while open, camera/orbit control restored on close, Escape closes the chooser. The Agents is the existing environment; the remaining five are labelled concept previews until their separate environments and opening transitions are built. `clay-visor.tsx` owns the system Dialog/Button/Text composition; the approved concept sheet is `public/references/visor-world-previews-v1.png`.
+
+- **His hovering island (World.md W110):** `agents-island-v1.png` is the approved blueprint-based concept. The clearing now occupies a 22 m radius circular sandy island with a sealed faceted rocky underside. Four proportional meadow hills sit back-left (largest), back-right, left edge and front-right (smallest). The pond is removed. The joined blank screen assembly spans an 8 m centre and two 6.5 m wings at the retained 33° sweep, rear-middle at z = −8.5 m. Six companions form the foreground arc around Clay’s centre at z = 8.8 m; podium docking stays intact. Circular travel clearance shares the island radius; the reset view fits the entire island and underside on desktop and portrait. This supersedes the former endless floor, three-hill layout and screen/seating coordinates above.
+
+- **His island fidelity correction:** W110’s underside is now a rounded 12.5 m deep mineral rock mass with embedded faceted boulders, replacing the shallow triangulated drum. Painted meadow continues across the top shore fringe and down irregular moss curtains on the sides. The back-left hill is 6.8 m high with 6.5 m footprint radii, shared with terrain support. His “glass texture” is interpreted as the reference’s grass/moss edge coverage.
+
+- **His natural-terrain correction:** top sand, subtle rises and hills now share one mesh and support function. Meadow uses irregular world-space patches across slopes, low ground and the underside, replacing the uniform perimeter fringe. Sand has multiscale mineral mottling and grain. The underside is one eroded rock mass, without attached boulder rows. Every stone is restricted to low hill feet and checked against shore/terrain height. OrbitControls has no horizontal angle limits: drag freely through 360° repeatedly. These corrections supersede W110’s earlier edge and embedded-boulder descriptions.
+
+- **His rounded-edge/depth refinement:** `islandRadius(angle)` varies the approximately circular shoreline naturally and is shared by top, shell, stones and Clay’s clearance. The top rolls over a rounded shoulder with softened upper-side normals. The rocky underside is 50% deeper (18.75 m nominal, formerly 12.5 m), with proportionally deeper relief; reset framing targets slightly lower to fit it.
+
+- **His overall-form correction:** replace the pointed bowl with a broad irregular underside, several offset deep masses, shelves and recesses. Smooth incidental triangle shading while retaining broad rock form; moss favors recesses. Low aprons soften hill transitions. Opening/reset camera is slightly oblique, balancing the gathering with the deeper rock silhouette. Keep the blueprint, increased depth envelope and full horizontal orbit.
+
+- **His golden sun (2026-10-19):** a warm golden disc above the island shares its direction with the golden directional light and ground shadows. The sun is opaque, without a glow overlay; existing sky and clouds remain.
+
+- **His free camera and pan (2026-10-19):** remove the former above-ground vertical orbit limits so the camera can look toward the sun and below the hovering island. Retain tiny pole margins to avoid an inverted up axis. Right-drag or Shift-left-drag pans camera and target together in the screen plane, preserving the viewing angle; two-finger touch drag pans and pinch zooms. Ordinary left-drag rotates. Home/Escape restores the opening frame. This supersedes the previous vertical safety limits.
+
+- **His sun visibility and sunset reference (2026-10-19):** replace the isolated solar sphere with a direction-space pale luminous disc, narrow golden aureole and broad amber atmospheric scattering in the sky shader. His photo explicitly supplies this sun treatment, superseding the earlier no-glow sun finish. Place the sun at 2° elevation, −7° turn; sky, clouds and directional lighting share it. Lower the opening camera elevation to frame both sun and island on desktop and portrait. Clouds and world geometry still occlude the sun naturally; no screen overlay.
+
+- **His screen enlargement (2026-10-19):** increase all three screens’ width and height by 30% with one shared 1.3 scale, locking each aspect ratio. The centre is 10.4 m wide, wings 8.45 m wide, and all panels 8.45 m tall. Keep the joined 33° wings, grounded bases and shared rendering/collision dimensions.
+
+- **His equal portrait screens (2026-10-19):** all three panels are exactly 9 m wide and 16 m tall, superseding the prior 30% enlargement. Reduce the forward wing sweep from about 33° to 20° while keeping adjoining edges, grounded bases and shared collision/support dimensions.
+
+- **His continuous curved screen (2026-10-19):** replace the three joined panels with one seamless blank black screen, retaining 27 m total surface width, 16 m height and 18 cm thickness. A gentle 60° cylindrical arc sweeps forward around the gathering, centred at the retained rear position. Collision and top support follow the same arc, including its ends. This supersedes the equal three-panel arrangement.
+
+- **His sun turn (2026-10-19):** move the sun 45° right, from −7° to 38° azimuth, retaining its 2° elevation and golden finish. Cloud illumination and directional shadows follow the same turn.
+
+- **His screen/terrain clearance correction (2026-10-19):** the curved screen sits on a level sandy bed at its base height, blending smoothly into natural terrain over a broad apron. Stones and grass stay clear of the full arc and its ends. `clearing-screen.ts` shares dimensions and nearest-arc distance between slab rendering, travel/support and terrain/scatter exclusion.
+
+- **His sun turn refinement (2026-10-19):** move 15° left from 38° to 23° azimuth, keeping the 2° elevation and golden finish. This leaves the sun 30° right of its original −7° position; sky, clouds and shadows remain aligned.
+
+- **His opposite orange sun (2026-10-19):** place the sun 180° from its original −7° heading, at 173° azimuth, retaining 2° elevation. The solar disc is orange, with an orange-gold aureole; cloud illumination and directional light use the warmer orange sunlight. This replaces the subsequent 38°/23° trials and the pale solar core.
+
+- **His orange sun adjustment (2026-10-19):** move 30° left from 173° to 143° azimuth, preserving 2° elevation, orange disc and aligned orange illumination.
+
+- **His further orange sun turn (2026-10-19):** move another 30° left, from 143° to 113° azimuth. Retain 2° elevation, orange finish and shared lighting direction.
+
+- **His docking camera (2026-10-19):** entering Clay’s circle also eases the camera into a centered view from behind Clay toward the screen, matching his reference. It shares the podium settle timing, applies immediately with reduced motion, and backs away in portrait to retain screen width. Walking away, visor view or manually adjusting the camera releases the transition; docking again replays it. Initial docking and Reset use the same view.
+
+- **His isometric camera angle (2026-10-19):** the overview and Home/Escape reset use equal camera offsets on all three axes: 45° azimuth and 35.264° elevation, retaining the perspective lens and responsive distance. Docking still transitions to his centered screen-facing reference.
+
+- **His isometric exit correction (2026-10-19):** releasing Clay’s circle stance automatically eases the camera back to the isometric overview, using the same podium settle timing and following Clay’s movement. Re-entering restores the screen-facing view; reduced motion finishes immediately and manual camera interaction cancels either transition.
+
+- **His lower overview (2026-10-19):** lower the isometric overview’s elevation by 30°, from 35.264° to 5.264°, retaining its 45° azimuth and distance. Both circle exit and camera reset use this shared angle; the screen-facing docking view stays as set.
+
+- **His temporary camera readout (2026-10-19):** show live azimuth/elevation in degrees, camera position, look-at target and field of view in a shared-system card. Copy camera copies the exact current settings as labeled JSON for him to send back after orbiting, panning or zooming.
+
+- **His chosen overview camera (2026-10-19):** copied position `[40.776, 12.491, 52.479]`, target `[4.12, 0.78, 4.879]`, FOV 44° (about 37.599° azimuth and 11.03° elevation) replaces the lowered isometric trial. Reset uses this exact framing on desktop; circle exit uses the same framing translated with Clay’s travel. Portrait backs away along the same view direction to fit. The temporary readout remains available for tuning.
+
+- **His revised overview camera (2026-10-19):** replace the prior copied view with position `[37.819, 19.28, 58.957]`, target `[6.105, 2.905, 9.232]`, FOV 44° (32.529° azimuth, 15.517° elevation). Reset and circle exit use this reference, retaining travel follow, portrait fitting and the screen-facing docking view.
+
+- **His start-location reference (2026-10-19):** Clay starts outside the centre circle on the foreground sand, screen-left of the podium in his chosen overview (`x = 0, z = 17`), facing the gathering. Reset restores this spot and heading; initial load keeps the overview rather than docking. Entering the centre circle still settles Clay and moves the camera toward the screen.
+
+- **His surface cursor and walking (2026-10-19):** restore the house violet circle despite OrbitControls’ inline grab cursor. With Follow cursor enabled, raycast the actual island top and project a violet ground ring at the hit, retaining its last ground point over controls. Clay’s head looks at that point while moving, and W/forward walks toward it. Double-clicking the island or the Walk button starts walking to the selected point, stops on arrival, at a blocker or when docking, and cancels on manual movement, flight, Reset, Follow cursor off, bag/visor, blur or hiding the tab. Follow cursor off retains camera-relative travel and the ordinary house cursor. No invented pathfinding through obstacles.
+
+- **His signal cursor and double-W correction (2026-10-19):** replace the flat surface cursor with a raised hollow violet cylinder and two small expanding signal rings, version 1. Signal period and spread read motion-token fallbacks; reduced motion shows the still cylinder. Double-tapping W within the walk-tap interval starts auto-walk to the selected surface point; key auto-repeat never cancels it, and releasing W keeps it running. Existing stop/cancel rules remain.
+
+- **His automatic run and obstacle crossing (2026-10-19):** double-W, double-clicking Walk or the island starts running to the selected point. Sample the direct route using the existing finite-height support/collision model; when blocked ahead, use Clay’s retained flight to climb above the route’s highest obstacle, cross and descend onto the destination’s support. Flight retains the target and can rise over screens beyond the manual 10 m limit. Manual commands, Follow cursor off, reset, bag/visor, blur and hidden tab cancel automatic travel and release automated flight.
+
+- **His screen intro, version 1 (2026-10-19):** the first podium docking turns on the curved screen. Lime and violet circles grow together, hold, then separate into the two O positions of NO ORIGINS; warm-white Montserrat letters unmask around them. One continuous ease, roughly three seconds, no loop, flash or glow; the finished composition remains through subsequent docking and Reset for this mounted world. Reduced motion shows it immediately. `screen-intro.ts` reads undecided `--motion-screen-intro-*` fallbacks at activation, paints the curved display independently of scene lighting and disposes its texture with the world. This animated title is a screen composition, not a replacement for Brand.md's canonical blob wordmark.
+
+- **His progressive startup (2026-10-19):** meadow download overlaps renderer setup and construction. Present sky, island, then the gathering in the same overview, yielding between batches; clouds follow the island. `data-stage` exposes startup order, while `data-ready` still means the complete interactive world. Missing meadow texture falls back to sand instead of preventing entry.
+
+- **His bottom-to-top loading motion, version 1 (2026-10-19):** a temporary world-height clipping plane rises through each solid item’s own bounds. Reveal the complete island first, then the screen, Clay (including bag/visor), podium and each companion together. Sky/clouds remain the backdrop. Warm materials before starting each reveal; remove clipping groups afterward so flight is unrestricted. `loading-reveal.ts` reads undecided `--motion-world-reveal-duration` (1100 ms) and `--motion-world-reveal-ease` fallbacks; reduced motion shows completed items immediately.
+
+- **His bottom navigation cells (2026-10-19):** remove the temporary Camera testing card. Move Clay, Bag and Visor are icon buttons in individual 1×1 system Slots, using the responsive system cell size and 12px gutter, centered at the bottom with safe-area clearance. Move Clay opens its existing controls in a system Popover; Bag and Visor retain their dialogs and keyboard behavior. The world remains off the grid.
+
+- **His three loading levels and violet edge (World.md W111, 2026-10-19):** explicit per-zone lists supersede the earlier startup batches. Level 1: island and sky/sun/clouds. Level 2: each companion independently, with its ring, plus Clay/bag/visor. Level 3: screen and podium/centre circle. Jobs within a level start together and reveal individually on arrival; the next level waits until every current item finishes appearing. CPU builders yield between items. One render pump owns the GPU. An opaque violet layer follows each solid item's upper reveal edge and disappears immediately at completion, restoring source materials and removing clipping. Reduced motion skips the effect; hidden tabs pause it. Layer width reads `--motion-world-reveal-layer` (7% fallback); duration/easing retain v1 fallbacks. Keep `world-loading.ts`, `load-level.ts` and `loading-reveal.ts` reusable by future zones.
+
+- **His loading polish (World.md W111, 2026-10-19):** the cut's inner faces paint violet, so each item rises under a solid violet lid. Items compile off-screen (own materials, then loading materials) before joining the scene; lights are in the scene before level 1; a frame advances a reveal by at most 50 ms; builders take turns with a painted frame between (`buildTurns`). Build-time raycasts against Clay's trunk and each companion's proxy go through `build-raycast.ts` (`three-mesh-bvh` 0.9.15, indirect), released before the skin deforms. `e2e/.mcp/loading/` (gitignored) records the startup (`capture.mjs`), logs long frames (`frames.mjs`) and CPU-profiles it (`profile.mjs`).
+
+- **His screen grid and button cells (World.md W112, 2026-10-19):** after the title, the design system's field reveals over the curved screen from its centre. It is painted by the grid's own `gridFieldPainter` on a 1024 px box (`lg`, 14 × 8), dark-theme tokens, with the pointer's cell lit violet. Three two-cell pills (card slot, ghost Button) sit centred on row 4. Portfolio loads the live portfolio on the screen: the camera holds the docked view, the page lies in an iframe behind the alpha canvas, and `screen-window.ts`'s transparent window on the screen's face shows it with Clay and the companions still in front; a ✕ cell joins the bottom row to close it. The other two are inert until he names them in `screen-menu-items.ts`. A visually hidden `nav` of system Buttons serves keys and readers. `screen-menu.ts` reads undecided `--motion-screen-menu-*` fallbacks; reduced motion shows it at docking. `e2e/.mcp/orbit-screen-menu.mjs` docks Clay and checks title, reveal, hover, the page on the screen, a scroll turning it and the close.

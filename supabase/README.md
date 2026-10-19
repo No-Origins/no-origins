@@ -10,7 +10,7 @@ its rules, its tests and the local stack's config live here, run with the Supaba
 |---|---|
 | `config.toml` | The local stack: Auth for every app that signs in (each one's callback among the redirect URLs and its origin among the passkey origins, :3002 to :3008), confirmations on, eight-character passwords, a six-digit email code, TOTP on, the access token hook and `jwt_expiry = 600`, the three mail templates. Seeding is off. `[remotes.production]` at its end pins what the hosted project holds where it differs from the local stack, so a `config push` changes only what was meant. |
 | `migrations/` | The schema, applied in order (below). |
-| `tests/` | pgTAP, run by `npx supabase test db`: nine files, 149 tests, each file one transaction rolled back. |
+| `tests/` | pgTAP, run by `npx supabase test db`: twelve files, 192 tests, each file one transaction rolled back. |
 | `templates/` | The mails: `magic-link.html`, `confirmation.html`, `recovery.html`. Each link carries a token hash the callback verifies, so it works on any device, and the code beside it for the page that asked. |
 
 ## The schema
@@ -26,12 +26,14 @@ its rules, its tests and the local stack's config live here, run with the Supaba
   hold. `noo_access_token_hook(event)` writes `perms` and `kind` into every token (and never refuses a sign-in). An
   `admin.*` permission counts only after a second factor (`aal2`, or a passkey sign-in), and the gravest changes need
   one from the last five minutes, refused with `NOAAL` (A12).
-- **The studios**: `studio_items` (kind `character` and `drawing` are Orbit's, `action` the motion studio's),
+- **The studios**: `studio_items` (kind `character` and `drawing` are Orbit's, as are `mountain`, `tree`, `portal`,
+  `human` and `world`, the elements' variants and the world of World.md W73, `environment`, W75, and `pipe` and
+  `road`, W84; `action` the motion studio's),
   `studio_drafts` (one an item, `rev` bumped by the database when `data` changes) and `studio_versions` (`major.minor`,
   frozen: no update or delete for any role, truncate revoked), published through `studio_publish()`, which refuses a
   stale `rev`; a new character by `studio_new_character(name, data)`. Anyone may read the characters, the drawings and
   their versions — never a draft, nor who made or published them (Orbit.md C24); everything else asks its app's
-  permission.
+  permission. Orbit's elements, the world and the environment are read the same way, drafts aside (World.md W73, W75).
 - **Storage**: `assets` (private, the Owner's alone: Orbit's uploaded drawings) and `publish` (public read).
 
 ## The migrations
@@ -51,6 +53,9 @@ its rules, its tests and the local stack's config live here, run with the Supaba
 | `…_access_save_role.sql`, `…_access_set_roles.sql` | A role's permissions, and a person's roles, saved in one transaction (`noo_save_role`, `noo_set_roles`). |
 | `…_access_second_factor.sql`, `…_access_step_up.sql` | The admin's second factor, and the fresh code the gravest changes ask for (A12). |
 | `…_access_own_account.sql` | `noo_delete_own_account()`: never the Owner's or an agent's; with a verified authenticator, only after a fresh code. |
+| `…_orbit_elements.sql` | World.md W73: the kinds `mountain`, `tree`, `portal`, `human` and `world`, Orbit's; made and saved with `orbit.draft.save`, published with `orbit.version.publish`; everyone reads what is published of them; the two sentences reworded. |
+| `…_orbit_environment.sql` | World.md W75: the kind `environment`, Orbit's, one item published version after version; made, saved, published and read as the elements are; the two sentences reworded. |
+| `…_orbit_pipes_roads.sql` | World.md W84: the kinds `pipe` and `road`, Orbit's elements' variants; made, saved, published and read as the other elements are; the two sentences reworded. |
 
 ## Running it locally
 

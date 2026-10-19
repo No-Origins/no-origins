@@ -1,5 +1,5 @@
-import { Studio } from "@/components/studio";
+import { Text } from "@no-origins/ui/components/text";
 
-export default function Page() {
-  return <Studio />;
+export default function Start() {
+  return <main className="sr-only"><Text as="h1" role="title">Orbit</Text><Text role="body">A circular sandy island hovering in the sky, with a faceted rocky underside. One continuous curved black screen surrounds a clay figure and six colorful companions: a violet sphere, a lime cube, a green cone, a blue prism, an orange cylinder and a pink dome. The companions stand three on each side of Clay’s central circle. A silver pedestal podium is always ready. Entering the circle smoothly guides Clay to the centre, turns Clay toward the screens and rests both hands on its tabletop. Four grassy hills of proportional widths and heights shelter the perimeter: largest at back left, then back right, left edge and the smallest at front right. Weathered stones and grasses sit on their slopes. The screen has no bezel. The first time Clay enters the circle, lime and violet circles appear, move into the two O positions, and the remaining letters reveal No Origins. The name then stays on screen.</Text></main>;
 }

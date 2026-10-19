@@ -50,7 +50,8 @@ src/components/*.tsx      74 components: 61 shadcn copies, edited on purpose (ru
                             never moves: a still `frame` + `look`, or `paint(frame, look)` through its ref each frame.
                             The motion studio and Orbit draw it; keep its `data-sphere-*` (e2e/agents.spec.ts)
   colour-picker.tsx       `ColourPicker`: swatches composed from `ToggleGroup`, one a colour, the picked one pressed,
-                            each named in its title; every pick of a colour in every app
+                            each named in a tooltip, at the small size in rows, a family (`group`) a row; every pick
+                            of a colour in every app
   liquid.tsx              `Liquid`: a box filled to `level`, its surface two flowing SVG waves (the back a tone of the
                             front mixed toward the card, never translucent), played by `useLiquidMotion` (Motion.md
                             M25); a 1 × 1 is a round glass. The status page's cells

@@ -14,6 +14,7 @@ import { Slider } from "@no-origins/ui/components/slider";
 import { Slot } from "@no-origins/ui/components/slot";
 import { Tabs, TabsList, TabsTrigger } from "@no-origins/ui/components/tabs";
 import { Text } from "@no-origins/ui/components/text";
+import { cn } from "@no-origins/ui/lib/utils";
 import { actionFamilyOf } from "@/content/agent-actions";
 import { EASES, FAMILIES, type Family, type PresetId, type Token } from "@/content/families";
 import { StudioProvider, useStudio } from "@/components/studio-context";
@@ -101,7 +102,7 @@ function Tuning({ family, compact = false }: { family: Family; compact?: boolean
     <Button size="icon-xs" variant="ghost" aria-label="Next controls" disabled={current === pages.length - 1} onClick={() => setPage(current + 1)}><ArrowRight /></Button>
   </div>}>
     <div className={compact ? "grid grid-cols-2 gap-x-6 gap-y-3" : "flex flex-col gap-6"}>
-      {shown?.tokens.map((token) => <Parameter key={token.name} family={family} token={token} />)}
+      {shown?.tokens.map((token) => <div key={token.name} className={cn(compact && token.swatches && "col-span-2")}><Parameter family={family} token={token} /></div>)}
     </div>
   </Panel>;
 }

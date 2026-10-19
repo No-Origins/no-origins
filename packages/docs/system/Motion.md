@@ -40,7 +40,7 @@ database (M24).
 | The grid: the turn, the theme's sheet, the lit cell | module constants: `TURN_MS` (`grid-pages.tsx`), `FALL_MS`, `LIT_FADE_MS` (`grid.tsx`) | every grid | Grid.md |
 | Ambient: skeleton pulse, spinner | Tailwind's `animate-pulse`, `animate-spin` | `Skeleton`, `Spinner` | Tailwind's (§5) |
 | The portfolio's HEY! | `hey-overlay.tsx`, GSAP | the portfolio | the app's, not the system's |
-| A human figure's walk and run | `--motion-human-*` in globals.css (`lib/human-motion.ts`) | Orbit's `/hiddenstack` | starting values. Open: his |
+| A human figure's walk and run | `--motion-human-*` in globals.css (`lib/human-motion.ts`) | Orbit's human, the figure the visitor travels as (World.md W51) | starting values. Open: his |
 
 ## 3. The rules
 

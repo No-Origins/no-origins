@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Inter, Montserrat } from "next/font/google";
 import { ThemeProvider } from "@no-origins/ui/components/theme-provider";
-import { TooltipProvider } from "@no-origins/ui/components/tooltip";
 import { cn } from "@no-origins/ui/lib/utils";
+import { World } from "@/components/world";
 import "./globals.css";
 
 // Fonts stay the host's job: the app declares --font-sans / --font-heading / --font-mono, the package only reads them.
@@ -12,7 +12,7 @@ const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   title: { default: "No Origins — Orbit", template: "%s — No Origins Orbit" },
-  description: "Orbit, the agents, each by its own name: what each one looks like, on one cell at the centre of the grid.",
+  description: "Orbit, the world of No Origins.",
 };
 
 export const viewport: Viewport = {
@@ -23,9 +23,9 @@ export const viewport: Viewport = {
 };
 
 /**
- * orbit.no-origins.com — Orbit (Orbit.md). The shell is the motion studio's: the theme,
- * the fonts and the tooltips' provider; the page is one Grid that takes the whole viewport, so there is no nav, footer
- * or container here.
+ * orbit.no-origins.com — Orbit, the world (World.md). The world is drawn here, in the root layout, so that it stays
+ * mounted from one place to the next (W2); each place's page is the interface over it (W10). The interface's layer lets
+ * the pointer through to the world (a drag, the wheel), and takes it back only on what it draws: the sidebar, the card.
  */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -34,9 +34,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
       className={cn("h-full antialiased font-sans", fontSans.variable, fontHeading.variable, fontMono.variable)}
     >
-      <body className="min-h-full">
+      <body className="h-dvh overflow-hidden">
         <ThemeProvider>
-          <TooltipProvider>{children}</TooltipProvider>
+          <World />
+          <div className="pointer-events-none relative">{children}</div>
         </ThemeProvider>
       </body>
     </html>

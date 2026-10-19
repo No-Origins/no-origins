@@ -57,13 +57,14 @@ function useJigs(family: Family): JigSpec[] {
   const metrics = useGridMetrics()!;
   const versioned = family.version !== undefined;
   // How many controls a column's card puts on a line: the columns' width, the same both sides.
-  const width = studioLayout(metrics.cols, metrics.rows, picksOf(family)).columns?.[0];
-  const perLine = perLineOf(width ? width.colSpan * (metrics.cell + metrics.gap) - metrics.gap : 0);
+  const column = studioLayout(metrics.cols, metrics.rows, picksOf(family)).columns?.[0];
+  const width = column ? column.colSpan * (metrics.cell + metrics.gap) - metrics.gap : 0;
+  const perLine = perLineOf(width);
   return React.useMemo(() => {
     const sections = jigSections(family).map((section, index): JigSpec => {
-      const natural = tokenNatural(section.tokens, perLine);
+      const natural = tokenNatural(section.tokens, perLine, Infinity, width);
       return {
-        id: `tokens:${section.title}`, title: section.title, natural, min: tokenNatural(section.tokens, perLine, 3), estimate: natural,
+        id: `tokens:${section.title}`, title: section.title, natural, min: tokenNatural(section.tokens, perLine, 3, width), estimate: natural,
         render: (budget) => <TokenJig family={family} section={index} height={budget} />,
       };
     });
@@ -71,7 +72,7 @@ function useJigs(family: Family): JigSpec[] {
     if (family.action) return [{ id: "action", title: family.label, estimate: 220, render: () => <ActionCard /> }, ...sections];
     // A family designed version by version (the agent, his, 2026-09-30) has no scene: its tokens are all.
     return versioned ? sections : [...sections, { id: "scene", title: "Scene", estimate: 200, render: () => <Scene family={family} /> }];
-  }, [family, versioned, perLine]);
+  }, [family, versioned, perLine, width]);
 }
 
 function Scene({ family }: { family: Family }) {

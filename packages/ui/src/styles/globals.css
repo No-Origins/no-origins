@@ -529,16 +529,18 @@
    moved on every pointer move would cost a whole-page layerize a move and lag. The colour is `--violet` as sRGB
    (146 98 243, D43), because an image cannot read a custom property; the 2x image is the
    same drawing at twice the pixels, and a browser without `image-set` for cursors takes the first line. The hotspot is
-   the centre. The grid only sets `data-cursor` where the device hovers with a fine pointer, so a phone keeps its own. */
-[data-slot="grid"][data-cursor],
-[data-slot="grid"][data-cursor] * {
+   the centre. It is worn wherever an element carries `data-cursor`, not on the grid alone: the grid sets it on its
+   field, and a surface off the grid on its own (Orbit's world, World.md W10). Either sets it only where the device
+   hovers with a fine pointer, so a phone keeps its own. */
+[data-cursor],
+[data-cursor] * {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
   cursor: image-set(url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 1x,
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 2x) 12 12, auto;
 }
 
-[data-slot="grid"][data-cursor]:active,
-[data-slot="grid"][data-cursor]:active * {
+[data-cursor]:active,
+[data-cursor]:active * {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%239262f3' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
   cursor: image-set(url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%239262f3' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 1x,
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%239262f3' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 2x) 12 12, auto;
@@ -547,16 +549,16 @@
 /* Over a component that scrolls its own content (Grid.md D52, Motion.md M26): the ring holds a little liquid, the sign
    that it scrolls. An image too, so it never trails the hand: `scroll-area.tsx` draws it into `--scroll-cursor` as the
    liquid floats up, and marks the box `data-scroll-cursor` while it holds one. Pressed, the ring fills as everywhere. */
-[data-slot="grid"][data-cursor]:not(:active) [data-scroll-cursor],
-[data-slot="grid"][data-cursor]:not(:active) [data-scroll-cursor] * {
+[data-cursor]:not(:active) [data-scroll-cursor],
+[data-cursor]:not(:active) [data-scroll-cursor] * {
   cursor: var(--scroll-cursor);
 }
 
 /* A slider's head held (slider.tsx, Motion.md M16): the pressed cursor stays the ring, and the head detaches into
    it. From the
    press to the release, wherever the pointer is, so a drag off the bar keeps it. */
-[data-slot="grid"][data-cursor]:has([data-slot="slider-thumb"][data-held]),
-[data-slot="grid"][data-cursor]:has([data-slot="slider-thumb"][data-held]) * {
+[data-cursor]:has([data-slot="slider-thumb"][data-held]),
+[data-cursor]:has([data-slot="slider-thumb"][data-held]) * {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
   cursor: image-set(url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 1x,
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%239262f3' stroke-width='2'/%3E%3C/svg%3E") 2x) 12 12, auto;
@@ -581,3 +583,65 @@
   --motion-human-sway: 2;
   --motion-human-twist: 5;
 }
+
+/* World.md W109: visor-only blur, peripheral shading and motion, tuned after his review. */
+:root {
+  --space-visor-zone: 48px;
+  --motion-visor-enter: 650ms;
+  --motion-visor-exit: 240ms;
+  --motion-visor-camera: 650ms;
+  --motion-visor-turn: 420ms;
+  --motion-visor-hover: 280ms;
+  --motion-visor-hover-scale: 1.055;
+  --motion-visor-pan-speed: 520;
+  --motion-visor-deadzone: 0.12;
+  --motion-visor-yaw: 38;
+  --motion-visor-ease: cubic-bezier(.22, 1, .36, 1);
+}
+[data-slot="world"] > canvas { transition: filter var(--motion-visor-enter) var(--motion-visor-ease); }
+[data-slot="world"][data-visor-open] > canvas { filter: blur(5px); }
+[data-slot="world"][data-visor-open] > :not(canvas) { visibility: hidden; }
+[data-slot="clay-visor"].clay-visor {
+  position: fixed; inset: 0; inset-inline-start: 0; width: 100%; height: 100dvh; max-width: none;
+  transform: none; translate: none; border: 0; border-radius: 0; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; box-shadow: none; isolation: isolate;
+  animation: none; overflow: hidden; outline: none;
+}
+.visor-shade { position: absolute; inset: 0; pointer-events: none; z-index: -1;
+  background: radial-gradient(ellipse at center, transparent 36%, rgb(18 17 21 / 15%) 68%, rgb(18 17 21 / 72%) 100%);
+}
+.visor-rim { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+.visor-viewport { width: 100%; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; touch-action: pan-x; padding-block: 48px; }
+.visor-viewport::-webkit-scrollbar { display: none; }
+.visor-choices { position: relative; display: flex; align-items: center; gap: var(--space-visor-zone); width: max-content; padding-inline: calc(50vw - 110px); padding-block: 24px; }
+.visor-choice[data-slot="button"] { display: flex; flex-direction: column; gap: 24px; padding: 0; border: 0; height: auto; min-width: 0; width: 220px; background: transparent; white-space: normal; text-transform: none; letter-spacing: normal; transition: none; }
+.visor-preview { display: block; width: 100%; aspect-ratio: 1; border-radius: 50%; border: 3px solid #f6ecd9; background-repeat: no-repeat;
+  transition: transform var(--motion-visor-hover) var(--motion-visor-ease), border-color var(--motion-visor-hover) var(--motion-visor-ease);
+}
+.visor-choice[data-selected="true"] .visor-preview { border-color: var(--secondary); }
+.visor-choice:focus-visible .visor-preview { transform: scale(var(--motion-visor-hover-scale)); border-color: var(--secondary); }
+@media (hover: hover) and (pointer: fine) {
+  .visor-choice:hover .visor-preview { transform: scale(var(--motion-visor-hover-scale)); border-color: var(--secondary); }
+}
+.visor-label[data-slot="text"] { display: flex; align-items: center; justify-content: center; min-height: 36px; padding: 8px 16px; border-radius: 999px; background: #f6ecd9; color: #252428; text-align: center; font-size: 16px; line-height: 1.2; text-transform: none; letter-spacing: normal; }
+.visor-choice:focus-visible { outline: none; box-shadow: none; }
+.visor-actions { position: absolute; bottom: 32px; inset-inline: 24px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.visor-hint[data-slot="text"] { color: #f6ecd9; text-shadow: 0 1px 4px #252428; }
+.visor-note[data-slot="text"], .visor-exit[data-slot="button"] { background: #f6ecd9; color: #252428; border-radius: 999px; padding: 8px 16px; }
+@media (max-width: 640px) {
+  .visor-choices { gap: 48px; padding-inline: calc(50vw - 90px); }
+  .visor-choice[data-slot="button"] { width: 180px; }
+  .visor-label[data-slot="text"] { font-size: 14px; }
+  .visor-actions { bottom: 32px; }
+  .visor-rim { opacity: .85; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="world"] > canvas, .visor-preview { transition: none; }
+  .visor-choice:hover .visor-preview, .visor-choice:focus-visible .visor-preview { transform: none; }
+}
+
+/* OrbitControls writes inline grab/grabbing cursors; retain the house cursor on its canvas.
+   When projected onto the island, its 3D ring is the cursor instead. */
+[data-cursor] [data-slot="world"] canvas { cursor: inherit !important; }
+[data-cursor] [data-slot="world"] canvas[data-surface-cursor] { cursor: none !important; }

@@ -21,7 +21,7 @@ export const AUTH_APP = { id: "auth", name: "Account", host: "auth.no-origins.co
 
 export const NO_ORIGINS_APPS: readonly NoOriginsApp[] = [
   { id: "motion", name: "Motion", line: "The motion studio: every motion of the system, to try.", host: "motion.no-origins.com", port: 3004, permission: "motion.open" },
-  { id: "orbit", name: "Orbit", line: "The agents, and how they look.", host: "orbit.no-origins.com", port: 3005, permission: null },
+  { id: "orbit", name: "Orbit", line: "The world.", host: "orbit.no-origins.com", port: 3005, permission: null },
   { id: "home", name: "Home", line: "The house, and its tour.", host: "home.no-origins.com", port: 3006, permission: "home.open" },
   { id: "portfolio", name: "Portfolio", line: "Hiddenstack's work, played by the agents.", host: "hiddenstack.no-origins.com", port: 3000, permission: null },
   { id: "design", name: "Design", line: "The design system, every component in both themes.", host: "design.no-origins.com", port: 3001, permission: null },

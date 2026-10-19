@@ -1,0 +1,12 @@
+{
+  "headBottomY": 364,
+  "torsoN": 4,
+  "armN": 2.6,
+  "armOverlapPx": 14,
+  "skirtPx": 14,
+  "skirtDrawIn": 0.03,
+  "headExponent": 3.6,
+  "fairPasses": 7,
+  "legN": 2.5,
+  "armEndBlunt": 2.3
+}

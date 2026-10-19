@@ -22,9 +22,9 @@ export const ENGINEERING_ROUTES = ["/", "/learn/jido"];
 export const MOTION = "http://localhost:3004";
 export const MOTION_ROUTES = ["/", "/concepts/split", "/concepts/dock", "/concepts/inspector"];
 
-/** Orbit (Orbit.md), the agents' app, a fifth, on :3005 — the agent's cell on the grid, and Hiddenstack's figure. */
+/** Orbit (World.md), the world, a fifth, on :3005 — the start location, and the builder's pages (W14). */
 export const ORBIT = "http://localhost:3005";
-export const ORBIT_ROUTES = ["/", "/hiddenstack"];
+export const ORBIT_ROUTES = ["/"];
 
 /** Home (Home.md), the model of the house, a sixth, on :3006 — one route, the model and its tour. */
 export const HOME = "http://localhost:3006";
@@ -47,7 +47,10 @@ const APPS = [
   { name: "design", base: DESIGN, routes: DESIGN_ROUTES },
   { name: "engineering", base: ENGINEERING, routes: ENGINEERING_ROUTES },
   { name: "motion", base: MOTION, routes: MOTION_ROUTES },
-  { name: "orbit", base: ORBIT, routes: ORBIT_ROUTES },
+  // The world draws in 3D with no grid. CI has no GPU, so it renders in software, frames of seconds each, and its
+  // loading reveals (World.md W111) would take minutes: it is reviewed finished, under reduced motion, with three times
+  // the time and no grid wait.
+  { name: "orbit", base: ORBIT, routes: ORBIT_ROUTES, world: true },
   { name: "home", base: HOME, routes: HOME_ROUTES },
   { name: "status", base: STATUS, routes: STATUS_ROUTES },
   { name: "auth", base: AUTH, routes: AUTH_ROUTES },
@@ -59,6 +62,10 @@ for (const app of APPS) {
   for (const route of app.routes) {
     const title = app.name ? `${app.name} ${route}` : route;
     test(`review ${title}`, async ({ page }, testInfo) => {
+      if (app.world) {
+        test.slow();
+        await page.emulateMedia({ reducedMotion: "reduce" });
+      }
       const pageErrors: string[] = [];
       const consoleErrors: string[] = [];
       page.on("pageerror", (err) => pageErrors.push(err.message));
@@ -73,13 +80,19 @@ for (const app of APPS) {
       // leap to the boxes they open, open them and go home, and the grid hands over within a few seconds. The screenshot
       // is of the page it hands over to; a page stuck in it fails here. Then a moment for the grid to lay its page out;
       // the screenshot fast-forwards what is still moving.
-      await page.waitForFunction(() => !document.querySelector('[data-slot="grid"][data-intro]'), null, { timeout: 10_000 });
+      if (!app.world) await page.waitForFunction(() => !document.querySelector('[data-slot="grid"][data-intro]'), null, { timeout: 10_000 });
       // Home opens on its tour's long shot (Home.md H9); a model standing at a stop with a picture fades it in over
       // 0.6 s, and the screenshot is of the picture hung. Nothing to wait for on a page with no model.
       await page.waitForFunction(() => {
         const canvas = document.querySelector<HTMLElement>('[data-slot="model-view"] canvas');
         return !canvas || (canvas.dataset.ready === "true" && (!canvas.dataset.picture || canvas.dataset.picture === "100"));
       }, null, { timeout: 5_000 }).catch(() => undefined);
+      // The world (World.md) says when its first frame is drawn and its portals have opened, or that the device can
+      // draw no 3D.
+      await page.waitForFunction(() => {
+        const canvas = document.querySelector<HTMLElement>('[data-slot="world"] canvas');
+        return !canvas || (canvas.dataset.ready === "true" && !canvas.dataset.opening) || canvas.dataset.unavailable === "true";
+      }, null, { timeout: app.world ? 60_000 : 5_000 }).catch(() => undefined);
       await page.waitForTimeout(400);
 
       const file = `e2e/screenshots/${testInfo.project.name}/${app.name ? `${app.name}__` : ""}${slug(route)}.png`;
