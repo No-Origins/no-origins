@@ -32,7 +32,7 @@ export type BuiltClouds = {
  * colour still grows with distance into the horizon. The layer, the edge, the paint and the motion are the clouds' jig's (`clouds.ts`, W38), read as uniforms. Every camera stays under the ceiling and everything built is under it (W29), so the clouds are
  * drawn as the sky is, behind everything, at the world's resolution.
  */
-export function buildClouds(environment: EnvironmentConfig, clouds: CloudsConfig, ceiling: number, airAt?: (p: typeof positionWorld) => THREE.Node<"vec4">): BuiltClouds {
+export function buildClouds(environment: EnvironmentConfig, clouds: CloudsConfig, ceiling: number, airAt?: (p: typeof positionWorld) => THREE.Node<"vec4">, panoramic = false): BuiltClouds {
   const boundary = boundaryPaint(clouds, environment.sky);
   const levels = cloudNoise();
   const noise = new THREE.DataTexture(levels[0].data, NOISE_SIZE, NOISE_SIZE, THREE.RGBAFormat, THREE.UnsignedByteType);
@@ -207,11 +207,18 @@ export function buildClouds(environment: EnvironmentConfig, clouds: CloudsConfig
   const rim = smoothstep(featherStart, WORLD_SIZE.diameter / 2, positionWorld.xz.length());
   const cap = mix(ceilingPaint, boundary.at(positionWorld), rim.max(smoothstep(ceiling - 100, ceiling - 20, cameraPosition.y)));
   const air = airAt?.(positionWorld);
-  material.colorNode = air ? mix(cap, air.rgb, air.a) : cap;
+  // W108: the clearing retains this cloud shader across the open sky, without the former cylinder rim.
+  const painted = panoramic ? ceilingPaint : cap;
+  material.colorNode = air ? mix(painted, air.rgb, air.a) : painted;
+  material.depthWrite = !panoramic;
+  if (panoramic) {
+    material.colorNode = result.xyz;
+    material.opacityNode = result.w;
+    material.transparent = true;
+  }
   material.addEventListener("dispose", () => noise.dispose());
-  const mesh = new THREE.Mesh(new THREE.CircleGeometry(WORLD_SIZE.diameter / 2, 192), material);
-  mesh.geometry.rotateX(-Math.PI / 2);
-  mesh.position.y = ceiling;
+  const mesh = new THREE.Mesh(panoramic ? new THREE.SphereGeometry(10000, 48, 32) : new THREE.CircleGeometry(WORLD_SIZE.diameter / 2, 192), material);
+  if (!panoramic) { mesh.geometry.rotateX(-Math.PI / 2); mesh.position.y = ceiling; }
   mesh.name = "cloud-ceiling";
   mesh.frustumCulled = false;
   mesh.renderOrder = -2;

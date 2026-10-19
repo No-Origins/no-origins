@@ -7,7 +7,9 @@ every app stands on, one app at a time. Orbit (`apps/orbit`, orbit.no-origins.co
 **Draft, not signed off.** What is marked *his* he said in his own words; what is marked *mine* Claude proposes, for
 him to keep, change or drop.
 
-Current as of 2026-10-16.
+Current as of 2026-10-18.
+
+**Current direction: W108 supersedes the former Orbit implementation and builder. W1–W107 remain historical decisions.**
 
 Rule numbers are this document's own, W1 onward. Companion documents: **Grid.md** (the base this replaces),
 **Cinema.md** (the other 3D work, whose libraries this may share), **Brand.md**.
@@ -3244,3 +3246,181 @@ through takeoff, mode changes and landing when Still is selected. Version 8 is f
   desktop and 390 px portrait, and switching forms. The same review harness renders all five views; the Suit’s five
   shaded views remain pixel-identical. Typecheck, lint and production build pass; nothing is saved or published to
   the database by this work.
+
+
+## W108. Start again from the sandy clearing
+
+2026-10-18. **His:** “Let's remove all that we created in the orbit in no-origins and let's create this”, with a reference of a warm sandy clearing, three bowed cream screens and a gathering of small characters.
+
+- The previous world, frozen environment renderer versions, editor pages, world jigs and world published copy are removed from the app. The existing Clay character, its measured geometry, connected skin, rig, flight support, saved character settings and measurement scripts are retained and reused. His follow-up explicitly keeps the existing sky and clouds too: their current builders, noise, supporting settings and copied environment settings are retained. No database records are deleted or rewritten.
+- The replacement is a real 3D scene: three curved blank cream screens with dark thin frames; a featureless cream clay human; violet sphere, lime cube, green scalloped cone, blue faceted prism, orange honeycomb cylinder and pink ridged dome; six fine ground rings and an empty ring in the centre. Warm directional light, sand grain, rocks and sparse grass follow his reference.
+- *Implementation:* one persistent canvas, three.js WebGPU with WebGL fallback, deterministic geometry, on-demand rendering and complete disposal. Drag/touch looks round, wheel/pinch zooms, arrow keys rotate and Home/Escape resets. Portrait uses a more distant view. The existing sky and cloud motion remains, paused for reduced motion or a hidden tab.
+- Screens remain blank and inert. Their contents, destinations and interactions, and the companions' assignments, have not been supplied.
+- `/` is the sole route; former builder addresses redirect there. The scene does not read the previous saved world or environment.
+- This reference replaces the old world's ground, block hierarchy, human travel and editor requirements; his follow-ups retain the existing Clay character, sky and clouds. The shared design system still owns any interface added later.
+
+- **His follow-up:** all three screens are the same size and curved, increased to portrait 9:16 (his “16:9 vertical screen”). Each surface is 5.4 m along its cylindrical arc and 9.6 m tall, with one shared curvature and frame construction. The initial camera fits their increased height.
+
+- **Bezel correction:** each screen has one solid frame with a rounded opening and a small edge bevel, bent onto the same cylinder as the display. This replaces the four separate tubular rails and their exposed corner joins.
+
+- **His follow-up:** improve stones and grass and add a small pond. `clearing-scenery.ts` replaces the simple scatter with rounded irregular weathered stones, mineral relief and color variation, denser clumps of curved tapered grass, and an irregular roughly 4 × 2.5 m pond on the left. Its water lies below a real opening in the ground, edged by a sloping bank, pebbles and grass. Opaque teal water has pale shallows and subtle still ripple normals. The gathering remains clear.
+
+- **His follow-up:** the six agents and their circles are evenly arranged around the centre circle: a regular hexagon with a shared 3.2 m radius and 60° spacing. Each agent and its ring use the same derived position.
+
+- **His rock finish preference:** return to the polygon version. Stones retain their irregular shapes, mineral variation and grain, with separate triangle normals for visible facets rather than welded smooth shading.
+
+- **His pink-agent reference:** replace its dot eyes with round dark sunglasses: opaque circular lenses, fine dark rims, a small arched bridge and slim arms following the dome. Its opening orientation shows both lenses.
+
+- **His size correction:** the pink agent’s shades are smaller: lens radius 8.5 cm, closer spacing and finer rims and bridge.
+
+- **His shades refinement:** remove the temples; widen lens spacing to 30 cm centre-to-centre and lengthen the bridge to span the 13 cm gap, retaining the small lenses.
+
+- **His follow-up:** bring back movement controls for Clay. WASD/arrows walk relative to the camera; Shift runs; Space jumps; double Space toggles flight; in flight Space rises and Shift descends. The existing Clay gait and interruptible hover/boost samplers and effects are reused, with camera follow and collision boundaries for screens, agents and pond. The design system supplies compact touch controls and Reset. Held inputs clear on blur/hidden tab; reduced motion suppresses jumps and holds airborne poses. Camera Home/Escape reset remains.
+
+- **Stone collisions:** Clay’s movement checks the convex ground footprint of every rendered stone (including pond pebbles), derived from its actual deformed and rotated vertices, with 45 cm character clearance. The existing per-axis movement response stops at a stone or slides along it.
+
+- **Clay companions, version 1 (his request):** make the agents smoother, more clay-bodied and give them character. `clearing-agents.ts` keeps the six colors and core silhouettes but rounds their edges, adds broad hand-shaped irregularity and fine matte clay grain, replacing the repeated cone scales, cylinder honeycomb and pink ridges. *First interpretation, for his tuning:* curious violet (asymmetric gaze, raised brow), attentive lime (upright rounded cube, small open mouth), relaxed green (soft tapered body, resting eyelids and smile), shy blue (rounded seven-sided column, close-set eyes and small smile), eager orange (soft cylinder, open eyes and wider smile), easygoing pink (gently folded mound, his small shades and a smirk). Subtle still tilts distinguish their attitudes. Rings retain equal 60° spacing at a 3.2 m radius.
+
+- **His correction to clay companions:** retain the textures and patterns too. Green regains overlapping rounded scallops, orange a softly embossed honeycomb and pink fine wavy ridges. Relief is projected onto the softened bodies, keeping clay grain and the new expressions; green/orange patterns leave their faces clear.
+
+- **His reactive-face request:** eyes, eyebrows and mouths respond to interaction; violet has two eyebrows. Hover/tap prompts a blink and attention, eyes track the pointer or nearby Clay, paired brows lift and mouth morphs strengthen the smile as Clay approaches. Pink retains its shades, which lift with its smirk. Reaction values read `--motion-agent-react-*` fallbacks; reduced motion snaps to held expressions and omits the blink. The render loop runs while expressions settle, even with sky motion paused.
+
+- **His blue-agent correction:** replace its eyes with the existing identity’s lime bar shades. The single rounded bar follows the clay body’s front curvature, uses the shared Lime paint, and reacts with a small lift, tilt and gaze shift; its brows and mouth remain reactive.
+
+- **His blue refinement:** remove eyebrows, keep the original seven-sided prism silhouette, and center the lime bar 30% down from the top (70% of its 1.35 m height above the base).
+
+- **His attention rule:** all six agents turn their bodies to face Clay whenever he is near the gathering, including behind them, and keep tracking as he moves. Entry is within 8 m of the centre circle, with a 1 m exit margin; beyond it they return to their resting headings. Turns follow the shortest arc on a motion-token response; reduced motion turns immediately. Clay takes priority over pointer gaze while nearby.
+
+- **His Clay color reference:** replace the white look with warm ivory clay (`#e1d2c5`) and restrained warm sheen. Shared head/body pigment includes broad hand-worked variation plus the existing fine anchored grain, so the finish remains consistent through movement. The rig, shape and abilities are retained.
+
+- **His collision-height correction:** object boundaries occupy finite height rather than infinite columns. Ground movement still blocks against the sides; flying feet above an agent, screen frame or stone clear it. Agent and stone tops derive from their rendered bounds; screen height includes its frame. Descending or falling onto these footprints lands on top, and stepping off falls back to the ground. The pond restriction applies at ground level so flight can cross it.
+
+- **His restored head tracking:** Clay’s head follows mouse/pen position while standing, moving and flying, using the existing `gazeAt`/`withGaze` rig limits and camera-facing target plane. The turn eases on `--motion-human-gaze-response`; leaving the canvas returns to the current gait/flight pose. Reduced motion snaps without easing.
+
+- **His flight request:** Clay “just flies up without any motion”; make the fly action natural and smooth, and improve the glide, flying and rotation. *Mine, for his tuning* (`clay-travel.ts`, `human-flight.ts`; every number a `--motion-human-clay-*` fallback, not in globals.css):
+  - **Takeoff** pushes up (`launch`, 3.2 m/s, on top of a jump under way), flares the jets and stretches the clay; a height spring (`float-hz` 0.9, `float-damping` 0.7) catches it a little over `takeoff-lift` (1.1 m) and floats it down onto it. The Space that took off does not climb until it is let go.
+  - **Height:** Space and Shift ease the climb in and out; let go, it settles about `float-lead` (0.12 s) on along its way, overshooting by centimetres. Sinking slows under `flare` (1.6 m), the body stands up into the hover before its feet touch, and every touchdown, a jump's too, squashes the clay by the impact and springs back.
+  - **Momentum:** it comes up to speed over `fly-accel` (0.45 s) and carries its speed over `fly-coast` (1.5 s); a screen, agent or stone stops it that way and it slides along.
+  - **Glide** is now reachable: let go faster than `glide-over` (1.4 m/s) and it glides until it slows under half that; Shift while moving is a diving glide. Its pose opens the chest, spreads the arms swept a little back, trails the legs together and leans `glide-lean` (24°, was 16°).
+  - **Rotation:** in the air it turns to face the way it is flying on a spring (`turn-hz` 0.9, `turn-damping` 0.85), so it curves through a turn instead of snapping round, and banks into it by its turning rate × speed, up to 30°. On the ground it still turns over the figure’s Turn.
+  - **Secondary motion:** it pitches into acceleration and flares back as it brakes; arms and legs follow through on looser springs; the head counters the body’s pitch and bank; each limb’s float runs on its own phase behind the body’s bob. Climbing fires the jets by its rate. Changing ability in the air takes `change` (520 ms), not the full takeoff.
+  - Reduced motion: no squash, bank, pitch, overshoot or momentum; it takes off, turns and stops at once. The canvas’s `data-clay-attitude` gives heading, pitch, bank and squash. Script: `e2e/.mcp/clay-fly-motion.mjs` (frames and track), `e2e/.mcp/clay-fly-button.mjs`.
+
+- **His head-tracking toggle:** Follow cursor in Clay’s controls turns tracking on/off, enabled by default. Off restores the normal gait/flight head pose; Reset preserves the toggle. It is session-only, and the setting is retained even if toggled before the renderer finishes loading.
+
+- **His approved hillock concept:** three low grassy mounds shelter the perimeter, with meadow patches, tiny wildflowers and scattered stones, retaining the open sandy gathering. Deterministic radial geometry blends into sand; grass and stones follow the same smooth terrain height that supports Clay on slopes.
+
+- **His hillock refinement:** move the right-hand mound into the marked front-left foreground. Replace the pale oval borders and patchy surface with irregular low slopes sharing the floor’s sand material, grain and world UVs; meadow coverage thins into sand over a broad fringe. Denser fresh green, shorter curved blades follow his grassy hill reference, with small flowers and stones retained.
+
+- **His painted-meadow correction:** replace the dense hillock blade geometry with a generated hand-painted albedo texture (`painted-meadow-v1.png`): sage/olive leaf dabs, short grass strokes, sandy gaps and tiny flower flecks. A per-vertex coverage mask mixes the meadow with the floor’s sand texture over the irregular fringe; the sparse original planting beside stones and pond remains. Terrain, hill positions and Clay support stay shared.
+
+- **His seating rearrangement (2026-10-18):** the supplied plan replaces the hexagon with six places in a broad shallow arc, three on either side of Clay’s centre circle. A podium sits ahead toward the screens and activates while Clay stands within the circle. Implementation: it rises from a low plinth, lightens, and the circle darkens; leaving or flying above the circle deactivates it. Screens remain inert.
+
+- **His podium/backdrop reference (2026-10-18):** recreate the supplied silver pedestal with thin overhanging tabletop and stepped foot, in front of three adjoining iridescent panels. This supersedes the blank 9:16 screens; the reference’s spectral finish is approved here on the screens. Entering Clay’s circle snaps Clay to its centre, turns Clay toward the screens, and rests both paddle-arm ends on the podium. Movement, flight or reset releases the stance; leaving the circle re-arms docking. The table height and placement derive from Clay’s existing arm reach.
+
+- **His screen and podium refinement (2026-10-18):** remove screen bezels and the spectral finish, leave blank cream surfaces, halve the outer-panel angle to 0.08 radians and move the backdrop two metres farther back. Keep the pedestal always fully raised, with no active/inactive state or circle colour change. Replace the instantaneous snap with an eased transition of position, shortest-path heading and pose into the centred hands-on-table stance (850 ms fallback via `--motion-human-podium-settle`); camera follow uses that same displacement. Fresh input interrupts it; reduced motion uses the finished stance immediately.
+
+- **His screen plan correction (2026-10-18):** follow the supplied top-view line drawing: a straight centre screen, with two straight side screens sweeping forward from its ends. The drawing’s proportions give a 5.4 m centre and 4.5 m wings at about 33°. They share 6.5 m height, meet at their endpoints, remain blank and bezel-free, and retain the centre’s farther-back position. This replaces the shallow cylindrical triptych; collisions follow the same flat panels.
+
+- **His screen breathing-room correction (2026-10-18):** move the joined screens and the rear hill five metres farther away from the podium, retaining their relative spacing and plan. Screens become blank black 18 cm solid slabs without bezels. The rear travel boundary extends with the added open space; terrain support follows the relocated hill and screen collisions include their thickness.
+
+- **His first-load placement (2026-10-18):** start Clay at the exact centre of its circle, facing the screens. The existing eased docking settles both hands onto the podium as the scene opens. Reset restores this same initial position and heading.
+
+- **His hip and knee correction:** Clay’s legs should move as a skeleton rather than folding as whole columns at the crotch. The hip sockets move inside the pelvis above the visible split; thigh and shin skin follow their separate hip and knee bones with compact blended knee hinges and local surface fairing. The measured resting outline stays continuous and featureless. This is the first articulation pass for his tuning.
+
+- **His shared screen attention (2026-10-18):** when Clay is docked in the podium circle, all six agents turn toward the screens, including their gaze, with the existing smooth turn response. Presentation attention overrides Clay and pointer tracking until docking is released; normal tracking then resumes.
+
+- **His bag request (2026-10-18):** Clay carries a bag for things accumulated while walking through the world and travelling between zones; currently only the agent zone exists. Clicking it opens an overlay of its contents. His follow-up image sets the look: a red faceted backpack with pale folded-panel seams, small silver fasteners and red straps. The carried geometry follows the chest rig. An accessible Bag button opens the same shared-system dialog, whose empty state stays honest until actual items are defined. Inventory is versioned browser-local data shared by future zones, with item identity, copy, source zone and quantity; it survives reset and reload. This does not introduce collectibles or additional zones. Opening the bag clears held movement and blocks travel commands until closing.
+
+- **His approved bag concept and correction:** he approved the generated rear/front Clay backpack image, then asked for a closer replication after comparing it with the first in-world model. The accepted concept is kept as `clay-backpack-v1.png`: a broad compact red shell with actual folded depth, horizontal outer panels and triangular side facets, tactile red finish, visible pale seams and silver rivets, a substantial carry loop and woven straps that wrap the shoulders with open dark adjusters. Construction samples the retained character’s shoulder surface for the straps; the character silhouette is preserved.
+
+- **His green/blue marked bag correction:** remove the top carry loop (green). Fix the shoulder strap disappearing into Clay (blue), including while posed: the strap’s full width follows the retained skin’s deforming triangles, with a small surface clearance. The shell and the bag overlay keep their existing behavior.
+
+- **His walking correction:** the shoulder strap must not stretch into a spike during gait. A shoulder-fitting ray that misses the torso may hit a leg; reject distant/lower-body hits rather than binding a strap to them. Check the corrected attachment across full stride poses while retaining the carry-loop removal.
+
+- **His VR v1 body request:** he approved the generated sleek smoked-black visor without temples, then explicitly asked to update Clay’s body to that image, generating multiple sides before building. `clay-vr-v1.png` and the generated `clay-vr-turnaround-v1.png` retain that concept and four-view reference. The clearing’s Clay proportions use the larger round head, broader torso, thicker arms and wider separated legs from the sheet, at the existing eight-foot height. Existing measured lofts, connected skin, hip/knee rig, gaze, gait, flight and podium behavior remain. A shallow opaque curved visor conforms to the actual head surface, moves with the head bone, and has a thin graphite rim with no temples, head straps, earpieces or cables. The red bag and its overlay remain, with no carry loop.
+
+- **His VR body review:** the first implementation's dimension changes did not reproduce the image's character. VR Clay gains a dedicated rounded head/crown and fuller cheeks, a rounder wider torso, softer longer paddle-end caps and relaxed outward arms. This changes the actual loft profiles and rest stance while retaining the existing connected deforming rig, gaze, podium, gait and flight. Warmer ivory and anchored broader clay marks improve the tactile finish. The original measured head/turnaround remains available for the historical profile; the visor follows the new head surface.
+
+- **His height correction:** the broadened body and backpack looked squat, so he requested more height. Clearing Clay becomes 295 cm tall (about 21% taller) with the same head dimensions, widths and depths; longer legs/arms and torso provide the rise. The bag grows vertically, not sideways. Independent stature is propagated through the lofts, rig rest positions, shoulder attachments, visor and podium reach; the former eight-foot default remains for characters without this override.
+
+- **His bag width adjustment:** make the bag 10% narrower, retaining its height/depth and Clay’s proportions. Shoulder fit remains matched to Clay while the bag attachment points follow the narrower shell.
+
+- **His compact backpack refinement (2026-10-19):** match the bag in `clay-backpack-v2.png`, the user-selected world concept, without changing Clay or the surrounding world. The actual shell is a compact octagonal volume with one broad central face, large pitched corner/perimeter facets, softly chamfered edges, quiet coated-red grain and one restrained dark-red closure near the back. This supersedes the earlier horizontal panel grid, pale piping and silver rivets. The existing 10% narrower shell bounds, fitted woven shoulder straps, nearby-upper-skin barycentric attachment guards, chest carrying, carry-loop removal and click-to-open inventory behavior remain.
+
+- **His shoulder-strap smoothing (2026-10-19):** round the pointed bends on both shoulders where the strap's skin-bound and fixed sections meet. The upper ribbons now fair those transitions while preserving their full width and thickness; contact-plane constraints retain the existing shoulder clearance instead of smoothing into Clay. Nearby-upper-skin attachment guards, fixed bag mounts, shell and inventory remain. Review both sides in podium, opposing gait and flight poses.
+
+## W109. The Gateway inside Clay’s visor
+
+2026-10-19. **His:** zones have separate environments reached through a visual transition, rather than a shared landscape streamed on approach. Control T temporarily opens the Gateway from inside Clay’s VR visor. Six circles offer sneak peeks into The Agents, Tech, Art, Future Societies, Experiments and Games. His chosen iteration centres the whole row, keeps the previews and names sharp, lightly blurs the background and shades the periphery with a vignette. This explicitly permits blur and the vignette in the visor view. Other app surfaces retain the existing rules.
+
+- First implementation: a shared-system modal chooser and touch-accessible Visor button, with first-person camera placement at Clay’s eye height, paused travel input, a saved third-person view restored on exit, and Escape exit. A subtle dark perimeter suggests the visor; no telemetry or status decorations.
+- **His refinement:** all circles retain equal dimensions with broad spacing and a horizontal strip that may extend beyond the viewport. Pointer position looks left/right across the strip; held A/D turns too. The scene camera shares the strip’s yaw. Arrow/Home/End selection brings its card into view; touch swipes the strip. Hover/focus grows only the preview slightly, with no layout change. Solid light pill labels remain readable over the scene.
+- The hard rounded-rectangle border is replaced with a thin curved inner visor silhouette and restrained peripheral shading. Entry/exit fades, camera interpolation, turning response and hover all read the `visor` motion tokens. Timings follow elapsed time; reduced motion skips camera travel, fades, automatic pointer turning and hover scaling. Held turn keys clear on blur/hidden tab. Opening starts with the strip centred; Escape closes the chooser and restores the saved view.
+- `visor-world-previews-v1.png` preserves his approved generated concept; CSS crops its world windows for the first visual prototype. These are static concept previews, not live environments. The Agents returns to the existing clearing. The other five are explicitly marked as concept previews and cannot claim to enter environments that do not yet exist.
+- Open: build each destination and its circular opening transition; replace concept crops with destination-specific previews as their art is decided. No zone content or agent assignments are inferred from the concept illustration.
+
+## W110. The Agents’ hovering circular island
+
+2026-10-19. **His:** approve the generated floating-island concept, supply a circular top-view blueprint, then approve its rendered arrangement and ask to build it in Orbit. `agents-island-v1.png` preserves the approved image.
+
+- Replace the endless sandy floor with one circular island, 44 m across, with a sealed faceted earthen underside tapering about 8.5 m below the surface. Keep the existing sky, clouds, painted meadow and clay finish.
+- Four peripheral hills follow the blueprint, their heights proportional to their footprint diameters: largest back-left, second back-right, medium on the left edge, smallest front-right. Terrain height, planting, stones and Clay’s slope support share their placements. The new plan removes the pond.
+- The blank joined screen assembly sits across the rear middle, with an 8 m centre and 6.5 m wings retaining the 33° sweep and 6.5 m height. Six companions and Clay occupy the blueprint’s foreground U-shaped arc; the silver podium remains directly ahead of Clay with the existing docking behavior.
+- Preserve Clay’s current body, visor, backpack, inventory, gait and flight. Rendered screen/agent/stone positions remain shared with collision and support. Travel is bounded by the circular shore with character clearance. Initial/reset camera frames the whole island, including its underside, adapting to portrait.
+
+- **His island fidelity correction (2026-10-19):** the first shell looked like a shallow polygon drum rather than the approved rounded floating rock mass. Replace it with a deeper 12.5 m bowl-shaped underside, coherent mineral grain and embedded faceted boulders breaking its silhouette. Continue the actual painted meadow across a flush shore fringe and down the sides in irregular moss curtains. Increase the back-left hill to a 6.5 m footprint radius and 6.8 m height so it reads above the screen. “Glass texture” is interpreted from the reference as grass/moss on the edges, without introducing transparent glass. Terrain support follows the enlarged hill.
+
+- **His natural-terrain correction (2026-10-19):** compare directly with the approved image. Replace the flat cap and uniform grassy rim with one continuous terrain mesh carrying subtle sandy rises and the four hills. Sand gains multiscale mottling, mineral flecks and tactile grain. Deterministic world-space vegetation patches leave bare gaps, cross hill slopes and depressions, and recur on the rocky underside; no complete planted border. Remove the separate rows of underside boulders in favor of a single eroded rock mass with coherent broad lobes. Stones belong only at the low feet of hills, with height and shore checks for every stone. Remove both horizontal azimuth limits from the orbit controls so dragging permits repeated full 360° revolutions; vertical safety limits remain.
+
+- **His rounded-edge and depth refinement (2026-10-19):** soften the precisely cut circular shoreline with deterministic broad and fine radial variation, keeping the island approximately circular. The last 1.4 m of top terrain rolls over an 80 cm rounded shoulder into the same side geometry; upper-side normals are smoothed while deeper rock keeps its facets. Top geometry, underside, stone exclusion and Clay’s boundary share the irregular shoreline. Increase the underside’s nominal depth by exactly 50%, from 12.5 m to 18.75 m, scaling its vertical relief too. Lower the reset framing target slightly to keep the deeper silhouette in view.
+
+- **His approval to correct the overall form (2026-10-19):** after reviewing the pointed bowl silhouette, proceed with a structural rebuild. Replace the single radial apex with a broad uneven underside carrying several offset deep rock masses, local shelves and recesses. Retain the increased depth envelope, irregular shared shoreline, open gathering and existing blueprint positions. Blend the hills into wider low aprons, soften small triangular shading artifacts while retaining broad mineral form, and favor moss in sheltered recesses. The opening camera is slightly oblique and balances the gathering with the deeper rock silhouette; full horizontal rotation remains available.
+
+- **His golden sun (2026-10-19):** add a visible golden sun above the island, with warm directional illumination and shadows aligned to its position. Retain the existing sky and clouds; the opaque sun has no glow overlay.
+
+- **His free camera and pan (2026-10-19):** remove the former above-ground vertical orbit limits so the camera can look toward the sun and below the hovering island. Retain tiny pole margins to avoid an inverted up axis. Right-drag or Shift-left-drag pans camera and target together in the screen plane, preserving the viewing angle; two-finger touch drag pans and pinch zooms. Ordinary left-drag rotates. Home/Escape restores the opening frame. This supersedes the previous vertical safety limits.
+
+- **His sun visibility and sunset reference (2026-10-19):** replace the isolated solar sphere with a direction-space pale luminous disc, narrow golden aureole and broad amber atmospheric scattering in the sky shader. His photo explicitly supplies this sun treatment, superseding the earlier no-glow sun finish. Place the sun at 2° elevation, −7° turn; sky, clouds and directional lighting share it. Lower the opening camera elevation to frame both sun and island on desktop and portrait. Clouds and world geometry still occlude the sun naturally; no screen overlay.
+
+- **His screen enlargement (2026-10-19):** increase all three screens’ width and height by 30% with one shared 1.3 scale, locking each aspect ratio. The centre is 10.4 m wide, wings 8.45 m wide, and all panels 8.45 m tall. Keep the joined 33° wings, grounded bases and shared rendering/collision dimensions.
+
+- **His equal portrait screens (2026-10-19):** all three panels are exactly 9 m wide and 16 m tall, superseding the prior 30% enlargement. Reduce the forward wing sweep from about 33° to 20° while keeping adjoining edges, grounded bases and shared collision/support dimensions.
+
+- **His continuous curved screen (2026-10-19):** replace the three joined panels with one seamless blank black screen, retaining 27 m total surface width, 16 m height and 18 cm thickness. A gentle 60° cylindrical arc sweeps forward around the gathering, centred at the retained rear position. Collision and top support follow the same arc, including its ends. This supersedes the equal three-panel arrangement.
+
+- **His sun turn (2026-10-19):** move the sun 45° right, from −7° to 38° azimuth, retaining its 2° elevation and golden finish. Cloud illumination and directional shadows follow the same turn.
+
+- **His screen/terrain clearance correction (2026-10-19):** the curved screen sits on a level sandy bed at its base height, blending smoothly into natural terrain over a broad apron. Stones and grass stay clear of the full arc and its ends. `clearing-screen.ts` shares dimensions and nearest-arc distance between slab rendering, travel/support and terrain/scatter exclusion.
+
+- **His sun turn refinement (2026-10-19):** move 15° left from 38° to 23° azimuth, keeping the 2° elevation and golden finish. This leaves the sun 30° right of its original −7° position; sky, clouds and shadows remain aligned.
+
+- **His opposite orange sun (2026-10-19):** place the sun 180° from its original −7° heading, at 173° azimuth, retaining 2° elevation. The solar disc is orange, with an orange-gold aureole; cloud illumination and directional light use the warmer orange sunlight. This replaces the subsequent 38°/23° trials and the pale solar core.
+
+- **His orange sun adjustment (2026-10-19):** move 30° left from 173° to 143° azimuth, preserving 2° elevation, orange disc and aligned orange illumination.
+
+- **His further orange sun turn (2026-10-19):** move another 30° left, from 143° to 113° azimuth. Retain 2° elevation, orange finish and shared lighting direction.
+
+- **His docking camera (2026-10-19):** entering Clay’s circle also eases the camera into a centered view from behind Clay toward the screen, matching his reference. It shares the podium settle timing, applies immediately with reduced motion, and backs away in portrait to retain screen width. Walking away, visor view or manually adjusting the camera releases the transition; docking again replays it. Initial docking and Reset use the same view.
+
+- **His isometric camera angle (2026-10-19):** the overview and Home/Escape reset use equal camera offsets on all three axes: 45° azimuth and 35.264° elevation, retaining the perspective lens and responsive distance. Docking still transitions to his centered screen-facing reference.
+
+- **His isometric exit correction (2026-10-19):** releasing Clay’s circle stance automatically eases the camera back to the isometric overview, using the same podium settle timing and following Clay’s movement. Re-entering restores the screen-facing view; reduced motion finishes immediately and manual camera interaction cancels either transition.
+
+- **His lower overview (2026-10-19):** lower the isometric overview’s elevation by 30°, from 35.264° to 5.264°, retaining its 45° azimuth and distance. Both circle exit and camera reset use this shared angle; the screen-facing docking view stays as set.
+
+- **His temporary camera readout (2026-10-19):** show live azimuth/elevation in degrees, camera position, look-at target and field of view in a shared-system card. Copy camera copies the exact current settings as labeled JSON for him to send back after orbiting, panning or zooming.
+
+- **His chosen overview camera (2026-10-19):** copied position `[40.776, 12.491, 52.479]`, target `[4.12, 0.78, 4.879]`, FOV 44° (about 37.599° azimuth and 11.03° elevation) replaces the lowered isometric trial. Reset uses this exact framing on desktop; circle exit uses the same framing translated with Clay’s travel. Portrait backs away along the same view direction to fit. The temporary readout remains available for tuning.
+
+- **His revised overview camera (2026-10-19):** replace the prior copied view with position `[37.819, 19.28, 58.957]`, target `[6.105, 2.905, 9.232]`, FOV 44° (32.529° azimuth, 15.517° elevation). Reset and circle exit use this reference, retaining travel follow, portrait fitting and the screen-facing docking view.
+
+- **His start-location reference (2026-10-19):** Clay starts outside the centre circle on the foreground sand, screen-left of the podium in his chosen overview (`x = 0, z = 17`), facing the gathering. Reset restores this spot and heading; initial load keeps the overview rather than docking. Entering the centre circle still settles Clay and moves the camera toward the screen.
+
+- **His surface cursor and walking (2026-10-19):** restore the house violet circle despite OrbitControls’ inline grab cursor. With Follow cursor enabled, raycast the actual island top and project a violet ground ring at the hit, retaining its last ground point over controls. Clay’s head looks at that point while moving, and W/forward walks toward it. Double-clicking the island or the Walk button starts walking to the selected point, stops on arrival, at a blocker or when docking, and cancels on manual movement, flight, Reset, Follow cursor off, bag/visor, blur or hiding the tab. Follow cursor off retains camera-relative travel and the ordinary house cursor. No invented pathfinding through obstacles.
+
+- **His signal cursor and double-W correction (2026-10-19):** replace the flat surface cursor with a raised hollow violet cylinder and two small expanding signal rings, version 1. Signal period and spread read motion-token fallbacks; reduced motion shows the still cylinder. Double-tapping W within the walk-tap interval starts auto-walk to the selected surface point; key auto-repeat never cancels it, and releasing W keeps it running. Existing stop/cancel rules remain.
+
+- **His automatic run and obstacle crossing (2026-10-19):** double-W, double-clicking Walk or the island starts running to the selected point. Sample the direct route using the existing finite-height support/collision model; when blocked ahead, use Clay’s retained flight to climb above the route’s highest obstacle, cross and descend onto the destination’s support. Flight retains the target and can rise over screens beyond the manual 10 m limit. Manual commands, Follow cursor off, reset, bag/visor, blur and hidden tab cancel automatic travel and release automated flight.
+
+- **Screen intro, version 1 (2026-10-19):** his first docking activates the screen with lime and violet circles, followed by the other letters of No Origins. The first interpretation grows two circles, pauses, separates them into the two O positions of NO ORIGINS and unmasks the remaining Montserrat letters. The black screen retains the finished composition; it plays once per mounted world, including across Reset. Reduced motion applies the finished title at first docking. Timing and shift read undecided `--motion-screen-intro-*` fallbacks (Motion.md M3); no continuous animation, flash or glow. This screen title does not change the canonical blob wordmark in Brand.md.

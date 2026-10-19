@@ -21,20 +21,8 @@ const nextConfig: NextConfig = {
         destination: `https://${CANONICAL_HOST}/:path*`,
         permanent: true,
       })),
-      // The portal was the hole until its version 5 (World.md W15), and went with W93 (his: "Let's remove Portal because
-      // Pipes can be portals now"); the trees', the pipes' and the roads' pages went with it, their looks set as they are
-      // placed on the Sectors page (his: "As they are placed, like a block"). Their old addresses, for a tab left open.
-      { source: "/build/hole", destination: "/build/sectors", permanent: false },
-      { source: "/build/portal", destination: "/build/sectors", permanent: false },
-      { source: "/build/trees", destination: "/build/sectors", permanent: false },
-      { source: "/build/pipes", destination: "/build/sectors", permanent: false },
-      { source: "/build/roads", destination: "/build/sectors", permanent: false },
-      // The sector was the plane in its version 1 (World.md W24), and an element until Spaces took it (W81).
-      { source: "/build/plane", destination: "/build/sectors", permanent: false },
-      { source: "/build/sector", destination: "/build/sectors", permanent: false },
-      // Inspect went with W73: the mountain has a page of its own; the Environment is a page a group, Sky its first.
-      { source: "/build/inspect", destination: "/build/mountains", permanent: false },
-      { source: "/build/environment", destination: "/build/sky", permanent: false },
+      // W108: old builder bookmarks return to the replacement scene.
+      { source: "/build/:path*", destination: "/", permanent: false },
     ];
   },
 

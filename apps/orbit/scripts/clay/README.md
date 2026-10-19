@@ -61,3 +61,13 @@ Clay ability and its effects. The browser checks cover the transition lifecycle,
 and switching forms. Pure transition regressions run with Node 24:
 
     node --test apps/orbit/scripts/clay/flight.test.mjs
+
+## Approved VR turnaround profile
+
+The clearing's `clay-vr.ts` uses the approved `public/references/clay-vr-turnaround-v1.png` and sets
+`clayProfile: "vr-v1"`. Its proportions alone did not match the new reference: `human.ts` therefore gives this
+profile a smooth, full-cheeked head loft, a rounder torso section, and longer elliptical paddle-end caps.
+`build-human.ts` adds its relaxed outward arm rest to the existing posed rig; `clay-skin.ts` keeps its broader
+pressed-clay marks anchored through deformation. The original measured turnaround and its generator stay intact
+for the historical Clay profile. Review the clearing's actual assembled character, including the head-carried visor
+and backpack, rather than treating a change in dimensions as proof of a visual match.

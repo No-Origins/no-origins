@@ -2,8 +2,16 @@ import * as THREE from "three/webgpu";
 import { attribute, color, modelViewMatrix, mx_noise_float, mx_noise_vec3, normalize, normalView, positionGeometry, vec4 } from "three/tsl";
 
 /** Fine anchored relief shared by the Clay's rigid head and deforming skin. */
-export const clayGrain = (position: THREE.Node<"vec3"> = positionGeometry) => mx_noise_vec3(position.mul(310)).mul(0.065)
-  .add(mx_noise_vec3(position.mul(105).add(17)).mul(0.025));
+export const clayGrain = (position: THREE.Node<"vec3"> = positionGeometry, sculpted = false) => {
+  const fine = mx_noise_vec3(position.mul(310)).mul(sculpted ? 0.035 : 0.065)
+    .add(mx_noise_vec3(position.mul(105).add(17)).mul(sculpted ? 0.018 : 0.025));
+  return sculpted ? fine.add(mx_noise_vec3(position.mul(13)).mul(0.045)) : fine;
+};
+
+/** Warm pigment and broader pressed-clay marks on the approved VR maquette, anchored through every pose. */
+export const clayPaint = (paint: THREE.ColorRepresentation, position: THREE.Node<"vec3"> = positionGeometry, sculpted = false) =>
+  color(new THREE.Color(paint)).mul(mx_noise_float(position.mul(sculpted ? 13 : 4.5)).mul(sculpted ? 0.055 : 0.045).add(0.985))
+    .mul(mx_noise_float(position.mul(510)).mul(sculpted ? 0.018 : 0.035).add(0.985));
 
 /** Fair influences along the connected surface, keeping close but unconnected arms independent (World.md W104). */
 export function fairClayWeights(geometry: THREE.BufferGeometry): number[][] {
@@ -59,7 +67,8 @@ export function claySkin(
   root: THREE.Group,
   geometry: THREE.BufferGeometry,
   neighbours: number[][],
-  radii: { arm: number; hip: number },
+  radii: { arm: number; hip: number; knee: number },
+  sculpted = false,
 ) {
   const material = source.clone();
   const points = geometry.getAttribute("position") as THREE.BufferAttribute;
@@ -68,8 +77,8 @@ export function claySkin(
   points.setUsage(THREE.DynamicDrawUsage);
   (geometry.getAttribute("normal") as THREE.BufferAttribute).setUsage(THREE.DynamicDrawUsage);
   const anchored = attribute("clayRest", "vec3");
-  material.normalNode = normalize(normalView.add(modelViewMatrix.mul(vec4(clayGrain(anchored), 0)).xyz));
-  material.colorNode = color(source.color).mul(mx_noise_float(anchored.mul(510)).mul(0.035).add(0.985));
+  material.normalNode = normalize(normalView.add(modelViewMatrix.mul(vec4(clayGrain(anchored, sculpted), 0)).xyz));
+  material.colorNode = clayPaint(source.color, anchored, sculpted);
 
   const indices = geometry.getAttribute("skinIndex").array;
   const weights = geometry.getAttribute("skinWeight").array;
@@ -80,8 +89,8 @@ export function claySkin(
   const position = new THREE.Vector3();
   const scale = new THREE.Vector3();
   const smoothing: { index: number; amount: number }[] = [];
-  const pivots = skeleton.bones.filter(b => /Arm$|Hip$/.test(b.name)).map(b => ({
-    position: b.getWorldPosition(new THREE.Vector3()), radius: b.name.endsWith("Arm") ? radii.arm : radii.hip,
+  const pivots = skeleton.bones.filter(b => /Arm$|Hip$|Knee$/.test(b.name)).map(b => ({
+    position: b.getWorldPosition(new THREE.Vector3()), radius: b.name.endsWith("Arm") ? radii.arm : b.name.endsWith("Knee") ? radii.knee : radii.hip,
   }));
   for (let i = 0; i < points.count; i++) {
     const x = points.getX(i), y = points.getY(i), z = points.getZ(i);

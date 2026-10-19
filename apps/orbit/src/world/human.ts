@@ -4,7 +4,7 @@ import { motionMs, motionNumber } from "@no-origins/ui/lib/motion";
 import { TURNAROUND } from "./clay-turnaround";
 import { COLOURS } from "./colours";
 import { configOf, type Jig, type JigControl, type JigGroup } from "./jig";
-import { PUBLISHED_HUMANS } from "./published";
+import { PUBLISHED_HUMANS } from "./published-humans";
 import type { Variant } from "./variants";
 
 /**
@@ -51,7 +51,7 @@ export const HUMAN_FEET = 8;
 /** How tall the figure is, in metres, from sole to crown. */
 export const HUMAN_HEIGHT = HUMAN_FEET * FOOT;
 /** A new look replaces the persistent renderer during development as well as the jig's starting values. */
-export const HUMAN_VERSION = 9;
+export const HUMAN_VERSION = 10;
 
 const joint = (id: JointId) => HUMAN_JOINTS.find((j) => j.id === id)!;
 
@@ -171,6 +171,10 @@ export type HumanConfig = {
    * deep; its arms this long from the armpit, this wide at their widest and this deep, the Groove off the torso; its
    * legs this long up to the crotch, each this wide and deep, parted by the Gap.
    */
+  /** The approved VR turnaround uses a new rounded head/torso profile and relaxed outward arm rest. */
+  clayProfile?: "vr-v1";
+  /** Optional stature in cm; widths and head dimensions stay independently measured. */
+  clayHeight?: number;
   clayHeadWidth: number;
   clayHeadHeight: number;
   clayHeadDepth: number;
@@ -362,7 +366,7 @@ const CLAY_GROUPS: JigGroup<HumanConfig>[] = [
   {
     title: "Legs",
     note: () =>
-      "Two thick column legs, a little wider at their flat round feet, parted by the Gap at the crotch, one skin with the torso; no knee or foot. Each bends at its hip as it walks and runs. Length is from the ground to the crotch.",
+      "Two thick column legs, a little wider at their flat round feet, parted by the Gap at the crotch, one skin with the torso; no drawn knee or foot. Each articulates at its hip and knee as it walks and runs. Length is from the ground to the crotch.",
     controls: [
       { kind: "number", key: "clayLegLength", label: "Length", min: 40, max: 120, step: 1, marks: 10, unit: "cm" },
       { kind: "number", key: "clayLegWidth", label: "Width", min: 20, max: 70, step: 1, marks: 10, unit: "cm" },
@@ -913,7 +917,7 @@ export function stepOf(motion: HumanMotion, gait: Exclude<HumanGait, "rest">, le
 
 /**
  * The figure's leg, in metres, from where it turns to the ground (W102): the rig's for the Suit, whose knee bends; the
- * Clay's from its hip's pivot, since its whole leg swings from there, so its stride covers the ground its feet do.
+ * Clay's from its hip socket to the sole, so its stride uses the articulated leg's full reach.
  */
 export function legOf(config: HumanConfig): number {
   if (config.form !== "clay") return HUMAN_LEG;
@@ -1108,25 +1112,29 @@ export function poseOf(figure: Figure, motion: HumanMotion): { pose: HumanPose; 
  * Version 8 (World.md W104) joins each shoulder-to-hand loft to the torso in an open-arm bind pose. The torso,
  * arms, legs and neck are one skin: the two leg section fields morph into the torso's instead of overlapping capped
  * pieces at the hips (`ForkPart`). Dual-quaternion skinning and local pose fairing keep its joints round. The head remains a piece on its
- * head bone, with a faired depth and the measured faceted outline. No elbow or knee is drawn.
+ * head bone, with a faired depth and the measured faceted outline. No elbow or knee is drawn; the continuous leg skin follows the hip and knee bones.
  */
+export const clayHeightOf = (config: HumanConfig) => config.clayHeight ? config.clayHeight / 100 : HUMAN_HEIGHT;
+
 function clayLookOf(config: HumanConfig): Look {
   const t = TURNAROUND;
   const m = CLAY_MEASURES;
-  const H = HUMAN_HEIGHT;
+  const H = clayHeightOf(config);
+  const HEIGHT_CM = H * 100;
+  const stature = HUMAN_HEIGHT / H;
   const scale = {
-    headWidth: config.clayHeadWidth / m.headWidth,
-    headHeight: config.clayHeadHeight / m.headHeight,
-    headDepth: config.clayHeadDepth / m.headDepth,
-    neck: config.clayNeck / m.neck,
-    body: config.clayBody / m.body,
-    depth: config.clayBodyDepth / m.bodyDepth,
-    armLength: config.clayArmLength / m.armLength,
-    armWidth: config.clayArmWidth / m.armWidth,
-    armDepth: config.clayArmDepth / m.armDepth,
-    legLength: config.clayLegLength / m.legLength,
-    legWidth: config.clayLegWidth / m.legWidth,
-    legDepth: config.clayLegDepth / m.legDepth,
+    headWidth: config.clayHeadWidth / m.headWidth * stature,
+    headHeight: config.clayHeadHeight / m.headHeight * stature,
+    headDepth: config.clayHeadDepth / m.headDepth * stature,
+    neck: config.clayNeck / m.neck * stature,
+    body: config.clayBody / m.body * stature,
+    depth: config.clayBodyDepth / m.bodyDepth * stature,
+    armLength: config.clayArmLength / m.armLength * stature,
+    armWidth: config.clayArmWidth / m.armWidth * stature,
+    armDepth: config.clayArmDepth / m.armDepth * stature,
+    legLength: config.clayLegLength / m.legLength * stature,
+    legWidth: config.clayLegWidth / m.legWidth * stature,
+    legDepth: config.clayLegDepth / m.legDepth * stature,
   };
   // Heights, as fractions of the figure's height.
   const headFoot = 1 - config.clayHeadHeight / HEIGHT_CM;
@@ -1176,9 +1184,11 @@ function clayLookOf(config: HumanConfig): Look {
     n,
   });
   const shoulder = ballOf(armJoint, t.square.arm, JOINT_ACROSS.arm);
-  // A leg turns at the middle of its row at the crotch: its skin bends there (`LEG_TURN`), with no ball.
+  // The hip socket sits inside the pelvis above the visible crotch; the knee divides the leg below it.
   const legTop = legRows.reduce((a, b) => (Math.abs(b[0] - crotch) < Math.abs(a[0] - crotch) ? b : a));
-  const hip = { at: [(legTop[1] + legTop[2]) / 2, legTop[0], (legTop[3] + legTop[4]) / 2] as const };
+  const hip = { at: [(legTop[1] + legTop[2]) / 2, legTop[0] + 0.045 * stretch, (legTop[3] + legTop[4]) / 2] as const };
+  const kneeHeight = hip.at[1] * 0.5;
+  const kneeBlend = (hip.at[1] - kneeHeight) * H * 0.18;
   // The neck: from inside the trunk up into the head, round about its middle, its depth the turnaround's in proportion.
   const neckHalf = t.neck.half * scale.neck;
   const neckMiddle = ((t.neck.back + t.neck.front) / 2) * scale.depth;
@@ -1206,11 +1216,23 @@ function clayLookOf(config: HumanConfig): Look {
   ]));
   const headDepth = Math.max(...headEnvelope.map((row) => row[4]! - row[3]!));
   const headDepthScale = config.clayHeadDepth / HEIGHT_CM / headDepth;
-  const headRows = headEnvelope.map((row, i) => metres([
+  let headRows = headEnvelope.map((row, i) => metres([
     row[0]!, -t.head[i]![1] * scale.headWidth, t.head[i]![1] * scale.headWidth,
     headMiddle + (row[3]! - headMiddle) * headDepthScale,
     headMiddle + (row[4]! - headMiddle) * headDepthScale,
   ]));
+
+  if (config.clayProfile === "vr-v1") {
+    // VR turnaround: a broad rounded crown and full lower cheeks, rather than scaling the old seven-corner outline.
+    // A truncated superellipse seats its lower edge into the short neck. Dense smooth rows avoid latitude facets.
+    headRows = Array.from({ length: 97 }, (_,i): LoftRow => {
+      const u=i/96, t=-0.85+1.85*u;
+      const across=Math.pow(Math.max(0,1-Math.pow(Math.abs(t),2.3)),1/2.3);
+      const deep=Math.pow(Math.max(0,1-Math.pow(Math.abs(t),2.2)),1/2.2);
+      const half=config.clayHeadWidth/200*across, depth=config.clayHeadDepth/200*deep;
+      return [(headFoot+(1-headFoot)*u)*H,-half,half,headMiddle*H-depth,headMiddle*H+depth,2.5];
+    });
+  }
 
   // The skin turns from the hips to the spine over the crotch's rise, and from the spine to the chest under the
   // armpit, the first held under the second whatever the sizes, so a long leg or a tall head never jumps it.
@@ -1231,11 +1253,25 @@ function clayLookOf(config: HumanConfig): Look {
   // One shoulder-to-hand loft (W103). The former ball under a separate shoulder cap put a ring round every
   // upper arm. Fairing the measured rows also removes tiny tracing wobbles,
   // which are invisible in the silhouette but conspicuous in a surface normal.
-  const armSkinRows = fairClayRows([
+  let armSkinRows = fairClayRows([
     ...armRows.filter(([y]) => y < armpit),
     ...shoulderRows.filter(([y]) => y >= armpit),
   ]);
-  const bodyRows = torsoRows.filter(([y]) => y >= crotch * H).map((row): LoftRow => [row[0], row[1], row[2], row[3], row[4], t.square.torso]);
+  if (config.clayProfile === "vr-v1") {
+    // The reference ends each paddle in a generous curved lobe, not the older short blunt cap.
+    const tip=armSkinRows[0][0], desired=tip+0.09;
+    const base=armSkinRows.reduce((a,b)=>Math.abs(a[0]-desired)<Math.abs(b[0]-desired)?a:b);
+    const middle=(base[1]+base[2])/2, half=(base[2]-base[1])/2;
+    const zmid=(base[3]+base[4])/2, depth=(base[4]-base[3])/2;
+    const cap=Array.from({length:25},(_,i)=>{
+      const u=i/24, round=Math.sqrt(Math.max(0,1-(1-u)*(1-u)));
+      const x=middle+0.009*(1-u);
+      return [tip+(base[0]-tip)*u,x-half*round,x+half*round,zmid-depth*round,zmid+depth*round,2.2];
+    });
+    armSkinRows=fairClayRows(fairClayRows([...cap,...armSkinRows.filter(row=>row[0]>base[0])]));
+  }
+  const torsoExponent = config.clayProfile === "vr-v1" ? 2.8 : t.square.torso;
+  const bodyRows = torsoRows.filter(([y]) => y >= crotch * H).map((row): LoftRow => [row[0], row[1], row[2], row[3], row[4], torsoExponent]);
   const lowerRows = fairClayRows(legRows.filter(([y]) => y <= crotch + 0.001)).map((row) => [...row.slice(0, 5), t.square.leg]);
   const lower = ([1, -1] as const).map((side): LoftPart => ({
     kind: "loft", name: `${side === 1 ? "left" : "right"} leg section`, rows: mirrored(lowerRows, side),
@@ -1243,11 +1279,18 @@ function clayLookOf(config: HumanConfig): Look {
   })) as [LoftPart, LoftPart];
   const body: ForkPart = {
     kind: "fork", name: "body and legs",
-    upper: { kind: "loft", name: "body section", rows: bodyRows, n: t.square.torso, carried: carriedByHeight },
+    upper: { kind: "loft", name: "body section", rows: bodyRows, n: torsoExponent, carried: carriedByHeight },
     lower, merge: [crotch * H, (crotch + 0.14 * stretch) * H],
     carried: (x, y) => {
       const prefix = x >= 0 ? "left" : "right";
-      if (y < (crotch + 0.07) * H) return [`${prefix}Hip`, "hips", 1 - smoothstep(y, crotch * H - LEG_TURN.below, (crotch + 0.07) * H)];
+      // Rigid long bones with a compact soft hinge: the shin must follow the knee,
+      // rather than inheriting the hip all the way to the sole (World.md W108).
+      if (y < kneeHeight * H + kneeBlend) {
+        return [`${prefix}Hip`, `${prefix}Knee`, smoothstep(y, kneeHeight * H - kneeBlend, kneeHeight * H + kneeBlend)];
+      }
+      if (y < hip.at[1] * H + LEG_TURN.above) {
+        return [`${prefix}Hip`, "hips", 1 - smoothstep(y, hip.at[1] * H - LEG_TURN.below, hip.at[1] * H + LEG_TURN.above)];
+      }
       return carriedByHeight(x, y);
     },
   };
@@ -1255,6 +1298,14 @@ function clayLookOf(config: HumanConfig): Look {
   const bones: NonNullable<Look["bones"]> = {
     neck: [0, shoulderTop * H, neckMiddle * H], head: [0, headFoot * H, headMiddle * H],
   };
+  if (H !== HUMAN_HEIGHT) {
+    const bodyHeight = H - config.clayHeadHeight / 100;
+    const previousBodyHeight = HUMAN_HEIGHT - config.clayHeadHeight / 100;
+    for (const id of ["hips", "spine", "chest"] as const) {
+      const at=joint(id).at;
+      bones[id]=[at[0]*UNIT,at[1]*UNIT*bodyHeight/previousBodyHeight,at[2]*UNIT];
+    }
+  }
   const bindPose: HumanPose = {};
   for (const side of [-1, 1] as const) {
     const prefix = side === 1 ? "left" : "right";
@@ -1264,7 +1315,7 @@ function clayLookOf(config: HumanConfig): Look {
     trunk.push({
       kind: "turned", name: `${prefix} arm`, pivot, angle, side,
       carried: (x) => [`${prefix}Arm`, "chest", smoothstep(Math.abs(x), crease * H * 0.72, Math.abs(pivot[0]) + 0.08)],
-      source: { kind: "loft", name: `${prefix} arm skin`, rows: mirrored(armSkinRows, side), n: t.square.arm,
+      source: { kind: "loft", name: `${prefix} arm skin`, rows: mirrored(armSkinRows, side), n: config.clayProfile === "vr-v1" ? 2.3 : t.square.arm,
         inner: side === 1 ? -1 : 1, innerN: ARM_INNER_SQUARE,
         innerFade: [(armpit + 0.005) * H, (armpit + 0.07) * H], carried: rigid(`${prefix}Arm`) },
     });
@@ -1274,7 +1325,7 @@ function clayLookOf(config: HumanConfig): Look {
     bones[`${prefix}Elbow`] = at(shoulder.at[0], (shoulder.at[1] + armEnd) / 2, shoulder.at[2]);
     bones[`${prefix}Hand`] = at(shoulder.at[0], armEnd, shoulder.at[2]);
     bones[`${prefix}Hip`] = at(...hip.at);
-    bones[`${prefix}Knee`] = at(hip.at[0], hip.at[1] / 2, hip.at[2]);
+    bones[`${prefix}Knee`] = at(hip.at[0], kneeHeight, hip.at[2]);
     bones[`${prefix}Foot`] = at(hip.at[0], 0.01, hip.at[2]);
   }
   const pieces: Piece[] = [{
@@ -1290,7 +1341,7 @@ function clayLookOf(config: HumanConfig): Look {
     }, parts: trunk,
   }];
   pieces.push({ name: "head", bone: "head", blend: 0, finish: "soft", parts: [{
-    kind: "loft", name: "head", rows: headRows, n: t.head[0][4], carried: rigid("head"),
+    kind: "loft", name: "head", rows: headRows, n: config.clayProfile === "vr-v1" ? 2.5 : t.head[0][4], carried: rigid("head"),
   }] });
   return { pieces, head: null, bones, bindPose, skinning: "dual-quaternion", eye: [0, ((1 + headFoot) / 2) * H, headMiddle * H] };
 }

@@ -4,7 +4,7 @@ import { edgeTable, triTable } from "three/addons/objects/MarchingCubes.js";
 import { HUMAN_JOINTS, type HumanPose, type JointId } from "@no-origins/ui/lib/human-motion";
 
 import { boosting, lookOf, SKULL, TOE, UNIT, type Cut, type Head, type HumanConfig, type Look, type Part, type Piece } from "./human";
-import { clayGrain, claySkin, fairClayWeights } from "./clay-skin";
+import { clayGrain, clayPaint, claySkin, fairClayWeights } from "./clay-skin";
 import { buildHumanFlight } from "./build-human-flight";
 import { readClayFlightMotion, type ClayFlightFrame } from "./human-flight";
 
@@ -94,7 +94,7 @@ export function buildHuman(config: HumanConfig): BuiltHuman {
   const look = config.shows === "skeleton" ? null : lookOf(config);
   // The skin's colour is the figure's; a vertex inside a booster's hole darkens it (`color`), so the holes read deep.
   const material = look?.eye
-    ? new THREE.MeshPhysicalNodeMaterial({ color: config.colour, roughness: 1, metalness: 0, vertexColors: true, sheen: 0.24, sheenColor: "#faf7f4", sheenRoughness: 1, specularIntensity: 0.18 })
+    ? new THREE.MeshPhysicalNodeMaterial({ color: config.colour, roughness: 1, metalness: 0, vertexColors: true, sheen: 0.16, sheenColor: "#fff0de", sheenRoughness: 1, specularIntensity: 0.18 })
     : new THREE.MeshStandardNodeMaterial({ color: config.colour, roughness: 1, metalness: 0, vertexColors: true });
   // The reflection the metal and the glass wear: the sky above, the ground's grey below.
   const sky = Fn(() => mix(color(SKY.low), color(SKY.high), smoothstepNode(float(-0.2), float(0.7), reflectVector.y)))();
@@ -106,11 +106,11 @@ export function buildHuman(config: HumanConfig): BuiltHuman {
     // by noise anchored to the skin (two scales, a fine one over a coarser one), so the grain catches the light as the
     // picture's does and never moves over the surface. (The bump below is the Suit's as it was, and draws nothing:
     // a procedural height has no texture to take its slope from.)
-    const grain = clayGrain();
+    const grain = clayGrain(positionGeometry, config.clayProfile === "vr-v1");
     // Taken into the view as a direction, its length kept (a normal's transform would make every tilt a full one).
     material.normalNode = normalize(normalView.add(modelViewMatrix.mul(vec4(grain, 0)).xyz));
     // Restrained fibre-scale variation in the paint survives diffuse light, where a normal-only grain disappeared.
-    material.colorNode = color(config.colour).mul(mx_noise_float(positionGeometry.mul(510)).mul(0.035).add(0.985));
+    material.colorNode = clayPaint(config.colour, positionGeometry, config.clayProfile === "vr-v1");
   } else if (look) {
     material.normalNode = bumpMap(
       mx_noise_float(positionGeometry.mul(180)).mul(0.0007)
@@ -262,7 +262,8 @@ export function buildHuman(config: HumanConfig): BuiltHuman {
         const skin = claySkin(material as THREE.MeshPhysicalNodeMaterial, skeleton, object, geometry, neighbours, {
           arm: Math.max(config.clayArmWidth, config.clayArmDepth) / 100 * 1.05,
           hip: Math.max(config.clayLegWidth, config.clayLegDepth) / 100 * 0.85,
-        });
+          knee: Math.max(config.clayLegWidth, config.clayLegDepth) / 100 * 0.55,
+        }, config.clayProfile === "vr-v1");
         skinUpdates.push(skin.update);
         const made = mesh(new THREE.Mesh(geometry, skin.material), piece.name);
         object.add(made);
@@ -325,7 +326,7 @@ export function buildHuman(config: HumanConfig): BuiltHuman {
   const flight = config.form === "clay" && (config.shows === "look" || config.shows === "boost")
     ? buildHumanFlight(object, bones, readClayFlightMotion(document.documentElement).jetLength) : null;
 
-  const hips = HUMAN_JOINTS[0]!.at[1] * UNIT;
+  const hips = bones.hips.position.y;
   return {
     object,
     bones,
@@ -334,7 +335,8 @@ export function buildHuman(config: HumanConfig): BuiltHuman {
     pose(pose, lift) {
       for (const { id } of HUMAN_JOINTS) {
         const [x, y, z] = pose[id] ?? [0, 0, 0];
-        bones[id].rotation.set(THREE.MathUtils.degToRad(x), THREE.MathUtils.degToRad(y), THREE.MathUtils.degToRad(z));
+        const restSpread = config.clayProfile === "vr-v1" ? (id === "leftArm" ? 14 : id === "rightArm" ? -14 : 0) : 0;
+        bones[id].rotation.set(THREE.MathUtils.degToRad(x), THREE.MathUtils.degToRad(y), THREE.MathUtils.degToRad(z + restSpread));
       }
       bones.hips.position.y = hips + lift * UNIT;
       object.updateMatrixWorld(true);

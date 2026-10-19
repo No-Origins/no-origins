@@ -38,7 +38,15 @@ export function buildFluidSky(environment: AtmosphereSettings) {
   const material = new THREE.MeshBasicNodeMaterial({ side: THREE.BackSide, depthWrite: false, fog: false });
   // W33: a pixel's worth of dither keeps the blue-to-peach gradient from banding.
   const dither = hash(screenCoordinate.x.add(screenCoordinate.y.mul(4096))).sub(0.5).mul(1.5 / 255);
-  material.colorNode = mix(gases, light, sunset).add(dither); // W28: diffuse light, no hard sun disc in the powder target.
+  // W110: his sunset reference supersedes W28's disc-free sky. The solar disc and
+  // atmospheric aureole live in direction space, behind cloud opacity and world geometry.
+  const distanceFromSun = float(1).sub(facing.clamp(-1, 1));
+  const amberHaze = distanceFromSun.mul(-28).exp().mul(0.6);
+  const aureole = distanceFromSun.mul(-550).exp().mul(0.9);
+  const disc = smoothstep(Math.cos(THREE.MathUtils.degToRad(1.65)), Math.cos(THREE.MathUtils.degToRad(1.5)), facing);
+  const sunSky = mix(gases, light, sunset).add(vec3(1.4, 0.42, 0.035).mul(amberHaze));
+  const haloSky = sunSky.add(vec3(2.4, 0.65, 0.035).mul(aureole));
+  material.colorNode = mix(haloSky, vec3(2.5, 0.22, 0.008), disc).add(dither);
   const mesh = new THREE.Mesh(new THREE.SphereGeometry(10000, 48, 32), material);
   mesh.name = "open-sky-background";
   mesh.renderOrder = -3;
