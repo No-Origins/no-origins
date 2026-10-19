@@ -3,6 +3,7 @@ import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.j
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { Fn, normalView, normalize, vec3, sin, positionGeometry, mx_noise_float, mix, color } from "three/tsl";
 import type { BuiltHuman } from "./build-human";
+import { indexForRays } from "./build-raycast";
 import { HUMAN_HEIGHT, clayHeightOf, type HumanConfig } from "./human";
 
 /** World.md W108: the compact chamfered shell in references/clay-backpack-v2.png. */
@@ -146,6 +147,7 @@ export function buildClayBag(human: BuiltHuman, config: HumanConfig) {
   const strapX = shoulderWidth * 0.46, front = config.clayBodyDepth / 200 + 0.018;
   const trunk = human.object.getObjectByName("trunk");
   const ray = new THREE.Raycaster();
+  const releaseTrunk = trunk instanceof THREE.Mesh ? indexForRays(trunk) : () => {};
   const skinAt = (origin: THREE.Vector3, direction: THREE.Vector3) => {
     ray.set(human.object.localToWorld(origin.clone()),direction.clone().transformDirection(human.object.matrixWorld));
     const hit = trunk ? ray.intersectObject(trunk,true)[0] : undefined;
@@ -213,6 +215,7 @@ export function buildClayBag(human: BuiltHuman, config: HumanConfig) {
       buckle.position.copy(buckleAt).add(new THREE.Vector3(x,y,.012));
     }
   }
+  releaseTrunk();
   human.bones.chest.add(object);
   const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
   const normal = new THREE.Vector3(), clothPoint = new THREE.Vector3(), clothEdge = new THREE.Vector3();

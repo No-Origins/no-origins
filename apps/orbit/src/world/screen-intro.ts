@@ -23,7 +23,7 @@ export function buildScreenIntro(host: HTMLCanvasElement) {
   object.position.y = SCREEN_BASE + SCREEN_HEIGHT / 2;
   object.name = "no-origins-screen-intro";
   object.visible = false;
-  let started = false, clock = 0;
+  let started = false, finished = false, clock = 0;
   let timing = { seed: 0, hold: 0, travel: 0, letters: 0, stagger: 0, distance: 0 };
   let curve = easing("cubic-bezier(0.22, 1, 0.36, 1)");
   const font = getComputedStyle(host).getPropertyValue("--font-heading").trim() || "Montserrat, sans-serif";
@@ -92,10 +92,13 @@ export function buildScreenIntro(host: HTMLCanvasElement) {
       const end = timing.seed + timing.hold + timing.travel + timing.letters + timing.stagger * 5;
       if (clock >= end) return false;
       clock = reduced ? end : Math.min(end, clock + ms);
+      finished = clock >= end;
       paint();
       host.dataset.screenIntro = clock >= end ? "complete" : "playing";
       return clock < end;
     },
+    /** The title has finished playing; the screen menu follows it (World.md W112). */
+    get complete() { return finished; },
     dispose() { texture.dispose(); },
   };
 }

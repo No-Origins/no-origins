@@ -27,7 +27,7 @@ export function ClayBag() {
   }, []);
   return <Dialog open={open} onOpenChange={changeOpen}>
     <DialogTrigger asChild>
-      <Button ref={trigger} variant="outline" size="sm" className="fixed right-4 top-4" aria-label={`Open Clay’s bag, ${count} items`}><Backpack />Bag<Text as="span" role="caption">{count}</Text></Button>
+      <Button ref={trigger} variant="ghost" size="icon" className="size-full" title="Clay’s bag" aria-label={`Open Clay’s bag, ${count} items`}><Backpack className="size-5" /></Button>
     </DialogTrigger>
     <DialogContent className="max-h-[calc(100dvh-32px)]" onCloseAutoFocus={event => { event.preventDefault(); trigger.current?.focus(); }}>
       <DialogHeader className="pe-12">

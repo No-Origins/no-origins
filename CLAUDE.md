@@ -34,6 +34,8 @@ it before editing the app (its `AGENTS.md` points there and carries the Next.js 
   for it is a block on the grid that talks to this runtime. Agent lifecycle stays on the BEAM. The swarm does not
   write `packages/ui`, the portfolio, or the publish bucket.
 
+**3D zone loading follows World.md W111:** three explicit priority lists, independent item arrival within each level, bottom-to-top reveals with a temporary violet upper edge. Read it before changing a world’s loading.
+
 **Orbit starts again at W108** (World.md): his sandy clearing reference replaces the prior world and editor while retaining the existing Clay character, sky and clouds; the app no longer reads published variants, world or environment from the database. The historical direction was **Orbit is the world**: the 3D world that becomes No Origins' base UI in place of the grid, one app at a
 time, each a place he describes and Claude builds. The agents are six (Bali, Kino, Zaza, Oru, Mira, Lola; Agents.md).
 A *character* is one agent's look: `CharacterLook`, the database's rows of kind `character`, still read by the motion

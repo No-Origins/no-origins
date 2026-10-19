@@ -1,4 +1,5 @@
 import * as THREE from "three/webgpu";
+import { indexForRays } from "./build-raycast";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
 import { COLOURS } from "./colours";
@@ -6,7 +7,7 @@ import { motionMs, motionNumber } from "@no-origins/ui/lib/motion";
 import { bumpMap, float, mx_noise_float, positionLocal } from "three/tsl";
 
 /** W108, clay companions v1: familiar silhouettes with hand-shaped bodies and individual expressions. */
-export function buildClearingAgents(ring: (x: number, z: number) => void) {
+export function buildClearingAgents(ring: (x: number, z: number) => void, only?: number) {
   const object = new THREE.Group();
   object.name = "clay-companions-v1";
   const positions: THREE.Vector2[] = [];
@@ -45,20 +46,32 @@ export function buildClearingAgents(ring: (x: number, z: number) => void) {
     const geometry = mergeVertices(source, 0.00001); geometry.computeVertexNormals(); source.dispose();
     return geometry;
   }
-  const violet = new THREE.SphereGeometry(0.7, 64, 48); violet.scale(1.03, 0.93, 0.98); violet.translate(0, 0.64, 0);
-  const lime = new RoundedBoxGeometry(1.22, 1.25, 1.15, 6, 0.18); lime.translate(0, 0.625, 0);
-  const green = turned([[0,0],[0.5,0],[0.66,0.07],[0.69,0.18],[0.62,0.4],[0.47,0.83],[0.28,1.23],[0.12,1.54],[0.065,1.61],[0,1.64]]);
-  // Preserve blue's original seven-sided prism silhouette.
-  const blue = new THREE.CylinderGeometry(0.67, 0.67, 1.35, 7);
-  blue.translate(0, 1.35 / 2, 0);
-  const orange = turned([[0,0],[0.42,0],[0.57,0.07],[0.61,0.21],[0.6,1.22],[0.54,1.4],[0.4,1.45],[0,1.45]]);
-  const pink = new THREE.SphereGeometry(0.78, 80, 48, 0, Math.PI * 2, 0, Math.PI / 2);
-  const pp = pink.getAttribute("position");
-  for (let i = 0; i < pp.count; i++) {
-    const x = pp.getX(i), y = pp.getY(i), z = pp.getZ(i);
-    const fold = 1 + 0.012 * Math.sin(y * 19 + Math.atan2(z, x) * 2) * (1 - y / 0.78);
-    pp.setXYZ(i, x * fold, y, z * fold);
-  }
+  // Lazy bodies let the priority loader build one companion without constructing
+  // (or waiting for) the other five. The existing all-at-once call remains valid.
+  const violet = () => {
+    const geometry = new THREE.SphereGeometry(0.7, 64, 48);
+    geometry.scale(1.03, 0.93, 0.98); geometry.translate(0, 0.64, 0); return geometry;
+  };
+  const lime = () => {
+    const geometry = new RoundedBoxGeometry(1.22, 1.25, 1.15, 6, 0.18);
+    geometry.translate(0, 0.625, 0); return geometry;
+  };
+  const green = () => turned([[0,0],[0.5,0],[0.66,0.07],[0.69,0.18],[0.62,0.4],[0.47,0.83],[0.28,1.23],[0.12,1.54],[0.065,1.61],[0,1.64]]);
+  const blue = () => {
+    const geometry = new THREE.CylinderGeometry(0.67, 0.67, 1.35, 7);
+    geometry.translate(0, 1.35 / 2, 0); return geometry;
+  };
+  const orange = () => turned([[0,0],[0.42,0],[0.57,0.07],[0.61,0.21],[0.6,1.22],[0.54,1.4],[0.4,1.45],[0,1.45]]);
+  const pink = () => {
+    const geometry = new THREE.SphereGeometry(0.78, 80, 48, 0, Math.PI * 2, 0, Math.PI / 2);
+    const pp = geometry.getAttribute("position");
+    for (let i = 0; i < pp.count; i++) {
+      const x = pp.getX(i), y = pp.getY(i), z = pp.getZ(i);
+      const fold = 1 + 0.012 * Math.sin(y * 19 + Math.atan2(z, x) * 2) * (1 - y / 0.78);
+      pp.setXYZ(i, x * fold, y, z * fold);
+    }
+    return geometry;
+  };
   const specs = [
     { index: 0, name: "curious-violet", color: "#8d6cba", body: violet, faceY: 0.79, spacing: 0.145, tilt: -0.08 },
     { index: 1, name: "attentive-lime", color: "#bec22c", body: lime, faceY: 0.78, spacing: 0.155, tilt: 0.025 },
@@ -67,7 +80,7 @@ export function buildClearingAgents(ring: (x: number, z: number) => void) {
     { index: 4, name: "eager-orange", color: "#f58c1e", body: orange, faceY: 0.91, spacing: 0.15, tilt: -0.04 },
     { index: 3, name: "easygoing-pink", color: "#e66f85", body: pink, faceY: 0.53, spacing: 0.15, tilt: 0 },
   ];
-  for (const spec of specs) {
+  for (const spec of specs.filter(spec => only === undefined || spec.index === only)) {
     const [x, z] = places[spec.index];
     ring(x, z); positions.push(new THREE.Vector2(x, z));
     const features: Feature[] = [];
@@ -77,12 +90,13 @@ export function buildClearingAgents(ring: (x: number, z: number) => void) {
     group.rotation.y = Math.abs(x) < 0.001 ? 0 : THREE.MathUtils.clamp(Math.atan2(-x, 2 - z) * 0.3, -0.5, 0.5);
     group.rotation.z = spec.tilt;
     object.add(group);
-    const geometry = soften(spec.body, spec.index);
+    const geometry = soften(spec.body(), spec.index);
     const bodyPaint = clay(spec.color);
     mesh(geometry, bodyPaint, group);
     // Project each facial mark onto its own sculpted surface instead of floating it in front of a primitive.
     const proxy = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }));
     proxy.updateMatrixWorld();
+    const releaseProxy = indexForRays(proxy);
     const ray = new THREE.Raycaster();
     const front = (x: number, y: number, offset = 0.018) => {
       ray.set(new THREE.Vector3(x, y, 3), new THREE.Vector3(0, 0, -1));
@@ -210,6 +224,7 @@ export function buildClearingAgents(ring: (x: number, z: number) => void) {
       group.rotation.y = -0.55;
     }
     faces.push({ index: spec.index, group, features, restYaw: group.rotation.y, response: 0, blink: 0, pulse: 0 });
+    releaseProxy();
     proxy.material.dispose();
     // Stand the hand-shaped body firmly on the sand even with its slight attitude tilt.
     const extent = new THREE.Box3().setFromObject(group);

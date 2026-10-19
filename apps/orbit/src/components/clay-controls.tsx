@@ -3,9 +3,9 @@
 import { useId, useState } from "react";
 import { Switch } from "@no-origins/ui/components/switch";
 import { Label } from "@no-origins/ui/components/label";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Footprints } from "lucide-react";
 import { Button } from "@no-origins/ui/components/button";
-import { Card, CardContent } from "@no-origins/ui/components/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@no-origins/ui/components/popover";
 import { Text } from "@no-origins/ui/components/text";
 import { sendClayInput } from "@/world/clay-input";
 
@@ -22,8 +22,13 @@ export function ClayControls() {
     onKeyUp: (event: React.KeyboardEvent<HTMLButtonElement>) => { if (event.key === " " || event.key === "Enter") { event.preventDefault(); sendClayInput({ code, pressed: false }); } },
     onBlur: () => sendClayInput({ code, pressed: false }),
   });
-  return <Card size="sm" className="pointer-events-auto fixed bottom-4 left-4 max-w-[calc(100vw-32px)]">
-    <CardContent className="flex flex-col gap-stack-tight">
+  return <Popover>
+    <PopoverTrigger asChild>
+      <Button variant="ghost" size="icon" className="size-full" aria-label="Move Clay" title="Move Clay"><Footprints className="size-5" /></Button>
+    </PopoverTrigger>
+    <PopoverContent side="top" sideOffset={12} className="w-[min(480px,calc(100vw-24px))]" onCloseAutoFocus={() => {
+      for (const code of ["ArrowLeft", "ArrowUp", "ArrowDown", "ArrowRight", "KeyW", "ShiftLeft", "Space"]) sendClayInput({ code, pressed: false });
+    }}>
       <div className="flex items-center justify-between gap-inline">
         <Text role="label">Move Clay</Text>
         <div className="flex items-center gap-inline-tight">
@@ -43,6 +48,6 @@ export function ClayControls() {
         <Button variant="outline" size="sm" onClick={() => sendClayInput({ action: "flight" })}>Fly / land</Button>
         <Button variant="ghost" size="sm" onClick={() => sendClayInput({ action: "reset" })}>Reset</Button>
       </div>
-    </CardContent>
-  </Card>;
+    </PopoverContent>
+  </Popover>;
 }

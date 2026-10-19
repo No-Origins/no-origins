@@ -52,7 +52,7 @@ export function ClayVisor() {
   }, [open, close]);
   return <Dialog open={open} onOpenChange={value => { if (value) setOpen(true); else dismiss(); }}>
       <DialogTrigger asChild>
-        <Button ref={trigger} data-clay-visor-trigger style={{ visibility: "visible", opacity: open ? 0 : 1, pointerEvents: open ? "none" : undefined }} variant="outline" size="sm" className="fixed left-4 top-4" aria-label="Open Clay’s visor, Control T"><Glasses />Visor<Text as="span" role="caption">Ctrl T</Text></Button>
+        <Button ref={trigger} data-clay-visor-trigger style={{ visibility: "visible", opacity: open ? 0 : 1, pointerEvents: open ? "none" : undefined }} variant="ghost" size="icon" className="size-full" title="Visor · Ctrl T" aria-label="Open Clay’s visor, Control T"><Glasses className="size-5" /></Button>
       </DialogTrigger>
       <DialogContent ref={mount} data-slot="clay-visor" className="clay-visor" style={{ translate: "none", transform: "none", insetInlineStart: 0, top: 0 }} showCloseButton={false} onKeyDown={event => {
           const direction = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 0;
